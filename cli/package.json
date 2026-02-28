@@ -1,0 +1,67 @@
+{
+  "name": "jaz-clio",
+  "version": "4.16.0",
+  "description": "Clio — Command Line Interface Orchestrator for Jaz AI.",
+  "type": "module",
+  "bin": {
+    "clio": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "commands"
+  ],
+  "scripts": {
+    "build": "tsc && node --input-type=module -e \"import{readFileSync,writeFileSync}from'fs';const c=readFileSync('dist/index.js','utf8');if(!c.startsWith('#!')){writeFileSync('dist/index.js','#!/usr/bin/env node\\n'+c)}\"",
+    "postbuild": "cp -r src/agent/prompts dist/agent/prompts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "jaz",
+    "juan",
+    "clio",
+    "accounting",
+    "bookkeeping",
+    "invoicing",
+    "reconciliation",
+    "tax",
+    "gst",
+    "ifrs",
+    "financial-calculator",
+    "data-conversion",
+    "agent-skills",
+    "ai",
+    "api"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teamtinvio/jaz-ai"
+  },
+  "author": "Jaz Engineering <api-support@jaz.ai>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
+    "adm-zip": "^0.5.16",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "financial": "^0.2.4",
+    "openai": "^4.104.0",
+    "ora": "^8.1.1",
+    "pdfjs-dist": "^5.4.624",
+    "prompts": "^2.4.2",
+    "update-notifier": "^7.3.1"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.6",
+    "@types/node": "^22.10.1",
+    "@types/prompts": "^2.4.9",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.18"
+  }
+}

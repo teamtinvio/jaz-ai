@@ -1,0 +1,35 @@
+{
+  "name": "jaz-plugins",
+  "id": "jaz-plugins",
+  "owner": {
+    "name": "Jaz Engineering",
+    "email": "api-support@jaz.ai"
+  },
+  "metadata": {
+    "description": "Jaz accounting platform skills for AI agents and humans",
+    "version": "4.16.0"
+  },
+  "plugins": [
+    {
+      "name": "jaz-ai",
+      "source": "./",
+      "description": "Every endpoint, field name, error code, and production gotcha for Jaz — directly inside your AI agent. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any Agent Skills-compatible tool. API reference + data conversion playbook + 16 transaction recipes + 12 accounting jobs (month/quarter/year-end close + 9 ad-hoc operational workflows) + Singapore Form C-S corporate income tax computation (wizard workflow + CLI engine) + 10 CLI financial calculators with journal entries, workings, and execution blueprints. 17 slash commands for guided workflows.",
+      "version": "4.16.0",
+      "author": {
+        "name": "Jaz Engineering"
+      },
+      "keywords": [
+        "jaz",
+        "juan",
+        "accounting",
+        "api",
+        "conversion",
+        "migration",
+        "xero",
+        "quickbooks"
+      ],
+      "category": "productivity",
+      "strict": false
+    }
+  ]
+}

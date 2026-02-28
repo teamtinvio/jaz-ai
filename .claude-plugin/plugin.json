@@ -1,0 +1,14 @@
+{
+  "name": "jaz-ai",
+  "version": "4.16.0",
+  "description": "Every endpoint, field name, error code, and production gotcha for Jaz — directly inside your AI agent. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any Agent Skills-compatible tool. API skill (80 rules, full endpoint catalog, error catalog, field mapping) + conversion skill (Xero, QuickBooks, Sage, Excel migrations) + 16 transaction recipes (prepaid, deferred, accrued, loans, IFRS 16 leases, hire purchase, depreciation, fixed deposits, asset disposal, FX reval, ECL, employee accruals, provisions, dividends, intercompany, capital WIP) + 12 accounting jobs (month/quarter/year-end close, bank recon, document collection, GST/VAT filing, payment runs, credit control, supplier recon, audit prep, FA review, statutory filing) + Singapore Form C-S corporate income tax computation (wizard workflow + CLI engine) + 10 CLI financial calculators with math, journal entries, workings, and execution blueprints. For agents and humans building, migrating, converting, importing, querying, and debugging.",
+  "author": {
+    "name": "Jaz Engineering",
+    "url": "https://github.com/teamtinvio/jaz-ai"
+  },
+  "homepage": "https://help.jaz.ai",
+  "license": "MIT",
+  "keywords": ["jaz", "juan", "accounting", "api", "invoicing", "conversion", "migration", "xero", "quickbooks"],
+  "skills": ["./.claude/skills/api", "./.claude/skills/conversion", "./.claude/skills/transaction-recipes", "./.claude/skills/jobs"],
+  "agentSkills": ["./.agents/skills/api", "./.agents/skills/conversion", "./.agents/skills/transaction-recipes", "./.agents/skills/jobs"]
+}
