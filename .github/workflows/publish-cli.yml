@@ -1,0 +1,40 @@
+name: Publish CLI to npm
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish-cli:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check if version already published
+        id: check
+        run: |
+          PKG_VERSION=$(node -p "require('./cli/package.json').version")
+          PUBLISHED=$(npm view jaz-clio version 2>/dev/null || echo "")
+          if [ "$PKG_VERSION" = "$PUBLISHED" ]; then
+            echo "jaz-clio@$PKG_VERSION already published — skipping"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Publishing jaz-clio@$PKG_VERSION (npm has: ${PUBLISHED:-none})"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and publish
+        if: steps.check.outputs.skip == 'false'
+        working-directory: cli
+        run: |
+          npm install
+          npm run build
+          npm publish --access public --provenance

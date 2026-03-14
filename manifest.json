@@ -1,0 +1,83 @@
+{
+  "manifest_version": "0.3",
+  "name": "jaz-ai",
+  "display_name": "Jaz Accounting",
+  "version": "4.34.2",
+  "description": "Give Claude full access to Jaz accounting. Create invoices, record bills, reconcile banks, close books, compute taxes, and generate reports. 240 tools, 13 IFRS calculators, 12 job blueprints, complete API coverage. Agents do real accounting work, autonomously and correctly.",
+  "long_description": "Complete agent stack for Jaz accounting.\n\n**240 tools**: invoices, bills, credit notes, journals, cash entries, contacts, items, chart of accounts, bank reconciliation, reports, attachments, payments, currency management, and more.\n\n**13 financial calculators**: loan amortization, depreciation (SL/DDB/SYD), IFRS 16 leases, hire purchase, fixed deposits, asset disposal, FX revaluation, ECL provisioning, IAS 37 provisions, prepaid amortization. Each outputs journal entries, workings, and execution blueprints.\n\n**12 job blueprints**: month/quarter/year-end close, bank recon, document collection, GST/VAT filing, payment runs, credit control, supplier recon, audit prep, FA review, Singapore Form C-S tax computation.\n\n**117 API rules**: field mapping, error catalog, endpoint catalog, and production gotchas so agents work with Jaz correctly on the first try.\n\nOffline tools (calculators, job blueprints) work without an API key. API tools connect directly to Jaz with no intermediary servers.",
+  "author": {
+    "name": "Jaz Engineering",
+    "email": "api-support@jaz.ai",
+    "url": "https://jaz.ai"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teamtinvio/jaz-ai.git"
+  },
+  "homepage": "https://jaz.ai",
+  "documentation": "https://github.com/teamtinvio/jaz-ai/blob/main/README.md",
+  "support": "https://github.com/teamtinvio/jaz-ai/issues",
+  "icon": "icon.png",
+  "license": "MIT",
+  "privacy_policies": ["https://jaz.ai/legal"],
+  "keywords": [
+    "accounting",
+    "invoicing",
+    "bookkeeping",
+    "finance",
+    "tax",
+    "reconciliation",
+    "IFRS",
+    "GST"
+  ],
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "JAZ_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Jaz API Key",
+      "description": "Your Jaz API key (get one from Settings > API in the Jaz app). Offline tools (calculators, job blueprints) work without a key.",
+      "required": false,
+      "sensitive": true
+    }
+  },
+  "tools_generated": true,
+  "tools": [
+    {
+      "name": "list_invoices",
+      "description": "List invoices with pagination and status filtering"
+    },
+    {
+      "name": "create_invoice",
+      "description": "Create a draft invoice for a contact"
+    },
+    {
+      "name": "search_contacts",
+      "description": "Fuzzy search contacts by name"
+    },
+    {
+      "name": "calc_loan",
+      "description": "Loan amortization schedule with journal entries"
+    },
+    {
+      "name": "generate_month_end_blueprint",
+      "description": "Month-end close playbook with checklist"
+    }
+  ]
+}
