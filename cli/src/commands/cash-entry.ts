@@ -1,0 +1,275 @@
+import { Command } from 'commander';
+import { success, accent, muted, highlight } from './ui/theme.js';
+import { formatStatus, formatId, formatReference, formatCurrency } from './format-helpers.js';
+import type { JazClient } from '../core/api/client.js';
+import type { CashflowTransaction, PaginatedResponse, PaginationParams } from '../core/api/types.js';
+import { searchCashflowTransactions, deleteCashEntry } from '../core/api/cashflow.js';
+import { apiAction } from './api-action.js';
+import { resolveAccountFlag } from './resolve.js';
+import { parsePositiveInt, parseNonNegativeInt, parseJournalEntries, readBodyInput, requireFields } from './parsers.js';
+import { paginatedFetch } from './pagination.js';
+import { outputList, type OutputOpts } from './output.js';
+import type { TableColumn } from './table-formatter.js';
+
+// ── Shared helpers (also used by cash-transfer.ts) ──────────────
+
+export function formatCashflowDate(epochMs: number): string {
+  if (!Number.isFinite(epochMs) || epochMs === 0) return '—';
+  return new Date(epochMs).toISOString().slice(0, 10);
+}
+
+export function formatCashflowRow(t: CashflowTransaction): string {
+  const status = formatStatus(t.transactionStatus);
+  const amount = muted(`${t.currencySymbol}${t.totalAmount.toFixed(2)}`);
+  const date = formatCashflowDate(t.valueDate);
+  const acctName = t.account?.name || '—';
+  return `  ${accent(t.resourceId)}  ${t.transactionReference || '(no ref)'}  ${status}  ${amount}  ${date}  ${acctName}`;
+}
+
+export function printCashflowDetail(t: CashflowTransaction): void {
+  const status = formatStatus(t.transactionStatus);
+  console.log(highlight('Reference:'), t.transactionReference || '(none)');
+  console.log(highlight('  ID:'), accent(t.resourceId));
+  console.log(highlight('  Status:'), status);
+  console.log(highlight('  Date:'), formatCashflowDate(t.valueDate));
+  console.log(highlight('  Type:'), t.businessTransactionType);
+  console.log(highlight('  Direction:'), t.direction);
+  console.log(highlight('  Amount:'), `${t.currencySymbol}${t.totalAmount.toFixed(2)} ${t.currencyCode}`);
+  console.log(highlight('  Account:'), t.account?.name || '—', muted(`(${t.organizationAccountResourceId})`));
+  if (t.contactResourceId) console.log(highlight('  Contact:'), t.contactResourceId);
+}
+
+const CASH_ENTRY_COLUMNS: TableColumn[] = [
+  { key: 'resourceId', header: 'ID', format: formatId },
+  { key: 'transactionReference', header: 'Reference', format: formatReference },
+  { key: 'transactionStatus', header: 'Status', format: (v) => formatStatus(String(v)) },
+  { key: 'totalAmount', header: 'Amount', align: 'right', format: formatCurrency },
+  { key: 'valueDate', header: 'Date', format: (v) => formatCashflowDate(Number(v)) },
+];
+
+// ── Factory: generates a full CRUD command group ────────────────
+
+export interface CashEntryConfig {
+  name: string;       // 'cash-in' | 'cash-out'
+  label: string;      // 'Cash-In' | 'Cash-Out'
+  txnType: string;    // 'JOURNAL_DIRECT_CASH_IN' | 'JOURNAL_DIRECT_CASH_OUT'
+  listFn: (client: JazClient, params?: PaginationParams) => Promise<PaginatedResponse<CashflowTransaction>>;
+  getFn: (client: JazClient, resourceId: string) => Promise<{ data: CashflowTransaction }>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- generic over cash-in/out typed bodies; API validates
+  createFn: (client: JazClient, data: any) => Promise<{ data: unknown }>;
+  updateFn: (client: JazClient, resourceId: string, data: Record<string, unknown>) => Promise<{ data: unknown }>;
+}
+
+export function registerCashEntryCommand(program: Command, config: CashEntryConfig): void {
+  const cmd = program
+    .command(config.name)
+    .description(`Manage ${config.label.toLowerCase()} entries`);
+
+  // ── list ──────────────────────────────────────────────────────
+  cmd
+    .command('list')
+    .description(`List ${config.label.toLowerCase()} entries`)
+    .option('--limit <n>', 'Max results (default 100)', parsePositiveInt)
+    .option('--offset <n>', 'Page number offset (0-indexed)', parseNonNegativeInt)
+    .option('--all', 'Fetch all pages')
+    .option('--max-rows <n>', 'Max rows for --all (default 10000)', parsePositiveInt)
+    .option('--format <type>', 'Output format: table, json, csv, yaml')
+    .option('--api-key <key>', 'API key (overrides stored/env)')
+    .option('--json', 'Output as JSON')
+    .action(apiAction(async (client, opts) => {
+      const result = await paginatedFetch(
+        opts,
+        (p) => config.listFn(client, p),
+        { label: `Fetching ${config.label.toLowerCase()} entries` },
+      );
+
+      outputList(result as any, CASH_ENTRY_COLUMNS, opts as OutputOpts, config.label);  // eslint-disable-line @typescript-eslint/no-explicit-any
+    }));
+
+  // ── get ───────────────────────────────────────────────────────
+  cmd
+    .command('get <resourceId>')
+    .description(`Get a ${config.label.toLowerCase()} entry by ID`)
+    .option('--api-key <key>', 'API key (overrides stored/env)')
+    .option('--json', 'Output as JSON')
+    .action((resourceId: string, opts) => apiAction(async (client) => {
+      const { data: t } = await config.getFn(client, resourceId);
+
+      if (opts.json) {
+        console.log(JSON.stringify(t, null, 2));
+      } else {
+        printCashflowDetail(t);
+      }
+    })(opts));
+
+  // ── create ────────────────────────────────────────────────────
+  cmd
+    .command('create')
+    .description(`Create a ${config.label.toLowerCase()} entry (saves as draft by default)`)
+    .option('--account <resourceId>', 'Bank account name or resourceId')
+    .option('--entries <json>', 'Entry lines as JSON array (offset entries)', parseJournalEntries)
+    .option('--date <YYYY-MM-DD>', 'Value date')
+    .option('--ref <reference>', 'Reference')
+    .option('--notes <text>', 'Notes')
+    .option('--tag <tag>', 'Tag')
+    .option('--currency <code>', 'Source currency code (for cross-currency)')
+    .option('--exchange-rate <rate>', 'Exchange rate (for cross-currency)', parseFloat)
+    .option('--finalize', 'Finalize instead of saving as draft')
+    .option('--input <file>', 'Read full request body from JSON file (or pipe via stdin)')
+    .option('--api-key <key>', 'API key (overrides stored/env)')
+    .option('--json', 'Output as JSON')
+    .action(apiAction(async (client, opts) => {
+      const body = readBodyInput(opts);
+
+      let res;
+      if (body) {
+        res = await config.createFn(client, {
+          ...body,
+          saveAsDraft: body.saveAsDraft ?? !opts.finalize,
+        });
+      } else {
+        requireFields(opts as Record<string, unknown>, [
+          { flag: '--account', key: 'account' },
+          { flag: '--entries', key: 'entries' },
+          { flag: '--date', key: 'date' },
+        ]);
+
+        // Resolve bank account by name
+        const acctResolved = await resolveAccountFlag(client, opts.account, { filter: 'bank', silent: opts.json });
+        opts.account = acctResolved.resourceId;
+
+        const data: Record<string, unknown> = {
+          accountResourceId: opts.account,
+          lines: opts.entries,
+          valueDate: opts.date,
+          saveAsDraft: !opts.finalize,
+        };
+        if (opts.ref) data.reference = opts.ref;
+        if (opts.notes) data.notes = opts.notes;
+        if (opts.tag) data.tags = [opts.tag];
+        if (opts.currency) {
+          data.currency = {
+            sourceCurrency: opts.currency,
+            exchangeRate: opts.exchangeRate,
+          };
+        }
+        res = await config.createFn(client, data);
+      }
+
+      const created = res.data as Record<string, unknown>;
+      if (opts.json) {
+        console.log(JSON.stringify(created, null, 2));
+      } else {
+        const status = opts.finalize ? 'finalized' : 'draft';
+        console.log(success(`${config.label} created (${status}): ${created.resourceId}`));
+        console.log(highlight('ID:'), created.resourceId);
+      }
+    }));
+
+  // ── update ────────────────────────────────────────────────────
+  cmd
+    .command('update <resourceId>')
+    .description(`Update a ${config.label.toLowerCase()} entry`)
+    .option('--entries <json>', 'Entry lines as JSON array', parseJournalEntries)
+    .option('--date <YYYY-MM-DD>', 'Value date')
+    .option('--ref <reference>', 'Reference')
+    .option('--notes <text>', 'Notes')
+    .option('--tag <tag>', 'Tag')
+    .option('--finalize', 'Finalize instead of saving as draft')
+    .option('--input <file>', 'Read full request body from JSON file (or pipe via stdin)')
+    .option('--api-key <key>', 'API key (overrides stored/env)')
+    .option('--json', 'Output as JSON')
+    .action((resourceId: string, opts) => apiAction(async (client) => {
+      const body = readBodyInput(opts);
+
+      let res;
+      if (body) {
+        res = await config.updateFn(client, resourceId, {
+          ...body,
+          saveAsDraft: body.saveAsDraft ?? !opts.finalize,
+        });
+      } else {
+        const data: Record<string, unknown> = {};
+        if (opts.entries) data.lines = opts.entries;
+        if (opts.date) data.valueDate = opts.date;
+        if (opts.ref) data.reference = opts.ref;
+        if (opts.notes) data.notes = opts.notes;
+        if (opts.tag) data.tags = [opts.tag];
+        data.saveAsDraft = !opts.finalize;
+        res = await config.updateFn(client, resourceId, data);
+      }
+
+      const updated = res.data as Record<string, unknown>;
+      if (opts.json) {
+        console.log(JSON.stringify(updated, null, 2));
+      } else {
+        const status = opts.finalize ? 'finalized' : 'draft';
+        console.log(success(`${config.label} updated (${status}): ${updated.resourceId || resourceId}`));
+      }
+    })(opts));
+
+  // ── search ────────────────────────────────────────────────────
+  cmd
+    .command('search')
+    .description(`Search ${config.label.toLowerCase()} entries`)
+    .option('--ref <reference>', 'Filter by reference (contains)')
+    .option('--account <resourceId>', 'Filter by bank account name or resourceId')
+    .option('--from <YYYY-MM-DD>', 'Filter from date (inclusive)')
+    .option('--to <YYYY-MM-DD>', 'Filter to date (inclusive)')
+    .option('--status <status>', 'Filter by status (ACTIVE, VOID)')
+    .option('--sort <field>', 'Sort field (default: valueDate)')
+    .option('--order <direction>', 'Sort order: ASC or DESC (default: DESC)')
+    .option('--limit <n>', 'Max results (default 20)', parsePositiveInt)
+    .option('--offset <n>', 'Page number offset (0-indexed)', parseNonNegativeInt)
+    .option('--all', 'Fetch all pages')
+    .option('--max-rows <n>', 'Max rows for --all (default 10000)', parsePositiveInt)
+    .option('--format <type>', 'Output format: table, json, csv, yaml')
+    .option('--api-key <key>', 'API key (overrides stored/env)')
+    .option('--json', 'Output as JSON')
+    .action(apiAction(async (client, opts) => {
+      // Resolve account by name if provided
+      if (opts.account) {
+        const resolved = await resolveAccountFlag(client, opts.account, { filter: 'bank', silent: opts.json });
+        opts.account = resolved.resourceId;
+      }
+
+      const filter: Record<string, unknown> = {
+        businessTransactionType: { eq: config.txnType },
+      };
+      if (opts.ref) filter.businessTransactionReference = { contains: opts.ref };
+      if (opts.account) filter.organizationAccountResourceId = { eq: opts.account };
+      if (opts.status) filter.businessTransactionStatus = { eq: opts.status };
+      if (opts.from || opts.to) {
+        const dateFilter: Record<string, string> = {};
+        if (opts.from) dateFilter.gte = opts.from;
+        if (opts.to) dateFilter.lte = opts.to;
+        filter.valueDate = dateFilter;
+      }
+
+      const sort = { sortBy: [opts.sort ?? 'valueDate'] as string[], order: (opts.order ?? 'DESC') as 'ASC' | 'DESC' };
+
+      const result = await paginatedFetch(
+        opts,
+        ({ limit, offset }) => searchCashflowTransactions(client, { filter, limit, offset, sort }),
+        { label: `Searching ${config.label.toLowerCase()}`, defaultLimit: 20 },
+      );
+
+      outputList(result as any, CASH_ENTRY_COLUMNS, opts as OutputOpts, config.label);  // eslint-disable-line @typescript-eslint/no-explicit-any
+    }));
+
+  // ── delete ────────────────────────────────────────────────────
+  cmd
+    .command('delete <resourceId>')
+    .description(`Delete/void a ${config.label.toLowerCase()} entry`)
+    .option('--api-key <key>', 'API key (overrides stored/env)')
+    .option('--json', 'Output as JSON')
+    .action((resourceId: string, opts) => apiAction(async (client) => {
+      await deleteCashEntry(client, resourceId);
+
+      if (opts.json) {
+        console.log(JSON.stringify({ deleted: true, resourceId }));
+      } else {
+        console.log(success(`${config.label} ${resourceId} deleted.`));
+      }
+    })(opts));
+}
