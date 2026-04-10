@@ -1,0 +1,44 @@
+{
+  "name": "jaz-clio",
+  "version": "4.55.5",
+  "description": "Clio: Command Line Interface Operator for Jaz AI.",
+  "type": "module",
+  "bin": {
+    "clio": "./cli.mjs"
+  },
+  "scripts": {
+    "postinstall": "node postinstall.mjs"
+  },
+  "files": [
+    "cli.mjs",
+    "postinstall.mjs",
+    "assets",
+    "help-center-mirror"
+  ],
+  "keywords": [
+    "jaz",
+    "juan",
+    "clio",
+    "accounting",
+    "bookkeeping",
+    "invoicing",
+    "reconciliation",
+    "tax",
+    "gst",
+    "ifrs",
+    "financial-calculator",
+    "data-conversion",
+    "agent-skills",
+    "ai",
+    "api"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teamtinvio/jaz-ai"
+  },
+  "author": "Jaz <api-support@jaz.ai>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,1058 @@
+{
+  "manifest_version": "0.3",
+  "name": "jaz-ai",
+  "display_name": "Jaz Accounting",
+  "version": "4.55.5",
+  "description": "Give Claude full access to Jaz accounting. Create invoices, record bills, reconcile banks, close books, compute taxes, and generate reports. 247 tools, 13 IFRS calculators, 12 job blueprints, complete API coverage. Agents do real accounting work, autonomously and correctly.",
+  "long_description": "Complete agent stack for Jaz accounting.\n\n**247 tools**: invoices, bills, credit notes, journals, cash entries, contacts, items, chart of accounts, bank reconciliation, reports, attachments, payments, currency management, and more.\n\n**13 financial calculators**: loan amortization, depreciation (SL/DDB/SYD), IFRS 16 leases, hire purchase, fixed deposits, asset disposal, FX revaluation, ECL provisioning, IAS 37 provisions, prepaid amortization. Each outputs journal entries, workings, and execution blueprints.\n\n**12 job blueprints**: month/quarter/year-end close, bank recon, document collection, GST/VAT filing, payment runs, credit control, supplier recon, audit prep, FA review, Singapore Form C-S tax computation.\n\n**117 API rules**: field mapping, error catalog, endpoint catalog, and production gotchas so agents work with Jaz correctly on the first try.\n\nOffline tools (calculators, job blueprints) work without an API key. API tools connect directly to Jaz with no intermediary servers.",
+  "author": {
+    "name": "Jaz",
+    "email": "api-support@jaz.ai",
+    "url": "https://jaz.ai"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/teamtinvio/jaz-ai.git"
+  },
+  "homepage": "https://jaz.ai",
+  "documentation": "https://github.com/teamtinvio/jaz-ai/blob/main/README.md",
+  "support": "https://github.com/teamtinvio/jaz-ai/issues",
+  "icon": "icon.png",
+  "license": "MIT",
+  "privacy_policies": [
+    "https://jaz.ai/legal"
+  ],
+  "keywords": [
+    "accounting",
+    "invoicing",
+    "bookkeeping",
+    "finance",
+    "tax",
+    "reconciliation",
+    "IFRS",
+    "GST"
+  ],
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": [
+      "darwin",
+      "win32"
+    ],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "JAZ_API_KEY": "${user_config.api_key}"
+      }
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Jaz API Key or Access Token",
+      "description": "Enter a jk-... key, pat_... token, or multiple keys separated by commas. Get from Settings in the Jaz app.",
+      "required": false,
+      "sensitive": true
+    }
+  },
+  "tools_generated": true,
+  "tools": [
+    {
+      "name": "get_organization",
+      "description": "Get organization details (name, currency, country, lock date, fiscal year end)."
+    },
+    {
+      "name": "list_accounts",
+      "description": "List chart of accounts. Returns account name, code, type, class, status. Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_accounts",
+      "description": "Search chart of accounts by name, code, class, type, status. For OR search (name or code), use filter param: {\"or\":{\"name\":{\"contains\":\"X\"},\"code\":{\"contains\":\"X\"}}}."
+    },
+    {
+      "name": "create_account",
+      "description": "Create a new chart of accounts entry. Auto-checks for duplicates by name — returns existing account if found. Code must be unique. Account class is inferred from accountType."
+    },
+    {
+      "name": "update_account",
+      "description": "Update an existing chart of accounts entry (name or code)."
+    },
+    {
+      "name": "list_contacts",
+      "description": "List contacts (customers/suppliers). Returns billingName, name, emails, status. Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_contacts",
+      "description": "Search contacts by name, email, customer/supplier role, status."
+    },
+    {
+      "name": "get_contact",
+      "description": "Get full contact details by resourceId."
+    },
+    {
+      "name": "create_contact",
+      "description": "Create a new contact. Auto-checks for duplicates by name — returns existing contact if found instead of creating a duplicate."
+    },
+    {
+      "name": "update_contact",
+      "description": "Update an existing contact. Fetches current data first so you only need to send changed fields."
+    },
+    {
+      "name": "list_invoices",
+      "description": "List invoices. Returns reference, date, status, contact, totalAmount. Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_invoices",
+      "description": "Search invoices. Supports comma-separated status (e.g., \"UNPAID,PARTIALLY_PAID\"). Use filter param for advanced queries (nested paths, OR groups)."
+    },
+    {
+      "name": "get_invoice",
+      "description": "Get full invoice details including line items, payments, totals."
+    },
+    {
+      "name": "create_invoice",
+      "description": "Create a new invoice. IMPORTANT:\n- Line items use \"name\" (not \"description\") for the item label.\n- saveAsDraft defaults to true. Set to false only if user says \"finalize\".\n- accountResourceId is REQUIRED on each lineItem for finalized invoices. Search accounts first (e.g. Operating Revenue).\n- Currency format: { sourceCurrency: \"USD\", exchangeRate: 1.35 }\n- contactResourceId is required — search contacts first to get the ID.\n- Dates must be YYYY-MM-DD format.\n- reference MUST be unique per org — if the user doesn't specify one, generate one with a timestamp (e.g., INV-20260309-1430). Duplicates cause 422."
+    },
+    {
+      "name": "update_invoice",
+      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced — pass the complete updated lineItems array."
+    },
+    {
+      "name": "delete_invoice",
+      "description": "Delete a draft invoice. Cannot delete finalized invoices."
+    },
+    {
+      "name": "pay_invoice",
+      "description": "Record a payment against an invoice. Invoice must be APPROVED/UNPAID before payment — draft or voided invoices cannot be paid. If the invoice is still a DRAFT, call finalize_invoice first."
+    },
+    {
+      "name": "finalize_invoice",
+      "description": "Finalize a draft invoice (set saveAsDraft=false). Can optionally update fields in the same call. IMPORTANT: Every lineItem MUST have accountResourceId. If the draft was created without it, pass lineItems with accountResourceId added (search accounts first, e.g. Operating Revenue for sales)."
+    },
+    {
+      "name": "apply_credits_to_invoice",
+      "description": "Apply customer credit note(s) to an invoice. You MUST call this tool to actually apply credits — do not just describe the steps.\nSteps: 1) search_customer_credit_notes with status UNAPPLIED for the same contact. 2) If CN is still DRAFT, call finalize_customer_credit_note first. 3) Call this tool with creditNoteResourceId and amountApplied for each CN."
+    },
+    {
+      "name": "download_invoice_pdf",
+      "description": "Download an invoice as PDF. Returns { fileUrl }."
+    },
+    {
+      "name": "list_bills",
+      "description": "List bills (purchase invoices). Returns reference, date, status, contact, amounts. Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_bills",
+      "description": "Search bills. Supports comma-separated status (e.g., \"UNPAID,PARTIALLY_PAID\"). Use filter param for advanced queries."
+    },
+    {
+      "name": "get_bill",
+      "description": "Get full bill details."
+    },
+    {
+      "name": "create_bill",
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — generate one with a timestamp if user doesn't specify."
+    },
+    {
+      "name": "update_bill",
+      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced — pass the complete updated lineItems array."
+    },
+    {
+      "name": "delete_bill",
+      "description": "Delete a draft bill."
+    },
+    {
+      "name": "pay_bill",
+      "description": "Record a payment against a bill. Bill must be APPROVED before payment — draft or voided bills cannot be paid."
+    },
+    {
+      "name": "finalize_bill",
+      "description": "Finalize a draft bill (set saveAsDraft=false). Can optionally update fields in the same call. IMPORTANT: Every lineItem MUST have accountResourceId. If the draft was created without it, pass lineItems with accountResourceId added (search accounts first, e.g. Operating Expense for purchases)."
+    },
+    {
+      "name": "apply_credits_to_bill",
+      "description": "Apply supplier credit note(s) to a bill. IMPORTANT: The credit note must be FINALIZED first (status UNAPPLIED, not DRAFT). If it is still a draft, call finalize_supplier_credit_note first. Then search_supplier_credit_notes with status UNAPPLIED to find available credits for the contact, and pass creditNoteResourceId and amountApplied for each."
+    },
+    {
+      "name": "list_journals",
+      "description": "List journal entries. Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "get_journal",
+      "description": "Get full journal entry details by resourceId. Returns journal lines, amounts, status, and metadata."
+    },
+    {
+      "name": "search_journals",
+      "description": "Search journals by status, type, date, reference, tag. Status uses ACTIVE (not FINALIZED). Supports comma-separated status/type."
+    },
+    {
+      "name": "create_journal",
+      "description": "Create a journal entry. IMPORTANT:\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount.\n- Total debits MUST equal total credits — the API rejects unbalanced journals.\n- Search accounts first to get the correct resourceIds.\n- Double-check your math: sum all DEBIT amounts and all CREDIT amounts — they must be equal."
+    },
+    {
+      "name": "create_transfer_trial_balance",
+      "description": "Create opening balance entries (Transfer Trial Balance). Used to set up initial account balances when migrating to a new accounting system.\n- Always created as ACTIVE — no draft mode.\n- Reference is auto-generated (\"Transfer Trial Balance\") — do NOT send a reference.\n- Minimum 1 entry (unlike regular journals which require 2).\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount (must be > 0).\n- Skips lock date validation (opening balances are special).\n- Uses journalEntries (NOT lines — this is a journal type)."
+    },
+    {
+      "name": "delete_journal",
+      "description": "Delete a draft journal entry."
+    },
+    {
+      "name": "generate_trial_balance",
+      "description": "Generate a trial balance report."
+    },
+    {
+      "name": "generate_balance_sheet",
+      "description": "Generate a balance sheet report."
+    },
+    {
+      "name": "generate_profit_and_loss",
+      "description": "Generate a profit & loss (income statement) report."
+    },
+    {
+      "name": "generate_cashflow",
+      "description": "Generate a cashflow report."
+    },
+    {
+      "name": "generate_aged_ar",
+      "description": "Generate aged accounts receivable summary."
+    },
+    {
+      "name": "generate_aged_ap",
+      "description": "Generate aged accounts payable summary."
+    },
+    {
+      "name": "generate_cash_balance",
+      "description": "Generate a cash balance report showing cash position at a specific date. PREFERRED for cash position questions — use this (NOT balance sheet) when asked about total cash, cash on hand, available cash, or cash position across all bank accounts."
+    },
+    {
+      "name": "generate_general_ledger",
+      "description": "Generate a general ledger report."
+    },
+    {
+      "name": "list_bank_accounts",
+      "description": "List bank accounts connected to the organization."
+    },
+    {
+      "name": "list_items",
+      "description": "List items (products & services). Returns internalName, itemCode, appliesToSale/Purchase. Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_items",
+      "description": "Search items by status, category, sale/purchase applicability. Use list_items to search by name (internalName is not a filter field)."
+    },
+    {
+      "name": "get_item",
+      "description": "Get full item details by resourceId."
+    },
+    {
+      "name": "create_item",
+      "description": "Create a new item. Auto-checks for duplicates by itemCode — returns existing item if found.\n- saleItemName/purchaseItemName are auto-set from internalName if not provided.\n- Set appliesToSale and/or appliesToPurchase to control where the item can be used."
+    },
+    {
+      "name": "update_item",
+      "description": "Update an existing item. Only send fields you want to change — required fields are auto-merged from current state."
+    },
+    {
+      "name": "delete_item",
+      "description": "Delete an item."
+    },
+    {
+      "name": "bulk_upsert_items",
+      "description": "Create or update items in bulk (max 500 per call). Provide resourceId per item to update (partial — only changed fields needed, server preserves existing values). Omit resourceId to create (defaults: status=ACTIVE, itemCategory=NON_INVENTORY)."
+    },
+    {
+      "name": "list_tags",
+      "description": "List tags used for transaction categorization. Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_tags",
+      "description": "Search tags by name."
+    },
+    {
+      "name": "create_tag",
+      "description": "Create a new tag. Automatically reuses existing tag if one with the same name exists."
+    },
+    {
+      "name": "get_tag",
+      "description": "Get a tag by resourceId."
+    },
+    {
+      "name": "update_tag",
+      "description": "Rename a tag."
+    },
+    {
+      "name": "delete_tag",
+      "description": "Delete a tag."
+    },
+    {
+      "name": "list_capsule_types",
+      "description": "List capsule types (e.g., PREPAID_EXPENSE, DEFERRED_REVENUE). Use to get capsuleTypeResourceId before creating capsules."
+    },
+    {
+      "name": "list_capsules",
+      "description": "List capsules (transaction groupings for amortization, deferred revenue, etc.). Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_capsules",
+      "description": "Search capsules by title or status."
+    },
+    {
+      "name": "get_capsule",
+      "description": "Get full capsule details by resourceId."
+    },
+    {
+      "name": "create_capsule",
+      "description": "Create a new capsule. List capsule types first to get the capsuleTypeResourceId."
+    },
+    {
+      "name": "update_capsule",
+      "description": "Update a capsule title or description. Required fields are auto-merged from current state."
+    },
+    {
+      "name": "delete_capsule",
+      "description": "Delete a capsule."
+    },
+    {
+      "name": "list_customer_credit_notes",
+      "description": "List customer credit notes (AR adjustments/refunds). Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_customer_credit_notes",
+      "description": "Search customer credit notes by reference, status, contact, tag. Status: DRAFT, UNAPPLIED, PARTIALLY_APPLIED, APPLIED, VOID."
+    },
+    {
+      "name": "get_customer_credit_note",
+      "description": "Get full customer credit note details including line items."
+    },
+    {
+      "name": "create_customer_credit_note",
+      "description": "Create a customer credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- contactResourceId required — search contacts first.\n- reference MUST be unique — generate one with a timestamp if user doesn't specify."
+    },
+    {
+      "name": "delete_customer_credit_note",
+      "description": "Delete a draft customer credit note."
+    },
+    {
+      "name": "update_customer_credit_note",
+      "description": "Update a draft customer credit note (change amount, line items, contact, date, notes). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a credit note."
+    },
+    {
+      "name": "finalize_customer_credit_note",
+      "description": "Finalize a draft customer credit note (set saveAsDraft=false). Status becomes UNAPPLIED."
+    },
+    {
+      "name": "create_customer_credit_note_refund",
+      "description": "Record a refund payment against a customer credit note."
+    },
+    {
+      "name": "list_customer_credit_note_refunds",
+      "description": "List refund payments for a customer credit note."
+    },
+    {
+      "name": "list_supplier_credit_notes",
+      "description": "List supplier credit notes (AP adjustments/refunds). Paginated — response includes totalElements. Use limit/offset to page."
+    },
+    {
+      "name": "search_supplier_credit_notes",
+      "description": "Search supplier credit notes by reference, status, contact, tag. Status: DRAFT, UNAPPLIED, PARTIALLY_APPLIED, APPLIED, VOID."
+    },
+    {
+      "name": "get_supplier_credit_note",
+      "description": "Get full supplier credit note details including line items."
+    },
+    {
+      "name": "create_supplier_credit_note",
+      "description": "Create a supplier credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- contactResourceId required — search contacts first."
+    },
+    {
+      "name": "delete_supplier_credit_note",
+      "description": "Delete a draft supplier credit note."
+    },
+    {
+      "name": "update_supplier_credit_note",
+      "description": "Update a draft supplier credit note (change amount, line items, contact, date, notes). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a credit note."
+    },
+    {
+      "name": "finalize_supplier_credit_note",
+      "description": "Finalize a draft supplier credit note (set saveAsDraft=false). Status becomes UNAPPLIED."
+    },
+    {
+      "name": "create_supplier_credit_note_refund",
+      "description": "Record a refund payment against a supplier credit note."
+    },
+    {
+      "name": "list_supplier_credit_note_refunds",
+      "description": "List refund payments for a supplier credit note."
+    },
+    {
+      "name": "list_currencies",
+      "description": "List currencies enabled for the organization. Returns currency code, name, symbol, and whether it is the base currency."
+    },
+    {
+      "name": "add_currency",
+      "description": "Enable one or more currencies for the organization."
+    },
+    {
+      "name": "list_currency_rates",
+      "description": "List exchange rates for a specific currency. IMPORTANT: You MUST call list_currencies first to discover which currencies the org has enabled — never guess or assume currency codes."
+    },
+    {
+      "name": "add_currency_rate",
+      "description": "Add or set an exchange rate for a currency. ALWAYS use this tool even when the user says \"update rate\" — it handles both new and existing rates. Rate is relative to the base currency. Call list_currencies first to get valid currency codes."
+    },
+    {
+      "name": "update_currency_rate",
+      "description": "Update an EXISTING exchange rate record by its resourceId. Requires the rate resourceId from list_currency_rates. WARNING: If the user says \"update the rate\" or \"set the rate\", they almost always mean add_currency_rate (which creates/overwrites for a date). Only use this tool when explicitly modifying an existing rate record by ID."
+    },
+    {
+      "name": "start_currency_rates_import_job",
+      "description": "Start an async job to import currency rates from a CSV file URL."
+    },
+    {
+      "name": "get_currency_rates_import_job_status",
+      "description": "Check the status of a currency rates import job."
+    },
+    {
+      "name": "bulk_upsert_currency_rates",
+      "description": "Create exchange rates in bulk (max 500 per call). Auto-enables currencies not yet enabled in the org — no need to call add_currency first. Requires rateDirection per rate."
+    },
+    {
+      "name": "list_tax_profiles",
+      "description": "List tax profiles (GST, VAT, etc.). Returns name, rate, tax type."
+    },
+    {
+      "name": "list_tax_types",
+      "description": "List available tax types. Use the tax type code when creating tax profiles."
+    },
+    {
+      "name": "create_tax_profile",
+      "description": "Create a new tax profile. List tax types first to get the taxTypeCode. Automatically checks for duplicates by name — returns existing profile if found."
+    },
+    {
+      "name": "list_cash_in",
+      "description": "List cash-in entries (direct cash receipts). Paginated."
+    },
+    {
+      "name": "create_cash_in",
+      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit from outside).\nWHEN TO USE: customer payments received, refunds from suppliers, insurance payouts, external deposits.\nWHEN NOT TO USE: moving money between your own bank/cash accounts — use create_cash_transfer instead.\n- CRITICAL: accountResourceId MUST be a Bank/Cash account from list_bank_accounts output. Using expense, revenue, or liability accounts will fail. Always call list_bank_accounts first to find valid accounts.\n- lines are the offsetting entries. Each needs accountResourceId, type (DEBIT/CREDIT), and amount. IMPORTANT: offset accounts must be regular P&L or balance sheet accounts (expense, revenue, asset, liability) — NOT bank/cash accounts or controlled accounts (AR/AP). Example: Service Revenue, Interest Income, Other Income.\n- The API enforces account separation: cash-in bank account cannot appear in lines."
+    },
+    {
+      "name": "list_cash_out",
+      "description": "List cash-out entries (direct cash disbursements). Paginated."
+    },
+    {
+      "name": "create_cash_out",
+      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal).\nWHEN TO USE: expenses paid, supplier payments, reimbursements, withdrawals to external parties.\nWHEN NOT TO USE: moving money between your own bank/cash accounts — use create_cash_transfer instead.\n- CRITICAL: accountResourceId MUST be a Bank/Cash account from list_bank_accounts output. Using expense, revenue, or liability accounts will fail with \"CashOut journal account cannot be in CashIn Entries\". Always call list_bank_accounts first to find valid accounts.\n- lines are the offsetting entries. Each needs accountResourceId, type (DEBIT for cash-out expenses), and amount (must be > 0). For cash-out: use type \"DEBIT\" on the expense/offset account. IMPORTANT: offset accounts must be regular P&L or balance sheet accounts (expense, revenue, asset, liability) — NOT bank/cash accounts or controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct-id>\", type: \"DEBIT\", amount: 100 }.\n- The API enforces account separation: cash-out bank account cannot appear in lines."
+    },
+    {
+      "name": "get_cash_in",
+      "description": "Get a cash-in entry by resourceId."
+    },
+    {
+      "name": "update_cash_in",
+      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated."
+    },
+    {
+      "name": "get_cash_out",
+      "description": "Get a cash-out entry by resourceId."
+    },
+    {
+      "name": "update_cash_out",
+      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated."
+    },
+    {
+      "name": "list_cash_transfers",
+      "description": "List cash transfer entries. Paginated."
+    },
+    {
+      "name": "create_cash_transfer",
+      "description": "Move money between two of YOUR OWN bank/cash accounts (internal transfer, e.g., main bank to petty cash, USD account to SGD account).\nWHEN TO USE: petty cash top-ups from bank, inter-account transfers, currency conversions between own accounts.\nWHEN NOT TO USE: receiving money from external parties (use create_cash_in) or paying external parties (use create_cash_out).\n- cashOut = source account (money leaves), cashIn = destination account (money arrives).\n- Each side needs accountResourceId + amount.\n- reference is auto-generated if not provided.\n- Do NOT send currency/exchangeRate — derived server-side from bank account currencies."
+    },
+    {
+      "name": "delete_cash_in",
+      "description": "Delete (void) a cash-in entry. Uses parentEntityResourceId from create response."
+    },
+    {
+      "name": "delete_cash_out",
+      "description": "Delete (void) a cash-out entry. Uses parentEntityResourceId from create response."
+    },
+    {
+      "name": "delete_cash_transfer",
+      "description": "Delete (void) a cash transfer. Uses parentEntityResourceId from create response."
+    },
+    {
+      "name": "list_scheduled_invoices",
+      "description": "List scheduled (recurring) invoices. Paginated."
+    },
+    {
+      "name": "list_scheduled_bills",
+      "description": "List scheduled (recurring) bills. Paginated."
+    },
+    {
+      "name": "list_scheduled_journals",
+      "description": "List scheduled (recurring) journals. Paginated."
+    },
+    {
+      "name": "get_bank_account",
+      "description": "Get full bank account details by resourceId."
+    },
+    {
+      "name": "search_bank_records",
+      "description": "Search bank records for a specific account. Filter by status, date, description, payer, reference, amount range. Call list_bank_accounts first to get accountResourceId."
+    },
+    {
+      "name": "search_cashflow_transactions",
+      "description": "Search cashflow transactions (unified ledger). Filter by type, direction (PAYIN/PAYOUT), status, date, reference, account."
+    },
+    {
+      "name": "list_bookmarks",
+      "description": "List organization bookmarks (saved values/settings)."
+    },
+    {
+      "name": "get_bookmark",
+      "description": "Get a bookmark by resourceId."
+    },
+    {
+      "name": "create_bookmarks",
+      "description": "Create one or more bookmarks. categoryCode must be one of: AUDIT_AND_ASSURANCE, BANKING_AND_FINANCE, BUDGETS_AND_CONTROLS, EMPLOYEES_AND_PAYROLL, EXTERNAL_DOCUMENTS, GENERAL_INFORMATION, OWNERS_AND_DIRECTORS, TAXATION_AND_COMPLIANCE, WORKFLOWS_AND_PROCESSES."
+    },
+    {
+      "name": "update_bookmark",
+      "description": "Update an existing bookmark (name, value, or category). Use when modifying a previously created bookmark."
+    },
+    {
+      "name": "list_org_users",
+      "description": "List organization users (team members). Returns name, email, roles."
+    },
+    {
+      "name": "search_org_users",
+      "description": "Search organization users by name, email, role, status. For OR search (name or email), use filter param."
+    },
+    {
+      "name": "invite_org_user",
+      "description": "Invite a new user to the organization."
+    },
+    {
+      "name": "update_org_user",
+      "description": "Update an organization user's module roles."
+    },
+    {
+      "name": "remove_org_user",
+      "description": "Remove a user from the organization."
+    },
+    {
+      "name": "list_payments",
+      "description": "List recent payments across all transaction types. Paginated."
+    },
+    {
+      "name": "search_payments",
+      "description": "Search payments by type, direction (PAYIN/PAYOUT), method, date, reference, account."
+    },
+    {
+      "name": "download_export",
+      "description": "Download a data export report. Returns { fileName, fileUrl }.\nAvailable export types: trial-balance, balance-sheet, profit-and-loss, general-ledger, cashflow, cash-balance, ar-report, ap-report, sales-summary, sales-payments-summary, purchase-summary, purchase-payments-summary, customer-revenue-summary, product-sales-summary, periodic-revenue-summary, supplier-expense-summary, product-purchase-summary, periodic-expense-summary, credit-note-summary, sales-cost-margin, sale-inventory-movement, purchase-inventory-movement, analysis-anomalous-invoices, analysis-anomalous-bills, analysis-cashflow-anomalies, analysis-gl-journal-audit, analysis-receivables-customer-risk, analysis-cash-expense-health, statement-of-account-export."
+    },
+    {
+      "name": "plan_recipe",
+      "description": "Plan a transaction recipe — run a financial calculator and show what accounts, contacts, and bank accounts are needed. This is READ-ONLY (no API calls, no transactions created).\nYOUR NEXT STEP after this tool: call execute_recipe with the same parameters plus startDate. The execute_recipe tool IS available to you — ALWAYS use it (not create_journal/create_invoice/create_cash_out).\nSupported recipes: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend\nReturns: capsule type/name, required accounts, step breakdown (journal/bill/invoice/cash-in/cash-out), and full calculator results.\nUse this BEFORE execute_recipe to verify requirements. Parameters vary by recipe — see recipe skill docs for per-recipe params.\nCRITICAL: ALWAYS call this tool for ANY calculation involving: depreciation, amortization, ECL/expected credit loss, FX revaluation, lease/IFRS 16, hire purchase, loan schedules, provisions, deferred revenue, fixed deposits, or asset disposal. Never compute these manually."
+    },
+    {
+      "name": "execute_recipe",
+      "description": "Execute a transaction recipe end-to-end — run calculator, create capsule, post all entries in one call.\nPREFERRED over manual transaction creation — replaces ~20 manual tool calls. After plan_recipe, ALWAYS use this tool (not create_journal/create_invoice/create_cash_out).\nSupported recipes: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend\nRequires startDate (to generate blueprint with dated steps).\nAuto-resolves accounts from chart of accounts. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps."
+    },
+    {
+      "name": "create_scheduled_journal",
+      "description": "Create a scheduled (recurring) journal. CRITICAL:\n- Use schedulerEntries (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT/CREDIT), name.\n- Use repeat (NOT frequency/interval): WEEKLY, MONTHLY, QUARTERLY, YEARLY.\n- Total debits MUST equal total credits.\n- Flat structure — reference, valueDate, saveAsDraft at top level (not nested).\nDynamic strings for reference/name/notes: {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — replaced with values relative to the transaction date."
+    },
+    {
+      "name": "create_scheduled_invoice",
+      "description": "Create a scheduled (recurring) invoice. Use for fixed-amount recurring invoices where you want full control over currency, tax, and line items each period.\nDIFFERENT from subscriptions: no proration, but currency/tax/items can differ per occurrence.\nCRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_SALE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): WEEKLY, MONTHLY, QUARTERLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings for reference/name/notes: {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — replaced with values relative to the transaction date."
+    },
+    {
+      "name": "create_scheduled_bill",
+      "description": "Create a scheduled (recurring) bill. CRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_PURCHASE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): WEEKLY, MONTHLY, QUARTERLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings for reference/name/notes: {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — replaced with values relative to the transaction date."
+    },
+    {
+      "name": "update_journal",
+      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize."
+    },
+    {
+      "name": "import_bank_statement",
+      "description": "Import a bank statement from URL or attachment ID. Processing is async — check magic workflows for status."
+    },
+    {
+      "name": "add_bank_records",
+      "description": "Create bank statement entries via JSON POST (1-100 records per call). For CSV/OFX file imports, use import_bank_statement instead.\n\nFields per record:\n- amount (required): positive = cash-in, negative = cash-out\n- transactionDate (required): YYYY-MM-DD\n- description, payerOrPayee, reference: optional strings\n\nReturns {data: {errors: []}} on success. accountResourceId must be a bank-type CoA account (find via list_bank_accounts)."
+    },
+    {
+      "name": "create_bt_from_attachment",
+      "description": "Create a business transaction (invoice/bill/credit note) from an uploaded file using AI extraction. Processing is async."
+    },
+    {
+      "name": "get_magic_workflow_status",
+      "description": "Get the current status of specific magic workflow(s) by resourceId(s). Returns workflow details including status, document type, and results."
+    },
+    {
+      "name": "get_attachments",
+      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note)."
+    },
+    {
+      "name": "add_attachment",
+      "description": "Add an attachment to a business transaction. Provide sourceUrl (downloads and uploads as file) or attachmentId (links existing)."
+    },
+    {
+      "name": "delete_attachment",
+      "description": "Delete an attachment from a business transaction."
+    },
+    {
+      "name": "fetch_attachment_table",
+      "description": "Fetch extracted table data from an attachment (OCR/AI extraction result)."
+    },
+    {
+      "name": "message_to_pdf",
+      "description": "Convert a markdown message to a downloadable PDF document."
+    },
+    {
+      "name": "generate_month_end_blueprint",
+      "description": "Generate a month-end close checklist with phases, steps, recipe references, and API calls. Returns a structured JobBlueprint."
+    },
+    {
+      "name": "generate_quarter_end_blueprint",
+      "description": "Generate a quarter-end close checklist. Set incremental=true to skip month-end phases (assumes months are already closed)."
+    },
+    {
+      "name": "generate_year_end_blueprint",
+      "description": "Generate a year-end close checklist. Set incremental=true to skip quarter/month phases (assumes already closed)."
+    },
+    {
+      "name": "generate_bank_recon_blueprint",
+      "description": "Generate a bank reconciliation job checklist — match bank statement entries to ledger transactions."
+    },
+    {
+      "name": "generate_gst_vat_blueprint",
+      "description": "Generate a GST/VAT filing job checklist — verify tax transactions, reconcile GST accounts, prepare F5 return."
+    },
+    {
+      "name": "generate_payment_run_blueprint",
+      "description": "Generate a payment run job checklist — identify outstanding bills, verify bank details, batch payments."
+    },
+    {
+      "name": "generate_credit_control_blueprint",
+      "description": "Generate a credit control job checklist — chase overdue invoices, send reminders, escalate aged debt."
+    },
+    {
+      "name": "generate_supplier_recon_blueprint",
+      "description": "Generate a supplier reconciliation job checklist — match supplier statements to AP ledger."
+    },
+    {
+      "name": "generate_audit_prep_blueprint",
+      "description": "Generate an audit preparation job checklist — verify completeness, prepare supporting schedules, organize documents."
+    },
+    {
+      "name": "generate_fa_review_blueprint",
+      "description": "Generate a fixed asset review job checklist — verify asset register, reconcile depreciation, check disposals."
+    },
+    {
+      "name": "generate_document_collection_blueprint",
+      "description": "Generate a document collection job checklist — identify missing invoices, receipts, and supporting docs for the period."
+    },
+    {
+      "name": "generate_statutory_filing_blueprint",
+      "description": "Generate a statutory filing job checklist — prepare corporate income tax computation, file returns."
+    },
+    {
+      "name": "validate_invoice_draft",
+      "description": "Check if an invoice draft is ready to finalize. Returns missing fields, structured validation report, and ready status. Use before finalize_invoice to prevent errors."
+    },
+    {
+      "name": "validate_bill_draft",
+      "description": "Check if a bill draft is ready to finalize. Returns missing fields, structured validation report, and ready status. Use before finalize_bill to prevent errors."
+    },
+    {
+      "name": "validate_journal_draft",
+      "description": "Check if a journal draft is ready to finalize. Returns missing fields (accounts, amounts, date), structured validation, and ready status."
+    },
+    {
+      "name": "validate_credit_note_draft",
+      "description": "Check if a credit note draft (customer or supplier) is ready to finalize. Returns missing fields, structured validation, and ready status."
+    },
+    {
+      "name": "list_bank_rules",
+      "description": "List bank reconciliation rules (action shortcuts). Shows rule name, action type, and target bank account."
+    },
+    {
+      "name": "get_bank_rule",
+      "description": "Get full bank rule details including configuration (allocation percentages, accounts, tax settings)."
+    },
+    {
+      "name": "search_bank_rules",
+      "description": "Search bank rules by name."
+    },
+    {
+      "name": "create_bank_rule",
+      "description": "Create a bank reconciliation rule. Rules auto-match bank records to transactions during reconciliation. When the user asks to create a bank rule, use this tool directly — do not only list existing rules.\n- appliesToReconciliationAccount: the bank account UUID this rule applies to (NOT \"ResourceId\" suffix)\n- configuration MUST be nested under reconcileWithDirectCashEntry key\n- configuration.reconcileWithDirectCashEntry.reference is REQUIRED (omitting causes error)\n- amountAllocationType: \"PERCENTAGE\" or \"FIXED\". Do NOT send \"FIXED_AND_PERCENTAGE\" — include both arrays and the server infers it.\n- Optional: contactResourceId (pre-fills contact on created DCE), internalNotes, currencySettings, taxCurrencySettings\nMinimum payload: { reconcileWithDirectCashEntry: { amountAllocationType: \"PERCENTAGE\", reference: \"{{bankReference}}\", percentageAllocation: [{ organizationAccountResourceId: \"<acct>\", amount: 100 }] } }\nFull payload: { reconcileWithDirectCashEntry: { amountAllocationType: \"PERCENTAGE\", reference: \"{{bankPayee}} - {{bankDescription}}\", percentageAllocation: [...], fixedAllocation: [...], contactResourceId: \"<uuid>\", internalNotes: \"Auto-reconciled\", tags: [\"auto\"], taxInclusion: false, taxVatApplicable: false } }\nDynamic strings for name/reference: {{bankReference}} (e.g., INV-03/01/2025-01), {{bankPayee}} (e.g., Fruit Planet), {{bankDescription}} (e.g., QR Payment) — replaced with actual bank record values during reconciliation."
+    },
+    {
+      "name": "update_bank_rule",
+      "description": "Update an existing bank reconciliation rule. FULL REPLACEMENT — the API replaces the entire rule on update. You MUST provide the complete configuration, appliesToReconciliationAccount, and name every time. Use get_bank_rule first to read the current state, merge your changes, then call this tool with the full payload. Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}."
+    },
+    {
+      "name": "delete_bank_rule",
+      "description": "Delete a bank reconciliation rule."
+    },
+    {
+      "name": "view_auto_reconciliation",
+      "description": "Generate auto-reconciliation recommendations for a bank account. Returns magic match suggestions."
+    },
+    {
+      "name": "universal_search",
+      "description": "Search across all entity types (contacts, invoices, bills, credit notes, journals, items, capsules) in one call. Returns categorized results. For filtering by tags, dates, amounts, or status, use the specific search tools (search_cashflow_transactions, search_invoices, search_journals, etc.) instead — they support structured filters."
+    },
+    {
+      "name": "list_fixed_assets",
+      "description": "List fixed assets. Returns name, reference, type, category, status, purchase amount, net book value."
+    },
+    {
+      "name": "get_fixed_asset",
+      "description": "Get full fixed asset details including depreciation schedule, accounts, disposal info."
+    },
+    {
+      "name": "search_fixed_assets",
+      "description": "Search fixed assets by name, status, category, tag, type, date, amount range."
+    },
+    {
+      "name": "create_fixed_asset",
+      "description": "Register a fixed asset linked to an existing purchase transaction (bill or journal).\n- saveAsDraft defaults to true. Set to false to activate — requires ALL fields below.\n- ACTIVE assets require: purchaseBusinessTransactionType + purchaseBusinessTransactionResourceId\n  (links to the bill/journal that recorded the purchase).\n- For standalone asset entry (no linked transaction), use transfer_fixed_asset instead."
+    },
+    {
+      "name": "update_fixed_asset",
+      "description": "Update an existing fixed asset (draft or active). Can update name, depreciation settings, notes."
+    },
+    {
+      "name": "delete_fixed_asset",
+      "description": "Delete a draft fixed asset. Cannot delete active/disposed assets."
+    },
+    {
+      "name": "discard_fixed_asset",
+      "description": "Discard (write off) a fixed asset. Records the disposal and final depreciation."
+    },
+    {
+      "name": "mark_fixed_asset_sold",
+      "description": "Mark a fixed asset as sold. Links to the sale transaction and records gain/loss. When the user asks to sell an asset, use this tool directly — retrieve the asset first with list_fixed_assets or search_fixed_assets to get the resourceId."
+    },
+    {
+      "name": "transfer_fixed_asset",
+      "description": "Register a previously purchased fixed asset with accumulated depreciation.\nUse when the asset was acquired before using Jaz, imported from a legacy system, or purchased outside the system.\nNo linked purchase transaction needed — unlike create_fixed_asset which requires a bill/journal reference.\n- bookValueAccumulatedDepreciationAmount: depreciation already incurred before registration\n- All depreciation/account fields same as create_fixed_asset"
+    },
+    {
+      "name": "undo_fixed_asset_disposal",
+      "description": "Undo a fixed asset disposal (discard or sale). Restores the asset to active status. When the user asks to reverse or undo a disposal, use this tool directly."
+    },
+    {
+      "name": "list_subscriptions",
+      "description": "List recurring subscriptions. Returns status, interval, next schedule date, amount, transaction type."
+    },
+    {
+      "name": "get_subscription",
+      "description": "Get full subscription details including line items, schedule, and payment history."
+    },
+    {
+      "name": "create_subscription",
+      "description": "Create a subscription — auto-generates invoices on schedule with proration.\nDIFFERENT from scheduled invoices: subscriptions auto-prorate partial periods (credit notes for mid-period changes), but currency/tax/account are immutable after creation.\nUse for: software licenses, retainer services, recurring SaaS billing. Invoices only (no bills).\n- accountResourceId and taxProfileResourceId apply to ALL line items (same for all — immutable after creation)\n- interval: \"WEEKLY\", \"MONTHLY\", \"QUARTERLY\", \"YEARLY\"\n- reference is REQUIRED (API rejects without it)\nDynamic strings for reference/line item name/notes: {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — replaced with values relative to the transaction date (e.g., {{Month}} → \"March\", {{Date+7}} → \"16 Mar 2026\")."
+    },
+    {
+      "name": "update_subscription",
+      "description": "Update an existing subscription (interval, end date, or transaction template). When the user asks to update a subscription, use this tool directly. NOTE: accountResourceId and taxProfileResourceId on line items are immutable after creation — to change them, cancel and recreate."
+    },
+    {
+      "name": "delete_subscription",
+      "description": "Delete a subscription. Removes the recurring schedule."
+    },
+    {
+      "name": "cancel_subscription",
+      "description": "Cancel an active subscription. Prorates remaining period and stops future billing. Safe to call — subscriptions can be reactivated after cancellation. Always use this tool when the user asks to cancel a subscription. Must cancel before delete."
+    },
+    {
+      "name": "search_scheduled_transactions",
+      "description": "Search scheduled transactions (subscriptions, recurring). Filter by type, status, interval, contact."
+    },
+    {
+      "name": "generate_vat_ledger",
+      "description": "Generate VAT/GST ledger report showing all tax transactions for the period."
+    },
+    {
+      "name": "generate_equity_movement",
+      "description": "Generate equity movement report (statement of changes in equity)."
+    },
+    {
+      "name": "generate_bank_balance_summary",
+      "description": "Generate bank balance summary report — snapshot of all bank account balances at a point in time."
+    },
+    {
+      "name": "generate_bank_recon_summary",
+      "description": "Generate bank reconciliation summary for a specific bank account. Essential for month-end close — call this for each in-scope bank account for the current entity and reporting period. Use for bank recon status, unreconciled items count, or reconciliation summaries."
+    },
+    {
+      "name": "generate_bank_recon_details",
+      "description": "Generate detailed bank reconciliation report showing matched/unmatched items."
+    },
+    {
+      "name": "generate_fa_summary",
+      "description": "Generate fixed assets summary report grouped by account, type, category, or status."
+    },
+    {
+      "name": "generate_fa_recon_summary",
+      "description": "Generate fixed assets reconciliation summary — reconciles asset register with general ledger."
+    },
+    {
+      "name": "generate_ar_report",
+      "description": "Generate accounts receivable aging report. Shows outstanding invoices grouped by aging buckets. Use this when discussing customer payment allocation, credit control, or AR status — generate the report to show the full picture."
+    },
+    {
+      "name": "get_ledger_highlights",
+      "description": "Get ledger highlights — summary metadata about the org general ledger: transaction counts by type, date range, active accounts, active currencies, and cross-currency detection. No parameters needed."
+    },
+    {
+      "name": "list_contact_groups",
+      "description": "List contact groups with their associated contacts. Used to segment customers/suppliers."
+    },
+    {
+      "name": "get_contact_group",
+      "description": "Get contact group details including all associated contacts."
+    },
+    {
+      "name": "search_contact_groups",
+      "description": "Search contact groups by name."
+    },
+    {
+      "name": "create_contact_group",
+      "description": "Create a new contact group for segmenting contacts (e.g., \"VIP Customers\", \"Government\", \"Overdue > 90 Days\")."
+    },
+    {
+      "name": "update_contact_group",
+      "description": "Update a contact group name or members. NOTE: Update endpoint has a known 500 bug on some orgs — retry or recreate if it fails."
+    },
+    {
+      "name": "delete_contact_group",
+      "description": "Delete a contact group. Does not delete the contacts themselves."
+    },
+    {
+      "name": "list_custom_fields",
+      "description": "List custom fields defined for the organization. Custom fields add extra data to invoices, bills, credit notes, and payments."
+    },
+    {
+      "name": "get_custom_field",
+      "description": "Get a custom field by resourceId. Returns full definition including appliesTo flags and list options."
+    },
+    {
+      "name": "search_custom_fields",
+      "description": "Search custom fields by name or data type."
+    },
+    {
+      "name": "create_custom_field",
+      "description": "Create a new custom field. Custom fields appear on transactions (invoices, bills, credit notes, payments).\n- Use appliesTo to control which transaction types show this field.\n- printOnDocuments controls whether the field appears on PDFs."
+    },
+    {
+      "name": "update_custom_field",
+      "description": "Update a custom field definition. Can change name, description, printOnDocuments, and appliesTo flags."
+    },
+    {
+      "name": "delete_custom_field",
+      "description": "Delete a custom field. Removes it from all future transactions."
+    },
+    {
+      "name": "list_withholding_tax_codes",
+      "description": "List withholding tax codes (industry classification codes for PH/SG compliance). Returns full list (no pagination)."
+    },
+    {
+      "name": "search_tax_profiles",
+      "description": "Search tax profiles by name, tax type code, applicability (sale/purchase). Filter appliesToSale/appliesToPurchase to scope by transaction type."
+    },
+    {
+      "name": "get_tax_profile",
+      "description": "Get full tax profile details including tax rate, type code, and status."
+    },
+    {
+      "name": "update_tax_profile",
+      "description": "Update an existing tax profile (name, rate, or status)."
+    },
+    {
+      "name": "list_inventory_items",
+      "description": "List inventory-tracked items with stock details, COGS accounts, and purchase/sale accounts."
+    },
+    {
+      "name": "get_inventory_balance",
+      "description": "Get current inventory balance for a specific item — quantity on hand, average cost, base unit."
+    },
+    {
+      "name": "create_inventory_item",
+      "description": "Create a new inventory-tracked item. Requires itemCode, name, costingMethod (FIXED or WAC), cogsResourceId, and account links. Use --input for full JSON body."
+    },
+    {
+      "name": "delete_contact",
+      "description": "Delete a contact. Cannot delete contacts with existing transactions."
+    },
+    {
+      "name": "delete_account",
+      "description": "Delete a chart of accounts entry. Cannot delete accounts with existing transactions."
+    },
+    {
+      "name": "get_cash_transfer",
+      "description": "Get full cash transfer details by resourceId."
+    },
+    {
+      "name": "download_credit_note_pdf",
+      "description": "Download a customer credit note as PDF. Returns a file URL."
+    },
+    {
+      "name": "get_transaction_summary",
+      "description": "Get a complete summary of any transaction — fetches the transaction, its attachments, and payment history in one call.\nWorks for invoices, bills, customer credit notes, supplier credit notes, and journals."
+    },
+    {
+      "name": "bulk_finalize_drafts",
+      "description": "Finalize multiple draft transactions in one call. Attempts finalization for each item and returns per-item pass/fail results. Supports invoices, bills, and credit notes."
+    },
+    {
+      "name": "bulk_invite_org_users",
+      "description": "Invite multiple users to the organization in one call. Accepts an array of user objects.\nEach user needs: email, firstName, lastName, moduleRoles. Returns per-user pass/fail results."
+    },
+    {
+      "name": "bulk_create_contacts",
+      "description": "Create multiple contacts in one call. Deduplicates against existing contacts (exact name match).\nReturns per-contact result: created, skipped (duplicate), or failed."
+    },
+    {
+      "name": "quick_fix_transactions",
+      "description": "Bulk-update multiple transactions of the same type in one call. Pass resourceIds + attributes — only included fields are changed, omitted fields are left unchanged.\nPer-entity attributes:\n- Invoices: valueDate, dueDate, invoiceNotes, templateResourceId, contactResourceId, billFrom, billTo, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Bills: valueDate, dueDate, contactResourceId, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Customer CNs: valueDate, notes, templateResourceId, contactResourceId, creditFrom, creditTo, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Supplier CNs: valueDate, contactResourceId, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Journals: valueDate, contactResourceId, tags, internalNotes, capsuleResourceId\n- Cash entries: organizationAccountResourceId, valueDate, contactResourceId, capsuleResourceId, tags, reference, currencySetting (SINGULAR — { rateFunctionalToSource, exchangeToken }), taxCurrencySettings\n- Sale/subscription schedules: endDate, interval, invoiceNotes, templateResourceId, contactResourceId, billFrom, billTo, tags, customFields, capsuleResourceId (+ currencySettings/taxCurrencySettings for sale only)\n- Purchase schedules: endDate, interval, contactResourceId, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Journal schedules: startDate, endDate, interval, contactResourceId, tags, internalNotes, capsuleResourceId\nTags: string array (max 50 items, max 50 chars each), e.g. [\"Q1\"].\nResponse: { updated: string[], failed: [{ resourceId, error, errorCode }] }. On partial failure (HTTP 207), both arrays may be populated — always check failed.length. On 207, only retry failed resourceIds."
+    },
+    {
+      "name": "quick_fix_line_items",
+      "description": "Bulk-update line items across multiple transactions. Only included fields are changed, omitted fields left unchanged.\nRequest patterns by entity type:\n- ARAP + accounting (invoices, bills, CNs, journals, cash-entries): pass lineItemResourceIds + attributes.\n- Schedulers (sale/purchase/subscription-schedules): pass schedulerUpdates with arrayIndex per line item (Pattern C).\n- Journal schedules: pass schedulerUpdates with lineItemResourceId (UUID) per line item — NOT arrayIndex (Pattern D).\nLine item attributes by type:\n- Sale (invoices + customer CNs): name, quantity, unit, unitPrice, discount, itemResourceId, organizationAccountResourceId, taxProfileResourceId, classifierConfig\n- Purchase (bills + supplier CNs): same as sale + withholdingTax\n- Scheduler (sale/purchase/subscription, Pattern C): name, description, sku, unit, unitPrice, quantity, discount, taxProfileResourceId, organizationAccountResourceId, classifierConfig, itemResourceId, withholdingTax (purchase only). Uses arrayIndex (zero-based).\n- Journal/cash-entry: organizationAccountResourceId, amount, description, taxProfileResourceId, classifierConfig\n- Journal-schedule (Pattern D): amount, description, organizationAccountResourceId, taxProfileResourceId, classifierConfig, itemResourceId, unit, quantity, pricePerUnit. Uses lineItemResourceId (UUID).\nResponse: { updated: string[], failed: [{ resourceId, error, errorCode }] }. On partial failure (HTTP 207), check failed.length."
+    },
+    {
+      "name": "list_nano_classifiers",
+      "description": "List nano classifiers (tracking categories). Paginated. Nano classifiers tag line items with structured categories."
+    },
+    {
+      "name": "get_nano_classifier",
+      "description": "Get a nano classifier by resourceId. Returns type and all classes."
+    },
+    {
+      "name": "search_nano_classifiers",
+      "description": "Search nano classifiers (tracking categories) by type name."
+    },
+    {
+      "name": "create_nano_classifier",
+      "description": "Create a nano classifier (tracking category). Provide a type name and list of class names. printable defaults to true (NOTE: printable: false is currently rejected by a server bug — always use true)."
+    },
+    {
+      "name": "update_nano_classifier",
+      "description": "Update a nano classifier — change type name, modify classes, or toggle printable."
+    },
+    {
+      "name": "delete_nano_classifier",
+      "description": "Delete a nano classifier."
+    },
+    {
+      "name": "list_invoice_payments",
+      "description": "List all payments recorded against an invoice. Returns payment records with amounts, dates, and methods."
+    },
+    {
+      "name": "list_invoice_credits",
+      "description": "List all credit notes applied to an invoice."
+    },
+    {
+      "name": "reverse_invoice_credit",
+      "description": "Reverse (unapply) a credit note from an invoice. The credit note becomes UNAPPLIED again."
+    },
+    {
+      "name": "list_bill_payments",
+      "description": "List all payments recorded against a bill. Returns payment records with amounts, dates, and methods."
+    },
+    {
+      "name": "list_bill_credits",
+      "description": "List all credit notes applied to a bill."
+    },
+    {
+      "name": "reverse_bill_credit",
+      "description": "Reverse (unapply) a supplier credit note from a bill. The credit note becomes UNAPPLIED again."
+    },
+    {
+      "name": "get_scheduled_invoice",
+      "description": "Get a scheduled (recurring) invoice by resourceId."
+    },
+    {
+      "name": "update_scheduled_invoice",
+      "description": "Update a scheduled invoice — change schedule settings and/or the invoice template."
+    },
+    {
+      "name": "delete_scheduled_invoice",
+      "description": "Delete a scheduled (recurring) invoice."
+    },
+    {
+      "name": "get_scheduled_bill",
+      "description": "Get a scheduled (recurring) bill by resourceId."
+    },
+    {
+      "name": "update_scheduled_bill",
+      "description": "Update a scheduled bill — change schedule settings and/or the bill template."
+    },
+    {
+      "name": "delete_scheduled_bill",
+      "description": "Delete a scheduled (recurring) bill."
+    },
+    {
+      "name": "get_scheduled_journal",
+      "description": "Get a scheduled (recurring) journal by resourceId."
+    },
+    {
+      "name": "update_scheduled_journal",
+      "description": "Update a scheduled journal — change schedule settings and/or the journal template."
+    },
+    {
+      "name": "delete_scheduled_journal",
+      "description": "Delete a scheduled (recurring) journal."
+    },
+    {
+      "name": "get_payment",
+      "description": "Get a specific payment record by resourceId. Returns payment amount, method, date, and reference."
+    },
+    {
+      "name": "update_payment",
+      "description": "Update a payment record — correct amount, reference, date, method, or account."
+    },
+    {
+      "name": "delete_payment",
+      "description": "Delete (void) a payment record. The associated invoice/bill balance is restored."
+    },
+    {
+      "name": "get_export_columns",
+      "description": "List all exportable columns for an entity type, including their paths and data types. Use paths from this response to build custom column sets for export_records or preview_export_records."
+    },
+    {
+      "name": "preview_export_records",
+      "description": "Preview an export before generating the file. Returns totalRecords, up to 10 sample rows, resolved column definitions, and a human-readable filterDescription. Use this to confirm scope before calling export_records. Pass either query OR filter, never both."
+    },
+    {
+      "name": "export_records",
+      "description": "Generate a filtered XLSX export for an entity type. Returns a pre-signed download URL (expires in ~5 minutes — download immediately), file name, and total record count. Pass either query OR filter, never both. Use preview_export_records first to confirm scope."
+    },
+    {
+      "name": "search_background_jobs",
+      "description": "Search and poll background jobs. ANY operation that returns a jobId (bulk_upsert_contacts, bulk_upsert_items, bank statement import, magic file processing, etc.) can be tracked here. Filter by resourceId (the jobId value) to poll a specific job. Poll until status is SUCCESS, FAILED, or PARTIAL_SUCCESS. Use processedCount/failedCount/totalRecords for progress. IMPORTANT: filter by resourceId field, NOT jobId — they differ."
+    },
+    {
+      "name": "bulk_upsert_contacts",
+      "description": "Create or update contacts in bulk (max 500 per call). Provide resourceId per contact to update (partial — only changed fields needed). Omit resourceId to create new contacts. Returns a jobId — this is async. Poll search_background_jobs with filter {resourceId:{eq:jobId}} until status is SUCCESS, FAILED, or PARTIAL_SUCCESS. NOTE: unlike bulk_upsert_items (sync), contacts bulk-upsert is async."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "jaz-ai",
+  "version": "4.55.5",
+  "description": "Complete AI agent stack for Jaz Accounting. 242 tools, 117 rules, 16 IFRS recipes, 13 calculators, 12 job playbooks. Multi-org support. Data migration (Xero/QB/Sage/MYOB). Singapore Form C-S tax. For Claude Code, Copilot, Cursor, Codex, and any MCP-compatible agent.",
+  "author": {
+    "name": "Jaz",
+    "url": "https://github.com/teamtinvio/jaz-ai"
+  },
+  "homepage": "https://help.jaz.ai",
+  "license": "MIT",
+  "keywords": ["jaz", "juan", "accounting", "api", "invoicing", "conversion", "migration", "xero", "quickbooks"],
+  "skills": ["./.claude/skills/api", "./.claude/skills/cli", "./.claude/skills/conversion", "./.claude/skills/transaction-recipes", "./.claude/skills/jobs"],
+  "agentSkills": ["./.agents/skills/api", "./.agents/skills/cli", "./.agents/skills/conversion", "./.agents/skills/transaction-recipes", "./.agents/skills/jobs"],
+  "mcpServers": {
+    "jaz-ai": {
+      "command": "npx",
+      "args": ["-y", "jaz-clio@latest", "mcp"],
+      "env": {
+        "JAZ_API_KEY": ""
+      }
+    }
+  }
+}
