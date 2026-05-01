@@ -1,0 +1,87 @@
+name: Publish CLI to npm
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  publish-cli:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Check if version already published
+        id: check
+        run: |
+          PKG_VERSION=$(node -p "require('./cli/package.json').version")
+          PUBLISHED=$(npm view jaz-clio version 2>/dev/null || echo "")
+          if [ "$PKG_VERSION" = "$PUBLISHED" ]; then
+            echo "jaz-clio@$PKG_VERSION already published — skipping"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Publishing jaz-clio@$PKG_VERSION (npm has: ${PUBLISHED:-none})"
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish pre-built bundle
+        if: steps.check.outputs.skip == 'false'
+        working-directory: cli
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Check if MCPB release exists
+        id: mcpb
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./cli/package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "Release v$VERSION already exists, skipping MCPB"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build MCPB bundle
+        if: steps.mcpb.outputs.skip == 'false'
+        run: |
+          VERSION="${{ steps.mcpb.outputs.version }}"
+          mkdir -p mcpb-build/server
+          cp cli/cli.mjs mcpb-build/server/bundle.js
+          cat > mcpb-build/server/index.js << 'JSEOF'
+          if (process.versions?.electron) {
+            process.argv = [process.execPath, 'mcp'];
+          } else {
+            process.argv = [process.execPath, 'jaz-clio', 'mcp'];
+          }
+          await import('./bundle.js');
+          JSEOF
+          cp manifest.json icon.png README.md LICENSE CHANGELOG.md package.json mcpb-build/
+          cd mcpb-build
+          npx --yes @anthropic-ai/mcpb pack
+          mv mcpb-build.mcpb "jaz-ai-${VERSION}.mcpb"
+
+      - name: Create GitHub release with MCPB
+        if: steps.mcpb.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ steps.mcpb.outputs.version }}"
+          awk "/^## \\[?${VERSION}\\]?/{flag=1;next} /^## /{if(flag)exit} flag" CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "Release v${VERSION} — see CHANGELOG.md" > release-notes.md
+          fi
+          gh release create "v${VERSION}" \
+            --title "v${VERSION}" \
+            --notes-file release-notes.md \
+            "mcpb-build/jaz-ai-${VERSION}.mcpb"
