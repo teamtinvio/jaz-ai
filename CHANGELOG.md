@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.2.1] - 2026-05-05
+
+### Fixed
+- **Anomaly detection and audit reports now discoverable.** Asking the agent for "anomalous bills", "anomalous invoices", "cashflow anomalies", "GL journal audit", "exchange rate audit", "receivables customer risk", or "cash expense health" now reaches the data export tool that generates them. Same fix surfaces the IFRS recipe library (depreciation, IFRS 16 lease, ECL, FX revaluation, asset disposal, hire purchase, fixed deposit, amortization) when asking by calculation type instead of by name.
+- **Exchange Rates Summary export (`analysis-exchange-rate-audit`) listed in download_export.** The export type was already supported by the API but missing from the agent-facing list of available exports.
+- **Depreciation method names corrected.** Agent-facing copy now lists the actual supported methods (SL / DDB / 150DB), not the SYD method that was never implemented.
+
 ## [5.2.0] - 2026-05-05
 
 ### Added
