@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.1.8
+version: 5.2.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 117 production gotchas, error
@@ -10,7 +10,7 @@ description: >-
   schedulers, subscriptions, attachments, and Jaz Magic extraction. Also use
   when building API clients, seeding test data, or adding new endpoint support.
 license: MIT
-compatibility: Requires Jaz API key (x-jk-api-key header). Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown.
+compatibility: Requires Jaz API key (x-jk-api-key header). Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown. For end-to-end practitioner flows that combine these API gotchas with client + engagement context, load the jaz-practice skill (engagement-type playbooks at `jaz-practice/references/{monthly-close,quarterly-gst,annual-statutory,onboarding}.md` invoke these endpoints with concrete CLIENT.md-driven inputs).
 ---
 
 # Jaz API Skill
@@ -26,6 +26,12 @@ Before touching this skill's HTTP details, check what's actually available:
 - **No agent surface, raw integration**: write HTTP calls per the endpoints catalog below.
 
 The rest of this skill — field names, gotchas, error catalog, dependency order, search filter syntax — applies regardless of invocation path. Read it for *context*, not for HTTP-call construction unless you're in the third bucket.
+
+## Reading Order — Practitioner vs Integrator
+
+**Practitioner (Claude Desktop / `jaz-practice`)** — priority + engagement type typically hit during (rule numbering preserved; this is a curation overlay): (1) Identifiers & Dates 1–3 — every engagement; (2) Names & Fields 9–13 — monthly-close review; (3) Transaction Creation 14–16 — onboarding opening entries + monthly-close draft finalization; (4) Chart of Accounts 17–22 — onboarding COA setup + monthly-close classification; (5) Payments / Cross-Currency 4–8 — monthly-close payment-run + quarterly-gst AR/AP recon; (6) Journals & Cash 23–26 — monthly-close accruals + annual-statutory year-end true-ups; (7) Credit Notes & Refunds 27–28 — monthly-close AR review + ad-hoc credit issuance; (8) Reports 36–37 — every engagement, TB/BS at start of monthly-close, quarterly-gst, annual-statutory; (9) Tax Profile Scoping 100 — quarterly-gst F5 box mapping; (10) Transaction References 104 — monthly-close period-end + onboarding ref reuse; (11) Draft Finalization Pipeline 81–88 — monthly-close draft queues + onboarding draft promotion; (12) Jaz Magic / PDF-JPG 57–63 — onboarding doc capture + monthly-close document-collection; (13) Currency Rates 39, 49, 105 — monthly-close FX reval + annual-statutory year-end revaluation; (14) Withholding Tax 45, 98 — quarterly-gst + annual-statutory tax computation.
+
+**Integrator (API clients, pipelines, batch jobs, MCP/CLI)** — after the practitioner list: Bulk Upsert (Items/Contacts/Rates); Background Jobs (filter `resourceId` not `jobId`); Export Records; Pagination (38); Search & Filter (50–56); Response Shape Gotchas (66–73); Cash Entry Response Shape (74–77); Entity Resolution (78–80); Bank Rules (89–90c); Fixed Assets (91–92c); Subscriptions & Scheduled (93–94); niche endpoints (95–102); Journals balance (103); Quick Fix (107, 111); TTB (108 — onboarding-relevant); Dynamic Strings (109–110); Sub-Resource Shapes (112); Nano-Classifier (113); Scheduler Asymmetry (114); Payment Record CRUD (115–117); Bulk Upserts transactions (118–122); Reconciliation write-side (123–127); Drafts lifecycle (128–135).
 
 ## When to Use This Skill
 
@@ -478,3 +484,4 @@ Supports `--json` for structured output. 186 articles across 20 sections. Automa
 - **jaz-jobs** — 12 accounting job playbooks (month-end close, bank recon, GST/VAT filing, etc.)
 - **jaz-conversion** — Data migration workflows from Xero, QuickBooks, Sage, MYOB, and Excel
 - **jaz-cli** — CLI command reference, auth, output formats, pagination, and workflow patterns
+- **jaz-practice** — Practitioner workspace + engagement-type wrapper (CLIENT.md, ENGAGEMENT.md, monthly-close / quarterly-gst / annual-statutory / onboarding playbooks); loads the gotchas above with concrete CLIENT.md-driven inputs (COA, materiality, JAZ_API_KEY override).

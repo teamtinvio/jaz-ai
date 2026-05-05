@@ -43,15 +43,18 @@ clio calc lease --payment 5000 --term 36 --rate 5 # IFRS 16 (offline, instant)
 clio jobs month-end --period 2026-03              # Step-by-step close playbook
 clio magic create --file receipt.pdf              # AI extracts → draft transaction
 clio invoices search --query 'status:unpaid AND $500+'  # Structured per-entity search
+clio practice init --firm-name "My Firm"          # Set up a client workspace at ~/Documents/Jaz Practice
+clio practice onboard --name "Acme Pte Ltd" --fy-end 12-31 --gst quarterly
+clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-03
 ```
 
-53 command groups. 16 report types. 13 calculators. 12 job playbooks. Every command supports `--json`. Run `clio --help` for the full list.
+54 command groups. 16 report types. 13 calculators. 12 job playbooks. New in v5.2.0: practitioner workspace (`clio practice`). Every command supports `--json`. Run `clio --help` for the full list.
 
 ---
 
 ## MCP Server
 
-266 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports.
+272 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports. Includes the v5.2.0 `practice_*` tools (init, onboard_client, list_clients, load_client, create_engagement, load_engagement) so an agent in Claude Desktop or Claude Code can scaffold and load client workspaces conversationally.
 
 **Claude Code:**
 ```bash

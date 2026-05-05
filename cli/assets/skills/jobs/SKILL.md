@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 5.1.8
+version: 5.2.0
 description: >-
   Use this skill for recurring accounting workflows — month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -9,7 +9,7 @@ description: >-
   when the user mentions closing the books, period-end, tax filing, or any
   operational accounting task.
 license: MIT
-compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill. For individual transaction patterns, load the jaz-recipes skill.
+compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill. For individual transaction patterns, load the jaz-recipes skill. For the engagement-type wrapper that invokes these blueprints inside a client workspace, load the jaz-practice skill (see `jaz-practice/references/<engagement-type>.md` for canonical engagement-type definitions).
 ---
 
 # Jobs Skill
@@ -38,23 +38,23 @@ Period-close jobs build on each other. Quarter = month + extras. Year = quarter 
 
 | Job | CLI Command | Description |
 |-----|-------------|-------------|
-| **Month-End Close** | `clio jobs month-end --period YYYY-MM` | 5 phases: pre-close prep, accruals, valuations, verification, lock. The foundation. |
-| **Quarter-End Close** | `clio jobs quarter-end --period YYYY-QN` | Month-end for each month + GST/VAT, ECL review, bonus accruals, intercompany, provisions. |
-| **Year-End Close** | `clio jobs year-end --period YYYY` | Quarter-end for each quarter + true-ups, dividends, CYE rollover, audit prep, final lock. |
+| **Month-End Close** (`generate_month_end_blueprint`) | `clio jobs month-end --period YYYY-MM` | 5 phases: pre-close prep, accruals, valuations, verification, lock. The foundation. *Used in: monthly-close engagement (see `jaz-practice/references/monthly-close.md`).* |
+| **Quarter-End Close** (`generate_quarter_end_blueprint`) | `clio jobs quarter-end --period YYYY-QN` | Month-end for each month + GST/VAT, ECL review, bonus accruals, intercompany, provisions. *Used in: monthly-close engagement (3-month roll-up at quarter boundary; see `jaz-practice/references/monthly-close.md`).* |
+| **Year-End Close** (`generate_year_end_blueprint`) | `clio jobs year-end --period YYYY` | Quarter-end for each quarter + true-ups, dividends, CYE rollover, audit prep, final lock. *Used in: annual-statutory engagement (see `jaz-practice/references/annual-statutory.md`).* |
 
 ### Ad-Hoc Jobs
 
 | Job | CLI Command | Description |
 |-----|-------------|-------------|
-| **Bank Recon** | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. Paired tool: `clio jobs bank-recon match`. |
-| **Document Collection** | `clio jobs document-collection` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for agent upload. Paired tool: `clio jobs document-collection ingest`. |
-| **GST/VAT Filing** | `clio jobs gst-vat --period YYYY-QN` | Tax ledger review, discrepancy check, filing summary. |
-| **Payment Run** | `clio jobs payment-run` | Select outstanding bills by due date, process payments. |
-| **Credit Control** | `clio jobs credit-control` | AR aging review, overdue chase list, bad debt assessment. |
-| **Supplier Recon** | `clio jobs supplier-recon` | AP vs supplier statement, identify mismatches. |
-| **Audit Preparation** | `clio jobs audit-prep --period YYYY` | Compile reports, schedules, reconciliations for auditor/tax. |
-| **FA Review** | `clio jobs fa-review` | Fixed asset register review, disposal/write-off processing. |
-| **Statutory Filing** | `clio jobs statutory-filing` | Corporate income tax computation and filing. Paired tools: `clio jobs statutory-filing sg-cs`, `clio jobs statutory-filing sg-ca`. |
+| **Bank Recon** (`generate_bank_recon_blueprint`) | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. Paired tool: `clio jobs bank-recon match`. *Used in: monthly-close engagement (run as part of every period close; see `jaz-practice/references/monthly-close.md`).* |
+| **Document Collection** (`generate_document_collection_blueprint`) | `clio jobs document-collection` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for agent upload. Paired tool: `clio jobs document-collection ingest`. *Used in: onboarding flow (initial client doc capture; see `jaz-practice/references/onboarding.md`) and the open phase of every engagement (monthly-close, quarterly-gst, annual-statutory).* |
+| **GST/VAT Filing** (`generate_gst_vat_blueprint`) | `clio jobs gst-vat --period YYYY-QN` | Tax ledger review, discrepancy check, filing summary. *Used in: quarterly-gst engagement (see `jaz-practice/references/quarterly-gst.md`).* |
+| **Payment Run** (`generate_payment_run_blueprint`) | `clio jobs payment-run` | Select outstanding bills by due date, process payments. *Used in: monthly-close engagement (AP cycle inside the period close; see `jaz-practice/references/monthly-close.md`).* |
+| **Credit Control** (`generate_credit_control_blueprint`) | `clio jobs credit-control` | AR aging review, overdue chase list, bad debt assessment. *Used in: ad-hoc engagement (run on-demand when AR aging deteriorates; not tied to a recurring engagement type).* |
+| **Supplier Recon** (`generate_supplier_recon_blueprint`) | `clio jobs supplier-recon` | AP vs supplier statement, identify mismatches. *Used in: annual-statutory engagement (audit AP confirmations; see `jaz-practice/references/annual-statutory.md`) and ad-hoc engagement (when statement mismatches surface mid-period).* |
+| **Audit Preparation** (`generate_audit_prep_blueprint`) | `clio jobs audit-prep --period YYYY` | Compile reports, schedules, reconciliations for auditor/tax. *Used in: annual-statutory engagement (see `jaz-practice/references/annual-statutory.md`).* |
+| **FA Review** (`generate_fa_review_blueprint`) | `clio jobs fa-review` | Fixed asset register review, disposal/write-off processing. *Used in: annual-statutory engagement (asset register sign-off as part of year-end; see `jaz-practice/references/annual-statutory.md`).* |
+| **Statutory Filing** (`generate_statutory_filing_blueprint`) | `clio jobs statutory-filing` | Corporate income tax computation and filing. Paired tools: `clio jobs statutory-filing sg-cs`, `clio jobs statutory-filing sg-ca`. *Used in: annual-statutory engagement (see `jaz-practice/references/annual-statutory.md`).* |
 
 ## How Jobs Work
 
@@ -95,8 +95,9 @@ clio jobs fa-review [--json]
 | **jaz-api** | Provides the exact API payloads for each step (field names, gotchas, error handling) |
 | **jaz-recipes** | Provides the accounting patterns for complex steps (accruals, FX reval, ECL, etc.) |
 | **jaz-jobs** (this skill) | Combines recipes + API into sequenced, verifiable business processes |
+| **jaz-practice** | Wraps these blueprints inside the practitioner's client + engagement context. The 12 blueprints map to engagement types: month-end / quarter-end / bank-recon / payment-run → monthly-close; gst-vat → quarterly-gst; year-end / audit-prep / fa-review / supplier-recon / statutory-filing → annual-statutory; document-collection → onboarding flow + every engagement open phase; credit-control → ad-hoc. |
 
-**Load all three skills together** for the complete picture. Jobs reference recipes by name — an AI agent should read the referenced recipe for implementation details.
+**Load all three skills together** for the complete picture. Jobs reference recipes by name — an AI agent should read the referenced recipe for implementation details. When invoked from inside a client folder, jaz-practice supplies the CLIENT.md context (COA, materiality, JAZ_API_KEY override) that these blueprints consume.
 
 ## Supporting Files
 

@@ -12,6 +12,7 @@ Agent skills for the [Jaz](https://jaz.ai) accounting platform. Works with [Clau
 | **jaz-conversion** | Xero, QuickBooks, Sage, Excel migration playbook — CoA mapping, tax profiles, FX, trial balance verification |
 | **jaz-recipes** | 16 IFRS-compliant recipes (loans, leases, depreciation, FX reval, ECL, provisions) + 13 CLI financial calculators with blueprint output |
 | **jaz-jobs** | 12 accounting jobs (month/quarter/year-end close, bank recon, document collection, GST/VAT, payment runs, credit control, supplier recon, audit prep, FA review, statutory filing) + Singapore Form C-S tax computation |
+| **jaz-practice** | Practitioner workspace scaffolding — onboard clients, scaffold engagements (monthly-close, quarterly-gst, annual-statutory, onboarding), keep period work organized. Each engagement template names the specific Jaz tools, recipes, and calculators to invoke. New in v5.2.0 |
 
 ## Install
 

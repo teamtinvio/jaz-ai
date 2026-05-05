@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
   <img src="https://img.shields.io/badge/API_rules-135-green?style=for-the-badge" alt="135 API Rules">
-  <img src="https://img.shields.io/badge/skills-5-purple?style=for-the-badge" alt="5 Skills">
+  <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 Skills">
   <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
   <img src="https://img.shields.io/badge/jobs-12-teal?style=for-the-badge" alt="12 Jobs">
@@ -66,6 +66,7 @@ npm install -g jaz-clio && clio auth add <your-api-key> && clio invoices list
 | **jaz-conversion** | Xero, QuickBooks, Sage, Excel migration playbook. CoA mapping, tax profiles, FX, clearing accounts, trial balance verification |
 | **jaz-recipes** | 16 IFRS-compliant recipes (loans, leases, depreciation, FX reval, ECL, provisions, and more) + 13 CLI financial calculators with blueprint output |
 | **jaz-jobs** | 12 accounting jobs (month/quarter/year-end close, bank recon, document collection, GST/VAT filing, payment runs, credit control, supplier recon, audit prep, FA review, statutory filing) + Singapore Form C-S tax computation with AI-guided wizard workflow |
+| **jaz-practice** | Practitioner workspace scaffolding. Onboard clients, scaffold engagements (monthly-close, quarterly-gst, annual-statutory, onboarding), keep period work organized in `~/Documents/Jaz Practice/clients/<name>/`. Each engagement template names the specific Jaz tools, recipes, and calculators it uses. New in v5.2.0 |
 
 ## Installation
 
@@ -76,7 +77,7 @@ There are four ways to use Jaz AI, depending on what you need:
 | **Skills** | Knowledge files your AI reads automatically | Anyone using an AI coding tool with Jaz |
 | **Plugins** | One-click install via marketplace / extensions | Claude Code, Claude Cowork, Gemini CLI |
 | **CLI** | `clio` command-line tool with calculators, jobs, and full API access | AI agents |
-| **MCP Server** | 266 tools your AI can call directly | AI agents and accountants that need live API access |
+| **MCP Server** | 272 tools your AI can call directly | AI agents and accountants that need live API access |
 
 ### Option 1: Install Skills (for any AI tool)
 
@@ -110,7 +111,7 @@ If you have Node.js installed, you can use `npx` to auto-detect your AI tool and
 ```bash
 cd /path/to/your/project
 
-# Install all 5 skills (auto-detects your AI tool)
+# Install all 6 skills (auto-detects your AI tool)
 npx jaz-clio init
 
 # Or specify a platform
@@ -143,7 +144,7 @@ Both register skills and the MCP server automatically.
 
 ### Option 3: Use the CLI (for AI agents)
 
-The CLI gives you direct access to 54 command groups — financial calculators, job blueprints, API commands, and more — from your terminal.
+The CLI gives you direct access to 55 command groups — financial calculators, job blueprints, API commands, and more — from your terminal.
 
 **Requires Node.js 18+.** If `node --version` works, you're set. Otherwise, download from [nodejs.org](https://nodejs.org) (LTS).
 
@@ -205,7 +206,7 @@ Comma-separated API keys enable multi-org mode. Claude sees a `list_organization
 Personal access tokens (`pat_...`) also work for multi-org once available — one token for all your organizations.
 
 <details>
-<summary>Available tool categories (266 tools)</summary>
+<summary>Available tool categories (272 tools)</summary>
 
 | Category | Tools | Auth Required |
 |----------|-------|---------------|
@@ -312,7 +313,7 @@ Skills are pure markdown — no runtime, no dependencies. Your agent reads them 
 
 ### MCP Tools
 
-With the MCP server running (`claude mcp add jaz -- npx jaz-clio mcp`), your agent has 266 tools for direct API access. Every tool returns structured JSON. See [tool categories](#option-4-mcp-server-for-ai-agents) for the full breakdown.
+With the MCP server running (`claude mcp add jaz -- npx jaz-clio mcp`), your agent has 272 tools for direct API access. Every tool returns structured JSON. See [tool categories](#option-4-mcp-server-for-ai-agents) for the full breakdown.
 
 ### Structured Output
 
@@ -360,13 +361,36 @@ clio jobs audit-prep --period 2025
 clio jobs gst-vat --period 2025-Q1
 ```
 
+### Practitioner Workspace (v5.2.0)
+
+Set up a structured client folder once, run period work from inside it forever after. The agent loads each client's CLIENT.md before touching the books, so it knows the FY end, GST scheme, COA mapping, banks, and recurring accruals without you having to repeat yourself every session.
+
+```bash
+# Set up your firm workspace at ~/Documents/Jaz Practice
+clio practice init --firm-name "My Firm"
+
+# Onboard a client (legal entity, FY, GST scheme)
+clio practice onboard --name "Acme Pte Ltd" --fy-end 12-31 --gst quarterly
+
+# Scaffold an engagement folder
+clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-03
+
+# In Claude Code or Claude Desktop, the agent can also do this conversationally:
+#   "Onboard Beta Pte Ltd, FY June, GST quarterly"
+#   "Close March for Acme"
+# It scaffolds the right folders and follows the engagement-type playbook
+# (which names the specific Jaz tools, recipes, and calculators to invoke).
+```
+
+Engagement types include `monthly-close`, `quarterly-gst`, `annual-statutory`, and `onboarding` (data migration from prior firm). Each ships with a checklist that cross-references jaz-jobs blueprints, jaz-recipes recipes, and `clio calc` calculators — the agent already knows which to invoke when.
+
 ## What's Inside
 
 ### API Skill (`jaz-api`)
 
 | Reference | Lines | Content |
 |-----------|-------|---------|
-| `SKILL.md` | 480 | 135 rules — auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `SKILL.md` | 487 | 135 rules — auth, IDs, dates, FX, payments, field aliases, response shapes |
 | `endpoints.md` | 2342 | Request/response examples for every core endpoint |
 | `errors.md` | 860 | Error catalog with root causes and fixes |
 | `field-map.md` | 678 | Intuitive name → actual field name mapping |
@@ -469,7 +493,7 @@ src/skills/                      Source of truth — all skills live here
 
 ```
 src/
-├── commands/                    54 command groups (invoices, bills, contacts, calc, jobs, mcp, ...)
+├── commands/                    55 command groups (invoices, bills, contacts, calc, jobs, mcp, ...)
 ├── core/
 │   ├── api/                     Jaz REST client (30+ modules, 70+ endpoints)
 │   ├── calc/                    13 financial calculators

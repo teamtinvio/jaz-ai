@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.2.0] - 2026-05-05
+
+### Added
+- **Practitioner workspace.** Set up a structured client folder once, then run period work from inside it forever after. The agent reads each client's `CLIENT.md` (FY end, GST scheme, COA mapping, banks, recurring accruals, materiality threshold) before invoking any Jaz API tool, so it stays hyper-contextual to that specific client across sessions.
+
+  Six new offline tools — `practice_init`, `practice_list_clients`, `practice_load_client`, `practice_onboard_client`, `practice_create_engagement`, `practice_load_engagement` — manage the workspace at `~/Documents/Jaz Practice/` (override with `PRACTICE_HOME` env or the `--root` flag). Same surface from the CLI: `clio practice <subcommand>`.
+
+  Engagement types ship with concrete checklist templates that name the specific Jaz tools, recipes, and calculators each phase invokes:
+  - **monthly-close** — drives `generate_month_end_blueprint` plus `plan_recipe` for accruals, depreciation, FX revaluation, prepaid recognition.
+  - **quarterly-gst** — Singapore F5 boxes 1-16, output/input tax cross-check, IRAS-specific.
+  - **annual-statutory** — year-end audit + corporate tax + ACRA + IRAS workstreams.
+  - **onboarding** — new-client takeover from prior firm: opening balances, COA setup, multi-currency, first-month reconciliation. Triggers the `jaz-conversion` skill when migrating from Xero / QuickBooks / Sage / MYOB.
+
+  Multi-org agencies: `CLIENT.md.jaz_api_key_override` overrides the firm default for that client only. Resolution chain: CLIENT override → PRACTICE default → `JAZ_API_KEY` env. Same key never serves two clients accidentally.
+
+- **`jaz-practice` skill.** Sixth skill in the bundle. Routes practitioner intent ("close the books for Acme March") to the right engagement type and loads the canonical playbook from `references/<type>.md`. Cross-referenced from the existing skills (jaz-jobs, jaz-recipes, jaz-conversion, jaz-api) so the agent always knows where to go for deeper detail.
+
+### Changed
+- **Existing skills audited for cross-references.** Each of the 12 jaz-jobs blueprints and 16 jaz-recipes recipes now names the engagement type it typically appears in. The jaz-api skill TOC reorders practitioner-relevant content first, integrator-only content later. The jaz-cli skill labels itself as power-user / automation surface so practitioners on Claude Desktop don't load it unnecessarily.
+- Tool count: 266 → 272 (six new `practice_*` tools).
+- Command groups: 54 → 55 (new `clio practice`).
+
 ## [5.1.6] - 2026-05-01
 
 ### Added
