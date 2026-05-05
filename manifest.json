@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.2.1",
+  "version": "5.2.2",
   "description": "Bring Jaz into Claude. Run IFRS calculators, plan close procedures, search the help center. Sign in or enter a key to extend across invoices, bills, journals, reports, and reconciliations. Built for accountants and operators worldwide.",
   "long_description": "Jaz Accounting brings an agent that knows accounting into Claude. Out of the box, run IFRS calculators (loans, leases, depreciation, FX revaluation, ECL, provisions, fixed deposits, asset disposals, accruals, dividends, prepaids, deferred revenue), plan close-procedure blueprints (month/quarter/year-end close, bank recon, GST/VAT filing, payment runs, credit control, audit prep), and search the help center. No account needed.\n\nSign in or enter a Jaz API key to extend across the books. Create invoices, record bills, post journals, run financial reports, reconcile banks, manage fixed assets, and apply bulk updates. 272 tools total, with built-in guardrails so the agent works on the first try.\n\nBuilt for accountants and operators worldwide, with multi-currency and multi-org support out of the box. Singapore-grade compliance including GST filing and Form C-S corporate tax. Your data goes directly to Jaz, no intermediary servers.",
   "author": {
@@ -560,7 +560,7 @@
     },
     {
       "name": "download_export",
-      "description": "Download a data export report. Returns { fileName, fileUrl }.\nAvailable export types: trial-balance, balance-sheet, profit-and-loss, general-ledger, cashflow, cash-balance, ar-report, ap-report, sales-summary, sales-payments-summary, purchase-summary, purchase-payments-summary, customer-revenue-summary, product-sales-summary, periodic-revenue-summary, supplier-expense-summary, product-purchase-summary, periodic-expense-summary, credit-note-summary, sales-cost-margin, sale-inventory-movement, purchase-inventory-movement, analysis-anomalous-invoices, analysis-anomalous-bills, analysis-cashflow-anomalies, analysis-gl-journal-audit, analysis-exchange-rate-audit, analysis-receivables-customer-risk, analysis-cash-expense-health, statement-of-account-export."
+      "description": "Generate an analytical, financial, or audit report as a downloadable XLSX file. Returns { fileName, fileUrl }.\n\nUSE THIS TOOL (not export_records) when the user asks for any of:\n- Anomaly detection — anomalous invoices, anomalous bills, cashflow anomalies (analysis-anomalous-invoices, analysis-anomalous-bills, analysis-cashflow-anomalies)\n- Audit analyses — GL journal audit, exchange rate audit (analysis-gl-journal-audit, analysis-exchange-rate-audit)\n- Risk analyses — receivables customer risk, cash expense health (analysis-receivables-customer-risk, analysis-cash-expense-health)\n- Financial statements — trial balance, balance sheet, P&L, cashflow, general ledger, cash balance (trial-balance, balance-sheet, profit-and-loss, cashflow, general-ledger, cash-balance)\n- Aging — AR / AP report (ar-report, ap-report)\n- Summaries — sales, sales-payments, purchase, purchase-payments, customer-revenue, product-sales, periodic-revenue, supplier-expense, product-purchase, periodic-expense, credit-note, sales-cost-margin\n- Inventory movement — sale, purchase (sale-inventory-movement, purchase-inventory-movement)\n- Statement of account (statement-of-account-export)\n\nDO NOT use export_records for these — that tool is for raw entity dumps (list of invoices/bills/contacts as rows), not for analytical reports.\n\nAll export types accept startDate / endDate (YYYY-MM-DD), currencyCode, tags, contactResourceId. The fileUrl is pre-signed (~5 min)."
     },
     {
       "name": "plan_recipe",
@@ -1040,7 +1040,7 @@
     },
     {
       "name": "export_records",
-      "description": "Generate a filtered XLSX export for an entity type. Returns a pre-signed download URL (expires in ~5 minutes — download immediately), file name, and total record count. Pass either query OR filter, never both. Use preview_export_records first to confirm scope."
+      "description": "Generate a raw entity-row XLSX export for one entity type (a list of invoices, bills, contacts, items, journals, bank records, cashflow, fixed assets, etc. — one row per record, with column selection). Returns a pre-signed download URL (~5 min), file name, and total record count. Pass either query OR filter, never both. Use preview_export_records first to confirm scope.\n\nDO NOT use this tool for analytical or audit reports (anomalous invoices, anomalous bills, cashflow anomalies, GL journal audit, exchange rate audit, receivables customer risk, cash expense health), financial statements (trial balance, P&L, balance sheet, cashflow, general ledger), aging (AR/AP report), summary reports (sales-summary, purchase-summary, etc.), or statement of account. Those go through download_export."
     },
     {
       "name": "search_background_jobs",

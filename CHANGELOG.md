@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.2.2] - 2026-05-05
+
+### Fixed
+- **Anomaly / audit / risk reports now actually generated, not just discoverable.** Asking the agent for "anomalous bills 2026" or "cashflow anomalies" was reaching the export tool (since 5.2.1) but the agent was picking the wrong export tool — `export_records`, which dumps raw bill rows — instead of `download_export`, which generates the analytical report. Tool descriptions now explicitly disambiguate so the right tool runs.
+
 ## [5.2.1] - 2026-05-05
 
 ### Fixed
