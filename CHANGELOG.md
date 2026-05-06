@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.2.3] - 2026-05-06
+
+### Changed
+- Refreshed connector store copy. Tighter positioning: Jaz in your agents, full-featured accounting, finance, and reporting. IFRS-first, multi-currency, multi-user.
+
 ## [5.2.2] - 2026-05-05
 
 ### Fixed
