@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.3.0",
+  "version": "5.3.1",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1120,7 +1120,7 @@
     },
     {
       "name": "validate_drafts",
-      "description": "BULK validate — process up to 500 draft business transactions in ONE call, mixing any combination of invoices, bills, customer credit notes, and supplier credit notes (no per-type tools needed). SYNC: returns per-item errors and display data inline; no state change. Use this before convert_drafts_to_active to surface eligibility issues client-side. btType enum: SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE = customer CN, PURCHASE_CREDIT_NOTE = supplier CN. Journals are NOT in this enum."
+      "description": "BULK validate — process up to 500 draft business transactions in ONE call, mixing any combination of invoices, bills, customer credit notes, and supplier credit notes (no per-type tools needed). SYNC: returns per-item errors and display data inline; no state change. Each result also carries `contactSignals` (Mid-7 contact-history insight: cadence, outliers, severity, divergences from the contact's modal pattern — null when the draft has no contact or the contact has no history) and `breakdown` (full Balance-panel payload: line items + trx-level metadata like subtotal, tax, total, balance, exchange rate). Top-level `contactSignalsMeta.unavailable=true` signals the freshness layer was unavailable for the whole batch. USE THIS to score a specific draft against contact history; for stand-alone \"what does this contact normally look like?\" lookups WITHOUT a draft, use `get_contact_signals` instead. Run before convert_drafts_to_active to surface eligibility issues client-side. btType enum: SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE = customer CN, PURCHASE_CREDIT_NOTE = supplier CN. Journals are NOT in this enum."
     },
     {
       "name": "convert_drafts_to_active",

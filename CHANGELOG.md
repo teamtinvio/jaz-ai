@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.3.1] - 2026-05-10
+
+### Changed
+- `validate_drafts` per-result responses now carry `contactSignals` (Mid-7 contact-history insight: cadence, outliers, severity, divergences, outstanding balance — populated against the draft's contact) and `breakdown` (Balance-panel payload: line items + trx-level metadata like subtotal, tax, total, paymentRecorded, balance, exchangeRate). Top-level `contactSignalsMeta.unavailable=true` signals the freshness layer was offline for the whole batch. The tool description cross-references `get_contact_signals` for stand-alone history lookups without a draft.
+
 ## [5.3.0] - 2026-05-10
 
 ### Added
