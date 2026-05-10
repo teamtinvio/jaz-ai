@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.4.1] - 2026-05-10
+
+Consolidated release notes for the v5.2.5 → v5.4.0 wave so what's new lands in one place. No code changes from v5.4.0.
+
+### Added
+- **New tool `get_contact_signals`** — read-only contact pattern lookup. Pull the cadence, outliers, divergences, currency / payment-terms / top-account / top-item modal patterns, and outstanding balance for any one contact (scoped to a transaction type: SALE, PURCHASE, SALE_CREDIT_NOTE, PURCHASE_CREDIT_NOTE). Use it to ask "what does this supplier normally look like?" before drafting a transaction. For draft-vs-history scoring after drafting, use `validate_drafts`.
+- **New tool `bulk_upsert_chart_of_accounts`** — bulk create or update up to 500 chart-of-accounts entries in a single sync call. Returns `resourceIds` for successful rows alongside `failedRows` (with row index, column name, value, error code, and message) and `failedCount` for partial-success introspection. Dedup is by NAME, not code — duplicate-name rows surface `ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED` per row while other rows in the same batch still succeed. Companion CLI: `clio accounts bulk-upsert --input <file.json>`.
+- **9 IFRS 18 chart-of-accounts classification types** (effective 2027) added alongside the classic 12: Discontinued Expense, Discontinued Income, Finance Cost, Financing Income, Goodwill, Income Tax Expense, Investing Expense, Investing Income, Investment. Unambiguous variants are normalized client-side ("income tax" → Income Tax Expense, "investments" → Investment, "finance costs" → Finance Cost). "Interest expense" / "interest income" are intentionally NOT auto-classified — under IFRS 18, those can land in either Financing or Investing depending on the entity's business activity, so the agent must pick the explicit canonical string. Classic types still work — IFRS 18 is purely additive.
+
+### Changed
+- **`validate_drafts` now returns rich per-result enrichment** — every entry in the response carries `contactSignals` (Mid-7 contact-history insight: cadence, outliers, severity, divergences, outstanding balance — populated against the draft's contact) and `breakdown` (Balance-panel payload: line items + transaction-level metadata like subtotal, tax, total, paymentRecorded, balance, exchangeRate). Top-level `contactSignalsMeta.unavailable=true` signals the freshness layer was offline for the whole batch. The tool description cross-references `get_contact_signals` for stand-alone history lookups without a draft.
+- **`bulk_upsert_currency_rates` surfaces per-row failures** — response now includes `failedRows[]` (with row index, column name, value, error code, message) and `failedCount` alongside successful `resourceIds`. Agents can introspect partial-failure detail without polling a background job. Also documented `rateApplicableTo` defaulting: omitting it now means the API defaults to `rateApplicableFrom - 0.999ms`, preventing temporal gaps in rate lookups.
+- **`bulk_upsert_contacts` documents the 5 request-level validation rules** that fail the whole batch with HTTP 422: `customer` or `supplier` must be true per row (the API backfills omitted flags from the existing contact on update), `emailList` entries must be unique within a contact (case-insensitive), payment-terms `value` must be a positive integer when `name` != "CUSTOM", contact `name` must be unique within the batch, and `addressLine1` is required when a `billingAddress` / `shippingAddress` object is provided. Pre-validate client-side: one bad row drops the whole batch.
+
 ## [5.4.0] - 2026-05-10
 
 ### Added
