@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.3.2] - 2026-05-10
+
+### Added
+- Chart of accounts now accepts the 9 IFRS 18 classification types (effective 2027) alongside the classic 12: **Discontinued Expense**, **Discontinued Income**, **Finance Cost**, **Financing Income**, **Goodwill**, **Income Tax Expense**, **Investing Expense**, **Investing Income**, **Investment**. The `create_account` tool description enumerates them; `normalizeAccountType` maps unambiguous variants client-side ("income tax" → Income Tax Expense, "investments" → Investment, "finance costs" → Finance Cost). Ambiguous "interest expense" / "interest income" are intentionally NOT auto-mapped (under IFRS 18, those can land in either Financing or Investing depending on the entity's business activity — agents must pick the explicit canonical string). Classic types still work — IFRS 18 is purely additive.
+
 ## [5.3.1] - 2026-05-10
 
 ### Changed

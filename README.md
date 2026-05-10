@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
-  <img src="https://img.shields.io/badge/API_rules-139-green?style=for-the-badge" alt="139 API Rules">
+  <img src="https://img.shields.io/badge/API_rules-140-green?style=for-the-badge" alt="140 API Rules">
   <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 Skills">
   <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
@@ -19,7 +19,7 @@
 **Complete agent stack for all of Jaz, built for AI agents and accountants.**
 MCP server, CLI, skills, and plugins for Claude Code, Cowork, Codex, Copilot, Cursor, and 30+ AI tools.
 
-Includes 139 API rules, 13 financial calculators, 16 IFRS recipes, 12 accounting jobs, and data conversion playbooks so that agents work with [Jaz](https://jaz.ai) correctly and autonomously.
+Includes 140 API rules, 13 financial calculators, 16 IFRS recipes, 12 accounting jobs, and data conversion playbooks so that agents work with [Jaz](https://jaz.ai) correctly and autonomously.
 
 > All skills, CLI commands, MCP tools, and the plugin are fully compatible with [Juan Accounting](https://juan.ac) too.
 
@@ -62,7 +62,7 @@ npm install -g jaz-clio && clio auth add <your-api-key> && clio invoices list
 
 | Skill | What It Does |
 |-------|-------------|
-| **jaz-api** | 139 rules, full endpoint catalog, error catalog, field mapping. Agents write correct Jaz API code on the first try instead of guessing |
+| **jaz-api** | 140 rules, full endpoint catalog, error catalog, field mapping. Agents write correct Jaz API code on the first try instead of guessing |
 | **jaz-conversion** | Xero, QuickBooks, Sage, Excel migration playbook. CoA mapping, tax profiles, FX, clearing accounts, trial balance verification |
 | **jaz-recipes** | 16 IFRS-compliant recipes (loans, leases, depreciation, FX reval, ECL, provisions, and more) + 13 CLI financial calculators with blueprint output |
 | **jaz-jobs** | 12 accounting jobs (month/quarter/year-end close, bank recon, document collection, GST/VAT filing, payment runs, credit control, supplier recon, audit prep, FA review, statutory filing) + Singapore Form C-S tax computation with AI-guided wizard workflow |
@@ -390,7 +390,7 @@ Engagement types include `monthly-close`, `quarterly-gst`, `annual-statutory`, a
 
 | Reference | Lines | Content |
 |-----------|-------|---------|
-| `SKILL.md` | 495 | 139 rules — auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `SKILL.md` | 497 | 140 rules — auth, IDs, dates, FX, payments, field aliases, response shapes |
 | `endpoints.md` | 2342 | Request/response examples for every core endpoint |
 | `errors.md` | 860 | Error catalog with root causes and fixes |
 | `field-map.md` | 678 | Intuitive name → actual field name mapping |
@@ -473,7 +473,7 @@ Skills are written once in `src/skills/` and copied to platform-specific discove
 
 ```
 src/skills/                      Source of truth — all skills live here
-├── api/                         139 rules + 7 reference files
+├── api/                         140 rules + 7 reference files
 ├── conversion/                  Conversion domain + 7 reference files
 ├── transaction-recipes/         16 recipes + 18 reference files
 └── jobs/                        12 jobs + 12 job files + 10 sg-tax files
