@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.4.0] - 2026-05-10
+
+### Added
+- New tool `bulk_upsert_chart_of_accounts` — bulk create/update up to 500 chart-of-accounts entries in a single sync call (no jobId polling). Returns `resourceIds[]` for successful rows alongside `failedRows[]` (with `rowIndex`, `columnName`, `columnValue`, `errorCode`, `errorMessage`) and `failedCount` for partial-success introspection. Common per-row error: `ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED` when a row's name collides with an existing account (dedup is by NAME, not code) — other rows in the batch still succeed. Accepts the classic 12 + 9 IFRS 18 `accountType` values; common variants normalized client-side. Companion CLI `clio accounts bulk-upsert --input <file.json>` for human-driven imports.
+
 ## [5.3.2] - 2026-05-10
 
 ### Added

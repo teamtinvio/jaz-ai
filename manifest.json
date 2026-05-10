@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.3.2",
+  "version": "5.4.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -85,6 +85,10 @@
     {
       "name": "update_account",
       "description": "Update an existing chart of accounts entry (name or code)."
+    },
+    {
+      "name": "bulk_upsert_chart_of_accounts",
+      "description": "Create or update chart-of-accounts entries in bulk (max 500 per call). SYNC: returns `{ resourceIds: string[], failedRows: ImportedRowError[], failedCount: number }` immediately — no jobId polling. Each successful row contributes one resourceId; each failure surfaces a `failedRows[]` entry with `rowIndex`, `columnName`, `columnValue`, `errorCode`, `errorMessage`. Common per-row errors: `ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED` when a row's `name` collides with an existing account in the org (dedup is by NAME not code). Other rows in the batch still succeed (PARTIAL_SUCCESS pattern). Provide `resourceId` per account to update; omit to create. Accepts the classic 12 + 9 IFRS 18 `accountType` values per rule 140; common variants are normalized client-side via normalizeAccountType. Use this tool for CoA imports, IFRS 18 migrations, and bulk template seeding. For one-off creates with auto-dedup-on-name, use `create_account` instead."
     },
     {
       "name": "list_contacts",
