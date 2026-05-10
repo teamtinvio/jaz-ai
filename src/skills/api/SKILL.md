@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.2.7
+version: 5.3.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 117 production gotchas, error
@@ -438,6 +438,8 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 136. **Sync bulk-upsert response carries per-row failures** — `bulk_upsert_currency_rates` and `bulk_upsert_chart_of_accounts` return `{ resourceIds: string[], failedRows: ImportedRowError[], failedCount: number }` synchronously (no jobId polling needed). Each `failedRows` entry: `{ rowIndex, columnName, columnValue, errorCode, errorMessage }`. Empty `failedRows: []` + `failedCount: 0` on full success. For `bulk_upsert_currency_rates` specifically: omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (prevents temporal gaps in rate lookups). Contrast with async bulk-upserts (contacts, invoices, journals, etc.) which return `{ jobId }` and need `search_background_jobs` polling — there, per-row failures live in the job's `errorDetails` field instead.
 
 137. **`bulk_upsert_contacts` request-level validation** — fails the WHOLE batch with HTTP 422 (no per-row partial success at this layer). Five rules to satisfy before submitting: (a) every contact must have `customer: true` OR `supplier: true` after defaults+backfill — for updates, the API backfills omitted flags from the existing contact; for creates, you must explicitly set at least one. (b) `emailList[]` entries within a contact must be case-insensitively unique. (c) `customerPaymentTerms.value` and `supplierPaymentTerms.value` must be positive integers when `name` != "CUSTOM". (d) `name` must be unique within the batch (after whitespace+case normalize). (e) When `billingAddress` or `shippingAddress` is provided, its `addressLine1` is required. Pre-validate client-side before calling; one bad row rejects the entire batch and the agent loses any successful work-in-progress.
+
+138. **`get_contact_signals` — read-only contact-history pattern lookup** — `GET /api/v1/contacts/{resourceId}/signals?btType=…` returns the contact's modal patterns (currency, payment-terms, tax-inclusion/presence, top-COA, top-item), cadence (median interval days, days-since-last, interval ratio), and outstanding-balance snapshot for one (contact × business-transaction-type) pair. `btType` is required: `SALE` | `PURCHASE` | `SALE_CREDIT_NOTE` | `PURCHASE_CREDIT_NOTE`. Returns null `data` when sampleSize < 5 or the freshness layer is unavailable. Cache key is per-(contactId, btType) pair, so repeated calls for the same pair are cheap. **Three slices are always empty/null on this endpoint** — `severitySummary`, `outlierFlags`, `revealedDivergences` — because they require a draft to compare against; those populate only on the per-result `contactInsight` object inside `validate_drafts` responses. Use this tool for "what does this contact normally look like?" questions before drafting; use `validate_drafts` for "how does this draft compare to the contact's history?" questions after drafting.
 
 ## Supporting Files
 

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.2.7",
+  "version": "5.3.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -97,6 +97,10 @@
     {
       "name": "get_contact",
       "description": "Get full contact details by resourceId."
+    },
+    {
+      "name": "get_contact_signals",
+      "description": "Get contact signals — read-only pattern intelligence (cadence, outliers, divergences, severity) for a single contact. USE THIS for stand-alone contact-history lookup before drafting a transaction (e.g. \"what does this supplier normally look like?\"). Do NOT use validate_drafts unless you already have a specific draft to score. Returns null when the contact has no qualifying history yet (sampleSize < 5) or the freshness layer is unavailable. Per-pair cache (contactId × btType) — duplicate calls for the same pair return the same result. Three response slices populate ONLY on the validate_drafts path (severitySummary, outlierFlags, revealedDivergences) — those require a draft to compare against, so they're always empty/null here."
     },
     {
       "name": "create_contact",

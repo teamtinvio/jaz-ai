@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.3.0] - 2026-05-10
+
+### Added
+- New tool `get_contact_signals` — read-only pattern intelligence for any contact (cadence, outliers, currency / payment-terms / top-COA / top-item modal patterns, outstanding-balance snapshot, severity bucket). Scope to one business-transaction type via the required `btType` param (SALE | PURCHASE | SALE_CREDIT_NOTE | PURCHASE_CREDIT_NOTE). Use this for stand-alone "what does this contact normally look like?" lookups before drafting a transaction. For draft-vs-history scoring after drafting, keep using `validate_drafts`.
+
 ## [5.2.7] - 2026-05-10
 
 ### Changed
