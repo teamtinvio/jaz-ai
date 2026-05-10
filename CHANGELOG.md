@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.2.6] - 2026-05-10
+
+### Changed
+- `bulk_upsert_currency_rates` now surfaces per-row failures: response includes `failedRows[]` (with rowIndex, columnName, columnValue, errorCode, errorMessage) and `failedCount` alongside successful `resourceIds`. Agents can introspect partial-failure detail without polling a background job.
+- Documented `rateApplicableTo` defaulting: omitting it now means the API defaults to `rateApplicableFrom - 0.999ms`, preventing temporal gaps in rate lookups.
+
 ## [5.2.5] - 2026-05-10
 
 Internal release. No user-facing changes since v5.2.4.

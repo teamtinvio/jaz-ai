@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.2.5
+version: 5.2.6
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 117 production gotchas, error
@@ -434,6 +434,8 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 134. **Bulk-upsert FLAT vs NESTED variants** — for invoices and bills, there are TWO bulk-upsert endpoints. **FLAT** (`bulk_upsert_invoices` / `bulk_upsert_bills`) — one line per row, set at row level via `itemDescription` + `totalAmount` + `invoiceAccountResourceId` (or `billAccountResourceId`). **NESTED** (`bulk_upsert_invoice_line_items` / `bulk_upsert_bill_line_items`) — multi-line per row via nested `lineItems[]`, each with `itemDescription` + `quantity` + `unitPrice` + `accountResourceId`. Use FLAT when one line per transaction is fine (CSV import, simple bills); use NESTED when each transaction needs multiple lines. Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $0 invoice.
 
 135. **Reconciliation `lineItems[]` use a DIFFERENT field naming convention** — for `reconcile_invoice_receipt.invoiceDetails.lineItems[]` and `reconcile_bill_receipt.billDetails.lineItems[]`, each line uses `name` (NOT `itemDescription`) for the description and `organizationAccountResourceId` (NOT `accountResourceId`) for the revenue/expense account. The bulk-upsert-line-items variants use `itemDescription` + `accountResourceId`. Memorize this: bulk = `itemDescription`+`accountResourceId`; recon-create = `name`+`organizationAccountResourceId`.
+
+136. **Sync bulk-upsert response carries per-row failures** — `bulk_upsert_currency_rates` and `bulk_upsert_chart_of_accounts` return `{ resourceIds: string[], failedRows: ImportedRowError[], failedCount: number }` synchronously (no jobId polling needed). Each `failedRows` entry: `{ rowIndex, columnName, columnValue, errorCode, errorMessage }`. Empty `failedRows: []` + `failedCount: 0` on full success. For `bulk_upsert_currency_rates` specifically: omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (prevents temporal gaps in rate lookups). Contrast with async bulk-upserts (contacts, invoices, journals, etc.) which return `{ jobId }` and need `search_background_jobs` polling — there, per-row failures live in the job's `errorDetails` field instead.
 
 ## Supporting Files
 

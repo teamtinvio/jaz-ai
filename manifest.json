@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.2.5",
+  "version": "5.2.6",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -424,7 +424,7 @@
     },
     {
       "name": "bulk_upsert_currency_rates",
-      "description": "Create exchange rates in bulk (max 500 per call). Auto-enables currencies not yet enabled in the org — no need to call add_currency first. Requires rateDirection per rate."
+      "description": "Create exchange rates in bulk (max 500 per call). Auto-enables currencies not yet enabled in the org — no need to call add_currency first. Requires rateDirection per rate. Response surfaces per-row failures: `failedRows[]` (each with rowIndex, columnName, columnValue, errorCode, errorMessage) + `failedCount` alongside `resourceIds[]` for successful inserts. Omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (no temporal gap)."
     },
     {
       "name": "list_tax_profiles",
