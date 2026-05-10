@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.2.5] - 2026-05-10
+
+Internal release. No user-facing changes since v5.2.4.
+
 ## [5.2.4] - 2026-05-08
 
 Internal release automation update. No user-facing changes since v5.2.3.
