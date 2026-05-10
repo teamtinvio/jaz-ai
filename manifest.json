@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.2.6",
+  "version": "5.2.7",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1048,7 +1048,7 @@
     },
     {
       "name": "bulk_upsert_contacts",
-      "description": "Create or update contacts in bulk (max 500 per call). Provide resourceId per contact to update (partial — only changed fields needed). Omit resourceId to create new contacts. Returns a jobId — this is async. Poll search_background_jobs with filter {resourceId:{eq:jobId}} until status is SUCCESS, FAILED, or PARTIAL_SUCCESS. NOTE: unlike bulk_upsert_items (sync), contacts bulk-upsert is async."
+      "description": "Create or update contacts in bulk (max 500 per call). Provide resourceId per contact to update (partial — omitted fields preserve existing values, including customer/supplier flags). Omit resourceId to create. Returns a jobId — async; poll search_background_jobs with filter {resourceId:{eq:jobId}} until status is SUCCESS / FAILED / PARTIAL_SUCCESS. Per-row failures live in the background job's errorDetails (NOT failedRows — that's the sync bulk-upsert pattern). Common 422 cases (whole batch rejected at request level): at least one of `customer` or `supplier` must be true per contact (after defaults+backfill from existing); duplicate emails within a contact's emailList (case-insensitive after trim); payment-terms `value` must be a positive integer when `name` != CUSTOM; duplicate names within the batch (after whitespace+case normalize); when a billingAddress / shippingAddress object is provided, its `addressLine1` field is required."
     },
     {
       "name": "bulk_upsert_invoices",

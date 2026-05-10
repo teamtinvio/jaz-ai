@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.2.7] - 2026-05-10
+
+### Changed
+- `bulk_upsert_contacts` description now spells out the five request-level validation rules that fail the whole batch with HTTP 422: `customer` or `supplier` must be true per row (the API backfills omitted flags from the existing contact on update), `emailList` entries must be unique within a contact (case-insensitive), payment-terms `value` must be a positive integer when `name` != "CUSTOM", contact `name` must be unique within the batch, and `addressLine1` is required when a `billingAddress` / `shippingAddress` object is provided. Pre-validate client-side: one bad row drops the whole batch.
+
 ## [5.2.6] - 2026-05-10
 
 ### Changed
