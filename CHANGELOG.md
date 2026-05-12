@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.4.2] - 2026-05-12
+
+### Fixed
+- **`bulk_upsert_chart_of_accounts` now works end-to-end.** The tool was returning an API validation error ("accounts is a required field") on every call since it shipped — affecting both the MCP tool and the companion `clio accounts bulk-upsert` CLI command. Existing chart-of-accounts entries were unaffected; only the bulk-upsert path was blocked. Single-account `create_account` calls were never impacted.
+
 ## [5.4.1] - 2026-05-10
 
 Consolidated release notes for the v5.2.5 → v5.4.0 wave so what's new lands in one place. No code changes from v5.4.0.
