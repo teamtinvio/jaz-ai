@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.4.3] - 2026-05-12
+
+Internal smoke-test fixture fix. No user-facing changes since v5.4.2.
+
 ## [5.4.2] - 2026-05-12
 
 ### Fixed
