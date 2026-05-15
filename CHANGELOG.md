@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.4.36] - 2026-05-16
+
+Consolidated release notes for the v5.4.7 → v5.4.35 wave so what's new lands in one place. 19 patch releases shipped overnight on token-economics + skill-doc accuracy work; this entry collects the user-facing impact.
+
+### Fixed
+- **22 stale step-number cross-references** between recipe playbooks and engagement playbooks. The `quarterly-gst.md step Q` placeholder is gone; off-by-N citations are corrected (`monthly-close.md step 9` → `step 5` for depreciation; `step 8` → `step 7` for deferred-revenue / capital-WIP / intercompany capsule unwinding; `step 10` → `step 4` for employee leave accrual); current/non-current loan + lease reclassification is now correctly routed to `year-end-close.md Y6` instead of `annual-statutory.md step 8`. Agents following the practice → recipe → back-to-engagement loop now land on the right section every time.
+- **4 invented API references** in skill examples. `capsule.customFields` (not a Capsule field — capsule-level context belongs in `title` / `description`; per-event narrative belongs in journal `tags` + `internalNotes`) and `JOURNAL_TYPE: 'DEPRECIATION'` (not a valid journal-type value — depreciation journals filter by `capsuleResourceId` or `tag: 'depreciation'`). Agents following year-end FA reconciliation, capital-WIP setup, or bank-loan playbooks no longer hit invalid filter or payload errors.
+
+### Changed
+- **Tool description efficiency.** Trimmed redundant prose from the 9 `bulk_upsert_*` tool descriptions and ~20 search tools (`search_invoices`, `search_journals`, `search_accounts`, etc.). Wire-shape contracts (FLAT vs nested-lineItems shape, NATURAL KEY warnings, sibling-tool pointers, pre/post-condition guards, error-code names) preserved verbatim — agents save ~254 tokens of schema overhead per turn for the same functionality.
+
 ## [5.4.7] - 2026-05-15
 
 Internal release. Added 35 discovery test cases locking in agent-query → tool resolution across 19 canonical natural-language prompts ("close the books", "bank reconciliation", "WHT codes", etc.) plus cross-provider parity simulation (Anthropic full-list, OpenAI namespace-search). No user-facing changes since v5.4.6.
