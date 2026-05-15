@@ -55,7 +55,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 274 MCP tools, 
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.4.14", "mcp"],
+      "args": ["-y", "jaz-clio@5.4.16", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -69,14 +69,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 274 MCP tools, 
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.4.14", "mcp"],
+      "args": ["-y", "jaz-clio@5.4.16", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.4.14` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat_...`) also work for multi-org.
+Pin `jaz-clio@5.4.16` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat_...`) also work for multi-org.
 
 ### OpenAI Responses API
 
@@ -99,11 +99,14 @@ A managed hosted endpoint isn't published yet; use the OpenAI Codex CLI / Agents
 npx jaz-clio init                  # auto-detects your tool
 npx jaz-clio init --platform cursor
 npx jaz-clio init --no-rules       # skills only, skip the agent-rules file
+npx jaz-clio init --check          # report drift between installed agent-rules version and current
 ```
 
 Skills install to `.agents/skills/` (Agent Skills standard, used by Cursor, Copilot, Codex, Antigravity, Windsurf, Goose, Roo Code, Junie, Amp, and more) or `.claude/skills/` (Claude Code).
 
-`init` also writes a one-page `jaz-agent-rules.md` to the path your platform reads on workspace open, so any agent (Claude / GPT / Gemini / Copilot / Cursor) starts every session with the meta-tool discovery flow, the 6 API gotchas, and the recipe-engine carve-out (no double-posting on `fx-reval`):
+`init` also writes a one-page `jaz-agent-rules.md` block to the path your platform reads on workspace open, so any agent (Claude / GPT / Gemini / Copilot / Cursor) starts every session with the meta-tool discovery flow, the 6 API gotchas, and the recipe-engine carve-out (no double-posting on `fx-reval`).
+
+The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.Y.Z -->` / `<!-- END jaz-agent-rules -->`), so re-running `init` updates only the Jaz block — your own rules above and below stay untouched. Run `clio init --check` to report drift between your installed version and the current package version (exit 1 = drift, exit 0 = current).
 
 | Platform | Rules file path |
 |---|---|
@@ -339,7 +342,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.4.14", "mcp"],
+  "args": ["-y", "jaz-clio@5.4.16", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
