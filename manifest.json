@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.12",
+  "version": "5.4.14",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -588,7 +588,7 @@
     },
     {
       "name": "create_scheduled_bill",
-      "description": "Create a scheduled (recurring) bill. CRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_PURCHASE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): WEEKLY, MONTHLY, QUARTERLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings for reference/name/notes: {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — replaced with values relative to the transaction date."
+      "description": "Create a scheduled (recurring) bill. CRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_PURCHASE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): WEEKLY, MONTHLY, QUARTERLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — relative to transaction date."
     },
     {
       "name": "update_journal",
@@ -1064,27 +1064,27 @@
     },
     {
       "name": "bulk_upsert_invoice_line_items",
-      "description": "Create or update invoices with nested line items in bulk (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async — returns a jobId. Poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures. Dates are ISO 8601 only."
+      "description": "Create or update invoices with nested line items in bulk (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
     },
     {
       "name": "bulk_upsert_bills",
-      "description": "Create or update bills in bulk (max 500 per call). FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead — that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED — last wins). Async — returns a jobId. Poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures. Dates are ISO 8601 only — dateFormat field was removed."
+      "description": "Create or update bills in bulk (max 500 per call). FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead — that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED — last wins). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only — dateFormat field was removed."
     },
     {
       "name": "bulk_upsert_bill_line_items",
-      "description": "Create or update bills with nested line items in bulk (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async — returns a jobId. Poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures."
+      "description": "Create or update bills with nested line items in bulk (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails."
     },
     {
       "name": "bulk_upsert_customer_credit_notes",
-      "description": "Create or update customer credit notes in bulk (max 500 per call). Natural key: creditNoteReference. Async — returns a jobId. Poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures. Dates are ISO 8601 only."
+      "description": "Create or update customer credit notes in bulk (max 500 per call). Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
     },
     {
       "name": "bulk_upsert_supplier_credit_notes",
-      "description": "Create or update supplier credit notes in bulk (max 500 per call). Natural key: creditNoteReference. Async — returns a jobId. Poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures. Dates are ISO 8601 only."
+      "description": "Create or update supplier credit notes in bulk (max 500 per call). Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
     },
     {
       "name": "bulk_upsert_journals",
-      "description": "Create or update manual journals in bulk (max 500 per call). NATURAL KEY: `journalReference` (NOT `reference` — every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]` — different from `clio journals create` which uses entries). Each leg has `accountResourceId` + `debitAmount` + `creditAmount` (debit + credit must balance per row). Async — returns a jobId. Poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures. Dates are ISO 8601 (YYYY-MM-DD) only — dateFormat field was removed."
+      "description": "Create or update manual journals in bulk (max 500 per call). NATURAL KEY: `journalReference` (NOT `reference` — every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]` — different from `clio journals create` which uses entries). Each leg has `accountResourceId` + `debitAmount` + `creditAmount` (debit + credit must balance per row). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only — dateFormat field was removed."
     },
     {
       "name": "bulk_upsert_fixed_assets",
@@ -1092,7 +1092,7 @@
     },
     {
       "name": "quick_reconcile",
-      "description": "Bulk-reconcile bank statement entries against a list of journals (max 500). Reconciliation mode is hardcoded to QUICK_RECON. Async — returns a jobId. Poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails. Caller provides bankAccountResourceId + journalsForReconciliation[] (each row: bankStatementEntryResourceId, journalReference, journalAccountResourceId)."
+      "description": "Bulk-reconcile bank statement entries against a list of journals (max 500). Reconciliation mode is hardcoded to QUICK_RECON. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Caller provides bankAccountResourceId + journalsForReconciliation[] (each row: bankStatementEntryResourceId, journalReference, journalAccountResourceId)."
     },
     {
       "name": "apply_bank_rule",
@@ -1128,11 +1128,11 @@
     },
     {
       "name": "convert_drafts_to_active",
-      "description": "BULK promote — finalize up to 500 draft business transactions to ACTIVE in ONE call, mixing any combination of invoices, bills, and credit notes (no per-type tools needed). ASYNC: returns a jobId — poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures. NOT idempotent: a second call on already-promoted drafts returns 422. Filter the draft list by status: DRAFT before submitting. Pair with validate_drafts for a pre-flight check on large batches."
+      "description": "BULK promote — finalize up to 500 draft business transactions to ACTIVE in ONE call, mixing any combination of invoices, bills, and credit notes (no per-type tools needed). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent: a second call on already-promoted drafts returns 422. Filter the draft list by status: DRAFT before submitting. Pair with validate_drafts for a pre-flight check on large batches."
     },
     {
       "name": "submit_drafts_for_approval",
-      "description": "BULK submit — route up to 500 draft business transactions into the approval workflow in ONE call, mixing any combination of invoices, bills, and credit notes. ASYNC: returns a jobId — poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures. NOT idempotent on drafts that already have an in-flight approval request."
+      "description": "BULK submit — route up to 500 draft business transactions into the approval workflow in ONE call, mixing any combination of invoices, bills, and credit notes. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent on drafts that already have an in-flight approval request."
     },
     {
       "name": "search_help_center",
