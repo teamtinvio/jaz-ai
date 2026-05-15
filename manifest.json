@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.18",
+  "version": "5.4.20",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -593,6 +593,10 @@
     {
       "name": "update_journal",
       "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize."
+    },
+    {
+      "name": "bulk_update_journals",
+      "description": "Bulk-update journals — most common use is bulk-finalize (saveAsDraft: false on each row). Sync; per-row sequential execution; max 500 per call (~1-2 min wall-clock for a full 500).\n\nbulk_finalize_drafts only handles invoices/bills/credit-notes — journals need this. Common monthly-close pattern: search_journals(filter:{capsuleResourceId:{eq:<id>}, status:{eq:'DRAFT'}}) → map to {resourceId, saveAsDraft: false} → bulk_update_journals.\n\nEach row carries the same fields as update_journal (resourceId required + any of reference, valueDate, notes, tags, saveAsDraft). Omitted fields preserve existing.\n\nResponse: { updated: [{resourceId}], failed: [{resourceId, error, errorCode, status}], updatedCount, failedCount }. Per-row execution — partial results are normal; retry only failed[].resourceId. errorCode + status come from the underlying JazApiError when available."
     },
     {
       "name": "import_bank_statement",

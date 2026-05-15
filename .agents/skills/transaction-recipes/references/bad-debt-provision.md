@@ -77,6 +77,7 @@ If `topUpRequired` is below `CLIENT.materiality_threshold`: skip the recipe enti
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'ecl',
   receivables: [
     {bucket: 'current', balance: 100000, lossRate: 0.005},

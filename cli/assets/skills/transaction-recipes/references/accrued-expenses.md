@@ -17,7 +17,7 @@
 - **`search_contacts(filter: {name: {eq: <vendor>}})`** — step 3: resolve vendor (per `CLIENT.recurring_accruals[i].vendor`).
 - **`search_accounts(filter: {name: {in: ['<expense GL>', '<accrued liability GL>']}})`** — step 3: confirm both sides of the journal exist in CoA.
 - **`search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: 'DRAFT'})`** — step 5 monthly: find this period's pre-emitted DRAFT for finalization.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5: finalize this period's accrual + reversal pair.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5: finalize this period's accrual + reversal pair.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verification: confirm Accrued Expenses balance and net P&L impact.
 
 ### Cross-references
@@ -50,6 +50,7 @@ Returns `{ totalAccrued: 3000, schedule: [{accrualDate: '2025-01-31', reversalDa
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'accrued-expense',
   amount: 3000,
   periods: 1,

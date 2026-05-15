@@ -109,6 +109,7 @@ If `CLIENT.dividend_policy.declared_for_FY > 0`:
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'dividend',
   amount: <gross-dividend>,
   withholdingRate: <CLIENT.dividend_policy.withholding_rate>,
@@ -194,7 +195,7 @@ search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-0
 search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-12-31']}})
 ```
 
-ALL three must return zero. If any: `update_<entity>(resourceId, saveAsDraft: false)  // per-id; bulk_finalize_drafts only supports invoice/bill/CN, not journal/cash` for the keep-set; `delete_*` for the discards.
+ALL three must return zero. If any: `bulk_update_journals(items: [{resourceId, saveAsDraft: false}, ...]) for journals; bulk_finalize_drafts(items: [{type, resourceId}, ...]) for invoices/bills/CN` for the keep-set; `delete_*` for the discards.
 
 ### Y8 — Lock the year
 

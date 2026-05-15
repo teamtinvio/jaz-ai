@@ -15,7 +15,7 @@
 - **`search_capsules(filter: {capsuleType: {eq: 'Depreciation'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check. One depreciation capsule per asset; duplicate setup is almost always an error.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation — Vehicles', 'Depreciation Expense']}})`** — step 3: confirm the asset, contra-asset, and expense GL accounts exist.
 - **`generate_trial_balance(period_end: <date>)`** — step 5: verify NBV matches schedule.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly: finalize this period's pre-emitted DRAFT depreciation journal.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT depreciation journal.
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/monthly-close.md` step 9 (only when an asset uses non-SL method — Jaz native FA handles SL automatically). For SL: `create_fixed_asset` directly via `fixed-assets` tool family; do NOT use this recipe.

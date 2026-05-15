@@ -15,7 +15,7 @@
 - **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Provision for Warranties', 'Finance Cost', 'Warranty Expense']}})`** — step 3.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify provision balance matches schedule's `closingProvision`.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly finalize.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly finalize.
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/annual-statutory.md` step 4e (Y5 in `year-end-close.md`) for year-end provision remeasurement, and `practice/references/monthly-close.md` step 7 (verify scheduler, finalize this period's unwinding DRAFT).
@@ -48,6 +48,7 @@ Save schedule to `workpapers/<period>/provision-warranty-FY2025.json`.
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'provision',
   amount: 500000,
   annualRate: 4,

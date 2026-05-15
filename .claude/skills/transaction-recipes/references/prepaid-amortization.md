@@ -39,6 +39,7 @@ Returns: `{ perPeriodAmount, recognitionStartDate, recognitionEndDate, schedule[
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'prepaid-expense',
   amount: 12000,
   periods: 12,

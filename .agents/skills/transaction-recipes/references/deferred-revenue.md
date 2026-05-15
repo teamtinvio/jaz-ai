@@ -18,7 +18,7 @@
 - **`generate_trial_balance(period_end: <date>)`** — step 5: verify Deferred Revenue balance unwinds correctly.
 - **`search_capsules(filter: {capsuleType: {eq: 'Deferred Revenue'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`finalize_invoice(resourceId: <id>)`** — step 4 fallback: lift the upfront invoice from DRAFT to ACTIVE once practitioner confirms the engagement is genuinely starting.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly: finalize this period's pre-emitted DRAFT recognition journal.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT recognition journal.
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/monthly-close.md` step 8 (finalize this period's pre-emitted journal for existing capsules; create a new capsule for any new deferred arrangement starting this period).
@@ -49,6 +49,7 @@ Returns: `{ perPeriodAmount: 2000, recognitionStartDate: '2025-01-31', recogniti
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'deferred-revenue',
   amount: 24000,
   periods: 12,

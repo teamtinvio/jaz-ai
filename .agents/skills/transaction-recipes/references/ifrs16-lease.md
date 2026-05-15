@@ -17,7 +17,7 @@
 - **`search_contacts(filter: {supplier: true, name: {eq: <lessor>}})`** — step 3 (lease counterparty).
 - **`create_fixed_asset(...)`** — step 4 manual: register the ROU asset in Jaz native FA. `cost` = PV from calculator, `usefulLifeMonths` = lease term, `depreciationMethod` = 'sl' (straight-line). Jaz auto-posts monthly depreciation thereafter.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly: finalize this period's pre-emitted unwinding DRAFT.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted unwinding DRAFT.
 - **`generate_fa_summary(period_end: <date>)`** — step 5 verify Jaz auto-posted ROU depreciation.
 
 ### Cross-references
@@ -49,6 +49,7 @@ Returns: `{ presentValue: 167287.43, totalInterest: 12712.57, schedule: [{period
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'lease',
   monthlyPayment: 5000,
   termMonths: 36,

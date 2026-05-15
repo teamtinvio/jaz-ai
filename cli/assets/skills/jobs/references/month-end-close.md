@@ -30,7 +30,7 @@
 - **`generate_profit_and_loss(period_start, period_end)`** — step 15.
 - **`generate_balance_sheet(period_end)`** — step 16.
 - **`search_journals(filter: {status: 'DRAFT', valueDate: {between: [<period-start>, <period-end>]}})`** — step 17: gate on zero drafts.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 17: clear residual drafts before lock.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 17: clear residual drafts before lock.
 - **`update_account(resourceId: <CoA root>, lockDate: <period-end>)`** — step 18: lock the period.
 
 ### Calculators (cross-check, no API key needed)
@@ -107,7 +107,7 @@ For each `CLIENT.recurring_accruals[]` where `last_posted < '2025-01-31'`:
 4. Resolve `requiredAccounts` + `needsContact` (search/create as needed).
 5. `execute_recipe(...)`. Engine emits dual-entry accrual + reversal scheduler.
 6. `validate_journal_draft(resourceId: <id>)` for each draft journal.
-7. After all accruals processed: `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`.
+7. After all accruals processed: `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`.
 
 Cross-check: `generate_trial_balance(period_end: '2025-01-31')`. Sum credit movements against accrual liability accounts. Verify `|sum - expected| ≤ CLIENT.materiality_threshold`.
 
@@ -117,7 +117,7 @@ For each existing `Prepaid Expenses` capsule (via `search_capsules(filter: {caps
 
 1. `search_journals(filter: {capsuleResourceId: {eq: <capsule.id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})`. The recipe pre-emitted this period's recognition journal as DRAFT at recipe-execution time.
 2. If empty: either the recipe was set up wrong (no journal for this period — investigate via `search_journals` without status filter to see if it's already ACTIVE, then skip), OR the practitioner went off-recipe. Surface to practitioner.
-3. If found: collect resourceIds, then `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`.
+3. If found: collect resourceIds, then `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`.
 4. New prepaid setups during this period (a new prepaid started this month): invoke `plan_recipe(recipe: 'prepaid-expense', ...)` per `prepaid-amortization.md` — this creates the bill + N future-dated DRAFT journals; the current period's journal is then in the bulk_finalize_drafts queue above.
 
 ### Step 8 — Deferred revenue recognition
@@ -148,7 +148,7 @@ For each active loan capsule (via `search_capsules(filter: {capsuleType: {eq: 'L
 
 1. `search_journals(filter: {capsuleResourceId: {eq: <loan-capsule-id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})`. The `loan` recipe pre-emitted all `termMonths` future-dated DRAFT journals at execution time — this period's repayment is one of them.
 2. Should return exactly one DRAFT journal per active loan. Each is a 3-line entry (debit Loan Payable, debit Interest Expense, credit Cash) with the correct amortization split for the period.
-3. Collect resourceIds, then `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`.
+3. Collect resourceIds, then `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`.
 4. Do NOT post manual loan-interest accruals — the recipe already emitted the journal with the correct split per `clio calc loan` schedule.
 
 If a loan was newly disbursed this period: invoke `plan_recipe(recipe: 'loan', ...)` then `execute_recipe`; the disbursement (cash-in) and this period's repayment journal are both included in the engine output.

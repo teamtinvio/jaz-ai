@@ -16,7 +16,7 @@
 - **`search_accounts(filter: {name: {in: ['Loan Payable', 'Interest Expense']}})`** — used in step 3: confirm liability + expense GL accounts exist.
 - **`search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}, name: {eq: <capsuleName>}})`** — used in step 0: detect duplicate setup before re-running. Loan capsules are unique per facility — duplicate creation is almost always an agent error.
 - **`generate_trial_balance(period_end: <date>)`** — used in step 5: verify the loan liability balance matches the schedule's `closingBalance` column.
-- **`update_journal(resourceId: <id>, saveAsDraft: false)`** — used in step 4 verification: lift draft journals to ACTIVE once practitioner confirms. (No bulk-finalize-journals tool today; loop per id.)
+- **`update_journal(resourceId: <id>, saveAsDraft: false)`** — used in step 4 verification: lift draft journals to ACTIVE once practitioner confirms.
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/onboarding.md` (when the prior firm's loan transfers in via the conversion clearing account, then forward-recognition starts here) and from `practice/references/monthly-close.md` step 4 (monthly accruals do NOT include loan interest — interest is auto-emitted by the loan scheduler).
@@ -47,6 +47,7 @@ Returns: `{ perPeriodAmount: 1933.28, totalInterest: 15996.80, schedule: [{perio
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'loan',
   principal: 100000,
   annualRate: 6,

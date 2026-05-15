@@ -15,7 +15,7 @@
 - **`search_journals(filter: {tag: 'bonus-accrual', valueDate: {between: [<Q-start>, <Q-end>]}})`** — Q3 bonus YTD pull.
 - **`create_journal(...)`** — Q3 bonus true-up adjustment (manual one-off).
 - **`search_capsules(filter: {capsuleType: {eq: 'Intercompany'}})`** — Q4 IC reconciliation per pair of entities (multi-org coordination — see `intercompany.md` recipe).
-- **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}})` + `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
+- **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}})` + `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
 - **`generate_trial_balance(period_end: <Q-end>)`** — verification.
 - **`update_account(resourceId: <CoA root>, lockDate: <Q-end>)`** — final lock.
 
@@ -121,7 +121,7 @@ Per capsule: this period's quarter-end unwinding DRAFT journals (3 monthly DRAFT
 
 ```
 search_journals(filter: {capsuleResourceId: {eq: <provision capsule id>}, valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {eq: 'DRAFT'}})
-update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet
+bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])
 ```
 
 If practitioner determines remeasurement is needed (cash-flow estimate changed, discount rate moved): see `provisions.md` step 6 — recompute, post adjustment, reverse remaining DRAFT unwinding journals, re-execute recipe with new inputs.

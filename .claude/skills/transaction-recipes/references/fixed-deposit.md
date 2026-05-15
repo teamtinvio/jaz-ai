@@ -16,7 +16,7 @@
 - **`search_accounts(filter: {name: {in: ['Fixed Deposit Receivable', 'Accrued Interest Receivable', 'Interest Income']}})`** — step 3.
 - **`search_contacts(filter: {supplier: true, name: {eq: <bank>}})`** — step 3 optional: bank contact for narrative.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify accrued interest unwinds; FD principal stays at carrying amount until maturity.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly finalize.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly finalize.
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (existing FD capsules — finalize this month's accrual; new FD setups during the period — invoke recipe).

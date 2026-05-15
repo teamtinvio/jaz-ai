@@ -13,7 +13,7 @@
 - **`generate_general_ledger(accountResourceId: <FA category GL>, period_start, period_end)`** — step 4: per-FA-category GL movement vs FA register.
 - **`update_fixed_asset(resourceId: <id>, status: 'DISPOSED' | 'WRITTEN_OFF', disposalDate, disposalProceeds)`** — step 5: status updates for disposals. Mirror endpoints `POST /api/v1/mark-as-sold/fixed-assets` (sale) / `POST /api/v1/discard-fixed-assets/{id}` (scrap).
 - **`plan_recipe(recipe: 'asset-disposal', ...)` + `execute_recipe(...)`** — step 5: invoke per disposal identified during review (per `asset-disposal.md` recipe).
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 / 6: finalize disposal journals + any pending DDB / 150DB depreciation DRAFTs from `declining-balance.md` recipe.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 / 6: finalize disposal journals + any pending DDB / 150DB depreciation DRAFTs from `declining-balance.md` recipe.
 
 ### Calculators (cross-check, no API key needed)
 - **`clio calc depreciation --cost --salvage --life --method --frequency annual --json`** — step 4 per-asset cross-check.
@@ -72,7 +72,7 @@ For each ACTIVE SL asset (Jaz auto-depreciates):
 
 For each ACTIVE DDB / 150DB asset (recipe-managed, see `declining-balance.md`):
 - Per capsule: `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, valueDate: {between: [<year-start>, <year-end>]}, status: 'DRAFT'})`. Should be zero — all 12 months' DRAFT depreciation journals should already be FINALIZED via monthly-close.
-- If non-zero: `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet` for each remaining DRAFT.
+- If non-zero: `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])` for each remaining DRAFT.
 
 Cross-check via `clio calc depreciation --frequency annual --json` per asset; auditor will sample-test.
 
@@ -82,6 +82,7 @@ For each disposal identified in step 2:
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'asset-disposal',
   cost, salvageValue, usefulLifeYears, acquisitionDate, disposalDate, proceeds, method,
   ...,

@@ -28,7 +28,7 @@ The two patterns share the same `Employee Benefits` capsule type but use differe
 - **`search_capsules(filter: {capsuleType: {eq: 'Employee Benefits'}})`** — step 0: discover existing leave + bonus capsules.
 - **`search_accounts(filter: {name: {in: ['Leave Expense', 'Leave Liability', 'Bonus Expense', 'Bonus Payable']}})`** — step 3.
 - **`search_journals(filter: {tag: 'leave-accrual', valueDate: {between: [<period-start>, <period-end>]}, status: 'DRAFT'})`** — step 5 monthly: pull this period's pre-emitted leave DRAFT.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — monthly finalize.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — monthly finalize.
 - **`generate_trial_balance(period_end: <date>)`** — verification.
 - For year-end true-up: see `year-end-close.md` Y2 — manual journal pattern with HR-supplied actuals.
 
@@ -61,6 +61,7 @@ Returns: `{ totalAnnualCost: 84000, perPeriodAmount: 7000, schedule: [{period: 1
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'leave-accrual',
   headcount: 20,
   daysPerEmployee: 14,
@@ -118,6 +119,7 @@ clio calc accrued-expense --amount <est> --periods 1 --start-date 2025-03-31 --j
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'accrued-expense',
   amount: <est>,
   periods: 1,

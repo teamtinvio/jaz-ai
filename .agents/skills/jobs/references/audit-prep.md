@@ -27,7 +27,7 @@
 - **`search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: must return zero rows before pack hand-off.
 - **`search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: same gate, sales side.
 - **`search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: same gate, purchases side.
-- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 12 fallback: clear residual drafts before pack hand-off.
+- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 12 fallback: clear residual drafts before pack hand-off.
 - **`update_account(resourceId: <CoA root>, lockDate: <FY-end>)`** — step 12 final: lock the period to prevent backdated entries during fieldwork.
 
 ### Calculators (cross-check schedules — no API key needed)
@@ -198,7 +198,7 @@ search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-0
 search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-12-31']}})
 ```
 
-ALL three must return zero. If any return rows: collect `resourceId`s, classify (delete vs finalize) per practitioner judgment, and `update_<entity>(resourceId, saveAsDraft: false)  // per-id; bulk_finalize_drafts only supports invoice/bill/CN, not journal/cash` for the keep-set.
+ALL three must return zero. If any return rows: collect `resourceId`s, classify (delete vs finalize) per practitioner judgment, and `bulk_update_journals(items: [{resourceId, saveAsDraft: false}, ...]) for journals; bulk_finalize_drafts(items: [{type, resourceId}, ...]) for invoices/bills/CN` for the keep-set.
 
 Then lock the period:
 ```

@@ -54,6 +54,7 @@ clio calc dividend --amount 200000 --withholding-rate 10 --currency PHP --json
 
 ```
 plan_recipe(
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
   recipe: 'dividend',
   amount: 200000,
   withholdingRate: 0,
