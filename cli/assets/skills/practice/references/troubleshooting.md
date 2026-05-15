@@ -48,7 +48,7 @@ When the agent invokes Jaz tools inside an engagement context, common error clas
 | Symptom | Cause | Recovery |
 |---------|-------|----------|
 | `plan_recipe(name: 'accrued-expense', …)` returns negative amount | Estimation method picked up a credit balance | Surface "Accrual `<name>`: prior_month estimation produced a credit. Switch CLIENT.md.recurring_accruals[i].estimation_method to `fixed_amount` for this row this period, or pull `trailing_3m_avg`." |
-| `plan_recipe(name: 'fx-reval', …)` returns very large gain/loss | Currency rate stale or wrong direction | Verify `list_currency_rates` is current for the period. Confirm whether `from_rate` and `to_rate` match the expected period boundaries. |
+| `clio calc fx-reval` (verification) returns very different gain/loss vs Jaz's auto-posted | Closing rate stale or wrong direction; or settlement-realized FX shifted the book rate mid-period | Verify `list_currency_rates(currencyCode, valueDate: <period-end>)` is current. Confirm rate direction (`SOURCE_TO_FUNCTIONAL`). Check for settlement events: `search_payments(filter: {valueDate: {between: [<period-start>, <period-end>]}, currency: {ne: <CLIENT.base_currency>}})`. NEVER `execute_recipe(name: 'fx-reval', ...)` to "correct" — would double-post against Jaz's auto-emitted FX journals. |
 | `clio calc <name>` validation error | Required option missing | The CLI prints which required option is missing. Match against the engagement-type playbook's specified arguments. |
 
 ## Workspace integrity

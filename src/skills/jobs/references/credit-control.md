@@ -1,273 +1,196 @@
 # Credit Control / AR Chase
 
-Systematically chase overdue customer invoices, assess collection risk, and manage bad debt exposure. This is not just "send reminders" — it's a structured process to protect your cash flow and recognize when receivables are impaired.
+> Systematically chase overdue customer invoices, assess collection risk, identify bad debt. Driver tool: `generate_credit_control_blueprint`.
 
-**CLI:** `clio jobs credit-control [--overdue-days 30] [--json]`
+## Tools, recipes, calculators this job uses
 
----
+### MCP tools
+- **`generate_credit_control_blueprint(period: <YYYY-MM>, overdueDays: <n>, currency: <base>)`** — step 0: emit blueprint.
+- **`generate_aged_ar(period_end: <date>)`** — step 1: AR aging report with bucket breakdown.
+- **`search_invoices(filter: {status: {eq: 'UNPAID'}, dueDate: {lt: <date>}, contactResourceId: <customer>}, sort: 'dueDate:asc', limit: 200)`** — step 2: per-customer overdue detail. Paginate.
+- **`get_contact(resourceId: <customer id>)`** — step 2: pull contact info (email, phone, primary contact).
+- **`get_contact_signals(contactResourceId: <id>, businessTransactionType: 'SALE')`** — step 3: pull cadence + outlier signals + outstanding balance for the customer. Mid-7 endpoint.
+- **`apply_credit_to_invoice(...)`** / **`create_customer_credit_note(...)`** — step 6: write-off path A for stage-3 specific impairment.
+- **`create_invoice_payment(... paymentMethod: 'DEBT_WRITE_OFF' ...)`** — step 6: write-off path B (direct).
+- **`plan_recipe(name: 'ecl', ...)` + `execute_recipe(...)`** — step 7: ECL collective top-up if material change in aging.
+- **`download_export(exportType: 'analysis-receivables-customer-risk', startDate, endDate)`** — step 8: pre-empt audit by surfacing high-risk customers.
 
-## Phase 1: Generate the AR Aging
-
-The aging report is your starting point. Everything flows from this.
-
-### Step 1: Generate AR aging report
-
-```
-POST /api/v1/generate-reports/ar-report
-{ "endDate": "2025-02-28" }
-```
-
-**What you get:** All outstanding customer invoices grouped by aging bucket (current, 1-30 days, 31-60 days, 61-90 days, 91-120 days, 120+ days), with totals per customer and grand totals.
-
-### Step 2: Export for working paper (optional)
-
-```
-POST /api/v1/data-exports/ar-report
-{ "endDate": "2025-02-28" }
-```
+### Cross-references
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 4 (AR aging review + flag overdue) and ad-hoc whenever overdue threshold is hit.
+- Sibling jobs: `bank-recon.md` (newly-cleared customer payments shift the aging), `audit-prep.md` step 6 (year-end AR aging review).
+- Recipes: `bad-debt-provision.md` (engine `ecl`) for collective provision; path A/B for specific write-offs.
 
 ---
 
-## Phase 2: Prioritize
-
-### Step 3: Filter by overdue threshold
-
-If `--overdue-days` is specified (e.g., 30), focus on invoices overdue by at least that many days. Otherwise, review all overdue items.
-
-**Priority classification:**
-
-| Priority | Overdue | Action |
-|----------|---------|--------|
-| **Critical** | 90+ days | Escalate to management, consider legal, assess bad debt |
-| **High** | 60-90 days | Direct phone call, formal demand letter |
-| **Medium** | 30-60 days | Follow-up email with statement of account |
-| **Low** | 1-30 days | Gentle reminder, may be processing delay |
-| **Current** | Not yet due | No action needed — monitor only |
-
-### Step 4: Group by customer, sort by largest balance
-
-From the AR aging data, rank customers by total overdue amount (descending). The 80/20 rule applies — a handful of customers typically account for most of your overdue AR.
-
----
-
-## Phase 3: Detailed Customer Review
-
-For each overdue customer (starting with the largest balances), pull the full picture.
-
-### Step 5: List outstanding invoices for a customer
+## Step 0 — Emit blueprint
 
 ```
-POST /api/v1/invoices/search
-{
-  "filter": {
-    "contactResourceId": { "eq": "<customer-uuid>" },
-    "status": { "eq": "UNPAID" },
-    "balanceAmount": { "gt": 0 }
+generate_credit_control_blueprint(period: '2025-01', overdueDays: 30, currency: <CLIENT.base_currency>)
+```
+
+## Step 1 — AR aging snapshot
+
+```
+generate_aged_ar(period_end: '2025-01-31')
+```
+
+Save to `recurring/monthly/<period>/credit-control/aging.json`. Returns aging buckets (current, 30d, 60d, 90d, 120d+) per customer. Total per bucket informs collection priority.
+
+## Step 2 — Identify overdue invoices per customer
+
+For each customer with `60d` or `90d` or `120d+` balance > `CLIENT.materiality_threshold`:
+
+```
+search_invoices(
+  filter: {
+    status: {eq: 'UNPAID'},
+    contactResourceId: <customer id>,
+    dueDate: {lt: '2025-01-31'}
   },
-  "sort": { "sortBy": ["dueDate"], "order": "ASC" },
-  "limit": 100
-}
+  sort: 'dueDate:asc',
+  limit: 200
+)
 ```
 
-**What to check per invoice:**
-- `dueDate` — How overdue is it?
-- `balanceAmount` — How much is still owed? (Could be partially paid)
-- `reference` — The invoice number for follow-up correspondence
-- `totalAmount` vs `balanceAmount` — Has the customer been making partial payments?
-
-### Step 6: Check for unapplied credit notes
-
-Before chasing, verify there are no unapplied customer credit notes that should reduce the balance:
-
 ```
-POST /api/v1/customer-credit-notes/search
-{
-  "filter": {
-    "contactResourceId": { "eq": "<customer-uuid>" },
-    "status": { "eq": "UNAPPLIED" }
-  },
-  "sort": { "sortBy": ["valueDate"], "order": "DESC" },
-  "limit": 50
-}
+get_contact(resourceId: <customer id>)
 ```
 
-If there are unapplied credit notes, apply them before chasing:
+For each customer build a chase record: `{customerName, totalOverdue, oldestDaysOverdue, invoices: [{reference, valueDate, dueDate, daysOverdue, balanceAmount}], primaryContact}`.
+
+## Step 3 — Contact-signals pull (Mid-7)
 
 ```
-POST /api/v1/invoices/{invoiceResourceId}/credits
-{
-  "credits": [
-    { "creditNoteResourceId": "<credit-note-uuid>", "amountApplied": 500.00 }
-  ]
-}
+get_contact_signals(contactResourceId: <customer id>, businessTransactionType: 'SALE')
 ```
 
-### Step 7: Generate statement of account
+Returns: `{ cadence, outlierFlags[], severitySummary, patternDivergenceFlags, outstandingSnapshot, revealedPatterns[] }`. High-signal data for collection prioritization:
+- **Cadence outliers** (this customer typically pays N days late): expected vs current overdue.
+- **Severity** (`LOW` / `MEDIUM` / `HIGH`): customer-specific risk index.
+- **Pattern divergence**: a customer who's never been overdue is now — escalate.
 
+Save to `recurring/monthly/<period>/credit-control/contact-signals-<customer-slug>.json`.
+
+## Step 4 — Categorize for action
+
+Per customer, classify based on aging bucket + contact-signals:
+
+| Bucket | Signal | Action |
+|--------|--------|--------|
+| < 30d | (any) | Soft reminder email — automated tooling outside Jaz. |
+| 30-60d | severity LOW | Phone call OR formal email. Document in narrative. |
+| 30-60d | severity MEDIUM/HIGH | Phone call + escalation to AR manager. |
+| 60-90d | (any) | Formal demand letter. Begin specific-provision review (path A/B if appropriate). |
+| 90-120d | (any) | Final demand. Suspend further credit. Begin write-off review. |
+| 120d+ | severity LOW | Final demand + small claims / mediation option. |
+| 120d+ | severity HIGH | Likely uncollectible — proceed to step 6 specific write-off. |
+
+The contact-signals `outstandingSnapshot.recoverabilityScore` (0-100) is a useful tie-breaker.
+
+## Step 5 — Document chase activities
+
+For each customer chased: log in `recurring/monthly/<period>/credit-control/chase-log.md` with:
+- Date contacted
+- Method (email / phone / letter)
+- Person spoken to
+- Promised payment date (if any)
+- Next action date
+
+Capsule alternative: `create_capsule(capsuleType: 'Bad Debt Write-off', title: 'Credit Control — <customer> — FY2025')` with the chase log as the description; attach any eventual write-off journal / credit note to the same capsule for audit trail.
+
+## Step 6 — Specific write-off (stage-3 impairment)
+
+For customers where objective evidence of impairment exists (formal insolvency, repeated dishonor, ceased trading): write off the bills per `bad-debt-provision.md` step 6.
+
+**Path A — credit note** (preferred for paper trail):
 ```
-POST /api/v1/statement-of-account-export
+create_customer_credit_note(
+  contactResourceId: <customer>,
+  valueDate: '2025-01-31',
+  reference: 'WRITE-OFF-<customer>-FY2025',
+  lineItems: [{
+    name: 'Write-off — uncollectible (formal insolvency)',
+    accountResourceId: <Bad Debt Expense GL>,
+    amount: <balance to write off>,
+    saveAsDraft: false
+  }],
+  capsuleResourceId: <credit-control capsule>
+)
+apply_credit_to_invoice(invoiceResourceId: <inv>, creditNoteResourceId: <cn>, amount: <balance>)
 ```
 
-The statement of account is what you send to the customer — it shows all invoices, payments, and the running balance. Attach this to follow-up communications.
-
----
-
-## Phase 4: Follow-Up Priority List
-
-### Step 8: Build the chase list
-
-For each overdue customer, document:
-
-| Customer | Total Overdue | Oldest Invoice | Days Overdue | Priority | Action |
-|----------|--------------|----------------|--------------|----------|--------|
-| Acme Corp | $45,000 | INV-1023 | 95 | Critical | Phone + demand letter |
-| Beta Ltd | $12,500 | INV-1089 | 62 | High | Phone call |
-| Gamma Inc | $3,200 | INV-1134 | 35 | Medium | Email reminder |
-
-**Escalation process (typical SMB):**
-
-1. **Day 1-7 overdue:** Automated or gentle email reminder with invoice attached
-2. **Day 14 overdue:** Second reminder, direct email to AP contact
-3. **Day 30 overdue:** Phone call to AP contact, request payment commitment date
-4. **Day 45 overdue:** Escalate to customer's management, send statement of account
-5. **Day 60 overdue:** Formal demand letter, consider suspending future sales on credit
-6. **Day 90 overdue:** Final demand, engage collections agency or legal counsel
-7. **Day 120+ overdue:** Write off if uncollectable (see Phase 5)
-
----
-
-## Phase 5: Bad Debt Assessment
-
-**Conditional:** Only if there are material amounts in the 90+ day aging bucket.
-
-### Step 9: Assess bad debt risk
-
-For invoices that appear uncollectable, evaluate using the ECL (Expected Credit Loss) model:
-
-**Calculator:** `clio calc ecl`
-
-```bash
-clio calc ecl --current 100000 --30d 50000 --60d 20000 --90d 10000 --120d 5000 --rates 0.5,2,5,10,50
+**Path B — direct write-off**:
 ```
-
-This produces the provision matrix — the estimated total bad debt exposure based on aging buckets and historical loss rates.
-
-**Recipe:** `bad-debt-provision` — see `transaction-recipes/references/bad-debt-provision.md` for the full ECL provision pattern.
-
-### Step 10: Record bad debt write-off (if uncollectable)
-
-When a specific invoice is confirmed uncollectable (customer bankrupt, dissolved, or dispute resolution failed), write it off:
-
-**Option A: Customer credit note + write-off journal**
-
-Create a customer credit note to clear the invoice balance:
-
-```
-POST /api/v1/customer-credit-notes
-{
-  "contactResourceId": "<customer-uuid>",
-  "saveAsDraft": false,
-  "reference": "CN-BADDEBT-001",
-  "valueDate": "2025-02-28",
-  "lineItems": [{
-    "name": "Bad debt write-off — INV-1023",
-    "unitPrice": 45000.00,
-    "quantity": 1,
-    "accountResourceId": "<bad-debt-expense-uuid>"
+create_invoice_payment(
+  invoiceResourceId: <inv>,
+  payments: [{
+    paymentAmount: <balance>,
+    transactionAmount: <balance>,
+    accountResourceId: <Bad Debt Expense GL>,
+    paymentMethod: 'DEBT_WRITE_OFF',
+    reference: 'WRITE-OFF-<inv>',
+    valueDate: '2025-01-31'
   }]
-}
+)
 ```
 
-Then apply the credit note to the invoice:
+Per memory rule [Bad Debt Write-off]: `paymentMethod: 'DEBT_WRITE_OFF'` is the canonical method enum. Bad Debt Expense GL must exist in CoA.
+
+Future-receivable reversal: if the customer eventually pays after write-off (rare but possible), post via `create_journal`: Dr Cash / Cr Bad Debt Recoveries (separate revenue line for transparency).
+
+## Step 7 — ECL collective top-up (if material aging shift)
+
+If the AR aging shifted materially this period (e.g., $50K moved from current to 90d+): invoke `bad-debt-provision.md` recipe for the collective top-up.
 
 ```
-POST /api/v1/invoices/{invoiceResourceId}/credits
-{
-  "credits": [
-    { "creditNoteResourceId": "<credit-note-uuid>", "amountApplied": 45000.00 }
-  ]
-}
+clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <CLIENT.ecl_loss_rate_matrix> --existing-provision <TB Allowance balance> --json
 ```
 
-**Option B: Use DEBT_WRITE_OFF payment method**
-
-Record as a payment using the special write-off method:
-
+If `topUpRequired > CLIENT.materiality_threshold`:
 ```
-POST /api/v1/invoices/{invoiceResourceId}/payments
-{
-  "payments": [{
-    "paymentAmount": 45000.00,
-    "transactionAmount": 45000.00,
-    "accountResourceId": "<bad-debt-expense-uuid>",
-    "paymentMethod": "DEBT_WRITE_OFF",
-    "reference": "WRITEOFF-INV-1023",
-    "valueDate": "2025-02-28"
-  }]
-}
+plan_recipe(name: 'ecl', ..., capsuleResourceId: <credit-control capsule OR new ECL Provision capsule>)
+execute_recipe(...)
+bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})
 ```
 
-**Accounting effect:** DR Bad Debt Expense, CR Accounts Receivable — removes the receivable from the books and recognizes the expense.
+Note: monthly ECL is typically a mental check; formal ECL provision recompute is quarterly (per `quarter-end-close.md` Q2). Trigger this monthly only on material shifts.
+
+## Step 8 — Pre-empt audit signals
+
+```
+download_export(exportType: 'analysis-receivables-customer-risk', startDate: <FY-start>, endDate: <today>)
+```
+
+Returns XLSX with high-risk customer flags (rising aging trends, recently-defaulted, concentration risk). Auditor will run similar analysis at year-end; surface now to address rather than react.
 
 ---
 
-## Phase 6: Verification
+## Common error classes and recovery
 
-### Step 11: Re-run AR aging after actions
-
-```
-POST /api/v1/generate-reports/ar-report
-{ "endDate": "2025-02-28" }
-```
-
-**What to check:**
-- Credit notes have reduced the correct invoice balances
-- Written-off invoices no longer appear in the aging
-- Total AR ties to the Accounts Receivable balance on the trial balance
-
-### Step 12: Review trial balance impact
-
-```
-POST /api/v1/generate-reports/trial-balance
-{ "startDate": "2025-02-01", "endDate": "2025-02-28" }
-```
-
-**What to check:**
-- Accounts Receivable balance reflects all collections, credit notes, and write-offs
-- Bad Debt Expense (if write-offs were made) shows the correct amount
-- Allowance for Doubtful Debts (if using provision method) reflects the ECL calculation
+| Source | Error | Recovery |
+|--------|-------|----------|
+| Step 2 | `search_invoices` returns 0 despite aging shows overdue | Aging report may include `PARTIALLY_PAID` invoices; expand filter `status: {in: ['UNPAID', 'PARTIALLY_PAID']}`. |
+| Step 3 | `get_contact_signals` returns `{ unavailable: true }` | The freshness layer is offline; skip the signals step and use aging alone. Don't halt the job. |
+| Step 6 Path A | `apply_credit_to_invoice` 422 `credit_exceeds_balance` | Split the credit across multiple invoices, OR reduce the credit amount to match the bill balance. |
+| Step 6 Path B | `paymentMethod: 'DEBT_WRITE_OFF'` rejected | Verify the enum value via `jaz-api/SKILL.md` (some orgs may have custom payment-method config; default supports DEBT_WRITE_OFF). |
+| Step 7 ECL recipe | Top-up causes Bad Debt Expense to spike | Expected — material aging shift = material P&L impact. Surface to practitioner; potentially split across multiple periods if it's a known one-off (rare). |
+| Customer files insolvency mid-chase | (process) | Stop chase. Move directly to step 6 specific write-off. Document the insolvency filing reference. |
+| Customer pays post-write-off | (rare) | Post `create_journal`: Dr Cash / Cr Bad Debt Recoveries. Don't reverse the original write-off — keep the audit trail clean. |
 
 ---
 
-## Credit Control Checklist (Quick Reference)
+## Tips
 
-| # | Step | Phase | Conditional |
-|---|------|-------|-------------|
-| 1 | Generate AR aging | Assess | Always |
-| 2 | Export working paper | Assess | Optional |
-| 3 | Filter by overdue threshold | Prioritize | If --overdue-days specified |
-| 4 | Group by customer | Prioritize | Always |
-| 5 | List outstanding invoices | Review | Always |
-| 6 | Check unapplied credit notes | Review | Always |
-| 7 | Generate statement of account | Review | Always |
-| 8 | Build chase list | Follow-up | Always |
-| 9 | Assess bad debt (ECL) | Bad debt | If material 90d+ balances |
-| 10 | Record write-off | Bad debt | If confirmed uncollectable |
-| 11 | Re-run AR aging | Verify | Always |
-| 12 | Review trial balance | Verify | Always |
+- **Run weekly, not monthly.** Aging gets worse the longer you wait. A 30-day-overdue invoice has a 70% recovery rate; 90-day-overdue drops to 40%; 120+ days to 20%.
+- **Contact-signals is the differentiator.** `get_contact_signals` surfaces who's likely to pay and who's behaving abnormally. Without this, credit control is just "send reminders to everyone."
+- **Capsule per customer write-off** = audit trail. Even small write-offs ($500+) should have a capsule with the chase history.
+- **Year-end specific impairment** is harder than monthly. Catch it monthly — auditor will sample-test path A/B write-offs as part of audit-prep.
 
 ---
 
-## Tips for SMBs
+## Cross-references back to engagements
 
-**Typical credit terms:** Net 30 is standard in Singapore. Some industries use Net 60 or Net 14. Whatever your terms, enforce them consistently — if you let one customer pay at 60 when terms are 30, everyone will.
-
-**Prevention is cheaper than collection.** Before extending credit to a new customer, do a basic credit check (ACRA business profile for SG companies, $5.50). Set a credit limit and stick to it.
-
-**The phone is more effective than email.** After 30 days, email follow-ups have diminishing returns. A 5-minute phone call to the AP department resolves more overdue invoices than 10 emails.
-
-**Document everything.** Keep records of all follow-up attempts (dates, who you spoke to, commitments made). If it goes to legal, you need an evidence trail.
-
-**When to involve legal:** If the amount exceeds $20,000 and the customer is unresponsive after 90 days, consider a letter of demand from a lawyer ($300-500). For amounts under $10,000, the Small Claims Tribunal (SG) is a cost-effective option.
-
-**Bad debt tax deduction (SG):** Bad debts written off are deductible for income tax purposes if you can prove the debt is genuinely irrecoverable and reasonable steps were taken to collect. Keep documentation.
+- `practice/references/monthly-close.md` step 4 — AR aging review + chase activity log.
+- `quarter-end-close.md` Q2 — formal ECL provision review (collective).
+- `audit-prep.md` step 6 — year-end AR aging; specific impairments documented via path A/B with capsules.
+- Recipes: `bad-debt-provision.md` (engine `ecl`).

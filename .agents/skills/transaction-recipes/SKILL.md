@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.4.5
+version: 5.4.6
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -18,7 +18,9 @@ compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent t
 
 You are modeling **complex multi-step accounting scenarios** in Jaz — transactions that span multiple periods, involve changing amounts, or require several linked entries to complete a single business event.
 
-**This skill provides conceptual recipes with full accounting logic. For API field names and payloads, load the `jaz-api` skill alongside this one.**
+> **Jaz-native, not generic.** Every recipe in this skill is designed around the Jaz recipe engine (`plan_recipe` / `execute_recipe`), Jaz capsule types, Jaz CoA classifications, and Jaz scheduler primitives. It is NOT an interchangeable IFRS reference; it is the operating manual for posting these transactions through the Jaz ledger. If you find yourself hand-constructing journal entries from this skill, you have skipped step 1 — invoke `plan_recipe(name: ...)` first and let the engine emit the entries.
+
+**This skill provides Jaz-contextual recipes with full accounting logic. For API field names and payloads, load the `jaz-api` skill alongside this one. For end-to-end execution within a practitioner engagement (which recipes appear in `monthly-close`, `quarterly-gst`, `annual-statutory`, `onboarding`), load the `jaz-practice` skill — it specifies which `CLIENT.md` fields drive the recipe parameters and what error classes to expect.**
 
 ## When to Use This Skill
 
@@ -109,7 +111,7 @@ Each recipe includes: scenario description, accounts involved, journal entries, 
 
 ### Tier 3 — Month-End Close Recipes
 
-10. **[FX Revaluation — Non-AR/AP Items](references/fx-revaluation.md)** — IAS 21 revaluation of non-AR/AP foreign currency monetary items (intercompany loans, term deposits, FX provisions) with Day 1 reversal. *Paired calculator: `clio calc fx-reval`. Typical engagement context: monthly-close (period-end FX reval inside `generate_month_end_blueprint`) and annual-statutory (year-end revaluation inside `generate_year_end_blueprint`).*
+10. **[FX Revaluation — verification only](references/fx-revaluation.md)** — Jaz auto-handles ALL period-end IAS 21.23 FX translation (AR, AP, cash, bank, intercompany, term deposits, FX provisions). The recipe and `clio calc fx-reval` are for VERIFICATION ONLY (independent cross-check vs what Jaz auto-posted). Do NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post. *Typical engagement context: monthly-close / quarterly-gst / annual-statutory step 6 verification flow.*
 
 11. **[Bad Debt Provision / ECL](references/bad-debt-provision.md)** — IFRS 9 simplified approach provision matrix using aged receivables and historical loss rates. *Paired calculator: `clio calc ecl`. Typical engagement context: quarterly-gst (ECL is reviewed alongside the F5 prep cycle since AR aging is already pulled) and annual-statutory (year-end ECL true-up inside `generate_year_end_blueprint`).*
 

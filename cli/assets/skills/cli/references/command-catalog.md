@@ -437,7 +437,6 @@ Blueprints are offline (no auth). Tools require auth.
 | `match` | Tool | `--input` (bank records + transactions JSON) |
 | `gst-vat` | Blueprint | `--period`, `--jurisdiction` |
 | `payment-run` | Blueprint | `--date` |
-| `bank-file` | Tool | `--format`, `--input` (generates GIRO/FAST/PayNow file) |
 | `outstanding` | Tool | `--contact`, `--limit` (group outstanding bills) |
 | `credit-control` | Blueprint | `--aging-days` |
 | `supplier-recon` | Blueprint | `--contact` |

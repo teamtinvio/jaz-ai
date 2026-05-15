@@ -1,246 +1,166 @@
-# Payment Run (Bulk Bill Payments)
+# Payment Run
 
-Process outstanding supplier bills in a structured batch. A payment run typically happens weekly or fortnightly — you identify what's due, group by supplier, approve the batch, and record the payments. This keeps supplier relationships healthy and avoids late payment penalties.
+> Process outstanding supplier bills in a structured weekly or fortnightly batch through the Jaz API surface. Driver tool: `generate_payment_run_blueprint`.
 
-**CLI:** `clio jobs payment-run [--due-before 2025-02-28] [--json]`
+## Tools, recipes, calculators this job uses
+
+### MCP tools (jaz-api)
+- **`generate_payment_run_blueprint`** — used in step 1: emit phased blueprint for the cutoff date.
+- **`search_bills(filter: {status: 'UNPAID', balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sort: 'dueDate:asc', limit: 200)`** — used in step 2: pull due bills (paginate via `offset` if `>200`).
+- **`generate_aged_ap(period_end: <cutoff>)`** — used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
+- **`generate_bank_balance_summary(period_end: <cutoff>)`** — used in step 5: confirm cash availability before approving the batch.
+- **`get_contact(resourceId: <contactResourceId>)`** — used in step 4 (per supplier): pull payment terms / preferred payment method / bank details (especially `taxId`, `bankAccountNumber`, `bicSwift` for GIRO file generation).
+- **`create_bill_payment(billResourceId: <id>, payments: [{...}])`** — used in step 6: post the payment per bill. NO BATCH PAYMENT ENDPOINT yet — one POST per bill.
+- **`search_payments(filter: {reference: {startsWith: <run-prefix>}, valueDate: {eq: <run-date>}})`** — used in step 8: idempotency / verification check (re-running the run won't duplicate-pay if all references match).
+- **`finalize_bill(resourceId: <id>)`** — used in step 0 fallback: bills must be `status: APPROVED` (not `DRAFT`) before they accept payments.
+
+### CLI tools (jaz-cli)
+- **`clio jobs payment-run --due-before <YYYY-MM-DD> --json`** — emit blueprint as JSON for downstream agent consumption.
+- **`clio jobs payment-run outstanding --due-before <YYYY-MM-DD> --currency SGD --json`** — fetch outstanding bills grouped by supplier (uses API key; equivalent to step 2 + step 4 grouping in one call).
+
+### Cross-references
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 8 (run between mid-month and month-end so the close has fewer outstanding payables) and from `practice/references/quarterly-gst.md` step 9 (final pre-filing payment run).
+- Sibling jobs: `credit-control.md` (the AR-side mirror), `supplier-recon.md` (run BEFORE payment-run to catch disputed bills that should be excluded).
+- API rules: `jaz-api/SKILL.md` rules 4-8 (payment field names — `paymentAmount` vs `transactionAmount` for FX), rule 24 (`currency` field shape), rule 50a (search `query` DSL). The 6 required payment fields are: `paymentAmount`, `transactionAmount`, `accountResourceId`, `paymentMethod`, `reference`, `valueDate` (jaz-api rule 7).
 
 ---
 
-## Phase 1: Identify Outstanding Bills
+## Step 0 — Idempotency precheck
 
-### Step 1: List all unpaid bills
-
-Pull every posted bill with an outstanding balance:
+Generate a run prefix: `PAYRUN-<YYYY-MM-DD>-<seq>`. Before proceeding:
 
 ```
-POST /api/v1/bills/search
-{
-  "filter": {
-    "status": { "eq": "UNPAID" },
-    "balanceAmount": { "gt": 0 }
+search_payments(filter: {reference: {startsWith: 'PAYRUN-2025-02-28-'}})
+```
+
+If results: surface "A payment run with prefix `PAYRUN-2025-02-28-*` already executed on this date (`<n>` payments totalling `<amt>`). Confirm intent — re-run will create duplicate payments." Halt unless practitioner confirms.
+
+## Step 1 — Emit blueprint
+
+```
+generate_payment_run_blueprint(period_end: '2025-02-28', currency: <CLIENT.base_currency>)
+```
+
+Save to `recurring/<period>/payment-run-<run-date>/blueprint.json`. The blueprint produces the phased structure this playbook follows.
+
+## Step 2 — Identify bills
+
+```
+search_bills(
+  filter: {
+    status: {eq: 'UNPAID'},
+    balanceAmount: {gt: 0},
+    dueDate: {lte: '2025-02-28'}
   },
-  "sort": { "sortBy": ["dueDate"], "order": "ASC" },
-  "limit": 1000
-}
+  sort: 'dueDate:asc',
+  limit: 200
+)
 ```
 
-**What you get:** All unpaid bills sorted by due date (earliest first). Each result includes `balanceAmount` (remaining unpaid), `totalAmount` (original), `dueDate`, and contact details.
+Paginate via `offset` if `totalElements > 200`. Add a 7-day grace window (`dueDate.lte: <cutoff + 7 days>`) — pay slightly early beats missing day-after.
 
-### Step 2: Filter by due date
+For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, `balanceAmount`, `dueDate`, `reference`. Per `jaz-api/SKILL.md` rule 52, `dueDate` arrives as epoch ms — convert with `new Date(ms)` before display.
 
-If `--due-before` is specified, narrow to bills due on or before that date:
-
-```
-POST /api/v1/bills/search
-{
-  "filter": {
-    "status": { "eq": "UNPAID" },
-    "balanceAmount": { "gt": 0 },
-    "dueDate": { "lte": "2025-02-28" }
-  },
-  "sort": { "sortBy": ["dueDate"], "order": "ASC" },
-  "limit": 1000
-}
-```
-
-**Tip:** Include bills due in the next 7 days beyond your cutoff — paying a few days early is better than missing one because it was due the day after your run.
-
----
-
-## Phase 2: Group and Summarize
-
-### Step 3: Group by supplier
-
-Organize the bills by `contactResourceId`. For each supplier, summarize:
-
-- Number of bills
-- Total amount due
-- Earliest due date
-- Currency (important for FX payments)
-
-**Why group:** Suppliers prefer a single consolidated payment over multiple small ones. It also reduces bank transaction fees for the payer.
-
-### Step 4: Generate AP aging for context
+## Step 3 — AP aging cross-check
 
 ```
-POST /api/v1/generate-reports/ap-report
-{ "endDate": "2025-02-28" }
+generate_aged_ap(period_end: '2025-02-28')
 ```
 
-**What to check:**
-- Total AP aging should match the sum of all unpaid bills from Step 1
-- Identify any bills in the 60d+ aging buckets — these are overdue and may need priority payment or dispute resolution
-- Flag disputed bills (do NOT include them in the payment run)
+Verify: `sum(search_bills.balanceAmount) ≈ generate_aged_ap.totalOutstanding` (within `CLIENT.materiality_threshold`). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling — surface to practitioner.
 
----
+Flag any bill in the 60d+ bucket — these need priority OR dispute resolution. Cross-reference `practice/references/monthly-close.md` step 8 sub-clause "disputed bills" to exclude.
 
-## Phase 3: Select and Approve
+## Step 4 — Group by supplier
 
-### Step 5: Build the payment batch
+For each unique `contactResourceId` from step 2:
+- `get_contact(resourceId: <id>)` to pull `paymentTerms`, `preferredPaymentMethod`, `bankAccountNumber`, `bicSwift`, `taxId`.
+- Aggregate: `{ contactName, billCount, totalDue, currencies[], earliestDueDate, paymentMethod }`.
 
-Select which bills to pay. Three common approaches:
+Suppliers prefer one consolidated payment per run. Multi-currency suppliers need separate per-currency payments (Jaz does NOT auto-net cross-currency).
 
-**All-due:** Pay everything due on or before the cutoff date. Simplest, works for most SMBs.
-
-**Priority-based:** Pay overdue first (60d+, then 30d+), then current. Useful when cash is tight.
-
-**Supplier-based:** Pay strategic suppliers first (sole suppliers, key relationships), then others. Business judgment call.
-
-**Before proceeding:** Confirm cash availability. Check the bank balance:
+## Step 5 — Cash availability gate
 
 ```
-POST /api/v1/generate-reports/bank-balance-summary
-{ "primarySnapshotDate": "2025-02-28" }
+generate_bank_balance_summary(period_end: '2025-02-28')
 ```
 
-If total payments exceed available cash, prioritize and defer the rest to the next run.
+For each `bankAccountResourceId` you'll pay from: confirm `availableBalance >= sum of payments to be drawn from it`. If insufficient: defer the bottom of the priority stack to the next run; surface the deferred list to practitioner with explanation.
 
----
+Apply `CLIENT.cash_buffer_days` from CLIENT.md (default: 14 days operating expenses) — never drain to zero. Compute buffer-required from last 30 days' opex via `generate_profit_and_loss(period_start: <-30d>, period_end: <today>)`.
 
-## Phase 4: Record Payments
+## Step 6 — Record payments
 
-### Step 6: Record payment for each bill
-
-For each bill in the approved batch, record the payment:
+For each approved bill (one POST per bill — no batch endpoint):
 
 ```
-POST /api/v1/bills/{billResourceId}/payments
-{
-  "payments": [{
-    "paymentAmount": 5350.00,
-    "transactionAmount": 5350.00,
-    "accountResourceId": "<bank-account-uuid>",
-    "paymentMethod": "BANK_TRANSFER",
-    "reference": "PAYRUN-2025-02-28-001",
-    "valueDate": "2025-02-28"
+create_bill_payment(
+  billResourceId: <id>,
+  payments: [{
+    paymentAmount: 5350.00,
+    transactionAmount: 5350.00,
+    accountResourceId: <bank-account-resourceId>,
+    paymentMethod: 'BANK_TRANSFER',
+    reference: 'PAYRUN-2025-02-28-001',
+    valueDate: '2025-02-28'
   }]
-}
+)
 ```
 
-**CRITICAL field notes:**
-- `paymentAmount` — The amount leaving the bank account (bank currency)
-- `transactionAmount` — The amount applied to the bill balance (bill currency). Same as `paymentAmount` for same-currency. Different for FX (see below).
-- `accountResourceId` — The bank account UUID (NOT the expense account)
-- `paymentMethod` — Use `"BANK_TRANSFER"` for electronic payments. Other options: `"CHEQUE"`, `"CASH"`, `"CREDIT_CARD"`, `"E_WALLET"`
-- `reference` — Use a consistent naming convention (e.g., `PAYRUN-{date}-{seq}`)
-- `valueDate` — The date the payment is made (YYYY-MM-DD format)
+**FX bills (e.g., USD bill paid from SGD account):** `paymentAmount` is the SGD amount that left the bank, `transactionAmount` is the USD amount applied to the bill. The platform calculates the implied rate and posts the FX gain/loss. Per `jaz-api/SKILL.md` rule 4: same-currency means both fields equal; FX means they differ.
 
-Always wrap in `{ "payments": [...] }` even for a single payment.
+**Partial payment:** Set both fields to the partial amount; bill remains `UNPAID` with reduced `balanceAmount`.
 
-**Note:** There is no batch payment endpoint yet. Each bill requires an individual `POST /bills/{id}/payments` call. If you're paying 50 bills, that's 50 API calls. The batch endpoint is planned but not yet available.
+**Reference convention:** `PAYRUN-YYYY-MM-DD-NNN` (zero-padded sequence). Bank reconciliation downstream relies on this prefix to auto-match bank statement lines.
 
-### Step 7: Partial payments
+**`paymentMethod` enum:** `BANK_TRANSFER` (default — GIRO / FAST / wire), `CHEQUE`, `CASH`, `CREDIT_CARD`, `E_WALLET` (PayNow for business, GrabPay).
 
-If paying less than the full balance (e.g., cash constraints or instalment arrangement), set `paymentAmount` and `transactionAmount` to the partial amount. The bill remains in `UNPAID` status with a reduced `balanceAmount`.
+## Step 7 — Verify
+
+After all `create_bill_payment` calls succeed:
 
 ```
-POST /api/v1/bills/{billResourceId}/payments
-{
-  "payments": [{
-    "paymentAmount": 2000.00,
-    "transactionAmount": 2000.00,
-    "accountResourceId": "<bank-account-uuid>",
-    "paymentMethod": "BANK_TRANSFER",
-    "reference": "PAYRUN-2025-02-28-PARTIAL",
-    "valueDate": "2025-02-28"
-  }]
-}
+generate_aged_ap(period_end: '2025-02-28')
+search_payments(filter: {reference: {startsWith: 'PAYRUN-2025-02-28-'}, valueDate: {eq: '2025-02-28'}})
 ```
+
+Assert:
+- AP aging total reduced by `sum(payments.transactionAmount)` (in base currency, FX-converted at value date).
+- Bills fully paid no longer appear in aging; partials show reduced `balanceAmount`.
+- `search_payments` returns N rows where N = bills paid in step 6.
+
+```
+generate_bank_balance_summary(period_end: '2025-02-28')
+```
+
+Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)`. Cross-reference to actual bank statement when it arrives — this is the next-day bank-recon job.
 
 ---
 
-## Phase 5: FX Payments
+## Common error classes and recovery
 
-**Conditional:** Only if paying bills in a non-base currency.
-
-### Step 8: Record FX payment
-
-When paying a foreign currency bill from a base currency bank account (e.g., paying a USD bill from an SGD account):
-
-```
-POST /api/v1/bills/{billResourceId}/payments
-{
-  "payments": [{
-    "paymentAmount": 6750.00,
-    "transactionAmount": 5000.00,
-    "accountResourceId": "<sgd-bank-account-uuid>",
-    "paymentMethod": "BANK_TRANSFER",
-    "reference": "PAYRUN-2025-02-28-FX",
-    "valueDate": "2025-02-28"
-  }]
-}
-```
-
-Here `paymentAmount` is 6,750 SGD (what left the bank) and `transactionAmount` is 5,000 USD (what was applied to the bill). The platform calculates the implied exchange rate and posts any FX gain/loss automatically.
-
-**Tip:** Check the actual bank debit amount against your bank statement. Banks often add a spread to the exchange rate — the SGD amount debited may differ from what you'd calculate using the mid-market rate.
+| Source | Error | Recovery |
+|--------|-------|----------|
+| `create_bill_payment` | 422 `bill_not_approved` | Bill is `DRAFT`. `finalize_bill(resourceId: <id>)` first, then retry. Do NOT pay drafts. |
+| `create_bill_payment` | 422 `currency_mismatch` | `paymentAmount` currency ≠ bank account currency. Either pay from the matching-currency bank account, or model as FX (different `paymentAmount` and `transactionAmount`). |
+| `create_bill_payment` | 422 `bill_already_paid` | Bill went `PAID` since step 2. Re-run `search_bills` for fresh state; remove from batch. |
+| `create_bill_payment` | 422 `lock_date_violated` | `valueDate` is in a locked period. Either lift the lock via `update_account` lock_date OR adjust `valueDate` to the next open period. |
+| `create_bill_payment` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent — re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. |
+| `generate_aged_ap` | Total mismatch with `search_bills` | Likely `PARTIALLY_PAID` bills excluded from `search_bills` filter. Add `status: {in: ['UNPAID', 'PARTIALLY_PAID']}` and retry. |
 
 ---
 
-## Phase 6: Verification
+## Variations
 
-### Step 9: Verify AP aging reflects the payments
-
-```
-POST /api/v1/generate-reports/ap-report
-{ "endDate": "2025-02-28" }
-```
-
-**What to check:**
-- Total AP should be reduced by the sum of all payments made
-- Bills that were fully paid should no longer appear in the aging
-- Partially paid bills should show the correct reduced balance
-
-### Step 10: Verify bank balance
-
-```
-POST /api/v1/generate-reports/bank-balance-summary
-{ "primarySnapshotDate": "2025-02-28" }
-```
-
-**What to check:**
-- Bank balance should be reduced by the total payment amount
-- Cross-reference to the actual bank statement to confirm all payments cleared
+- **Priority-based payment ordering:** `sort: 'dueDate:asc'` covers chronological. For overdue-first, sort by `daysOverdue:desc`. For supplier-strategic, get the practitioner to mark `CLIENT.priority_suppliers[]` and process those first.
+- **Multi-currency runs:** Split the run by currency. SGD bills → SGD bank; USD bills → USD bank or SWIFT-routed. The actual bank disbursement is handled outside Jaz (via the bank's portal); Jaz records the payment after it clears.
+- **Approval workflow (multi-signatory SMBs):** Build the batch in step 5, get out-of-band approval, then execute step 6 only after sign-off. Do NOT post payments before the actual bank transfer is initiated — Jaz payments are not "payment instructions", they record completed payments.
+- **Early-payment discounts:** If supplier offers `2% 10 Net 30`, computing the equivalent annualized return is `(2% / 98%) × (365 / 20) ≈ 37.2%`. Take it when cash allows. Apply the discount as: pay `transactionAmount = bill.balanceAmount × 0.98`, then post a separate journal Dr Bank Charges/Discount Income for the 2% saved (cleaner than partial payment of the original bill).
 
 ---
 
-## Payment Run Checklist (Quick Reference)
+## Cross-references back to engagements
 
-| # | Step | Phase | Conditional |
-|---|------|-------|-------------|
-| 1 | List unpaid bills | Identify | Always |
-| 2 | Filter by due date | Identify | If --due-before specified |
-| 3 | Group by supplier | Summarize | Always |
-| 4 | Generate AP aging | Summarize | Always |
-| 5 | Build payment batch | Select | Always |
-| 6 | Record each payment | Pay | Always |
-| 7 | Partial payments | Pay | If cash constraints |
-| 8 | FX payments | Pay | If multi-currency bills |
-| 9 | Verify AP aging | Verify | Always |
-| 10 | Verify bank balance | Verify | Always |
-
----
-
-## Payment Method Options
-
-| Method | When to Use | Code |
-|--------|-------------|------|
-| Bank transfer | Most common for SMBs — GIRO, FAST, wire | `BANK_TRANSFER` |
-| Cheque | Decreasing usage but some suppliers still require it | `CHEQUE` |
-| Cash | Petty cash payments, small amounts | `CASH` |
-| Credit card | Corporate card payments | `CREDIT_CARD` |
-| E-wallet | GrabPay, PayNow for business | `E_WALLET` |
-
----
-
-## Tips for SMBs
-
-**Run payments on a schedule.** Weekly (Friday) or fortnightly. Predictable payment cycles help with cash flow planning and reduce the "can you pay this urgently" interruptions.
-
-**Use payment terms strategically.** If a supplier offers 2% 10 Net 30 (2% discount for paying within 10 days), that's equivalent to a 36% annualized return. Take early payment discounts when cash allows.
-
-**Keep a buffer.** Don't pay everything that's due if it drains the account. Always maintain a cash buffer of at least 2 weeks of operating expenses.
-
-**Payment reference convention:** Use a consistent format like `PAYRUN-YYYY-MM-DD-SEQ` so payments are easy to trace in both your books and the bank statement. This makes bank reconciliation much easier downstream.
-
-**Approval workflow:** For SMBs with multiple signatories, build the payment list first, get approval, then execute. Don't record payments in Jaz until the actual bank transfer is initiated.
+- `practice/references/monthly-close.md` step 8 — payment-run is invoked between mid-month and month-end so the close has fewer outstanding payables to defer. Practice playbook reads `CLIENT.cash_buffer_days` and `CLIENT.bank_accounts[]` for the gate logic.
+- `practice/references/quarterly-gst.md` step 9 — pre-filing payment-run to clear deductible-input-tax bills so they appear in the quarter's filing. Skip bills with `status: DRAFT` (they don't have GST claims yet).
+- `practice/references/onboarding.md` — typically NOT invoked during onboarding (opening balances are set via the conversion flow, not a payment run).

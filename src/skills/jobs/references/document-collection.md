@@ -1,240 +1,202 @@
 # Document Collection
 
-Scan and classify client documents (invoices, bills, credit notes, bank statements) from local directories or cloud share links (Dropbox, Google Drive, OneDrive). Outputs classified file paths with metadata. Supports encrypted PDF detection and decryption via `qpdf`. The AI agent handles uploads via the api skill.
+> Scan + classify client docs (invoices, bills, credit notes, bank statements) from local dirs or cloud links (Dropbox, Google Drive, OneDrive); decrypt encrypted PDFs (`qpdf`); upload via Jaz Magic. Driver tool: `generate_document_collection_blueprint`.
 
-## When to Use
+## Tools, recipes, calculators this job uses
 
-- Client sends a folder of PDFs (invoices, bills, credit notes, receipts) for bulk processing
-- Processing bank statement CSVs/OFX files for import
-- Migrating documents from file dumps (Dropbox, shared folders, email attachments)
-- Processing documents from a shared Dropbox, Google Drive, or OneDrive link
-- Batch-processing scanned documents during onboarding
-- Handling password-protected bank statement PDFs (auto-detection + decryption)
+### MCP tools
+- **`generate_document_collection_blueprint(period: <YYYY-MM>)`** — step 0: emit blueprint with the file-classification heuristics + upload sequence.
+- **`mcp magic create --file <pdf>` / `create_business_transaction_from_attachment(sourceFile, businessTransactionType: 'BILL'|'INVOICE'|'CREDIT_NOTE', sourceType: 'FILE')`** — step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction.
+- **`finalize_bill(...)` / `finalize_invoice(...)` / `finalize_customer_credit_note(...)`** — step 5: finalize practitioner-reviewed Magic-extracted DRAFTs.
+- **`import_bank_statement(bankAccountResourceId, sourceFile, sourceType: 'FILE')`** — step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
+- **`search_background_jobs(filter: {resourceId: {eq: <jobId>}})`** — step 7: poll Magic / bank-import async jobs to terminal status.
 
-## How It Works
+### CLI tools (jaz-cli — offline)
+- **`clio jobs document-collection ingest --source <local-dir> --json`** — step 2 ingest local: scan a local directory, classify per file-type heuristics, output JSON with per-file metadata (`{path, classifiedAs, confidence, encrypted, suggestedAction}`).
+- **`clio jobs document-collection ingest --source 'https://www.dropbox.com/scl/fo/...' --json`** — step 2 ingest cloud: same flow over a Dropbox / Google Drive / OneDrive shared link. Recursive folder traversal. Files downloaded to a temp dir.
+- **`clio jobs document-collection ingest --source <dir> --decrypt --json`** — step 3 decryption: detect password-protected PDFs and decrypt via `qpdf`. Per memory rule: if `__pw__<password>` is in the filename, the ingest tool extracts and uses the password automatically.
+
+### External dependencies
+- **`qpdf`** binary — required for encrypted PDF decryption. Document-collection ingest detects encryption + invokes qpdf transparently. If qpdf missing: surface install instruction (`brew install qpdf` on macOS, `apt-get install qpdf` on Linux).
+
+### Cross-references
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 2 (collecting late-arriving bills before close), and from `practice/references/onboarding.md` (initial doc collection from prior firm + first month).
+- Sibling jobs: `bank-recon.md` (consumes bank statements imported here), `audit-prep.md` step 13 (data exports vs documents traceability).
+- API rules: `jaz-api/SKILL.md` rules 57-63 (Jaz Magic / PDF-JPG OCR specifics).
+
+---
+
+## Step 0 — Emit blueprint
 
 ```
-Source (local or cloud)              CLI Output (IngestPlan)
-┌───────────────┐                    ┌──────────────────────────────────────────┐
-│ invoices/     │── scan + classify ─► documentType: INVOICE                    │
-│   inv-001.pdf │                    │ sizeBytes: 45230                         │
-│ credit-notes/ │── scan + classify ─► documentType: CUSTOMER_CREDIT_NOTE      │
-│   cn-001.pdf  │                    │                                          │
-│ bills/        │── scan + classify ─► documentType: BILL                       │
-│   acme-jan.pdf│                    │                                          │
-│ bank/         │── scan + classify ─► documentType: BANK_STATEMENT             │
-│   dbs-jan.csv │                    │ encrypted: true (if password-protected)  │
-│   dbs-feb.pdf │                    │                                          │
-└───────────────┘                    └──────────────────────────────────────────┘
-                                                    │
-                                            AI Agent reads plan,
-                                        uploads via api skill / clio magic
+generate_document_collection_blueprint(period: '2025-01')
 ```
 
-Cloud links are downloaded to a temp directory first, then scanned through the same pipeline.
+## Step 1 — Identify the source
 
-## Folder Classification
+Source can be:
+- Local directory: `./client-docs/2025-01/` (most common, after practitioner downloads from email)
+- Dropbox shared link: `https://www.dropbox.com/scl/fo/<token>/<folder>?dl=0`
+- Google Drive shared link: `https://drive.google.com/drive/folders/<folder-id>`
+- OneDrive shared link: `https://1drv.ms/f/s!<token>`
 
-The tool auto-classifies documents by **folder name** (case-insensitive prefix match):
+Per `CLIENT.document_collection.preferred_source` if practitioner pre-configured.
 
-| Folder name pattern | Classification |
-|---|---|
-| `invoice*`, `sales*`, `ar*`, `receivable*`, `revenue*`, `customer*` | INVOICE |
-| `credit-note*`, `cn*`, `customer-credit*`, `sales-credit*` | CUSTOMER_CREDIT_NOTE |
-| `debit-note*`, `dn*`, `supplier-credit*`, `vendor-credit*`, `purchase-credit*` | SUPPLIER_CREDIT_NOTE |
-| `bill*`, `purchase*`, `expense*`, `ap*`, `payable*`, `supplier*`, `vendor*`, `cost*` | BILL |
-| `bank*`, `statement*`, `recon*`, `payment*`, `transaction*` | BANK_STATEMENT |
-| (unknown) | UNKNOWN — skipped unless `--type` forced |
+## Step 2 — Ingest
 
-Multilingual support: Filipino/Tagalog, Bahasa Indonesia/Malay, Vietnamese, and Mandarin (pinyin) folder names are also recognized for all five document types.
-
-### File Extension Filters
-
-- **Invoices/Bills/Credit Notes**: `.pdf`, `.jpg`, `.jpeg`, `.png`
-- **Bank Statements**: `.csv`, `.ofx`
-- **Containers** (auto-extracted): `.zip` — contents extracted and processed individually
-- **Skipped** (with warning): `.xlsx`, `.xls`, `.doc`, `.docx`, `.txt`, `.rar`, `.7z`
-
-### Traversal Rules
-
-1. **Subfolders** — each classified by name; nested subfolders inherit from nearest classified ancestor
-2. **Root-level files** — classified as UNKNOWN (no folder context)
-3. **Max depth** — 10 levels (prevents runaway recursion)
-4. **Hidden files/dirs** — skipped (anything starting with `.`)
-5. **ZIP files** — extracted to temp dir, contents scanned through same pipeline (max 1 level, no nested ZIPs)
-
-## Cloud Provider Support
-
-The `--source` flag accepts public share links from Dropbox, Google Drive, and OneDrive. Files are downloaded to a temp directory, then processed through the same scan/classify pipeline as local directories.
-
-| Provider | File Links | Folder Links | Auth Required |
-|----------|-----------|--------------|---------------|
-| **Dropbox** | Direct download (dl=1 trick) | ZIP download + extract | No |
-| **Google Drive** | Direct download (large file confirmation) | Not supported (requires API key) | No |
-| **OneDrive/SharePoint** | MS Graph sharing API | MS Graph sharing API (first page only) | No (best-effort) |
-
-### Cloud Limitations
-
-- **Google Drive folders** require authentication — download manually and use a local path
-- **OneDrive** is best-effort: Microsoft has restricted public link access since Feb 2025
-- **Dropbox folders** download as ZIP — extracted automatically, macOS metadata stripped
-- **Max file size**: 100MB per file, 500MB total for folder downloads
-- **Timeout**: Default 30s (files) / 120s (folders). Override with `--timeout <ms>`
-
-## CLI Usage
-
-```bash
-# Scan + classify local directory
-clio jobs document-collection ingest --source ./client-docs/ [--json]
-
-# Scan + classify a ZIP file (auto-extracted)
-clio jobs document-collection ingest --source ./client-docs.zip [--json]
-
-# Cloud sources — Dropbox, Google Drive, OneDrive
-clio jobs document-collection ingest --source "https://www.dropbox.com/scl/fo/.../folder?rlkey=..." [--json]
-clio jobs document-collection ingest --source "https://drive.google.com/file/d/FILE_ID/view" [--json]
-clio jobs document-collection ingest --source "https://1drv.ms/f/s!..." [--json]
-
-# Dropbox file link to a ZIP (auto-extracted)
-clio jobs document-collection ingest --source "https://www.dropbox.com/scl/fi/.../docs.zip?rlkey=...&dl=0" [--json]
-
-# With timeout for large cloud downloads
-clio jobs document-collection ingest --source "https://www.dropbox.com/..." --timeout 120000 [--json]
-
-# Force classification (skip auto-detect)
-clio jobs document-collection ingest --source ./scans/ --type invoice [--json]
-clio jobs document-collection ingest --source ./scans/ --type credit-note-customer [--json]
-
-# Upload a ZIP of invoices via Magic (all files treated as same type)
-clio magic create --file ./invoices.zip --type invoice --json
-
-# Scan + upload (encrypted PDFs with password embedded in filename)
-clio jobs document-collection ingest --source ./bank-docs/ --upload --bank-account "DBS Checking" --json
-# To decrypt: rename encrypted PDF to: receipt__pw__actualPassword.pdf
-# The __pw__ delimiter is case-insensitive; the password itself is case-sensitive.
+```
+clio jobs document-collection ingest --source <source> --json
 ```
 
-### Options
-
-| Flag | Description |
-|------|-------------|
-| `--source <path\|url>` | Local directory, .zip file, or public cloud share link — Dropbox, Google Drive, OneDrive (required). ZIPs are auto-extracted. |
-| `--type <type>` | Force all files to: `invoice`, `bill`, `credit-note-customer`, `credit-note-supplier`, or `bank-statement` |
-| `--upload` | Upload classified files to Jaz after scanning (requires auth) |
-| `--bank-account <name-or-id>` | Bank account name or resourceId (required for bank statements) |
-| `--api-key <key>` | API key for upload (or use `JAZ_API_KEY` env var) |
-| `--timeout <ms>` | Download timeout in milliseconds (default: 30000 for files, 120000 for folders) |
-| `--currency <code>` | Functional/reporting currency label |
-| `--json` | Structured JSON output with absolute file paths |
-
-### Encrypted PDF Passwords
-
-Embed the password in the filename using the `__pw__` pattern:
-```
-receipt__pw__s3cRetP@ss.pdf  →  password: "s3cRetP@ss", display name: "receipt.pdf"
-```
-- `__pw__` is case-insensitive (`__PW__`, `__Pw__`, etc.)
-- The password after `__pw__` is case-sensitive
-- Requires `qpdf` installed (`brew install qpdf`)
-
-### JSON Output
-
-The `--json` output includes absolute file paths, classification, and size for each file. The AI agent uses these paths to upload via the api skill.
-
+Returns per-file:
 ```json
 {
-  "source": "./client-docs/",
-  "sourceType": "local",
-  "localPath": "/tmp/client-docs",
-  "folders": [{
-    "folder": "invoices",
-    "documentType": "INVOICE",
-    "files": [{
-      "path": "invoices/inv-001.pdf",
-      "filename": "inv-001.pdf",
-      "extension": ".pdf",
-      "documentType": "INVOICE",
-      "absolutePath": "/tmp/client-docs/invoices/inv-001.pdf",
-      "sizeBytes": 45230,
-      "confidence": "auto",
-      "reason": "Folder \"invoices\" → INVOICE"
-    }],
-    "count": 1
-  }],
-  "summary": {
-    "total": 1,
-    "uploadable": 1,
-    "needClassification": 0,
-    "skipped": 0,
-    "encrypted": 0,
-    "byType": { "INVOICE": 1 }
-  }
+  "path": "/tmp/dc-ingest/<orig path>",
+  "originalName": "Acme Inv 2025-01-15.pdf",
+  "classifiedAs": "BILL" | "INVOICE" | "CREDIT_NOTE" | "BANK_STATEMENT" | "RECEIPT" | "UNKNOWN",
+  "confidence": 0.92,
+  "encrypted": false,
+  "fileSize": 124321,
+  "suggestedAction": "magic-create-bill" | "magic-create-invoice" | "import-bank-statement" | "manual-review"
 }
 ```
 
-For cloud sources, `localPath` points to the temp directory where files were downloaded.
+Classification heuristics:
+- Filename contains `inv` / `bill` / `purchase` → SALES_INVOICE / BILL
+- Filename contains `cn` / `credit` → CREDIT_NOTE
+- Filename contains `statement` / `stmt` / `bank` → BANK_STATEMENT
+- Per-file content sniff for PDFs (header parsing) — confidence boost when filename is ambiguous
 
-## Encrypted PDF Support
+Save the ingest result to `recurring/monthly/<period>/document-collection/ingest.json` for the engagement.
 
-Bank statements and some government documents are often delivered as password-protected PDFs. The Magic API cannot process encrypted PDFs, so the tool detects them during scan and decrypts before upload.
+## Step 3 — Decrypt encrypted PDFs (if any)
 
-### Detection
+For files where `encrypted: true`:
 
-During scan, each `.pdf` file is checked for a `/Encrypt` dictionary entry in the PDF binary. Encrypted files are flagged with `encrypted: true` in the plan and shown with a `(encrypted)` tag in the output.
-
-### Decryption
-
-Decryption requires `qpdf` (a system CLI tool):
-
-```bash
-# Install qpdf
-brew install qpdf        # macOS
-sudo apt install qpdf    # Ubuntu/Debian
-choco install qpdf       # Windows
+```
+clio jobs document-collection ingest --source <dir> --decrypt --json
 ```
 
-Passwords are embedded in the filename using the `__pw__` pattern: `receipt__pw__myPass.pdf`. During upload, encrypted PDFs with a filename password are decrypted to a temp file, uploaded, then cleaned up.
+Decryption flow:
+- Filename `Bill_Invoice__pw__supersecret.pdf` → ingest extracts `supersecret` from `__pw__<password>` token, invokes `qpdf --password=supersecret --decrypt` to a temp file.
+- Filename without `__pw__` → surface to practitioner: "File `<name>` is encrypted; provide password OR rename file with `__pw__<password>` token to enable auto-decryption."
+- `qpdf` binary missing → surface install instruction; halt this file but continue rest of batch.
 
-### Error Handling (JSON mode)
+Decrypted files replace the original in the ingest manifest; original kept for audit trail.
 
-If encrypted PDFs are found during `--upload` without the required dependencies, the tool outputs structured errors for agent consumption:
+## Step 4 — Upload via Jaz Magic
 
-| Error Code | Condition | Action |
-|------------|-----------|--------|
-| `ENCRYPTED_PDF_NO_QPDF` | qpdf not installed | Install qpdf, then retry |
-| `ENCRYPTED_PDF_NO_PASSWORD` | Encrypted PDF without `__pw__` in filename | Rename file to embed password: `name__pw__password.pdf` |
+For each file with `suggestedAction: 'magic-create-bill' | 'magic-create-invoice' | 'magic-create-credit-note'`:
 
-## Phases (Blueprint)
+```
+mcp magic create --file <decrypted path> --type bill
+# OR equivalent MCP call:
+create_business_transaction_from_attachment(
+  sourceFile: <multipart upload>,
+  businessTransactionType: 'BILL',
+  sourceType: 'FILE'
+)
+```
 
-When run without `ingest` subcommand, produces a 4-phase blueprint:
+Per `jaz-api/SKILL.md` rules 57-63:
+- Multipart endpoint (NOT JSON): `Content-Type: multipart/form-data`
+- `sourceType: 'FILE'` for direct upload (vs `URL` for cloud-hosted)
+- Returns `{ jobId }` for async OCR processing
+- Poll via `search_background_jobs(filter: {resourceId: {eq: <jobId>}})` until terminal
+- On `SUCCESS`: returns the resourceId of the DRAFT bill / invoice / credit note created
+- Magic does: OCR + line-item extraction + contact matching (creates new contact if no match) + CoA mapping suggestion + tax-profile suggestion
 
-1. **Intake** — Identify source, validate access
-2. **Scan** — Traverse directory tree, list all files
-3. **Classify** — Auto-classify by folder name
-4. **Review** — Present plan for user/agent action
+## Step 5 — Practitioner review + finalize
 
-The AI agent then uses the classified file paths to upload via the Jaz Magic API (see api skill for endpoint details).
+For each Magic-extracted DRAFT:
 
-## ZIP File Support
+```
+get_bill(resourceId: <bill id>)  # or get_invoice / get_customer_credit_note
+```
 
-ZIP files are treated as containers — their contents are extracted and each file is processed individually through the same scan/classify pipeline.
+Surface to practitioner: extracted contact, line items, totals, suggested GL coding, tax profile. Practitioner reviews + adjusts any miscoding via `update_bill(...)` if needed.
 
-### Supported Scenarios
+When approved:
+```
+finalize_bill(resourceId: <id>)
+# OR for batch:
+bulk_finalize_drafts({kind: 'bill', resourceIds: [...]})
+```
 
-1. **ZIP in a scanned directory**: Extracted to a temp dir, contents scanned recursively
-2. **ZIP as --source**: `clio jobs document-collection ingest --source ./archive.zip` extracts and scans
-3. **ZIP from Dropbox file link**: Auto-extracted after download
-4. **ZIP via clio magic create**: `clio magic create --file archive.zip --type invoice` extracts and uploads each file
+## Step 6 — Bank statement import
 
-### Limitations
+For files with `suggestedAction: 'import-bank-statement'`:
 
-- Nested ZIPs (ZIP inside ZIP) are not extracted — only one level
-- Password-protected ZIPs are not supported (adm-zip limitation)
-- Max ZIP size: 500MB
-- `.rar` and `.7z` are still skipped (no built-in support)
+Resolve target bank account:
+```
+list_bank_accounts()  # or search_accounts(filter: {accountType: 'Bank Accounts'})
+```
 
-## Relationship to Other Skills
+Match by name + currency to the statement (typically the bank logo + account number in the PDF header gives the practitioner the right account).
 
-- **api skill** — Field names, auth headers, error codes for Magic endpoints. Agent uses this to upload classified files.
-- **bank-recon job** — After bank statement import, use bank-recon to match and reconcile
-- **transaction-recipes** — After Magic creates draft transactions, use recipes for complex accounting patterns
+```
+import_bank_statement(
+  bankAccountResourceId: <bank id>,
+  sourceFile: <statement file>,
+  sourceType: 'FILE'
+)
+```
+
+Returns `{ jobId }`. Poll via `search_background_jobs`. On terminal: returns count of bank records imported.
+
+Imported bank records are PENDING reconciliation — feed into `bank-recon.md` job for matching.
+
+## Step 7 — Async polling
+
+For all `jobId`s from steps 4 + 6:
+
+```
+search_background_jobs(filter: {resourceId: {in: [<all jobIds>]}})
+```
+
+Per `jaz-api/SKILL.md` rules 92-96: filter by `resourceId` (NOT `jobId`); poll until terminal status (`SUCCESS` / `FAILED` / `PARTIAL_SUCCESS`); on `PARTIAL_SUCCESS` read `errorDetails[]` for per-record failures.
+
+For `FAILED` Magic jobs: file may be unreadable (corrupted PDF, image-only without OCR support, password issue post-decryption). Surface to practitioner; manual posting required for that file.
+
+## Step 8 — Save audit trail
+
+Per file processed: capture `{originalPath, classifiedAs, magicJobId, resultingResourceId, finalizedTimestamp}` in `recurring/monthly/<period>/document-collection/audit.json`.
+
+Auditor sample-test traces from a posted bill back to the source PDF. Audit trail makes that trivial.
+
+---
+
+## Common error classes and recovery
+
+| Source | Error | Recovery |
+|--------|-------|----------|
+| Step 2 ingest | Cloud link returns 404 / shared-link expired | Practitioner re-shares link; re-run ingest. |
+| Step 2 ingest | Local directory empty | Check `CLIENT.document_collection.staging_dir` matches reality. |
+| Step 3 decryption | `qpdf` binary missing | `brew install qpdf` (macOS) / `apt-get install qpdf` (Linux). Re-run with `--decrypt`. |
+| Step 3 decryption | Password wrong (file remains encrypted) | Surface to practitioner with the file path. Manual decryption + re-ingest. |
+| Step 4 Magic | 422 `unsupported_file_type` | Convert to PDF / JPG first. Excel / Word formats not supported by Magic OCR. |
+| Step 4 Magic | Job stays in QUEUED for > 5 minutes | Magic queue is backed up. Check status; consider manual posting if blocking close. |
+| Step 4 Magic | `PARTIAL_SUCCESS` with low-confidence extractions | Review each in step 5; practitioner overrides. Magic confidence < 0.7 = manual review required. |
+| Step 5 review | Wrong contact assigned | `update_bill(contactResourceId: <correct id>)` before finalize. |
+| Step 5 review | Wrong line-item GL | `update_bill(lineItems: [<corrected>])` before finalize. |
+| Step 6 bank import | 422 `bank_format_unsupported` | Bank format not supported (some niche banks). Manual `add_bank_records(bankAccountResourceId, records: [...])` per statement line. |
+| Step 7 polling | Job stuck in PROCESSING > 10 minutes | Escalate; usually a Magic backend issue. |
+
+---
+
+## Tips
+
+- **Cloud ingest > local.** Practitioners often have client docs in shared Dropbox folders. Ingesting directly from the link skips the manual download step.
+- **Encrypt convention.** `__pw__` token in filename is a safe practitioner workaround when forwarding password-protected client PDFs. Document this in `practice/references/onboarding.md`.
+- **Magic confidence bands.** > 0.85 = auto-finalize after light review; 0.70-0.85 = practitioner-review-then-finalize; < 0.70 = manual posting (Magic was wrong about something material).
+- **Bank statement import** is the highest-leverage path. A 1-min import handles 50-200 bank records. Manual entry for the same is hours.
+- **Per-month audit folder**: `recurring/monthly/<period>/document-collection/` is a lightweight audit pack; auditor finds it instantly without asking.
+
+---
+
+## Cross-references back to engagements
+
+- `practice/references/monthly-close.md` step 2 — invoked at the start of monthly close to capture late-arriving bills.
+- `practice/references/onboarding.md` — invoked during initial client setup; first batch is often large (prior-firm export + current month).
+- `bank-recon.md` — consumes step 6 bank-statement imports.
+- `audit-prep.md` step 13 — XLSX exports plus document-collection audit.json provide the auditor with full traceability.

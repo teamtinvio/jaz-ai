@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 5.4.5
+version: 5.4.6
 description: >-
   Use this skill for recurring accounting workflows — month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -16,7 +16,9 @@ compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent t
 
 You are helping an **SMB accountant or bookkeeper** complete recurring accounting tasks in Jaz — period-end closes, bank reconciliation, tax filing, payment processing, and operational reviews. These are the real jobs that keep the books accurate and the business compliant.
 
-**Jobs combine recipes, calculators, and API calls into complete business processes.** If recipes are ingredients, jobs are the meal.
+> **Jaz-native, not generic.** Every job in this skill names specific Jaz MCP tools (`search_invoices`, `quick_reconcile`, `bulk_finalize_drafts`, `generate_*_blueprint`, `download_export`), Jaz reconciliation modes, and Jaz capsule patterns. It is NOT an interchangeable accounting workflow reference; it is the operating manual for running these processes through the Jaz API surface. When the playbook says "match bank entries", it means call `clio jobs bank-recon match` (the 5-phase cascade matcher built into the CLI), not "use any matching algorithm".
+
+**Jobs combine recipes, calculators, and API calls into complete business processes.** If recipes are ingredients, jobs are the meal. Within a practitioner engagement (`jaz-practice` skill), the engagement-type playbook (`practice/references/<type>.md`) is the canonical end-to-end orchestration — the references in this skill describe the building-block jobs the engagement playbook invokes.
 
 ## When to Use This Skill
 

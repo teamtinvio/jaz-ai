@@ -1,190 +1,115 @@
-# Recipe: Hire Purchase
+# Recipe: Hire Purchase (engine name: `lease`)
 
-## Scenario
+> Variant of the IFRS 16 lease recipe where ownership transfers at the end of the term. Same engine, same step structure as `ifrs16-lease.md` — but ROU asset depreciates over its USEFUL LIFE (typically longer), not the financing term.
 
-Your company acquires a motor vehicle under a hire purchase (HP) agreement: $5,000/month for 36 months at 5% incremental borrowing rate. Ownership transfers to you at the end of the term. Under IFRS 16, this is accounted for the same way as any other lease — right-of-use asset, lease liability, effective interest unwinding — with **one critical difference**: the ROU asset is depreciated over its **useful life** (60 months), not the lease term (36 months), because ownership transfers at the end.
+## Why hire-purchase uses the lease engine
 
-**Pattern:** Hybrid — native fixed asset (straight-line ROU depreciation over useful life) + manual journals (liability unwinding) + capsule
+Per IFRS 16.32: when ownership transfers at the end of the lease term, OR a purchase option is reasonably certain, the ROU asset is depreciated to the end of its USEFUL LIFE (not the lease term). For a vehicle on a 36-month HP with 60-month useful life: financing/liability over 36 months, depreciation over 60 months.
 
-**Cross-reference:** This recipe is a variant of the [IFRS 16 Lease recipe](./ifrs16-lease.md). Everything is identical except the depreciation period. Read the IFRS 16 recipe first for the full foundational treatment, then return here for the hire purchase-specific difference.
+The recipe engine handles both: pass `usefulLifeMonths` distinct from `termMonths`. The lease/financing schedule (36 monthly DRAFT journals for the unwinding) tracks the liability; the FA register's `usefulLifeMonths: 60` controls depreciation cadence.
 
-**Why the difference:** IFRS 16.32 requires that when ownership transfers (or a purchase option is reasonably certain to be exercised), the ROU asset is depreciated over the asset's useful life rather than the lease term. Hire purchase agreements always transfer ownership, so this rule always applies.
+## Tools, recipes, calculators this recipe uses
 
----
+### Recipe engine entry point
+- **`plan_recipe(name: 'lease', ...)`** — used in step 2: same engine as IFRS 16 lease, with `usefulLifeMonths > termMonths` to flag hire-purchase pattern.
+- **`execute_recipe(name: 'lease', ...)`** — step 4: posts initial recognition + N future-dated DRAFT unwinding journals over `termMonths`. The fixed-asset step is engine-SKIPPED — practitioner manually invokes `create_fixed_asset(usefulLifeMonths: 60, ...)` with the longer useful life.
 
-## Accounts Involved
+### Calculator
+- **`clio calc lease --payment <monthly> --term <months> --rate <annual %> --useful-life <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — same calc as IFRS 16 lease, with explicit `--useful-life` flag distinguishing it from the financing term. Returns `{ presentValue, totalInterest, schedule[n], depreciationSchedule[m] }` where `m == usefulLifeMonths` (longer than financing schedule).
 
-| Account | Type | Subtype | Role |
-|---|---|---|---|
-| Right-of-Use Asset | Asset | Non-Current Asset | The HP'd asset (e.g., motor vehicle) |
-| Accumulated Depreciation — ROU | Asset | Non-Current Asset | Contra-asset reducing ROU net book value |
-| Lease Liability | Liability | Non-Current Liability | PV of future HP payments |
-| Interest Expense — Leases | Expense | Finance Cost | Effective interest on lease liability |
-| Depreciation Expense — ROU | Expense | Depreciation | Straight-line over useful life (NOT lease term) |
-| Cash / Bank Account | Asset | Bank | Makes monthly HP payments |
+### Tools (jaz-api / direct)
+- All the same as `ifrs16-lease.md` (search_capsules, search_accounts, search_contacts for the financing counterparty, list_bank_accounts, create_fixed_asset, generate_trial_balance, bulk_finalize_drafts, generate_fa_summary).
 
-> **Same accounts as IFRS 16 lease.** The only change is the depreciation calculation — the accounts, journal structure, and liability unwinding are all identical.
-
----
-
-## Journal Entries
-
-### Step 1: Initial Recognition (same as IFRS 16)
-
-| Line | Account | Debit | Credit |
-|---|---|---|---|
-| 1 | Right-of-Use Asset | $166,828.51 | |
-| 2 | Lease Liability | | $166,828.51 |
-
-PV of 36 payments of $5,000 at 5% annual (0.4167% monthly).
-
-### Step 2: Monthly HP Payment (same as IFRS 16)
-
-Each $5,000 payment splits between interest (expense) and principal (liability reduction):
-
-| Line | Account | Debit | Credit |
-|---|---|---|---|
-| 1 | Lease Liability | *principal portion* | |
-| 2 | Interest Expense — Leases | *interest portion* | |
-| 3 | Cash / Bank Account | | $5,000 |
-
-**Calculation per month:**
-- Interest = Outstanding liability x 0.4167%
-- Principal = $5,000 - Interest
-- New liability = Outstanding liability - Principal
-
-### Step 3: Monthly Depreciation — THE KEY DIFFERENCE
-
-| Line | Account | Debit | Credit |
-|---|---|---|---|
-| 1 | Depreciation Expense — ROU | $2,780.48 | |
-| 2 | Accumulated Depreciation — ROU | | $2,780.48 |
-
-**Standard IFRS 16 lease:** $166,828.51 / 36 months = **$4,634.13/month**
-**Hire purchase:** $166,828.51 / 60 months = **$2,780.48/month**
-
-> The hire purchase depreciation rate is **$1,853.65/month LESS** than a standard lease. This is because the asset's economic life (60 months) extends well beyond the payment term (36 months). Ownership transfers, so the asset continues generating value after the last payment.
+### Cross-references
+- See `ifrs16-lease.md` for the full step-by-step, error table, and variations. This file documents only the hire-purchase-specific deltas.
+- IFRS / accounting context: IFRS 16.32 (depreciation period for assets where ownership transfers); IAS 16 (depreciation method itself — typically SL for HP'd assets).
 
 ---
 
-## Capsule Structure
+## Hire-purchase-specific deltas vs `ifrs16-lease.md`
 
-**Capsule:** "Hire Purchase — Motor Vehicle — 2025"
-**Capsule Type:** "Hire Purchase"
+### Step 1 — Calculator delta
 
-Contents:
-- 1 initial recognition journal (ROU asset + lease liability)
-- 36 monthly payment journals (manual — interest changes each month)
-- 60 monthly depreciation entries (auto-generated by fixed asset register — these appear in the ledger but aren't manually created)
-- **Manually created entries:** 37
-
-> The fixed asset depreciation entries are not assigned to the capsule automatically. Group the General Ledger by the ROU asset account alongside the capsule view for a complete picture. Depreciation continues for 24 months after the last HP payment.
-
----
-
-## Worked Example
-
-**HP terms:**
-- Monthly payment: $5,000
-- Lease term: 36 months
-- Incremental borrowing rate: 5% annual (0.4167% monthly)
-- Asset useful life: 60 months
-- PV of lease payments: $166,828.51
-
-**CLI command:**
 ```
-clio calc lease --payment 5000 --term 36 --rate 5 --useful-life 60 --start-date 2025-01-01
+clio calc lease \
+  --payment 5000 \
+  --term 36 \
+  --rate 5 \
+  --useful-life 60 \
+  --start-date 2025-01-01 \
+  --currency SGD \
+  --json
 ```
 
-The `--useful-life 60` flag tells the calculator this is a hire purchase — depreciation will use 60 months instead of the 36-month lease term. The CLI generates a `capsuleDescription` with full workings so the capsule is self-documenting.
+The `--useful-life 60` flag tells the calculator the asset will be used for 60 months (vs 36-month financing). Output includes both:
+- `schedule[36]` — the financing/unwinding schedule (interest + principal split per month for 36 months)
+- `depreciationSchedule[60]` — the SL depreciation schedule for the FA register ($PV / 60 per month)
 
-### Liability Unwinding Table (first 3 months + month 36)
+### Step 2 — Recipe plan delta
 
-| Month | Opening Liability | Interest (0.4167%) | Principal | Closing Liability |
-|---|---|---|---|---|
-| 1 | $166,828.51 | $695.12 | $4,304.88 | $162,523.63 |
-| 2 | $162,523.63 | $677.18 | $4,322.82 | $158,200.81 |
-| 3 | $158,200.81 | $659.17 | $4,340.83 | $153,859.98 |
-| ... | ... | ... | ... | ... |
-| 36 | $4,979.24 | $20.75 | $4,979.24 | $0.00* |
+```
+plan_recipe(
+  name: 'lease',
+  monthlyPayment: 5000,
+  termMonths: 36,
+  annualRate: 5,
+  usefulLifeMonths: 60,         ← THIS is the HP-specific input
+  startDate: '2025-01-01',
+  ... (same as ifrs16-lease) ...
+)
+```
 
-> *Final payment adjusted to close the liability exactly to zero (payment = $4,999.99).
+The engine's `plan_recipe` accepts `usefulLifeMonths` as an explicit input. RecipePlan output is the same shape as the lease recipe (initial journal + 36 unwinding journals + 1 fixed-asset note). The note step references the longer useful life so practitioner uses the right value in step 4 manual FA creation.
 
-**Month 1 journal entry (manual — same as IFRS 16):**
-- Dr Lease Liability $4,304.88
-- Dr Interest Expense — Leases $695.12
-- Cr Cash $5,000.00
-- Description: "HP payment — Month 1 of 36 (Motor Vehicle)"
-- Assign to capsule
+### Step 4 — Manual FA creation delta
 
-**Month 1 depreciation (automatic — posted by Jaz FA register):**
-- Dr Depreciation Expense — ROU $2,780.48
-- Cr Accumulated Depreciation — ROU $2,780.48
+```
+create_fixed_asset(
+  name: 'Motor Vehicle — HP — Truck-002 (FY2025)',
+  reference: 'HP-TRUCK-002-2025',
+  cost: <PV from calc>,
+  acquisitionDate: '2025-01-01',
+  usefulLifeMonths: 60,         ← Use USEFUL LIFE, not term-months
+  depreciationMethod: 'sl',
+  capsuleResourceId: <capsule from execute_recipe>,
+  saveAsDraft: false
+)
+```
 
-### Depreciation Comparison: Hire Purchase vs Standard Lease
+Critical: `usefulLifeMonths: 60` (not 36). After registration, Jaz auto-posts `PV / 60` per month for 60 months. The FA continues depreciating for 24 months AFTER the financing term ends — that's the period during which you OWN the asset outright but it's still in service.
 
-| Item | Standard IFRS 16 Lease | Hire Purchase |
-|---|---|---|
-| Depreciation period | 36 months (lease term) | 60 months (useful life) |
-| Monthly depreciation | $4,634.13 | $2,780.48 |
-| **Difference** | — | **$1,853.65/month LESS** |
+### Step 5 — Monthly action
 
-### What Happens After Month 36 (Lease Payments End)
+Months 1-36: same as lease — finalize this period's unwinding DRAFT (`bulk_finalize_drafts`) + verify Jaz auto-posted SL depreciation for this month.
 
-| Item | Value |
-|---|---|
-| Lease Liability | $0 (fully unwound) |
-| ROU Asset (gross) | $166,828.51 |
-| Accumulated Depreciation (36 months) | $100,097.28 |
-| **ROU Net Book Value** | **$66,731.23** |
-| Remaining depreciation period | 24 more months |
+Months 37-60: ONLY verify Jaz auto-posted depreciation. No more financing journals (the unwinding schedule ended at month 36; the 36 DRAFT journals exhausted). The Lease Liability should be 0 from month 37 onward.
 
-After the last HP payment, the lease liability is zero and no more cash leaves the account. But the ROU asset still has a book value of $66,731.23 because it was depreciated over 60 months, not 36. Depreciation of $2,780.48/month continues for another 24 months until the asset is fully depreciated.
-
-### Summary Over Full Useful Life (60 Months)
-
-| Item | Total |
-|---|---|
-| Total cash payments | $180,000 (36 x $5,000) |
-| Total interest expense | $13,171.48 |
-| Total depreciation expense | $166,828.51 |
-| **Total P&L impact** | **$180,000** |
-| Lease liability at month 36 | $0 |
-| ROU asset net book value at month 36 | $66,731.23 |
-| ROU asset net book value at month 60 | $0 |
-
-> **P&L timing differs from a standard lease.** With hire purchase, the P&L charge is spread over 60 months instead of 36. In months 1-36, both interest and depreciation hit the P&L. In months 37-60, only depreciation remains — at a lower rate than the original cash payment.
+Month 60: final depreciation post. NBV = 0. Decommission FA via `update_fixed_asset(status: 'DISPOSED')` if asset is then sold/scrapped, OR keep ACTIVE and continue using (no further depreciation, but asset remains tracked).
 
 ---
 
-## Enrichment Suggestions
+## Hire-purchase-specific error classes
 
-| Enrichment | Value | Why |
-|---|---|---|
-| Tracking Tag | "Hire Purchase" | Filter all HP-related transactions |
-| Nano Classifier | Asset Type → "Motor Vehicle" | Break down by asset class if multiple HPs |
-| Custom Field | "HP Agreement #" → "HP-2025-0089" | Record the hire purchase agreement reference |
-
----
-
-## Verification
-
-1. **Lease Liability should reduce to $0 at end of lease term (month 36)** → Group General Ledger by Capsule. Liability starts at $166,828.51 and closes at $0 after 36 payments.
-2. **Interest Expense total = total cash payments - PV** → $180,000 − $166,828.51 = $13,171.48 (rounding may cause ±$0.01 variance).
-3. **ROU Asset continues depreciating after lease payments end** → At month 36, ROU net book value = $66,731.23. Depreciation continues at $2,780.48/month for 24 more months.
-4. **At end of useful life (month 60), ROU asset is fully depreciated** → ROU Asset $166,828.51 − Accumulated Depreciation $166,828.51 = $0 net book value.
-5. **Balance Sheet check** → Between months 37-60, no lease liability exists but the ROU asset (net of accumulated depreciation) continues appearing on the balance sheet. This is the distinguishing feature of hire purchase vs operating lease.
+| Source | Error | Recovery |
+|--------|-------|----------|
+| `create_fixed_asset` | `usefulLifeMonths` set to 36 (term) instead of 60 (useful life) | Re-create with correct value. Reverse any incorrect depreciation already auto-posted. The most-common HP mistake. |
+| Verification month 37+ | Jaz still auto-posting depreciation but TB Lease Liability is 0 | Expected — financing ended at month 36, depreciation continues to month 60 (per IFRS 16.32). |
+| Verification month 37+ | Lease Liability nonzero after term end | The `loan` recipe was used instead of `lease` engine. Or `termMonths` was wrong. Audit the unwinding schedule. |
+| Asset sold mid-term | (process) | Two scenarios: (a) sold WHILE still on HP — practitioner pays off remaining liability + invokes `asset-disposal.md` recipe; (b) sold AFTER HP ends but before useful life — invoke `asset-disposal.md` only. |
+| Practitioner upgrades to a longer/shorter term mid-life | (lease modification) | Per IFRS 16.39-46 — re-measure liability, adjust ROU. Manual journals; recipe doesn't support modification. |
 
 ---
 
 ## Variations
 
-**Standard operating lease (no ownership transfer):** Use `clio calc lease --payment 5000 --term 36 --rate 5` without the `--useful-life` flag. The ROU asset is depreciated over the lease term (36 months), not useful life. See the [IFRS 16 Lease recipe](./ifrs16-lease.md).
+- **Purchase option**: HP without explicit ownership transfer but with a purchase option reasonably certain to be exercised (e.g., bargain purchase). Same recipe — `usefulLifeMonths > termMonths` flag.
+- **Lease vs HP for tax**: SG IRAS treats HP differently from operating lease for tax purposes. Document the IFRS 16 capitalized treatment vs the tax-deductible payment-as-expense treatment. Practitioner adds a tax-only adjustment in Form C-S computation (`practice/references/annual-statutory.md` step 7).
+- **Multiple assets under one HP agreement** (e.g., fleet of vehicles on one master HP): one capsule per asset; each asset gets its own `create_fixed_asset` invocation. Master HP financing is split across capsules pro-rata to asset cost.
 
-**Guaranteed residual value:** If the HP agreement includes a guaranteed residual value (e.g., $10,000 balloon payment at end of term), add the PV of the residual to the initial ROU asset and lease liability. The liability schedule must include the balloon as the final period payment.
+---
 
-**Variable payments:** Only the fixed portion of HP payments is included in the PV calculation. Any variable component (e.g., mileage-based charges) is recognized as expense when incurred, not capitalized in the ROU asset.
+## Cross-references back to engagements
 
-**SG motor vehicle specifics:** The COE (Certificate of Entitlement) is typically treated as a separate intangible asset with its own amortization schedule (10 years for Category A/B), not bundled into the HP's ROU asset. Create a separate capsule for the COE if applicable.
-
-**SG tax depreciation (IRAS):** Capital allowances for motor vehicles under Section 19/19A may differ from IFRS depreciation. The S-car cap ($35,000 for private cars) and the 3-year write-off period for commercial vehicles don't align with IFRS useful life estimates. Businesses may need to track both IFRS depreciation (for financial reporting) and tax depreciation (for S68 deductions) separately. This recipe covers IFRS only — tax depreciation adjustments are out of scope.
+- See `ifrs16-lease.md` cross-references — same engagement contexts (monthly-close step 7, annual-statutory step 8 for current/non-current reclass).
+- Sibling recipe `ifrs16-lease.md` — full step-by-step + error table + non-HP variations.
+- `asset-disposal.md` — when HP'd asset is eventually sold/scrapped (typically after month 60 = end of useful life).

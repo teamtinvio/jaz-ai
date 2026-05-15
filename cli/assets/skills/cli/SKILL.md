@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.4.5
+version: 5.4.6
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -260,7 +260,7 @@ Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $
 
 **Calculators**: `calc` (loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend)
 
-**Jobs**: `jobs` (month-end, quarter-end, year-end, bank-recon, gst-vat, payment-run, credit-control, supplier-recon, audit-prep, fa-review, document-collection, statutory-filing) + tools (match, bank-file, outstanding, ingest, sg-cs, sg-ca)
+**Jobs**: `jobs` (month-end, quarter-end, year-end, bank-recon, gst-vat, payment-run, credit-control, supplier-recon, audit-prep, fa-review, document-collection, statutory-filing) + tools (match, outstanding, ingest, sg-cs, sg-ca)
 
 **Organization**: `org` (info), `org-users`, `auth`
 

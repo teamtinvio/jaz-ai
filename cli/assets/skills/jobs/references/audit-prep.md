@@ -1,319 +1,251 @@
 # Audit Preparation
 
-Compile the complete report pack, supporting schedules, and reconciliations that an auditor or tax agent needs. For most SMBs, this is an annual exercise — either for the statutory audit (if required) or for the annual tax filing with IRAS (SG) or BIR (PH).
+> Compile the report pack + supporting schedules + reconciliations an auditor or tax agent needs to issue an opinion or file a return. Driver tool: `generate_audit_prep_blueprint`.
 
-**CLI:** `clio jobs audit-prep --period 2025 [--json]`
+## Tools, recipes, calculators this job uses
+
+### MCP tools — financial statements
+- **`generate_audit_prep_blueprint`** — used in step 1: emit the phased deliverables list for the period.
+- **`generate_trial_balance(period_end: <FY-end>)`** — step 2: master reconciliation. Every other report ties back to this.
+- **`generate_balance_sheet(period_end: <FY-end>)`** — step 3.
+- **`generate_profit_and_loss(period_start: <FY-start>, period_end: <FY-end>)`** — step 3.
+- **`generate_cashflow(period_start, period_end)`** — step 4.
+- **`generate_equity_movement(period_start, period_end)`** — step 4.
+- **`generate_general_ledger(period_start, period_end, groupBy: 'ACCOUNT')`** — step 5: the auditor's primary working document.
+
+### MCP tools — supporting schedules
+- **`generate_aged_ar(period_end)` / `generate_aged_ap(period_end)`** — step 6.
+- **`generate_bank_recon_summary(period_end)` / `generate_bank_recon_details(period_end)`** — step 7. NON-NEGOTIABLE deliverable.
+- **`generate_bank_balance_summary(period_end)`** — step 7. Cross-reference to bank confirmation letters.
+- **`generate_fa_summary(period_end)` / `generate_fa_recon_summary(period_start, period_end)`** — step 8.
+- **`generate_vat_ledger(period_start, period_end)`** — step 9. Annual total ties to sum of quarterly F5 returns.
+
+### MCP tools — XLSX deliverables
+- **`download_export(exportType: '<type>', startDate, endDate)`** — step 10: pre-signed XLSX URL (~5 min expiry). Per `jaz-api/SKILL.md` rule (data-exports), supported types include `trial-balance`, `profit-and-loss`, `balance-sheet`, `general-ledger`, `ar-report`, `ap-report`, `cashflow`, `analysis-anomalous-bills`, `analysis-anomalous-invoices`, `analysis-cashflow-anomalies`, `analysis-gl-journal-audit`, `analysis-exchange-rate-audit`, `analysis-receivables-customer-risk`, `analysis-cash-expense-health`. The audit-analyses are essential pre-emptive flags for the auditor.
+
+### MCP tools — completeness gates
+- **`search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: must return zero rows before pack hand-off.
+- **`search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: same gate, sales side.
+- **`search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: same gate, purchases side.
+- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 12 fallback: clear residual drafts before pack hand-off.
+- **`update_account(resourceId: <CoA root>, lockDate: <FY-end>)`** — step 12 final: lock the period to prevent backdated entries during fieldwork.
+
+### Calculators (cross-check schedules — no API key needed)
+- **`clio calc loan --principal --rate --term --start-date --json`** — step 8: independent loan amortization for the loan schedule.
+- **`clio calc lease --payment --term --rate --json`** — step 8: IFRS 16 ROU + lease liability schedule.
+- **`clio calc ecl --receivables <json> --json`** — step 8: ECL provision matrix per IFRS 9.
+- **`clio calc fixed-deposit --principal --rate --term --json`** — step 8: FD interest accrual.
+- **`clio calc depreciation --cost --salvage --life --method --json`** — step 8: per-asset depreciation cross-check vs FA register.
+
+### Cross-references
+- Within an engagement: invoked from `practice/references/annual-statutory.md` step 5 (audit-prep is the bridge between year-end close and statutory filing). Practice playbook reads `CLIENT.statutory_audit_required`, `CLIENT.tax_jurisdiction` (`SG` | `PH`), and `CLIENT.fy_end` to scope the deliverables.
+- Sibling jobs: `year-end-close.md` (must complete BEFORE this job — audit-prep assumes books are closed), `statutory-filing.md` (the SG Form C-S / PH ITR step that consumes the pack this job produces — see audit step 13 cross-reference).
+- API rules: `jaz-api/SKILL.md` rule 36 (`endDate` not `startDate` for AR/AP point-in-time reports), rule 38 (pagination for `general-ledger`), rule 52 (response dates are epoch ms).
 
 ---
 
-## Who Needs This
+## Who needs this
 
 | Situation | SG | PH |
 |-----------|----|----|
-| **Statutory audit required** | Companies with revenue > S$10M, assets > S$10M, or employees > 50 | All stock corporations, companies with paid-up capital > PHP 50K |
-| **Tax filing (no audit)** | All companies file Form C/C-S with IRAS | All companies file ITR with BIR |
-| **Compilation by accountant** | Small exempt private companies — no audit but accountant prepares financial statements | N/A |
+| Statutory audit required | Revenue > S$10M, assets > S$10M, or employees > 50 | All stock corporations, paid-up capital > PHP 50K |
+| Tax filing only | All companies file Form C / C-S with IRAS | All companies file ITR with BIR |
+| Compilation by accountant | Small exempt private companies | N/A |
 
-Even if you're a small exempt company not requiring an audit, your external accountant or tax agent needs the same reports to prepare your financial statements and tax return. This job produces the full pack.
+Even small exempt SG companies need this pack for the external accountant who prepares the financial statements + Form C-S.
+
+## Step 1 — Emit blueprint
+
+```
+generate_audit_prep_blueprint(period_start: '2025-01-01', period_end: '2025-12-31', currency: <CLIENT.base_currency>, jurisdiction: <CLIENT.tax_jurisdiction>)
+```
+
+Save to `recurring/annual/<period>/audit-prep/blueprint.json`. Blueprint emits jurisdiction-specific deliverable list (SG: TB / BS / P&L / CF / EM / AR aging / AP aging / bank recon / FA register / GST F5 yearly / supporting schedules. PH: same + ITR-specific schedules).
+
+## Step 2 — Trial balance (the master)
+
+```
+generate_trial_balance(period_end: '2025-12-31', currency: <CLIENT.base_currency>)
+```
+
+Save to `recurring/annual/<period>/audit-prep/tb.json`. Verify: every report from step 3 onwards must tie back to a TB line.
+
+## Step 3 — Primary financial statements
+
+```
+generate_balance_sheet(period_end: '2025-12-31')
+generate_profit_and_loss(period_start: '2025-01-01', period_end: '2025-12-31')
+```
+
+Optional comparative:
+```
+generate_profit_and_loss(period_start: '2024-01-01', period_end: '2024-12-31')
+generate_balance_sheet(period_end: '2024-12-31')
+```
+
+Assert: BS Total Assets = Total Liabilities + Total Equity. P&L Net Profit ties to Equity Movement (step 4) `netProfit` line.
+
+## Step 4 — Cashflow + Equity Movement
+
+```
+generate_cashflow(period_start: '2025-01-01', period_end: '2025-12-31')
+generate_equity_movement(period_start: '2025-01-01', period_end: '2025-12-31')
+```
+
+Cashflow classifies into Operating / Investing / Financing per IAS 7. Equity Movement reconciles opening equity → net profit → dividends → other movements → closing equity. The closing equity must tie to BS step 3 Total Equity.
+
+## Step 5 — General Ledger (auditor's working document)
+
+```
+generate_general_ledger(period_start: '2025-01-01', period_end: '2025-12-31', groupBy: 'ACCOUNT')
+```
+
+Per `jaz-api/SKILL.md` rule 38, paginate via `offset` if `totalElements > <page-size>`. Save full GL to `recurring/annual/<period>/audit-prep/gl.json`. Auditor will sample-test from this.
+
+## Step 6 — AR / AP aging
+
+```
+generate_aged_ar(period_end: '2025-12-31')
+generate_aged_ap(period_end: '2025-12-31')
+```
+
+Use `endDate` not `startDate` (rule 36 — point-in-time snapshot). Assert:
+- `aged_ar.totalOutstanding == TB['Accounts Receivable'].balance` (recoverability gate; auditor tests > 90d aging for ECL adequacy).
+- `aged_ap.totalOutstanding == TB['Accounts Payable'].balance` (completeness gate).
+
+If ECL provision feels inadequate for the > 90d bucket, run the ECL recipe immediately:
+```
+plan_recipe(name: 'ecl', receivables: <aged_ar.buckets converted to ECL input>, ...)
+```
+And post any top-up provision via `execute_recipe`. This avoids an auditor-proposed adjustment at fieldwork.
+
+## Step 7 — Bank reconciliation (NON-NEGOTIABLE)
+
+```
+generate_bank_recon_summary(period_end: '2025-12-31')
+generate_bank_recon_details(period_end: '2025-12-31')
+generate_bank_balance_summary(period_end: '2025-12-31')
+```
+
+For each bank account: `unreconciledCount` MUST be 0 OR every unreconciled item has a documented timing-difference explanation in `ENGAGEMENT.risk_areas`. The auditor will request bank confirmation letters DIRECTLY from your banks — `generate_bank_balance_summary` total must reconcile to those letters within tolerance.
+
+If `unreconciledCount > 0`: halt audit-prep and route back to `bank-recon.md` job. Do NOT hand the pack to the auditor with unreconciled items.
+
+## Step 8 — Fixed assets + supporting schedules
+
+```
+generate_fa_summary(period_end: '2025-12-31')
+generate_fa_recon_summary(period_start: '2025-01-01', period_end: '2025-12-31')
+```
+
+Assert: `fa_recon.openingNbv + additions - disposals - depreciation == fa_recon.closingNbv == TB['Fixed Assets'].balance`.
+
+For non-FA-register schedules (loan, lease, ECL, fixed-deposit, prepaid, intercompany), pull the underlying capsules:
+```
+search_capsules(filter: {capsuleType: {in: ['Loan Repayment', 'Lease', 'Fixed Deposit', 'Prepaid Expenses', 'Provision']}})
+```
+For each capsule, run the matching `clio calc <type>` to produce the independent schedule. Save to `recurring/annual/<period>/audit-prep/schedules/<capsule-name>.json`. Auditor uses these to test the IFRS 9 / IFRS 16 / IAS 37 measurements.
+
+## Step 9 — Tax ledger
+
+```
+generate_vat_ledger(period_start: '2025-01-01', period_end: '2025-12-31')
+```
+
+For SG: annual total ties to sum of 4 quarterly GST F5 returns. For PH: annual total ties to monthly VAT returns + quarterly summary. Cross-reference: `practice/references/quarterly-gst.md` keeps the per-quarter F5/VAT submissions; the annual reconciliation should already be clean if quarterly-gst engagements ran each period.
+
+## Step 10 — XLSX deliverables (pre-empt auditor requests)
+
+For each report the auditor needs in their workpapers:
+
+```
+download_export(exportType: 'trial-balance', startDate: '2025-01-01', endDate: '2025-12-31', currencyCode: <CLIENT.base_currency>)
+```
+
+Returns `{ fileName, fileUrl }` (pre-signed, ~5 min). Download immediately to `recurring/annual/<period>/audit-prep/xlsx/`. Repeat for: `profit-and-loss`, `balance-sheet`, `general-ledger`, `ar-report`, `ap-report`, `cashflow`.
+
+**Pre-emptive audit analyses** (run BEFORE handing over the pack — fix what they'd find):
+- `download_export(exportType: 'analysis-anomalous-bills', startDate, endDate)` — flag bills with unusual amounts vs supplier history
+- `download_export(exportType: 'analysis-anomalous-invoices', startDate, endDate)` — same, customer side
+- `download_export(exportType: 'analysis-gl-journal-audit', startDate, endDate)` — flags unbalanced / round-number / large-value journals likely to draw auditor scrutiny
+- `download_export(exportType: 'analysis-exchange-rate-audit', startDate, endDate)` — FX rates outside expected band
+- `download_export(exportType: 'analysis-cash-expense-health', startDate, endDate)` — cash-only expense patterns auditors flag
+
+If any analysis surfaces issues, fix BEFORE auditor sees them. Document the corrections in `ENGAGEMENT.md`.
+
+## Step 11 — Reconciliation checklist
+
+Before pack hand-off, assert each row:
+
+| Account | Source | Must match |
+|---------|--------|------------|
+| Cash / Bank | step 7 bank recon | bank confirmation letters |
+| Accounts Receivable | step 6 AR aging | TB AR line |
+| Accounts Payable | step 6 AP aging | TB AP line |
+| Fixed Assets NBV | step 8 FA register | TB FA lines (gross + accumulated dep) |
+| Loan Payable | step 8 loan schedule (per capsule) | TB Loan Payable line |
+| Lease Liability | step 8 lease schedule (per capsule) | TB Lease Liability line |
+| Revenue | step 3 P&L | step 9 VAT ledger Box 1+2+3 totals |
+| GST Receivable / Payable | step 9 VAT ledger | TB GST Control account |
+
+Any mismatch beyond `CLIENT.materiality_threshold` halts the pack and routes back to the originating job.
+
+## Step 12 — Completeness gates (final)
+
+```
+search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-12-31']}})
+search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-12-31']}})
+search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-12-31']}})
+```
+
+ALL three must return zero. If any return rows: collect `resourceId`s, classify (delete vs finalize) per practitioner judgment, and `bulk_finalize_drafts({kind, resourceIds: [...]})` for the keep-set.
+
+Then lock the period:
+```
+update_account(resourceId: <CoA root>, lockDate: '2025-12-31')
+```
+
+This prevents backdated entries during fieldwork. If the auditor needs to post AJEs, lift the lock temporarily, post, re-lock — do NOT leave it open during fieldwork.
+
+## Step 13 — Hand-off to statutory filing
+
+The pack is now ready. Cross-reference to `practice/references/annual-statutory.md` step 6-7 (statutory filing) which consumes:
+- TB + P&L + BS for Form C-S Lite eligibility check (revenue ≤ S$200K)
+- Audit-analyses for management-letter content
+- Loan / lease / FA schedules for tax computation add-backs
+- VAT ledger annual reconciliation for IRAS Box 1-7 cross-tie
+
+The SG Form C-S wizard (`practice/references/annual-statutory.md` step 7) walks the practitioner field-by-field through the C-S form, prefilling from the audit-prep pack.
 
 ---
 
-## Phase 1: Core Financial Reports
+## Common error classes and recovery
 
-Generate the three primary financial statements. These form the backbone of any audit or tax filing.
-
-### Step 1: Trial Balance
-
-The master reconciliation tool. Everything else derives from this.
-
-```
-POST /api/v1/generate-reports/trial-balance
-{ "startDate": "2025-01-01", "endDate": "2025-12-31" }
-```
-
-**What the auditor checks:** Debits = Credits (always). Any imbalance indicates a system error.
-
-### Step 2: Profit & Loss Statement
-
-```
-POST /api/v1/generate-reports/profit-and-loss
-{ "primarySnapshotDate": "2025-12-31", "secondarySnapshotDate": "2025-01-01" }
-```
-
-**Comparative:** If the auditor needs prior year comparison:
-
-```
-POST /api/v1/generate-reports/profit-and-loss
-{ "primarySnapshotDate": "2024-12-31", "secondarySnapshotDate": "2024-01-01" }
-```
-
-### Step 3: Balance Sheet
-
-```
-POST /api/v1/generate-reports/balance-sheet
-{ "primarySnapshotDate": "2025-12-31" }
-```
-
-**Key check:** Assets = Liabilities + Equity.
+| Source | Error | Recovery |
+|--------|-------|----------|
+| `generate_*` | 422 `period_not_closed` | Year-end close incomplete. Route to `year-end-close.md` first. |
+| `generate_bank_recon_*` | `unreconciledCount > 0` | Route to `bank-recon.md`; do NOT hand pack with this open. |
+| `download_export` | 422 `period_too_long` | GL XLSX rejected for >12 months. Split into per-quarter exports. |
+| `download_export` | 504 timeout | Large org. Re-run with smaller `endDate` range or contact infrastructure team. |
+| `update_account` | 422 `lock_date_in_future` | The CoA `lockDate` must be ≤ `period_end`. Use today if unsure. |
+| Reconciliation | TB AR ≠ AR aging | Likely a mid-period credit-note application missed. `search_customer_credit_notes(filter: {valueDate: {between: ...}})` and verify each was applied via `apply_credit_to_invoice`. |
+| Reconciliation | TB Cash ≠ bank balance summary | Unposted bank journal or unreconciled item. Re-run step 7. |
+| Step 12 gate | Drafts present at year-end | Either clear (finalize) or document in `ENGAGEMENT.risk_areas`. NEVER hand pack with drafts in the audit period. |
 
 ---
 
-## Phase 2: Supporting Ledgers
+## Tips
 
-Detailed transaction-level data behind the summary reports.
-
-### Step 4: General Ledger — grouped by account
-
-```
-POST /api/v1/generate-reports/general-ledger
-{ "startDate": "2025-01-01", "endDate": "2025-12-31", "groupBy": "ACCOUNT" }
-```
-
-This is the auditor's primary working document. Every transaction, grouped by CoA account, with opening balance, movements, and closing balance.
-
-### Step 5: Cashflow Statement
-
-```
-POST /api/v1/generate-reports/cashflow
-{ "primaryStartDate": "2025-01-01", "primaryEndDate": "2025-12-31" }
-```
-
-Classifies cash movements into Operating, Investing, and Financing activities.
-
-### Step 6: Equity Movement
-
-```
-POST /api/v1/generate-reports/equity-movement
-{ "primarySnapshotStartDate": "2025-01-01", "primarySnapshotEndDate": "2025-12-31" }
-```
-
-Shows opening equity, net profit, dividends, and other movements during the year.
+- **Start in January for prior FY.** Don't wait for the auditor's request list. Generate the pack in early January; have it ready before the engagement begins. Faster + cheaper audit.
+- **Bank confirmation letters take 2-4 weeks.** Request them from each bank in early January. The auditor will independently request these — yours is for self-verification.
+- **Pre-emptive audit-analyses are the differentiator.** Most accountants hand over the standard pack and wait for queries. Running the 5 `analysis-*` exports proactively in step 10 catches what the auditor would catch — at zero auditor cost.
+- **SG IRAS deadlines:** Form C-S/C: November 30 of the following year. ECI: within 3 months of FY-end. GST F5: 1 month after each quarter-end.
+- **Common audit queries:** "Revenue by customer" → AR Summary; "Top 10 expenses" → P&L sorted; "Related party transactions" → tag during the year, not at audit time; "Variance explanation" → month-by-month P&L.
 
 ---
 
-## Phase 3: Aging Reports
-
-### Step 7: AR Aging (Accounts Receivable)
-
-```
-POST /api/v1/generate-reports/ar-report
-{ "endDate": "2025-12-31" }
-```
-
-**Auditor use:** Tests recoverability of receivables. Aging > 90 days triggers bad debt assessment. The AR total MUST tie to the Accounts Receivable balance on the trial balance.
-
-### Step 8: AP Aging (Accounts Payable)
-
-```
-POST /api/v1/generate-reports/ap-report
-{ "endDate": "2025-12-31" }
-```
-
-**Auditor use:** Completeness assertion — are all liabilities recorded? The AP total MUST tie to the Accounts Payable balance on the trial balance.
-
----
-
-## Phase 4: Bank and Cash
-
-### Step 9: Bank Reconciliation Summary
-
-```
-POST /api/v1/generate-reports/bank-reconciliation-summary
-{ "primarySnapshotDate": "2025-12-31" }
-```
-
-**This is non-negotiable for auditors.** The bank recon proves that the cash balance per books matches the bank statement. Any unreconciled items at year-end must be explained.
-
-**For detailed reconciliation (per bank account):**
-
-```
-POST /api/v1/generate-reports/bank-reconciliation-details
-{ "primarySnapshotDate": "2025-12-31" }
-```
-
-### Step 10: Bank Balance Summary
-
-```
-POST /api/v1/generate-reports/bank-balance-summary
-{ "primarySnapshotDate": "2025-12-31" }
-```
-
-Summary of all bank account balances at year-end. Cross-reference to bank confirmation letters (which the auditor will request directly from your banks).
-
----
-
-## Phase 5: Fixed Assets
-
-### Step 11: Fixed Assets Register
-
-```
-POST /api/v1/generate-reports/fixed-assets-summary
-```
-
-Shows all fixed assets: acquisition date, cost, depreciation method, useful life, accumulated depreciation, and net book value.
-
-**For FA reconciliation (movements during the year):**
-
-```
-POST /api/v1/generate-reports/fixed-assets-recon-summary
-```
-
-This shows: opening NBV + additions - disposals - depreciation = closing NBV. The auditor reconciles this to the trial balance.
-
----
-
-## Phase 6: Tax
-
-### Step 12: Tax Ledger / GST Summary
-
-```
-POST /api/v1/generate-reports/vat-ledger
-{ "startDate": "2025-01-01", "endDate": "2025-12-31" }
-```
-
-Full year tax ledger for the auditor to verify GST returns filed during the year. The annual total should reconcile to the sum of the four quarterly GST F5 returns.
-
----
-
-## Phase 7: Data Exports
-
-Auditors and tax agents often need the data in Excel format for their own workpapers.
-
-### Step 13: Export all key reports
-
-```
-POST /api/v1/data-exports/trial-balance
-{ "startDate": "2025-01-01", "endDate": "2025-12-31" }
-```
-
-```
-POST /api/v1/data-exports/profit-and-loss
-{ "startDate": "2025-01-01", "endDate": "2025-12-31" }
-```
-
-```
-POST /api/v1/data-exports/general-ledger
-{ "startDate": "2025-01-01", "endDate": "2025-12-31", "groupBy": "ACCOUNT" }
-```
-
-```
-POST /api/v1/data-exports/ar-report
-{ "endDate": "2025-12-31" }
-```
-
-```
-POST /api/v1/data-exports/ap-report
-{ "endDate": "2025-12-31" }
-```
-
-**Note:** Data export endpoints use simpler field names than generate-reports. P&L export uses `startDate`/`endDate` instead of `primarySnapshotDate`/`secondarySnapshotDate`.
-
----
-
-## Phase 8: Supporting Schedules
-
-These are typically prepared manually by extracting data from the general ledger. The schedules explain what sits behind specific balance sheet line items.
-
-### Step 14: Compile supporting schedules
-
-**Prepaid Expenses Schedule:**
-- Search the general ledger for prepaid asset accounts
-- List each prepaid item: description, original amount, amortization to date, remaining balance
-- If using capsules for prepaid workflows, group the GL by capsule for a clean view
-
-**Loan Schedule:**
-- For each active loan: original principal, interest rate, monthly payment, balance at year-end
-- Extract from the loan capsule GL entries
-- **Calculator:** `clio calc loan` produces the full amortization table
-
-**Provision Schedule:**
-- List all provisions: ECL/bad debt, employee leave, warranty, legal, etc.
-- For each: opening balance, additions, utilizations, reversals, closing balance
-- ECL provision: `clio calc ecl` for the year-end calculation
-
-**Lease Schedule (if IFRS 16 applies):**
-- Right-of-use asset: opening, depreciation, closing
-- Lease liability: opening, interest, payments, closing
-- **Calculator:** `clio calc lease` for the complete schedule
-
-**Fixed Deposit Schedule:**
-- List all fixed deposits: bank, principal, rate, maturity date, accrued interest
-- **Calculator:** `clio calc fixed-deposit` for interest calculations
-
-**Intercompany Balances (if applicable):**
-- Receivables and payables with related parties
-- Must be disclosed separately in financial statements
-
----
-
-## Phase 9: Final Checks
-
-### Step 15: Reconciliation checklist
-
-Before handing the pack to the auditor, verify these tie:
-
-| Account | Report | Should Match |
-|---------|--------|-------------|
-| Cash / Bank | Bank Recon Summary (Step 9) | Bank statements |
-| Accounts Receivable | AR Aging (Step 7) | Trial balance AR line |
-| Accounts Payable | AP Aging (Step 8) | Trial balance AP line |
-| Fixed Assets (NBV) | FA Register (Step 11) | Trial balance FA lines |
-| Revenue | P&L (Step 2) | GST return Box 1+2+3 totals |
-| GST Receivable/Payable | Tax Ledger (Step 12) | Sum of quarterly GST returns |
-
-### Step 16: Review for completeness
-
-Run through this checklist:
-
-- [ ] All bank accounts reconciled at year-end (zero unreconciled items or documented timing differences)
-- [ ] All supplier statements reconciled for major suppliers
-- [ ] Lock date set to year-end (prevents backdated entries during audit)
-- [ ] No draft transactions in the period (search for status = DRAFT and resolve)
-- [ ] Depreciation posted for all 12 months
-- [ ] Accruals and prepayments up to date
-- [ ] Intercompany balances agree with counterparty
-- [ ] Related party transactions identified and documented
-
----
-
-## Audit Prep Checklist (Quick Reference)
-
-| # | Step | Phase | Report/Endpoint |
-|---|------|-------|----------------|
-| 1 | Trial Balance | Core | `POST /generate-reports/trial-balance` |
-| 2 | P&L | Core | `POST /generate-reports/profit-and-loss` |
-| 3 | Balance Sheet | Core | `POST /generate-reports/balance-sheet` |
-| 4 | General Ledger | Ledgers | `POST /generate-reports/general-ledger` |
-| 5 | Cashflow | Ledgers | `POST /generate-reports/cashflow` |
-| 6 | Equity Movement | Ledgers | `POST /generate-reports/equity-movement` |
-| 7 | AR Aging | Aging | `POST /generate-reports/ar-report` |
-| 8 | AP Aging | Aging | `POST /generate-reports/ap-report` |
-| 9 | Bank Recon Summary | Bank | `POST /generate-reports/bank-reconciliation-summary` |
-| 10 | Bank Balance Summary | Bank | `POST /generate-reports/bank-balance-summary` |
-| 11 | FA Register | Assets | `POST /generate-reports/fixed-assets-summary` |
-| 12 | Tax Ledger | Tax | `POST /generate-reports/vat-ledger` |
-| 13 | Data Exports | Export | `POST /data-exports/*` |
-| 14 | Supporting schedules | Schedules | Manual from GL + calculators |
-| 15 | Reconciliation checks | Final | Cross-reference all reports |
-| 16 | Completeness review | Final | Checklist |
-
----
-
-## Tips for SMBs
-
-**Start early.** Don't wait for the auditor's request list. Generate the report pack in January for the prior year and have it ready before the engagement begins. A well-prepared client gets a faster, cheaper audit.
-
-**The auditor will ask for bank confirmation letters.** These are letters from your bank confirming balances at year-end. Request them from your bank in early January — they can take 2-4 weeks to arrive.
-
-**Keep a "passed adjustments" list.** If the auditor proposes adjustments you disagree with (within materiality), track them. Below-materiality items may accumulate — the auditor must consider cumulative effect.
-
-**IRAS filing deadlines (SG):**
-- Form C-S/C: November 30 of the following year (e.g., FY 2025 due Nov 30, 2026)
-- ECI (Estimated Chargeable Income): Within 3 months of financial year-end
-- GST F5: 1 month after each quarter-end
-
-**Common audit queries you can pre-empt:**
-- "Can you provide a schedule of revenue by customer?" → Run AR summary report
-- "What are the top 10 expenses?" → Run P&L, sort expense lines
-- "Are there any related party transactions?" → Tag them during the year, not at audit time
-- "Can you explain the $X increase in expenses?" → Have month-by-month P&L ready for variance analysis
+## Cross-references back to engagements
+
+- `practice/references/annual-statutory.md` step 5 — audit-prep is the bridge between `year-end-close` and `statutory-filing` engagement steps. Practice playbook orchestrates audit-prep deliverables into the Form C-S wizard.
+- `practice/references/quarterly-gst.md` — keeps per-quarter F5 reconciliations clean; audit-prep step 9 trusts those.
+- `practice/references/onboarding.md` — only relevant when conversion happened mid-FY (rare). Then the audit pack must include a "conversion period" note explaining the mid-FY data load.

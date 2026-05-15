@@ -1,167 +1,225 @@
-# Recipe: Capital WIP to Fixed Asset Transfer
+# Recipe: Capital Work-in-Progress (CWIP) → Fixed Asset (manual — no engine)
 
-## Scenario
+> Multi-month asset construction pattern: accumulate construction costs in `Capital Work-in-Progress` (Non-Current Asset) via bills coded to CWIP, then transfer the accumulated cost to a Jaz native FA on completion. No recipe engine — built from primitive `create_bill` + `create_journal` + `create_fixed_asset`. The CWIP-to-FA transfer triggers Jaz's auto-depreciation (SL).
 
-Your company is renovating its office at a total estimated cost of $150,000, incurred over 4 months through multiple bills (contractor, materials, permits). During construction, all costs are accumulated in a Capital Work-in-Progress (CIP/CWIP) account. Once the renovation is complete, the total cost is transferred to a Fixed Asset and registered in Jaz's FA module for automatic straight-line depreciation.
+## Why no engine
 
-**Pattern:** Bills/journals coded to CIP (accumulation phase) + transfer journal + FA registration + capsule
+CWIP costs accumulate as construction progresses — multiple bills from contractors / suppliers, none of which are predictable in amount or timing. The recipe engine is for KNOWN-shape multi-period flows (loan amortization, lease unwinding); CWIP is INHERENTLY ad-hoc until completion. Once complete, the transfer is a single one-shot journal + FA registration.
 
----
+## Tools, recipes, calculators this recipe uses
 
-## Accounts Involved
+### Primitive MCP tools (no engine wrapper)
+- **`create_bill(...)`** — used in step 2 (multiple times during construction): each contractor bill / supplier invoice / permit fee coded to `Capital Work-in-Progress` GL account, NOT to Operating Expense. The asset is BEING BUILT — these are capitalized costs, not period expenses.
+- **`create_capsule(capsuleType: 'Capital Projects', ...)`** — step 1: one capsule per construction project, accumulates all bills + the eventual transfer journal.
+- **`create_journal(...)`** — step 4: the CWIP-to-FA transfer journal (Dr Fixed Asset / Cr Capital Work-in-Progress).
+- **`create_fixed_asset(...)`** — step 4: register the completed asset in Jaz native FA register; from this point forward, Jaz auto-posts SL depreciation.
 
-| Account | Type | Subtype | Role |
-|---|---|---|---|
-| Capital Work-in-Progress | Asset | Non-Current Asset | Accumulates costs during construction/development |
-| Fixed Asset — [Asset Name] | Asset | Non-Current Asset | Completed asset (after transfer) |
-| Accumulated Depreciation | Asset | Non-Current Asset (contra) | Depreciation reserve (auto by Jaz FA module) |
-| Depreciation Expense | Expense | Expense | Monthly depreciation charge (auto by Jaz FA module) |
-| Cash / Bank Account | Asset | Bank | Pays supplier bills |
-| Accounts Payable | Liability | Current Liability | When bills are recorded |
+### Tools (jaz-api / direct)
+- **`search_capsules(filter: {capsuleType: {eq: 'Capital Projects'}, name: {eq: <project>}})`** — step 1 idempotency check.
+- **`search_accounts(filter: {name: {in: ['Capital Work-in-Progress', '<target FA category>', '<target Accumulated Depreciation>']}})`** — step 0 + step 4.
+- **`generate_general_ledger(accountResourceId: <CWIP id>, period_start: <project start>, period_end: <today>)`** — step 3: pull all CWIP entries to confirm the accumulated cost.
+- **`search_bills(filter: {capsuleResourceId: <CWIP capsule id>})`** — step 3 alt: pull all bills attached to the project capsule.
+- **`generate_trial_balance(period_end: <date>)`** — step 5 verify CWIP balance is zero post-transfer; FA balance reflects new asset.
 
----
-
-## Journal Entries
-
-### Phase 1: Cost Accumulation (during construction)
-
-Each supplier bill or expense is coded to the CIP account — **not** to expense.
-
-**Supplier bill example:**
-- Create bill: $40,000 to "ABC Contractors"
-- Code to: Capital Work-in-Progress
-- Assign to capsule
-
-**Internal labor capitalization (if applicable):**
-
-| Line | Account | Debit | Credit |
-|---|---|---|---|
-| 1 | Capital Work-in-Progress | *labor cost* | |
-| 2 | Salaries Expense | | *labor cost* |
-
-### Phase 2: Transfer to Fixed Asset (on completion)
-
-When the project is complete, transfer the total accumulated cost from CIP to the fixed asset account:
-
-| Line | Account | Debit | Credit |
-|---|---|---|---|
-| 1 | Fixed Asset — Office Renovation | $150,000 | |
-| 2 | Capital Work-in-Progress | | $150,000 |
-
-### Phase 3: Register Fixed Asset
-
-Register the completed asset in Jaz's Fixed Asset module:
-- Asset name: "Office Renovation — 2025"
-- Cost: $150,000 (must match the transfer amount)
-- Salvage value: $0 (or estimated residual)
-- Useful life: 60 months (5 years for leasehold improvements)
-- Method: Straight-line (Jaz native FA module)
-
-Jaz will then auto-post monthly depreciation:
-- Dr Depreciation Expense $2,500 / Cr Accumulated Depreciation $2,500
+### Cross-references
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 11 (per active capital project per `CLIENT.capital_projects[]`); from `practice/references/annual-statutory.md` step 4 (year-end review of CWIP balances — IAS 16.20 capitalization criteria; flag any CWIP not capitalized for > 12 months as potential expense).
+- Sibling: `bank-loan.md` (financing the construction often ties together — the loan funds the CWIP); `declining-balance.md` / `asset-disposal.md` for post-capitalization lifecycle.
+- IFRS / accounting context: IAS 16.16-22 (cost components includable in PP&E during construction); IAS 16.23 (capitalization stops when asset is in location and condition for intended use); IAS 23 (borrowing costs eligible for capitalization on qualifying assets).
 
 ---
 
-## Capsule Structure
+## Step-by-step
 
-**Capsule:** "Office Renovation — 2025"
-**Capsule Type:** "Capital Projects"
+### Step 0 — Confirm GL accounts exist
 
-Contents:
-- Multiple supplier bills (Phase 1)
-- Internal labor journals (if any)
-- 1 transfer journal (Phase 2)
-- **Total entries:** Varies (typically 5-20 depending on project complexity)
+```
+search_accounts(filter: {name: {in: ['Capital Work-in-Progress', 'Office Improvements', 'Accumulated Depreciation — Office Improvements']}})
+```
 
-> **Note:** The auto-generated depreciation entries from the FA module are separate from the capsule. If you want them tracked, assign the FA to the same capsule tags.
+`Capital Work-in-Progress` is the holding account. The eventual FA destination (`Office Improvements`, `Buildings`, `Plant & Equipment`, etc.) and its corresponding accumulated depreciation account both need to exist before completion-time transfer.
+
+If `Capital Work-in-Progress` doesn't exist: `create_account(name: 'Capital Work-in-Progress', accountType: 'Non-Current Asset')` first. CRITICAL: classify as Non-Current Asset (not Operating Expense) — the whole point of CWIP is to defer expense recognition.
+
+### Step 1 — Create the project capsule
+
+```
+create_capsule(
+  capsuleTypeResourceId: <Capital Projects capsule type id>,
+  title: 'Office Renovation — Marina One — FY2025',
+  description: 'Renovation of Marina One office, total estimated cost SGD 150,000, expected completion 2025-04-30',
+  customFields: {
+    'Project Reference': 'CAPEX-2025-001',
+    'Estimated Cost': 150000,
+    'Estimated Completion': '2025-04-30'
+  }
+)
+```
+
+Each construction project gets its own capsule. The capsule is the audit trail — every bill paid for this project, plus the eventual transfer journal, attaches to it. Auditor can pull `search_bills(filter: {capsuleResourceId: <id>})` and see the full cost build.
+
+### Step 2 — Accumulate construction costs (multiple bills over months)
+
+For EACH contractor bill / supplier invoice / permit fee received during construction:
+
+```
+create_bill(
+  contactResourceId: <contractor / supplier>,
+  reference: '<contractor invoice number>',
+  valueDate: '<actual bill date>',
+  lineItems: [{
+    name: '<description of work>',
+    accountResourceId: <Capital Work-in-Progress GL>,
+    amount: <bill amount>,
+    quantity: 1
+  }],
+  capsuleResourceId: <project capsule>,
+  saveAsDraft: false
+)
+```
+
+Critical: `accountResourceId` on the line item points to `Capital Work-in-Progress`, NOT to an operating expense GL. Per IAS 16.16(a)-(c) cost includes:
+- Purchase price (less trade discounts)
+- Costs directly attributable to bringing the asset to working condition (delivery, installation, professional fees, site preparation, dismantling/removal of existing items being replaced)
+- Estimated dismantling / decommissioning costs (if obligation exists per IAS 37 — see `provisions.md` recipe)
+
+Costs NOT capitalizable per IAS 16.19-22:
+- Initial operating losses
+- Costs of opening a new facility (advertising, training)
+- General overhead allocations
+- Borrowing costs for non-qualifying assets (qualifying = takes substantial time to ready, per IAS 23.5 — assets typically construction projects qualify)
+
+If the project is FINANCED by a specific loan and qualifies under IAS 23: capitalize the borrowing costs (`Interest Expense`) into CWIP via a journal: Dr Capital Work-in-Progress / Cr Interest Expense for the period's interest. This transfers the interest from P&L to balance sheet during the construction period. Out of scope for this recipe — handled via manual journal.
+
+Pay each bill as normal (`create_bill_payment(...)`). Cash flow for construction is typically lumpy.
+
+### Step 3 — Periodic review during construction
+
+At each month-end during construction:
+
+```
+generate_general_ledger(accountResourceId: <CWIP GL>, period_start: <project start>, period_end: <month-end>)
+```
+
+Confirm the accumulated CWIP balance matches expectations vs `CLIENT.capital_projects[i].estimated_cost`. Variance > 10% → flag to practitioner for budget review.
+
+```
+search_bills(filter: {capsuleResourceId: <project capsule id>, status: {ne: 'PAID'}})
+```
+
+Identify unpaid bills attached to the project — payment timing matters for cash-flow planning.
+
+### Step 4 — Completion (CWIP → FA transfer)
+
+When construction is COMPLETE per IAS 16.23 — asset is in location and condition for intended use, NOT first revenue or first occupancy:
+
+**4a — Pull final CWIP balance:**
+
+```
+generate_general_ledger(accountResourceId: <CWIP GL>, period_end: <completion date>)
+```
+
+Note the closing balance — this is the asset's cost on initial recognition (IAS 16.15).
+
+**4b — Post the transfer journal:**
+
+```
+create_journal(
+  reference: 'CWIP-TRANSFER-CAPEX-2025-001',
+  valueDate: '<completion date>',
+  journalEntries: [
+    {
+      accountResourceId: <Office Improvements GL>,
+      amount: <final CWIP balance>,
+      type: 'DEBIT',
+      name: 'Capitalize Marina One renovation on completion'
+    },
+    {
+      accountResourceId: <Capital Work-in-Progress GL>,
+      amount: <final CWIP balance>,
+      type: 'CREDIT',
+      name: 'Transfer to Office Improvements on completion'
+    }
+  ],
+  capsuleResourceId: <project capsule>,
+  saveAsDraft: false
+)
+```
+
+Per `jaz-api/SKILL.md` rules 23-25: journals use `journalEntries` with `amount` + `type: 'DEBIT'|'CREDIT'`; line item field is `name`, not `description`.
+
+**4c — Register as Jaz FA:**
+
+```
+create_fixed_asset(
+  name: 'Office Renovation — Marina One',
+  reference: 'FA-OFFICE-MARINA-2025',
+  cost: <final CWIP balance>,
+  acquisitionDate: '<completion date>',
+  usefulLifeMonths: 60,                  // 5-year SL amortization typical for office reno
+  depreciationMethod: 'sl',
+  capsuleResourceId: <project capsule>,
+  saveAsDraft: false
+)
+```
+
+`usefulLifeMonths` per `CLIENT.capex_useful_life_matrix[asset-type]` (or practitioner judgment). Common defaults: office renovations 60 months, computer hardware 36 months, motor vehicles 60 months, buildings 240 months.
+
+From this point forward, Jaz auto-posts SL depreciation each month-end. NO manual depreciation journal required.
+
+### Step 5 — Verify
+
+```
+generate_trial_balance(period_end: '<completion date>')
+```
+
+Assert:
+- `balance['Capital Work-in-Progress'] == 0` exactly (transfer cleared the balance).
+- `balance['Office Improvements'] == <final CWIP balance>` (asset cost recognized).
+
+```
+generate_fa_summary(period_end: '<completion date>', fixedAssetResourceId: <FA UUID>)
+```
+
+Should show `cost: <final CWIP balance>, accumulatedDepreciation: 0, NBV: <cost>, status: 'ACTIVE'`. From next month-end onward, NBV reduces by `cost / 60` per month (SL).
+
+Close the project capsule (or keep ACTIVE for traceability — the FA still references it):
+```
+update_capsule(resourceId: <project capsule>, status: 'CLOSED')
+```
 
 ---
 
-## Worked Example
+## Common error classes and recovery
 
-**Project: Office Renovation**
-- Budget: $150,000
-- Duration: Jan 2025 — Apr 2025
-- Useful life after completion: 5 years (60 months)
-- Salvage value: $0
-
-**Jan 15 — Contractor deposit:**
-- Create bill: $40,000 to "ABC Contractors"
-- Code to Capital Work-in-Progress
-- Capsule: "Office Renovation — 2025"
-- Pay bill when due
-
-**Feb 10 — Materials purchase:**
-- Create bill: $35,000 to "BuildMart Supplies"
-- Code to Capital Work-in-Progress
-- Capsule: same
-
-**Mar 5 — Permits and fees:**
-- Create bill: $5,000 to "City Planning Authority"
-- Code to Capital Work-in-Progress
-- Capsule: same
-
-**Mar 28 — Contractor final payment:**
-- Create bill: $60,000 to "ABC Contractors"
-- Code to Capital Work-in-Progress
-- Capsule: same
-
-**Apr 1 — Internal labor capitalized:**
-- Journal: Dr CIP $10,000 / Cr Salaries Expense $10,000
-- Description: "Capitalize internal project management labor — Office Renovation"
-- Capsule: same
-
-**Apr 15 — CIP balance check:**
-- CIP account: $150,000 debit ($40K + $35K + $5K + $60K + $10K)
-
-**Apr 15 — Transfer journal:**
-- Dr Fixed Asset — Office Renovation $150,000
-- Cr Capital Work-in-Progress $150,000
-- Description: "Transfer CIP to Fixed Asset — renovation complete"
-- Capsule: same
-
-**Apr 15 — Register in FA module:**
-- Name: "Office Renovation — 2025"
-- Cost: $150,000
-- Salvage: $0
-- Life: 60 months
-- Start date: April 2025
-
-**May 31 onwards — Auto-depreciation:**
-- $150,000 / 60 months = $2,500/month
-- Jaz auto-posts: Dr Depreciation Expense $2,500 / Cr Accumulated Depreciation $2,500
-
----
-
-## Enrichment Suggestions
-
-| Enrichment | Value | Why |
-|---|---|---|
-| Tracking Tag | "Capital Project" | Filter all CWIP and transfer entries |
-| Tracking Tag | "Office Renovation" | Project-specific filter |
-| Nano Classifier | Cost Category → "Contractor" / "Materials" / "Permits" | Break down project costs by category |
-| Custom Field | "Project #" → "CAPEX-2025-001" | Internal project reference |
-
----
-
-## Verification
-
-1. **Trial Balance during accumulation** → Capital Work-in-Progress balance should equal the sum of all bills and journals coded to CIP.
-2. **After transfer** → CIP balance should be $0. Fixed Asset balance should equal the total project cost.
-3. **After FA registration** → Monthly depreciation should start from the completion month. Check first month's entry.
-4. **Group General Ledger by Capsule** → "Office Renovation — 2025" shows all bills + transfer. Complete project audit trail.
-5. **Fixed Asset Register** → Asset appears with correct cost, salvage, life, and monthly depreciation amount.
+| Source | Error | Recovery |
+|--------|-------|----------|
+| Step 0 | `Capital Work-in-Progress` doesn't exist as Non-Current Asset | `create_account(accountType: 'Non-Current Asset')`. Common gap in CoAs that haven't done capital projects. |
+| Step 2 | Bill posted to Operating Expense instead of CWIP | Reverse via `delete_bill` (if DRAFT) OR `create_supplier_credit_note` + `apply_credit_to_bill` (if ACTIVE). Re-post correctly. AVOID year-end audit headache — auditor will challenge any P&L expense for capital project items. |
+| Step 4b | Transfer journal unbalanced | Verify the `amount` on both lines exactly matches the closing CWIP balance from step 4a. Per `jaz-api/SKILL.md` rule 23 — total debits = total credits. |
+| Step 4c | `create_fixed_asset` 422 `cost_mismatch` | Cost passed differs from the transfer journal amount. Both must equal CWIP closing balance. Re-pull `generate_general_ledger` and re-confirm. |
+| Step 4c | Asset created but Jaz auto-depreciation not running | FA may have been created as DRAFT. `update_fixed_asset(resourceId: <id>, status: 'ACTIVE')`. From next month-end, auto-depreciation runs. |
+| Step 5 | CWIP balance nonzero post-transfer | A bill was posted to CWIP AFTER step 4a — common when contractor sends final invoice late. Two options: (a) extend the project (post the late bill, re-do step 4 transfer for the additional amount + create a SECOND FA OR update the existing FA cost via `update_fixed_asset`); (b) expense the late bill directly to operating expense if immaterial. |
+| Project abandoned mid-construction | (process — IAS 16.20 / IAS 36.18 impairment) | If asset will not be completed: write off CWIP balance to Loss on Abandoned Project. `create_journal`: Dr Loss on Abandoned Project / Cr Capital Work-in-Progress. Surface to practitioner — auditor will want documentation of the decision. |
+| Borrowing costs incorrectly capitalized post-completion | (IAS 23 violation) | Per IAS 23.22, capitalization stops when asset is ready for intended use. Any interest capitalized after completion → expense. Reverse via journal: Dr Interest Expense / Cr Capital Work-in-Progress (or the FA if already transferred). |
 
 ---
 
 ## Variations
 
-**Software development capitalization (IAS 38):** Same pattern but for internal software development. Research phase costs are expensed; development phase costs (once feasibility is established) are capitalized to CIP. Transfer to "Intangible Asset — Software" on go-live.
+- **Construction in stages** (e.g., warehouse with multiple phases): one capsule per phase. Each phase gets its own CWIP-to-FA transfer + FA registration on its own completion date. Useful when phases come into use at different times.
+- **Self-constructed asset** (using own labor + materials, not contractors): same pattern but bills from labor allocations + materials issuances. Per IAS 16.22, do NOT include internal profit margin (use cost not market price).
+- **Software development capitalization** (IAS 38 internally generated intangible): different recipe — separate accumulated R&D vs development phase per IAS 38.57. NOT covered by this recipe (use a manual pattern; consider creating a dedicated `Software Development WIP` capsule).
+- **Borrowing costs** (IAS 23 qualifying asset): capitalize period interest into CWIP via manual journals during the construction period. Cease capitalization on completion (per step 4 timing).
+- **Disposal of replaced item** (e.g., replacing old air-con system as part of renovation): per IAS 16.13 — derecognize the carrying amount of the replaced part. Use `asset-disposal.md` recipe for the OLD AC's NBV write-off as part of the renovation project.
+- **Multi-currency CWIP** (e.g., importing equipment): each foreign-currency bill records via `currency: { sourceCurrency: 'USD' }` per `jaz-api/SKILL.md` rule 25. Jaz auto-translates the CWIP balance at each period-end (per IAS 21 — non-monetary item at historical rate, but bills accumulate at their respective historical rates). Post-completion: FA cost is in base currency at the historical rates. NBV stays at historical (non-monetary, not revalued).
 
-**Multi-phase project:** If a large project has distinct milestones (e.g., Building A, Building B), you can create sub-capsules per phase or use nano classifiers to tag costs by phase. Transfer each phase to a separate fixed asset when that phase completes.
+---
 
-**Cost overrun:** If actual costs exceed budget, the full actual cost is capitalized. The higher cost simply means higher depreciation per period. No separate treatment needed — CIP captures everything.
+## Cross-references back to engagements
 
-**Borrowing costs (IAS 23):** If the project is funded by a specific loan, the interest during construction can be capitalized: Dr CIP / Cr Interest Expense. Stop capitalizing when the asset is ready for use.
-
-**Asset under construction — partial use:** If part of the asset starts being used before the project is complete (e.g., one floor of a building), transfer and register that portion. Continue accumulating costs for the remainder in CIP.
+- `practice/references/monthly-close.md` step 11 — review active CWIP per project; flag any pending completion.
+- `practice/references/annual-statutory.md` step 4 — year-end review: any CWIP balance > 12 months without completion should be questioned (auditor will). Either complete the transfer, or impair if abandoned.
+- `audit-prep.md` step 8 — supporting schedule: per project capsule, all bills + transfer journal + FA registration. Auditor traces from individual bills → CWIP balance → FA cost.
+- `bank-loan.md` — if construction is loan-financed, pair this recipe with the loan recipe; capitalize interest during construction per IAS 23.
+- `asset-disposal.md` — when the eventual FA is later disposed (typically many years after construction).
+- `provisions.md` — for decommissioning obligations (IAS 16.16(c)) — recognize the present value of dismantling costs as part of CWIP at the start of construction.

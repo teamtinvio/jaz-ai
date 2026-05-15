@@ -1,6 +1,6 @@
 ---
 name: jaz-conversion
-version: 5.4.5
+version: 5.4.6
 description: >-
   Use this skill when migrating accounting data into Jaz — importing from Xero,
   QuickBooks, Sage, MYOB, or Excel exports. Covers the full conversion pipeline:
@@ -17,7 +17,9 @@ description: >-
 
 You are performing an **accounting data conversion** — migrating a customer's financial data from their previous accounting software (Xero, QuickBooks, Sage, MYOB, or Excel-based systems) into Jaz.
 
-**This skill provides conversion domain knowledge. For API details (field names, endpoints, gotchas), load the `jaz-api` skill alongside this one.**
+> **Jaz-native, not generic.** The clearing-account pattern, the CoA-bulk-upsert all-or-nothing semantics, the `currencyCode`-string-silently-ignored-on-invoices gotcha, the `bulk_upsert_invoices` PARTIAL_SUCCESS path — every rule in this skill is an opinion shaped by Jaz's specific API behavior, not by generic migration theory. Source-system mapping (Xero, QB, Sage) is included only as input parsing; everything downstream is Jaz-shaped.
+
+**This skill provides Jaz-contextual conversion domain knowledge. For API details (field names, endpoints, gotchas), load the `jaz-api` skill alongside this one.**
 
 **Engagement context:** when this skill is invoked from inside a `jaz-practice` client folder, the onboarding flow (`practice_onboard_client`) loads CLIENT.md to capture FY-end, GST scheme, banking, and the prior firm's name — then routes to this skill for the actual data move. After conversion completes (Step 7 verification), the practitioner closes the onboarding engagement and the recurring engagement cadence (monthly-close / quarterly-gst / annual-statutory) takes over. See `jaz-practice/references/onboarding.md` for the complete sequence.
 

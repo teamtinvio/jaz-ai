@@ -22,7 +22,7 @@ Canonical playbook the agent walks through when the practitioner says "close `<p
 ### Recipes (jaz-recipes — IFRS-compliant transaction modeling)
 - `plan_recipe(name: 'accrued-expense', …)` — used in step 4: per `CLIENT.recurring_accruals[i]` whose `last_posted < period_end`. Two-scheduler accrue + reverse pattern.
 - `plan_recipe(name: 'depreciation', …)` — used in step 5: only when an asset uses a non-SL method (DDB, 150DB) — Jaz native FA already handles SL. Cross-check with `clio calc depreciation`.
-- `plan_recipe(name: 'fx-reval', …)` — used in step 6: per monetary balance whose currency ≠ `CLIENT.base_currency`. IAS 21, Day 1 reversal.
+- **FX revaluation** — used in step 6 as VERIFICATION ONLY (Jaz auto-handles all FX reval per IAS 21.23; do NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post).
 - `plan_recipe(name: 'prepaid-expense', …)` — used in step 7: only on initial setup of a new prepaid; ongoing recognition runs from the scheduler created at setup.
 - `plan_recipe(name: 'deferred-revenue', …)` — used in step 7: same setup-vs-recognition note as prepaid.
 - `plan_recipe(name: 'provision', …)` — used in step 7: monthly discount-unwinding journal for any active IAS 37 provision capsule.
@@ -30,7 +30,7 @@ Canonical playbook the agent walks through when the practitioner says "close `<p
 ### Calculators (jaz-cli / `clio calc`)
 - `clio calc accrued-expense` — used in step 4: independently compute accrual amount before invoking the recipe (cross-check).
 - `clio calc depreciation` — used in step 5: FA register cross-check; verify Jaz's posted depreciation against an independent calc.
-- `clio calc fx-reval` — used in step 6: independently compute period FX gain/loss before invoking the recipe.
+- `clio calc fx-reval` — used in step 6: independently compute period FX gain/loss for VERIFICATION against what Jaz auto-posted.
 - `clio calc prepaid-expense` / `clio calc deferred-revenue` — used in step 7 for setup events; not for ongoing periods.
 - `clio calc provision` — used in step 7: PV unwinding cross-check.
 
@@ -112,18 +112,22 @@ For each row in `CLIENT.recurring_accruals[]` where `last_posted < <period>-end`
 
 ### Step 6 — FX revaluation
 
-Pull the period-end TB. For every account row where the underlying currency ≠ `CLIENT.base_currency` and the account class is monetary (Bank, Receivables, Payables, Loans, Intercompany):
+**Jaz auto-handles FX revaluation for ALL foreign-currency monetary balances.** AR, AP, cash, bank, intercompany, term deposits, FX provisions — period-end translation per IAS 21.23 is automatic. **DO NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post.** This step is verification + variance investigation.
 
-1. For each foreign-currency monetary balance:
-   - Pull the FY closing rate via `list_currency_rates(filter: {sourceCurrency: <fcy>, valueDate: <period>-end})`.
-   - Pull the booked rate (the rate at which the balance entered the books) — typically tracked in the source transaction's `currency.exchangeRate` field.
-   - Compute period FX delta: `clio calc fx-reval --amount <fcy-balance> --book-rate <booked> --closing-rate <closing> --currency <fcy> --base-currency <CLIENT.base_currency> --json`.
-2. If the delta is `> CLIENT.materiality_threshold`: invoke `plan_recipe(name: 'fx-reval', amount: <fcy-balance>, bookRate: <booked>, closingRate: <closing>, valueDate: <period>-end, glAccount: <account.code>, …)` then `execute_recipe`.
-3. After all reval journals posted: `bulk_finalize_drafts`.
-4. Day-1 reversal: the recipe creates a reversal scheduler dated `<next-period>-01` automatically — confirm in `search_scheduled_transactions(filter: {tag: 'fx-reval', valueDate: {gte: <next-period>-01}})`.
+1. Confirm the period-end closing rate is loaded for each foreign currency: `list_currency_rates(filter: {sourceCurrency: <fcy>, valueDate: <period>-end})`. If empty: halt and surface "Closing rate for `<fcy>` on `<period>-end` not in Jaz — Jaz used the most recent rate as a fallback. Load the actual closing rate via `add_currency_rate` or `bulk_upsert_currency_rates`, which will trigger Jaz to re-translate; confirm via re-running step 6 verification before close." (See jaz-api rule 39.)
 
-**On 404 from `list_currency_rates`:** the FYE rate isn't yet loaded. Halt and surface "Closing rate for `<fcy>` on `<period>-end` not in Jaz; load via `add_currency_rate` or `bulk_upsert_currency_rates` before retry." (See jaz-api rule 39.)
-**On 422 from `plan_recipe` with reason `same_currency`:** the balance is already in `CLIENT.base_currency`; no reval needed. Skip.
+2. Pull what Jaz auto-posted to the FX accounts during the period:
+   - `search_accounts(filter: {name: {in: ['FX Unrealized Gain', 'FX Unrealized Loss', 'FX Bank Revaluation']}})` — get the FX account ids.
+   - `generate_general_ledger(period_end: <period>-end, accountResourceIds: [<FX ids>], groupBy: 'ACCOUNT')` — aggregate per account.
+
+3. For each foreign-currency monetary balance at period end (TB rows where currency ≠ `CLIENT.base_currency` and account class is monetary), independently compute via the calculator:
+   - `clio calc fx-reval --amount <fcy-balance> --book-rate <booked> --closing-rate <closing> --currency <fcy> --base-currency <CLIENT.base_currency> --json`.
+
+4. Sum your independent gain/loss across all foreign balances. Compare against Jaz's auto-posted FX totals from step 2. Variance > `CLIENT.materiality_threshold` → investigate (likely causes: a settlement-realized FX event mid-period shifted the book rate; an explicit `currency.exchangeRate` override on a transaction; multi-leg FX through a bank-side spread). See `jaz-recipes/references/fx-revaluation.md` for the full verification flow and likely-cause taxonomy.
+
+5. Save verification to `recurring/monthly/<period>/fx-reval-verification.json` for audit-prep step 8 supporting schedules.
+
+Per memory rule [Bank FX is Revaluation, not Realized]: bank/cash FX uses `FX Bank Revaluation`. AR/AP FX uses both Realized (settlement-time) and Unrealized (period-end translation).
 
 ### Step 7 — Other period-end recognition
 

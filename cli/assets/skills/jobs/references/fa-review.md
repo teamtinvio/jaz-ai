@@ -1,267 +1,150 @@
 # Fixed Asset Review
 
-Review the fixed asset register for accuracy, identify assets requiring disposal or write-off, process disposals, and reconcile the register to the trial balance. This is a housekeeping job — ensuring the FA register reflects reality.
+> Annual housekeeping of the FA register. Identify assets requiring disposal/write-off, reconcile register to TB, verify Jaz auto-depreciation matches schedules. Driver tool: `generate_fa_review_blueprint`.
 
-**CLI:** `clio jobs fa-review [--json]`
+## Tools, recipes, calculators this job uses
 
----
+### MCP tools
+- **`generate_fa_review_blueprint(period: <YYYY> | <YYYY-Q[1-4]>, currency: <base>)`** — step 0: emit blueprint.
+- **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'WRITTEN_OFF']}}, limit: 200)`** — step 1: enumerate FAs. Paginate.
+- **`get_fixed_asset(resourceId: <id>)`** — step 2: per-asset detail (cost, acquisitionDate, usefulLifeMonths, depreciationMethod, salvageValue, NBV).
+- **`generate_fa_summary(period_end: <date>)`** — step 3: aggregate FA register at period end.
+- **`generate_fa_recon_summary(period_start: <year-start>, period_end: <year-end>)`** — step 3: reconcile movement (opening + additions − disposals − depreciation = closing).
+- **`generate_general_ledger(accountResourceId: <FA category GL>, period_start, period_end)`** — step 4: per-FA-category GL movement vs FA register.
+- **`update_fixed_asset(resourceId: <id>, status: 'DISPOSED' | 'WRITTEN_OFF', disposalDate, disposalProceeds)`** — step 5: status updates for disposals. Mirror endpoints `POST /api/v1/mark-as-sold/fixed-assets` (sale) / `POST /api/v1/discard-fixed-assets/{id}` (scrap).
+- **`plan_recipe(name: 'asset-disposal', ...)` + `execute_recipe(...)`** — step 5: invoke per disposal identified during review (per `asset-disposal.md` recipe).
+- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 5 / 6: finalize disposal journals + any pending DDB / 150DB depreciation DRAFTs from `declining-balance.md` recipe.
 
-## When to Do This
+### Calculators (cross-check, no API key needed)
+- **`clio calc depreciation --cost --salvage --life --method --frequency annual --json`** — step 4 per-asset cross-check.
+- **`clio calc asset-disposal`** — step 5 per-disposal cross-check (auto-invoked by recipe).
 
-- **Annually (minimum):** As part of year-end close or audit preparation
-- **Quarterly:** For growing businesses that acquire assets frequently
-- **Ad-hoc:** After a major event (office move, equipment upgrade, insurance claim)
-
----
-
-## Phase 1: Take Stock
-
-### Step 1: List all fixed assets
-
-```
-POST /api/v1/fixed-assets/search
-{
-  "filter": { "status": { "eq": "ACTIVE" } },
-  "sort": { "sortBy": ["purchaseDate"], "order": "ASC" },
-  "limit": 1000
-}
-```
-
-**What you get:** Every active fixed asset with `name`, `purchaseDate`, `purchaseAmount`, `bookValueAmount`, `depreciationMethod`, `typeName`, and `status`.
-
-### Step 2: List fixed asset types
-
-```
-POST /api/v1/fixed-assets-types/search
-{
-  "filter": {},
-  "sort": { "sortBy": ["typeName"], "order": "ASC" },
-  "limit": 100
-}
-```
-
-Asset types define the default depreciation method and useful life. Common types for SMBs:
-
-| Type | Typical Useful Life | Depreciation | Examples |
-|------|-------------------|--------------|----------|
-| **Office Equipment** | 5-7 years | Straight-line | Desks, chairs, shelving |
-| **Computer Equipment** | 3-5 years | Straight-line or DDB | Laptops, servers, monitors |
-| **Motor Vehicles** | 5-8 years | Straight-line | Delivery vans, company cars |
-| **Furniture & Fittings** | 7-10 years | Straight-line | Reception area, meeting rooms |
-| **Leasehold Improvements** | Lease term | Straight-line | Renovation, fit-out |
-| **Plant & Machinery** | 5-15 years | Straight-line or DDB | Production equipment |
-| **Software** | 3-5 years | Straight-line | Licensed software, ERP |
+### Cross-references
+- Within an engagement: invoked from `practice/references/annual-statutory.md` step 4b (year-end FA review feeds audit-prep + Form C-S capital allowances).
+- Sibling jobs: `audit-prep.md` step 8 (auditor reviews FA register + recon summary), `month-end-close.md` step 9 (monthly depreciation; this job is the periodic comprehensive review).
+- Recipes: `asset-disposal.md`, `declining-balance.md` (depreciation engine).
+- API rules: `jaz-api/SKILL.md` rules 91-92c (fixed-asset endpoints).
 
 ---
 
-## Phase 2: Review
-
-Work through the asset list and classify each asset.
-
-### Step 3: Identify fully depreciated assets still in use
-
-Search for assets where book value equals zero (or equals salvage value):
+## Step 0 — Emit blueprint
 
 ```
-POST /api/v1/fixed-assets/search
-{
-  "filter": {
-    "status": { "eq": "ACTIVE" },
-    "bookValueAmount": { "eq": 0 }
-  },
-  "sort": { "sortBy": ["purchaseDate"], "order": "ASC" },
-  "limit": 1000
-}
+generate_fa_review_blueprint(period: '2025', currency: <CLIENT.base_currency>)
 ```
 
-**What to do:**
-- If the asset is still in use → no action required. It stays on the register at zero NBV. No further depreciation is posted.
-- If the asset is no longer in use → dispose (Phase 3)
-
-**Note:** Fully depreciated assets still in use should be reviewed for impairment reversal under IAS 36 if their recoverable amount is significantly higher than carrying amount (zero). In practice, most SMBs don't reverse — the asset just sits at zero until disposal.
-
-### Step 4: Identify assets no longer in use
-
-This is a physical verification step — walk through the office/warehouse and compare the register to reality. Common findings:
-
-- **Thrown away but not written off:** Old laptops, broken equipment disposed of without updating the register
-- **Lost or stolen:** Equipment that can't be located
-- **Returned under warranty:** Asset was replaced but the old entry wasn't removed
-- **Sold informally:** Asset was sold (e.g., to an employee) but the sale wasn't recorded
-
-**Flag these for disposal in Phase 3.**
-
-### Step 5: Review depreciation methods
+## Step 1 — Enumerate FAs
 
 ```
-POST /api/v1/fixed-assets/search
-{
-  "filter": { "status": { "eq": "ACTIVE" } },
-  "sort": { "sortBy": ["typeName"], "order": "ASC" },
-  "limit": 1000
-}
+search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'WRITTEN_OFF']}}, limit: 200, sort: 'acquisitionDate:asc')
 ```
 
-Group by asset type and verify:
-- All assets of the same type use the same depreciation method (consistency principle)
-- Useful lives are reasonable for the asset type
-- No assets have an obviously wrong method (e.g., a building on 3-year straight-line)
+Paginate via offset. For year-end review: include DISPOSED and WRITTEN_OFF (disposed during the year are part of the recon).
 
-**Conditional:** Only act on this if you find inconsistencies. Changing depreciation method mid-life is a change in accounting estimate (IAS 8) — apply prospectively, not retrospectively.
+## Step 2 — Identify candidates for review
+
+For each ACTIVE asset, flag for practitioner attention:
+- **Fully depreciated** (`NBV == salvageValue` per FA summary): consider disposal if no longer in use; consider impairment review per IAS 36 if NBV > recoverable amount.
+- **Recently acquired without `usefulLifeMonths`**: depreciation can't run; halt and surface.
+- **In a disposal-candidate list per `CLIENT.fa_disposal_review[]`**: practitioner pre-flagged.
+- **Damaged / no longer in use** (per practitioner inspection): write off.
+- **Mid-life disposals** (sold or traded in during the period): per asset-disposal recipe.
+
+## Step 3 — FA register reconciliation
+
+```
+generate_fa_summary(period_end: '2025-12-31')
+generate_fa_recon_summary(period_start: '2025-01-01', period_end: '2025-12-31')
+```
+
+Save both to `recurring/annual/2025/fa-review/`. Assert per FA category:
+- `closingNbv == openingNbv + additions - disposals - depreciation` (the recon formula).
+- Sum of per-asset NBV in the register equals TB `<FA cost> - <Accumulated Depreciation>` line for that category.
+
+If mismatch beyond `CLIENT.materiality_threshold`: investigate via `generate_general_ledger(accountResourceId: <FA category cost GL>, period_start, period_end)`. Common: a disposal posted via `asset-disposal.md` recipe but `update_fixed_asset(status: 'DISPOSED')` step 5 missed — Jaz continues auto-depreciating.
+
+## Step 4 — Depreciation cross-check
+
+For each ACTIVE SL asset (Jaz auto-depreciates):
+- Pull FA's expected annual depreciation: `(cost - salvage) / (usefulLifeMonths / 12)`.
+- Compare to actual `generate_general_ledger(accountResourceId: <Depreciation Expense for this category>, period_start: <year-start>, period_end: <year-end>)` movement.
+- Should match within rounding ($0.12 tolerance for full-year SL).
+
+For each ACTIVE DDB / 150DB asset (recipe-managed, see `declining-balance.md`):
+- Per capsule: `search_journals(filter: {capsuleResourceId: <dep capsule>, valueDate: {between: [<year-start>, <year-end>]}, status: 'DRAFT'})`. Should be zero — all 12 months' DRAFT depreciation journals should already be FINALIZED via monthly-close.
+- If non-zero: `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})` for each remaining DRAFT.
+
+Cross-check via `clio calc depreciation --frequency annual --json` per asset; auditor will sample-test.
+
+## Step 5 — Process disposals
+
+For each disposal identified in step 2:
+
+```
+plan_recipe(
+  name: 'asset-disposal',
+  cost, salvageValue, usefulLifeYears, acquisitionDate, disposalDate, proceeds, method,
+  ...,
+  fixedAssetResourceId: <asset id>,
+  capsuleType: 'Asset Disposal',
+  capsuleName: 'Disposal — <asset name> — <disposal date>'
+)
+execute_recipe(...)
+bulk_finalize_drafts({kind: 'journal', resourceIds: [<disposal journal id>]})
+```
+
+Then the manual FA-register status update (engine-skipped — see `asset-disposal.md` step 5):
+```
+update_fixed_asset(resourceId: <asset id>, status: 'DISPOSED', disposalDate, disposalProceeds)
+```
+
+For scrap / write-off (no proceeds): `update_fixed_asset(status: 'WRITTEN_OFF', disposalDate)`.
+
+## Step 6 — Write-off of fully depreciated unused assets
+
+For assets at salvage value AND no longer in use:
+- If salvage value > 0 and asset is to be retained at salvage: leave ACTIVE; no further depreciation.
+- If salvage value > 0 and asset is to be scrapped: invoke `asset-disposal.md` with `proceeds: 0` → loss = salvage value.
+- If salvage value = 0 and asset is to be scrapped: minimal P&L impact; `asset-disposal` recipe still required to clear the cost + accumulated depreciation balances against each other.
+
+## Step 7 — Per-category GL reconciliation
+
+For each FA category (e.g., Vehicles, Office Equipment, Computers, Buildings):
+```
+generate_general_ledger(accountResourceId: <FA cost GL>, period_start: '2025-01-01', period_end: '2025-12-31', groupBy: 'CAPSULE')
+```
+
+Group by capsule shows per-asset / per-disposal trail. Auditor sample-test will pick 2-3 assets per category and trace GL → original purchase bill → FA registration → depreciation history → disposal (if any).
+
+## Step 8 — Save register snapshot
+
+Save to `recurring/annual/2025/fa-review/`:
+- `fa-summary.json` — per-asset detail
+- `fa-recon.json` — opening/additions/disposals/depreciation/closing
+- `gl-by-category.json` — per-category capsule-grouped GL
+- `disposals.json` — list of disposals processed during the review with capsule + journal references
+
+These feed `audit-prep.md` step 8 supporting schedules.
 
 ---
 
-## Phase 3: Disposals
+## Common error classes and recovery
 
-### Step 6: Sale disposals
-
-When an asset is sold, record the disposal. The calculator computes accumulated depreciation to disposal date, net book value, and gain/loss.
-
-**Calculator:** `clio calc asset-disposal`
-
-```bash
-clio calc asset-disposal --cost 50000 --salvage 5000 --life 5 --acquired 2022-01-01 --disposed 2025-06-15 --proceeds 12000
-```
-
-**Recipe:** `asset-disposal` — see `transaction-recipes/references/asset-disposal.md` for the full journal pattern.
-
-Record the disposal journal:
-
-```
-POST /api/v1/journals
-{
-  "saveAsDraft": false,
-  "reference": "FA-DISP-001",
-  "valueDate": "2025-06-15",
-  "journalEntries": [
-    { "accountResourceId": "<bank-account-uuid>", "amount": 12000.00, "type": "DEBIT", "name": "Proceeds from sale of Delivery Van VH-1234" },
-    { "accountResourceId": "<accumulated-depreciation-uuid>", "amount": 31500.00, "type": "DEBIT", "name": "Clear accumulated depreciation — Delivery Van VH-1234" },
-    { "accountResourceId": "<loss-on-disposal-uuid>", "amount": 6500.00, "type": "DEBIT", "name": "Loss on disposal — Delivery Van VH-1234" },
-    { "accountResourceId": "<fixed-asset-cost-uuid>", "amount": 50000.00, "type": "CREDIT", "name": "Remove cost — Delivery Van VH-1234" }
-  ]
-}
-```
-
-Then mark the asset as sold in the FA register:
-
-```
-POST /api/v1/mark-as-sold/fixed-assets
-```
-
-### Step 7: Scrap / write-off disposals
-
-When an asset is scrapped (no sale proceeds), the full NBV becomes a loss.
-
-**Calculator:**
-
-```bash
-clio calc asset-disposal --cost 50000 --salvage 5000 --life 5 --acquired 2022-01-01 --disposed 2025-06-15 --proceeds 0
-```
-
-Record the write-off journal:
-
-```
-POST /api/v1/journals
-{
-  "saveAsDraft": false,
-  "reference": "FA-WRITEOFF-001",
-  "valueDate": "2025-06-15",
-  "journalEntries": [
-    { "accountResourceId": "<accumulated-depreciation-uuid>", "amount": 31500.00, "type": "DEBIT", "name": "Clear accumulated depreciation — Old Server Rack" },
-    { "accountResourceId": "<loss-on-disposal-uuid>", "amount": 18500.00, "type": "DEBIT", "name": "Write-off loss — Old Server Rack" },
-    { "accountResourceId": "<fixed-asset-cost-uuid>", "amount": 50000.00, "type": "CREDIT", "name": "Remove cost — Old Server Rack" }
-  ]
-}
-```
-
-Then mark the asset as discarded:
-
-```
-POST /api/v1/discard-fixed-assets/{assetResourceId}
-```
+| Source | Error | Recovery |
+|--------|-------|----------|
+| Step 1 | `search_fixed_assets` returns more than the page limit | Paginate via `offset`. Most SMBs have <100 FAs. |
+| Step 3 | Recon doesn't tie | Disposed asset still ACTIVE in register (see `asset-disposal.md` step 5 manual update). Audit each disposal's status. |
+| Step 4 | DDB / 150DB DRAFTs unfinalized | Likely a missed monthly-close. Finalize current and surface to practitioner — auditor will see 12 months' depreciation in one period. |
+| Step 4 | SL depreciation off by > $0.12 | A monthly depreciation period was skipped (asset created mid-month with mis-aligned `acquisitionDate`). Reconcile per asset. |
+| Step 5 | `update_fixed_asset` to DISPOSED | 422 `pending_depreciation_journals` | DRAFT depreciation journals exist for periods after disposal date. `search_journals(filter: {fixedAssetResourceId: <id>, valueDate: {gt: <disposal>}, status: 'DRAFT'})` → `delete_journal` per result. Then retry. |
+| Step 6 | Trying to dispose an FA at NBV = 0 with no proceeds | Recipe still works but creates a no-effect journal. May be skippable; surface to practitioner. |
 
 ---
 
-## Phase 4: Verification
+## Cross-references back to engagements
 
-### Step 8: FA register reconciliation
-
-```
-POST /api/v1/generate-reports/fixed-assets-summary
-```
-
-```
-POST /api/v1/generate-reports/fixed-assets-recon-summary
-```
-
-The reconciliation report shows:
-
-```
-Opening NBV (start of period)
-+ Additions (new assets acquired)
-- Disposals (sold or scrapped)
-- Depreciation (period charge)
-= Closing NBV (end of period)
-```
-
-### Step 9: Reconcile to trial balance
-
-```
-POST /api/v1/generate-reports/trial-balance
-{ "startDate": "2025-01-01", "endDate": "2025-12-31" }
-```
-
-**What must tie:**
-
-| FA Register | Trial Balance Account |
-|------------|----------------------|
-| Total cost (all active assets) | Fixed Assets (at cost) — total of all FA cost accounts |
-| Total accumulated depreciation | Accumulated Depreciation — total of all accum. dep. accounts |
-| Closing NBV | Cost minus Accumulated Depreciation = Net Book Value |
-| Period depreciation charge | Depreciation Expense on P&L |
-| Gain/Loss on disposal | Other Income / Other Expense on P&L |
-
-If the register and trial balance don't tie, investigate:
-- Manual journal entries to FA accounts that bypassed the register
-- FA register entries that didn't generate journals (system issue)
-- Disposed assets not yet removed from the register
-
----
-
-## FA Review Checklist (Quick Reference)
-
-| # | Step | Phase | What |
-|---|------|-------|------|
-| 1 | List all fixed assets | Take stock | Search active assets |
-| 2 | List asset types | Take stock | Review type definitions |
-| 3 | Fully depreciated assets | Review | Identify NBV = 0 assets |
-| 4 | Assets no longer in use | Review | Physical verification |
-| 5 | Depreciation methods | Review | Consistency check |
-| 6 | Sale disposals | Dispose | Calculator + journal + mark as sold |
-| 7 | Scrap / write-off | Dispose | Calculator + journal + discard |
-| 8 | FA register report | Verify | Reconciliation summary |
-| 9 | Reconcile to trial balance | Verify | FA register = TB accounts |
-
----
-
-## Tips for SMBs
-
-**Keep a low-value asset threshold.** Items under $1,000 (or your chosen threshold) should be expensed immediately, not capitalized as fixed assets. This reduces register clutter and depreciation complexity. Common SG practice is $1,000-$5,000 depending on company size.
-
-**Tag your assets.** Use physical asset tags (numbered stickers) and record the tag number as the asset reference in Jaz. This makes physical verification much faster.
-
-**Review useful lives annually.** If your "3-year laptop" is still going strong at year 5, the useful life estimate was wrong. Adjust prospectively (IAS 8) — extend the remaining life and recalculate monthly depreciation.
-
-**Depreciation for tax (SG-specific):**
-- IRAS allows 1-year write-off for assets costing <= S$5,000 (Section 19A(10A))
-- IRAS allows 3-year accelerated write-off for all other assets (Section 19A)
-- Book depreciation (straight-line over useful life) and tax depreciation (accelerated) can differ — track the deferred tax difference
-
-**Insurance coverage check.** While reviewing assets, verify that your business insurance covers the replacement cost of active assets. Fully depreciated assets may still have significant replacement value — a 5-year-old server at $0 NBV still costs $15,000 to replace.
-
-**Common FA accounts in Jaz:**
-- Fixed Assets (at cost) — typically one sub-account per asset type
-- Accumulated Depreciation — mirror sub-accounts for each asset type
-- Depreciation Expense — on P&L, may be split by asset type for reporting
-- Gain on Disposal — Other Income
-- Loss on Disposal — Other Expense
+- `practice/references/annual-statutory.md` step 4b — invokes this job for year-end FA review. Practice playbook reads `CLIENT.fa_disposal_review[]` for pre-flagged candidates.
+- `audit-prep.md` step 8 — consumes the snapshot files for the audit pack.
+- `statutory-filing.md` (SG Form C-S) — capital allowances computation reads from FA register; this job's reconciliation must be clean before the tax computation.
+- `month-end-close.md` step 9 — monthly depreciation (Jaz auto-SL + recipe-DDB); this job is the periodic comprehensive register review (typically annual).
+- Recipes: `asset-disposal.md` (per-disposal), `declining-balance.md` (per-DDB-asset depreciation engine).

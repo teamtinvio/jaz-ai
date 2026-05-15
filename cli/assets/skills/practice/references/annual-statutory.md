@@ -27,7 +27,7 @@ Canonical playbook the agent walks through when the practitioner says "year-end 
 
 ### Recipes (jaz-recipes)
 - `plan_recipe(name: 'depreciation', …)` — used in step 4: annual depreciation true-up for non-SL assets.
-- `plan_recipe(name: 'fx-reval', …)` — used in step 4: year-end revaluation per non-base-currency monetary balance (jaz-recipes "annual-statutory" engagement context).
+- **FX revaluation** — used in step 4c as VERIFICATION ONLY (Jaz auto-handles year-end FX translation per IAS 21.23). Independent recompute via `clio calc fx-reval`; do NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post.
 - `plan_recipe(name: 'asset-disposal', …)` — used in step 4: disposals surfaced during FA review.
 - `plan_recipe(name: 'ecl', …)` — used in step 4: IFRS 9 year-end true-up over `generate_aged_ar`.
 - `plan_recipe(name: 'provision', …)` — used in step 4: IAS 37 remeasurement.
@@ -101,17 +101,26 @@ For each asset where `search_fixed_assets` returns `status: DISPOSED` but no ass
 
 **On 422 from `plan_recipe` with `disposal_after_period_end`:** the disposal date is later than `<FY-end>`. The disposal belongs to next FY; halt and confirm with practitioner.
 
-#### 4c — Year-end FX revaluation
+#### 4c — Year-end FX revaluation (verification only)
 
-Same logic as monthly-close step 6, but at `<FY-end>` and with the FY closing rates. Pull rates: `list_currency_rates(filter: {sourceCurrency: <fcy>, valueDate: <FY-end>})` per non-base-currency.
+**Jaz auto-handles year-end FX translation per IAS 21.23.** All foreign-currency monetary balances (AR, AP, cash, bank, intercompany, term deposits, FX provisions) translate to base currency at the FY-end closing rate automatically. **DO NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post.**
 
-For each foreign-currency monetary balance:
-1. `clio calc fx-reval --amount <fcy> --book-rate <booked> --closing-rate <fy-close> --currency <fcy> --base-currency <CLIENT.base_currency> --json`.
-2. `plan_recipe(name: 'fx-reval', …)` then `execute_recipe`.
+This sub-step is a year-end verification (auditor will sample-test the rates used):
 
-The Day-1 reversal scheduler will post on FY-start of the next FY automatically.
+1. Confirm FY-end rates are loaded for every foreign currency: `list_currency_rates(filter: {sourceCurrency: <fcy>, valueDate: <FY-end>})`. If empty: `bulk_upsert_currency_rates` to load all required pairs before proceeding (jaz-api rule 39 — auto-enables currencies not yet enabled). After rates load, Jaz re-translates automatically.
 
-**On 404 from `list_currency_rates`:** FY-end rate not loaded. `bulk_upsert_currency_rates` to load rates for all required pairs before proceeding (jaz-api rule 39 — auto-enables currencies not yet enabled).
+2. Pull what Jaz auto-posted to FX accounts during the FY:
+   - `search_accounts(filter: {name: {in: ['FX Unrealized Gain', 'FX Unrealized Loss', 'FX Bank Revaluation']}})`.
+   - `generate_general_ledger(period_end: <FY-end>, accountResourceIds: [<FX ids>], groupBy: 'ACCOUNT')`.
+
+3. For each foreign-currency monetary balance, independently compute:
+   - `clio calc fx-reval --amount <fcy> --book-rate <booked> --closing-rate <fy-close> --currency <fcy> --base-currency <CLIENT.base_currency> --json`.
+
+4. Sum independent gain/loss across all foreign balances. Compare against Jaz's auto-posted FX totals from step 2. Variance > `CLIENT.materiality_threshold` → investigate per `jaz-recipes/references/fx-revaluation.md` (likely causes: settlement-realized FX shifts, explicit `currency.exchangeRate` overrides, multi-leg FX through bank-side spreads).
+
+5. Save FY verification to `engagements/<period>/fx-reval-verification.json` for audit-prep step 8 (auditors love independent FX cross-checks).
+
+**On variance > materiality:** halt and surface to practitioner with both numbers and per-account breakdown. Real corrections (rare) go via a manual journal targeting `FX Unrealized Gain/Loss` directly with clear narrative — NOT via `execute_recipe`.
 
 #### 4d — IFRS 9 ECL year-end true-up
 

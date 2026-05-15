@@ -1,268 +1,172 @@
 # Quarter-End Close
 
-The quarterly close builds on the monthly close. It is month-end close repeated three times, plus a set of quarterly-specific adjustments that only make sense at three-month intervals. For most SMBs, this adds half a day to a day of extra work on top of the regular month-end.
+> Monthly close × 3 + quarterly extras (GST/VAT filing, formal ECL review, bonus true-up, intercompany recon, provision unwinding finalize). Driver tool: `generate_quarter_end_blueprint`.
 
-**CLI:** `clio jobs quarter-end --period 2025-Q1 [--currency SGD] [--json]`
+## Tools, recipes, calculators this job uses
 
-**Standalone vs Incremental:**
-- **Standalone (default):** Generates the full plan — all monthly close steps for each of the three months in the quarter, followed by the quarterly extras. Use this when months haven't been closed yet.
-- **Incremental (`--incremental`):** Generates only the quarterly extras below. Use this when all three months are already closed and locked.
+### MCP tools — orchestration
+- **`generate_quarter_end_blueprint(period: <YYYY-Q[1-4]>, currency: <base>)`** — step 0: emit phased blueprint.
+- **`generate_month_end_blueprint(...)`** — invoked 3× in standalone mode (months 1, 2, 3 of the quarter) before quarterly extras.
 
----
+### MCP tools — quarterly extras
+- **`generate_vat_ledger(period_start: <Q-start>, period_end: <Q-end>)`** — Q1 GST/VAT filing prep: full quarterly tax ledger.
+- **`generate_aged_ar(period_end: <Q-end>)`** — Q2 ECL formal review input.
+- **`plan_recipe(name: 'ecl', ...)` + `execute_recipe(...)`** — Q2 ECL top-up if material.
+- **`search_journals(filter: {tag: 'bonus-accrual', valueDate: {between: [<Q-start>, <Q-end>]}})`** — Q3 bonus YTD pull.
+- **`create_journal(...)`** — Q3 bonus true-up adjustment (manual one-off).
+- **`search_capsules(filter: {capsuleType: {eq: 'Intercompany'}})`** — Q4 IC reconciliation per pair of entities (multi-org coordination — see `intercompany.md` recipe).
+- **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}})` + `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
+- **`generate_trial_balance(period_end: <Q-end>)`** — verification.
+- **`update_account(resourceId: <CoA root>, lockDate: <Q-end>)`** — final lock.
 
-## Phase 1–5: Monthly Close (x3)
+### Calculators (cross-check, no API key needed)
+- **`clio calc ecl --current --30d --60d --90d --120d --rates --json`** — Q2 ECL.
+- **`clio calc provision`** — Q5 provision recompute (verification).
 
-Complete the full month-end close for each month in the quarter. Each month follows the same 5-phase, 18-step process.
-
-**Reference:** `references/month-end-close.md`
-
-| Quarter | Month 1 | Month 2 | Month 3 |
-|---------|---------|---------|---------|
-| Q1 (Jan–Mar) | January close | February close | March close |
-| Q2 (Apr–Jun) | April close | May close | June close |
-| Q3 (Jul–Sep) | July close | August close | September close |
-| Q4 (Oct–Dec) | October close | November close | December close |
-
-**Important:** Close months in order. Month 1 must be locked before starting Month 2, and Month 2 before Month 3. The quarterly extras run after Month 3 is closed.
-
----
-
-## Phase 6: Quarterly Extras
-
-These steps run once per quarter, after all three months are closed. They address items that are reviewed less frequently or that accumulate over the quarter.
-
-### Step Q1: GST/VAT filing preparation
-
-Generate the tax ledger for the full quarter and reconcile input/output tax for filing.
-
-```
-POST /generate-reports/vat-ledger
-{ "startDate": "2025-01-01", "endDate": "2025-03-31" }
-```
-
-**What to do:**
-1. Pull the quarterly tax ledger report
-2. Review output tax (GST on sales) — verify every taxable invoice is included and the correct tax code was applied
-3. Review input tax (GST on purchases) — verify every claimable bill is included, no blocked input tax claimed
-4. Identify discrepancies — missing invoices/bills, wrong tax codes, exempt items coded as taxable
-5. Cross-reference totals to the GST return form
-
-**For Singapore (IRAS):**
-- Quarterly filing (standard GST-registered businesses)
-- File via myTax Portal within one month after quarter end
-- Box 1 (Total Sales): total revenue incl. zero-rated and exempt
-- Box 6 (Output Tax): from tax ledger output tax total
-- Box 7 (Input Tax): from tax ledger input tax total (net of blocked items)
-
-**For Philippines (BIR):**
-- Monthly VAT return (BIR Form 2550M) for each month in the quarter
-- Quarterly VAT return (BIR Form 2550Q) for the full quarter
-- Input VAT carried forward if excess over output VAT
-- File within 25 days after the close of the taxable quarter
-
-**Verification:** Output tax per tax ledger should equal sum of GST on all sales invoices for the quarter. Input tax per tax ledger should equal sum of GST on all purchase bills (excluding blocked items). Any difference = data entry error to investigate.
-
-**See also:** `references/gst-vat-filing.md` for the full GST/VAT filing job.
-
-### Step Q2: ECL / bad debt provision — formal review
-
-The monthly close includes a quick bad debt check (Step 13). The quarterly review is the formal one — full aged receivables analysis with loss rates applied.
-
-**Recipe:** `bad-debt-provision` | **Calculator:** `clio calc ecl`
-
-**Step-by-step:**
-
-1. Pull the AR aging report as at quarter-end:
-```
-POST /generate-reports/ar-report
-{ "endDate": "2025-03-31" }
-```
-
-2. Categorize receivables into aging buckets (current, 30d, 60d, 90d, 120d+)
-
-3. Apply historical loss rates to each bucket:
-```bash
-clio calc ecl --current 100000 --30d 50000 --60d 20000 --90d 10000 --120d 5000 --rates 0.5,2,5,10,50
-```
-
-4. Compare the calculated provision to the existing Allowance for Doubtful Debts balance on the trial balance
-
-5. Post an adjustment journal for the difference:
-```
-POST /journals
-{
-  "valueDate": "2025-03-31",
-  "reference": "QE-ECL-Q1-25",
-  "journalEntries": [
-    { "accountResourceId": "<bad-debt-expense>", "amount": 1250.00, "type": "DEBIT", "name": "ECL provision adjustment — Q1 2025" },
-    { "accountResourceId": "<allowance-doubtful-debts>", "amount": 1250.00, "type": "CREDIT", "name": "ECL provision adjustment — Q1 2025" }
-  ]
-}
-```
-
-**Note:** If the required provision has decreased, reverse the direction (DR Allowance, CR Bad Debt Expense). Some firms use a separate recovery account for write-backs.
-
-**Conditional:** Always perform the formal review at quarter-end, even if the monthly quick checks showed no change. Document the analysis — auditors will ask for it.
-
-### Step Q3: Bonus accrual true-up
-
-Review quarterly bonus obligations and adjust the accrual if estimates have changed.
-
-**Recipe:** `employee-accruals` (bonus component)
-
-During monthly closes, you accrue a fixed monthly estimate (1/12 of expected annual bonus). At quarter-end, re-assess whether the estimate is still accurate based on actual performance.
-
-**Step-by-step:**
-
-1. Verify three months of bonus accruals exist. Search for journals in the Employee Benefits capsule:
-```
-POST /journals/search
-{
-  "filter": {
-    "valueDate": { "between": ["2025-01-01", "2025-03-31"] }
-  },
-  "sort": { "sortBy": ["valueDate"], "order": "ASC" },
-  "limit": 100
-}
-```
-Filter results by capsule or reference prefix (e.g., "BONUS-ACCR") to isolate bonus entries.
-
-2. Sum the year-to-date accrual and compare to the revised full-year estimate
-
-3. If the estimate has changed, post a true-up journal:
-```
-POST /journals
-{
-  "valueDate": "2025-03-31",
-  "reference": "QE-BONUS-Q1-25",
-  "journalEntries": [
-    { "accountResourceId": "<bonus-expense>", "amount": 2000.00, "type": "DEBIT", "name": "Bonus accrual true-up — Q1 2025" },
-    { "accountResourceId": "<bonus-liability>", "amount": 2000.00, "type": "CREDIT", "name": "Bonus accrual true-up — Q1 2025" }
-  ]
-}
-```
-
-**Conditional:** Only if the business has bonus schemes. Most SMBs with 5+ employees and a performance bonus structure should review quarterly. If no change to estimate, document the review but skip the journal.
-
-### Step Q4: Intercompany reconciliation
-
-If the business operates multiple entities (e.g., SG parent + PH subsidiary), reconcile intercompany balances and post settlement journals.
-
-**Recipe:** `intercompany`
-
-**Step-by-step:**
-
-1. Pull the trial balance for each entity and isolate intercompany receivable/payable accounts:
-```
-POST /generate-reports/trial-balance
-{ "startDate": "2025-01-01", "endDate": "2025-03-31" }
-```
-
-2. Verify that Entity A's intercompany receivable = Entity B's intercompany payable (and vice versa). Differences indicate:
-   - Transactions recorded in one entity but not the other
-   - Timing differences (one entity booked end-of-quarter, the other booked beginning of next)
-   - FX differences if the entities operate in different currencies
-
-3. Post matching journals in both entities to clear discrepancies
-
-4. If settling (netting off balances), post settlement journals:
-```
-POST /journals
-{
-  "valueDate": "2025-03-31",
-  "reference": "QE-IC-SETTLE-Q1-25",
-  "journalEntries": [
-    { "accountResourceId": "<intercompany-payable>", "amount": 15000.00, "type": "DEBIT", "name": "IC settlement — Entity A, Q1 2025" },
-    { "accountResourceId": "<bank-account>", "amount": 15000.00, "type": "CREDIT", "name": "IC settlement — Entity A, Q1 2025" }
-  ]
-}
-```
-
-**Conditional:** Only if multi-entity. Single-entity SMBs skip this entirely.
-
-### Step Q5: Provision unwinding
-
-If IAS 37 provisions exist (e.g., restoration obligations, warranty provisions, legal claims), post the quarterly discount unwinding journal.
-
-**Recipe:** `provisions` | **Calculator:** `clio calc provision`
-
-Provisions measured at present value must have the discount unwound each period, recognizing the time value of money as a finance cost.
-
-```bash
-clio calc provision --amount 500000 --rate 4 --term 60 --start-date 2025-01-01 --json
-```
-
-The calculator generates the unwinding schedule. Post the quarterly entry:
-
-```
-POST /journals
-{
-  "valueDate": "2025-03-31",
-  "reference": "QE-PROV-UNWIND-Q1-25",
-  "journalEntries": [
-    { "accountResourceId": "<finance-cost>", "amount": 4975.00, "type": "DEBIT", "name": "Provision discount unwinding — Q1 2025" },
-    { "accountResourceId": "<provision-liability>", "amount": 4975.00, "type": "CREDIT", "name": "Provision discount unwinding — Q1 2025" }
-  ]
-}
-```
-
-**Conditional:** Only if IAS 37 provisions exist with a discounting component. Most simple SMBs won't have these. Common in businesses with lease restoration obligations or long-term warranty commitments.
+### Cross-references
+- Within an engagement: invoked from `practice/references/quarterly-gst.md` end-to-end. Practice playbook reads `CLIENT.gst_scheme` (`quarterly` | `monthly` | `not-registered`), `CLIENT.materiality_threshold`, `CLIENT.intercompany_arrangements[]`, `CLIENT.bonus_policy`, `CLIENT.ecl_loss_rate_matrix`.
+- Sibling jobs: `month-end-close.md` (Phase 1-5 invokes 3×), `gst-vat-filing.md` (Q1 detail), `year-end-close.md` (annual, builds on this).
+- Recipes invoked: `bad-debt-provision.md` (engine `ecl`), `employee-accruals.md` (bonus true-up via `accrued-expense`), `intercompany.md` (manual), `provisions.md`.
 
 ---
 
-## Phase 7: Quarterly Verification
+## Standalone vs Incremental
 
-Run the standard period verification (see `references/building-blocks.md` — Period Verification Pattern) for the full quarter, plus these quarterly-specific checks.
+- **Standalone (default):** Generates full plan — all month-end steps for months 1-3, then quarterly extras. Use when months haven't been closed yet.
+- **Incremental** (`--incremental`): Quarterly extras only. Use when all 3 months are already closed and locked.
 
-### Standard verification (full quarter)
+Months MUST be closed in order. Month 1 locked → Month 2 close → Month 2 locked → Month 3 close. Quarterly extras assume the 3 monthly closes are complete and current.
 
-```
-POST /generate-reports/trial-balance
-{ "startDate": "2025-01-01", "endDate": "2025-03-31" }
-```
+## Step 0 — Emit blueprint
 
 ```
-POST /generate-reports/profit-and-loss
-{ "primarySnapshotDate": "2025-03-31", "secondarySnapshotDate": "2025-01-01" }
+generate_quarter_end_blueprint(period: '2025-Q1', currency: <CLIENT.base_currency>)
 ```
 
+Save to `recurring/quarterly/2025-Q1/blueprint.json`.
+
+## Phase 1-5 — Monthly closes (×3) — IF standalone
+
+Invoke `month-end-close.md` job for each of months 1, 2, 3 of the quarter. By end of phase 5: all 3 months individually closed + locked.
+
+## Phase 6 — Quarterly extras
+
+### Q1 — GST/VAT filing preparation
+
 ```
-POST /generate-reports/balance-sheet
-{ "primarySnapshotDate": "2025-03-31" }
+generate_vat_ledger(period_start: '2025-01-01', period_end: '2025-03-31')
 ```
 
-### Quarterly-specific checks
+Save to `recurring/quarterly/2025-Q1/vat-ledger.json`. Verify:
+- Output tax total == sum of GST on all sales invoices in the quarter (per `search_invoices(filter: {valueDate: {between: [<Q-start>, <Q-end>]}})` × tax-profile lookup).
+- Input tax total == sum of GST on all purchase bills less blocked items.
 
-**GST reconciliation:**
-- Tax ledger output tax total = sum of GST on all sales invoices for Q1
-- Tax ledger input tax total = sum of GST on all purchase bills (less blocked items) for Q1
-- Net GST payable/refundable per tax ledger matches the amount on the GST return form
-- If you already filed monthly VAT returns (PH), quarterly total should equal sum of the three monthly returns
+For SG: file F5 via myTax Portal within 1 month of Q-end. Box mappings:
+- Box 1 (Total Sales): total revenue including zero-rated and exempt
+- Box 6 (Output Tax): tax-ledger output total
+- Box 7 (Input Tax): tax-ledger input total (net of blocked per `practice/references/quarterly-gst.md` step 4)
 
-**ECL provision balance:**
-- Allowance for Doubtful Debts on the balance sheet matches the calculated ECL from Step Q2
-- Bad Debt Expense on the P&L is reasonable relative to revenue
+For PH: file BIR Form 2550Q within 25 days of Q-end. Quarterly total = sum of the 3 monthly Form 2550M filings.
 
-**Intercompany balance check (if multi-entity):**
-- Entity A's intercompany receivable = Entity B's intercompany payable
-- Net intercompany position across all entities = zero (eliminates on consolidation)
+Full step-by-step in `gst-vat-filing.md`.
 
-**Bonus accrual reasonableness:**
-- Bonus Liability on the balance sheet = (monthly accrual x months elapsed) + any true-ups
-- Bonus Expense on the P&L is proportional to the period (e.g., Q1 = ~25% of full-year estimate)
+### Q2 — ECL formal review
+
+```
+generate_aged_ar(period_end: '2025-03-31')
+clio calc ecl --current 100000 --30d 50000 --60d 20000 --90d 10000 --120d 5000 --rates 0.5,2,5,10,50 --existing-provision <TB Allowance balance> --currency <CLIENT.base_currency> --json
+```
+
+If `topUpRequired > CLIENT.materiality_threshold`:
+
+```
+plan_recipe(name: 'ecl', receivables: <buckets>, ratesPerBucket: <rates from CLIENT.ecl_loss_rate_matrix>, ...)
+execute_recipe(...)
+bulk_finalize_drafts({kind: 'journal', resourceIds: [<ecl journal>]})
+```
+
+Document the analysis in `recurring/quarterly/2025-Q1/ecl-review.json`. Auditor will request this each quarter.
+
+### Q3 — Bonus accrual true-up
+
+If `CLIENT.bonus_policy.estimation_method` is set:
+
+```
+search_journals(filter: {tag: 'bonus-accrual', valueDate: {between: ['2025-01-01', '2025-03-31']}})
+```
+
+Sum YTD accruals. Re-estimate full-year bonus per current performance data. If revised quarterly estimate ≠ already-accrued amount: post manual `create_journal` true-up against `Bonus Expense` / `Bonus Payable` for the delta.
+
+### Q4 — Intercompany reconciliation
+
+If `CLIENT.intercompany_arrangements[]` non-empty:
+
+For each arrangement (per pair of entities):
+1. Per-entity TB pull: `generate_trial_balance(period_end: '2025-03-31')` in EACH entity's org (multi-org context switch — see `intercompany.md` recipe).
+2. Verify `Entity A's IC Receivable balance == Entity B's IC Payable balance` (sign flipped).
+3. Investigate discrepancies (timing, FX, missing posting).
+4. If settling balances: post `create_cash_out_entry` in payer org + `create_cash_in_entry` (or invoice payment) in payee org.
+
+Full pattern in `intercompany.md` recipe.
+
+### Q5 — Provision unwinding finalize
+
+For each active IAS 37 provision capsule:
+
+```
+search_capsules(filter: {capsuleType: {eq: 'Provisions'}, status: {eq: 'ACTIVE'}})
+```
+
+Per capsule: this period's quarter-end unwinding DRAFT journals (3 monthly DRAFTs from `provisions.md` recipe execution) should already be in the capsule. Verify and finalize:
+
+```
+search_journals(filter: {capsuleResourceId: <provision capsule id>, valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {eq: 'DRAFT'}})
+bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})
+```
+
+If practitioner determines remeasurement is needed (cash-flow estimate changed, discount rate moved): see `provisions.md` step 6 — recompute, post adjustment, reverse remaining DRAFT unwinding journals, re-execute recipe with new inputs.
+
+## Phase 7 — Quarterly verification
+
+```
+generate_trial_balance(period_end: '2025-03-31')
+generate_profit_and_loss(period_start: '2025-01-01', period_end: '2025-03-31')
+generate_balance_sheet(period_end: '2025-03-31')
+```
+
+Save to `recurring/quarterly/2025-Q1/`. Quarterly-specific assertions:
+- Tax ledger output tax == sum-of-quarter sales GST.
+- Tax ledger input tax == sum-of-quarter purchase GST less blocked.
+- `Allowance for Doubtful Debts` == calculated ECL from Q2.
+- `Bonus Liability` reasonable vs YTD accrual + true-ups.
+- IC balances net to zero across paired entities (Q4 verification).
+
+## Phase 8 — Lock the quarter
+
+Run completeness gates (drafts must be zero) per `month-end-close.md` step 17 pattern, then:
+
+```
+update_account(resourceId: <CoA root>, lockDate: '2025-03-31')
+```
 
 ---
 
-## Quarter-End Close Checklist (Quick Reference)
+## Common error classes and recovery
 
-| # | Step | Phase | Conditional | Recipe/Calc |
-|---|------|-------|-------------|-------------|
-| 1–18 | Month 1 close (all steps) | Monthly | Always | See month-end-close.md |
-| 1–18 | Month 2 close (all steps) | Monthly | Always | See month-end-close.md |
-| 1–18 | Month 3 close (all steps) | Monthly | Always | See month-end-close.md |
-| Q1 | GST/VAT filing preparation | Quarterly | Always (if GST-registered) | gst-vat-filing job |
-| Q2 | ECL / bad debt provision review | Quarterly | Always | bad-debt-provision / `clio calc ecl` |
-| Q3 | Bonus accrual true-up | Quarterly | If bonus schemes exist | employee-accruals |
-| Q4 | Intercompany reconciliation | Quarterly | If multi-entity | intercompany |
-| Q5 | Provision unwinding | Quarterly | If IAS 37 provisions exist | provisions / `clio calc provision` |
-| V | Quarterly verification | Verification | Always | — |
+| Source | Error | Recovery |
+|--------|-------|----------|
+| `generate_quarter_end_blueprint` | 422 `months_not_closed` (standalone) | Months incomplete. Route to missing `month-end-close.md`. Use `--incremental` only when all 3 months locked. |
+| Q1 verification | Tax ledger ≠ sum of GST per invoice/bill | Likely tax-profile assignment errors. Audit each invoice / bill for correct tax profile. Quick Fix: `quick_fix_invoices(...)` / `quick_fix_bills(...)`. |
+| Q2 ECL recipe | 422 `account_not_found` | `Allowance for Doubtful Debts` missing. Create via `create_account(accountType: 'Current Asset')`. |
+| Q3 | YTD accrual mismatches monthly recipe expectations | Likely a manual journal posted directly to Bonus Liability (not via recipe). Audit `generate_general_ledger(accountResourceId: <Bonus Liability>, period_start: <FY-start>, period_end: <today>)`. |
+| Q4 IC recon | Entity A IC Receivable ≠ Entity B IC Payable (sign-flipped) | See `intercompany.md` error table. Common causes: timing, FX confusion, posting skipped in one entity. |
+| Q5 | Provision DRAFTs missing for the quarter | Recipe wasn't executed at provision setup. Re-run `provisions.md` recipe with current inputs; the engine emits the unwinding schedule for the remaining periods. |
+
+---
+
+## Cross-references back to engagements
+
+- `practice/references/quarterly-gst.md` — orchestrates this job for clients on quarterly cadence. Reads `CLIENT.gst_scheme`, `CLIENT.gst_registration_number`, `CLIENT.bonus_policy`, `CLIENT.ecl_loss_rate_matrix`.
+- `practice/references/annual-statutory.md` — invokes 4× of this (one per quarter) in standalone year-end-close mode.
+- `gst-vat-filing.md` — Q1 detail.
+- `year-end-close.md` — incremental quarterly extras run within annual close.

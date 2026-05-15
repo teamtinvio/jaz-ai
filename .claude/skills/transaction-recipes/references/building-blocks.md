@@ -2,17 +2,138 @@
 
 The Jaz features that transaction recipes combine to model complex, multi-period accounting scenarios.
 
+> **Always anchor on the recipe engine first.** Before reading any specific recipe, the canonical entry point is `plan_recipe(name: <canonical>, ...)` followed by `execute_recipe(...)`. The engine emits the capsules, schedulers, journals, and bills described below — agents should NOT hand-construct them. The sections below explain the building blocks the engine produces, not a manual construction guide.
+
+## Recipe-name aliases (file-name vs engine-name)
+
+Reference file names use accounting-textbook terminology (`prepaid-amortization`, `bank-loan`, `bad-debt-provision`). The recipe engine uses canonical short names. Always pass the canonical name to `plan_recipe(name: ...)` — file-name aliases will return `422 unsupported_recipe`.
+
+| File / textbook name | Canonical engine name |
+|----------------------|------------------------|
+| `prepaid-amortization` | `prepaid-expense` |
+| `deferred-revenue` | `deferred-revenue` |
+| `accrued-expenses` | `accrued-expense` |
+| `bank-loan` | `loan` |
+| `ifrs16-lease` | `lease` |
+| `hire-purchase` | `lease` (with `useful-life-months` set) |
+| `declining-balance` | `depreciation` (with `method: 'ddb'` or `'150db'`) |
+| `bad-debt-provision` | `ecl` |
+| `fx-revaluation` | `fx-reval` |
+| `provisions` | `provision` |
+| `fixed-deposit` | `fixed-deposit` |
+| `asset-disposal` | `asset-disposal` |
+| `dividend` | `dividend` |
+| `employee-accruals` (annual leave / 13th month) | `leave-accrual` |
+| `intercompany` | (no engine — manual journals via `create_journal`; pair invoices/bills across two orgs) |
+| `capital-wip` | (no engine — manual capsule + capital-asset journal pattern) |
+
+**13 recipes are engine-managed.** 2 are manual patterns (intercompany + capital-wip) — they share the capsule + scheduler primitives below but emit journals via `create_journal` directly.
+
 ---
 
-## Capsules — Workflow Containers
+## Capsules — the Jaz primitive for complex / multi-step transactions
 
-Capsules group related transactions into a single logical unit for a specific accounting workflow. They are **not** a classification tool — they represent the full lifecycle of a business event.
+Capsules group related transactions into one logical lifecycle unit. NOT a classification tag, NOT a tracking dimension — capsules are the workflow container that ties every entry of a multi-step business event to the same audit trail. They unlock advanced patterns the recipe engine can't model on its own.
 
-**How capsules work in recipes:**
-- Create one capsule per scenario instance (e.g., "FY2025 Office Insurance")
-- Assign the initial transaction (bill, invoice, or journal) to the capsule
-- Assign the scheduler (if any) to the same capsule — every entry it generates automatically lands in that capsule
-- For manual journal recipes, assign each monthly journal to the capsule as you create it
+**Capsule = (capsuleType, capsuleName, [bills, invoices, journals, cash entries], custom fields, lifecycle status)**
+
+### Where capsules earn their place
+
+The recipe engine uses capsules automatically. But capsules also enable advanced/complex transactions OUTSIDE the engine — anywhere you need cross-period traceability, GL grouping, or auditor-friendly aggregation.
+
+**Advanced patterns that need capsules (no engine handles them):**
+
+| Pattern | Why a capsule | Tools to build it |
+|---------|---------------|-------------------|
+| Multi-leg M&A transaction (acquisition price + escrow + adjustments) | Track the full deal across legal close + post-close adjustments + escrow release in one auditable unit | `create_capsule(capsuleType: 'M&A')` + per-leg `create_journal` / `create_bill` / `create_cash_in` all assigned to the same capsule |
+| Construction-in-progress (CWIP → FA) — see `capital-wip.md` | Accumulate dozens of contractor bills + permits + materials across months; then transfer to FA on completion. Capsule = the audit trail for the project. | `create_capsule(capsuleType: 'Capital Projects')` + bills per cost + transfer journal + FA registration |
+| Intercompany lifecycle — see `intercompany.md` | Match invoices / bills across two orgs (and their settlements). One capsule per entity, both with matching reference. | `create_capsule(capsuleType: 'Intercompany')` per entity |
+| Multi-period contract revenue (deferred + variable consideration + reversals per IFRS 15) | Recipe engine handles ratable; capsule + manual adjustments handle variable consideration + true-ups | `Deferred Revenue` capsule + recipe + manual variable-consideration journals |
+| Restructuring program (multiple severance, lease exits, write-offs over 6-18 months) | Tie the full program — provisions, asset disposals, severance accruals, settlement cash-outs — to one capsule for board / auditor reporting | `create_capsule(capsuleType: 'Restructuring')` + provisions recipe + asset-disposal recipe + manual severance journals |
+| Insurance claim (loss event → claim filed → cash received → asset write-off / replacement) | Track the full claim lifecycle across multiple periods | `create_capsule(capsuleType: 'Insurance Claim')` + asset-disposal recipe + cash-in receipt + manual gain/loss journal |
+| Litigation provision lifecycle (initial recognition → settlement negotiations → final payment or release) | IAS 37 provision + interim remeasurements + eventual settlement — all in one trail | `create_capsule(capsuleType: 'Provisions')` + provision recipe + manual remeasurement journals + settlement cash-out |
+| Customer write-off campaign (specific impairment of a major debtor) | Group the customer's outstanding invoices + the credit notes that write them off + the resulting cash recovery (if any) | `create_capsule(capsuleType: 'Bad Debt Write-off')` + customer credit notes + apply_credit_to_invoice + any later cash recovery |
+| Foreign subsidiary investment lifecycle (subscription + dividends received + investment impairment + eventual disposal) | Long-running investment account with multiple economic events over years | `create_capsule(capsuleType: 'Investments')` + journals per event |
+
+### How to use capsules well
+
+**Three rules:**
+
+1. **One capsule per LIFECYCLE, not per period.** A 5-year loan = ONE capsule (not 12 per year). A construction project = ONE capsule (not one per contractor bill). The capsule's job is to span the full lifecycle.
+
+2. **Use Capsule Types as the search axis, not Capsule Name.** Capsule names are unique per instance ("FY2025 Office Insurance"); types are reusable ("Prepaid Expenses"). `search_capsules(filter: {capsuleType: {eq: 'Prepaid Expenses'}})` returns ALL prepaid capsules across history.
+
+3. **Group GL by capsule for the auditor.** Capsules are the ONLY enrichment that supports `groupBy: 'CAPSULE'` in `generate_general_ledger`. Auditor sample-test: pick 3 capsules per type, pull the full GL by capsule, tie the entries back to the source documents (bills, invoices, journals). This is the highest-leverage capsule use.
+
+**MCP tool shape:**
+
+```
+create_capsule(
+  capsuleTypeResourceId: <type id from search_capsule_types>,
+  title: 'Bank Loan — DBS Term Loan — FY2025',
+  description: 'SGD 100,000 5-year term loan, 6% p.a., facility ref LN-2025-0042',
+  customFields: { 'Loan Reference': 'LN-2025-0042', 'Bank Name': 'DBS Bank' }
+)
+```
+
+Then assign entries to it via `capsuleResourceId` on the create call:
+```
+create_journal(..., capsuleResourceId: <capsule id>)
+create_bill(..., capsuleResourceId: <capsule id>)
+create_invoice(..., capsuleResourceId: <capsule id>)
+create_cash_in_entry(..., capsuleResourceId: <capsule id>)
+create_cash_out_entry(..., capsuleResourceId: <capsule id>)
+```
+
+**Search and audit patterns:**
+
+```
+search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}, status: {eq: 'ACTIVE'}})
+  # All open loan capsules — feed into year-end-close.md Y6 reclassification
+search_journals(filter: {capsuleResourceId: <id>}, sort: 'valueDate:asc')
+  # Full GL for one capsule — the auditor's view
+generate_general_ledger(period_start, period_end, groupBy: 'CAPSULE')
+  # Period activity grouped by capsule — the practitioner's view
+```
+
+**Capsule lifecycle:**
+
+- Created on first use (recipe `execute_recipe` or manual `create_capsule`).
+- ACTIVE while events accumulate.
+- CLOSED when the lifecycle ends (loan paid off, lease term ends, project complete). `update_capsule(resourceId: <id>, status: 'CLOSED')`.
+- Closed capsules remain searchable + reportable; they're an auditor's friend.
+
+### Recipe-engine capsules vs manually-created capsules
+
+The recipe engine creates ONE capsule per `execute_recipe` call. For complex transactions where you need MULTIPLE recipes against ONE business event, create the capsule manually FIRST, then pass `capsuleResourceId` into each recipe + manual entry:
+
+```
+# Restructuring program example:
+1. create_capsule(capsuleType: 'Restructuring', title: 'FY2025 Restructuring')
+2. plan_recipe(name: 'provision', ..., capsuleResourceId: <restructuring capsule>)  # severance provision
+3. plan_recipe(name: 'asset-disposal', ..., capsuleResourceId: <restructuring capsule>)  # office equipment write-off
+4. create_journal(..., capsuleResourceId: <restructuring capsule>)  # lease termination penalty
+```
+
+All entries land in one capsule; auditor reviews the whole restructuring as one unit.
+
+### When NOT to use a capsule
+
+- Single-period one-shot entries (e.g., monthly utility bill) — use a tag instead. Capsules are overkill.
+- Operating expenses that aren't part of a multi-step event — tag for analysis, no capsule.
+- Bank reconciliation — bank entries don't need capsules; they belong to specific transactions.
+
+**Capsule overuse cost:** every capsule is a lifecycle to manage. Closing them is manual. Audit reports list them. Over-capsulizing pollutes the search namespace.
+
+---
+
+## How recipes use capsules (engine pattern)
+
+The recipe engine creates one capsule per `execute_recipe` call. The pattern:
+- Capsule type comes from `capsuleType` in the recipe input
+- Capsule title = `<capsuleName>` + `(<startDate>)` for collision avoidance on repeat runs
+- All bill / invoice / journal / cash entries the recipe creates get the new capsule's resourceId
+- Manual journal recipes (intercompany, capital-wip) follow the same pattern but you create the capsule + assign journals manually
 
 **Capsule Types** are labels that categorize capsules. Create types that match your recipes:
 - Prepaid Expenses

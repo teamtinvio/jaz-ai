@@ -1,308 +1,260 @@
 # Month-End Close
 
-The monthly close is the foundation of accurate books. For an SMB, this typically takes 1-3 days depending on transaction volume and complexity. Every quarter-end and year-end builds on this.
+> The foundational close cadence — every quarter-end and year-end builds on it. For an SMB, 1-3 days depending on transaction volume. Driver tool: `generate_month_end_blueprint`.
 
-**CLI:** `clio jobs month-end --period 2025-01 [--currency SGD] [--json]`
+## Tools, recipes, calculators this job uses
 
----
+### MCP tools — pre-close gates
+- **`generate_month_end_blueprint(period: <YYYY-MM>, currency: <base>)`** — step 0: emit phased close checklist for the agent to execute.
+- **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, sort: 'valueDate:asc', limit: 200)`** — step 1: confirm sales invoices entered. Paginate via `offset`.
+- **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}}, ...)`** — step 2: confirm purchase bills entered.
+- **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', valueDateRange: {from, to})`** — step 3: pull unreconciled bank statement entries per account.
+- **`generate_aged_ar(period_end: <date>)` / `generate_aged_ap(period_end: <date>)`** — steps 4-5: aging reports tied to TB AR / AP balances.
 
-## Phase 1: Pre-Close Preparation
+### MCP tools — accruals + valuations
+- **`plan_recipe(name: 'accrued-expense', ...)` / `execute_recipe(...)`** — step 6: per `CLIENT.recurring_accruals[]` whose `last_posted < period_end`.
+- **`plan_recipe(name: 'prepaid-expense', ...)`** — step 7: only for new prepaid setup; ongoing recognition runs from the scheduler created at setup.
+- **`plan_recipe(name: 'deferred-revenue', ...)`** — step 8: same setup-vs-recognition note as prepaid.
+- **`plan_recipe(name: 'depreciation', ...)`** — step 9: only when an asset uses non-SL method (DDB, 150DB) — Jaz native FA handles SL automatically. Verify FA register first.
+- **`plan_recipe(name: 'leave-accrual', ...)` / `execute_recipe(...)`** — step 10: monthly leave accrual; the engine creates the scheduler so it auto-fires next month.
+- **FX revaluation** — step 12: **Jaz auto-handles**. The recipe is verification-only via `clio calc fx-reval`; do NOT invoke `execute_recipe(name: 'fx-reval', ...)` (would double-post).
+- **`plan_recipe(name: 'ecl', ...)`** — step 13: top-up bad-debt provision based on `generate_aged_ar` buckets.
 
-Before adjusting anything, ensure the raw data is complete. These are verification steps — you're checking, not creating.
+### MCP tools — reconciliation execution
+- **`view_auto_reconciliation(bankAccountResourceId: <id>)`** — step 3: READ-ONLY suggestions (does NOT write).
+- **`apply_bank_rule(...)`** — step 3: rule-driven recon.
+- **`quick_reconcile(...)` / `reconcile_direct_cash_entry(...)` / `reconcile_cash_journal(...)` / `reconcile_manual_journal(...)` / `reconcile_cash_transfer(...)` / `reconcile_invoice_receipt(...)` / `reconcile_bill_receipt(...)`** — step 3: per matched pair from the cascade.
 
-### Step 1: Verify all sales invoices are entered
+### MCP tools — verification + close
+- **`generate_trial_balance(period_end: <date>)`** — step 14: master reconciliation.
+- **`generate_profit_and_loss(period_start, period_end)`** — step 15.
+- **`generate_balance_sheet(period_end)`** — step 16.
+- **`search_journals(filter: {status: 'DRAFT', valueDate: {between: [<period-start>, <period-end>]}})`** — step 17: gate on zero drafts.
+- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 17: clear residual drafts before lock.
+- **`update_account(resourceId: <CoA root>, lockDate: <period-end>)`** — step 18: lock the period.
 
-Confirm every invoice issued during the period is in Jaz.
+### Calculators (cross-check, no API key needed)
+- **`clio calc accrued-expense`** — step 6: independently compute accrual amount.
+- **`clio calc prepaid-expense`** / **`clio calc deferred-revenue`** — steps 7-8: setup events only.
+- **`clio calc depreciation`** — step 9: FA register cross-check.
+- **`clio calc fx-reval`** — step 12: independent FX gain/loss for VERIFICATION against what Jaz auto-posted.
+- **`clio calc ecl`** — step 13: ECL provision cross-check.
 
-```
-POST /invoices/search
-{
-  "filter": { "valueDate": { "between": ["2025-01-01", "2025-01-31"] } },
-  "sort": { "sortBy": ["valueDate"], "order": "ASC" },
-  "limit": 1000
-}
-```
-
-**What to check:** Compare the count and total against your sales records or POS system. Missing invoices = understated revenue.
-
-### Step 2: Verify all purchase bills are entered
-
-Confirm every bill received during the period is in Jaz. For SMBs, this is the most common gap — bills arrive late or sit in someone's inbox.
-
-```
-POST /bills/search
-{
-  "filter": { "valueDate": { "between": ["2025-01-01", "2025-01-31"] } },
-  "sort": { "sortBy": ["valueDate"], "order": "ASC" },
-  "limit": 1000
-}
-```
-
-**What to check:** Cross-reference against email, supplier portals, and physical mail. Late bills → missed expenses → overstated profit.
-
-**Tip:** If you have the bill document but haven't entered it yet, use **Jaz Magic** (`POST /magic/createBusinessTransactionFromAttachment`) — upload the PDF/JPG and let extraction & autofill handle it.
-
-### Step 3: Complete bank reconciliation
-
-This is the single most important pre-close step. Every bank account must be reconciled to its statement closing balance.
-
-```
-POST /bank-records/{accountResourceId}/search
-{
-  "filter": { "status": { "eq": "UNRECONCILED" } },
-  "sort": { "sortBy": ["valueDate"], "order": "ASC" },
-  "limit": 1000
-}
-```
-
-**What to check:**
-- All unreconciled items are genuine timing differences (outstanding cheques, deposits in transit)
-- No items older than 30 days (investigate and resolve)
-- Book balance per Jaz matches bank statement closing balance
-
-**See also:** `references/bank-recon.md` for the full bank reconciliation catch-up job.
-
-### Step 4: Review AR aging
-
-Identify overdue customer invoices. This feeds into credit control and bad debt assessment.
-
-```
-POST /generate-reports/ar-report
-{ "endDate": "2025-01-31" }
-```
-
-**What to check:**
-- Total AR ties to Accounts Receivable on trial balance
-- Flag invoices overdue > 30/60/90 days
-- Consider bad debt provision if material (→ Phase 3)
-
-### Step 5: Review AP aging
-
-Identify upcoming and overdue supplier payments. This feeds into payment planning.
-
-```
-POST /generate-reports/ap-report
-{ "endDate": "2025-01-31" }
-```
-
-**What to check:**
-- Total AP ties to Accounts Payable on trial balance
-- Identify bills due in the next 7-14 days for the payment run
-- Flag any disputed or held bills
+### Cross-references
+- Within an engagement: invoked from `practice/references/monthly-close.md` end-to-end. Practice playbook reads CLIENT.md fields (`recurring_accruals[]`, `bank_accounts[]`, `materiality_threshold`, `coa_mapping`, `base_currency`, `multi_currency`) and writes outputs to `recurring/monthly/<period>/`.
+- Sibling jobs: `bank-recon.md` (step 3 detail), `payment-run.md` (typically run separately mid-month), `quarter-end-close.md` / `year-end-close.md` (additive on top of this base).
+- Recipes invoked: `accrued-expenses.md`, `prepaid-amortization.md`, `deferred-revenue.md`, `declining-balance.md`, `employee-accruals.md`, `bank-loan.md` (verification only — engine emits interest), `fx-revaluation.md`, `bad-debt-provision.md`. See per-recipe files for engine entry points.
+- API rules: `jaz-api/SKILL.md` rules 2 (valueDate not issueDate), 14 (saveAsDraft default), 18 (bank-accounts envelope), 31 (currency object shape), 36 (endDate for AR/AP point-in-time), 124 (recon NOT idempotent).
 
 ---
 
-## Phase 2: Accruals & Adjustments
-
-Record transactions that belong to this period but aren't yet in the books. This is where recipes come in.
-
-### Step 6: Record accrued expenses
-
-Expenses incurred but not yet billed (utilities, professional services, cleaning, etc.). The most common month-end adjustment for SMBs.
-
-**Recipe:** `accrued-expenses`
-**Pattern:** DR Expense, CR Accrued Liabilities → reverse on Day 1 of next month
+## Step 0 — Emit blueprint
 
 ```
-POST /journals
-{
-  "valueDate": "2025-01-31",
-  "reference": "ME-ACCR-JAN25",
-  "journalEntries": [
-    { "accountResourceId": "<expense-account>", "amount": 500.00, "type": "DEBIT", "name": "Electricity accrual — Jan 2025" },
-    { "accountResourceId": "<accrued-liabilities>", "amount": 500.00, "type": "CREDIT", "name": "Electricity accrual — Jan 2025" }
-  ]
-}
+generate_month_end_blueprint(period: '2025-01', currency: <CLIENT.base_currency>)
 ```
 
-**Conditional:** Only if there are expenses not yet billed for the period. Common examples: utilities, internet, cleaning, accounting fees.
+Save to `recurring/monthly/2025-01/blueprint.json`. Blueprint produces the phased structure this playbook executes.
 
-### Step 7: Amortize prepaid expenses
+## Phase 1 — Pre-close gates
 
-If you've set up prepaid expense capsules with schedulers, verify the scheduler fired for this month. If not, post the amortization journal manually.
+### Step 1 — Verify sales invoices entered
 
-**Recipe:** `prepaid-amortization` | **Calculator:** `clio calc prepaid-expense`
-**Pattern:** DR Expense, CR Prepaid Asset
-
-**Verification:** Search for journals in the prepaid capsule for this period:
 ```
-POST /journals/search
-{
-  "filter": {
-    "valueDate": { "between": ["2025-01-01", "2025-01-31"] }
-  },
-  "sort": { "sortBy": ["valueDate"], "order": "DESC" },
-  "limit": 100
-}
+search_invoices(filter: {valueDate: {between: ['2025-01-01', '2025-01-31']}}, sort: 'valueDate:asc', limit: 200)
 ```
 
-Filter results by capsule name (e.g., "FY2025 Office Insurance") to confirm the entry exists.
+Compare count + sum against POS / sales register. Missing invoices = understated revenue. Per `jaz-api/SKILL.md` rule 38, paginate via `offset` if `totalElements > 200`.
 
-### Step 8: Recognize deferred revenue
+### Step 2 — Verify bills entered (most common SMB gap)
 
-If you've received upfront payments that should be recognized over time, verify the scheduler fired or post manually.
+```
+search_bills(filter: {valueDate: {between: ['2025-01-01', '2025-01-31']}}, sort: 'valueDate:asc', limit: 200)
+```
 
-**Recipe:** `deferred-revenue` | **Calculator:** `clio calc deferred-revenue`
-**Pattern:** DR Deferred Revenue (liability), CR Revenue
+Cross-reference against email + supplier portals + physical mail. Late bills = missed expenses = overstated profit. For PDFs in hand: invoke `mcp magic create --file <pdf>` (Jaz Magic OCR + autofill) to generate the bill draft.
 
-**Conditional:** Only if your business has subscription or prepaid revenue models.
+### Step 3 — Bank reconciliation
 
-### Step 9: Record depreciation
+For each `CLIENT.bank_accounts[]`:
 
-For fixed assets, record the monthly depreciation charge. Jaz supports straight-line natively via fixed assets. For declining balance or 150DB methods, use the calculator and post manual journals.
+1. If `jaz_resource_id` empty: `list_bank_accounts()`, match by `name + currency`, write back to CLIENT.md, ask practitioner to confirm.
+2. `search_bank_records(accountResourceId: <jaz_resource_id>, status: 'UNRECONCILED', valueDateRange: {from: '2025-01-01', to: '2025-01-31'}, limit: 200, sort: 'valueDate:asc')`.
+3. If results: `clio jobs bank-recon match --input <records> --tolerance 0.01 --date-window 14 --json` (5-phase cascade matcher). For each match, invoke the matching `reconcile_*` tool.
+4. `view_auto_reconciliation(bankAccountResourceId: <id>, recommendationType: 'MAGIC_MATCH')` — READ-ONLY suggestions for residuals; commit via `quick_reconcile` / `apply_bank_rule` / per-entry `reconcile_*`.
+5. `generate_bank_recon_summary(period_end: '2025-01-31', accountResourceId: <id>)`. Confirm `unreconciledCount == 0` OR document in `ENGAGEMENT.risk_areas`.
 
-**Recipe:** `declining-balance` | **Calculator:** `clio calc depreciation`
-**Pattern:** DR Depreciation Expense, CR Accumulated Depreciation
+Full detail in `bank-recon.md`. NOT idempotent — see error table.
 
-**If using native Jaz FA depreciation:** Verify auto-calculated depreciation is running correctly via the FA register.
-**If using non-standard methods:** Post manual journal from calculator output.
+### Steps 4-5 — AR / AP aging
 
-### Step 10: Accrue employee benefits
+```
+generate_aged_ar(period_end: '2025-01-31')
+generate_aged_ap(period_end: '2025-01-31')
+```
 
-Record monthly leave accrual. If using a scheduler, verify it fired.
+Use `endDate` (rule 36 — point-in-time, not period-range). Assert: aging totals match `generate_trial_balance` AR/AP lines within `CLIENT.materiality_threshold`. Flag > 60d for credit-control / payment-priority. Disputed bills exit the active aging — annotate practitioner.
 
-**Recipe:** `employee-accruals`
-**Pattern:** DR Leave Expense, CR Leave Liability (monthly fixed amount from scheduler)
+## Phase 2 — Accruals & adjustments
 
-**Conditional:** Only if you track leave balances. Most SMBs with 5+ employees should.
+### Step 6 — Accrued expenses
 
-### Step 11: Accrue loan interest
+For each `CLIENT.recurring_accruals[]` where `last_posted < '2025-01-31'`:
 
-If you have bank loans, verify the interest portion of this month's payment is correctly recorded. If payments are embedded in bill/cash-out entries, this may already be handled.
+1. Compute amount per `estimation_method` (`prior_month` via `search_journals`, `trailing_3m_avg`, `budget`, `fixed_amount`).
+2. Cross-check: `clio calc accrued-expense --amount <computed> --periods 1 --json`.
+3. `plan_recipe(name: 'accrued-expense', amount: <computed>, glAccount: <CLIENT.recurring_accruals[i].gl_account>, vendor: <CLIENT.recurring_accruals[i].vendor>, valueDate: '2025-01-31', reversalDate: '2025-02-01')`.
+4. Resolve `requiredAccounts` + `needsContact` (search/create as needed).
+5. `execute_recipe(...)`. Engine emits dual-entry accrual + reversal scheduler.
+6. `validate_journal_draft(resourceId: <id>)` for each draft journal.
+7. After all accruals processed: `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`.
 
-**Recipe:** `bank-loan` | **Calculator:** `clio calc loan`
-**Pattern:** Interest splits from principal in each payment — verify the amortization table matches.
+Cross-check: `generate_trial_balance(period_end: '2025-01-31')`. Sum credit movements against accrual liability accounts. Verify `|sum - expected| ≤ CLIENT.materiality_threshold`.
 
-**Conditional:** Only if you have active loans. Skip if loan payments are already correctly coded.
+### Step 7 — Prepaid expense recognition (finalize this period's pre-emitted journal)
+
+For each existing `Prepaid Expenses` capsule (via `search_capsules(filter: {capsuleType: {eq: 'Prepaid Expenses'}})`):
+
+1. `search_journals(filter: {capsuleResourceId: {eq: <capsule.id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})`. The recipe pre-emitted this period's recognition journal as DRAFT at recipe-execution time.
+2. If empty: either the recipe was set up wrong (no journal for this period — investigate via `search_journals` without status filter to see if it's already ACTIVE, then skip), OR the practitioner went off-recipe. Surface to practitioner.
+3. If found: collect resourceIds, then `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`.
+4. New prepaid setups during this period (a new prepaid started this month): invoke `plan_recipe(name: 'prepaid-expense', ...)` per `prepaid-amortization.md` — this creates the bill + N future-dated DRAFT journals; the current period's journal is then in the bulk_finalize_drafts queue above.
+
+### Step 8 — Deferred revenue recognition
+
+Mirror of step 7. Existing `Deferred Revenue` capsules: search for this period's DRAFT journal in each, then `bulk_finalize_drafts`. New deferred setups: `plan_recipe(name: 'deferred-revenue', ...)` then handle the current period's journal in the same bulk_finalize.
+
+### Step 9 — Depreciation
+
+```
+search_fixed_assets(filter: {status: {eq: 'ACTIVE'}, depreciationMethod: {in: ['ddb', '150db']}})
+```
+
+For Jaz-native SL assets: depreciation auto-posts; verify via `generate_fa_summary(period_end: '2025-01-31')` showing month's depreciation movement. For non-SL methods returned above: `plan_recipe(name: 'depreciation', method: 'ddb' | '150db', cost, salvage, life, ...)` per asset, then `execute_recipe`.
+
+### Step 10 — Employee benefit accruals
+
+If `CLIENT.headcount > 0` and `CLIENT.tracks_leave_balances == true`:
+
+```
+plan_recipe(name: 'leave-accrual', headcount: <CLIENT.headcount>, daysPerEmployee: <CLIENT.leave_days_per_year>, dailyRate: <avg-daily-rate>, startDate: '2025-01-01', termMonths: 12)
+```
+
+On first month of FY only — engine creates the scheduler and posts the first accrual. Subsequent months: scheduler emits automatically. Cross-check via `clio calc leave-accrual`.
+
+### Step 11 — Loan interest (finalize this period's pre-emitted journal)
+
+For each active loan capsule (via `search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}})`):
+
+1. `search_journals(filter: {capsuleResourceId: {eq: <loan-capsule-id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})`. The `loan` recipe pre-emitted all `termMonths` future-dated DRAFT journals at execution time — this period's repayment is one of them.
+2. Should return exactly one DRAFT journal per active loan. Each is a 3-line entry (debit Loan Payable, debit Interest Expense, credit Cash) with the correct amortization split for the period.
+3. Collect resourceIds, then `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`.
+4. Do NOT post manual loan-interest accruals — the recipe already emitted the journal with the correct split per `clio calc loan` schedule.
+
+If a loan was newly disbursed this period: invoke `plan_recipe(name: 'loan', ...)` then `execute_recipe`; the disbursement (cash-in) and this period's repayment journal are both included in the engine output.
+
+## Phase 3 — Valuations
+
+### Step 12 — FX revaluation (verification only — Jaz auto-handles)
+
+**Jaz auto-handles FX revaluation for ALL foreign-currency monetary balances** (AR, AP, cash, bank, intercompany journals, term deposits, FX provisions). Period-end translation per IAS 21.23 happens inside the platform automatically. **DO NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post.**
+
+This step is a verification cross-check. If `CLIENT.multi_currency == true`:
+
+1. Pull what Jaz auto-posted to FX accounts during the period:
+```
+search_accounts(filter: {name: {in: ['FX Unrealized Gain', 'FX Unrealized Loss', 'FX Bank Revaluation']}})
+generate_general_ledger(period_end: '2025-01-31', accountResourceIds: [<FX account ids>], groupBy: 'ACCOUNT')
+```
+
+2. For each foreign-currency monetary balance at period end (from a separate `generate_general_ledger` filtered to non-base-currency accounts), independently compute:
+```
+clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <list_currency_rates valueDate: '2025-01-31'> --currency <code> --base-currency <CLIENT.base_currency> --json
+```
+
+3. Sum your independent gain/loss across all foreign balances. Compare against Jaz's auto-posted FX totals from step 1. Variance > `CLIENT.materiality_threshold` → investigate (see `fx-revaluation.md` for likely causes — settlement-realized FX shifts, explicit `currency.exchangeRate` overrides, multi-leg FX through bank-side spreads).
+
+4. Save verification to `recurring/monthly/<period>/fx-reval-verification.json` for audit-prep step 8 supporting schedules.
+
+Per memory rule [Bank FX is Revaluation, not Realized]: bank/cash FX uses `FX Bank Revaluation` (not Realized). AR/AP FX uses both Realized (settlement) and Unrealized (period-end translation).
+
+### Step 13 — ECL review (typically quarterly, monthly check)
+
+Mental check on AR aging > 90d bucket changes. If material change vs prior month: invoke ECL recipe.
+
+```
+plan_recipe(name: 'ecl', receivables: <generate_aged_ar.buckets>, ratesPerBucket: <CLIENT.ecl_rates>)
+```
+
+For most SMBs, formal ECL adjustment runs in `quarter-end-close.md`. Skip in routine monthly close unless a major customer default / dispute occurred.
+
+## Phase 4 — Verification
+
+### Step 14 — Trial balance
+
+```
+generate_trial_balance(period_end: '2025-01-31')
+```
+
+Save to `recurring/monthly/2025-01/tb-close.json`. Assert:
+- Debits == Credits (exact).
+- Cash / bank balances match step 3 bank reconciliation summaries.
+- AR balance == `generate_aged_ar.totalOutstanding` from step 4.
+- AP balance == `generate_aged_ap.totalOutstanding` from step 5.
+- No unexpected balances (negative cash, credit balances on expense accounts).
+
+### Steps 15-16 — P&L + Balance Sheet
+
+```
+generate_profit_and_loss(period_start: '2025-01-01', period_end: '2025-01-31')
+generate_balance_sheet(period_end: '2025-01-31')
+```
+
+Save both. Assert: BS Total Assets == Total Liabilities + Total Equity. P&L net profit ties to BS Equity Movement.
+
+### Step 17 — Prior-month variance + draft gate
+
+Compare against `recurring/monthly/<prior-period>/tb-close.json`. Surface to practitioner top 3 deltas where `|delta| > CLIENT.materiality_threshold`, descending magnitude, with 1-line possible-explanation.
+
+```
+search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-01-31']}})
+search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-01-31']}})
+search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-01-31']}})
+```
+
+All three must return zero. If any rows: classify per practitioner judgment, then `bulk_finalize_drafts` for the keep-set OR delete via `delete_journal` / `delete_invoice` / `delete_bill`.
+
+## Phase 5 — Lock
+
+### Step 18 — Move lock date forward
+
+```
+update_account(resourceId: <CoA root>, lockDate: '2025-01-31')
+```
+
+Locks the period — prevents accidental backdated entries. Move forward only. Reverse only if posting corrections (and re-lock immediately after).
 
 ---
 
-## Phase 3: Period-End Valuations
+## Common error classes and recovery
 
-Adjustments that depend on period-end rates or balances. These are less common for simple SMBs but critical for accuracy.
-
-### Step 12: FX revaluation
-
-If your org has foreign currency monetary items (bank accounts, receivables, payables in non-base currency), revalue them at period-end exchange rates.
-
-**Recipe:** `fx-revaluation` | **Calculator:** `clio calc fx-reval`
-**Pattern:** DR/CR FX Unrealized Gain/Loss for the difference between book rate and closing rate. Post a Day 1 reversal.
-
-```bash
-clio calc fx-reval --amount 50000 --book-rate 1.35 --closing-rate 1.38 --currency USD --base-currency SGD
-```
-
-**Conditional:** Only if multi-currency org with material foreign currency balances. Many SGD-only SMBs can skip this.
-
-**Note:** Jaz auto-handles FX on AR/AP (invoices/bills in foreign currency). This step is for non-AR/AP items only (foreign currency bank accounts, deposits, intercompany balances).
-
-### Step 13: Review bad debt provision (ECL)
-
-Assess whether the bad debt provision needs adjusting based on the AR aging report from Step 4.
-
-**Recipe:** `bad-debt-provision` | **Calculator:** `clio calc ecl`
-**Pattern:** DR Bad Debt Expense, CR Allowance for Doubtful Debts
-
-```bash
-clio calc ecl --current 100000 --30d 50000 --60d 20000 --90d 10000 --120d 5000 --rates 0.5,2,5,10,50
-```
-
-**Conditional:** Review monthly, but typically adjust quarterly unless there's a significant change (e.g., major customer default). For most SMBs, a quick mental check is sufficient monthly — formal ECL review in quarter-end.
+| Source | Error | Recovery |
+|--------|-------|----------|
+| `generate_month_end_blueprint` | 422 `period_end_in_future` | `ENGAGEMENT.period` set wrong. Halt; surface to practitioner. |
+| `generate_month_end_blueprint` | 422 `period_already_locked` | Period closed in prior engagement. Halt; confirm re-open vs duplicate engagement. |
+| `search_bank_records` | 404 | Account doesn't exist or `jaz_resource_id` stale. Re-run `list_bank_accounts`. |
+| `quick_reconcile` | 422 `amount_mismatch` | Cascade tolerance too loose. Surface to practitioner; accept manually OR reject. |
+| `reconcile_invoice_receipt` | 422 `invoice_status_invalid` | Matched invoice still DRAFT. `finalize_invoice(resourceId: <id>)` first. |
+| `reconcile_*` | (any) — NOT idempotent | Per `jaz-api/SKILL.md` rule 124. On 500 / network error, do NOT retry. Confirm reconciled state via `view_auto_reconciliation` or `search_bank_records(status: 'RECONCILED')` first. |
+| `plan_recipe` | 422 `account_not_found` / `contact_not_found` | Step resolution incomplete. `search_accounts` / `search_contacts`; create if missing. Halt and surface to practitioner. |
+| `bulk_finalize_drafts` | 422 `journal_unbalanced` | Recipe regression. Halt; do not retry without manual review. |
+| `update_account` lockDate | 422 `lock_date_violated` | Open drafts in the period. Re-run step 17 gates. |
+| FA `depreciation` posting | 0 movement when expected | Asset not `status: ACTIVE` in FA register. `update_fixed_asset(resourceId: <id>, status: 'ACTIVE')` first. |
 
 ---
 
-## Phase 4: Verification
+## Cross-references back to engagements
 
-Run the numbers. Everything should tie.
-
-### Step 14: Review trial balance
-
-The master check. Total debits must equal total credits.
-
-```
-POST /generate-reports/trial-balance
-{ "startDate": "2025-01-01", "endDate": "2025-01-31" }
-```
-
-**What to check:**
-- Debits = Credits (always — if not, something is seriously wrong)
-- Cash/bank accounts match bank statements
-- AR balance matches AR aging total from Step 4
-- AP balance matches AP aging total from Step 5
-- No unexpected balances (negative cash, credit balances in expense accounts)
-
-### Step 15: Generate P&L
-
-```
-POST /generate-reports/profit-and-loss
-{ "primarySnapshotDate": "2025-01-31", "secondarySnapshotDate": "2025-01-01" }
-```
-
-**What to check:**
-- Revenue is in line with expectations
-- Expenses make sense for the month
-- Gross margin is reasonable
-- Any large one-off items should be explainable (accruals, adjustments from Phase 2)
-
-### Step 16: Generate balance sheet
-
-```
-POST /generate-reports/balance-sheet
-{ "primarySnapshotDate": "2025-01-31" }
-```
-
-**What to check:**
-- Assets = Liabilities + Equity (by definition — if not, the API has a bug)
-- Cash position is reasonable
-- Prepaid balances reduced by one month's amortization
-- Accrued liabilities reflect the accruals from Phase 2
-
-### Step 17: Compare to prior month
-
-Run the same P&L for the prior month and compare. Significant variances should be explainable.
-
-```
-POST /generate-reports/profit-and-loss
-{ "primarySnapshotDate": "2024-12-31", "secondarySnapshotDate": "2024-12-01" }
-```
-
-**Flag:** Revenue or expense lines that moved > 20% month-over-month without a clear reason.
-
----
-
-## Phase 5: Close & Lock
-
-Once everything checks out, lock the period to prevent accidental backdated entries.
-
-### Step 18: Set lock date
-
-Move the org lock date forward to the last day of the closed month.
-
-**Best practice:** Lock date = last day of the closed period (e.g., `2025-01-31` after January close).
-
-**Important:** Only move the lock date forward. Moving it backward reopens prior periods — do this only if you need to post corrections (and re-close afterward).
-
----
-
-## Month-End Close Checklist (Quick Reference)
-
-| # | Step | Phase | Conditional | Recipe/Calc |
-|---|------|-------|-------------|-------------|
-| 1 | Verify invoices entered | Pre-close | Always | — |
-| 2 | Verify bills entered | Pre-close | Always | — |
-| 3 | Complete bank reconciliation | Pre-close | Always | bank-recon job |
-| 4 | Review AR aging | Pre-close | Always | — |
-| 5 | Review AP aging | Pre-close | Always | — |
-| 6 | Record accrued expenses | Accruals | If unbilled expenses exist | accrued-expenses |
-| 7 | Amortize prepaid expenses | Accruals | If prepaid capsules exist | prepaid-amortization / `clio calc prepaid-expense` |
-| 8 | Recognize deferred revenue | Accruals | If deferred revenue exists | deferred-revenue / `clio calc deferred-revenue` |
-| 9 | Record depreciation | Accruals | If fixed assets exist | declining-balance / `clio calc depreciation` |
-| 10 | Accrue employee benefits | Accruals | If tracking leave | employee-accruals |
-| 11 | Accrue loan interest | Accruals | If active loans | bank-loan / `clio calc loan` |
-| 12 | FX revaluation | Valuations | If multi-currency | fx-revaluation / `clio calc fx-reval` |
-| 13 | Review bad debt provision | Valuations | If material AR change | bad-debt-provision / `clio calc ecl` |
-| 14 | Review trial balance | Verification | Always | — |
-| 15 | Generate P&L | Verification | Always | — |
-| 16 | Generate balance sheet | Verification | Always | — |
-| 17 | Compare to prior month | Verification | Always | — |
-| 18 | Set lock date | Close | Always | — |
+- `practice/references/monthly-close.md` — the canonical end-to-end orchestration. This job is what the practice playbook invokes; the practice playbook owns the CLIENT.md / ENGAGEMENT.md context wiring.
+- `practice/references/quarterly-gst.md` — invokes this job + GST-specific extras (step 9 GST filing, F5 box mapping).
+- `practice/references/annual-statutory.md` step 1 — final monthly close before year-end-close + audit-prep.

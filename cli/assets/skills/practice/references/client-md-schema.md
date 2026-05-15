@@ -11,7 +11,7 @@ The per-client master file. Lives at `~/Documents/Jaz Practice/clients/<slug>/CL
 | `uen` | string (Singapore) | annual-statutory | ACRA filings reference this. If `country: SG` and this is empty, surface to practitioner before annual-statutory deliverables. |
 | `registered_address` | string | annual-statutory | Stamped on financial statements lodgment. |
 | `country` | ISO-3166 alpha-2 | every playbook | Routes jurisdiction-specific guidance. `SG` triggers IRAS/ACRA paths; future codes (MY, PH, HK) route their equivalents. |
-| `base_currency` | ISO-4217 | every playbook | Functional currency. `plan_recipe(name: 'fx-reval', …)` is invoked when any monetary balance has a different currency. Stamped onto reports. |
+| `base_currency` | ISO-4217 | every playbook | Functional currency. Period-end FX revaluation against this is auto-handled by Jaz (IAS 21.23) — agent verifies via `clio calc fx-reval` cross-check, never invokes `execute_recipe(name: 'fx-reval', ...)`. Stamped onto reports. |
 | `fy_end` | MM-DD | annual-statutory | Drives period boundaries: `annual-statutory` engagement period spans `<previous fy_end + 1 day>` to `<this fy_end>`. |
 | `gst_scheme` | `quarterly` \| `monthly` \| `not-registered` | quarterly-gst | If `not-registered`, agent skips quarterly-gst engagement scheduling. Otherwise: cadence drives F5 period (e.g., quarterly = `2026-Q1`). |
 | `gst_registration_number` | string | quarterly-gst | Stamped onto F5 submission tracker. Required when `gst_scheme != not-registered`. |
@@ -42,7 +42,7 @@ GST scheme details (reverse-charge applicability, blocked input tax categories, 
 
 ### "Banking & multi-currency exposures"
 
-Which banks feed which entities, FX policy (revalue monthly vs at year-end), hedging arrangements, signatory rules. Drives `plan_recipe(name: 'fx-reval', …)` invocation cadence.
+Which banks feed which entities, FX verification cadence (Jaz auto-handles reval per IAS 21.23 — practitioner just decides how often to run the verification cross-check: monthly vs quarterly vs at year-end), hedging arrangements, signatory rules.
 
 ### "Known issues / quirks"
 
