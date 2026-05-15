@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.31",
+  "version": "5.4.32",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1060,7 +1060,7 @@
     },
     {
       "name": "bulk_upsert_contacts",
-      "description": "Bulk create/update contacts (max 500). resourceId per row → update (partial; omitted fields preserve existing). Omit resourceId → create. ASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}) until SUCCESS / FAILED / PARTIAL_SUCCESS. Per-row failures in background job's errorDetails (NOT failedRows — that's the sync pattern).\n\nWhole-batch 422 (validate before submit): (1) each contact must have at least one of customer:true OR supplier:true (after defaults + backfill from existing); (2) emailList unique within a contact (case-insensitive after trim); (3) paymentTerms.value must be positive integer when paymentTerms.name != \"CUSTOM\"; (4) no duplicate names within batch (after whitespace+case normalize); (5) billingAddress / shippingAddress: addressLine1 required when address object provided.\n\nOn PARTIAL_SUCCESS: succeeded rows are committed; inspect errorDetails[].rowIndex and re-submit only failed rows."
+      "description": "Bulk create/update contacts (max 500). resourceId per row → update (partial; omitted fields preserve existing). Omit resourceId → create. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Per-row failures in errorDetails (NOT failedRows — that's the sync pattern). On PARTIAL_SUCCESS: succeeded rows are committed; re-submit only failed rowIndex entries.\n\nWhole-batch 422 (validate before submit): (1) each contact must have at least one of customer:true OR supplier:true (after defaults + backfill); (2) emailList unique within a contact (case-insensitive after trim); (3) paymentTerms.value must be positive integer when paymentTerms.name != \"CUSTOM\"; (4) no duplicate names within batch (after whitespace+case normalize); (5) billingAddress / shippingAddress: addressLine1 required when address object provided."
     },
     {
       "name": "bulk_upsert_invoices",
