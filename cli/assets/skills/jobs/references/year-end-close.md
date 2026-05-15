@@ -73,7 +73,7 @@ For Jaz native straight-line depreciation: should be automatic and correct. Veri
 
 For non-SL assets (DDB, 150DB) where `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db')` was used: each capsule pre-emitted 12 future-dated DRAFT journals at recipe-execution time. Confirm all 12 are FINALIZED via `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})` — should be empty. If non-empty: route back to `month-end-close.md` step 9.
 
-Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond `CLIENT.materiality_threshold` → investigate (likely a disposal posted without `update_fixed_asset(status: 'DISPOSED')` — auditor will catch this).
+Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond `CLIENT.materiality_threshold` → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, startDate: <FY-start>, endDate: <FY-end>})`) — typical cause is a disposal posted without `update_fixed_asset(status: 'DISPOSED')`.
 
 ### Y2 — Annual true-ups (manual journals)
 

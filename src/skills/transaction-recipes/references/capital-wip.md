@@ -45,13 +45,8 @@ If `Capital Work-in-Progress` doesn't exist: `create_account(name: 'Capital Work
 ```
 create_capsule(
   capsuleTypeResourceId: <Capital Projects capsule type id>,
-  title: 'Office Renovation — Marina One — FY2025',
-  description: 'Renovation of Marina One office, total estimated cost SGD 150,000, expected completion 2025-04-30',
-  customFields: {
-    'Project Reference': 'CAPEX-2025-001',
-    'Estimated Cost': 150000,
-    'Estimated Completion': '2025-04-30'
-  }
+  title: 'Office Renovation — Marina One — FY2025 — CAPEX-2025-001',
+  description: 'Renovation of Marina One office. Project ref CAPEX-2025-001. Total estimated cost SGD 150,000. Expected completion 2025-04-30.'
 )
 ```
 
@@ -199,7 +194,7 @@ Close the project capsule (or keep ACTIVE for traceability — the FA still refe
 | Step 4c | `create_fixed_asset` 422 `cost_mismatch` | Cost passed differs from the transfer journal amount. Both must equal CWIP closing balance. Re-pull `generate_general_ledger` and re-confirm. |
 | Step 4c | Asset created but Jaz auto-depreciation not running | FA may have been created as DRAFT. `update_fixed_asset(resourceId: <id>, status: 'ACTIVE')`. From next month-end, auto-depreciation runs. |
 | Step 5 | CWIP balance nonzero post-transfer | A bill was posted to CWIP AFTER step 4a — common when contractor sends final invoice late. Two options: (a) extend the project (post the late bill, re-do step 4 transfer for the additional amount + create a SECOND FA OR update the existing FA cost via `update_fixed_asset`); (b) expense the late bill directly to operating expense if immaterial. |
-| Project abandoned mid-construction | (process — IAS 16.20 / IAS 36.18 impairment) | If asset will not be completed: write off CWIP balance to Loss on Abandoned Project. `create_journal`: Dr Loss on Abandoned Project / Cr Capital Work-in-Progress. Surface to practitioner — auditor will want documentation of the decision. |
+| Project abandoned mid-construction | (process — IAS 16.20 / IAS 36.18 impairment) | If asset will not be completed: write off CWIP balance to Loss on Abandoned Project. `create_journal({capsuleResourceId: <project capsule>, tags: ['abandoned', 'impairment'], internalNotes: '<abandonment date + reason + IAS 36.18 cite>', ...})` — the journal carries the abandonment narrative; the capsule already aggregates every bill + this journal as the audit trail. |
 | Borrowing costs incorrectly capitalized post-completion | (IAS 23 violation) | Per IAS 23.22, capitalization stops when asset is ready for intended use. Any interest capitalized after completion → expense. Reverse via journal: Dr Interest Expense / Cr Capital Work-in-Progress (or the FA if already transferred). |
 
 ---

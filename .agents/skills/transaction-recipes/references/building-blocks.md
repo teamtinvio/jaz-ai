@@ -70,9 +70,8 @@ The recipe engine uses capsules automatically. But capsules also enable advanced
 ```
 create_capsule(
   capsuleTypeResourceId: <type id from search_capsule_types>,
-  title: 'Bank Loan — DBS Term Loan — FY2025',
-  description: 'SGD 100,000 5-year term loan, 6% p.a., facility ref LN-2025-0042',
-  customFields: { 'Loan Reference': 'LN-2025-0042', 'Bank Name': 'DBS Bank' }
+  title: 'Bank Loan — DBS Term Loan — LN-2025-0042 — FY2025',
+  description: 'SGD 100,000 5-year term loan, 6% p.a. Bank: DBS Bank. Facility ref: LN-2025-0042.'
 )
 ```
 
