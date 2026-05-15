@@ -18,8 +18,8 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 ## Contents
 
 - [Three Ways In](#three-ways-in) — CLI, MCP, Skills
-- [CLI](#cli) — 53 command groups
-- [MCP Server](#mcp-server) — 265 tools for AI agents
+- [CLI](#cli) — 55 command groups
+- [MCP Server](#mcp-server) — 274 tools for AI agents
 - [Skills](#skills) — Teach any AI the Jaz API
 - [Setup](#setup) — Auth, multi-org, automation
 
@@ -27,7 +27,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 
 | | What happens | Try it |
 |---|---|---|
-| **CLI** | 53 command groups, every accounting operation | `clio invoices list` |
+| **CLI** | 55 command groups, every accounting operation | `clio invoices list` |
 | **MCP** | Plug into Claude Code, Cursor, Codex, Copilot | `clio mcp` |
 | **Skills** | Teach any AI tool the Jaz API | `clio init` |
 
@@ -48,7 +48,7 @@ clio practice onboard --name "Acme Pte Ltd" --fy-end 12-31 --gst quarterly
 clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-03
 ```
 
-54 command groups. 16 report types. 13 calculators. 12 job playbooks. New in v5.2.0: practitioner workspace (`clio practice`). Every command supports `--json`. Run `clio --help` for the full list.
+55 command groups. 16 report types. 13 calculators. 12 job playbooks. New in v5.2.0: practitioner workspace (`clio practice`). Every command supports `--json`. Run `clio --help` for the full list.
 
 ---
 

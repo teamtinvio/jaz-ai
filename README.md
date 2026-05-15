@@ -1,7 +1,8 @@
-# Jaz AI
+# Jaz AI · Agent stack for the ledger
 
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
+  <img src="https://img.shields.io/badge/MCP_tools-274-blue?style=for-the-badge" alt="274 MCP Tools">
   <img src="https://img.shields.io/badge/API_rules-141-green?style=for-the-badge" alt="141 API Rules">
   <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 Skills">
   <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
@@ -16,381 +17,210 @@
   <a href="https://github.com/teamtinvio/jaz-ai/stargazers"><img src="https://img.shields.io/github/stars/teamtinvio/jaz-ai?style=flat-square&logo=github" alt="GitHub stars"></a>
 </p>
 
-**Complete agent stack for all of Jaz, built for AI agents and accountants.**
-MCP server, CLI, skills, and plugins for Claude Code, Cowork, Codex, Copilot, Cursor, and 30+ AI tools.
+The complete agent surface for [Jaz](https://jaz.ai) accounting. 274 MCP tools, 6 skills, 16 IFRS recipes, 13 calculators, 12 close playbooks. Designed for any agent: Claude, GPT, Gemini, Copilot, Cursor. Hyper token economics, one-shot discovery, structured errors that an LLM can recover from.
 
-Includes 141 API rules, 13 financial calculators, 16 IFRS recipes, 12 accounting jobs, and data conversion playbooks so that agents work with [Jaz](https://jaz.ai) correctly and autonomously.
-
-> All skills, CLI commands, MCP tools, and the plugin are fully compatible with [Juan Accounting](https://juan.ac) too.
+> Also fully compatible with [Juan Accounting](https://juan.ac) (same API surface).
 
 ## Contents
 
-- [Quickstart](#quickstart)
-- [Skills](#skills)
-- [Installation](#installation)
-- [Usage](#usage)
-- [For AI Agents](#for-ai-agents)
-- [For Accountants](#for-accountants)
-- [What's Inside](#whats-inside)
-- [Architecture](#architecture)
+- [Install · 30 seconds](#install--30-seconds)
+- [What you get](#what-you-get)
+- [Three layers](#three-layers)
+- [Quick start](#quick-start)
+- [Token economics + speed](#token-economics--speed)
+- [For AI agents](#for-ai-agents)
+- [For accountants](#for-accountants)
+- [Reference](#reference)
 - [Troubleshooting](#troubleshooting)
-- [Privacy & Security](#privacy--security)
+- [Privacy & security](#privacy--security)
 - [Support](#support)
 
-## Quickstart
+## Install · 30 seconds
 
-Pick your path — all three take under 30 seconds:
+| Your agent | Install |
+|------------|---------|
+| **Claude Code** | `/plugin marketplace add teamtinvio/jaz-ai` |
+| **Claude Desktop** | Install the `.mcpb` from [latest release](https://github.com/teamtinvio/jaz-ai/releases/latest) |
+| **Cursor / Windsurf** | Add the stdio MCP config (below) |
+| **VS Code (incl. GitHub Copilot)** | Add the VS Code MCP config (below) to `.vscode/mcp.json` |
+| **Gemini CLI** | `gemini extensions install https://github.com/teamtinvio/jaz-ai` |
+| **OpenAI Codex CLI / Agents SDK** | Add the stdio MCP config (below) |
+| **OpenAI Responses API** | Hosted HTTP MCP only (see [Responses API note](#openai-responses-api)) |
+| **npm (CLI)** | `npm install -g jaz-clio && clio auth add <jk-your-api-key>` |
 
-**Skills** (any AI tool, zero dependencies):
-```bash
-# Download ZIP from GitHub, then copy:
-cp -r jaz-ai-main/.claude/skills/ your-project/.claude/skills/     # Claude Code
-cp -r jaz-ai-main/.agents/skills/ your-project/.agents/skills/     # Codex, Copilot, Cursor
-```
-
-**CLI** (developers, accountants & AI agents):
-```bash
-npm install -g jaz-clio && clio auth add <your-api-key> && clio invoices list
-```
-
-**Plugin** (Claude Code):
-```
-/plugin marketplace add teamtinvio/jaz-ai
-```
-
-## Skills
-
-| Skill | What It Does |
-|-------|-------------|
-| **jaz-api** | 141 rules, full endpoint catalog, error catalog, field mapping. Agents write correct Jaz API code on the first try instead of guessing |
-| **jaz-conversion** | Xero, QuickBooks, Sage, Excel migration playbook. CoA mapping, tax profiles, FX, clearing accounts, trial balance verification |
-| **jaz-recipes** | 16 IFRS-compliant recipes (loans, leases, depreciation, FX reval, ECL, provisions, and more) + 13 CLI financial calculators with blueprint output |
-| **jaz-jobs** | 12 accounting jobs (month/quarter/year-end close, bank recon, document collection, GST/VAT filing, payment runs, credit control, supplier recon, audit prep, FA review, statutory filing) + Singapore Form C-S tax computation with AI-guided wizard workflow |
-| **jaz-practice** | Practitioner workspace scaffolding. Onboard clients, scaffold engagements (monthly-close, quarterly-gst, annual-statutory, onboarding), keep period work organized in `~/Documents/Jaz Practice/clients/<name>/`. Each engagement template names the specific Jaz tools, recipes, and calculators it uses. New in v5.2.0 |
-
-## Installation
-
-There are four ways to use Jaz AI, depending on what you need:
-
-| Method | What You Get | Best For |
-|--------|-------------|----------|
-| **Skills** | Knowledge files your AI reads automatically | Anyone using an AI coding tool with Jaz |
-| **Plugins** | One-click install via marketplace / extensions | Claude Code, Claude Cowork, Gemini CLI |
-| **CLI** | `clio` command-line tool with calculators, jobs, and full API access | AI agents |
-| **MCP Server** | 274 tools your AI can call directly | AI agents and accountants that need live API access |
-
-### Option 1: Install Skills (for any AI tool)
-
-Skills are markdown files that teach your AI tool how to work with Jaz — API rules, field names, recipes, and more. Your AI reads them automatically. No npm, Node.js, or git required.
-
-**Download and copy** — works on any machine:
-
-1. [Download this repo as ZIP](https://github.com/teamtinvio/jaz-ai/archive/refs/heads/main.zip) and extract it
-2. Copy the skills folder into your project:
-
-| Your AI Tool | Copy To |
-|-------------|---------|
-| Claude Code | `.claude/skills/` |
-| Codex, Copilot, Cursor, Windsurf, Antigravity | `.agents/skills/` |
-
-```bash
-# For Claude Code
-cp -r jaz-ai-main/.claude/skills/ /path/to/your/project/.claude/skills/
-
-# For Codex, Copilot, Cursor, Windsurf, Antigravity (Agent Skills standard)
-cp -r jaz-ai-main/.agents/skills/ /path/to/your/project/.agents/skills/
-```
-
-Supports 30+ platforms via the [Agent Skills](https://agentskills.io) open standard: Claude Code, Codex, Copilot, Cursor, Antigravity, Windsurf, Goose, Gemini CLI, Roo Code, Junie, Amp, and more.
-
-<details>
-<summary>With a terminal (auto-detect platform)</summary>
-
-If you have Node.js installed, you can use `npx` to auto-detect your AI tool and install skills in one command — no global install needed:
-
-```bash
-cd /path/to/your/project
-
-# Install all 6 skills (auto-detects your AI tool)
-npx jaz-clio init
-
-# Or specify a platform
-npx jaz-clio init --platform claude       # .claude/skills/
-npx jaz-clio init --platform codex        # .agents/skills/
-npx jaz-clio init --platform copilot      # .agents/skills/
-npx jaz-clio init --platform cursor       # .agents/skills/
-npx jaz-clio init --platform windsurf     # .agents/skills/
-npx jaz-clio init --platform agents       # .agents/skills/ (universal)
-
-# Or install a specific skill only
-npx jaz-clio init --skill jaz-api
-```
-
-</details>
-
-### Option 2: Install Plugins
-
-**Claude Code / Claude Cowork:**
-```
-/plugin marketplace add teamtinvio/jaz-ai
-```
-
-**Gemini CLI:**
-```bash
-gemini extensions install https://github.com/teamtinvio/jaz-ai
-```
-
-Both register skills and the MCP server automatically.
-
-### Option 3: Use the CLI (for AI agents)
-
-The CLI gives you direct access to 55 command groups — financial calculators, job blueprints, API commands, and more — from your terminal.
-
-**Requires Node.js 18+.** If `node --version` works, you're set. Otherwise, download from [nodejs.org](https://nodejs.org) (LTS).
-
-```bash
-npm install -g jaz-clio
-
-# Authenticate with your Jaz API key
-clio auth add <your-api-key>
-
-# Now use any command
-clio invoices list
-clio calc loan --principal 100000 --rate 6 --term 60
-clio jobs bank-recon match --input bank-data.json
-clio --help                # See all commands
-```
-
-Full command reference: [README-cli.md](README-cli.md)
-
-### Option 4: MCP Server (for AI agents and accountants)
-
-The MCP server gives AI coding assistants direct access to 265 accounting tools — invoices, bills, journals, contacts, reports, financial calculators, job blueprints, and more. Runs locally on your machine.
-
-**Claude Code:**
-
-```bash
-claude mcp add jaz -- npx jaz-clio mcp
-```
-
-**Claude Desktop / Cowork / Cursor / VS Code / Windsurf** — add to your MCP config:
+**Stdio MCP config** (Claude Desktop, Cursor, Windsurf, OpenAI Codex CLI / Agents SDK, any host that runs MCP servers as local processes):
 
 ```json
 {
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio", "mcp"],
-      "env": {
-        "JAZ_API_KEY": "jk-your-api-key"
-      }
+      "args": ["-y", "jaz-clio@5.4.5", "mcp"],
+      "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-> Offline tools (calculators, job blueprints) work without an API key. For API tools, set `JAZ_API_KEY` or run `clio auth add` first.
-
-**Multi-org** — access multiple organizations in one session:
+**VS Code MCP config** (`.vscode/mcp.json` — workspace-scoped — used by VS Code itself and the GitHub Copilot Chat extension):
 
 ```json
 {
-  "env": {
-    "JAZ_API_KEY": "jk-org-one-key,jk-org-two-key"
+  "servers": {
+    "jaz": {
+      "command": "npx",
+      "args": ["-y", "jaz-clio@5.4.5", "mcp"],
+      "env": { "JAZ_API_KEY": "jk-your-api-key" }
+    }
   }
 }
 ```
 
-Comma-separated API keys enable multi-org mode. Claude sees a `list_organizations` tool and routes each request to the correct org via `org_id`. Switch orgs naturally in conversation: *"Show Acme's invoices"* then *"Now check Beta's AR aging"*.
+Pin `jaz-clio@5.4.5` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat_...`) also work for multi-org.
 
-Personal access tokens (`pat_...`) also work for multi-org once available — one token for all your organizations.
+### OpenAI Responses API
+
+The Responses API only accepts **HTTP MCP** (no stdio). To use Jaz from a Responses API tool, host the MCP server behind HTTP and point at it:
+
+```json
+{
+  "type": "mcp",
+  "server_label": "jaz",
+  "server_url": "https://your-hosted-jaz-mcp/",
+  "require_approval": "never"
+}
+```
+
+A managed hosted endpoint isn't published yet; use the OpenAI Codex CLI / Agents SDK path above for stdio in the meantime.
+
+**Just want skills** (no MCP, any agent on the [Agent Skills](https://agentskills.io) standard):
+
+```bash
+npx jaz-clio init                  # auto-detects your tool
+npx jaz-clio init --platform cursor
+```
+
+Skills install to `.agents/skills/` (Agent Skills standard, used by Cursor, Copilot, Codex, Antigravity, Windsurf, Goose, Roo Code, Junie, Amp, and more) or `.claude/skills/` (Claude Code).
+
+## What you get
+
+- **274 MCP tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and flags idempotency. The LLM picks right on the first call.
+- **6 skills** with the production-grade rules and playbooks any agent needs:
+
+| Skill | What it teaches an agent |
+|-------|--------------------------|
+| **jaz-api** | 141 production rules, every endpoint, error catalog, field aliases, response shapes |
+| **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
+| **jaz-conversion** | Xero / QuickBooks / Sage / MYOB / Excel migration, CoA mapping, FX, clearing accounts, TB verification |
+| **jaz-jobs** | 12 close playbooks (month-end / quarter-end / year-end / bank-recon / GST-VAT / payment-run / credit-control / supplier-recon / audit-prep / FA-review / statutory-filing) + Singapore Form C-S |
+| **jaz-recipes** | 16 IFRS recipes (loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal, etc.) + 13 calculators |
+| **jaz-practice** | Multi-client practitioner workspace, engagement scaffolding, per-client config |
+
+- **3 meta-tools** (`search_tools`, `describe_tools`, `execute_tool`) for deferred discovery so the full catalog never has to load into context.
+- **OpenAPI spec** at `spec/openapi.yaml` synced weekly from the source.
+- **Help center mirror** at `help-center-mirror/` synced weekly from Intercom.
+- **Structured-search DSL** for natural-feeling queries (`status:unpaid amount:>500 contact:Acme`).
+
+## Three layers
+
+The stack is one binary plus markdown skills, exposed through three layers that compose. The default agent setup is **Skills + MCP**. The CLI is the same binary as the MCP server with a different transport flag.
+
+| Layer | What it is | Use it alone when |
+|-------|------------|-------------------|
+| **Skills** | Domain knowledge as markdown (141 API rules, 16 recipes, 12 jobs, conversion playbooks, practitioner workflows). The agent reads these at session start. | Your AI tool reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
+| **CLI** (`jaz-clio`) | A `clio` binary: 55 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
+| **MCP server** (`clio mcp`) | The same binary in MCP mode: 274 Jaz tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
+
+Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together.
+
+## Quick start
+
+Once installed, skills load automatically when an agent works with Jaz. Describe what you need:
+
+```
+Close the books for Acme for January. Bank-recon DBS Current first.
+Then file GST for Q1.
+```
+
+Or call the CLI directly:
+
+```bash
+clio invoices list --json
+clio calc loan --principal 100000 --rate 6 --term 60 --json
+clio jobs month-end --period 2025-01 --json
+```
+
+Or via MCP from any agent:
+
+```
+search_tools("anomalous bills")
+  → download_export at rank 1
+execute_tool("download_export", { exportType: "analysis-anomalous-bills" })
+  → { fileName, fileUrl }
+```
+
+## Token economics + speed
+
+Built so any LLM sees the right tool fast and calls it once.
+
+| What | How |
+|------|-----|
+| **MCP delivery** | 3 meta-tools (~600 tokens) instead of 274 (~78KB). LLM searches into the catalog only when needed. |
+| **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
+| **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
+| **Discovery ranker** | In-memory, no network round-trip. Scans tool name + description + searchHint + namespace. |
+| **Disambiguation** | Every tricky pair (`download_export` vs `export_records`, `view_auto_reconciliation` vs `quick_reconcile`, `validate_drafts` vs per-entity validators) has explicit "USE THIS, not X" preambles. Saves the 1-3 wrong-tool turns. |
+| **Median tool call** | Subsecond for read tools; bounded by the Jaz API + network. |
+| **Errors are structured** | 422 responses carry field-level details so the LLM can self-correct without human input. |
+
+## For AI agents
+
+- **Skills load automatically** from `.claude/skills/`, `.agents/skills/`, the Claude Code marketplace, the Gemini CLI extension, or the Claude Desktop MCPB.
+- **Discovery is one-shot.** 68 canonical-query lock-in tests guarantee the right tool at rank 1 for the queries that matter.
+- **Disambiguation is explicit.** Tools that look similar carry "USE THIS, not X" preambles. No more guessing.
+- **Errors are structured.** Server validation failures return field-level details so the agent can self-correct.
+- **Multi-org is native.** Comma-separated keys (`jk-aaa,jk-bbb`) or PATs unlock cross-org tools (`list_organizations`, per-call `org_id`).
+- **OpenAPI spec at `spec/openapi.yaml`** for code-gen pipelines and custom SDKs.
+- **CONTEXT.md** captures runtime rules-of-engagement (bootstrap with `clio context --json`, search before create, mutate as draft first, never echo API keys).
+
+## For accountants
+
+Set up the firm workspace once, then run period work conversationally:
+
+```bash
+clio practice init --firm-name "My Firm"
+clio practice onboard --name "Acme Pte Ltd" --fy-end 12-31 --gst quarterly
+clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-03
+```
+
+Or describe it to any agent:
+
+> Onboard Beta Pte Ltd, FY June, GST quarterly.
+> Close March for Acme.
+
+Each engagement template names the exact Jaz tools, recipes, and calculators to invoke. The agent loads `CLIENT.md` automatically before touching the books: FY end, GST scheme, COA mapping, banks, recurring accruals.
+
+13 calculators (`clio calc loan / depreciation / lease / ecl / fx-reval / provision / fixed-deposit / asset-disposal / prepaid-expense / deferred-revenue / accrued-expense / leave-accrual / dividend`), 12 job blueprints (`clio jobs month-end / quarter-end / year-end / bank-recon / document-collection / gst-vat / payment-run / credit-control / supplier-recon / audit-prep / fa-review / statutory-filing`), all with `--json` for structured blueprint output.
+
+## Reference
+
+- **[CLAUDE.md](CLAUDE.md)** · architecture, source structure, version-bump procedure, contributor guide
+- **[CONTEXT.md](CONTEXT.md)** · runtime rules-of-engagement for agents using the stack
+- **[CHANGELOG.md](CHANGELOG.md)** · release notes
+- **[Skills source](src/skills/)** · all 6 skills (jaz-api / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-practice)
+- **[OpenAPI spec](spec/openapi.yaml)** · full HTTP surface, synced weekly
+- **[README-cli.md](README-cli.md)** · npm-package README, full CLI command catalog
+- **[help.jaz.ai](https://help.jaz.ai)** · Jaz product help center
+- **CLI surface**: 55 command groups across the `clio` binary
 
 <details>
-<summary>Available tool categories (274 tools)</summary>
+<summary><strong>What's inside · skill file catalog</strong></summary>
 
-| Category | Tools | Auth Required |
-|----------|-------|---------------|
-| **Invoices** | list, get, search, create, update, delete, pay, apply-credits, download | Yes |
-| **Bills** | list, get, search, create, update, delete, pay, apply-credits | Yes |
-| **Journals** | list, get, search, create, delete | Yes |
-| **Contacts** | list, get, search, create, update, delete | Yes |
-| **Accounts** | list, get, search, create, delete | Yes |
-| **Items** | list, get, search, create, update, delete | Yes |
-| **Bank** | import, accounts, records, add-records, auto-recon | Yes |
-| **Bank Rules** | list, get, search, create, update, delete | Yes |
-| **Fixed Assets** | list, get, search, create, update, delete, discard, sell, transfer, undo-disposal | Yes |
-| **Subscriptions** | list, get, create, update, delete, cancel, search-scheduled | Yes |
-| **Reports** | generate (16 types), pdf | Yes |
-| **Credit Notes** | customer + supplier CRUD, refunds, download | Yes |
-| **Cash Entries** | cash-in, cash-out, cash-transfer | Yes |
-| **Other API** | org, currencies, rates, tags, capsules, tax-profiles, bookmarks, payments, cashflow, schedulers, exports, attachments, org-users, contact-groups, custom-fields, inventory, search, magic | Yes |
-| **Calculators** | loan, depreciation, lease, ECL, provision, FX reval, fixed deposit, disposal, prepaid-expense, deferred-revenue, accrued-expense, leave-accrual, dividend | No |
-| **Job Blueprints** | month-end, quarter-end, year-end, bank-recon, document-collection, GST/VAT, payment-run, credit-control, supplier-recon, audit-prep, FA-review, statutory-filing | No |
-| **Draft Validation** | validate invoice, bill, journal, credit note drafts | Yes |
-
-</details>
-
-## Usage
-
-Skills activate automatically when you or your agent work with Jaz API code or data conversion tasks. Just describe what you need:
-
-### API Skill
-
-```
-Create an invoice with 3 line items and 7% GST
-
-Build a payment for invoice INV-001 in USD
-
-Query all overdue bills with pagination
-
-Set up chart of accounts for a Singapore company
-```
-
-### Conversion Skill
-
-```
-Convert this Xero trial balance export to Jaz
-
-Migrate QuickBooks aged receivables to conversion invoices
-
-Map this Excel chart of accounts to Jaz CoA structure
-
-Verify the trial balance after conversion
-```
-
-### Transaction Recipes Skill
-
-```
-Set up a 5-year bank loan with monthly repayment schedule
-
-Model IFRS 16 lease for a 3-year office lease at 5% IBR
-
-Calculate ECL provision on aged receivables
-
-Record prepaid insurance with monthly amortization via capsule
-```
-
-### Jobs Skill
-
-```
-Close the books for January 2025
-
-Run bank reconciliation for DBS Current account
-
-Prepare GST return for Q1 2025
-
-Generate a payment run for all overdue bills
-
-Prepare audit pack for FY 2025
-```
-
-### Financial Calculators & Job Tools (CLI)
-
-```bash
-clio calc loan --principal 100000 --rate 6 --term 60 --json
-clio calc depreciation --cost 50000 --salvage 5000 --life 5 --method ddb --json
-clio jobs bank-recon match --input bank-data.json --json
-clio jobs document-collection ingest --source "https://www.dropbox.com/scl/fo/..." --json
-clio jobs statutory-filing sg-cs --ya 2026 --revenue 500000 --profit 120000 --json
-```
-
-13 financial calculators, 12 job blueprints, and paired tools (bank matcher, document ingest with cloud support, SG Form C-S tax computation). Add `--json` for structured blueprint output with capsule type, journal entries, workings, and step-by-step execution plan.
-
-Full command reference: [README-cli.md](README-cli.md), [transaction-recipes skill](src/skills/transaction-recipes/SKILL.md), and [jobs skill](src/skills/jobs/SKILL.md).
-
-## For AI Agents
-
-### Skill Discovery
-
-AI tools automatically discover skills from standard paths:
-
-| Your AI Tool | Skills loaded from |
-|-------------|-------------------|
-| Claude Code | `.claude/skills/` |
-| Codex, Copilot, Cursor, Windsurf | `.agents/skills/` |
-
-Skills are pure markdown — no runtime, no dependencies. Your agent reads them and gains domain knowledge about Jaz accounting.
-
-### MCP Tools
-
-With the MCP server running (`claude mcp add jaz -- npx jaz-clio mcp`), your agent has 274 tools for direct API access. Every tool returns structured JSON. See [tool categories](#option-4-mcp-server-for-ai-agents) for the full breakdown.
-
-### Structured Output
-
-Every CLI command supports `--json` for machine-readable output:
-
-```bash
-clio invoices list --json              # JSON array of invoices
-clio calc loan --principal 100000 --rate 6 --term 60 --json   # Blueprint with journal entries
-clio context --json                    # Full org context for agent bootstrapping
-```
-
-### OpenAPI Spec
-
-Full OpenAPI specification available at `spec/openapi.yaml` — synced weekly from the API source.
-
-## For Accountants
-
-### What Jaz AI Does
-
-Jaz AI gives your AI assistant deep knowledge of accounting — so when you describe what you need in plain English, it does the right thing. No need to know API codes or field names.
-
-### Calculator Examples
-
-```bash
-# "I took a $100k bank loan at 6% for 5 years — give me the amortization schedule"
-clio calc loan --principal 100000 --rate 6 --term 60
-
-# "Depreciate a $50k machine over 5 years, $5k salvage, declining balance"
-clio calc depreciation --cost 50000 --salvage 5000 --life 5 --method ddb
-
-# "What's the ECL provision on our aged receivables?"
-clio calc ecl --receivables '[{"bucket":"0-30","balance":50000,"rate":0.5}]'
-```
-
-### Job Blueprints
-
-```bash
-# "Close the books for January" — gives you a full checklist
-clio jobs month-end --period 2025-01
-
-# "Prepare for the auditor" — compiles reports, schedules, reconciliations
-clio jobs audit-prep --period 2025
-
-# "File GST for Q1" — walks through tax ledger review and filing
-clio jobs gst-vat --period 2025-Q1
-```
-
-### Practitioner Workspace (v5.2.0)
-
-Set up a structured client folder once, run period work from inside it forever after. The agent loads each client's CLIENT.md before touching the books, so it knows the FY end, GST scheme, COA mapping, banks, and recurring accruals without you having to repeat yourself every session.
-
-```bash
-# Set up your firm workspace at ~/Documents/Jaz Practice
-clio practice init --firm-name "My Firm"
-
-# Onboard a client (legal entity, FY, GST scheme)
-clio practice onboard --name "Acme Pte Ltd" --fy-end 12-31 --gst quarterly
-
-# Scaffold an engagement folder
-clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-03
-
-# In Claude Code or Claude Desktop, the agent can also do this conversationally:
-#   "Onboard Beta Pte Ltd, FY June, GST quarterly"
-#   "Close March for Acme"
-# It scaffolds the right folders and follows the engagement-type playbook
-# (which names the specific Jaz tools, recipes, and calculators to invoke).
-```
-
-Engagement types include `monthly-close`, `quarterly-gst`, `annual-statutory`, and `onboarding` (data migration from prior firm). Each ships with a checklist that cross-references jaz-jobs blueprints, jaz-recipes recipes, and `clio calc` calculators — the agent already knows which to invoke when.
-
-## What's Inside
-
-### API Skill (`jaz-api`)
+### jaz-api
 
 | Reference | Lines | Content |
 |-----------|-------|---------|
-| `SKILL.md` | 499 | 141 rules — auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `SKILL.md` | 499 | 141 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
 | `endpoints.md` | 2342 | Request/response examples for every core endpoint |
 | `errors.md` | 860 | Error catalog with root causes and fixes |
 | `field-map.md` | 678 | Intuitive name → actual field name mapping |
@@ -399,24 +229,11 @@ Engagement types include `monthly-close`, `quarterly-gst`, `annual-statutory`, a
 | `dependencies.md` | 140 | Resource creation order (currencies → CoA → transactions) |
 | `feature-glossary.md` | 248 | Business context per feature |
 
-### Conversion Skill (`jaz-conversion`)
+### jaz-recipes (16 IFRS recipes + 13 calculators)
 
 | Reference | Content |
 |-----------|---------|
-| `SKILL.md` | Conversion domain knowledge, clearing account pattern, FX handling |
-| `mapping-rules.md` | CoA, contact, and tax code mapping rules |
-| `option1-full.md` | Full conversion workflow (all transactions FY + FY-1) |
-| `option2-quick.md` | Quick conversion workflow (opening balances at FYE) |
-| `file-types.md` | Supported file formats and detection heuristics |
-| `edge-cases.md` | Platform-specific quirks (Sage 300 preambles, Xero rounding) |
-| `verification.md` | Trial balance comparison and verification checklist |
-| `file-analysis.md` | Excel/CSV structure analysis and smart detection |
-
-### Transaction Recipes Skill (`jaz-recipes`)
-
-| Reference | Content |
-|-----------|---------|
-| `SKILL.md` | 16 recipes in 4 tiers, building blocks, key principles, calculator index |
+| `SKILL.md` | 16 recipes in 4 tiers, building blocks, calculator index |
 | `building-blocks.md` | Capsules, schedulers, manual journals, FA, tracking tags, nano classifiers |
 | `prepaid-amortization.md` | Annual insurance/rent paid upfront, monthly scheduler recognition |
 | `deferred-revenue.md` | Upfront customer payment, monthly revenue recognition |
@@ -435,202 +252,140 @@ Engagement types include `monthly-close`, `quarterly-gst`, `annual-statutory`, a
 | `intercompany.md` | Mirrored invoices/bills across two entities |
 | `capital-wip.md` | CIP accumulation → FA transfer on completion |
 
-
-### Jobs Skill (`jaz-jobs`)
+### jaz-jobs (12 close playbooks + Singapore Form C-S)
 
 | Reference | Content |
 |-----------|---------|
-| `SKILL.md` | 12 accounting jobs + SG tax computation, CLI commands, wizard workflow overview |
+| `SKILL.md` | 12 jobs + SG tax computation, CLI commands, wizard workflow |
 | `building-blocks.md` | Shared concepts: accounting periods, lock dates, period verification |
-| `month-end-close.md` | 5 phases, ~18 steps — the foundation for all period closes |
+| `month-end-close.md` | 5 phases, ~18 steps. Foundation for all period closes. |
 | `quarter-end-close.md` | Monthly + quarterly extras (GST/VAT, ECL, bonus accruals) |
 | `year-end-close.md` | Quarterly + annual extras (true-ups, dividends, CYE rollover) |
 | `bank-recon.md` | Match, categorize, resolve unreconciled items |
-| `bank-match.md` | Bank reconciliation matcher — 5-phase cascade algorithm (1:1, N:1, 1:N, N:M) |
-| `document-collection.md` | Scan and classify documents from local directories and cloud links (Dropbox, Google Drive, OneDrive) — outputs file paths for agent upload |
+| `bank-match.md` | 5-phase cascade matcher (1:1, N:1, 1:N, N:M) |
+| `document-collection.md` | Local + cloud (Dropbox / Drive / OneDrive) doc capture |
 | `gst-vat-filing.md` | Tax ledger review, discrepancy check, filing summary |
-| `payment-run.md` | Select outstanding bills by due date, process payments |
-| `credit-control.md` | AR aging review, overdue chase list, bad debt assessment |
-| `supplier-recon.md` | AP vs supplier statement, identify mismatches |
+| `payment-run.md` | Select bills by due date, process payments |
+| `credit-control.md` | AR aging review, overdue chase list, bad debt |
+| `supplier-recon.md` | AP vs supplier statement reconciliation |
 | `audit-prep.md` | Compile reports, schedules, reconciliations for auditor |
-| `fa-review.md` | Fixed asset register review, disposal/write-off processing |
-| `sg-tax/overview.md` | SG CIT framework: 17% rate, YA concept, Form C-S eligibility |
-| `sg-tax/form-cs-fields.md` | 18 Form C-S + 6 C-S Lite fields with IRAS labels |
-| `sg-tax/wizard-workflow.md` | Step-by-step AI agent wizard procedure |
-| `sg-tax/data-extraction.md` | How to pull P&L, TB, GL, FA from Jaz API for tax |
-| `sg-tax/add-backs-guide.md` | Which expenses are non-deductible + GL patterns |
-| `sg-tax/capital-allowances-guide.md` | S19, S19A, S19B, S14Q rules per asset category |
-| `sg-tax/ifrs16-tax-adjustment.md` | IFRS 16 lease reversal for tax purposes |
-| `sg-tax/enhanced-deductions.md` | R&D (250-400%), IP, donations (250% IPC), S14Q |
-| `sg-tax/exemptions-and-rebates.md` | SUTE, PTE, CIT rebate schedule by YA |
-| `sg-tax/losses-and-carry-forwards.md` | Set-off order, carry-forward rules |
+| `fa-review.md` | Fixed asset register review, disposal/write-off |
+| `sg-tax/*.md` | 10 files: SG CIT framework, Form C-S fields, wizard, data extraction, add-backs, capital allowances, IFRS 16 tax adj, enhanced deductions, exemptions, loss carry-forward |
 
-## Architecture
+### jaz-conversion
 
-Full OpenAPI specification available at `spec/openapi.yaml` — synced weekly from the API source.
+| Reference | Content |
+|-----------|---------|
+| `SKILL.md` | Conversion domain knowledge, clearing account pattern, FX handling |
+| `mapping-rules.md` | CoA, contact, and tax code mapping rules |
+| `option1-full.md` | Full conversion (all transactions FY + FY-1) |
+| `option2-quick.md` | Quick conversion (opening balances at FYE) |
+| `file-types.md` | Supported file formats and detection heuristics |
+| `edge-cases.md` | Platform-specific quirks (Sage 300, Xero rounding) |
+| `verification.md` | Trial balance comparison and verification checklist |
+| `file-analysis.md` | Excel/CSV structure analysis and smart detection |
 
-Skills are written once in `src/skills/` and copied to platform-specific discovery paths. Each path is a standard defined by the platform — not a naming choice we made.
-
-```
-src/skills/                      Source of truth — all skills live here
-├── api/                         141 rules + 7 reference files
-├── conversion/                  Conversion domain + 7 reference files
-├── transaction-recipes/         16 recipes + 18 reference files
-└── jobs/                        12 jobs + 12 job files + 10 sg-tax files
-```
-
-**Discovery paths** (identical copies of `src/skills/`, one per platform standard):
-
-| Path | Platform Standard | Used By |
-|------|-------------------|---------|
-| `.agents/skills/` | [Agent Skills](https://agentskills.io) open standard | Antigravity, Codex, Copilot, Cursor |
-| `.claude/skills/` | Claude Code skill discovery | Claude Code |
-| `.claude-plugin/` | Claude Code marketplace | Claude Code (plugin install) |
-| `gemini-extension.json` | Gemini CLI extension | Gemini CLI |
-| `assets/skills/` | npm bundle | `jaz-clio` CLI package |
-
-**CLI source** (`jaz-clio` on npm):
-
-```
-src/
-├── commands/                    55 command groups (invoices, bills, contacts, calc, jobs, mcp, ...)
-├── core/
-│   ├── api/                     Jaz REST client (30+ modules, 70+ endpoints)
-│   ├── calc/                    13 financial calculators
-│   ├── jobs/                    12 job blueprints + paired tools
-│   ├── drafts/                  Draft validation, sanitization, merge logic
-│   ├── auth/                    Credential management
-│   └── intelligence/            Fuzzy matching, date parsing, contact resolution
-└── assets/skills/               Bundled skill content for npm package
-```
+</details>
 
 ## Troubleshooting
 
 ### `command not found: clio`
 
-**Cause:** Node.js is not installed, or npm's global bin directory is not in your `PATH`.
+Node.js is not installed, or npm's global bin directory is not on `PATH`.
 
-**Fix:**
 ```bash
-# 1. Check if Node.js is installed
-node --version    # Should print v18+ — if not, install from https://nodejs.org (LTS)
-
-# 2. Install Clio globally
+node --version    # Need v18+. If missing, install LTS from https://nodejs.org
 npm install -g jaz-clio
-
-# 3. If clio still not found, add npm global bin to PATH
 npm config get prefix    # e.g. /usr/local or ~/.nvm/versions/node/v22.x.x
 export PATH="$(npm config get prefix)/bin:$PATH"   # Add to ~/.bashrc or ~/.zshrc
 ```
 
 ### Auth error / 401 Unauthorized
 
-**Cause:** Missing or invalid API key. Keys expire if regenerated in the Jaz app.
+Missing or invalid API key. Keys expire if regenerated in the Jaz app.
 
-**Fix:**
 ```bash
-clio auth whoami                   # Check current auth status
-clio auth add <your-api-key>       # Add or replace key (get from Settings > API in Jaz app)
-clio auth list                     # Verify the right org is active
+clio auth whoami
+clio auth add <your-api-key>       # Get from Settings > API in Jaz
+clio auth list                     # Confirm the right org is active
 ```
 
-If using env vars, ensure `JAZ_API_KEY` is set in the current shell or your MCP config's `env` block.
+If you use env vars, set `JAZ_API_KEY` in the current shell or your MCP config's `env` block.
 
 ### MCP not connecting
 
-**Cause:** MCP config path or command is wrong, or the server crashes on startup.
+The config path is wrong, the command is wrong, or the server crashes on startup.
 
-**Fix:**
 ```bash
-# 1. Test the MCP server directly
-npx jaz-clio mcp    # Should start without errors (Ctrl+C to stop)
-
-# 2. For Claude Code, verify registration
-claude mcp list      # Should show "jaz" in the list
-
-# 3. Re-add if missing
+npx jaz-clio mcp                   # Smoke-test the server (Ctrl+C to stop)
+claude mcp list                    # Confirm Claude Code sees "jaz"
 claude mcp add jaz -- npx jaz-clio mcp
 ```
 
-For Cursor/VS Code/Windsurf, check that your MCP config JSON is valid and includes an explicit API key to pin the org:
+For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio", "mcp"],
-  "env": {
-    "JAZ_API_KEY": "jk-your-api-key"
-  }
+  "args": ["-y", "jaz-clio@5.4.5", "mcp"],
+  "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
 
-> **Tip:** Pin `JAZ_API_KEY` in your MCP config rather than relying on the active profile. MCP servers cache credentials at startup — profile switches via `clio auth switch` won't take effect until the server restarts. For multi-org, use comma-separated keys: `"jk-aaa,jk-bbb"`.
+> Pin `JAZ_API_KEY` in MCP config rather than relying on the active CLI profile. MCP servers cache credentials at startup so `clio auth switch` won't take effect until restart. For multi-org, use comma-separated keys.
 
 ### Skills not loading
 
-**Cause:** Skill files are in the wrong directory, or your AI tool doesn't auto-discover from that path.
+Files are in the wrong path, or your tool doesn't auto-discover from there.
 
-**Fix:**
 ```bash
-# Check files are in the correct discovery path
-ls .claude/skills/       # Claude Code
-ls .agents/skills/       # Codex, Copilot, Cursor, Windsurf
-
-# Re-install with auto-detection
-npx jaz-clio init
+ls .claude/skills/                 # Claude Code
+ls .agents/skills/                 # Agent Skills standard (Cursor, Copilot, etc.)
+npx jaz-clio init                  # Re-install with auto-detection
 ```
 
-Files must be markdown (`.md`). Each skill folder should contain a `SKILL.md` plus reference files. If you copied manually, ensure the full folder structure was preserved (not just `SKILL.md`).
+Each skill folder must contain `SKILL.md` plus its reference files. Manual copies often miss subdirectories.
 
 ### `EACCES` permission denied on npm install
 
-**Cause:** npm's global directory requires elevated permissions (common on macOS/Linux without nvm).
+npm's global directory needs elevated permissions on macOS/Linux without nvm.
 
-**Fix:**
 ```bash
-# Option A: Use nvm (recommended)
+# Option A — nvm (recommended)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 nvm install --lts && npm install -g jaz-clio
 
-# Option B: Fix npm permissions
+# Option B — fix npm permissions
 mkdir -p ~/.npm-global && npm config set prefix ~/.npm-global
-export PATH="$HOME/.npm-global/bin:$PATH"    # Add to ~/.bashrc or ~/.zshrc
+export PATH="$HOME/.npm-global/bin:$PATH"   # Add to ~/.bashrc or ~/.zshrc
 npm install -g jaz-clio
 ```
 
 ### Stale data after org switch
 
-**Cause:** You switched orgs with `clio auth switch` but your AI tool's MCP server is still using the previous org's credentials (MCP servers cache auth at startup).
+You ran `clio auth switch` but the MCP server still uses the previous org (it cached auth at startup).
 
-**Fix:**
 ```bash
-# 1. Switch org in CLI
-clio auth switch <label>
-clio auth whoami                # Confirm new org
-
-# 2. Restart MCP server — required for the switch to take effect
-# Claude Code: remove and re-add
+# In Claude Code: remove and re-add
 claude mcp remove jaz && claude mcp add jaz -- npx jaz-clio mcp
 
-# Cursor/VS Code: restart the editor or reload MCP servers from the command palette
+# In Cursor / VS Code: restart the editor or reload MCP servers
 ```
 
-Alternatively, use **multi-org mode** to avoid restarts entirely — set `JAZ_API_KEY` to comma-separated keys (`jk-aaa,jk-bbb`) and switch orgs in conversation.
+Or use multi-org mode and skip restarts: comma-separated keys (`jk-aaa,jk-bbb`) and switch orgs in conversation.
 
-## Privacy & Security
+## Privacy & security
 
-Jaz AI runs entirely on your machine. API calls go directly from your machine to the Jaz API over HTTPS. This tool does not include telemetry or collect data. Your API key is stored locally in `~/.config/jaz-clio/credentials.json`.
+Runs entirely on your machine. API calls go directly from your machine to the Jaz API over HTTPS. No telemetry. The API key lives locally in `~/.config/jaz-clio/credentials.json`.
 
-See our full privacy policy: [jaz.ai/legal](https://jaz.ai/legal)
+Full policy: [jaz.ai/legal](https://jaz.ai/legal). Vulnerability disclosure: [SECURITY.md](SECURITY.md).
 
 ## Support
 
-- Help center: [help.jaz.ai](https://help.jaz.ai)
-- GitHub Issues: [github.com/teamtinvio/jaz-ai/issues](https://github.com/teamtinvio/jaz-ai/issues)
-- Email: api-support@jaz.ai
+- **Help center**: [help.jaz.ai](https://help.jaz.ai)
+- **Issues**: [github.com/teamtinvio/jaz-ai/issues](https://github.com/teamtinvio/jaz-ai/issues)
+- **Email**: api-support@jaz.ai
 
 ## License
 
-[MIT](LICENSE) - Copyright (c) 2026 Tinvio / Jaz
-
-Clio is a registered trademark owned by Tinvio.
+[MIT](LICENSE) · Copyright (c) 2026 Tinvio / Jaz · Clio is a registered trademark of Tinvio.

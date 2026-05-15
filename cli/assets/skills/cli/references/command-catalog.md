@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 53 command groups. Organized by domain.
+Complete reference for all 55 command groups. Organized by domain.
 
 ---
 

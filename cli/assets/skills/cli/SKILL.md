@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.4.4
+version: 5.4.5
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -8,6 +8,7 @@ description: >-
   command groups, auth precedence, output formats, entity resolution, and common
   workflow patterns. Also use when the user asks how to use clio, what commands
   are available, or how to automate accounting tasks from the command line.
+  Covers all 55 command groups and 274 agent tools.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 ---
@@ -16,7 +17,7 @@ compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 
 > **Audience note:** for power users and CI/automation. Most practitioners using Claude Desktop or `jaz-practice` workflows can ignore this skill — the practice MCP tools (`practice_*`) cover the day-to-day flows. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output.
 
-You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 53 command groups, 13 calculators, 12 job blueprints, 265 agent tools. Also fully compatible with Juan Accounting (same API, same endpoints).
+You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 55 command groups, 13 calculators, 12 job blueprints, 274 agent tools. Also fully compatible with Juan Accounting (same API, same endpoints).
 
 ## When to Use This Skill
 
@@ -33,7 +34,7 @@ You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting pl
 | Need | Skill |
 |------|-------|
 | CLI command syntax, flags, output | **jaz-cli** (this skill) |
-| API field names, error codes, 117 gotchas | **jaz-api** |
+| API field names, error codes, 141 gotchas | **jaz-api** |
 | IFRS transaction recipes (depreciation, leases, loans) | **jaz-recipes** |
 | Month-end close, bank recon, GST filing workflows | **jaz-jobs** |
 | Migration from Xero/QuickBooks/Sage | **jaz-conversion** |

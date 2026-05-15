@@ -1,10 +1,15 @@
 # Changelog
 
+## [5.4.5] - 2026-05-15
+
+Internal docs release. The public README and AGENTS.md were rewritten for clarity. No user-facing extension changes since v5.4.4.
+
 ## [5.4.4] - 2026-05-15
 
 ### Changed
-- **`view_auto_reconciliation` now explicitly identifies itself as READ-ONLY** and points agents to the write-side reconciliation tools (`quick_reconcile`, `apply_bank_rule`, the `reconcile_*` per-entry tools). Removes ambiguity for agents picking between suggestion vs. execution.
-- **Namespace descriptions cover more natural-language phrasings** — agents searching for "AR aging" / "dunning" / "recurring invoices" land on the invoices namespace; "CSV import" / "bulk upload" / "customer segmentation" land on contacts; "payment run" / "batch payment" / "payment matching" land on payments.
+- Bank reconciliation suggestions are now clearly distinguished from execution. The `view_auto_reconciliation` tool is labelled READ-ONLY in its description, and agents are pointed at `quick_reconcile`, `apply_bank_rule`, or the per-entry `reconcile_*` tools when they want to actually post a reconciliation.
+- Discoverability improved for "AR aging" / "dunning" / "recurring invoices" (lands on invoices), "CSV import" / "bulk upload" / "customer segmentation" (lands on contacts), and "payment run" / "batch payment" / "payment matching" (lands on payments).
+- jaz-api skill description updated from "117 production gotchas" to "141 production gotchas" to match the actual rule count.
 
 ## [5.4.3] - 2026-05-12
 
