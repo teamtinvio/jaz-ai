@@ -55,7 +55,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 274 MCP tools, 
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.4.8", "mcp"],
+      "args": ["-y", "jaz-clio@5.4.10", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -69,14 +69,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 274 MCP tools, 
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.4.8", "mcp"],
+      "args": ["-y", "jaz-clio@5.4.10", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.4.8` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat_...`) also work for multi-org.
+Pin `jaz-clio@5.4.10` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat_...`) also work for multi-org.
 
 ### OpenAI Responses API
 
@@ -98,9 +98,21 @@ A managed hosted endpoint isn't published yet; use the OpenAI Codex CLI / Agents
 ```bash
 npx jaz-clio init                  # auto-detects your tool
 npx jaz-clio init --platform cursor
+npx jaz-clio init --no-rules       # skills only, skip the agent-rules file
 ```
 
 Skills install to `.agents/skills/` (Agent Skills standard, used by Cursor, Copilot, Codex, Antigravity, Windsurf, Goose, Roo Code, Junie, Amp, and more) or `.claude/skills/` (Claude Code).
+
+`init` also writes a one-page `jaz-agent-rules.md` to the path your platform reads on workspace open, so any agent (Claude / GPT / Gemini / Copilot / Cursor) starts every session with the meta-tool discovery flow, the 6 API gotchas, and the recipe-engine carve-out (no double-posting on `fx-reval`):
+
+| Platform | Rules file path |
+|---|---|
+| Claude Code | `CLAUDE.md` |
+| Codex / Antigravity / Goose | `AGENTS.md` |
+| GitHub Copilot | `.github/copilot-instructions.md` |
+| Cursor | `.cursor/rules/jaz.mdc` (auto-loaded via `alwaysApply: true`) |
+| Windsurf | `.windsurf/rules/jaz.md` |
+| Gemini CLI | `GEMINI.md` |
 
 ## What you get
 
@@ -327,7 +339,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.4.8", "mcp"],
+  "args": ["-y", "jaz-clio@5.4.10", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

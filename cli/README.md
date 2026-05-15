@@ -83,13 +83,15 @@ claude mcp add jaz -- npx jaz-clio mcp
 
 ## Skills
 
-130 production-tested API rules. Field name mappings. Error recovery patterns. 12 job playbooks. Installable into any AI-aware project.
+141 production-tested API rules. Field name mappings. Error recovery patterns. 12 job playbooks. Installable into any AI-aware project.
 
 ```bash
-clio init
+clio init                            # auto-detect tool + install skills + agent-rules
+clio init --platform cursor          # explicit platform
+clio init --no-rules                 # skills only, skip the agent-rules file
 ```
 
-Auto-detects the AI tool (Claude Code, Codex, Copilot, Cursor, Antigravity) and installs the right skill files. The skills teach the AI how to call the Jaz API correctly — which fields to use, what to avoid, how to handle edge cases.
+Auto-detects the AI tool (Claude Code, Codex, Copilot, Cursor, Antigravity, Gemini, Windsurf, Goose) and installs the right skill files. `init` also writes a one-page `jaz-agent-rules.md` to the path your platform reads on workspace open (`CLAUDE.md` / `AGENTS.md` / `.github/copilot-instructions.md` / `.cursor/rules/jaz.mdc` / `.windsurf/rules/jaz.md` / `GEMINI.md`) so any agent starts every session with the meta-tool flow, the 6 API gotchas, and the recipe-engine carve-outs.
 
 ---
 
