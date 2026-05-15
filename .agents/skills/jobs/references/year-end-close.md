@@ -15,8 +15,8 @@
 - **`update_fixed_asset(resourceId: <id>, status: 'ACTIVE'|'DISPOSED'|'WRITTEN_OFF')`** — Y1 fallback if any FA has incorrect status at FY-end.
 - **`search_journals(filter: {tag: 'leave-accrual', valueDate: {between: [<FY-start>, <FY-end>]}})` / `search_journals(filter: {tag: 'bonus-accrual', ...})`** — Y2 true-up: pull all FY accrual journals to compare against actuals.
 - **`create_journal(...)`** — Y2 true-up adjustment journals (manual one-off, not recipe-driven).
-- **`plan_recipe(name: 'dividend', ...)` + `execute_recipe(...)`** — Y3 dividend declaration + payment (engine emits the 2-step pattern: declaration journal + payment cash-out).
-- **`plan_recipe(name: 'ecl', ...)` + `execute_recipe(...)`** — Y4 IFRS 9 ECL year-end true-up against `generate_aged_ar`.
+- **`plan_recipe(recipe: 'dividend', ...)` + `execute_recipe(...)`** — Y3 dividend declaration + payment (engine emits the 2-step pattern: declaration journal + payment cash-out).
+- **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — Y4 IFRS 9 ECL year-end true-up against `generate_aged_ar`.
 - **`update_account(resourceId: <CoA root>, lockDate: <FY-end>)`** — Y8 final lock.
 
 ### MCP tools — current/non-current reclassification (manual annual journals)
@@ -71,7 +71,7 @@ generate_fa_recon_summary(period_start: '2025-01-01', period_end: '2025-12-31')
 
 For Jaz native straight-line depreciation: should be automatic and correct. Verify the 12-month aggregate against `generate_general_ledger(accountResourceId: <Depreciation Expense>, period_start, period_end)`.
 
-For non-SL assets (DDB, 150DB) where `plan_recipe(name: 'depreciation', method: 'ddb' | '150db')` was used: each capsule pre-emitted 12 future-dated DRAFT journals at recipe-execution time. Confirm all 12 are FINALIZED via `search_journals(filter: {capsuleResourceId: <dep capsule>, status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})` — should be empty. If non-empty: route back to `month-end-close.md` step 9.
+For non-SL assets (DDB, 150DB) where `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db')` was used: each capsule pre-emitted 12 future-dated DRAFT journals at recipe-execution time. Confirm all 12 are FINALIZED via `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})` — should be empty. If non-empty: route back to `month-end-close.md` step 9.
 
 Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond `CLIENT.materiality_threshold` → investigate (likely a disposal posted without `update_fixed_asset(status: 'DISPOSED')` — auditor will catch this).
 
@@ -109,7 +109,7 @@ If `CLIENT.dividend_policy.declared_for_FY > 0`:
 
 ```
 plan_recipe(
-  name: 'dividend',
+  recipe: 'dividend',
   amount: <gross-dividend>,
   withholdingRate: <CLIENT.dividend_policy.withholding_rate>,
   declarationDate: '2025-12-31',
@@ -141,7 +141,7 @@ clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rate
 If top-up needed > `CLIENT.materiality_threshold`:
 
 ```
-plan_recipe(name: 'ecl', receivables: <buckets>, ratesPerBucket: <rates>, existingProvisionAccount: <Allowance for Doubtful Debts>, glBadDebtExpense: <Bad Debt Expense>, valueDate: '2025-12-31', capsuleType: 'ECL Provision', capsuleName: 'FY2025 ECL Year-End True-Up')
+plan_recipe(recipe: 'ecl', receivables: <buckets>, ratesPerBucket: <rates>, existingProvisionAccount: <Allowance for Doubtful Debts>, glBadDebtExpense: <Bad Debt Expense>, valueDate: '2025-12-31', capsuleType: 'ECL Provision', capsuleName: 'FY2025 ECL Year-End True-Up')
 ```
 
 Then `execute_recipe(...)`. Engine emits 1 journal: Dr Bad Debt Expense / Cr Allowance for Doubtful Debts for the top-up amount. ECL recipe is one-shot per FY (no ongoing schedule) — capsule closes on execution.
@@ -156,7 +156,7 @@ For each existing IAS 37 provision capsule (warranty, legal, decommissioning):
 search_capsules(filter: {capsuleType: {eq: 'Provision'}, status: 'ACTIVE'})
 ```
 
-Per capsule, recompute the present value at FY-end (`clio calc provision`). Top-up via additional `plan_recipe(name: 'provision', ...)` + `execute_recipe` if required, OR reverse via `create_journal` if the obligation reduced.
+Per capsule, recompute the present value at FY-end (`clio calc provision`). Top-up via additional `plan_recipe(recipe: 'provision', ...)` + `execute_recipe` if required, OR reverse via `create_journal` if the obligation reduced.
 
 ### Y6 — Current/non-current reclassification (manual journals)
 
@@ -194,7 +194,7 @@ search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-0
 search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-12-31']}})
 ```
 
-ALL three must return zero. If any: `bulk_finalize_drafts({kind, resourceIds: [...]})` for the keep-set; `delete_*` for the discards.
+ALL three must return zero. If any: `update_<entity>(resourceId, saveAsDraft: false)  // per-id; bulk_finalize_drafts only supports invoice/bill/CN, not journal/cash` for the keep-set; `delete_*` for the discards.
 
 ### Y8 — Lock the year
 

@@ -11,11 +11,11 @@
 ### MCP tools — quarterly extras
 - **`generate_vat_ledger(period_start: <Q-start>, period_end: <Q-end>)`** — Q1 GST/VAT filing prep: full quarterly tax ledger.
 - **`generate_aged_ar(period_end: <Q-end>)`** — Q2 ECL formal review input.
-- **`plan_recipe(name: 'ecl', ...)` + `execute_recipe(...)`** — Q2 ECL top-up if material.
+- **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — Q2 ECL top-up if material.
 - **`search_journals(filter: {tag: 'bonus-accrual', valueDate: {between: [<Q-start>, <Q-end>]}})`** — Q3 bonus YTD pull.
 - **`create_journal(...)`** — Q3 bonus true-up adjustment (manual one-off).
 - **`search_capsules(filter: {capsuleType: {eq: 'Intercompany'}})`** — Q4 IC reconciliation per pair of entities (multi-org coordination — see `intercompany.md` recipe).
-- **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}})` + `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
+- **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}})` + `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
 - **`generate_trial_balance(period_end: <Q-end>)`** — verification.
 - **`update_account(resourceId: <CoA root>, lockDate: <Q-end>)`** — final lock.
 
@@ -80,9 +80,9 @@ clio calc ecl --current 100000 --30d 50000 --60d 20000 --90d 10000 --120d 5000 -
 If `topUpRequired > CLIENT.materiality_threshold`:
 
 ```
-plan_recipe(name: 'ecl', receivables: <buckets>, ratesPerBucket: <rates from CLIENT.ecl_loss_rate_matrix>, ...)
+plan_recipe(recipe: 'ecl', receivables: <buckets>, ratesPerBucket: <rates from CLIENT.ecl_loss_rate_matrix>, ...)
 execute_recipe(...)
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<ecl journal>]})
+update_journal(resourceId: <ecl journal>, saveAsDraft: false)
 ```
 
 Document the analysis in `recurring/quarterly/2025-Q1/ecl-review.json`. Auditor will request this each quarter.
@@ -120,8 +120,8 @@ search_capsules(filter: {capsuleType: {eq: 'Provisions'}, status: {eq: 'ACTIVE'}
 Per capsule: this period's quarter-end unwinding DRAFT journals (3 monthly DRAFTs from `provisions.md` recipe execution) should already be in the capsule. Verify and finalize:
 
 ```
-search_journals(filter: {capsuleResourceId: <provision capsule id>, valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {eq: 'DRAFT'}})
-bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})
+search_journals(filter: {capsuleResourceId: {eq: <provision capsule id>}, valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {eq: 'DRAFT'}})
+update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet
 ```
 
 If practitioner determines remeasurement is needed (cash-flow estimate changed, discount rate moved): see `provisions.md` step 6 — recompute, post adjustment, reverse remaining DRAFT unwinding journals, re-execute recipe with new inputs.

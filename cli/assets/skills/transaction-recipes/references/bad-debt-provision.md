@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'ecl', ...)`** — used in step 2: returns RecipePlan with one journal: top-up amount (Dr Bad Debt Expense / Cr Allowance for Doubtful Debts) for the delta between calculated ECL and existing provision. If existing > calculated: reversal direction.
-- **`execute_recipe(name: 'ecl', ...)`** — used in step 4: posts the single ECL journal. ONE-SHOT — no schedule, no future-dated entries.
+- **`plan_recipe(recipe: 'ecl', ...)`** — used in step 2: returns RecipePlan with one journal: top-up amount (Dr Bad Debt Expense / Cr Allowance for Doubtful Debts) for the delta between calculated ECL and existing provision. If existing > calculated: reversal direction.
+- **`execute_recipe(recipe: 'ecl', ...)`** — used in step 4: posts the single ECL journal. ONE-SHOT — no schedule, no future-dated entries.
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <r1>,<r2>,<r3>,<r4>,<r5> --existing-provision <ep> --currency <code> --json`** — used in step 1: applies per-bucket loss rates to receivables aged into 5 buckets. Returns `{ totalReceivables, calculatedEcl, existingProvision, topUpRequired, perBucket: [{bucket, balance, lossRate, ecl}, ...] }`. Top-up positive = increase provision; negative = release / reverse.
@@ -77,7 +77,7 @@ If `topUpRequired` is below `CLIENT.materiality_threshold`: skip the recipe enti
 
 ```
 plan_recipe(
-  name: 'ecl',
+  recipe: 'ecl',
   receivables: [
     {bucket: 'current', balance: 100000, lossRate: 0.005},
     {bucket: '30d', balance: 50000, lossRate: 0.02},
@@ -109,10 +109,10 @@ If `Allowance for Doubtful Debts` doesn't exist in the CoA: `create_account(name
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'ecl', ...same args..., accountMap: <resolved>)
+execute_recipe(recipe: 'ecl', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
-Returns: `{ capsule: {resourceId, type, title}, steps: [{step: 1, action: 'journal', status: 'created', resourceId: <journal id>}], summary: {total: 1, created: 1} }`. The single journal is DRAFT — finalize via `bulk_finalize_drafts({kind: 'journal', resourceIds: [<id>]})` once the practitioner confirms the inputs.
+Returns: `{ capsule: {resourceId, type, title}, steps: [{step: 1, action: 'journal', status: 'created', resourceId: <journal id>}], summary: {total: 1, created: 1} }`. The single journal is DRAFT — finalize via `update_journal(resourceId: <id>, saveAsDraft: false)` once the practitioner confirms the inputs.
 
 ### Step 5 — Verify
 

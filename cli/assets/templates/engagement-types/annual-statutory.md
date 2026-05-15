@@ -19,7 +19,7 @@ Practitioner checklist. Tick boxes as the underlying Jaz tools succeed. Agent re
 
 **Tools.** `generate_year_end_blueprint` · `generate_audit_prep_blueprint` · `generate_statutory_filing_blueprint` (the three drivers) · monthly-close tools (TB/BS/P&L, search_*, reconcile_*, bulk_finalize_drafts) plus `generate_cashflow` · `generate_equity_movement` · `generate_aged_ar` · `generate_aged_ap` · `generate_fa_summary` · `generate_fa_recon_summary` · `search_fixed_assets` · `search_capsules` (intercompany + lease + provision capsules).
 
-**Recipes.** `plan_recipe(name: 'depreciation', …)` (annual close per asset) · `plan_recipe(name: 'fx-reval', …)` (year-end revaluation per non-base-currency monetary balance) · `plan_recipe(name: 'provision', …)` (IAS 37 provisions remeasurement) · `plan_recipe(name: 'ecl', …)` (year-end IFRS 9 true-up) · `plan_recipe(name: 'asset-disposal', …)` (any disposal that surfaced during FA review) · `plan_recipe(name: 'dividend', …)` (post profit-finalization declaration).
+**Recipes.** `plan_recipe(recipe: 'depreciation', …)` (annual close per asset) · `plan_recipe(recipe: 'fx-reval', …)` (year-end revaluation per non-base-currency monetary balance) · `plan_recipe(recipe: 'provision', …)` (IAS 37 provisions remeasurement) · `plan_recipe(recipe: 'ecl', …)` (year-end IFRS 9 true-up) · `plan_recipe(recipe: 'asset-disposal', …)` (any disposal that surfaced during FA review) · `plan_recipe(recipe: 'dividend', …)` (post profit-finalization declaration).
 
 **Calculators.** `clio calc loan` (year-end loan schedules) · `clio calc lease` (IFRS 16 unwinding for ROU register) · `clio calc provision` (PV unwinding) · `clio calc asset-disposal` (gain/loss verification) · `clio calc dividend` · `clio jobs statutory-filing sg-cs` (Singapore Form C-S computation engine) · `clio jobs statutory-filing sg-ca` (capital allowance schedule).
 
@@ -32,9 +32,9 @@ Practitioner checklist. Tick boxes as the underlying Jaz tools succeed. Agent re
 - [ ] Year-end blueprint — `generate_year_end_blueprint(period: <ENGAGEMENT.period>, currency: <CLIENT.base_currency>)`
 - [ ] All 12 monthly closes signed-off (precondition)
 - [ ] Year-end FX reval — every monetary balance ≠ `CLIENT.base_currency` revalued at FY-end closing rate
-- [ ] FA register review — `generate_fa_summary` + `generate_fa_recon_summary`; disposals booked via `plan_recipe(name: 'asset-disposal', …)`
-- [ ] ECL year-end true-up — `plan_recipe(name: 'ecl', …)` over `generate_aged_ar` output
-- [ ] Provisions remeasured — `plan_recipe(name: 'provision', …)` for every active IAS 37 capsule
+- [ ] FA register review — `generate_fa_summary` + `generate_fa_recon_summary`; disposals booked via `plan_recipe(recipe: 'asset-disposal', …)`
+- [ ] ECL year-end true-up — `plan_recipe(recipe: 'ecl', …)` over `generate_aged_ar` output
+- [ ] Provisions remeasured — `plan_recipe(recipe: 'provision', …)` for every active IAS 37 capsule
 - [ ] Intercompany elimination — every intercompany capsule reconciled and confirmed
 - [ ] Final TB pulled — `generate_trial_balance(period_end: <FY-end>)` saved to `recurring/annual/<period>/audit/tb.json`
 - [ ] Full report set — BS, P&L, cashflow (`generate_cashflow`), equity movement (`generate_equity_movement`), aged AR/AP, FA summary saved to `deliverables/`

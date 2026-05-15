@@ -32,7 +32,7 @@ Canonical playbook the agent walks through when the practitioner says "onboard `
 
 ### Recipes (jaz-recipes)
 - Not used during onboarding setup itself. Onboarding's job is to populate `CLIENT.md` so subsequent recurring engagements can drive recipes from it.
-- After step 8 hand-off, the first `monthly-close` engagement uses `plan_recipe(name: 'accrued-expense', …)` per `CLIENT.recurring_accruals[]` etc. — see `jaz-practice/references/monthly-close.md`.
+- After step 8 hand-off, the first `monthly-close` engagement uses `plan_recipe(recipe: 'accrued-expense', …)` per `CLIENT.recurring_accruals[]` etc. — see `jaz-practice/references/monthly-close.md`.
 
 ### Calculators (jaz-cli)
 - Not used during setup. Used in subsequent engagements after onboarding closes.

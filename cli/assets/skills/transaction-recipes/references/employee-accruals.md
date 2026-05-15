@@ -14,11 +14,11 @@ The two patterns share the same `Employee Benefits` capsule type but use differe
 ### Recipe engine entry points
 
 **Leave (engine: `leave-accrual`):**
-- **`plan_recipe(name: 'leave-accrual', ...)`** — used in step 2A: returns RecipePlan with N future-dated DRAFT accrual journals (one per month, fixed amount). NO reversal.
-- **`execute_recipe(name: 'leave-accrual', ...)`** — used in step 4A: posts N future-dated DRAFT journals upfront.
+- **`plan_recipe(recipe: 'leave-accrual', ...)`** — used in step 2A: returns RecipePlan with N future-dated DRAFT accrual journals (one per month, fixed amount). NO reversal.
+- **`execute_recipe(recipe: 'leave-accrual', ...)`** — used in step 4A: posts N future-dated DRAFT journals upfront.
 
 **Bonus (engine: `accrued-expense`):**
-- **`plan_recipe(name: 'accrued-expense', amount: <quarterly bonus est>, periods: 1, ...)`** — used in step 2B: returns 2-journal pair (accrual at period-end + reversal at next-period-start). See `accrued-expenses.md` for the full pattern.
+- **`plan_recipe(recipe: 'accrued-expense', amount: <quarterly bonus est>, periods: 1, ...)`** — used in step 2B: returns 2-journal pair (accrual at period-end + reversal at next-period-start). See `accrued-expenses.md` for the full pattern.
 
 ### Calculators
 - **`clio calc leave-accrual --headcount <n> --days-per-employee <days> --daily-rate <amt> --periods <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — leave cross-check. Returns `{ totalAnnualCost, perPeriodAmount, schedule[periods] }`.
@@ -28,7 +28,7 @@ The two patterns share the same `Employee Benefits` capsule type but use differe
 - **`search_capsules(filter: {capsuleType: {eq: 'Employee Benefits'}})`** — step 0: discover existing leave + bonus capsules.
 - **`search_accounts(filter: {name: {in: ['Leave Expense', 'Leave Liability', 'Bonus Expense', 'Bonus Payable']}})`** — step 3.
 - **`search_journals(filter: {tag: 'leave-accrual', valueDate: {between: [<period-start>, <period-end>]}, status: 'DRAFT'})`** — step 5 monthly: pull this period's pre-emitted leave DRAFT.
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — monthly finalize.
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — monthly finalize.
 - **`generate_trial_balance(period_end: <date>)`** — verification.
 - For year-end true-up: see `year-end-close.md` Y2 — manual journal pattern with HR-supplied actuals.
 
@@ -61,7 +61,7 @@ Returns: `{ totalAnnualCost: 84000, perPeriodAmount: 7000, schedule: [{period: 1
 
 ```
 plan_recipe(
-  name: 'leave-accrual',
+  recipe: 'leave-accrual',
   headcount: 20,
   daysPerEmployee: 14,
   dailyRate: 300,
@@ -73,7 +73,7 @@ plan_recipe(
   capsuleType: 'Employee Benefits',
   capsuleName: 'Annual Leave Accrual — FY2025'
 )
-execute_recipe(name: 'leave-accrual', ...same args..., accountMap: <resolved>)
+execute_recipe(recipe: 'leave-accrual', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Engine emits **12 future-dated DRAFT journals** (one per month, fixed $7,000 each: Dr Leave Expense / Cr Leave Liability).
@@ -81,8 +81,8 @@ Engine emits **12 future-dated DRAFT journals** (one per month, fixed $7,000 eac
 ### Step 5A — Monthly action
 
 ```
-search_journals(filter: {capsuleResourceId: <leave capsule id>, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<journal id>]})
+search_journals(filter: {capsuleResourceId: {eq: <leave capsule id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 When an employee actually takes leave:
@@ -118,7 +118,7 @@ clio calc accrued-expense --amount <est> --periods 1 --start-date 2025-03-31 --j
 
 ```
 plan_recipe(
-  name: 'accrued-expense',
+  recipe: 'accrued-expense',
   amount: <est>,
   periods: 1,
   startDate: '2025-03-31',
@@ -129,7 +129,7 @@ plan_recipe(
   capsuleType: 'Employee Benefits',
   capsuleName: 'Bonus Accrual — Q1 2025'
 )
-execute_recipe(name: 'accrued-expense', ...)
+execute_recipe(recipe: 'accrued-expense', ...)
 ```
 
 Engine emits 2 journals: accrual (Mar 31) + reversal (Apr 1). Mirror Q2 / Q3 / Q4.
@@ -155,7 +155,7 @@ Per quarter-end-close (`quarter-end-close.md`):
 | `plan_recipe` (bonus) | 422 `unsupported_recipe` | Use `accrued-expense` for bonus — leave is `leave-accrual`. |
 | `execute_recipe` | 422 `account_not_found` | Step 3 incomplete. Common gap: `Bonus Payable` (most CoAs lack); create via `create_account(accountType: 'Current Liability')`. |
 | Verification | Leave Liability balance > expected | Practitioner posted manual leave-utilization journals against the wrong account, OR the original recipe estimate was high. Year-end Y2a true-up will catch this. |
-| Verification | Bonus accrual nonzero after quarterly reversal posts | Reversal didn't finalize. `search_journals(filter: {capsuleResourceId: <bonus capsule>, valueDate: <reversal date>, status: 'DRAFT'})` then `bulk_finalize_drafts`. |
+| Verification | Bonus accrual nonzero after quarterly reversal posts | Reversal didn't finalize. `search_journals(filter: {capsuleResourceId: {eq: <bonus capsule>}, valueDate: <reversal date>, status: 'DRAFT'})` then `bulk_finalize_drafts`. |
 | 13th-month bonus (PH-specific) | (process — separate from Q4 bonus) | Use `accrued-expense` recipe with `amount: <annual base / 12>`, `periods: 12`, accruing throughout FY. Settle in December via Dr Bonus Payable / Cr Cash. |
 
 ---

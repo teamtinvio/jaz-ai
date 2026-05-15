@@ -12,8 +12,8 @@
 - **`generate_fa_recon_summary(period_start: <year-start>, period_end: <year-end>)`** — step 3: reconcile movement (opening + additions − disposals − depreciation = closing).
 - **`generate_general_ledger(accountResourceId: <FA category GL>, period_start, period_end)`** — step 4: per-FA-category GL movement vs FA register.
 - **`update_fixed_asset(resourceId: <id>, status: 'DISPOSED' | 'WRITTEN_OFF', disposalDate, disposalProceeds)`** — step 5: status updates for disposals. Mirror endpoints `POST /api/v1/mark-as-sold/fixed-assets` (sale) / `POST /api/v1/discard-fixed-assets/{id}` (scrap).
-- **`plan_recipe(name: 'asset-disposal', ...)` + `execute_recipe(...)`** — step 5: invoke per disposal identified during review (per `asset-disposal.md` recipe).
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 5 / 6: finalize disposal journals + any pending DDB / 150DB depreciation DRAFTs from `declining-balance.md` recipe.
+- **`plan_recipe(recipe: 'asset-disposal', ...)` + `execute_recipe(...)`** — step 5: invoke per disposal identified during review (per `asset-disposal.md` recipe).
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 / 6: finalize disposal journals + any pending DDB / 150DB depreciation DRAFTs from `declining-balance.md` recipe.
 
 ### Calculators (cross-check, no API key needed)
 - **`clio calc depreciation --cost --salvage --life --method --frequency annual --json`** — step 4 per-asset cross-check.
@@ -71,8 +71,8 @@ For each ACTIVE SL asset (Jaz auto-depreciates):
 - Should match within rounding ($0.12 tolerance for full-year SL).
 
 For each ACTIVE DDB / 150DB asset (recipe-managed, see `declining-balance.md`):
-- Per capsule: `search_journals(filter: {capsuleResourceId: <dep capsule>, valueDate: {between: [<year-start>, <year-end>]}, status: 'DRAFT'})`. Should be zero — all 12 months' DRAFT depreciation journals should already be FINALIZED via monthly-close.
-- If non-zero: `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})` for each remaining DRAFT.
+- Per capsule: `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, valueDate: {between: [<year-start>, <year-end>]}, status: 'DRAFT'})`. Should be zero — all 12 months' DRAFT depreciation journals should already be FINALIZED via monthly-close.
+- If non-zero: `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet` for each remaining DRAFT.
 
 Cross-check via `clio calc depreciation --frequency annual --json` per asset; auditor will sample-test.
 
@@ -82,7 +82,7 @@ For each disposal identified in step 2:
 
 ```
 plan_recipe(
-  name: 'asset-disposal',
+  recipe: 'asset-disposal',
   cost, salvageValue, usefulLifeYears, acquisitionDate, disposalDate, proceeds, method,
   ...,
   fixedAssetResourceId: <asset id>,
@@ -90,7 +90,7 @@ plan_recipe(
   capsuleName: 'Disposal — <asset name> — <disposal date>'
 )
 execute_recipe(...)
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<disposal journal id>]})
+update_journal(resourceId: <disposal journal id>, saveAsDraft: false)
 ```
 
 Then the manual FA-register status update (engine-skipped — see `asset-disposal.md` step 5):

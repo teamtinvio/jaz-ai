@@ -17,7 +17,7 @@ bank_accounts:                                # <!-- Read by monthly-close befor
     account_number_ref: ""                    # <!-- Last 4 digits or internal ref; never store the full account number. -->
     currency: SGD                             # <!-- ISO-4217. Multi-currency banks must list each leg separately. -->
     jaz_resource_id: ""                       # <!-- Jaz bank_accounts resourceId. Populated after first reconciliation; agent uses it directly to skip lookup. -->
-recurring_accruals:                           # <!-- Read by monthly-close step "accruals". Each entry drives one plan_recipe(name: 'accrued-expense', ...) call. -->
+recurring_accruals:                           # <!-- Read by monthly-close step "accruals". Each entry drives one plan_recipe(recipe: 'accrued-expense', ...) call. -->
   - name: ""                                  # <!-- Human label, e.g., "Utilities — SP Group". -->
     gl_account: ""                            # <!-- Accrual GL account code from Jaz CoA. Must exist or accrual step fails with 422. -->
     vendor: ""                                # <!-- Counterparty contact name as it appears in Jaz contacts. -->

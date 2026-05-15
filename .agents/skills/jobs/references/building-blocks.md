@@ -54,8 +54,8 @@ Recipe engine creates ALL future-dated journals upfront as DRAFT (loan: 60 month
 
 Monthly action per recipe-managed capsule:
 ```
-search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<this period's pre-emitted journal>]})
+search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+update_journal(resourceId: <this period's pre-emitted journal>, saveAsDraft: false)
 ```
 
 For Jaz-scheduler-driven recurrences (`create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`, subscriptions): scheduler templates auto-fire and create new ACTIVE entries each period. Different primitive — the recipe engine doesn't use these.

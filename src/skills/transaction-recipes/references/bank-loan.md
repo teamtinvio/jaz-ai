@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'loan', ...)`** — used in step 2: returns `RecipePlan` with full amortization schedule, capsule shape, journal templates per period, required accounts.
-- **`execute_recipe(name: 'loan', ...)`** — used in step 4: posts the disbursement cash-in, creates the loan capsule, creates the monthly repayment scheduler (or per-period journals if `frequency: manual`).
+- **`plan_recipe(recipe: 'loan', ...)`** — used in step 2: returns `RecipePlan` with full amortization schedule, capsule shape, journal templates per period, required accounts.
+- **`execute_recipe(recipe: 'loan', ...)`** — used in step 4: posts the disbursement cash-in, creates the loan capsule, creates the monthly repayment scheduler (or per-period journals if `frequency: manual`).
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc loan --principal <p> --rate <annual %> --term <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: independently produce the amortization table and verify the engine's `perPeriodAmount`. Returns `{ perPeriodAmount, totalInterest, schedule[n] }`.
@@ -16,7 +16,7 @@
 - **`search_accounts(filter: {name: {in: ['Loan Payable', 'Interest Expense']}})`** — used in step 3: confirm liability + expense GL accounts exist.
 - **`search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}, name: {eq: <capsuleName>}})`** — used in step 0: detect duplicate setup before re-running. Loan capsules are unique per facility — duplicate creation is almost always an agent error.
 - **`generate_trial_balance(period_end: <date>)`** — used in step 5: verify the loan liability balance matches the schedule's `closingBalance` column.
-- **`finalize_journal(resourceId: <id>)`** — used in step 4 verification: lift draft journals to ACTIVE once practitioner confirms.
+- **`update_journal(resourceId: <id>, saveAsDraft: false)`** — used in step 4 verification: lift draft journals to ACTIVE once practitioner confirms. (No bulk-finalize-journals tool today; loop per id.)
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/onboarding.md` (when the prior firm's loan transfers in via the conversion clearing account, then forward-recognition starts here) and from `practice/references/monthly-close.md` step 4 (monthly accruals do NOT include loan interest — interest is auto-emitted by the loan scheduler).
@@ -47,7 +47,7 @@ Returns: `{ perPeriodAmount: 1933.28, totalInterest: 15996.80, schedule: [{perio
 
 ```
 plan_recipe(
-  name: 'loan',
+  recipe: 'loan',
   principal: 100000,
   annualRate: 6,
   termMonths: 60,
@@ -78,7 +78,7 @@ For the lender contact:
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'loan', ...same args..., accountMap: <resolved>, contactId: <resolved>)
+execute_recipe(recipe: 'loan', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...], summary: {total, created, ...} }`. The recipe creates **termMonths + 1 entries upfront**:
@@ -94,13 +94,13 @@ Note: This is NOT the Jaz scheduler primitive. The recipe pre-emits all 60 journ
 After the actual bank payment posts each month, the corresponding repayment journal already exists in the capsule as DRAFT. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
 ```
 
 Returns the one DRAFT for that period (the engine pre-emitted it). Finalize:
 
 ```
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<journal id>]})
+update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 After disbursement (period 0):
@@ -116,7 +116,7 @@ After each monthly finalize:
 After the FINAL period (60th repayment) is finalized:
 - Assert: `balance['Loan Payable'] == 0` exactly.
 - Assert: `balance['Interest Expense'] (life-to-date)` matches `totalInterest` from the calculator within ±1 cent (engine forces final-period adjustment for rounding).
-- Close the capsule via `update_capsule(resourceId: <id>, status: 'CLOSED')` if the org tracks capsule status.
+- Close the capsule via a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only) if the org tracks capsule status.
 
 ---
 
@@ -139,8 +139,8 @@ After the FINAL period (60th repayment) is finalized:
 
 - **Variable-rate loan:** Cannot model in a single `plan_recipe` call. Run the recipe for the initial fixed period; when the rate changes, halt the existing scheduler (`update_scheduler(status: 'PAUSED')`), recompute with new rate via `clio calc loan` from the current outstanding balance, and run `plan_recipe` again with the new schedule plus an `existingCapsuleResourceId` pointer so the new repayments append to the same capsule.
 - **Lump-sum principal repayment:** Post a manual journal (`create_journal`) Dr Loan Payable / Cr Cash. Then halt the existing scheduler and re-plan with the new outstanding balance.
-- **Interest-only period:** Pass `interestOnlyPeriods: <n>` to the recipe. The engine emits interest-only journals for the first `n` periods then switches to amortizing for the remainder. Verify the schedule output before executing.
-- **Multi-currency loan (USD loan with SGD base):** Pass `currency: 'USD'`. Disbursement records via `currency: { sourceCurrency: 'USD' }` per `jaz-api/SKILL.md` rule 25. Monthly repayments stay in USD. Period-end FX revaluation against base currency is auto-handled by Jaz (Loan Payable is a monetary item per IAS 21.23 — Jaz auto-translates at closing rate). Verify via `practice/references/monthly-close.md` step 6 verification flow; do NOT invoke `execute_recipe(name: 'fx-reval', ...)`.
+- **Interest-only period:** Not supported by the loan calculator. Workaround: post N manual interest-only journals via `create_journal` (Dr Interest Expense / Cr Cash) for the interest-only window, then run `plan_recipe(recipe: 'loan', ...)` from the start of the amortizing window with the full outstanding principal.
+- **Multi-currency loan (USD loan with SGD base):** Pass `currency: 'USD'`. Disbursement records via `currency: { sourceCurrency: 'USD' }` per `jaz-api/SKILL.md` rule 25. Monthly repayments stay in USD. Period-end FX revaluation against base currency is auto-handled by Jaz (Loan Payable is a monetary item per IAS 21.23 — Jaz auto-translates at closing rate). Verify via `practice/references/monthly-close.md` step 6 verification flow; do NOT invoke `execute_recipe(recipe: 'fx-reval', ...)`.
 - **Loan origination fees:** Out of scope for this recipe (the engine's IFRS 9 effective-interest treatment doesn't currently amortize fees into the EIR). Post fees as a separate manual journal: Dr `Operating Expense > Loan Origination Fee` / Cr Cash. For IFRS 9 EIR-amortized fees, model the fee as `prepaid-expense` over the loan term.
 - **Year-end current/non-current reclassification:** Out of scope for the engine — manual annual journal: Dr Loan Payable Non-Current / Cr Loan Payable Current for the next 12 months' principal portion. Practice playbook `practice/references/annual-statutory.md` step 8 covers this.
 

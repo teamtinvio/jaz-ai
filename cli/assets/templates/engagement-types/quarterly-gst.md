@@ -19,7 +19,7 @@ Practitioner checklist. Tick boxes as the underlying Jaz tools succeed. Agent re
 
 **Tools.** `generate_gst_vat_blueprint` (drives the sequence) · `generate_vat_ledger` (the F5 source-of-truth ledger) · `search_invoices(status: APPROVED, valueDate: …)` (output tax cross-check) · `search_bills(status: APPROVED, valueDate: …)` (input tax cross-check) · `search_tax_profiles` (verify F5 box mapping per profile) · `export_records` (vat-ledger CSV) · `download_export` (download the generated CSV for IRAS submission attachment).
 
-**Recipes.** None. GST is tooling-heavy, not recipe-heavy. Exception: if ECL review is folded in (per jaz-recipes guidance that ECL is reviewed alongside F5 prep), `plan_recipe(name: 'ecl', …)`.
+**Recipes.** None. GST is tooling-heavy, not recipe-heavy. Exception: if ECL review is folded in (per jaz-recipes guidance that ECL is reviewed alongside F5 prep), `plan_recipe(recipe: 'ecl', …)`.
 
 **Calculators.** `clio calc ecl` if ECL review is bundled with F5 prep.
 

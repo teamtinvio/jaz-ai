@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'lease', ...)`** — used in step 2: returns RecipePlan with PV-derived initial recognition journal, fixed-asset note (manual step), and N future-dated liability unwinding journals.
-- **`execute_recipe(name: 'lease', ...)`** — used in step 4: posts the initial journal + N future-dated DRAFT unwinding journals. The fixed-asset step is SKIPPED by the engine (per `src/core/recipe/engine.ts:73-83` — `fixed-asset` and `note` actions can't be auto-created via the engine; they appear in the `notes` summary for the practitioner to handle manually).
+- **`plan_recipe(recipe: 'lease', ...)`** — used in step 2: returns RecipePlan with PV-derived initial recognition journal, fixed-asset note (manual step), and N future-dated liability unwinding journals.
+- **`execute_recipe(recipe: 'lease', ...)`** — used in step 4: posts the initial journal + N future-dated DRAFT unwinding journals. The fixed-asset step is SKIPPED by the engine (per `src/core/recipe/engine.ts:73-83` — `fixed-asset` and `note` actions can't be auto-created via the engine; they appear in the `notes` summary for the practitioner to handle manually).
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc lease --payment <monthly> --term <months> --rate <annual %> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: independently produce `{ presentValue, totalInterest, schedule[n] }` (monthly payment splits into interest + principal portions, principal reducing the liability).
@@ -17,7 +17,7 @@
 - **`search_contacts(filter: {supplier: true, name: {eq: <lessor>}})`** — step 3 (lease counterparty).
 - **`create_fixed_asset(...)`** — step 4 manual: register the ROU asset in Jaz native FA. `cost` = PV from calculator, `usefulLifeMonths` = lease term, `depreciationMethod` = 'sl' (straight-line). Jaz auto-posts monthly depreciation thereafter.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify.
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 5 monthly: finalize this period's pre-emitted unwinding DRAFT.
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly: finalize this period's pre-emitted unwinding DRAFT.
 - **`generate_fa_summary(period_end: <date>)`** — step 5 verify Jaz auto-posted ROU depreciation.
 
 ### Cross-references
@@ -49,7 +49,7 @@ Returns: `{ presentValue: 167287.43, totalInterest: 12712.57, schedule: [{period
 
 ```
 plan_recipe(
-  name: 'lease',
+  recipe: 'lease',
   monthlyPayment: 5000,
   termMonths: 36,
   annualRate: 5,
@@ -86,7 +86,7 @@ Bank account:
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'lease', ...same args..., accountMap: <resolved>, contactId: <resolved>, bankAccountId: <resolved>)
+execute_recipe(recipe: 'lease', ...same args..., accountMap: <resolved>, contactName: <resolved>, bankAccountName: <resolved>)
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId | 'skipped'}], summary: {total: 38, created: 37, skipped: 1, notes: ['Step 2 (fixed-asset): Register ROU asset in Jaz FA module — see practice playbook step 4 manual action.']} }`. The recipe creates **37 entries upfront** (1 initial journal + 36 unwinding journals). All journals attach to the same capsule.
@@ -115,8 +115,8 @@ For each month after recipe execution:
 **5a — Finalize this period's unwinding journal (3-line, lease payment):**
 
 ```
-search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<journal id>]})
+search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 This posts the cash payment + interest split per the amortization schedule.
@@ -138,7 +138,7 @@ Should show this month's $4,646.87 depreciation movement. If missing: the FA was
 After the FINAL period (month 36):
 - Assert: `balance['Lease Liability'] == 0` exactly.
 - Assert: `balance['Right-of-Use Asset']` net of accumulated depreciation `== 0`.
-- Close capsule via `update_capsule(resourceId: <id>, status: 'CLOSED')`. Decommission FA via `update_fixed_asset(status: 'DISPOSED')` (lease end = de-recognition per IFRS 16.46).
+- Close capsule via a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only). Decommission FA via `update_fixed_asset(status: 'DISPOSED')` (lease end = de-recognition per IFRS 16.46).
 
 ---
 

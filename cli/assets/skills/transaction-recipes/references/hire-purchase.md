@@ -11,11 +11,11 @@ The recipe engine handles both: pass `usefulLifeMonths` distinct from `termMonth
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'lease', ...)`** — used in step 2: same engine as IFRS 16 lease, with `usefulLifeMonths > termMonths` to flag hire-purchase pattern.
-- **`execute_recipe(name: 'lease', ...)`** — step 4: posts initial recognition + N future-dated DRAFT unwinding journals over `termMonths`. The fixed-asset step is engine-SKIPPED — practitioner manually invokes `create_fixed_asset(usefulLifeMonths: 60, ...)` with the longer useful life.
+- **`plan_recipe(recipe: 'lease', ...)`** — used in step 2: same engine as IFRS 16 lease, with `usefulLifeMonths > termMonths` to flag hire-purchase pattern.
+- **`execute_recipe(recipe: 'lease', ...)`** — step 4: posts initial recognition + N future-dated DRAFT unwinding journals over `termMonths`. The fixed-asset step is engine-SKIPPED — practitioner manually invokes `create_fixed_asset(usefulLifeMonths: 60, ...)` with the longer useful life.
 
 ### Calculator
-- **`clio calc lease --payment <monthly> --term <months> --rate <annual %> --useful-life <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — same calc as IFRS 16 lease, with explicit `--useful-life` flag distinguishing it from the financing term. Returns `{ presentValue, totalInterest, schedule[n], depreciationSchedule[m] }` where `m == usefulLifeMonths` (longer than financing schedule).
+- **`clio calc lease --payment <monthly> --term <months> --rate <annual %> --useful-life <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — same calc as IFRS 16 lease, with explicit `--useful-life` flag distinguishing it from the financing term. Returns the LeaseResult shape: `{ presentValue, totalInterest, totalDepreciation, monthlyRouDepreciation, depreciationMonths, isHirePurchase, schedule[termMonths] }`. The depreciation side is implicit — `monthlyRouDepreciation × depreciationMonths` (where `depreciationMonths == usefulLifeMonths`, longer than the financing `schedule[]`).
 
 ### Tools (jaz-api / direct)
 - All the same as `ifrs16-lease.md` (search_capsules, search_accounts, search_contacts for the financing counterparty, list_bank_accounts, create_fixed_asset, generate_trial_balance, bulk_finalize_drafts, generate_fa_summary).
@@ -41,15 +41,15 @@ clio calc lease \
   --json
 ```
 
-The `--useful-life 60` flag tells the calculator the asset will be used for 60 months (vs 36-month financing). Output includes both:
-- `schedule[36]` — the financing/unwinding schedule (interest + principal split per month for 36 months)
-- `depreciationSchedule[60]` — the SL depreciation schedule for the FA register ($PV / 60 per month)
+The `--useful-life 60` flag tells the calculator the asset will be used for 60 months (vs 36-month financing). Output:
+- `schedule[36]` — the financing/unwinding schedule (interest + principal split per month for 36 months).
+- `monthlyRouDepreciation` (≈ presentValue / 60) + `depreciationMonths: 60` — the SL depreciation amount for the FA register. The calculator does NOT emit a separate per-row depreciation array; the practitioner derives the schedule from the constant monthly amount × 60 months.
 
 ### Step 2 — Recipe plan delta
 
 ```
 plan_recipe(
-  name: 'lease',
+  recipe: 'lease',
   monthlyPayment: 5000,
   termMonths: 36,
   annualRate: 5,

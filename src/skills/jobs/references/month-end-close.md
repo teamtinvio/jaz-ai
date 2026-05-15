@@ -12,13 +12,13 @@
 - **`generate_aged_ar(period_end: <date>)` / `generate_aged_ap(period_end: <date>)`** — steps 4-5: aging reports tied to TB AR / AP balances.
 
 ### MCP tools — accruals + valuations
-- **`plan_recipe(name: 'accrued-expense', ...)` / `execute_recipe(...)`** — step 6: per `CLIENT.recurring_accruals[]` whose `last_posted < period_end`.
-- **`plan_recipe(name: 'prepaid-expense', ...)`** — step 7: only for new prepaid setup; ongoing recognition runs from the scheduler created at setup.
-- **`plan_recipe(name: 'deferred-revenue', ...)`** — step 8: same setup-vs-recognition note as prepaid.
-- **`plan_recipe(name: 'depreciation', ...)`** — step 9: only when an asset uses non-SL method (DDB, 150DB) — Jaz native FA handles SL automatically. Verify FA register first.
-- **`plan_recipe(name: 'leave-accrual', ...)` / `execute_recipe(...)`** — step 10: monthly leave accrual; the engine creates the scheduler so it auto-fires next month.
-- **FX revaluation** — step 12: **Jaz auto-handles**. The recipe is verification-only via `clio calc fx-reval`; do NOT invoke `execute_recipe(name: 'fx-reval', ...)` (would double-post).
-- **`plan_recipe(name: 'ecl', ...)`** — step 13: top-up bad-debt provision based on `generate_aged_ar` buckets.
+- **`plan_recipe(recipe: 'accrued-expense', ...)` / `execute_recipe(...)`** — step 6: per `CLIENT.recurring_accruals[]` whose `last_posted < period_end`.
+- **`plan_recipe(recipe: 'prepaid-expense', ...)`** — step 7: only for new prepaid setup; ongoing recognition runs from the scheduler created at setup.
+- **`plan_recipe(recipe: 'deferred-revenue', ...)`** — step 8: same setup-vs-recognition note as prepaid.
+- **`plan_recipe(recipe: 'depreciation', ...)`** — step 9: only when an asset uses non-SL method (DDB, 150DB) — Jaz native FA handles SL automatically. Verify FA register first.
+- **`plan_recipe(recipe: 'leave-accrual', ...)` / `execute_recipe(...)`** — step 10: monthly leave accrual; the engine creates the scheduler so it auto-fires next month.
+- **FX revaluation** — step 12: **Jaz auto-handles**. The recipe is verification-only via `clio calc fx-reval`; do NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` (would double-post).
+- **`plan_recipe(recipe: 'ecl', ...)`** — step 13: top-up bad-debt provision based on `generate_aged_ar` buckets.
 
 ### MCP tools — reconciliation execution
 - **`view_auto_reconciliation(bankAccountResourceId: <id>)`** — step 3: READ-ONLY suggestions (does NOT write).
@@ -30,7 +30,7 @@
 - **`generate_profit_and_loss(period_start, period_end)`** — step 15.
 - **`generate_balance_sheet(period_end)`** — step 16.
 - **`search_journals(filter: {status: 'DRAFT', valueDate: {between: [<period-start>, <period-end>]}})`** — step 17: gate on zero drafts.
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 17: clear residual drafts before lock.
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 17: clear residual drafts before lock.
 - **`update_account(resourceId: <CoA root>, lockDate: <period-end>)`** — step 18: lock the period.
 
 ### Calculators (cross-check, no API key needed)
@@ -103,11 +103,11 @@ For each `CLIENT.recurring_accruals[]` where `last_posted < '2025-01-31'`:
 
 1. Compute amount per `estimation_method` (`prior_month` via `search_journals`, `trailing_3m_avg`, `budget`, `fixed_amount`).
 2. Cross-check: `clio calc accrued-expense --amount <computed> --periods 1 --json`.
-3. `plan_recipe(name: 'accrued-expense', amount: <computed>, glAccount: <CLIENT.recurring_accruals[i].gl_account>, vendor: <CLIENT.recurring_accruals[i].vendor>, valueDate: '2025-01-31', reversalDate: '2025-02-01')`.
+3. `plan_recipe(recipe: 'accrued-expense', amount: <computed>, glAccount: <CLIENT.recurring_accruals[i].gl_account>, vendor: <CLIENT.recurring_accruals[i].vendor>, valueDate: '2025-01-31', reversalDate: '2025-02-01')`.
 4. Resolve `requiredAccounts` + `needsContact` (search/create as needed).
 5. `execute_recipe(...)`. Engine emits dual-entry accrual + reversal scheduler.
 6. `validate_journal_draft(resourceId: <id>)` for each draft journal.
-7. After all accruals processed: `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`.
+7. After all accruals processed: `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`.
 
 Cross-check: `generate_trial_balance(period_end: '2025-01-31')`. Sum credit movements against accrual liability accounts. Verify `|sum - expected| ≤ CLIENT.materiality_threshold`.
 
@@ -117,12 +117,12 @@ For each existing `Prepaid Expenses` capsule (via `search_capsules(filter: {caps
 
 1. `search_journals(filter: {capsuleResourceId: {eq: <capsule.id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})`. The recipe pre-emitted this period's recognition journal as DRAFT at recipe-execution time.
 2. If empty: either the recipe was set up wrong (no journal for this period — investigate via `search_journals` without status filter to see if it's already ACTIVE, then skip), OR the practitioner went off-recipe. Surface to practitioner.
-3. If found: collect resourceIds, then `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`.
-4. New prepaid setups during this period (a new prepaid started this month): invoke `plan_recipe(name: 'prepaid-expense', ...)` per `prepaid-amortization.md` — this creates the bill + N future-dated DRAFT journals; the current period's journal is then in the bulk_finalize_drafts queue above.
+3. If found: collect resourceIds, then `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`.
+4. New prepaid setups during this period (a new prepaid started this month): invoke `plan_recipe(recipe: 'prepaid-expense', ...)` per `prepaid-amortization.md` — this creates the bill + N future-dated DRAFT journals; the current period's journal is then in the bulk_finalize_drafts queue above.
 
 ### Step 8 — Deferred revenue recognition
 
-Mirror of step 7. Existing `Deferred Revenue` capsules: search for this period's DRAFT journal in each, then `bulk_finalize_drafts`. New deferred setups: `plan_recipe(name: 'deferred-revenue', ...)` then handle the current period's journal in the same bulk_finalize.
+Mirror of step 7. Existing `Deferred Revenue` capsules: search for this period's DRAFT journal in each, then `bulk_finalize_drafts`. New deferred setups: `plan_recipe(recipe: 'deferred-revenue', ...)` then handle the current period's journal in the same bulk_finalize.
 
 ### Step 9 — Depreciation
 
@@ -130,14 +130,14 @@ Mirror of step 7. Existing `Deferred Revenue` capsules: search for this period's
 search_fixed_assets(filter: {status: {eq: 'ACTIVE'}, depreciationMethod: {in: ['ddb', '150db']}})
 ```
 
-For Jaz-native SL assets: depreciation auto-posts; verify via `generate_fa_summary(period_end: '2025-01-31')` showing month's depreciation movement. For non-SL methods returned above: `plan_recipe(name: 'depreciation', method: 'ddb' | '150db', cost, salvage, life, ...)` per asset, then `execute_recipe`.
+For Jaz-native SL assets: depreciation auto-posts; verify via `generate_fa_summary(period_end: '2025-01-31')` showing month's depreciation movement. For non-SL methods returned above: `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db', cost, salvage, life, ...)` per asset, then `execute_recipe`.
 
 ### Step 10 — Employee benefit accruals
 
 If `CLIENT.headcount > 0` and `CLIENT.tracks_leave_balances == true`:
 
 ```
-plan_recipe(name: 'leave-accrual', headcount: <CLIENT.headcount>, daysPerEmployee: <CLIENT.leave_days_per_year>, dailyRate: <avg-daily-rate>, startDate: '2025-01-01', termMonths: 12)
+plan_recipe(recipe: 'leave-accrual', headcount: <CLIENT.headcount>, daysPerEmployee: <CLIENT.leave_days_per_year>, dailyRate: <avg-daily-rate>, startDate: '2025-01-01', termMonths: 12)
 ```
 
 On first month of FY only — engine creates the scheduler and posts the first accrual. Subsequent months: scheduler emits automatically. Cross-check via `clio calc leave-accrual`.
@@ -148,16 +148,16 @@ For each active loan capsule (via `search_capsules(filter: {capsuleType: {eq: 'L
 
 1. `search_journals(filter: {capsuleResourceId: {eq: <loan-capsule-id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})`. The `loan` recipe pre-emitted all `termMonths` future-dated DRAFT journals at execution time — this period's repayment is one of them.
 2. Should return exactly one DRAFT journal per active loan. Each is a 3-line entry (debit Loan Payable, debit Interest Expense, credit Cash) with the correct amortization split for the period.
-3. Collect resourceIds, then `bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`.
+3. Collect resourceIds, then `update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`.
 4. Do NOT post manual loan-interest accruals — the recipe already emitted the journal with the correct split per `clio calc loan` schedule.
 
-If a loan was newly disbursed this period: invoke `plan_recipe(name: 'loan', ...)` then `execute_recipe`; the disbursement (cash-in) and this period's repayment journal are both included in the engine output.
+If a loan was newly disbursed this period: invoke `plan_recipe(recipe: 'loan', ...)` then `execute_recipe`; the disbursement (cash-in) and this period's repayment journal are both included in the engine output.
 
 ## Phase 3 — Valuations
 
 ### Step 12 — FX revaluation (verification only — Jaz auto-handles)
 
-**Jaz auto-handles FX revaluation for ALL foreign-currency monetary balances** (AR, AP, cash, bank, intercompany journals, term deposits, FX provisions). Period-end translation per IAS 21.23 happens inside the platform automatically. **DO NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post.**
+**Jaz auto-handles FX revaluation for ALL foreign-currency monetary balances** (AR, AP, cash, bank, intercompany journals, term deposits, FX provisions). Period-end translation per IAS 21.23 happens inside the platform automatically. **DO NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` — would double-post.**
 
 This step is a verification cross-check. If `CLIENT.multi_currency == true`:
 
@@ -183,7 +183,7 @@ Per memory rule [Bank FX is Revaluation, not Realized]: bank/cash FX uses `FX Ba
 Mental check on AR aging > 90d bucket changes. If material change vs prior month: invoke ECL recipe.
 
 ```
-plan_recipe(name: 'ecl', receivables: <generate_aged_ar.buckets>, ratesPerBucket: <CLIENT.ecl_rates>)
+plan_recipe(recipe: 'ecl', receivables: <generate_aged_ar.buckets>, ratesPerBucket: <CLIENT.ecl_rates>)
 ```
 
 For most SMBs, formal ECL adjustment runs in `quarter-end-close.md`. Skip in routine monthly close unless a major customer default / dispute occurred.

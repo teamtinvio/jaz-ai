@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'depreciation', method: 'ddb' | '150db', ...)`** — used in step 2: returns RecipePlan with N future-dated depreciation journals (one per period in the schedule), capsule shape, required accounts.
-- **`execute_recipe(name: 'depreciation', ...)`** — used in step 4: posts N future-dated DRAFT journals all attached to the same capsule. NO fixed-asset step (recipe assumes asset is tracked in CoA only, not in FA register).
+- **`plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db', ...)`** — used in step 2: returns RecipePlan with N future-dated depreciation journals (one per period in the schedule), capsule shape, required accounts.
+- **`execute_recipe(recipe: 'depreciation', ...)`** — used in step 4: posts N future-dated DRAFT journals all attached to the same capsule. NO fixed-asset step (recipe assumes asset is tracked in CoA only, not in FA register).
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc depreciation --cost <c> --salvage <s> --life <years> --method <ddb|150db|sl> --frequency <annual|monthly> --json`** — used in step 1: full depreciation schedule. Returns `{ totalDepreciation, schedule[n] }` where each row carries `period`, `openingBookValue`, `depreciationAmount`, `accumulatedDepreciation`, `closingBookValue`. Final period absorbs rounding to land at salvage value exactly.
@@ -15,7 +15,7 @@
 - **`search_capsules(filter: {capsuleType: {eq: 'Depreciation'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check. One depreciation capsule per asset; duplicate setup is almost always an error.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation — Vehicles', 'Depreciation Expense']}})`** — step 3: confirm the asset, contra-asset, and expense GL accounts exist.
 - **`generate_trial_balance(period_end: <date>)`** — step 5: verify NBV matches schedule.
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 5 monthly: finalize this period's pre-emitted DRAFT depreciation journal.
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly: finalize this period's pre-emitted DRAFT depreciation journal.
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/monthly-close.md` step 9 (only when an asset uses non-SL method — Jaz native FA handles SL automatically). For SL: `create_fixed_asset` directly via `fixed-assets` tool family; do NOT use this recipe.
@@ -51,7 +51,7 @@ Save schedule to `workpapers/<period>/depreciation-<asset-id>.json` for the enga
 
 ```
 plan_recipe(
-  name: 'depreciation',
+  recipe: 'depreciation',
   cost: 50000,
   salvageValue: 5000,
   usefulLifeYears: 5,
@@ -79,7 +79,7 @@ NO contact resolution (depreciation has no counterparty). NO bank account resolu
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'depreciation', ...same args..., accountMap: <resolved>)
+execute_recipe(recipe: 'depreciation', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...60], summary: {total: 60, created: 60} }`. The recipe creates **60 future-dated DRAFT depreciation journals** (one per month for 5 years), all attached to the same capsule. Each journal is dated end-of-month for its period.
@@ -93,8 +93,8 @@ If the asset MUST be in the FA register for reporting reasons (e.g. fixed-assets
 For each month after recipe execution, this period's DRAFT depreciation journal already exists. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<journal id>]})
+search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 Verify after finalize:
@@ -130,7 +130,7 @@ After the FINAL period (month 60):
 - **Sum-of-years' digits (SYD)**: NOT supported by the engine. Use `clio calc depreciation` with `--method sl` for the calculation, then post manual journals for each period (rare in modern practice).
 - **Units-of-production**: NOT supported (depreciation per unit produced, not per period). Manual journal pattern: at each period-end, compute `units × per-unit-rate`, post Dr Depreciation Expense / Cr Accumulated Depreciation.
 - **Component depreciation** (IFRS 16.43): different parts of an asset depreciated separately. Each component gets its own recipe invocation + capsule.
-- **Mid-period acquisition**: pass `startDate` mid-month; engine prorates the first journal to days-in-period × daily rate, then full months. Schedule output makes this explicit.
+- **Mid-period acquisition:** The calculator does NOT prorate the first period. Schedule entries are full-period (e.g. monthly) starting from `startDate`. For partial-period accuracy, either (a) set `startDate` to the first of the period after acquisition (lose the partial-period depreciation), or (b) post a manual partial-period journal via `create_journal` for the days-in-acquisition-period, then run `plan_recipe` from the next full period.
 
 ---
 

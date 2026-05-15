@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'deferred-revenue', ...)`** — used in step 2: returns RecipePlan with the upfront customer invoice + N period-end recognition journals, capsule shape, required accounts, customer requirements.
-- **`execute_recipe(name: 'deferred-revenue', ...)`** — used in step 4: posts 1 invoice + N future-dated DRAFT journals (one per recognition period). Customer invoice creates the AR + Deferred Revenue liability; recognition journals roll the liability into Revenue over `periods`.
+- **`plan_recipe(recipe: 'deferred-revenue', ...)`** — used in step 2: returns RecipePlan with the upfront customer invoice + N period-end recognition journals, capsule shape, required accounts, customer requirements.
+- **`execute_recipe(recipe: 'deferred-revenue', ...)`** — used in step 4: posts 1 invoice + N future-dated DRAFT journals (one per recognition period). Customer invoice creates the AR + Deferred Revenue liability; recognition journals roll the liability into Revenue over `periods`.
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc deferred-revenue --amount <total> --periods <n> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: independently produce the recognition schedule. Returns `{ perPeriodAmount, recognitionStartDate, recognitionEndDate, schedule[n] }`. Final period absorbs rounding remainder.
@@ -18,7 +18,7 @@
 - **`generate_trial_balance(period_end: <date>)`** — step 5: verify Deferred Revenue balance unwinds correctly.
 - **`search_capsules(filter: {capsuleType: {eq: 'Deferred Revenue'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`finalize_invoice(resourceId: <id>)`** — step 4 fallback: lift the upfront invoice from DRAFT to ACTIVE once practitioner confirms the engagement is genuinely starting.
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 5 monthly: finalize this period's pre-emitted DRAFT recognition journal.
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly: finalize this period's pre-emitted DRAFT recognition journal.
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/monthly-close.md` step 8 (finalize this period's pre-emitted journal for existing capsules; create a new capsule for any new deferred arrangement starting this period).
@@ -49,7 +49,7 @@ Returns: `{ perPeriodAmount: 2000, recognitionStartDate: '2025-01-31', recogniti
 
 ```
 plan_recipe(
-  name: 'deferred-revenue',
+  recipe: 'deferred-revenue',
   amount: 24000,
   periods: 12,
   startDate: '2025-01-01',
@@ -79,7 +79,7 @@ Customer:
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'deferred-revenue', ...same args..., accountMap: <resolved>, contactId: <resolved>)
+execute_recipe(recipe: 'deferred-revenue', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...], summary: {total: 13, created: 13, ...} }`. The recipe creates **N+1 entries upfront**:
@@ -93,8 +93,8 @@ All N journals attach to the same capsule. Customer payment: handled separately 
 For each month after recipe execution, the corresponding DRAFT recognition journal already exists in the capsule. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<journal id>]})
+search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 Verify after finalize:
@@ -104,7 +104,7 @@ Verify after finalize:
 
 After the FINAL period is finalized:
 - Assert: `balance['Deferred Revenue'] == 0` exactly (final-period rounding absorbed).
-- Close the capsule via `update_capsule(resourceId: <id>, status: 'CLOSED')` if the org tracks capsule status.
+- Close the capsule via a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only) if the org tracks capsule status.
 
 If customer cancels mid-term: invoke ad-hoc adjustment — delete remaining DRAFT recognition journals via `delete_journal(resourceId: <id>)` per period, and post a customer credit note via `create_customer_credit_note(...)` for the unrecognized portion.
 
@@ -129,7 +129,7 @@ If customer cancels mid-term: invoke ad-hoc adjustment — delete remaining DRAF
 ## Variations
 
 - **Quarterly recognition:** `periods: 4, frequency: 'quarterly'`. 4 quarter-end recognition journals at $6,000 each.
-- **Partial first period:** Engine prorates first journal to `(days remaining in first period / total days in period) × perPeriodAmount`. Schedule output makes this explicit.
+- **Partial first period:** The calculator does NOT prorate. Schedule entries are equal full-period amounts (`amount / periods`). For partial-period revenue (e.g. annual subscription starting mid-month), use `create_subscription` (handles proration natively) rather than this recipe.
 - **Multi-currency:** Pass `currency: 'USD'` if invoice in USD; per `jaz-api/SKILL.md` rule 25, invoice records via `currency: { sourceCurrency: 'USD' }`. Recognition journals also in USD; Jaz auto-handles period-end FX revaluation of the Deferred Revenue liability balance per IAS 21.23 (do NOT invoke `fx-reval` recipe — see `fx-revaluation.md`).
 - **Renewal:** New capsule per term (`'FY2026 Acme Annual License'`). Capsule lifecycle is per recognition cycle.
 - **Stage-based / milestone billing** (NOT ratable): NOT supported by this recipe. Use `create_invoice` per milestone with line coded directly to Revenue; no deferral capsule needed.

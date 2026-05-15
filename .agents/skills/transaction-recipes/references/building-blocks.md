@@ -2,11 +2,11 @@
 
 The Jaz features that transaction recipes combine to model complex, multi-period accounting scenarios.
 
-> **Always anchor on the recipe engine first.** Before reading any specific recipe, the canonical entry point is `plan_recipe(name: <canonical>, ...)` followed by `execute_recipe(...)`. The engine emits the capsules, schedulers, journals, and bills described below — agents should NOT hand-construct them. The sections below explain the building blocks the engine produces, not a manual construction guide.
+> **Always anchor on the recipe engine first.** Before reading any specific recipe, the canonical entry point is `plan_recipe(recipe: <canonical>, ...)` followed by `execute_recipe(...)`. The engine emits the capsules, schedulers, journals, and bills described below — agents should NOT hand-construct them. The sections below explain the building blocks the engine produces, not a manual construction guide.
 
 ## Recipe-name aliases (file-name vs engine-name)
 
-Reference file names use accounting-textbook terminology (`prepaid-amortization`, `bank-loan`, `bad-debt-provision`). The recipe engine uses canonical short names. Always pass the canonical name to `plan_recipe(name: ...)` — file-name aliases will return `422 unsupported_recipe`.
+Reference file names use accounting-textbook terminology (`prepaid-amortization`, `bank-loan`, `bad-debt-provision`). The recipe engine uses canonical short names. Always pass the canonical name to `plan_recipe(recipe: ...)` — file-name aliases will return `422 unsupported_recipe`.
 
 | File / textbook name | Canonical engine name |
 |----------------------|------------------------|
@@ -88,9 +88,9 @@ create_cash_out_entry(..., capsuleResourceId: <capsule id>)
 **Search and audit patterns:**
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}, status: {eq: 'ACTIVE'}})
+search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}}, status: {eq: 'ACTIVE'}})
   # All open loan capsules — feed into year-end-close.md Y6 reclassification
-search_journals(filter: {capsuleResourceId: <id>}, sort: 'valueDate:asc')
+search_journals(filter: {capsuleResourceId: {eq: <id>}}, sort: 'valueDate:asc')
   # Full GL for one capsule — the auditor's view
 generate_general_ledger(period_start, period_end, groupBy: 'CAPSULE')
   # Period activity grouped by capsule — the practitioner's view
@@ -100,7 +100,7 @@ generate_general_ledger(period_start, period_end, groupBy: 'CAPSULE')
 
 - Created on first use (recipe `execute_recipe` or manual `create_capsule`).
 - ACTIVE while events accumulate.
-- CLOSED when the lifecycle ends (loan paid off, lease term ends, project complete). `update_capsule(resourceId: <id>, status: 'CLOSED')`.
+- CLOSED when the lifecycle ends (loan paid off, lease term ends, project complete). a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only).
 - Closed capsules remain searchable + reportable; they're an auditor's friend.
 
 ### Recipe-engine capsules vs manually-created capsules
@@ -110,8 +110,8 @@ The recipe engine creates ONE capsule per `execute_recipe` call. For complex tra
 ```
 # Restructuring program example:
 1. create_capsule(capsuleType: 'Restructuring', title: 'FY2025 Restructuring')
-2. plan_recipe(name: 'provision', ..., capsuleResourceId: <restructuring capsule>)  # severance provision
-3. plan_recipe(name: 'asset-disposal', ..., capsuleResourceId: <restructuring capsule>)  # office equipment write-off
+2. plan_recipe(recipe: 'provision', ..., capsuleResourceId: <restructuring capsule>)  # severance provision
+3. plan_recipe(recipe: 'asset-disposal', ..., capsuleResourceId: <restructuring capsule>)  # office equipment write-off
 4. create_journal(..., capsuleResourceId: <restructuring capsule>)  # lease termination penalty
 ```
 
@@ -119,7 +119,7 @@ All entries land in one capsule; auditor reviews the whole restructuring as one 
 
 ### When NOT to use a capsule
 
-- Single-period one-shot entries (e.g., monthly utility bill) — use a tag instead. Capsules are overkill.
+- Single-period one-shot entries (e.g.}, monthly utility bill) — use a tag instead. Capsules are overkill.
 - Operating expenses that aren't part of a multi-step event — tag for analysis, no capsule.
 - Bank reconciliation — bank entries don't need capsules; they belong to specific transactions.
 

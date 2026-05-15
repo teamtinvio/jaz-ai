@@ -18,7 +18,7 @@ CWIP costs accumulate as construction progresses — multiple bills from contrac
 - **`search_capsules(filter: {capsuleType: {eq: 'Capital Projects'}, name: {eq: <project>}})`** — step 1 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Capital Work-in-Progress', '<target FA category>', '<target Accumulated Depreciation>']}})`** — step 0 + step 4.
 - **`generate_general_ledger(accountResourceId: <CWIP id>, period_start: <project start>, period_end: <today>)`** — step 3: pull all CWIP entries to confirm the accumulated cost.
-- **`search_bills(filter: {capsuleResourceId: <CWIP capsule id>})`** — step 3 alt: pull all bills attached to the project capsule.
+- **`search_bills(filter: {capsuleResourceId: {eq: <CWIP capsule id>}})`** — step 3 alt: pull all bills attached to the project capsule.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify CWIP balance is zero post-transfer; FA balance reflects new asset.
 
 ### Cross-references
@@ -55,7 +55,7 @@ create_capsule(
 )
 ```
 
-Each construction project gets its own capsule. The capsule is the audit trail — every bill paid for this project, plus the eventual transfer journal, attaches to it. Auditor can pull `search_bills(filter: {capsuleResourceId: <id>})` and see the full cost build.
+Each construction project gets its own capsule. The capsule is the audit trail — every bill paid for this project, plus the eventual transfer journal, attaches to it. Auditor can pull `search_bills(filter: {capsuleResourceId: {eq: <id>}})` and see the full cost build.
 
 ### Step 2 — Accumulate construction costs (multiple bills over months)
 
@@ -103,7 +103,7 @@ generate_general_ledger(accountResourceId: <CWIP GL>, period_start: <project sta
 Confirm the accumulated CWIP balance matches expectations vs `CLIENT.capital_projects[i].estimated_cost`. Variance > 10% → flag to practitioner for budget review.
 
 ```
-search_bills(filter: {capsuleResourceId: <project capsule id>, status: {ne: 'PAID'}})
+search_bills(filter: {capsuleResourceId: {eq: <project capsule id>}, status: {ne: 'PAID'}})
 ```
 
 Identify unpaid bills attached to the project — payment timing matters for cash-flow planning.
@@ -184,7 +184,7 @@ Should show `cost: <final CWIP balance>, accumulatedDepreciation: 0, NBV: <cost>
 
 Close the project capsule (or keep ACTIVE for traceability — the FA still references it):
 ```
-update_capsule(resourceId: <project capsule>, status: 'CLOSED')
+// Capsule has no `status` field — record closure manually via `update_capsule(title: '<original> [CLOSED]')` or in ENGAGEMENT.md notes
 ```
 
 ---

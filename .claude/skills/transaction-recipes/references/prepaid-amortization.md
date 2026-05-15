@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'prepaid-expense', ...)`** — used in step 2: model the schedule + journal entries; returns `RecipePlan` with `requiredAccounts`, `needsContact`, capsule shape, scheduler config.
-- **`execute_recipe(name: 'prepaid-expense', ...)`** — used in step 4: post the bill (or cash-out), create the capsule, create the monthly amortization scheduler. Returns `{ capsuleResourceId, billResourceId, schedulerResourceId, journalResourceIds }`.
+- **`plan_recipe(recipe: 'prepaid-expense', ...)`** — used in step 2: model the schedule + journal entries; returns `RecipePlan` with `requiredAccounts`, `needsContact`, capsule shape, scheduler config.
+- **`execute_recipe(recipe: 'prepaid-expense', ...)`** — used in step 4: post the bill (or cash-out), create the capsule, create the monthly amortization scheduler. Returns `{ capsuleResourceId, billResourceId, schedulerResourceId, journalResourceIds }`.
 
 ### Calculators (for cross-check, no API key needed)
 - **`clio calc prepaid-expense --amount <total> --periods <n> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: independently verify the period amount and end-of-recognition date before invoking the recipe.
@@ -39,7 +39,7 @@ Returns: `{ perPeriodAmount, recognitionStartDate, recognitionEndDate, schedule[
 
 ```
 plan_recipe(
-  name: 'prepaid-expense',
+  recipe: 'prepaid-expense',
   amount: 12000,
   periods: 12,
   startDate: '2025-01-01',
@@ -69,7 +69,7 @@ For the vendor (because `needsContact: true`):
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'prepaid-expense', ...same args..., accountMap: <resolved>, contactId: <resolved>)
+execute_recipe(recipe: 'prepaid-expense', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...], summary: {total, created, ...} }`. The recipe creates **N+1 entries upfront**:
@@ -85,13 +85,13 @@ Note: This is NOT the Jaz scheduler primitive (`create_scheduled_journal`). The 
 For each month after recipe execution, the corresponding DRAFT journal already exists in the capsule. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
 ```
 
 Returns the one DRAFT for that period. Finalize:
 
 ```
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<journal id>]})
+update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 After finalize:
@@ -101,7 +101,7 @@ After finalize:
 
 After the FINAL period (period N+1) is finalized:
 - Assert: `balance['Prepaid Insurance'] == 0` exactly (the calculator forces the final period to absorb any rounding remainder).
-- The capsule lifecycle is now complete; close via `update_capsule(resourceId: <id>, status: 'CLOSED')` if the org tracks capsule status.
+- The capsule lifecycle is now complete; close via a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only) if the org tracks capsule status.
 
 ---
 
@@ -123,7 +123,7 @@ After the FINAL period (period N+1) is finalized:
 ## Variations
 
 - **Quarterly recognition:** `periods: 4, frequency: 'quarterly'`. Recipe outputs 4 quarter-end journals at $3,000 each.
-- **Partial first period:** If insurance starts Feb 15 (mid-month), the engine prorates the first journal to days-in-period × daily rate, then full months thereafter. The schedule output makes this explicit.
+- **Partial first period:** The calculator does NOT prorate. Schedule entries are equal full-period amounts (`amount / periods`) starting from `startDate`. For partial-period accuracy on a mid-period start (e.g. insurance starting Feb 15), either accept the slight timing mismatch (most prepaids are immaterial), or post a manual partial-period journal first then run `plan_recipe` from the next full period.
 - **Multi-currency:** Pass `currency: 'USD'` if the premium is in USD; the bill is recorded in USD via the standard `currency: { sourceCurrency: 'USD' }` field (per `jaz-api/SKILL.md` rule 25). Monthly recognition journals are also in USD. **Note:** Prepaid Insurance is a NON-MONETARY item per IAS 21.16 — it stays at historical (booking) rate and is NOT FX-revalued at period-end. The auto-FX engine knows this; no action needed.
 - **Renewal:** New capsule per year (`'FY2026 Office Insurance'`). Do not extend or re-use the prior capsule — capsule lifecycle is per recognition cycle.
 

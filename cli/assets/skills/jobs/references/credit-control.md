@@ -9,10 +9,10 @@
 - **`generate_aged_ar(period_end: <date>)`** — step 1: AR aging report with bucket breakdown.
 - **`search_invoices(filter: {status: {eq: 'UNPAID'}, dueDate: {lt: <date>}, contactResourceId: <customer>}, sort: 'dueDate:asc', limit: 200)`** — step 2: per-customer overdue detail. Paginate.
 - **`get_contact(resourceId: <customer id>)`** — step 2: pull contact info (email, phone, primary contact).
-- **`get_contact_signals(contactResourceId: <id>, businessTransactionType: 'SALE')`** — step 3: pull cadence + outlier signals + outstanding balance for the customer. Mid-7 endpoint.
+- **`get_contact_signals(resourceId: <id>, btType: 'SALE')`** — step 3: pull cadence + outlier signals + outstanding balance for the customer. Mid-7 endpoint.
 - **`apply_credit_to_invoice(...)`** / **`create_customer_credit_note(...)`** — step 6: write-off path A for stage-3 specific impairment.
 - **`create_invoice_payment(... paymentMethod: 'DEBT_WRITE_OFF' ...)`** — step 6: write-off path B (direct).
-- **`plan_recipe(name: 'ecl', ...)` + `execute_recipe(...)`** — step 7: ECL collective top-up if material change in aging.
+- **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — step 7: ECL collective top-up if material change in aging.
 - **`download_export(exportType: 'analysis-receivables-customer-risk', startDate, endDate)`** — step 8: pre-empt audit by surfacing high-risk customers.
 
 ### Cross-references
@@ -61,7 +61,7 @@ For each customer build a chase record: `{customerName, totalOverdue, oldestDays
 ## Step 3 — Contact-signals pull (Mid-7)
 
 ```
-get_contact_signals(contactResourceId: <customer id>, businessTransactionType: 'SALE')
+get_contact_signals(resourceId: <customer id>, btType: 'SALE')
 ```
 
 Returns: `{ cadence, outlierFlags[], severitySummary, patternDivergenceFlags, outstandingSnapshot, revealedPatterns[] }`. High-signal data for collection prioritization:
@@ -148,9 +148,9 @@ clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rate
 
 If `topUpRequired > CLIENT.materiality_threshold`:
 ```
-plan_recipe(name: 'ecl', ..., capsuleResourceId: <credit-control capsule OR new ECL Provision capsule>)
+plan_recipe(recipe: 'ecl', ..., capsuleResourceId: <credit-control capsule OR new ECL Provision capsule>)
 execute_recipe(...)
-bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})
+bulk_finalize_drafts({kind: 'journal'}, resourceIds: [...]})
 ```
 
 Note: monthly ECL is typically a mental check; formal ECL provision recompute is quarterly (per `quarter-end-close.md` Q2). Trigger this monthly only on material shifts.
@@ -170,7 +170,7 @@ Returns XLSX with high-risk customer flags (rising aging trends, recently-defaul
 | Source | Error | Recovery |
 |--------|-------|----------|
 | Step 2 | `search_invoices` returns 0 despite aging shows overdue | Aging report may include `PARTIALLY_PAID` invoices; expand filter `status: {in: ['UNPAID', 'PARTIALLY_PAID']}`. |
-| Step 3 | `get_contact_signals` returns `{ unavailable: true }` | The freshness layer is offline; skip the signals step and use aging alone. Don't halt the job. |
+| Step 3 | `get_contact_signals` returns `null` | The freshness layer is offline; skip the signals step and use aging alone. Don't halt the job. |
 | Step 6 Path A | `apply_credit_to_invoice` 422 `credit_exceeds_balance` | Split the credit across multiple invoices, OR reduce the credit amount to match the bill balance. |
 | Step 6 Path B | `paymentMethod: 'DEBT_WRITE_OFF'` rejected | Verify the enum value via `jaz-api/SKILL.md` (some orgs may have custom payment-method config; default supports DEBT_WRITE_OFF). |
 | Step 7 ECL recipe | Top-up causes Bad Debt Expense to spike | Expected — material aging shift = material P&L impact. Surface to practitioner; potentially split across multiple periods if it's a known one-off (rare). |

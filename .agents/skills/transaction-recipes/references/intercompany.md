@@ -16,8 +16,8 @@ Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity
 - **`apply_credit_to_invoice(...)` / `apply_credit_to_bill(...)`** — netting if both entities owe each other (one entity's invoice clears against the other's bill via credit note).
 
 ### Search tools for reconciliation
-- **`search_invoices(filter: {capsuleResourceId: <Entity A IC capsule>})`** — pull all Entity A intercompany invoices.
-- **`search_bills(filter: {capsuleResourceId: <Entity B IC capsule>})`** — pull all Entity B intercompany bills.
+- **`search_invoices(filter: {capsuleResourceId: {eq: <Entity A IC capsule>}})`** — pull all Entity A intercompany invoices.
+- **`search_bills(filter: {capsuleResourceId: {eq: <Entity B IC capsule>}})`** — pull all Entity B intercompany bills.
 - **`generate_general_ledger(accountResourceId: <Intercompany Receivable>, period_end: <date>)` / same for Intercompany Payable** — eliminate at consolidation.
 
 ### Multi-org auth (CRITICAL)

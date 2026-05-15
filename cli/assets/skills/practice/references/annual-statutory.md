@@ -26,12 +26,12 @@ Canonical playbook the agent walks through when the practitioner says "year-end 
 - `export_records` / `download_export` — used in step 5: deliverable XLSX exports for auditor pack.
 
 ### Recipes (jaz-recipes)
-- `plan_recipe(name: 'depreciation', …)` — used in step 4: annual depreciation true-up for non-SL assets.
-- **FX revaluation** — used in step 4c as VERIFICATION ONLY (Jaz auto-handles year-end FX translation per IAS 21.23). Independent recompute via `clio calc fx-reval`; do NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post.
-- `plan_recipe(name: 'asset-disposal', …)` — used in step 4: disposals surfaced during FA review.
-- `plan_recipe(name: 'ecl', …)` — used in step 4: IFRS 9 year-end true-up over `generate_aged_ar`.
-- `plan_recipe(name: 'provision', …)` — used in step 4: IAS 37 remeasurement.
-- `plan_recipe(name: 'dividend', …)` — used in step 8: declaration after profit finalization (per jaz-recipes annual-statutory context).
+- `plan_recipe(recipe: 'depreciation', …)` — used in step 4: annual depreciation true-up for non-SL assets.
+- **FX revaluation** — used in step 4c as VERIFICATION ONLY (Jaz auto-handles year-end FX translation per IAS 21.23). Independent recompute via `clio calc fx-reval`; do NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` — would double-post.
+- `plan_recipe(recipe: 'asset-disposal', …)` — used in step 4: disposals surfaced during FA review.
+- `plan_recipe(recipe: 'ecl', …)` — used in step 4: IFRS 9 year-end true-up over `generate_aged_ar`.
+- `plan_recipe(recipe: 'provision', …)` — used in step 4: IAS 37 remeasurement.
+- `plan_recipe(recipe: 'dividend', …)` — used in step 8: declaration after profit finalization (per jaz-recipes annual-statutory context).
 
 ### Calculators (jaz-cli)
 - `clio calc loan` — used in step 4: independent verification of loan schedules at FY-end.
@@ -90,20 +90,20 @@ This is the largest step and runs through the recipe set in this order:
 
 Invoke `generate_fa_summary(period_end: <FY-end>)`. For every active asset:
 - If `depreciationMethod == STRAIGHT_LINE`: Jaz native FA already posted monthly. Verify the year's accumulated depreciation per the report. Cross-check via `clio calc depreciation --cost <c> --salvage <s> --life <l> --method sl --frequency annual --currency <CLIENT.base_currency> --json`. Tolerance: `CLIENT.materiality_threshold`.
-- If `depreciationMethod ∈ { DDB, 150DB }`: confirm the 12 monthly close engagements posted via `plan_recipe(name: 'depreciation', …)`. Year-end true-up only if a remeasurement of `usefulLife` happened during FY.
+- If `depreciationMethod ∈ { DDB, 150DB }`: confirm the 12 monthly close engagements posted via `plan_recipe(recipe: 'depreciation', …)`. Year-end true-up only if a remeasurement of `usefulLife` happened during FY.
 
 #### 4b — FA disposals discovered during review
 
 For each asset where `search_fixed_assets` returns `status: DISPOSED` but no asset-disposal capsule exists, OR the practitioner identifies a missed disposal during review:
 1. `clio calc asset-disposal --cost <c> --salvage <s> --life <l> --acquired <YYYY-MM-DD> --disposed <YYYY-MM-DD> --proceeds <p> --method <sl|ddb|150db> --currency <CLIENT.base_currency> --json` for verification.
-2. `plan_recipe(name: 'asset-disposal', cost: <c>, accumulated: <accumulated-to-disposal-date>, disposalDate: <YYYY-MM-DD>, proceeds: <p>, glAccountCost: <FA gl>, glAccountAccumulated: <accumulated gl>, glAccountGainLoss: <P&L line>, …)`.
+2. `plan_recipe(recipe: 'asset-disposal', cost: <c>, accumulated: <accumulated-to-disposal-date>, disposalDate: <YYYY-MM-DD>, proceeds: <p>, glAccountCost: <FA gl>, glAccountAccumulated: <accumulated gl>, glAccountGainLoss: <P&L line>, …)`.
 3. `execute_recipe`. Inspect `notes` — typically includes a `note` action to deregister the asset in the FA module.
 
 **On 422 from `plan_recipe` with `disposal_after_period_end`:** the disposal date is later than `<FY-end>`. The disposal belongs to next FY; halt and confirm with practitioner.
 
 #### 4c — Year-end FX revaluation (verification only)
 
-**Jaz auto-handles year-end FX translation per IAS 21.23.** All foreign-currency monetary balances (AR, AP, cash, bank, intercompany, term deposits, FX provisions) translate to base currency at the FY-end closing rate automatically. **DO NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post.**
+**Jaz auto-handles year-end FX translation per IAS 21.23.** All foreign-currency monetary balances (AR, AP, cash, bank, intercompany, term deposits, FX provisions) translate to base currency at the FY-end closing rate automatically. **DO NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` — would double-post.**
 
 This sub-step is a year-end verification (auditor will sample-test the rates used):
 
@@ -127,13 +127,13 @@ This sub-step is a year-end verification (auditor will sample-test the rates use
 1. `generate_aged_ar(period_end: <FY-end>)`.
 2. Bucket receivables by aging band per CLIENT historical loss-rate matrix.
 3. `clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <r1>,<r2>,<r3>,<r4>,<r5> --existing-provision <ep> --currency <CLIENT.base_currency> --json`.
-4. If top-up > `CLIENT.materiality_threshold`: `plan_recipe(name: 'ecl', …)` then `execute_recipe`.
+4. If top-up > `CLIENT.materiality_threshold`: `plan_recipe(recipe: 'ecl', …)` then `execute_recipe`.
 
 #### 4e — IAS 37 provisions remeasurement
 
 For each capsule from step 3 with `tag: 'provision'`:
 1. `clio calc provision --amount <pv> --rate <discount-rate> --term <remaining-months-to-FY-end> --currency <CLIENT.base_currency> --json` to verify cumulative discount unwinding.
-2. If best-estimate has changed materially during FY: re-run `plan_recipe(name: 'provision', …)` with new amount; the recipe creates a remeasurement journal.
+2. If best-estimate has changed materially during FY: re-run `plan_recipe(recipe: 'provision', …)` with new amount; the recipe creates a remeasurement journal.
 
 #### 4f — Bonus accrual true-up
 
@@ -205,7 +205,7 @@ Practitioner submits on myTax Portal manually. Capture submission reference into
 
 If the board declares a dividend post profit-finalization (per jaz-recipes annual-statutory context):
 1. `clio calc dividend --amount <amt> --declaration-date <YYYY-MM-DD> --payment-date <YYYY-MM-DD> [--withholding-rate <r>] --currency <CLIENT.base_currency> --json`.
-2. `plan_recipe(name: 'dividend', amount: <amt>, declarationDate: <YYYY-MM-DD>, paymentDate: <YYYY-MM-DD>, withholdingRate: <r>, …)` then `execute_recipe`. Recipe creates declaration journal (reduces retained earnings) + payment journal + optional WHT journal.
+2. `plan_recipe(recipe: 'dividend', amount: <amt>, declarationDate: <YYYY-MM-DD>, paymentDate: <YYYY-MM-DD>, withholdingRate: <r>, …)` then `execute_recipe`. Recipe creates declaration journal (reduces retained earnings) + payment journal + optional WHT journal.
 3. `bulk_finalize_drafts`.
 
 For cross-border WHT obligations: see jaz-api § Withholding Tax (rules 45, 98).
@@ -254,7 +254,7 @@ If any fails: do NOT mark `filed`. Surface the failed check.
 | Error class | Where | Recovery |
 |---|---|---|
 | 422 `prior_year_not_locked` | `generate_year_end_blueprint` | Close prior FY first; halt. |
-| 422 `disposal_after_period_end` | `plan_recipe(name: 'asset-disposal', …)` | Disposal date > FY-end; belongs to next FY. |
+| 422 `disposal_after_period_end` | `plan_recipe(recipe: 'asset-disposal', …)` | Disposal date > FY-end; belongs to next FY. |
 | 422 `journal_unbalanced` | `bulk_finalize_drafts` | Recipe regression; halt without retry. |
 | 404 `currency_rate_missing` | step 4c FX reval | `bulk_upsert_currency_rates` to load FY-end rates; auto-enables currencies (jaz-api rule 39). |
 | 422 `account_locked` | step 4 recipe execution | A monthly close already locked the account; lift lock for that specific account, post adjustment, re-lock. |

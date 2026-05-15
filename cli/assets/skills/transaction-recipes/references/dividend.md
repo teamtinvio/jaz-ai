@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'dividend', ...)`** — used in step 2: returns RecipePlan with declaration journal + payment cash-out + optional withholding cash-out.
-- **`execute_recipe(name: 'dividend', ...)`** — used in step 4: posts 2-3 entries (no future-dated DRAFTs — dividend is point-in-time).
+- **`plan_recipe(recipe: 'dividend', ...)`** — used in step 2: returns RecipePlan with declaration journal + payment cash-out + optional withholding cash-out.
+- **`execute_recipe(recipe: 'dividend', ...)`** — used in step 4: posts 2-3 entries (no future-dated DRAFTs — dividend is point-in-time).
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc dividend --amount <gross> --withholding-rate <%> --currency <code> --json`** — used in step 1: computes net dividend payable to shareholder + withholding tax to remit. Returns `{ grossAmount, withholdingTax, netToShareholder }`.
@@ -54,7 +54,7 @@ clio calc dividend --amount 200000 --withholding-rate 10 --currency PHP --json
 
 ```
 plan_recipe(
-  name: 'dividend',
+  recipe: 'dividend',
   amount: 200000,
   withholdingRate: 0,
   declarationDate: '2025-12-31',
@@ -89,7 +89,7 @@ Shareholder contact: optional but recommended for narrative tagging. `search_con
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'dividend', ...same args..., accountMap: <resolved>, bankAccountId: <resolved>)
+execute_recipe(recipe: 'dividend', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...], summary: {total: 2 or 3, created: 2 or 3} }`. The recipe creates 2 entries (or 3 with withholding), all attached to the same capsule:
@@ -114,7 +114,7 @@ After payment finalized (Mar 15, 2026):
 
 After payment AND WHT remittance:
 - `balance['Withholding Tax Payable']` back to 0.
-- Capsule lifecycle complete; close via `update_capsule(resourceId: <id>, status: 'CLOSED')`.
+- Capsule lifecycle complete; close via a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only).
 
 ---
 

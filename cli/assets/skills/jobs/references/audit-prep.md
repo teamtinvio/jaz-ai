@@ -27,7 +27,7 @@
 - **`search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: must return zero rows before pack hand-off.
 - **`search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: same gate, sales side.
 - **`search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})`** — step 12: same gate, purchases side.
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 12 fallback: clear residual drafts before pack hand-off.
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 12 fallback: clear residual drafts before pack hand-off.
 - **`update_account(resourceId: <CoA root>, lockDate: <FY-end>)`** — step 12 final: lock the period to prevent backdated entries during fieldwork.
 
 ### Calculators (cross-check schedules — no API key needed)
@@ -115,7 +115,7 @@ Use `endDate` not `startDate` (rule 36 — point-in-time snapshot). Assert:
 
 If ECL provision feels inadequate for the > 90d bucket, run the ECL recipe immediately:
 ```
-plan_recipe(name: 'ecl', receivables: <aged_ar.buckets converted to ECL input>, ...)
+plan_recipe(recipe: 'ecl', receivables: <aged_ar.buckets converted to ECL input>, ...)
 ```
 And post any top-up provision via `execute_recipe`. This avoids an auditor-proposed adjustment at fieldwork.
 
@@ -198,7 +198,7 @@ search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-0
 search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-12-31']}})
 ```
 
-ALL three must return zero. If any return rows: collect `resourceId`s, classify (delete vs finalize) per practitioner judgment, and `bulk_finalize_drafts({kind, resourceIds: [...]})` for the keep-set.
+ALL three must return zero. If any return rows: collect `resourceId`s, classify (delete vs finalize) per practitioner judgment, and `update_<entity>(resourceId, saveAsDraft: false)  // per-id; bulk_finalize_drafts only supports invoice/bill/CN, not journal/cash` for the keep-set.
 
 Then lock the period:
 ```

@@ -20,12 +20,12 @@ Canonical playbook the agent walks through when the practitioner says "close `<p
 - `search_journals(status: ACTIVE, valueDate: <period_end>)` — used in step 11: confirm period-end journals are all `ACTIVE` (NOT `FINALIZED` — see jaz-api rule on journal status, jaz-jobs note in `references/month-end-close.md`).
 
 ### Recipes (jaz-recipes — IFRS-compliant transaction modeling)
-- `plan_recipe(name: 'accrued-expense', …)` — used in step 4: per `CLIENT.recurring_accruals[i]` whose `last_posted < period_end`. Two-scheduler accrue + reverse pattern.
-- `plan_recipe(name: 'depreciation', …)` — used in step 5: only when an asset uses a non-SL method (DDB, 150DB) — Jaz native FA already handles SL. Cross-check with `clio calc depreciation`.
-- **FX revaluation** — used in step 6 as VERIFICATION ONLY (Jaz auto-handles all FX reval per IAS 21.23; do NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post).
-- `plan_recipe(name: 'prepaid-expense', …)` — used in step 7: only on initial setup of a new prepaid; ongoing recognition runs from the scheduler created at setup.
-- `plan_recipe(name: 'deferred-revenue', …)` — used in step 7: same setup-vs-recognition note as prepaid.
-- `plan_recipe(name: 'provision', …)` — used in step 7: monthly discount-unwinding journal for any active IAS 37 provision capsule.
+- `plan_recipe(recipe: 'accrued-expense', …)` — used in step 4: per `CLIENT.recurring_accruals[i]` whose `last_posted < period_end`. Two-scheduler accrue + reverse pattern.
+- `plan_recipe(recipe: 'depreciation', …)` — used in step 5: only when an asset uses a non-SL method (DDB, 150DB) — Jaz native FA already handles SL. Cross-check with `clio calc depreciation`.
+- **FX revaluation** — used in step 6 as VERIFICATION ONLY (Jaz auto-handles all FX reval per IAS 21.23; do NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` — would double-post).
+- `plan_recipe(recipe: 'prepaid-expense', …)` — used in step 7: only on initial setup of a new prepaid; ongoing recognition runs from the scheduler created at setup.
+- `plan_recipe(recipe: 'deferred-revenue', …)` — used in step 7: same setup-vs-recognition note as prepaid.
+- `plan_recipe(recipe: 'provision', …)` — used in step 7: monthly discount-unwinding journal for any active IAS 37 provision capsule.
 
 ### Calculators (jaz-cli / `clio calc`)
 - `clio calc accrued-expense` — used in step 4: independently compute accrual amount before invoking the recipe (cross-check).
@@ -87,7 +87,7 @@ For each row in `CLIENT.recurring_accruals[]` where `last_posted < <period>-end`
    - `budget`: read from `CLIENT.recurring_accruals[i].budget_amount` (NOT `fixed_amount`).
    - `fixed_amount`: use `CLIENT.recurring_accruals[i].fixed_amount`.
 2. Cross-check: `clio calc accrued-expense --amount <computed> --periods 1 --start-date <period>-end --currency <CLIENT.base_currency> --json`.
-3. Invoke `plan_recipe(name: 'accrued-expense', amount: <computed>, glAccount: <CLIENT.recurring_accruals[i].gl_account>, vendor: <CLIENT.recurring_accruals[i].vendor>, valueDate: <period>-end, reversalDate: <next-period>-01)`.
+3. Invoke `plan_recipe(recipe: 'accrued-expense', amount: <computed>, glAccount: <CLIENT.recurring_accruals[i].gl_account>, vendor: <CLIENT.recurring_accruals[i].vendor>, valueDate: <period>-end, reversalDate: <next-period>-01)`.
 4. Inspect `plan_recipe` output: `requiredAccounts`, `needsContact`. If `needsContact` and the vendor doesn't yet exist: invoke `search_contacts(filter: {name: {eq: <vendor>}})`; if empty, halt and surface "Accrual vendor `<vendor>` not in Jaz contacts — create via `create_contact` or remap CLIENT.md before retry."
 5. If `requiredAccounts` includes a GL account not in the org's CoA: surface "Accrual `<accrual.name>` references GL account `<glAccount>` not in `CLIENT.coa_mapping` / Jaz CoA; create via `create_account` or remap before retry." Halt.
 6. Invoke `execute_recipe(...)` with the same args as `plan_recipe` plus the resolved `accountMap` and `contactId`. The recipe creates a capsule + the dual-entry accrual + reversal scheduler. The journals are returned in DRAFT.
@@ -104,7 +104,7 @@ For each row in `CLIENT.recurring_accruals[]` where `last_posted < <period>-end`
 
 1. Invoke `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}}, limit: 200)`. For each asset:
    - If `depreciationMethod = STRAIGHT_LINE`: Jaz auto-posts via the FA module. No journal needed. Cross-check that the period's journal exists via `search_journals(filter: {tag: <asset.tagName>, valueDate: <period>-end, type: DEPRECIATION})`.
-   - If `depreciationMethod ∈ { DDB, 150DB }`: Jaz native FA does NOT handle. Invoke `plan_recipe(name: 'depreciation', cost: <asset.cost>, salvage: <asset.salvage>, life: <asset.usefulLifeMonths>, method: <ddb|150db>, frequency: monthly, valueDate: <period>-end, …)` then `execute_recipe`.
+   - If `depreciationMethod ∈ { DDB, 150DB }`: Jaz native FA does NOT handle. Invoke `plan_recipe(recipe: 'depreciation', cost: <asset.cost>, salvage: <asset.salvage>, life: <asset.usefulLifeMonths>, method: <ddb|150db>, frequency: monthly, valueDate: <period>-end, …)` then `execute_recipe`.
 2. Independent cross-check per asset: `clio calc depreciation --cost <cost> --salvage <salvage> --life <life> --method <method> --frequency monthly --currency <CLIENT.base_currency> --json`. Compare per-period journal output to what Jaz posted.
 3. For any asset where Jaz-posted ≠ calc-output by > `CLIENT.materiality_threshold`: surface to practitioner.
 
@@ -112,7 +112,7 @@ For each row in `CLIENT.recurring_accruals[]` where `last_posted < <period>-end`
 
 ### Step 6 — FX revaluation
 
-**Jaz auto-handles FX revaluation for ALL foreign-currency monetary balances.** AR, AP, cash, bank, intercompany, term deposits, FX provisions — period-end translation per IAS 21.23 is automatic. **DO NOT invoke `execute_recipe(name: 'fx-reval', ...)` — would double-post.** This step is verification + variance investigation.
+**Jaz auto-handles FX revaluation for ALL foreign-currency monetary balances.** AR, AP, cash, bank, intercompany, term deposits, FX provisions — period-end translation per IAS 21.23 is automatic. **DO NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` — would double-post.** This step is verification + variance investigation.
 
 1. Confirm the period-end closing rate is loaded for each foreign currency: `list_currency_rates(filter: {sourceCurrency: <fcy>, valueDate: <period>-end})`. If empty: halt and surface "Closing rate for `<fcy>` on `<period>-end` not in Jaz — Jaz used the most recent rate as a fallback. Load the actual closing rate via `add_currency_rate` or `bulk_upsert_currency_rates`, which will trigger Jaz to re-translate; confirm via re-running step 6 verification before close." (See jaz-api rule 39.)
 
@@ -134,7 +134,7 @@ Per memory rule [Bank FX is Revaluation, not Realized]: bank/cash FX uses `FX Ba
 For each scheduler-driven recipe whose unwinding journal is due this period:
 
 1. Invoke `search_capsules(filter: {tag: {in: ['prepaid', 'deferred-revenue', 'provision', 'lease', 'loan']}, status: ACTIVE})`.
-2. For each capsule, the unwinding/recognition journal is auto-emitted by the scheduler — verify it exists via `search_journals(filter: {capsuleResourceId: <id>, valueDate: <period>-end})`.
+2. For each capsule, the unwinding/recognition journal is auto-emitted by the scheduler — verify it exists via `search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: <period>-end})`.
 3. If missing: the scheduler is paused or mis-dated. Surface to practitioner: "Capsule `<title>` has no period-end journal — confirm scheduler status before close."
 4. For provision capsules: cross-check unwinding amount via `clio calc provision --amount <pv> --rate <rate> --term <remaining-months> --json` and verify the period slice matches.
 

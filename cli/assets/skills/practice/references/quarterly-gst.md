@@ -17,7 +17,7 @@ Canonical playbook the agent walks through when the practitioner says "prep GST 
 - `download_export` — used in step 7: download the generated CSV/XLSX for IRAS submission attachment.
 
 ### Recipes (jaz-recipes)
-- None for F5 prep itself. Exception (per jaz-recipes guidance): if ECL review is bundled with F5 prep cycle (since AR aging is already pulled), `plan_recipe(name: 'ecl', …)`.
+- None for F5 prep itself. Exception (per jaz-recipes guidance): if ECL review is bundled with F5 prep cycle (since AR aging is already pulled), `plan_recipe(recipe: 'ecl', …)`.
 
 ### Calculators (jaz-cli)
 - `clio calc ecl` — only if ECL review is bundled (typically the case for quarterly cadence).
@@ -146,7 +146,7 @@ If the practitioner has scoped ECL into this engagement (typical for quarterly c
 2. Bucket receivables by aging band (current, 30, 60, 90, 120+ days).
 3. Read `CLIENT` decisions log for the historical loss-rate matrix.
 4. Invoke `clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <r1>,<r2>,<r3>,<r4>,<r5> --existing-provision <ep> --currency <CLIENT.base_currency> --json`.
-5. If the calc surfaces a top-up provision > `CLIENT.materiality_threshold`: invoke `plan_recipe(name: 'ecl', …)` then `execute_recipe`.
+5. If the calc surfaces a top-up provision > `CLIENT.materiality_threshold`: invoke `plan_recipe(recipe: 'ecl', …)` then `execute_recipe`.
 6. `bulk_finalize_drafts` for the journal(s) created.
 
 ### Step 9 — Sign-off + transition

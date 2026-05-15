@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'accrued-expense', ...)`** — used in step 2: returns RecipePlan with N accrual + N reversal journals (2N total), capsule shape, required accounts, vendor metadata.
-- **`execute_recipe(name: 'accrued-expense', ...)`** — used in step 4: posts 2N future-dated DRAFT journals (one accrual at period-end, one reversal at next-period-start, repeated for `periods`) all attached to the same capsule.
+- **`plan_recipe(recipe: 'accrued-expense', ...)`** — used in step 2: returns RecipePlan with N accrual + N reversal journals (2N total), capsule shape, required accounts, vendor metadata.
+- **`execute_recipe(recipe: 'accrued-expense', ...)`** — used in step 4: posts 2N future-dated DRAFT journals (one accrual at period-end, one reversal at next-period-start, repeated for `periods`) all attached to the same capsule.
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc accrued-expense --amount <per-period> --periods <n> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: independently produce the schedule. Returns `{ totalAccrued, schedule[n] }` where each row carries `accrualDate`, `reversalDate`, `accrualJournal`, `reversalJournal`.
@@ -16,8 +16,8 @@
 - **`search_journals(filter: {tag: <accrual.name>, valueDate: {between: [<-3 months>, <today>]}})`** — step 1 alt: trailing 3-month average when `estimation_method: 'trailing_3m_avg'`.
 - **`search_contacts(filter: {name: {eq: <vendor>}})`** — step 3: resolve vendor (per `CLIENT.recurring_accruals[i].vendor`).
 - **`search_accounts(filter: {name: {in: ['<expense GL>', '<accrued liability GL>']}})`** — step 3: confirm both sides of the journal exist in CoA.
-- **`search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: [<period-start>, <period-end>]}, status: 'DRAFT'})`** — step 5 monthly: find this period's pre-emitted DRAFT for finalization.
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 5: finalize this period's accrual + reversal pair.
+- **`search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: 'DRAFT'})`** — step 5 monthly: find this period's pre-emitted DRAFT for finalization.
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5: finalize this period's accrual + reversal pair.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verification: confirm Accrued Expenses balance and net P&L impact.
 
 ### Cross-references
@@ -50,7 +50,7 @@ Returns `{ totalAccrued: 3000, schedule: [{accrualDate: '2025-01-31', reversalDa
 
 ```
 plan_recipe(
-  name: 'accrued-expense',
+  recipe: 'accrued-expense',
   amount: 3000,
   periods: 1,
   startDate: '2025-01-31',
@@ -77,7 +77,7 @@ Vendor: confirm via `search_contacts(filter: {name: {eq: <vendor>}})` for taggin
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'accrued-expense', ...same args..., accountMap: <resolved>)
+execute_recipe(recipe: 'accrued-expense', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...], summary: {total: 2N, created: 2N, ...} }`. The recipe creates **2N future-dated DRAFT journals** (for `periods: 1`, that's 2 journals: 1 accrual + 1 reversal). All attach to the same capsule.
@@ -91,8 +91,8 @@ Engine output journals:
 For the current period (Jan 2025), the accrual journal exists in DRAFT in the capsule. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<accrual journal id>]})
+search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})
+update_journal(resourceId: <accrual journal id>, saveAsDraft: false)
 ```
 
 The reversal journal (dated 2025-02-01) stays DRAFT until February's monthly-close. **Do NOT finalize both at once** — that defeats the period-matching purpose. February's close finalizes the reversal AND any new accrual for Feb if the bill still hasn't arrived (run `plan_recipe + execute_recipe` again for Feb's `period`).
@@ -118,7 +118,7 @@ When the actual quarterly bill arrives (typically Mar 31, $9,000 total): post a 
 | `plan_recipe` | 422 `invalid_amount` | Amount is non-positive. Computed amount may have been a credit (e.g. `prior_month` returned a credit balance). Switch `estimation_method` to `fixed_amount` for this row this period, OR investigate the credit. |
 | `execute_recipe` | 422 `account_not_found` | Step 3 resolution incomplete. `search_accounts`; create via `create_account` if the practitioner confirms classification. |
 | `bulk_finalize_drafts` | 422 `journal_unbalanced` | Engine-emitted journals are always balanced. If you see this, the source schema changed — escalate (do not retry). |
-| Verification | Net P&L impact stuck after reversal posts | Likely the reversal hasn't been finalized yet. `search_journals(filter: {capsuleResourceId: <id>, valueDate: <reversal-date>, status: 'DRAFT'})` — if non-empty, finalize. |
+| Verification | Net P&L impact stuck after reversal posts | Likely the reversal hasn't been finalized yet. `search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: <reversal-date>, status: 'DRAFT'})` — if non-empty, finalize. |
 | Verification | Accrued Expenses balance nonzero after the actual bill posts AND all reversals run | Either the bill amount diverged from the accrual estimate (post a true-up journal: Dr/Cr `<expense GL>` for the difference) OR a reversal was missed. Audit via `generate_general_ledger(accountResourceId: 'Accrued Expenses', period_end: <today>)`. |
 | Practitioner posts the actual bill against `Accrued Expenses` instead of `<expense GL>` | (process error) | If they do this, the reversal AND the bill both touch `Accrued Expenses` — net to zero on liability, but expense gets double-recognized. Reverse the bill, re-post against `<expense GL>`. Document in `ENGAGEMENT.risk_areas`. |
 

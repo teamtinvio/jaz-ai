@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'asset-disposal', ...)`** — used in step 2: returns RecipePlan with the disposal journal (Dr Cash + Dr Accumulated Depreciation + Dr/Cr Loss/Gain on Disposal / Cr Fixed Asset Cost) and a note step.
-- **`execute_recipe(name: 'asset-disposal', ...)`** — used in step 4: posts the disposal journal. The note step is SKIPPED (engine surfaces it in `summary.notes` for the practitioner to action manually).
+- **`plan_recipe(recipe: 'asset-disposal', ...)`** — used in step 2: returns RecipePlan with the disposal journal (Dr Cash + Dr Accumulated Depreciation + Dr/Cr Loss/Gain on Disposal / Cr Fixed Asset Cost) and a note step.
+- **`execute_recipe(recipe: 'asset-disposal', ...)`** — used in step 4: posts the disposal journal. The note step is SKIPPED (engine surfaces it in `summary.notes` for the practitioner to action manually).
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc asset-disposal --cost <c> --salvage <s> --life <years> --acquired <YYYY-MM-DD> --disposed <YYYY-MM-DD> --proceeds <p> --method <sl|ddb|150db> --currency <code> --json`** — used in step 1: computes accumulated depreciation to disposal date, net book value, gain/loss. Returns `{ accumulatedDepreciation, netBookValue, proceeds, gainOrLoss, classification: 'gain' | 'loss' }`.
@@ -54,13 +54,13 @@ Cross-check with Jaz FA register:
 ```
 generate_fa_summary(period_end: '2026-03-15', fixedAssetResourceId: <FA UUID>)
 ```
-Should report `accumulatedDepreciation: 28500, netBookValue: 21500` matching the independent calc within 1 cent. Variance investigation: missing monthly depreciation journals (search via `search_journals(filter: {capsuleResourceId: <dep capsule>, status: 'DRAFT'})`); finalize them BEFORE disposal recipe.
+Should report `accumulatedDepreciation: 28500, netBookValue: 21500` matching the independent calc within 1 cent. Variance investigation: missing monthly depreciation journals (search via `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, status: 'DRAFT'})`); finalize them BEFORE disposal recipe.
 
 ### Step 2 — Plan the recipe
 
 ```
 plan_recipe(
-  name: 'asset-disposal',
+  recipe: 'asset-disposal',
   cost: 50000,
   salvageValue: 5000,
   usefulLifeYears: 5,
@@ -101,12 +101,12 @@ Bank account: resolve via `list_bank_accounts()` if `CLIENT.bank_accounts[i].jaz
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'asset-disposal', ...same args..., accountMap: <resolved>, bankAccountId: <resolved>)
+execute_recipe(recipe: 'asset-disposal', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step: 1, action: 'journal', status: 'created', resourceId: <journal id>}, {step: 2, action: 'note', status: 'skipped'}], summary: {total: 2, created: 1, skipped: 1, notes: ['Step 2 (note): Update Jaz FA register: use POST /mark-as-sold/fixed-assets (if sold) or POST /discard-fixed-assets/:id (if scrapped).'] } }`.
 
-The disposal journal is DRAFT. Finalize when ready: `finalize_journal(resourceId: <journal id>)` OR `bulk_finalize_drafts({kind: 'journal', resourceIds: [<id>]})`.
+The disposal journal is DRAFT. Finalize when ready: `update_journal(resourceId: <journal id>, saveAsDraft: false)`.
 
 ### Step 5 — Manual FA register update (CRITICAL)
 

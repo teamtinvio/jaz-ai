@@ -17,7 +17,7 @@ Practitioner checklist. Tick boxes as the underlying Jaz tools succeed. Agent re
 
 **Tools.** `generate_month_end_blueprint` (drives the whole sequence) · `generate_trial_balance` · `generate_balance_sheet` · `generate_profit_and_loss` · `search_bank_records` (per `CLIENT.bank_accounts[]`) · `quick_reconcile` / `reconcile_*` family · `bulk_finalize_drafts` · `validate_journal_draft`.
 
-**Recipes.** `plan_recipe(name: 'accrued-expense', …)` (per `CLIENT.recurring_accruals[]`) · `plan_recipe(name: 'depreciation', …)` (FA cross-check) · `plan_recipe(name: 'fx-reval', …)` (any monetary balance ≠ `CLIENT.base_currency`) · `plan_recipe(name: 'prepaid-expense', …)` (period recognition).
+**Recipes.** `plan_recipe(recipe: 'accrued-expense', …)` (per `CLIENT.recurring_accruals[]`) · `plan_recipe(recipe: 'depreciation', …)` (FA cross-check) · `plan_recipe(recipe: 'fx-reval', …)` (any monetary balance ≠ `CLIENT.base_currency`) · `plan_recipe(recipe: 'prepaid-expense', …)` (period recognition).
 
 **Calculators.** `clio calc depreciation` (FA register cross-check) · `clio calc accrued-expense` (accrual amounts) · `clio calc fx-reval` (period FX gain/loss) · `clio calc prepaid-expense` (amortization slice).
 
@@ -31,7 +31,7 @@ Practitioner checklist. Tick boxes as the underlying Jaz tools succeed. Agent re
 - [ ] Bank recon cleared — for each `CLIENT.bank_accounts[i]`: `search_bank_records(accountResourceId: …, status: UNRECONCILED)` returns empty after `reconcile_*` cycle
 - [ ] Accruals booked — every `CLIENT.recurring_accruals[i]` with `last_posted < period_end` has a recipe-output journal in DRAFT, then `bulk_finalize_drafts`
 - [ ] Depreciation posted — FA register cross-checked against `clio calc depreciation` for every active asset
-- [ ] FX revaluation booked — every monetary balance whose `currency ≠ CLIENT.base_currency` has a `plan_recipe(name: 'fx-reval', …)` journal
+- [ ] FX revaluation booked — every monetary balance whose `currency ≠ CLIENT.base_currency` has a `plan_recipe(recipe: 'fx-reval', …)` journal
 - [ ] Prepaid recognition booked — every prepaid scheduler has a posting for the period
 - [ ] Variance analysis surfaced — `|delta| > CLIENT.materiality_threshold` items explained in `recurring/monthly/<period>/variances.md`
 - [ ] Reports finalized — `generate_balance_sheet`, `generate_profit_and_loss`, `generate_aged_ar`, `generate_aged_ap` saved to `deliverables/`

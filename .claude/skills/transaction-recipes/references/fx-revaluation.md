@@ -2,7 +2,7 @@
 
 > **Jaz auto-handles FX revaluation for ALL foreign-currency monetary balances.** AR, AP, cash, bank accounts, intercompany journals, term deposits, FX-denominated provisions — all of it. Period-end translation per IAS 21.23 happens inside the platform with no manual journal required.
 >
-> **DO NOT invoke `execute_recipe(name: 'fx-reval', ...)` in normal operation.** It would double-post against Jaz's auto-emitted FX gain/loss journals. The recipe survives in the engine for one purpose: **independent cross-check** of what Jaz auto-posted.
+> **DO NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` in normal operation.** It would double-post against Jaz's auto-emitted FX gain/loss journals. The recipe survives in the engine for one purpose: **independent cross-check** of what Jaz auto-posted.
 
 ## What this recipe is for now
 
@@ -30,8 +30,8 @@
 - **`generate_balance_sheet(period_end: <date>)`** — IAS 21.23 verification (all monetary items at closing rate).
 
 ### Engine entry points (DO NOT INVOKE in normal operation)
-- ~~`plan_recipe(name: 'fx-reval', ...)`~~ — engine still accepts this for legacy reasons; output is for inspection only.
-- ~~`execute_recipe(name: 'fx-reval', ...)`~~ — **double-posts. Never invoke in a production org.**
+- ~~`plan_recipe(recipe: 'fx-reval', ...)`~~ — engine still accepts this for legacy reasons; output is for inspection only.
+- ~~`execute_recipe(recipe: 'fx-reval', ...)`~~ — **double-posts. Never invoke in a production org.**
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/monthly-close.md` step 6 only as a VERIFICATION step (cross-check Jaz's auto-posted reval against an independent calculation; surface variance to practitioner). Same in `quarterly-gst.md` and `annual-statutory.md`.
@@ -131,7 +131,7 @@ This file feeds `audit-prep.md` step 8 supporting schedules. Auditors love indep
 
 ## Why the engine still accepts the recipe
 
-Historical: pre-platform-auto-FX-reval orgs needed this. Some orgs may still run on a configuration where auto-FX is disabled (rare, legacy). For those orgs, `execute_recipe(name: 'fx-reval', ...)` posts the manual reval per the prior version of this recipe (period-end journal + Day 1 reversal). DO NOT use this path in any modern org.
+Historical: pre-platform-auto-FX-reval orgs needed this. Some orgs may still run on a configuration where auto-FX is disabled (rare, legacy). For those orgs, `execute_recipe(recipe: 'fx-reval', ...)` posts the manual reval per the prior version of this recipe (period-end journal + Day 1 reversal). DO NOT use this path in any modern org.
 
 If you genuinely need to know whether auto-FX is enabled for a specific org: check organization settings via `get_organization()`. If the auto-FX flag is on (default and typical), this recipe is verification-only as documented above.
 

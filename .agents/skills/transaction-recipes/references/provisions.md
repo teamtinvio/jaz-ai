@@ -5,8 +5,8 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
-- **`plan_recipe(name: 'provision', ...)`** — used in step 2: returns RecipePlan with PV-recognition journal + N period unwinding journals + settlement cash-out.
-- **`execute_recipe(name: 'provision', ...)`** — used in step 4: posts initial PV journal (today), N future-dated DRAFT discount-unwinding journals (one per month), and settlement cash-out (dated `settlementDate`, also DRAFT).
+- **`plan_recipe(recipe: 'provision', ...)`** — used in step 2: returns RecipePlan with PV-recognition journal + N period unwinding journals + settlement cash-out.
+- **`execute_recipe(recipe: 'provision', ...)`** — used in step 4: posts initial PV journal (today), N future-dated DRAFT discount-unwinding journals (one per month), and settlement cash-out (dated `settlementDate`, also DRAFT).
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc provision --amount <undiscounted total> --rate <annual %> --term <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: compute PV at recognition + per-period unwinding charge. Returns `{ presentValue, totalUnwindingCharge, schedule[n] }` where each row has `period`, `openingProvision`, `unwindingCharge`, `closingProvision`.
@@ -15,7 +15,7 @@
 - **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Provision for Warranties', 'Finance Cost', 'Warranty Expense']}})`** — step 3.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify provision balance matches schedule's `closingProvision`.
-- **`bulk_finalize_drafts({kind: 'journal', resourceIds: [...]})`** — step 5 monthly finalize.
+- **`update_journal(resourceId: <each id>, saveAsDraft: false)  // loop per id — no bulk-finalize-journals tool yet`** — step 5 monthly finalize.
 
 ### Cross-references
 - Within an engagement: invoked from `practice/references/annual-statutory.md` step 4e (Y5 in `year-end-close.md`) for year-end provision remeasurement, and `practice/references/monthly-close.md` step 7 (verify scheduler, finalize this period's unwinding DRAFT).
@@ -48,7 +48,7 @@ Save schedule to `workpapers/<period>/provision-warranty-FY2025.json`.
 
 ```
 plan_recipe(
-  name: 'provision',
+  recipe: 'provision',
   amount: 500000,
   annualRate: 4,
   termMonths: 60,
@@ -79,7 +79,7 @@ Bank account: only needed for the settlement cash-out at the end of the term.
 ### Step 4 — Execute
 
 ```
-execute_recipe(name: 'provision', ...same args..., accountMap: <resolved>, bankAccountId: <resolved>)
+execute_recipe(recipe: 'provision', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...62], summary: {total: 62, created: 62} }`. Initial recognition journal (today, ACTIVE if `finalize: true`); 60 future-dated DRAFT unwinding journals; 1 future-dated DRAFT settlement cash-out.
@@ -89,8 +89,8 @@ Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, r
 For each month after recipe execution:
 
 ```
-search_journals(filter: {capsuleResourceId: <id>, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
-bulk_finalize_drafts({kind: 'journal', resourceIds: [<journal id>]})
+search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 Verify after finalize:
@@ -117,9 +117,9 @@ This is in `year-end-close.md` Y5.
 ### Step 7 — Settlement (final period)
 
 When settlement date arrives:
-- Finalize the settlement cash-out: `bulk_finalize_drafts({kind: 'cash-in', resourceIds: [<settlement id>]})`.
+- Finalize the settlement cash-out: `update_cash_in(resourceId: <settlement id>, saveAsDraft: false)`.
 - Verify: `balance['Provision for Warranties'] == 0`; `balance['Cash']` reduced by 500,000.
-- Close capsule: `update_capsule(resourceId: <id>, status: 'CLOSED')`.
+- Close capsule: a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only).
 
 If actual settlement amount differs from estimated $500,000 (highly likely for warranty / decommissioning):
 - Edit the settlement cash-out before finalizing: `update_cash_out_entry(resourceId: <id>, lines: [{accountResourceId: <Provision>, amount: <actual>}, ...])`.
