@@ -19,7 +19,7 @@
 - **`apply_credit_to_invoice(...)` / `create_customer_credit_note(...)`** — step 6 specific write-off pattern: when individual invoices are deemed unrecoverable, write them off via credit note OR direct payment with `paymentMethod: 'DEBT_WRITE_OFF'` (per memory rule).
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/annual-statutory.md` step 4d (Y4 in `year-end-close.md`) for FY-end ECL; from `practice/references/quarterly-gst.md` step Q if quarterly cadence is set; rarely from monthly-close (mental check only).
+- Within an engagement: invoked from `practice/references/annual-statutory.md` step 4d (Y4 in `year-end-close.md`) for FY-end ECL; from `practice/references/quarterly-gst.md` step 8 if quarterly cadence is set; rarely from monthly-close (mental check during step 8 variance only).
 - Sibling: `provisions.md` (engine `provision`) — IAS 37 provisions with PV unwinding pattern, more complex than this recipe.
 - IFRS / accounting context: IFRS 9.5.5.15 (simplified approach mandatory for trade receivables); IFRS 9.B5.5.35 (provision matrix). For specific large customers in stage-3 (objective evidence of impairment): supplement this recipe with specific impairment via `create_customer_credit_note` per customer.
 
@@ -193,7 +193,7 @@ Write-offs reduce both the gross AR balance AND offset against the existing Allo
 ## Cross-references back to engagements
 
 - `practice/references/annual-statutory.md` step 4d (Y4) — year-end ECL true-up. Practice playbook reads `CLIENT.ecl_loss_rate_matrix` for the bucket rates and `CLIENT.materiality_threshold` for skip-or-post decision.
-- `practice/references/quarterly-gst.md` step Q (where applicable) — quarterly ECL review for clients on quarterly cadence.
-- `practice/references/monthly-close.md` step 13 — mental ECL check only; formal recipe runs annually/quarterly.
+- `practice/references/quarterly-gst.md` step 8 (where applicable) — quarterly ECL review for clients on quarterly cadence.
+- `practice/references/monthly-close.md` step 8 — mental ECL cross-check during variance analysis only; formal recipe runs annually/quarterly.
 - `audit-prep.md` step 8 — supporting schedule via the most recent `ECL Provision` capsule + the underlying `clio calc ecl` JSON. Auditor tests rate appropriateness against actual historical loss data.
 - Sibling `provisions.md` (engine `provision`) — IAS 37 provisions with PV unwinding (more complex pattern).

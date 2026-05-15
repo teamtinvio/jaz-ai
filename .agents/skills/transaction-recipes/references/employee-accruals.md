@@ -33,7 +33,7 @@ The two patterns share the same `Employee Benefits` capsule type but use differe
 - For year-end true-up: see `year-end-close.md` Y2 — manual journal pattern with HR-supplied actuals.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 10 (monthly leave) and `practice/references/annual-statutory.md` Y2 (annual leave + bonus true-ups).
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 4 (monthly leave) and `practice/references/annual-statutory.md` step 4f (Y2 in `year-end-close.md` — bonus accrual true-up).
 - Sibling: `accrued-expenses.md` (the engine that drives the bonus pattern); `dividend.md` (annual P&L distribution to shareholders, mirror to bonus).
 - IFRS / accounting context: IAS 19.11 (short-term employee benefits — recognized as expense in the period the service is rendered); IAS 19.13 (accrual of leave entitlement); IAS 19.19 (recognition criteria for bonuses — present obligation + reliable estimate).
 
@@ -174,7 +174,6 @@ Per quarter-end-close (`quarter-end-close.md`):
 
 ## Cross-references back to engagements
 
-- `practice/references/monthly-close.md` step 10 — monthly leave-accrual finalize per existing leave capsule.
-- `practice/references/quarterly-gst.md` step Q (where applicable) — quarterly bonus accrual + reversal pair finalize.
-- `practice/references/annual-statutory.md` Y2 — both leave and bonus true-ups against actuals; transition from accrual to actual cash payment in early Q1 next FY.
+- `practice/references/monthly-close.md` step 4 — monthly leave-accrual finalize per existing leave capsule.
+- `practice/references/annual-statutory.md` step 4f (Y2 in `year-end-close.md`) — both leave and bonus true-ups against actuals; transition from accrual to actual cash payment in early Q1 next FY. (No quarterly bonus-accrual step exists in `quarterly-gst.md` — true-up runs annually only.)
 - Sibling `accrued-expenses.md` — the engine that drives the bonus pattern; full error table + variations there.

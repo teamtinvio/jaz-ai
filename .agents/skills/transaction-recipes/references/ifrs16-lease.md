@@ -21,7 +21,7 @@
 - **`generate_fa_summary(period_end: <date>)`** — step 5 verify Jaz auto-posted ROU depreciation.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (verify scheduler / pre-emitted unwinding journal + verify Jaz FA posted ROU depreciation), `annual-statutory.md` step 4 (current/non-current reclassification of the next 12 months' principal portion).
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (verify scheduler / pre-emitted unwinding journal + verify Jaz FA posted ROU depreciation), `jobs/references/year-end-close.md` Y6 (current/non-current reclassification of the next 12 months' principal portion).
 - Sibling recipes: `bank-loan.md` (similar amortization pattern but no FA dimension); `hire-purchase.md` (shares the lease engine but with different useful-life-months per asset).
 - IFRS / accounting context: IFRS 16 paragraphs 22-25 (recognition), 36 (subsequent measurement), 47 (lease liability re-measurement).
 
@@ -164,14 +164,14 @@ After the FINAL period (month 36):
 - **Variable rent** (CPI-linked, turnover-linked): NOT supported by initial recipe. Recompute PV at each reset event and re-measure manually.
 - **Multi-currency lease** (USD payments from SGD bank): pass `currency: 'USD'`. ROU + Lease Liability denominate in USD; Jaz auto-translates BS balances at closing rate per IAS 21.23 (do NOT invoke `fx-reval` recipe).
 - **Lease with prepayments** (initial payment at signing): post the prepayment as `create_cash_out_entry` against ROU Asset BEFORE invoking the recipe. The recipe's PV calculation should exclude the upfront payment portion.
-- **Year-end current/non-current reclassification**: Out of scope for the engine. Manual annual journal: Dr Lease Liability (Non-Current) / Cr Lease Liability (Current) for the next 12 months' principal portion. Practice playbook `practice/references/annual-statutory.md` step 8 covers this.
+- **Year-end current/non-current reclassification**: Out of scope for the engine. Manual annual journal: Dr Lease Liability (Non-Current) / Cr Lease Liability (Current) for the next 12 months' principal portion. Job blueprint `jobs/references/year-end-close.md` Y6 covers this.
 
 ---
 
 ## Cross-references back to engagements
 
 - `practice/references/monthly-close.md` step 7 — invoked monthly to finalize this period's pre-emitted unwinding DRAFT (5a) + verify Jaz auto-posted ROU depreciation (5b).
-- `practice/references/annual-statutory.md` step 8 — current/non-current reclassification (manual annual journal) + auditor sample-test of the lease schedule via `clio calc lease`.
+- `jobs/references/year-end-close.md` Y6 — current/non-current reclassification (manual annual journal) + auditor sample-test of the lease schedule via `clio calc lease`.
 - `practice/references/onboarding.md` — opening lease balances loaded via conversion (`jaz-conversion/SKILL.md § Option 2` with the Conversion Clearing > Lease account); recipe runs forward only from migration date.
 - `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Lease'}})` + per-capsule `clio calc lease` recompute. Auditor reconciles to TB Lease Liability + ROU Asset NBV.
 - Sibling recipe `hire-purchase.md` — same engine, different useful-life parameter.

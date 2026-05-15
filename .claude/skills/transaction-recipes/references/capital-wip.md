@@ -22,7 +22,7 @@ CWIP costs accumulate as construction progresses — multiple bills from contrac
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify CWIP balance is zero post-transfer; FA balance reflects new asset.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 11 (per active capital project per `CLIENT.capital_projects[]`); from `practice/references/annual-statutory.md` step 4 (year-end review of CWIP balances — IAS 16.20 capitalization criteria; flag any CWIP not capitalized for > 12 months as potential expense).
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (per active capital project per `CLIENT.capital_projects[]`); from `practice/references/annual-statutory.md` step 4h (year-end review of CWIP balances — IAS 16.20 capitalization criteria; flag any CWIP not capitalized for > 12 months as potential expense).
 - Sibling: `bank-loan.md` (financing the construction often ties together — the loan funds the CWIP); `declining-balance.md` / `asset-disposal.md` for post-capitalization lifecycle.
 - IFRS / accounting context: IAS 16.16-22 (cost components includable in PP&E during construction); IAS 16.23 (capitalization stops when asset is in location and condition for intended use); IAS 23 (borrowing costs eligible for capitalization on qualifying assets).
 
@@ -217,8 +217,8 @@ Close the project capsule (or keep ACTIVE for traceability — the FA still refe
 
 ## Cross-references back to engagements
 
-- `practice/references/monthly-close.md` step 11 — review active CWIP per project; flag any pending completion.
-- `practice/references/annual-statutory.md` step 4 — year-end review: any CWIP balance > 12 months without completion should be questioned (auditor will). Either complete the transfer, or impair if abandoned.
+- `practice/references/monthly-close.md` step 7 — review active CWIP per project; flag any pending completion.
+- `practice/references/annual-statutory.md` step 4h — year-end review: any CWIP balance > 12 months without completion should be questioned (auditor will). Either complete the transfer, or impair if abandoned.
 - `audit-prep.md` step 8 — supporting schedule: per project capsule, all bills + transfer journal + FA registration. Auditor traces from individual bills → CWIP balance → FA cost.
 - `bank-loan.md` — if construction is loan-financed, pair this recipe with the loan recipe; capitalize interest during construction per IAS 23.
 - `asset-disposal.md` — when the eventual FA is later disposed (typically many years after construction).

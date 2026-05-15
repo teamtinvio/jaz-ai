@@ -139,7 +139,7 @@ If you genuinely need to know whether auto-FX is enabled for a specific org: che
 
 ## Cross-references back to engagements
 
-- `practice/references/monthly-close.md` step 6 — VERIFICATION ONLY. Confirm Jaz's auto-posted FX gain/loss matches independent calc; surface variance only. The prior step-6 wording calling for `plan_recipe` + `execute_recipe` is wrong and will be corrected in a follow-up R8.x patch.
+- `practice/references/monthly-close.md` step 6 — VERIFICATION ONLY. Confirm Jaz's auto-posted FX gain/loss matches independent calc; surface variance only.
 - `practice/references/quarterly-gst.md` step 6 — same.
-- `practice/references/annual-statutory.md` step 4f — FY-end FX verification feeds audit-prep step 8 supporting schedules; auditors want the independent recomputation alongside Jaz's auto-posted journals.
+- `practice/references/annual-statutory.md` step 4c — FY-end FX verification feeds audit-prep step 8 supporting schedules; auditors want the independent recomputation alongside Jaz's auto-posted journals.
 - `audit-prep.md` step 8 — receives the verification file as a supporting schedule.

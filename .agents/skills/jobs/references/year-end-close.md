@@ -229,7 +229,7 @@ Invoke `audit-prep.md` job. Year-end-close output (TB final, all reports, all re
 
 - **Run in January for prior FY.** Standalone mode includes all 4 quarter closes; allow 5-10 days for full FY catch-up if quarterly cadence has slipped.
 - **External audit timeline:** auditor typically arrives 4-6 weeks after FY-end. Year-end-close + audit-prep should complete within 6 weeks of FY-end. Faster = cheaper audit.
-- **Reclassification reversal:** the Y6 entries are FY-specific. Year 2's monthly-close.md step 0 (or a Y1 reverse step in next year's year-end-close) should reverse them before fresh classification.
+- **Reclassification reversal:** the Y6 entries are FY-specific. Year 2's monthly-close.md step 1 (or a Y1 reverse step in next year's year-end-close) should reverse them before fresh classification.
 - **Form C-S timing:** SG IRAS deadline is November 30 of the FOLLOWING year. ECI: within 3 months of FY-end. Plan year-end-close to feed audit-prep within 3 months for ECI compliance.
 
 ---

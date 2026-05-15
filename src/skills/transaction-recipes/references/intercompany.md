@@ -28,7 +28,7 @@ Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity
 - NEVER mix. Cross-org pollution corrupts both entities' books.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 11 (intercompany leg of monthly close, only for clients with active intercompany arrangements per `CLIENT.intercompany_arrangements[]`).
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (intercompany leg of monthly close, only for clients with active intercompany arrangements per `CLIENT.intercompany_arrangements[]`).
 - Sibling: `dividend.md` (cross-entity equity distribution — also requires multi-org coordination).
 - IFRS / accounting context: IAS 24 (related-party disclosure); intercompany balances ELIMINATE at consolidation per IFRS 10.B86 (consolidation procedures).
 
@@ -178,7 +178,7 @@ For consolidation (if the practitioner manages a group): the matched IC balances
 | Cross-FX intercompany | Entity A in SGD, Entity B in USD — IC Receivable in A doesn't match USD-equivalent in B | Both sides should agree on the transaction-currency amount (e.g., USD 15,000). Translation to base currency happens at each entity's books separately. Reconciliation at the SOURCE currency level, not base. |
 | Transfer-pricing dispute (IRAS audit) | (process — separate from posting) | IC charges must satisfy arm's-length principle (SG: ITA s34D / OECD TPG). Maintain a transfer-pricing study. Practice playbook should reference `CLIENT.transfer_pricing_documentation`. |
 | Both entities forget to post | (audit risk) | Year-end audit-prep step — auditor reconciles IC balances. Build a quarterly review into the engagement playbook. |
-| Settlement reference mismatch | Bank-recon doesn't match IC payment to bill payment | Use a consistent `IC-PAY-YYYY-MM-XX` reference convention. Document in `practice/references/monthly-close.md` step 11. |
+| Settlement reference mismatch | Bank-recon doesn't match IC payment to bill payment | Use a consistent `IC-PAY-YYYY-MM-XX` reference convention. Document in `practice/references/monthly-close.md` step 7. |
 
 ---
 
@@ -194,8 +194,8 @@ For consolidation (if the practitioner manages a group): the matched IC balances
 
 ## Cross-references back to engagements
 
-- `practice/references/monthly-close.md` step 11 — invoked monthly per active IC arrangement in `CLIENT.intercompany_arrangements[]`. Practice playbook orchestrates multi-org context switching (load entity A → post → load entity B → post → reconcile).
-- `practice/references/annual-statutory.md` step 4 — full FY IC reconciliation; auditor sample-tests.
+- `practice/references/monthly-close.md` step 7 — invoked monthly per active IC arrangement in `CLIENT.intercompany_arrangements[]`. Practice playbook orchestrates multi-org context switching (load entity A → post → load entity B → post → reconcile).
+- `practice/references/annual-statutory.md` step 4g — full FY IC reconciliation; auditor sample-tests.
 - `audit-prep.md` step 8 — IC balances supporting schedule; auditor independently confirms with the counter-entity.
 - Sibling `dividend.md` — cross-entity equity distribution; same multi-org coordination pattern.
 - `practice/references/onboarding.md` — multi-org practitioner workflow setup; CLIENT.md per entity with `jaz_api_key_override` per client.

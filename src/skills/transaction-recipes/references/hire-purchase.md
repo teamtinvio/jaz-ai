@@ -110,6 +110,6 @@ Month 60: final depreciation post. NBV = 0. Decommission FA via `update_fixed_as
 
 ## Cross-references back to engagements
 
-- See `ifrs16-lease.md` cross-references — same engagement contexts (monthly-close step 7, annual-statutory step 8 for current/non-current reclass).
+- See `ifrs16-lease.md` cross-references — same engagement contexts (monthly-close step 7, `jobs/references/year-end-close.md` Y6 for current/non-current reclass).
 - Sibling recipe `ifrs16-lease.md` — full step-by-step + error table + non-HP variations.
 - `asset-disposal.md` — when HP'd asset is eventually sold/scrapped (typically after month 60 = end of useful life).

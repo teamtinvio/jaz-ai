@@ -143,12 +143,12 @@ After the FINAL period (60th repayment) is finalized:
 - **Interest-only period:** Not supported by the loan calculator. Workaround: post N manual interest-only journals via `create_journal` (Dr Interest Expense / Cr Cash) for the interest-only window, then run `plan_recipe(recipe: 'loan', ...)` from the start of the amortizing window with the full outstanding principal.
 - **Multi-currency loan (USD loan with SGD base):** Pass `currency: 'USD'`. Disbursement records via `currency: { sourceCurrency: 'USD' }` per `jaz-api/SKILL.md` rule 25. Monthly repayments stay in USD. Period-end FX revaluation against base currency is auto-handled by Jaz (Loan Payable is a monetary item per IAS 21.23 — Jaz auto-translates at closing rate). Verify via `practice/references/monthly-close.md` step 6 verification flow; do NOT invoke `execute_recipe(recipe: 'fx-reval', ...)`.
 - **Loan origination fees:** Out of scope for this recipe (the engine's IFRS 9 effective-interest treatment doesn't currently amortize fees into the EIR). Post fees as a separate manual journal: Dr `Operating Expense > Loan Origination Fee` / Cr Cash. For IFRS 9 EIR-amortized fees, model the fee as `prepaid-expense` over the loan term.
-- **Year-end current/non-current reclassification:** Out of scope for the engine — manual annual journal: Dr Loan Payable Non-Current / Cr Loan Payable Current for the next 12 months' principal portion. Practice playbook `practice/references/annual-statutory.md` step 8 covers this.
+- **Year-end current/non-current reclassification:** Out of scope for the engine — manual annual journal: Dr Loan Payable Non-Current / Cr Loan Payable Current for the next 12 months' principal portion. Job blueprint `jobs/references/year-end-close.md` Y6 covers this.
 
 ---
 
 ## Cross-references back to engagements
 
 - `practice/references/monthly-close.md` step 4 — explicitly excludes loan interest from monthly accruals because the loan scheduler emits it automatically. Practitioner should never post a manual loan-interest accrual.
-- `practice/references/annual-statutory.md` step 8 — current/non-current reclassification of the next 12 months' principal portion (manual journal pattern, not engine-managed).
+- `jobs/references/year-end-close.md` Y6 — current/non-current reclassification of the next 12 months' principal portion (manual journal pattern, not engine-managed).
 - `practice/references/onboarding.md` — when the prior firm carried a loan, the opening trial balance includes the outstanding balance. Conversion (`jaz-conversion/SKILL.md § Option 2`) loads it via the `Conversion Clearing > Loan` account; this recipe then runs from the migration date forward only (do NOT model historical periods retroactively).

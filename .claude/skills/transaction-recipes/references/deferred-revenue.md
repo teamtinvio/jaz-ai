@@ -21,7 +21,7 @@
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT recognition journal.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 8 (finalize this period's pre-emitted journal for existing capsules; create a new capsule for any new deferred arrangement starting this period).
+- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (finalize this period's pre-emitted journal for existing capsules; create a new capsule for any new deferred arrangement starting this period).
 - Sibling recipes: `prepaid-amortization.md` (mirror — same engine pattern, opposite direction).
 - IFRS / accounting context: IFRS 15 — revenue recognition over time when control transfers gradually (subscriptions, retainers, multi-period service contracts). The recipe assumes ratable straight-line recognition; for stage-based / milestone billing, use a different pattern (see Variations).
 
@@ -140,7 +140,7 @@ If customer cancels mid-term: invoke ad-hoc adjustment — delete remaining DRAF
 
 ## Cross-references back to engagements
 
-- `practice/references/monthly-close.md` step 8 — invoked monthly to finalize this period's pre-emitted recognition journal per existing Deferred Revenue capsule, AND to plan/execute new capsules when a fresh deferred arrangement starts in the period.
+- `practice/references/monthly-close.md` step 7 — invoked monthly to finalize this period's pre-emitted recognition journal per existing Deferred Revenue capsule, AND to plan/execute new capsules when a fresh deferred arrangement starts in the period.
 - `practice/references/onboarding.md` — opening trial balance may include opening Deferred Revenue (subscriptions in flight at conversion date). Conversion (`jaz-conversion/SKILL.md § Option 2`) loads the opening balance via clearing account; this recipe then sets up forward recognition only (do NOT model historical periods retroactively).
 - `practice/references/annual-statutory.md` step 1 — final monthly close before year-end-close handles the December recognition journal; year-end-close confirms Deferred Revenue is correctly classified as current vs non-current liability for BS presentation.
 - Sibling recipe `prepaid-amortization.md` — same engine pattern from the buyer's perspective.
