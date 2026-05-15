@@ -135,20 +135,29 @@ The recipe engine creates one capsule per `execute_recipe` call. The pattern:
 - All bill / invoice / journal / cash entries the recipe creates get the new capsule's resourceId
 - Manual journal recipes (intercompany, capital-wip) follow the same pattern but you create the capsule + assign journals manually
 
-**Capsule Types** are labels that categorize capsules. Create types that match your recipes:
-- Prepaid Expenses
-- Deferred Revenue
-- Accrued Expenses
-- Loan Repayment
-- Lease Accounting (IFRS 16)
-- Depreciation (Non-Standard)
-- FX Revaluation
-- ECL Provision
-- Employee Benefits
-- Provisions
-- Dividends
+**Capsule Types** are labels that categorize capsules. Pass these exact strings — the engine and `search_capsules` filter rely on character-for-character match.
+
+Engine-emitted (canonical strings — match exactly):
+- Accrued Expenses (accrued-expense recipe)
+- Asset Disposal (asset-disposal recipe)
+- Deferred Revenue (deferred-revenue recipe)
+- Depreciation (depreciation recipe — covers SL, DDB, 150DB)
+- Dividends (dividend recipe)
+- ECL Provision (ecl recipe)
+- Employee Benefits (leave-accrual recipe)
+- Fixed Deposit (fixed-deposit recipe)
+- FX Revaluation (fx-reval recipe — verification only, do not execute_recipe)
+- Hire Purchase (lease recipe with `usefulLifeMonths > termMonths`)
+- Lease Accounting (lease recipe — IFRS 16)
+- Loan Repayment (loan recipe)
+- Prepaid Expenses (prepaid-expense recipe)
+- Provisions (provision recipe)
+
+Practitioner-created (manual `create_capsule(capsuleType: 'X')` — no engine):
 - Intercompany
 - Capital Projects
+
+> **Naming drift to watch for:** the file `accrued-expenses.md` (plural) covers the engine recipe `'accrued-expense'` (singular) which emits the capsule type `'Accrued Expenses'` (plural). Same content; the recipe name follows the engine convention while the file + capsule type follow the accounting convention. Pass capsule type strings exactly as listed above.
 
 **Reporting:** Capsules are the **only enrichment that supports group-by** in the General Ledger. Grouping by capsule shows the complete lifecycle of a multi-step transaction in one view.
 

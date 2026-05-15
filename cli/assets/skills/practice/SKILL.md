@@ -1,6 +1,6 @@
 ---
 name: jaz-practice
-version: 5.4.20
+version: 5.4.22
 description: >-
   Use this skill whenever an accounting practitioner is doing client work in
   Jaz — closing the books, filing GST, year-end statutory, onboarding a new
@@ -24,6 +24,12 @@ compatibility:
 # jaz-practice
 
 Practitioner-side scaffolding. The agent's entry point when an accountant is doing client work in Jaz.
+
+## When to Use This Skill
+
+Load `jaz-practice` when the user's intent is practitioner-shaped — closing the books, filing GST/VAT, year-end statutory, onboarding a new client, mid-quarter review for a specific client. The skill's job is to LOAD CONTEXT (CLIENT.md + ENGAGEMENT.md) before routing the actual accounting work to `jaz-jobs` (close playbooks), `jaz-recipes` (IFRS recipes), `jaz-conversion` (data migration), or `jaz-api` (raw endpoints).
+
+Trigger phrases: "close the books for X", "file GST for Y", "onboard new client Z", "what's outstanding for Acme this month", "Acme — quarterly close", "year-end statutory for X". When in doubt: if the user names a client or an engagement-type ("monthly close", "GST", "year-end"), load this skill first.
 
 ## Mental model
 

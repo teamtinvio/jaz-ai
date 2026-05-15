@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.4.20
+version: 5.4.22
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -278,7 +278,7 @@ Both tools accept all 13 recipe types: loan, lease, depreciation, prepaid-expens
 
 Scheduler creation tools are also available: `create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`.
 
-## Cross-References
+## See Also
 
 - **API field names and payloads**: Load the `jaz-api` skill — see `references/endpoints.md` and `references/field-map.md`
 - **Capsule API**: `POST /capsules`, `POST /capsuleTypes` — see api skill's `references/full-api-surface.md`
