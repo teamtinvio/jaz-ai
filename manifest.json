@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.32",
+  "version": "5.4.33",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -276,7 +276,7 @@
     },
     {
       "name": "bulk_upsert_items",
-      "description": "Create or update items in bulk (max 500 per call). Provide resourceId per item to update (partial — only changed fields needed, server preserves existing values). Omit resourceId to create (defaults: status=ACTIVE, itemCategory=NON_INVENTORY)."
+      "description": "Max 500 items per call. Provide resourceId per item to update (partial — only changed fields needed, server preserves existing values). Omit resourceId to create (defaults: status=ACTIVE, itemCategory=NON_INVENTORY)."
     },
     {
       "name": "list_tags",
@@ -432,7 +432,7 @@
     },
     {
       "name": "bulk_upsert_currency_rates",
-      "description": "Create exchange rates in bulk (max 500 per call). Auto-enables currencies not yet enabled in the org — no need to call add_currency first. Requires rateDirection per rate. Response surfaces per-row failures: `failedRows[]` (each with rowIndex, columnName, columnValue, errorCode, errorMessage) + `failedCount` alongside `resourceIds[]` for successful inserts. Omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (no temporal gap)."
+      "description": "Max 500 exchange rates per call. Auto-enables currencies not yet enabled in the org — no need to call add_currency first. Requires rateDirection per rate. Response surfaces per-row failures: `failedRows[]` (each with rowIndex, columnName, columnValue, errorCode, errorMessage) + `failedCount` alongside `resourceIds[]` for successful inserts. Omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (no temporal gap)."
     },
     {
       "name": "list_tax_profiles",
@@ -1064,31 +1064,31 @@
     },
     {
       "name": "bulk_upsert_invoices",
-      "description": "Bulk create/update invoices (max 500). FLAT shape — ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED — last wins). resourceId per row → update by UUID; omit → upsert by invoiceReference.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); PARTIAL_SUCCESS → data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed."
+      "description": "Max 500 invoices per call. FLAT shape — ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED — last wins). resourceId per row → update by UUID; omit → upsert by invoiceReference.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); PARTIAL_SUCCESS → data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed."
     },
     {
       "name": "bulk_upsert_invoice_line_items",
-      "description": "Create or update invoices with nested line items in bulk (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
+      "description": "Nested line items per invoice (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
     },
     {
       "name": "bulk_upsert_bills",
-      "description": "Create or update bills in bulk (max 500 per call). FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead — that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED — last wins). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only — dateFormat field was removed."
+      "description": "Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead — that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED — last wins). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only — dateFormat field was removed."
     },
     {
       "name": "bulk_upsert_bill_line_items",
-      "description": "Create or update bills with nested line items in bulk (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails."
+      "description": "Nested line items per bill (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails."
     },
     {
       "name": "bulk_upsert_customer_credit_notes",
-      "description": "Create or update customer credit notes in bulk (max 500 per call). Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
+      "description": "Max 500 customer credit notes per call. Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
     },
     {
       "name": "bulk_upsert_supplier_credit_notes",
-      "description": "Create or update supplier credit notes in bulk (max 500 per call). Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
+      "description": "Max 500 supplier credit notes per call. Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only."
     },
     {
       "name": "bulk_upsert_journals",
-      "description": "Create or update manual journals in bulk (max 500 per call). NATURAL KEY: `journalReference` (NOT `reference` — every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]` — different from `clio journals create` which uses entries). Each leg has `accountResourceId` + `debitAmount` + `creditAmount` (debit + credit must balance per row). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only — dateFormat field was removed."
+      "description": "Max 500 manual journals per call. NATURAL KEY: `journalReference` (NOT `reference` — every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]` — different from `clio journals create` which uses entries). Each leg has `accountResourceId` + `debitAmount` + `creditAmount` (debit + credit must balance per row). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only — dateFormat field was removed."
     },
     {
       "name": "bulk_upsert_fixed_assets",
