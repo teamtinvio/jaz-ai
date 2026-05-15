@@ -1,6 +1,6 @@
 ---
 name: jaz-practice
-version: 5.4.24
+version: 5.4.26
 description: >-
   Use this skill whenever an accounting practitioner is doing client work in
   Jaz — closing the books, filing GST, year-end statutory, onboarding a new
