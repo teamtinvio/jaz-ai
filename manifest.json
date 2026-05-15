@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.29",
+  "version": "5.4.30",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -520,7 +520,7 @@
     },
     {
       "name": "search_cashflow_transactions",
-      "description": "Search cashflow transactions (unified ledger). Filter by type, direction (PAYIN/PAYOUT), status, date, reference, account."
+      "description": "Search cashflow transactions (unified ledger across cash entries / payments / journals). direction enum: PAYIN | PAYOUT."
     },
     {
       "name": "list_bookmarks",
@@ -564,7 +564,7 @@
     },
     {
       "name": "search_payments",
-      "description": "Search payments by type, direction (PAYIN/PAYOUT), method, date, reference, account."
+      "description": "Search payments. direction enum: PAYIN | PAYOUT."
     },
     {
       "name": "download_export",
@@ -708,7 +708,7 @@
     },
     {
       "name": "search_bank_rules",
-      "description": "Search bank rules by name."
+      "description": "Search bank rules."
     },
     {
       "name": "create_bank_rule",
@@ -736,7 +736,7 @@
     },
     {
       "name": "search_fixed_assets",
-      "description": "Search fixed assets by name, status, category, tag, type, date, amount range."
+      "description": "Search fixed assets."
     },
     {
       "name": "create_fixed_asset",
@@ -840,7 +840,7 @@
     },
     {
       "name": "search_contact_groups",
-      "description": "Search contact groups by name."
+      "description": "Search contact groups."
     },
     {
       "name": "create_contact_group",
