@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.30",
+  "version": "5.4.31",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -404,7 +404,7 @@
     },
     {
       "name": "list_currencies",
-      "description": "List currencies enabled for the organization. Returns currency code, name, symbol, and whether it is the base currency."
+      "description": "List currencies enabled for the organization. Returns code, name, symbol, isBaseCurrency."
     },
     {
       "name": "add_currency",
@@ -792,7 +792,7 @@
     },
     {
       "name": "search_scheduled_transactions",
-      "description": "Search scheduled transactions (subscriptions, recurring). Filter by type, status, interval, contact."
+      "description": "Search scheduled transactions (subscriptions / recurring invoices / journals / cash entries)."
     },
     {
       "name": "generate_vat_ledger",
@@ -864,7 +864,7 @@
     },
     {
       "name": "search_custom_fields",
-      "description": "Search custom fields by name or data type."
+      "description": "Search custom fields."
     },
     {
       "name": "create_custom_field",
@@ -884,7 +884,7 @@
     },
     {
       "name": "search_tax_profiles",
-      "description": "Search tax profiles by name, tax type code, applicability (sale/purchase). Filter appliesToSale/appliesToPurchase to scope by transaction type."
+      "description": "Search tax profiles. Use appliesToSale / appliesToPurchase filters to scope by transaction type."
     },
     {
       "name": "get_tax_profile",
@@ -956,7 +956,7 @@
     },
     {
       "name": "search_nano_classifiers",
-      "description": "Search nano classifiers (tracking categories) by type name."
+      "description": "Search nano classifiers (tracking categories)."
     },
     {
       "name": "create_nano_classifier",
