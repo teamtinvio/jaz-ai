@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.7",
+  "version": "5.4.8",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -88,7 +88,7 @@
     },
     {
       "name": "bulk_upsert_chart_of_accounts",
-      "description": "Create or update chart-of-accounts entries in bulk (max 500 per call). SYNC: returns `{ resourceIds: string[], failedRows: ImportedRowError[], failedCount: number }` immediately — no jobId polling. Each successful row contributes one resourceId; each failure surfaces a `failedRows[]` entry with `rowIndex`, `columnName`, `columnValue`, `errorCode`, `errorMessage`. Common per-row errors: `ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED` when a row's `name` collides with an existing account in the org (dedup is by NAME not code). Other rows in the batch still succeed (PARTIAL_SUCCESS pattern). Provide `resourceId` per account to update; omit to create. Accepts the classic 12 + 9 IFRS 18 `accountType` values per rule 140; common variants are normalized client-side via normalizeAccountType. Use this tool for CoA imports, IFRS 18 migrations, and bulk template seeding. For one-off creates with auto-dedup-on-name, use `create_account` instead."
+      "description": "Bulk create/update CoA entries (max 500). SYNC: returns { resourceIds, failedRows: [{rowIndex, columnName, columnValue, errorCode, errorMessage}], failedCount } — no jobId polling. PARTIAL_SUCCESS: failed rows surface in failedRows[]; others still succeed.\n\nresourceId per row → update; omit → create. Note: dedup is by NAME (not code) — duplicate name surfaces ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED per row. Accepts classic 12 + 9 IFRS 18 accountType values; common variants normalized via normalizeAccountType.\n\nUse for CoA imports / IFRS 18 migration / template seeding. For one-off creates with dedup, use create_account."
     },
     {
       "name": "list_contacts",
@@ -104,7 +104,7 @@
     },
     {
       "name": "get_contact_signals",
-      "description": "Get contact signals — read-only pattern intelligence (cadence, outliers, divergences, severity) for a single contact. USE THIS for stand-alone contact-history lookup before drafting a transaction (e.g. \"what does this supplier normally look like?\"). Do NOT use validate_drafts unless you already have a specific draft to score. Returns null when the contact has no qualifying history yet (sampleSize < 5) or the freshness layer is unavailable. Per-pair cache (contactId × btType) — duplicate calls for the same pair return the same result. Three response slices populate ONLY on the validate_drafts path (severitySummary, outlierFlags, revealedDivergences) — those require a draft to compare against, so they're always empty/null here."
+      "description": "Read-only contact pattern intelligence (cadence, outliers, divergences, severity). USE THIS for stand-alone history lookup before drafting (e.g. \"what does this supplier normally look like?\"). Use validate_drafts instead when you have a specific draft to score.\n\nReturns null when the contact has no qualifying history yet (sampleSize < 5) or the freshness layer is unavailable. Per-pair cache (contactId × btType) — duplicate calls for the same pair return the same result.\n\nThree response slices (severitySummary, outlierFlags, revealedDivergences) populate ONLY on the validate_drafts path — empty/null here."
     },
     {
       "name": "create_contact",
@@ -128,7 +128,7 @@
     },
     {
       "name": "create_invoice",
-      "description": "Create a new invoice. IMPORTANT:\n- Line items use \"name\" (not \"description\") for the item label.\n- saveAsDraft defaults to true. Set to false only if user says \"finalize\".\n- accountResourceId is REQUIRED on each lineItem for finalized invoices. Search accounts first (e.g. Operating Revenue).\n- Currency format: { sourceCurrency: \"USD\", exchangeRate: 1.35 }\n- contactResourceId is required — search contacts first to get the ID.\n- Dates must be YYYY-MM-DD format.\n- reference MUST be unique per org — if the user doesn't specify one, generate one with a timestamp (e.g., INV-20260309-1430). Duplicates cause 422."
+      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\nREQUIRED: contactResourceId (search first), and accountResourceId per lineItem when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\", exchangeRate: 1.35 }`. Dates YYYY-MM-DD.\n\nreference MUST be unique per org — auto-generate with timestamp if user doesn't specify (e.g. INV-20260309-1430). Duplicate → 422."
     },
     {
       "name": "update_invoice",
@@ -452,7 +452,7 @@
     },
     {
       "name": "create_cash_in",
-      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit from outside).\nWHEN TO USE: customer payments received, refunds from suppliers, insurance payouts, external deposits.\nWHEN NOT TO USE: moving money between your own bank/cash accounts — use create_cash_transfer instead.\n- CRITICAL: accountResourceId MUST be a Bank/Cash account from list_bank_accounts output. Using expense, revenue, or liability accounts will fail. Always call list_bank_accounts first to find valid accounts.\n- lines are the offsetting entries. Each needs accountResourceId, type (DEBIT/CREDIT), and amount. IMPORTANT: offset accounts must be regular P&L or balance sheet accounts (expense, revenue, asset, liability) — NOT bank/cash accounts or controlled accounts (AR/AP). Example: Service Revenue, Interest Income, Other Income.\n- The API enforces account separation: cash-in bank account cannot appear in lines."
+      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts) — any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, type (DEBIT/CREDIT), amount }. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability) — NOT bank/cash and NOT controlled accounts (AR/AP)."
     },
     {
       "name": "list_cash_out",
@@ -460,7 +460,7 @@
     },
     {
       "name": "create_cash_out",
-      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal).\nWHEN TO USE: expenses paid, supplier payments, reimbursements, withdrawals to external parties.\nWHEN NOT TO USE: moving money between your own bank/cash accounts — use create_cash_transfer instead.\n- CRITICAL: accountResourceId MUST be a Bank/Cash account from list_bank_accounts output. Using expense, revenue, or liability accounts will fail with \"CashOut journal account cannot be in CashIn Entries\". Always call list_bank_accounts first to find valid accounts.\n- lines are the offsetting entries. Each needs accountResourceId, type (DEBIT for cash-out expenses), and amount (must be > 0). For cash-out: use type \"DEBIT\" on the expense/offset account. IMPORTANT: offset accounts must be regular P&L or balance sheet accounts (expense, revenue, asset, liability) — NOT bank/cash accounts or controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct-id>\", type: \"DEBIT\", amount: 100 }.\n- The API enforces account separation: cash-out bank account cannot appear in lines."
+      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, type: 'DEBIT' (typical for the expense leg), amount > 0 }. Offset accounts must be regular P&L or balance-sheet accounts — NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", type: \"DEBIT\", amount: 100 }."
     },
     {
       "name": "get_cash_in",
@@ -484,7 +484,7 @@
     },
     {
       "name": "create_cash_transfer",
-      "description": "Move money between two of YOUR OWN bank/cash accounts (internal transfer, e.g., main bank to petty cash, USD account to SGD account).\nWHEN TO USE: petty cash top-ups from bank, inter-account transfers, currency conversions between own accounts.\nWHEN NOT TO USE: receiving money from external parties (use create_cash_in) or paying external parties (use create_cash_out).\n- cashOut = source account (money leaves), cashIn = destination account (money arrives).\n- Each side needs accountResourceId + amount.\n- reference is auto-generated if not provided.\n- Do NOT send currency/exchangeRate — derived server-side from bank account currencies."
+      "description": "Move money between TWO OF YOUR OWN bank/cash accounts (petty-cash top-up, inter-account, FX between own accounts).\n\nNOT for external parties — use create_cash_in (receiving) / create_cash_out (paying).\n\ncashOut = source, cashIn = destination. Each side needs accountResourceId + amount. reference auto-generated if omitted. Do NOT send currency/exchangeRate (derived server-side)."
     },
     {
       "name": "delete_cash_in",
@@ -568,23 +568,23 @@
     },
     {
       "name": "download_export",
-      "description": "Generate an analytical, financial, or audit report as a downloadable XLSX file. Returns { fileName, fileUrl }.\n\nUSE THIS TOOL (not export_records) when the user asks for any of:\n- Anomaly detection — anomalous invoices, anomalous bills, cashflow anomalies (analysis-anomalous-invoices, analysis-anomalous-bills, analysis-cashflow-anomalies)\n- Audit analyses — GL journal audit, exchange rate audit (analysis-gl-journal-audit, analysis-exchange-rate-audit)\n- Risk analyses — receivables customer risk, cash expense health (analysis-receivables-customer-risk, analysis-cash-expense-health)\n- Financial statements — trial balance, balance sheet, P&L, cashflow, general ledger, cash balance (trial-balance, balance-sheet, profit-and-loss, cashflow, general-ledger, cash-balance)\n- Aging — AR / AP report (ar-report, ap-report)\n- Summaries — sales, sales-payments, purchase, purchase-payments, customer-revenue, product-sales, periodic-revenue, supplier-expense, product-purchase, periodic-expense, credit-note, sales-cost-margin\n- Inventory movement — sale, purchase (sale-inventory-movement, purchase-inventory-movement)\n- Statement of account (statement-of-account-export)\n\nDO NOT use export_records for these — that tool is for raw entity dumps (list of invoices/bills/contacts as rows), not for analytical reports.\n\nAll export types accept startDate / endDate (YYYY-MM-DD), currencyCode, tags, contactResourceId. The fileUrl is pre-signed (~5 min)."
+      "description": "Analytical / financial / audit report XLSX. Returns { fileName, fileUrl } (pre-signed, ~5 min).\n\nUse this tool (not export_records) for: analysis-* (anomalous-invoices/bills, cashflow-anomalies, gl-journal-audit, exchange-rate-audit, receivables-customer-risk, cash-expense-health); statements (trial-balance, balance-sheet, profit-and-loss, cashflow, general-ledger, cash-balance); aging (ar-report, ap-report); summaries (sales, sales-payments, purchase, purchase-payments, customer-revenue, product-sales, periodic-revenue, supplier-expense, product-purchase, periodic-expense, credit-note, sales-cost-margin); inventory movement (sale-/purchase-inventory-movement); statement-of-account-export.\n\nNOT for raw entity dumps (invoices/bills/contacts as rows) — use export_records."
     },
     {
       "name": "plan_recipe",
-      "description": "Offline — no API key required. Plan an IFRS accounting transaction (model the schedule + journals) WITHOUT writing to the books. Returns a complete RecipePlan: capsule type/name, required accounts, contact requirements, per-step breakdown (journal | bill | invoice | cash-in | cash-out), and full calculator output.\n\nSupported recipes (13): loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nCRITICAL: ALWAYS call this tool for ANY calculation involving depreciation, amortization, ECL/expected credit loss, lease/IFRS 16, hire purchase, loan schedules, provisions, deferred revenue, fixed deposits, asset disposal, accruals, leave, or dividends. Never compute these manually and never construct journals by hand.\n\nEXCEPTION — fx-reval: Jaz auto-handles all period-end IAS 21.23 FX translation. The fx-reval recipe is VERIFICATION ONLY (independent cross-check via clio calc fx-reval against what Jaz auto-posted). Do NOT invoke execute_recipe(name: 'fx-reval', ...) — would double-post. See jaz-recipes/references/fx-revaluation.md for the verification flow.\n\nYOUR NEXT STEP: call execute_recipe with the same parameters plus startDate to post the entries. The execute_recipe tool IS available to you — ALWAYS use it (not create_journal/create_invoice/create_cash_out) when an API key is configured.\n\nPRACTICE-AWARE WORKFLOW: when invoked inside a practitioner engagement (jaz-practice skill loaded), read the engagement-type playbook first — practice/references/{monthly-close,quarterly-gst,annual-statutory,onboarding}.md specifies which CLIENT.md fields drive the recipe parameters (e.g. CLIENT.recurring_accruals[i].gl_account for accrued-expense, CLIENT.coa_mapping['Prepaid Insurance'] for prepaid-expense), what the validate-execute-finalize sequence is, and which error classes from execute_recipe halt vs auto-recover.\n\nNAME ALIASES: file-name aliases used in jaz-recipes references map to canonical engine names: prepaid-amortization → prepaid-expense, bank-loan → loan, ifrs16-lease → lease, bad-debt-provision → ecl, accrued-expenses → accrued-expense, fx-revaluation → fx-reval, declining-balance → depreciation. Use the canonical engine name when calling this tool."
+      "description": "Offline. Plan an IFRS transaction (schedule + journals) WITHOUT posting. Returns RecipePlan: capsuleType, capsuleName, requiredAccounts, needsContact, steps (journal|bill|invoice|cash-in|cash-out), calculator output.\n\nSupported (13): loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nUSE FOR: depreciation (sl/ddb/150db), amortization, ECL, lease (IFRS 16), hire purchase, loan, IAS 37 provisions, deferred revenue, fixed deposits, asset disposal, accrued expenses, leave-accrual, dividends. Never hand-construct.\n\nfx-reval EXCEPTION: Jaz auto-handles period-end IAS 21.23 FX translation. fx-reval is VERIFICATION ONLY — do NOT execute_recipe(recipe: 'fx-reval'), it double-posts.\n\nNEXT STEP: call execute_recipe with same params + startDate.\n\nALIASES (file→engine): prepaid-amortization→prepaid-expense, bank-loan→loan, ifrs16-lease→lease, bad-debt-provision→ecl, accrued-expenses→accrued-expense, fx-revaluation→fx-reval, declining-balance→depreciation. Pass the engine name."
     },
     {
       "name": "execute_recipe",
-      "description": "Execute a transaction recipe end-to-end — run calculator, create capsule, post all entries in one call.\nPREFERRED over manual transaction creation — replaces ~20 manual tool calls. After plan_recipe, ALWAYS use this tool (not create_journal/create_invoice/create_cash_out).\nSupported recipes: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend\nRequires startDate (to generate blueprint with dated steps).\nAuto-resolves accounts from chart of accounts. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps."
+      "description": "Execute a recipe end-to-end — calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).\n\nSupported: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nRequires startDate. Auto-resolves accounts from CoA. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps."
     },
     {
       "name": "create_scheduled_journal",
-      "description": "Create a scheduled (recurring) journal. CRITICAL:\n- Use schedulerEntries (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT/CREDIT), name.\n- Use repeat (NOT frequency/interval): WEEKLY, MONTHLY, QUARTERLY, YEARLY.\n- Total debits MUST equal total credits.\n- Flat structure — reference, valueDate, saveAsDraft at top level (not nested).\nDynamic strings for reference/name/notes: {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — replaced with values relative to the transaction date."
+      "description": "Recurring journal. Use `schedulerEntries` (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT|CREDIT), name. Use `repeat` (NOT frequency/interval): WEEKLY|MONTHLY|QUARTERLY|YEARLY. Debits must equal credits. Flat structure — reference, valueDate, saveAsDraft at top level.\n\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}."
     },
     {
       "name": "create_scheduled_invoice",
-      "description": "Create a scheduled (recurring) invoice. Use for fixed-amount recurring invoices where you want full control over currency, tax, and line items each period.\nDIFFERENT from subscriptions: no proration, but currency/tax/items can differ per occurrence.\nCRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_SALE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): WEEKLY, MONTHLY, QUARTERLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings for reference/name/notes: {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — replaced with values relative to the transaction date."
+      "description": "Recurring invoice. Use for fixed-amount recurrence where you want per-period control over currency / tax / line items. DIFFERENT from subscriptions: no proration, but currency/tax/items can differ per occurrence.\n\nCRITICAL: saveAsDraft MUST be false (API rejects INVALID_SALE_STATUS). Use `repeat` (NOT frequency/interval): WEEKLY | MONTHLY | QUARTERLY | YEARLY. Each lineItem needs name, unitPrice, quantity, accountResourceId.\n\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}."
     },
     {
       "name": "create_scheduled_bill",
@@ -632,51 +632,51 @@
     },
     {
       "name": "generate_month_end_blueprint",
-      "description": "Generate a month-end close checklist with phases, steps, recipe references, and API calls. Returns a structured JobBlueprint."
+      "description": "Offline. Generate a month-end close checklist with phases, steps, recipe references, and API calls. Returns a structured JobBlueprint."
     },
     {
       "name": "generate_quarter_end_blueprint",
-      "description": "Generate a quarter-end close checklist. Set incremental=true to skip month-end phases (assumes months are already closed)."
+      "description": "Offline. Generate a quarter-end close checklist. Set incremental=true to skip month-end phases (assumes months are already closed)."
     },
     {
       "name": "generate_year_end_blueprint",
-      "description": "Generate a year-end close checklist. Set incremental=true to skip quarter/month phases (assumes already closed)."
+      "description": "Offline. Generate a year-end close checklist. Set incremental=true to skip quarter/month phases (assumes already closed)."
     },
     {
       "name": "generate_bank_recon_blueprint",
-      "description": "Generate a bank reconciliation job checklist — match bank statement entries to ledger transactions."
+      "description": "Offline. Generate a bank reconciliation job checklist — match bank statement entries to ledger transactions."
     },
     {
       "name": "generate_gst_vat_blueprint",
-      "description": "Generate a GST/VAT filing job checklist — verify tax transactions, reconcile GST accounts, prepare F5 return."
+      "description": "Offline. Generate a GST/VAT filing job checklist — verify tax transactions, reconcile GST accounts, prepare F5 return."
     },
     {
       "name": "generate_payment_run_blueprint",
-      "description": "Generate a payment run job checklist — identify outstanding bills, verify bank details, batch payments."
+      "description": "Offline. Generate a payment run job checklist — identify outstanding bills, verify bank details, batch payments."
     },
     {
       "name": "generate_credit_control_blueprint",
-      "description": "Generate a credit control job checklist — chase overdue invoices, send reminders, escalate aged debt."
+      "description": "Offline. Generate a credit control job checklist — chase overdue invoices, send reminders, escalate aged debt."
     },
     {
       "name": "generate_supplier_recon_blueprint",
-      "description": "Generate a supplier reconciliation job checklist — match supplier statements to AP ledger."
+      "description": "Offline. Generate a supplier reconciliation job checklist — match supplier statements to AP ledger."
     },
     {
       "name": "generate_audit_prep_blueprint",
-      "description": "Generate an audit preparation job checklist — verify completeness, prepare supporting schedules, organize documents."
+      "description": "Offline. Generate an audit preparation job checklist — verify completeness, prepare supporting schedules, organize documents."
     },
     {
       "name": "generate_fa_review_blueprint",
-      "description": "Generate a fixed asset review job checklist — verify asset register, reconcile depreciation, check disposals."
+      "description": "Offline. Generate a fixed asset review job checklist — verify asset register, reconcile depreciation, check disposals."
     },
     {
       "name": "generate_document_collection_blueprint",
-      "description": "Generate a document collection job checklist — identify missing invoices, receipts, and supporting docs for the period."
+      "description": "Offline. Generate a document collection job checklist — identify missing invoices, receipts, and supporting docs for the period."
     },
     {
       "name": "generate_statutory_filing_blueprint",
-      "description": "Generate a statutory filing job checklist — prepare corporate income tax computation, file returns."
+      "description": "Offline. Generate a statutory filing job checklist — prepare corporate income tax computation, file returns."
     },
     {
       "name": "validate_invoice_draft",
@@ -708,7 +708,7 @@
     },
     {
       "name": "create_bank_rule",
-      "description": "Create a bank reconciliation rule. Rules auto-match bank records to transactions during reconciliation. When the user asks to create a bank rule, use this tool directly — do not only list existing rules.\n- appliesToReconciliationAccount: the bank account UUID this rule applies to (NOT \"ResourceId\" suffix)\n- configuration MUST be nested under reconcileWithDirectCashEntry key\n- configuration.reconcileWithDirectCashEntry.reference is REQUIRED (omitting causes error)\n- amountAllocationType: \"PERCENTAGE\" or \"FIXED\". Do NOT send \"FIXED_AND_PERCENTAGE\" — include both arrays and the server infers it.\n- Optional: contactResourceId (pre-fills contact on created DCE), internalNotes, currencySettings, taxCurrencySettings\nMinimum payload: { reconcileWithDirectCashEntry: { amountAllocationType: \"PERCENTAGE\", reference: \"{{bankReference}}\", percentageAllocation: [{ organizationAccountResourceId: \"<acct>\", amount: 100 }] } }\nFull payload: { reconcileWithDirectCashEntry: { amountAllocationType: \"PERCENTAGE\", reference: \"{{bankPayee}} - {{bankDescription}}\", percentageAllocation: [...], fixedAllocation: [...], contactResourceId: \"<uuid>\", internalNotes: \"Auto-reconciled\", tags: [\"auto\"], taxInclusion: false, taxVatApplicable: false } }\nDynamic strings for name/reference: {{bankReference}} (e.g., INV-03/01/2025-01), {{bankPayee}} (e.g., Fruit Planet), {{bankDescription}} (e.g., QR Payment) — replaced with actual bank record values during reconciliation."
+      "description": "Bank reconciliation rule — auto-matches bank records. Use directly on user request, don't just list existing.\n\nRequired: name, appliesToReconciliationAccount (bank account UUID, no \"ResourceId\" suffix), configuration.\n\nconfiguration MUST nest under reconcileWithDirectCashEntry. Inside: reference (REQUIRED), amountAllocationType (\"PERCENTAGE\" | \"FIXED\" — server infers from arrays, don't send \"FIXED_AND_PERCENTAGE\"), percentageAllocation[] / fixedAllocation[].\n\nMinimum: `{ reconcileWithDirectCashEntry: { amountAllocationType: \"PERCENTAGE\", reference: \"{{bankReference}}\", percentageAllocation: [{ organizationAccountResourceId, amount: 100 }] } }`\n\nOptional inside configuration: contactResourceId, internalNotes, tags, currencySettings, taxCurrencySettings, taxInclusion, taxVatApplicable.\n\nDynamic strings (name + reference): {{bankReference}}, {{bankPayee}}, {{bankDescription}}."
     },
     {
       "name": "update_bank_rule",
@@ -772,7 +772,7 @@
     },
     {
       "name": "create_subscription",
-      "description": "Create a subscription — auto-generates invoices on schedule with proration.\nDIFFERENT from scheduled invoices: subscriptions auto-prorate partial periods (credit notes for mid-period changes), but currency/tax/account are immutable after creation.\nUse for: software licenses, retainer services, recurring SaaS billing. Invoices only (no bills).\n- accountResourceId and taxProfileResourceId apply to ALL line items (same for all — immutable after creation)\n- interval: \"WEEKLY\", \"MONTHLY\", \"QUARTERLY\", \"YEARLY\"\n- reference is REQUIRED (API rejects without it)\nDynamic strings for reference/line item name/notes: {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — replaced with values relative to the transaction date (e.g., {{Month}} → \"March\", {{Date+7}} → \"16 Mar 2026\")."
+      "description": "Subscription — auto-generates invoices on schedule WITH proration. DIFFERENT from scheduled_invoice: subscriptions prorate partial periods (credit notes for mid-period changes), but currency/tax/account are immutable after creation. Use for software licenses, retainers, recurring SaaS. Invoices only (no bills).\n\naccountResourceId + taxProfileResourceId apply to ALL line items (immutable). interval: WEEKLY | MONTHLY | QUARTERLY | YEARLY. reference REQUIRED.\n\nDynamic strings (reference/lineItem name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — relative to transaction date."
     },
     {
       "name": "update_subscription",
@@ -936,11 +936,11 @@
     },
     {
       "name": "quick_fix_transactions",
-      "description": "Bulk-update multiple transactions of the same type in one call. Pass resourceIds + attributes — only included fields are changed, omitted fields are left unchanged.\nPer-entity attributes:\n- Invoices: valueDate, dueDate, invoiceNotes, templateResourceId, contactResourceId, billFrom, billTo, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Bills: valueDate, dueDate, contactResourceId, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Customer CNs: valueDate, notes, templateResourceId, contactResourceId, creditFrom, creditTo, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Supplier CNs: valueDate, contactResourceId, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Journals: valueDate, contactResourceId, tags, internalNotes, capsuleResourceId\n- Cash entries: organizationAccountResourceId, valueDate, contactResourceId, capsuleResourceId, tags, reference, currencySetting (SINGULAR — { rateFunctionalToSource, exchangeToken }), taxCurrencySettings\n- Sale/subscription schedules: endDate, interval, invoiceNotes, templateResourceId, contactResourceId, billFrom, billTo, tags, customFields, capsuleResourceId (+ currencySettings/taxCurrencySettings for sale only)\n- Purchase schedules: endDate, interval, contactResourceId, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId\n- Journal schedules: startDate, endDate, interval, contactResourceId, tags, internalNotes, capsuleResourceId\nTags: string array (max 50 items, max 50 chars each), e.g. [\"Q1\"].\nResponse: { updated: string[], failed: [{ resourceId, error, errorCode }] }. On partial failure (HTTP 207), both arrays may be populated — always check failed.length. On 207, only retry failed resourceIds."
+      "description": "Bulk-update multiple transactions of the same type. Pass entity + resourceIds + attributes — only included fields change, omitted fields are unchanged.\n\nEntities: invoices, bills, customer-credit-notes, supplier-credit-notes, journals, cash-entries, sale-schedules, purchase-schedules, subscription-schedules, journal-schedules.\n\nCommon attributes (most entities): valueDate, contactResourceId, tags, customFields, capsuleResourceId, currencySettings. Plus per-entity: invoices/bills add dueDate; cash-entries use currencySetting SINGULAR ({rateFunctionalToSource, exchangeToken}); journal-schedules add startDate/endDate/interval. Full per-entity attribute matrix: see jaz-api SKILL.md Rule 107.\n\nTags: string[] max 50 items, max 50 chars each.\n\nResponse: { updated: string[], failed: [{ resourceId, error, errorCode }] }. HTTP 207 = partial — check failed.length, retry only failed resourceIds."
     },
     {
       "name": "quick_fix_line_items",
-      "description": "Bulk-update line items across multiple transactions. Only included fields are changed, omitted fields left unchanged.\nRequest patterns by entity type:\n- ARAP + accounting (invoices, bills, CNs, journals, cash-entries): pass lineItemResourceIds + attributes.\n- Schedulers (sale/purchase/subscription-schedules): pass schedulerUpdates with arrayIndex per line item (Pattern C).\n- Journal schedules: pass schedulerUpdates with lineItemResourceId (UUID) per line item — NOT arrayIndex (Pattern D).\nLine item attributes by type:\n- Sale (invoices + customer CNs): name, quantity, unit, unitPrice, discount, itemResourceId, organizationAccountResourceId, taxProfileResourceId, classifierConfig\n- Purchase (bills + supplier CNs): same as sale + withholdingTax\n- Scheduler (sale/purchase/subscription, Pattern C): name, description, sku, unit, unitPrice, quantity, discount, taxProfileResourceId, organizationAccountResourceId, classifierConfig, itemResourceId, withholdingTax (purchase only). Uses arrayIndex (zero-based).\n- Journal/cash-entry: organizationAccountResourceId, amount, description, taxProfileResourceId, classifierConfig\n- Journal-schedule (Pattern D): amount, description, organizationAccountResourceId, taxProfileResourceId, classifierConfig, itemResourceId, unit, quantity, pricePerUnit. Uses lineItemResourceId (UUID).\nResponse: { updated: string[], failed: [{ resourceId, error, errorCode }] }. On partial failure (HTTP 207), check failed.length."
+      "description": "Bulk-update line items across transactions. Only included fields change.\n\nRequest patterns:\n- ARAP + accounting (invoices, bills, CNs, journals, cash-entries): lineItemResourceIds + attributes.\n- Sale/purchase/subscription schedules (Pattern C): schedulerUpdates with arrayIndex (zero-based) per line.\n- Journal schedules (Pattern D): schedulerUpdates with lineItemResourceId (UUID), NOT arrayIndex.\n\nCommon line attributes: name, quantity, unit, unitPrice, discount, organizationAccountResourceId, taxProfileResourceId, classifierConfig. Purchase entities add withholdingTax. Journals/cash-entries use amount + description instead of unit/unitPrice. Full per-entity attribute matrix: see jaz-api SKILL.md Rule 107.\n\nResponse: { updated: string[], failed: [{ resourceId, error, errorCode }] }. HTTP 207 = partial."
     },
     {
       "name": "list_nano_classifiers",
@@ -1048,7 +1048,7 @@
     },
     {
       "name": "export_records",
-      "description": "Generate a raw entity-row XLSX export for one entity type (a list of invoices, bills, contacts, items, journals, bank records, cashflow, fixed assets, etc. — one row per record, with column selection). Returns a pre-signed download URL (~5 min), file name, and total record count. Pass either query OR filter, never both. Use preview_export_records first to confirm scope.\n\nDO NOT use this tool for analytical or audit reports (anomalous invoices, anomalous bills, cashflow anomalies, GL journal audit, exchange rate audit, receivables customer risk, cash expense health), financial statements (trial balance, P&L, balance sheet, cashflow, general ledger), aging (AR/AP report), summary reports (sales-summary, purchase-summary, etc.), or statement of account. Those go through download_export."
+      "description": "Raw entity-row XLSX export for one entity type (invoices/bills/contacts/items/journals/bank records/cashflow/fixed assets — one row per record, with column selection). Returns pre-signed download URL (~5 min), fileName, totalCount. Pass query OR filter, never both. Use preview_export_records first to confirm scope.\n\nDO NOT use this for analytical / audit reports, financial statements, aging, summary reports, or statement-of-account — those go through download_export."
     },
     {
       "name": "search_background_jobs",
@@ -1056,11 +1056,11 @@
     },
     {
       "name": "bulk_upsert_contacts",
-      "description": "Create or update contacts in bulk (max 500 per call). Provide resourceId per contact to update (partial — omitted fields preserve existing values, including customer/supplier flags). Omit resourceId to create. Returns a jobId — async; poll search_background_jobs with filter {resourceId:{eq:jobId}} until status is SUCCESS / FAILED / PARTIAL_SUCCESS. Per-row failures live in the background job's errorDetails (NOT failedRows — that's the sync bulk-upsert pattern). Common 422 cases (whole batch rejected at request level): at least one of `customer` or `supplier` must be true per contact (after defaults+backfill from existing); duplicate emails within a contact's emailList (case-insensitive after trim); payment-terms `value` must be a positive integer when `name` != CUSTOM; duplicate names within the batch (after whitespace+case normalize); when a billingAddress / shippingAddress object is provided, its `addressLine1` field is required."
+      "description": "Bulk create/update contacts (max 500). resourceId per row → update (partial; omitted fields preserve existing). Omit resourceId → create. ASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}) until SUCCESS / FAILED / PARTIAL_SUCCESS. Per-row failures in background job's errorDetails (NOT failedRows — that's the sync pattern).\n\nWhole-batch 422 (validate before submit): (1) each contact must have at least one of customer:true OR supplier:true (after defaults + backfill from existing); (2) emailList unique within a contact (case-insensitive after trim); (3) paymentTerms.value must be positive integer when paymentTerms.name != \"CUSTOM\"; (4) no duplicate names within batch (after whitespace+case normalize); (5) billingAddress / shippingAddress: addressLine1 required when address object provided.\n\nOn PARTIAL_SUCCESS: succeeded rows are committed; inspect errorDetails[].rowIndex and re-submit only failed rows."
     },
     {
       "name": "bulk_upsert_invoices",
-      "description": "Create or update invoices in bulk (max 500 per call). FLAT shape: ONE line per invoice via `itemDescription` + `totalAmount` + `invoiceAccountResourceId` at row level. For multi-line invoices use `bulk_upsert_invoice_line_items` instead — that variant takes nested `lineItems[]`. Natural key: `invoiceReference` (rows sharing one within a batch are MERGED — last wins). Provide resourceId per invoice to update via UUID; or omit and rely on invoiceReference for upsert. Async — returns a jobId. Poll search_background_jobs with filter {resourceId:{eq:jobId}} until SUCCESS / FAILED / PARTIAL_SUCCESS; on PARTIAL_SUCCESS read data[0].errorDetails on the same response for per-row failures. Dates are ISO 8601 (YYYY-MM-DD) only — the dateFormat field was removed."
+      "description": "Bulk create/update invoices (max 500). FLAT shape — ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED — last wins). resourceId per row → update by UUID; omit → upsert by invoiceReference.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); PARTIAL_SUCCESS → data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed."
     },
     {
       "name": "bulk_upsert_invoice_line_items",
@@ -1088,7 +1088,7 @@
     },
     {
       "name": "bulk_upsert_fixed_assets",
-      "description": "⚠️ DATE FIELD MISMATCH: bulk-upsert REQUEST uses `valueDate` (not `purchaseDate`); the GET response uses `purchaseDate`. Sending `purchaseDate` returns a cryptic 400 \"Invalid request body\" with no field detail. Create or update fixed assets in bulk (max 500 per call). Natural key: `reference`. Each row REQUIRED: `reference`, `registrationType` (NEW | TRANSFER). Recommended: `typeCode`, `typeName`, `category` (TANGIBLE | INTANGIBLE), `cost` (or synonym `purchaseAmount`), `valueDate`, `depreciationStartDate`, `effectiveLife` (or synonym `usefulLifeMonths`), `depreciationMethod`, `purchaseAssetAccountResourceId`, `depreciationExpenseAccountResourceId`, `accumulatedDepreciationAccountResourceId`. Account fields must be valid UUIDv4. Async — returns a jobId. Poll search_background_jobs filtered by resourceId; on PARTIAL_SUCCESS read data[0].errorDetails for per-row failures. Dates are ISO 8601 (YYYY-MM-DD) only."
+      "description": "Bulk create/update fixed assets (max 500). Natural key: reference.\n\n⚠️ DATE FIELD MISMATCH: REQUEST uses valueDate (NOT purchaseDate); GET response uses purchaseDate. Sending purchaseDate → cryptic 400 \"Invalid request body\".\n\nRequired per row: reference, registrationType (NEW | TRANSFER). Recommended: typeCode, typeName, category (TANGIBLE | INTANGIBLE), cost (synonym: purchaseAmount), valueDate, depreciationStartDate, effectiveLife (synonym: usefulLifeMonths), depreciationMethod, purchaseAssetAccountResourceId, depreciationExpenseAccountResourceId, accumulatedDepreciationAccountResourceId. Account fields = UUIDv4.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); on PARTIAL_SUCCESS read data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD)."
     },
     {
       "name": "quick_reconcile",
@@ -1124,7 +1124,7 @@
     },
     {
       "name": "validate_drafts",
-      "description": "BULK validate — process up to 500 draft business transactions in ONE call, mixing any combination of invoices, bills, customer credit notes, and supplier credit notes (no per-type tools needed). SYNC: returns per-item errors and display data inline; no state change. Each result also carries `contactSignals` (Mid-7 contact-history insight: cadence, outliers, severity, divergences from the contact's modal pattern — null when the draft has no contact or the contact has no history) and `breakdown` (full Balance-panel payload: line items + trx-level metadata like subtotal, tax, total, balance, exchange rate). Top-level `contactSignalsMeta.unavailable=true` signals the freshness layer was unavailable for the whole batch. USE THIS to score a specific draft against contact history; for stand-alone \"what does this contact normally look like?\" lookups WITHOUT a draft, use `get_contact_signals` instead. Run before convert_drafts_to_active to surface eligibility issues client-side. btType enum: SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE = customer CN, PURCHASE_CREDIT_NOTE = supplier CN. Journals are NOT in this enum."
+      "description": "BULK validate up to 500 draft business transactions in ONE call, mixing any btType. SYNC — returns per-item errors + display data; no state change. Run before convert_drafts_to_active.\n\nbtType enum: SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE = customer CN, PURCHASE_CREDIT_NOTE = supplier CN. Journals NOT in this enum.\n\nEach result carries contactSignals (Mid-7: cadence, outliers, severity, divergences from contact's modal pattern; null if no contact / no history) and breakdown (Balance-panel payload: line items + subtotal/tax/total/balance/exchange rate). Top-level contactSignalsMeta.unavailable=true → freshness layer offline for whole batch.\n\nUSE THIS to score a specific draft against contact history. For stand-alone \"what does this contact normally look like?\" without a draft → use get_contact_signals."
     },
     {
       "name": "convert_drafts_to_active",
@@ -1136,31 +1136,31 @@
     },
     {
       "name": "search_help_center",
-      "description": "Search the Jaz help center for how-to articles, feature guides, and accounting concepts. Use this for \"how do I...\" or \"what is...\" questions about Jaz: bank reconciliation, GST/VAT filing, multi-currency, fixed assets, custom fields, integrations, and so on. Returns top matching articles with title, section, snippet, and source URL.\n\nWorks without an API key — bundle ships the help center corpus locally."
+      "description": "Offline. Search the Jaz help center for how-to articles, feature guides, and accounting concepts. Use this for \"how do I...\" or \"what is...\" questions about Jaz: bank reconciliation, GST/VAT filing, multi-currency, fixed assets, custom fields, integrations, and so on. Returns top matching articles with title, section, snippet, and source URL.\n\nWorks without an API key — bundle ships the help center corpus locally."
     },
     {
       "name": "practice_init",
-      "description": "Scaffold the practitioner workspace at ~/Documents/Jaz Practice (or PRACTICE_HOME env override). Creates clients/, templates/, and a starter PRACTICE.md from the firm name. Idempotent on re-run. Filesystem-only. Run once before practice_onboard_client."
+      "description": "Offline. Scaffold the practitioner workspace at ~/Documents/Jaz Practice (or PRACTICE_HOME env override). Creates clients/, templates/, and a starter PRACTICE.md from the firm name. Idempotent on re-run. Filesystem-only. Run once before practice_onboard_client."
     },
     {
       "name": "practice_list_clients",
-      "description": "List all clients in the practitioner workspace. Returns slugs and last-active engagement per client. Filesystem-only. Use as a dashboard entry point before practice_load_client."
+      "description": "Offline. List all clients in the practitioner workspace. Returns slugs and last-active engagement per client. Filesystem-only. Use as a dashboard entry point before practice_load_client."
     },
     {
       "name": "practice_load_client",
-      "description": "Read a client's CLIENT.md master file. Returns the full record (legal entity, FY, COA mapping notes, banks, recurring accruals, recurring engagements, etc.) plus the list of active engagements. Filesystem-only. Use this to give the agent client context before invoking jaz-jobs blueprints or jaz-recipes recipes."
+      "description": "Offline. Read a client's CLIENT.md master file. Returns the full record (legal entity, FY, COA mapping notes, banks, recurring accruals, recurring engagements, etc.) plus the list of active engagements. Filesystem-only. Use this to give the agent client context before invoking jaz-jobs blueprints or jaz-recipes recipes."
     },
     {
       "name": "practice_onboard_client",
-      "description": "Scaffold a new client folder and write the initial CLIENT.md. Captures legal entity, FY end, GST scheme, banks, recurring accruals, recurring engagements. Optionally sets a per-client JAZ_API_KEY override for multi-org agencies. Filesystem-only. After this, call practice_create_engagement for the first period."
+      "description": "Offline. Scaffold a new client folder and write the initial CLIENT.md. Captures legal entity, FY end, GST scheme, banks, recurring accruals, recurring engagements. Optionally sets a per-client JAZ_API_KEY override for multi-org agencies. Filesystem-only. After this, call practice_create_engagement for the first period."
     },
     {
       "name": "practice_create_engagement",
-      "description": "Scaffold a new engagement folder under a client. Creates ENGAGEMENT.md from the type-specific template plus inputs/, workpapers/, deliverables/ subdirs. Filesystem-only. Engagement type drives which jaz-jobs blueprint and jaz-recipes recipes the agent should invoke. period is REQUIRED for monthly-close (YYYY-MM), quarterly-gst (YYYY-QN), and annual-statutory (YYYY) — only onboarding and adhoc accept free-text or omitted period."
+      "description": "Offline. Scaffold a new engagement folder under a client. Creates ENGAGEMENT.md from the type-specific template plus inputs/, workpapers/, deliverables/ subdirs. Filesystem-only. Engagement type drives which jaz-jobs blueprint and jaz-recipes recipes the agent should invoke. period is REQUIRED for monthly-close (YYYY-MM), quarterly-gst (YYYY-QN), and annual-statutory (YYYY) — only onboarding and adhoc accept free-text or omitted period."
     },
     {
       "name": "practice_load_engagement",
-      "description": "Read an engagement's ENGAGEMENT.md file. Returns scope, status, period, queries, decisions log. Pair with practice_load_client to get full context before driving jaz-jobs / jaz-recipes work."
+      "description": "Offline. Read an engagement's ENGAGEMENT.md file. Returns scope, status, period, queries, decisions log. Pair with practice_load_client to get full context before driving jaz-jobs / jaz-recipes work."
     }
   ]
 }
