@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.4.7] - 2026-05-15
+
+Internal release. Added 35 discovery test cases locking in agent-query → tool resolution across 19 canonical natural-language prompts ("close the books", "bank reconciliation", "WHT codes", etc.) plus cross-provider parity simulation (Anthropic full-list, OpenAI namespace-search). No user-facing changes since v5.4.6.
+
+## [5.4.6] - 2026-05-15
+
+### Changed
+- **Recipe + job documentation rewritten end-to-end** for Jaz-native depth. Every recipe now names the canonical engine entry point (`plan_recipe(name: '...')`), the future-dated DRAFT journals it pre-emits, the practitioner monthly action (`bulk_finalize_drafts`), the dependency-resolution flow, and the error-recovery table. Every job now names MCP tool calls (e.g. `search_invoices`, `quick_reconcile`, `bulk_finalize_drafts`) instead of HTTP routes.
+- **FX revaluation recipe is now verification-only.** Jaz auto-handles all period-end IAS 21.23 FX translation for foreign-currency monetary balances (AR, AP, cash, bank, intercompany, term deposits, FX provisions). Running `execute_recipe(name: 'fx-reval', ...)` would double-post; the recipe is repositioned as an independent cross-check via `clio calc fx-reval`.
+- **Capsules deep-dive** added to building-blocks with 9 advanced multi-step transaction patterns (M&A lifecycle, restructuring, insurance claims, intercompany, CWIP-to-FA, etc.).
+- **Audit-prep step expanded** with proactive audit-analyses pre-empt step (`download_export(exportType: 'analysis-anomalous-bills' | 'analysis-gl-journal-audit' | ...)`) so the practitioner runs the same audit-flag exports the auditor would, before handing over the pack.
+
+### Removed
+- **Outdated SG GIRO bank-file generators (DBS / OCBC / UOB)** removed from CLI and source. The CLI command `clio jobs payment-run bank-file` and its three format generators were unmaintained; bank-file generation now happens outside Jaz (via the bank's portal). Affects the CLI surface only — no API or MCP tool change.
+
 ## [5.4.5] - 2026-05-15
 
 Internal docs release. The public README and AGENTS.md were rewritten for clarity. No user-facing extension changes since v5.4.4.
