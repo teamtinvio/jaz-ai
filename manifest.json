@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.26",
+  "version": "5.4.27",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -76,7 +76,7 @@
     },
     {
       "name": "search_accounts",
-      "description": "Search chart of accounts by name, code, class, type, status. For OR search (name or code), use filter param: {\"or\":{\"name\":{\"contains\":\"X\"},\"code\":{\"contains\":\"X\"}}}."
+      "description": "Search chart of accounts. For OR (name or code), use filter: {\"or\":{\"name\":{\"contains\":\"X\"},\"code\":{\"contains\":\"X\"}}}."
     },
     {
       "name": "create_account",
@@ -96,7 +96,7 @@
     },
     {
       "name": "search_contacts",
-      "description": "Search contacts by name, email, customer/supplier role, status."
+      "description": "Search contacts."
     },
     {
       "name": "get_contact",
@@ -200,7 +200,7 @@
     },
     {
       "name": "search_journals",
-      "description": "Search journals by status, type, date, reference, tag. Status uses ACTIVE (not FINALIZED). Supports comma-separated status/type."
+      "description": "Search journals. Status uses ACTIVE (not FINALIZED). Supports comma-separated status/type."
     },
     {
       "name": "create_journal",
@@ -256,7 +256,7 @@
     },
     {
       "name": "search_items",
-      "description": "Search items by status, category, sale/purchase applicability. Use list_items to search by name (internalName is not a filter field)."
+      "description": "Search items. Use list_items to search by name (internalName is not a filter field)."
     },
     {
       "name": "get_item",
@@ -312,7 +312,7 @@
     },
     {
       "name": "search_capsules",
-      "description": "Search capsules by title or status."
+      "description": "Search capsules."
     },
     {
       "name": "get_capsule",
