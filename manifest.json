@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.10",
+  "version": "5.4.12",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -936,11 +936,11 @@
     },
     {
       "name": "quick_fix_transactions",
-      "description": "Bulk-update multiple transactions of the same type. Pass entity + resourceIds + attributes — only included fields change, omitted fields are unchanged.\n\nEntities: invoices, bills, customer-credit-notes, supplier-credit-notes, journals, cash-entries, sale-schedules, purchase-schedules, subscription-schedules, journal-schedules.\n\nCommon attributes (most entities): valueDate, contactResourceId, tags, customFields, capsuleResourceId, currencySettings. Plus per-entity: invoices/bills add dueDate; cash-entries use currencySetting SINGULAR ({rateFunctionalToSource, exchangeToken}); journal-schedules add startDate/endDate/interval. Full per-entity attribute matrix: see jaz-api SKILL.md Rule 107.\n\nTags: string[] max 50 items, max 50 chars each.\n\nResponse: { updated: string[], failed: [{ resourceId, error, errorCode }] }. HTTP 207 = partial — check failed.length, retry only failed resourceIds."
+      "description": "Bulk-update transactions of the same type. Only included fields change; omitted fields preserved.\n\nEntities: invoices, bills, customer-credit-notes, supplier-credit-notes, journals, cash-entries, sale-schedules, purchase-schedules, subscription-schedules, journal-schedules.\n\nCommon attrs: valueDate, contactResourceId, tags, customFields, capsuleResourceId, currencySettings. Per-entity: invoices/bills + dueDate; cash-entries use currencySetting SINGULAR ({rateFunctionalToSource, exchangeToken}); journal-schedules + startDate/endDate/interval. Full matrix in jaz-api Rule 107.\n\nTags: string[] max 50 items × 50 chars.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. HTTP 207 = partial — retry only failed resourceIds."
     },
     {
       "name": "quick_fix_line_items",
-      "description": "Bulk-update line items across transactions. Only included fields change.\n\nRequest patterns:\n- ARAP + accounting (invoices, bills, CNs, journals, cash-entries): lineItemResourceIds + attributes.\n- Sale/purchase/subscription schedules (Pattern C): schedulerUpdates with arrayIndex (zero-based) per line.\n- Journal schedules (Pattern D): schedulerUpdates with lineItemResourceId (UUID), NOT arrayIndex.\n\nCommon line attributes: name, quantity, unit, unitPrice, discount, organizationAccountResourceId, taxProfileResourceId, classifierConfig. Purchase entities add withholdingTax. Journals/cash-entries use amount + description instead of unit/unitPrice. Full per-entity attribute matrix: see jaz-api SKILL.md Rule 107.\n\nResponse: { updated: string[], failed: [{ resourceId, error, errorCode }] }. HTTP 207 = partial."
+      "description": "Bulk-update line items across transactions. Only included fields change.\n\nRequest patterns:\n- ARAP + accounting (invoices, bills, CNs, journals, cash-entries): lineItemResourceIds + attributes.\n- Sale/purchase/subscription schedules: schedulerUpdates with arrayIndex (zero-based).\n- Journal schedules: schedulerUpdates with lineItemResourceId (UUID), NOT arrayIndex.\n\nCommon line attrs: name, quantity, unit, unitPrice, discount, organizationAccountResourceId, taxProfileResourceId, classifierConfig. Purchase + withholdingTax. Journals/cash-entries use amount + description instead of unit/unitPrice. Full matrix in jaz-api Rule 107.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. HTTP 207 = partial."
     },
     {
       "name": "list_nano_classifiers",
