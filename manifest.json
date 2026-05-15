@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.27",
+  "version": "5.4.28",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -284,7 +284,7 @@
     },
     {
       "name": "search_tags",
-      "description": "Search tags by name."
+      "description": "Search tags."
     },
     {
       "name": "create_tag",
@@ -336,7 +336,7 @@
     },
     {
       "name": "search_customer_credit_notes",
-      "description": "Search customer credit notes by reference, status, contact, tag. Status: DRAFT, UNAPPLIED, PARTIALLY_APPLIED, APPLIED, VOID."
+      "description": "Search customer credit notes. Status: DRAFT, UNAPPLIED, PARTIALLY_APPLIED, APPLIED, VOID."
     },
     {
       "name": "get_customer_credit_note",
@@ -372,7 +372,7 @@
     },
     {
       "name": "search_supplier_credit_notes",
-      "description": "Search supplier credit notes by reference, status, contact, tag. Status: DRAFT, UNAPPLIED, PARTIALLY_APPLIED, APPLIED, VOID."
+      "description": "Search supplier credit notes. Status: DRAFT, UNAPPLIED, PARTIALLY_APPLIED, APPLIED, VOID."
     },
     {
       "name": "get_supplier_credit_note",
@@ -516,7 +516,7 @@
     },
     {
       "name": "search_bank_records",
-      "description": "Search bank records for a specific account. Filter by status, date, description, payer, reference, amount range. Call list_bank_accounts first to get accountResourceId."
+      "description": "Search bank records for a specific account. Call list_bank_accounts first to get accountResourceId."
     },
     {
       "name": "search_cashflow_transactions",
@@ -544,7 +544,7 @@
     },
     {
       "name": "search_org_users",
-      "description": "Search organization users by name, email, role, status. For OR search (name or email), use filter param."
+      "description": "Search organization users. For OR (name or email), use filter param."
     },
     {
       "name": "invite_org_user",
