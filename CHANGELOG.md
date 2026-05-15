@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.4.4] - 2026-05-15
+
+### Changed
+- **`view_auto_reconciliation` now explicitly identifies itself as READ-ONLY** and points agents to the write-side reconciliation tools (`quick_reconcile`, `apply_bank_rule`, the `reconcile_*` per-entry tools). Removes ambiguity for agents picking between suggestion vs. execution.
+- **Namespace descriptions cover more natural-language phrasings** — agents searching for "AR aging" / "dunning" / "recurring invoices" land on the invoices namespace; "CSV import" / "bulk upload" / "customer segmentation" land on contacts; "payment run" / "batch payment" / "payment matching" land on payments.
+
 ## [5.4.3] - 2026-05-12
 
 Internal smoke-test fixture fix. No user-facing changes since v5.4.2.

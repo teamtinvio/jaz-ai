@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.3",
+  "version": "5.4.4",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -720,7 +720,7 @@
     },
     {
       "name": "view_auto_reconciliation",
-      "description": "Generate auto-reconciliation recommendations for a bank account. Returns magic match suggestions."
+      "description": "Generate auto-reconciliation suggestions for a bank account. READ-ONLY — does NOT write reconciliations. To execute a reconciliation, use quick_reconcile (bulk async) or apply_bank_rule (rule-driven async) or one of the per-entry reconcile_* tools (sync). Returns magic match suggestions."
     },
     {
       "name": "list_fixed_assets",
