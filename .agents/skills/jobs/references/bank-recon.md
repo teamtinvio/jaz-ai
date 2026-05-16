@@ -10,7 +10,7 @@
 - **`search_accounts(filter: {accountType: {eq: 'Bank Accounts'}})`** — step 1 alternative: same data via standard CoA-search envelope if downstream wants pagination.
 - **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', valueDateRange: {from, to}, limit: 200, sort: 'valueDate:asc')`** — step 2: per-account work queue.
 - **`search_bank_records(accountResourceId: <id>, status: 'POSSIBLE_DUPLICATE')`** — step 3: handle dups FIRST or you'll double-create reconciling them.
-- **`view_auto_reconciliation(bankAccountResourceId: <id>, recommendationType: 'MAGIC_MATCH' | 'MAGIC_RECONCILE_WITH_CASH_TRANSFER' | 'MAGIC_RECONCILE_WITH_BANK_RULE' | 'MAGIC_QUICK_RECONCILE')`** — step 4: READ-ONLY auto-match suggestions. Does NOT write. NOTE: documented 500 quirk on high-volume accounts — see error table.
+- **`view_auto_reconciliation(bankAccountResourceId: <id>, recommendationType: 'MAGIC_MATCH' | 'MAGIC_RECONCILE_WITH_CASH_TRANSFER' | 'MAGIC_RECONCILE_WITH_BANK_RULE' | 'MAGIC_QUICK_RECONCILE' | 'MAGIC_RECONCILE_WITH_CASH_IN_OUT')`** — step 4: READ-ONLY auto-match suggestions. `MAGIC_RECONCILE_WITH_CASH_IN_OUT` returns Learned-Predictions (LP) suggestions sourced from past reconciliations on similar bank-entry shapes. Does NOT write. NOTE: documented 500 quirk on high-volume accounts — see error table.
 - **`search_cashflow_transactions(filter: {organizationAccountResourceId: <bank-id>, totalAmount: {eq: <amt>}, valueDate: {between: [<-3d>, <+3d>]}})`** — step 5 manual match: search book-side transactions for the same amount within ±3 day window.
 
 ### MCP tools — execute reconciliation (NOT idempotent — see error table)

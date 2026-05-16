@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.4.37] - 2026-05-16
+
+### Fixed
+- **`view_auto_reconciliation` now accepts `MAGIC_RECONCILE_WITH_CASH_IN_OUT`** alongside the existing 4 recommendation types. This is the workflow type the Learned-Predictions (LP) engine emits, so agents can finally read LP-generated reconciliation suggestions for a bank account via the auto-recon tool. Previously, passing this value returned 500 because the enum on the tool didn't list it.
+
 ## [5.4.36] - 2026-05-16
 
 Consolidated release notes for the v5.4.7 → v5.4.35 wave so what's new lands in one place. 19 patch releases shipped overnight on token-economics + skill-doc accuracy work; this entry collects the user-facing impact.
