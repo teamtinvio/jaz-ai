@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.4.39] - 2026-05-23
+
+Internal release. Fire-test workflow exit-code propagation hardened. No user-facing changes since v5.4.38.
+
 ## [5.4.37] - 2026-05-16
 
 ### Fixed

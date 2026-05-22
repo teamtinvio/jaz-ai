@@ -419,8 +419,8 @@ Source: https://help.jaz.ai/en/articles/13904552-gst-ledger
   - Transaction Type
   - Transaction Reference
   - GST Rate (%)
-  - Net (SGD)
-  - GST (SGD)
+  - Net (base currency)
+  - GST (base currency)
 - Click Apply to activate the selected filters.
 
 **Q6. Can I customize the GST Ledger columns?**
@@ -430,8 +430,8 @@ Source: https://help.jaz.ai/en/articles/13904552-gst-ledger
   - Account Name
   - Account Type
   - Tracking Tags
-  - GST (SGD)
-  - GST Adj. (SGD)
+  - GST (base currency)
+  - GST Adj. (base currency)
   - Net (Source)
   - GST (Source)
   - Gross (Source)
@@ -443,8 +443,8 @@ Source: https://help.jaz.ai/en/articles/13904552-gst-ledger
   - Contact
   - GST Profile
   - Currency
-  - Net (SGD)
-  - Gross (SGD)
+  - Net (base currency)
+  - Gross (base currency)
 - Click Save after making changes.
 
 **Q7. What is Display Options?**
@@ -468,7 +468,15 @@ You may also click Add New Template to create a customized GST Ledger layout.
 
 **Q11. Does the GST Ledger support multi-currency?**
 
-- Yes. If your organization uses multi-currency, both source currency and base currency values may appear depending on your selected columns.
+- Yes. If your organization uses multi-currency, the GST Ledger can display amounts in both the source currency and the tax currency, depending on the columns selected in the report.
+- **Note:** The tax currency is always the organization’s base currency, which is defined during organization creation.**Q12. What is the difference between base currency and source currency in the GST Ledger?**
+
+- **Base Currency**
+  - The base currency is the organization’s default currency configured during organization creation. This also serves as the tax currency used in the GST Ledger.
+  - If a transaction is recorded in a different currency, the GST Ledger automatically converts the transaction amounts into the base currency for reporting and tax computation purposes.
+- **Source Currency**
+  - The source currency refers to the original currency in which the transaction was recorded.
+  - For example, fields such as Net (Source), GST (Source), and Gross (Source) display the original transaction amounts before conversion into the base currency.
 
 ---
 
