@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.4.41] - 2026-05-23
+
+Internal release. Fire-test callback now retries on transient Sentinel cold-start. No user-facing changes since v5.4.40.
+
 ## [5.4.40] - 2026-05-23
 
 Internal release. `run_parallel` hardened against subshell exit-code-capture races. No user-facing changes since v5.4.39.
