@@ -319,29 +319,58 @@ Source: https://help.jaz.ai/en/articles/11710444-billing-account-setup
   - Optionally, add emails to CC for the billing email.
 - Once setup is done, inside each billing accounts you can:
   - Recharge your account
-  - Setup auto-charge and add payment methods
+  - Setup auto recharge and add payment methods
   - View transaction history
   - Edit billing account details
   - Make the billing account inactive
 
-**Q6. How do I recharge my billing accounts?**
+**Q6. How does billing work in Jaz?**
 
-- To recharge your account, you can manually top up or turn on the **auto charge function**.**Q7. How do saved payment methods work?**
+- Billing depends on whether you've set a Preferred Billing Date or not. Here's the flow for each:
+  - **Preferred Billing Date is set**
+    - All subscription charges are consolidated into one billing on your Preferred Billing Date each month.
+    - If you subscribe mid-cycle, your first charge is prorated, covering only the days from your subscription date up to your next billing date.
+      - The prorated amount is calculated as: (Monthly plan amount ÷ days in the subscription month) × days remaining until billing date.
+      - For example, if your billing date is the 30th and you subscribe on the 22nd, your first invoice covers 8 days at the daily rate. From the 30th onward, you are billed the full recurring amount each month.
+    - All charges are consolidated on the billing date and the consolidated invoice is sent to your billing email the following day.
+  - **Preferred Billing Date is not set**
+    - Your billing date is the start date of each organization's subscription.
+    - If your billing account pays for multiple organizations with different start dates, each organization is billed separately on its own start date.
+    - Invoices are sent the day after each organization's subscription start date.
+  - If your billing account has insufficient funds on the billing date, your organizations will be automatically downgraded. See [Re-instating your Org's Subscription](https://help.jaz.ai/en/articles/13368779-re-instating-your-org-s-subscription) to recover within 28 days.
+
+**Q7. How do I edit my billing account?**
+
+- Go to Settings → Billing Account → Hover over a billing account → Click the 3-dot icon → Edit.
+
+**Q8. How do I recharge my billing accounts?**
+
+- To recharge your account, you can manually top up or turn on the **Auto recharge function**.
+- When auto charge is enabled, your account is automatically recharged before the billing date using your saved payment methods. The auto-charge covers the amount needed to settle your upcoming or overdue bill.
+
+**Q9. How do saved payment methods work?**
 
 - Saved methods enable secure, fast, and automatic recharges. You can save cards and select wallets. If one payment method fails, the system will automatically try the other saved methods.
 
-**Q8. How do I set up auto-charge and add payment methods?**
+**Q10. How do I set up auto recharge and add payment methods?**
 
-- Add new payment methods. Having at least two is recommended for reliability.
-- Enable the Auto Charge toggle to activate automatic payments.
+- Add new payment methods. Having at least two is recommended. If the primary method fails, the system will automatically attempt the next saved method.
+- Enable the auto recharge toggle to activate automatic payments before your billing date.
 
-**Q9. Can I give others access to my billing account?**
+**Q11. Can I give others access to my billing account?**
 
-- Yes. You can add users through the **Delegate Whitelist**. Go to**Billing Account** > hover over the **account** > click the**three-dot icon** > **Edit** >**Delegate Whitelist** > **Add Emails**
+- Yes. You can add users through the **Delegate Whitelist**. Go to**Billing Account** → hover over the **account** → click the**three-dot icon** → **Edit** →**Delegate Whitelist** → **Add Emails**
 - Whitelisted users can use your account as a billing method in organizations where you both have billing permissions. They cannot view or manage the account.
-- **Note:** Only whitelist trusted users. Jaz is not liable for any unauthorized charges made by delegates.**Q10. I’ve set up my Billing Account, what’s next?**
+- **Note:** Only whitelist trusted users. Jaz is not liable for any unauthorized charges made by delegates.**Q12. What happens when I make my billing account inactive?**
 
-- Head over to **[Plans & Add-ons](https://help.jaz.ai/en/articles/11710415-choosing-plans-addons)**to customize the right plan for your organization.
+- You won’t be able to pay for Jaz plans, or use auto recharge.
+- If the billing account is actively paying for subscriptions, those organizations will be downgraded after the current billing cycle ends.
+- Downgraded organizations can be reinstated within 28 days. See [Re-instating your Org's Subscription](https://help.jaz.ai/en/articles/13368779-re-instating-your-org-s-subscription).
+- Note: Billing accounts cannot be deleted.
+
+**Q13. I’ve set up my Billing Account, what’s next?**
+
+- Head over to [Plans & Add-ons](https://help.jaz.ai/en/articles/11710415-choosing-plans-add-ons) to customize the right plan for your organization.
 
 ---
 

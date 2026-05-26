@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.4.41
+version: 5.5.0
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -277,6 +277,34 @@ When running as a daemon agent (`clio serve`), recipes are available via two ded
 Both tools accept all 13 recipe types: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.
 
 Scheduler creation tools are also available: `create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`.
+
+## Server-side recipe execution (Jaz API)
+
+A second path: 5 IFRS recipes (Loan Amortization, Accrual Reversal, Prepaid Amortization, Deferred Revenue, IFRS 16 Lease) also have a SERVER-SIDE lifecycle via Jaz REST. This produces real capsule entities + scheduler atoms (recurring journal postings) — distinct from the offline `plan_recipe` / `execute_recipe` path which is client-side compute.
+
+**Two distinct execution paths:**
+
+| Path | When to use | Tools |
+|---|---|---|
+| **Offline calculator** | Plan first, post manually. Agent has CoA picked. No need for a server-side capsule entity. Works without an API key. | `plan_recipe` → `execute_recipe` |
+| **Server-side trigger** | "Create the bill AND the prepaid amortization schedule in one shot." Capsule entity needed for FE/reporting. Requires API key. | Trigger via `capsuleRecipe` payload on `create_bill` / `create_invoice` / `create_journal` / `create_cash_in` / `create_cash_out` (and their `update_*` variants), OR standalone `preview_capsule_recipe` first. |
+
+**Server-side tools** (group: `capsule_recipes`):
+
+- `list_capsule_recipes` (read-only) — list registered IFRS recipes + per-version JSON Schemas. SOURCE OF TRUTH for `recipeName` values; don't hard-code.
+- `get_capsule_recipe(name)` (read-only) — one descriptor by enum name with `versions[].inputSchema`.
+- `preview_capsule_recipe({recipeName, recipeVersion?, inputs, baseTransactionResourceId?, baseTransactionType?, organizationResourceId?})` (read-only) — pure compute, no side effects. Returns `{legs[], expectedOutput[], previewMarkdown}`. Use BEFORE triggering via `capsuleRecipe` payload to validate inputs.
+- `resume_capsule_recipe(capsuleResourceId)` (write, NOT idempotent) — retry a FAILED recipe job from its failed leg. ≤3 same-leg attempts then terminal `BLOCKED_AFTER_3_RESUME_ATTEMPTS`.
+- `rollback_capsule_recipe(capsuleResourceId, dryRun?: boolean)` (write; dryRun IS idempotent) — delete every scheduler atom created by the recipe. Preview with `dryRun=true` before committing.
+
+**Trigger-mutation payload** — to create a base-trx AND fire a recipe in one shot, pass `capsuleRecipe: {recipeName, recipeVersion?, inputs}` to the create/update mutation. Mutually exclusive with `capsuleResourceId` (the "attach to existing capsule" path).
+
+**Recovery flow**:
+- `capsuleRecipeJob` is null on the response → recipe never started server-side. Poll `search_background_jobs` filtered by `baseTransactionResourceId` (NOT `capsuleResourceId` — which may not exist yet).
+- Job status `FAILED` → use `resume_capsule_recipe` (≤3 attempts) OR `rollback_capsule_recipe(dryRun=true)` first then `rollback_capsule_recipe(dryRun=false)`.
+- Capsule wasn't created via the recipe engine → rollback returns 422 `RECIPE_ROLLBACK_JOB_NOT_FOUND`; use `delete_capsule` for legacy capsules.
+
+**DO NOT** use server-side execution for `fx-reval` — Jaz auto-handles ALL period-end IAS 21.23 FX translation; double-posting risk identical to the offline `execute_recipe(recipe: 'fx-reval')` warning.
 
 ## See Also
 

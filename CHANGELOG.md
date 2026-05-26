@@ -1,5 +1,57 @@
 # Changelog
 
+## [5.5.0] - 2026-05-27
+
+The Jaz public REST surface added IFRS capsule recipes + pseudo-SQL since v5.4.x. v5.5.0 wraps both end-to-end across the agent stack — 9 new tools, 10 existing trigger mutations gain optional recipe-trigger payload, two new skill docs, 13 new agent rules, plus subscriptions proration expansion.
+
+### Added — IFRS capsule recipes (server-side recipe lifecycle)
+
+The 5 IFRS capsule recipes (Prepaid Amortization, Loan Amortization, Accrual Reversal, Deferred Revenue, IFRS 16 Lease) now have a server-side path alongside the existing offline calculator (`plan_recipe` / `execute_recipe`). The new path creates real capsule entities + scheduler atoms via a single API call — useful when you want the capsule entity to show up in FE / reporting alongside the base transaction.
+
+- **5 new tools** under `capsules_and_recipes` namespace, new `capsule_recipes` group:
+  - `list_capsule_recipes` — list registered IFRS recipes + per-version JSON Schemas (source of truth for `recipeName`).
+  - `get_capsule_recipe` — descriptor by enum name (PREPAID_AMORTIZATION, LOAN_AMORTIZATION, ACCRUAL_REVERSAL, DEFERRED_REVENUE, IFRS16_LEASE) with `versions[].inputSchema`.
+  - `preview_capsule_recipe` — compute the blueprint without persisting; returns `{legs[], expectedOutput[], previewMarkdown}`.
+  - `resume_capsule_recipe` — retry a FAILED recipe job from its failed leg. NOT idempotent (≤3 same-leg attempts then terminal `BLOCKED_AFTER_3_RESUME_ATTEMPTS`).
+  - `rollback_capsule_recipe` — delete every scheduler atom posted by the recipe. `dryRun=true` previews safely (idempotent on already-rolled-back capsules).
+- **10 trigger mutations gain optional `capsuleRecipe` payload** so you can create-and-fire in one shot:
+  - `create_invoice`, `update_invoice` (DEFERRED_REVENUE)
+  - `create_bill`, `update_bill` (PREPAID_AMORTIZATION)
+  - `create_journal`, `update_journal` (DEFERRED_REVENUE, ACCRUAL_REVERSAL, IFRS16_LEASE)
+  - `create_cash_in`, `update_cash_in` (LOAN_AMORTIZATION — cash-in = loan disbursement, canonical trigger)
+  - `create_cash_out`, `update_cash_out` (loan repayment patterns)
+
+  Mutually exclusive with `capsuleResourceId`. Response carries `capsuleRecipeJob: { jobResourceId, capsuleResourceId, recipeKey, idempotentHit, ... }` for polling and rollback.
+- **`jaz-recipes` skill** gains a "Server-side recipe execution" section explaining offline-vs-server-side path selection, recovery flow (3-attempt resume → rollback), and the `fx-reval` double-post warning.
+- **`plan_recipe` and `execute_recipe` descriptions** now point at the server-side path for the 5 overlap recipes so agents see both options out-of-the-box.
+
+### Added — Pseudo-SQL ad-hoc reporting
+
+The new pseudo-SQL DSL lets agents answer ad-hoc data questions that aren't covered by canonical `download_export` reports — top customers by revenue, FX-exposed bills, custom groupings, etc.
+
+- **4 new tools** under `operational_reports` namespace, new `pseudo_sql` group:
+  - `preview_pseudo_sql` — sync SELECT preview, up to 100 typed rows.
+  - `export_pseudo_sql` — async CSV export kickoff; supports `Idempotency-Key` for dedup.
+  - `get_pseudo_sql_export` — poll status; COMPLETED returns a short-lived (~15min) S3 download URL.
+  - `run_pseudo_sql_and_download` — one-shot composite: kickoff + poll + fetch. Auto-`Idempotency-Key` from `sha256(query).slice(0,16)`. 25s default timeout (safe under typical MCP provider 30s ceiling). Returns CSV buffer by default; opt-in `downloadToFile=true` writes to `~/Downloads/`.
+- **New `jaz-pseudo-sql` skill** with three reference docs: curated table inventory, 10+ query patterns by user intent, full error catalog with recovery paths.
+- **`download_export`** description now cross-references pseudo-SQL for ad-hoc custom queries.
+
+### Added — Subscription proration controls
+
+- **`create_subscription` and `update_subscription` accept the full `proratedConfig` payload.** Customize the first prorated period via 4 new fields: `proratedStartDate`, `proratedAdjustmentLineText`, `itemResourceId` (non-inventory item for the adjustment line), and `includeNextPeriod` (bundles next full period at 2x quantity AND advances nextScheduleDate). Response now includes `bundledPeriodEndDate` + `bundledAmount` when `includeNextPeriod=true` — needed by downstream CN refund calculations.
+
+### Added — 13 new agent rules
+
+The `jaz-api` skill gains Rules 142-154 covering: capsuleRecipe payload semantics (mutual exclusion with capsuleResourceId, response shape, recovery path), RecipeName closed enum at the API layer, pseudo-SQL `truncated` / downloadUrl 15min expiry / cashflow IAS 7 template gate, resume terminal states + rollback-only fallback, partial-rollback retry safety, RECIPE_INVALID_BASE_TRANSACTION_TYPE, saveAsDraft + capsuleRecipe stash-then-fire on activation, Idempotency-Key server-side dedup primary, and rollback-on-non-recipe-capsule (422 RECIPE_ROLLBACK_JOB_NOT_FOUND — use `delete_capsule` for legacy capsules).
+
+### Changed
+
+- **`download_export(exportType='cashflow')`** description now flags the IAS 7 template requirement (404 `template_not_found` if no template configured).
+- **`create_capsule` description** routes IFRS-recipe-driven flows to `preview_capsule_recipe` + `capsuleRecipe` payload; legacy manually-grouped capsules stay on `create_capsule`.
+- **`list_capsule_types` description** disambiguates from `list_capsule_recipes` (different surfaces — types are PREPAID_EXPENSE et al; recipes are LOAN_AMORTIZATION et al with JSON Schema input contracts).
+- **Tool count: 275 → 284.**
+
 ## [5.4.41] - 2026-05-23
 
 Internal release. Fire-test callback now retries on transient Sentinel cold-start. No user-facing changes since v5.4.40.

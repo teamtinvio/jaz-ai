@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.4.41",
+  "version": "5.5.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -128,11 +128,11 @@
     },
     {
       "name": "create_invoice",
-      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\nREQUIRED: contactResourceId (search first), and accountResourceId per lineItem when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\", exchangeRate: 1.35 }`. Dates YYYY-MM-DD.\n\nreference MUST be unique per org — auto-generate with timestamp if user doesn't specify (e.g. INV-20260309-1430). Duplicate → 422."
+      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\nREQUIRED: contactResourceId (search first), and accountResourceId per lineItem when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\", exchangeRate: 1.35 }`. Dates YYYY-MM-DD.\n\nreference MUST be unique per org — auto-generate with timestamp if user doesn't specify (e.g. INV-20260309-1430). Duplicate → 422.\n\nOptional capsuleRecipe (e.g. DEFERRED_REVENUE for a subscription) triggers an IFRS capsule recipe alongside the commit. Mutually exclusive with capsuleResourceId."
     },
     {
       "name": "update_invoice",
-      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced — pass the complete updated lineItems array."
+      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches an IFRS recipe to a draft on activation (mutually exclusive with capsuleResourceId)."
     },
     {
       "name": "delete_invoice",
@@ -168,11 +168,11 @@
     },
     {
       "name": "create_bill",
-      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — generate one with a timestamp if user doesn't specify."
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — generate one with a timestamp if user doesn't specify. Optional capsuleRecipe (e.g. PREPAID_AMORTIZATION) triggers an IFRS capsule recipe alongside the commit — split a prepaid bill into monthly journals in one shot. Mutually exclusive with capsuleResourceId."
     },
     {
       "name": "update_bill",
-      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced — pass the complete updated lineItems array."
+      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches an IFRS recipe to the draft on activation (mutually exclusive with capsuleResourceId)."
     },
     {
       "name": "delete_bill",
@@ -204,7 +204,7 @@
     },
     {
       "name": "create_journal",
-      "description": "Create a journal entry. IMPORTANT:\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount.\n- Total debits MUST equal total credits — the API rejects unbalanced journals.\n- Search accounts first to get the correct resourceIds.\n- Double-check your math: sum all DEBIT amounts and all CREDIT amounts — they must be equal."
+      "description": "Create a journal entry. IMPORTANT:\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount.\n- Total debits MUST equal total credits — the API rejects unbalanced journals.\n- Search accounts first to get the correct resourceIds.\n- Double-check your math: sum all DEBIT amounts and all CREDIT amounts — they must be equal.\n\nOptional capsuleRecipe (e.g. DEFERRED_REVENUE for unearned-revenue recognition, ACCRUAL_REVERSAL for month-end accruals) triggers an IFRS capsule recipe alongside the journal commit. Mutually exclusive with capsuleResourceId."
     },
     {
       "name": "create_transfer_trial_balance",
@@ -304,7 +304,7 @@
     },
     {
       "name": "list_capsule_types",
-      "description": "List capsule types (e.g., PREPAID_EXPENSE, DEFERRED_REVENUE). Use to get capsuleTypeResourceId before creating capsules."
+      "description": "List capsule types (e.g., PREPAID_EXPENSE, DEFERRED_REVENUE). Use to get capsuleTypeResourceId before creating capsules via create_capsule. NOT the same as list_capsule_recipes (which lists IFRS recipe descriptors with JSON Schema input contracts)."
     },
     {
       "name": "list_capsules",
@@ -320,7 +320,7 @@
     },
     {
       "name": "create_capsule",
-      "description": "Create a new capsule. List capsule types first to get the capsuleTypeResourceId."
+      "description": "Create a new (legacy) capsule. List capsule types first to get the capsuleTypeResourceId. `title` is required and must be non-empty (blank/empty rejected with 422). For IFRS recipe-driven capsules (PREPAID_AMORTIZATION, LOAN_AMORTIZATION, etc.), use `preview_capsule_recipe` + `capsuleRecipe` payload on a trigger mutation instead — those create the capsule + scheduler atoms in one shot. This tool is for manually-grouped legacy capsules."
     },
     {
       "name": "update_capsule",
@@ -452,7 +452,7 @@
     },
     {
       "name": "create_cash_in",
-      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts) — any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, type (DEBIT/CREDIT), amount }. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability) — NOT bank/cash and NOT controlled accounts (AR/AP)."
+      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts) — any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, type (DEBIT/CREDIT), amount }. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability) — NOT bank/cash and NOT controlled accounts (AR/AP).\n\nOptional capsuleRecipe — cash_in is the canonical trigger for LOAN_AMORTIZATION (cash-in = loan disbursement, recipe builds the repayment schedule). Mutually exclusive with capsuleResourceId."
     },
     {
       "name": "list_cash_out",
@@ -460,7 +460,7 @@
     },
     {
       "name": "create_cash_out",
-      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, type: 'DEBIT' (typical for the expense leg), amount > 0 }. Offset accounts must be regular P&L or balance-sheet accounts — NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", type: \"DEBIT\", amount: 100 }."
+      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, type: 'DEBIT' (typical for the expense leg), amount > 0 }. Offset accounts must be regular P&L or balance-sheet accounts — NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", type: \"DEBIT\", amount: 100 }.\n\nOptional capsuleRecipe — useful for loan repayment patterns (cash-out as installment). Mutually exclusive with capsuleResourceId."
     },
     {
       "name": "get_cash_in",
@@ -468,7 +468,7 @@
     },
     {
       "name": "update_cash_in",
-      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated."
+      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches an IFRS recipe (mutually exclusive with capsuleResourceId)."
     },
     {
       "name": "get_cash_out",
@@ -476,7 +476,7 @@
     },
     {
       "name": "update_cash_out",
-      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated."
+      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches an IFRS recipe (mutually exclusive with capsuleResourceId)."
     },
     {
       "name": "list_cash_transfers",
@@ -568,15 +568,51 @@
     },
     {
       "name": "download_export",
-      "description": "Analytical / financial / audit report XLSX. Returns { fileName, fileUrl } (pre-signed, ~5 min).\n\nUse this tool (not export_records) for: analysis-* (anomalous-invoices/bills, cashflow-anomalies, gl-journal-audit, exchange-rate-audit, receivables-customer-risk, cash-expense-health); statements (trial-balance, balance-sheet, profit-and-loss, cashflow, general-ledger, cash-balance); aging (ar-report, ap-report); summaries (sales, sales-payments, purchase, purchase-payments, customer-revenue, product-sales, periodic-revenue, supplier-expense, product-purchase, periodic-expense, credit-note, sales-cost-margin); inventory movement (sale-/purchase-inventory-movement); statement-of-account-export.\n\nNOT for raw entity dumps (invoices/bills/contacts as rows) — use export_records."
+      "description": "Analytical / financial / audit report XLSX. Returns { fileName, fileUrl } (pre-signed, ~5 min).\n\nUse this tool (not export_records) for: analysis-* (anomalous-invoices/bills, cashflow-anomalies, gl-journal-audit, exchange-rate-audit, receivables-customer-risk, cash-expense-health); statements (trial-balance, balance-sheet, profit-and-loss, cashflow, general-ledger, cash-balance); aging (ar-report, ap-report); summaries (sales, sales-payments, purchase, purchase-payments, customer-revenue, product-sales, periodic-revenue, supplier-expense, product-purchase, periodic-expense, credit-note, sales-cost-margin); inventory movement (sale-/purchase-inventory-movement); statement-of-account-export.\n\nNOT for raw entity dumps (invoices/bills/contacts as rows) — use export_records. For ad-hoc custom SELECT queries against the curated reporting schema — use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow exportType returns the IAS 7 templated report (org-configured); 404 template_not_found if no template (see jaz-api Rule 147)."
+    },
+    {
+      "name": "preview_pseudo_sql",
+      "description": "Run a read-only pseudo-SQL SELECT against the curated reporting schema. SYNC — returns up to 100 rows + typed columns. For canonical reports (anomaly/audit/aging/P&L/BS/GL/statement-of-account) use download_export instead. DELETE/UPDATE/INSERT and multi-statement input are rejected (PSEUDOSQL_PARSE_ERROR). Query max 16384 chars (over → 422 validation_error). `truncated:true` means \"more rows matched than were returned\" — NOT \"you hit the cap\"; inspect rowCount vs preview cap or your LIMIT. Curated tables include invoices, bills, journals, payments, contacts, accounts and more — see jaz-pseudo-sql skill for full inventory + query patterns."
+    },
+    {
+      "name": "export_pseudo_sql",
+      "description": "Kick off an async CSV export of a pseudo-SQL SELECT against the curated reporting schema. Returns { jobId, status }. Same DSL constraints as preview_pseudo_sql (SELECT-only, ≤16384 chars, single statement). Poll status via get_pseudo_sql_export — terminal states are COMPLETED (downloadUrl present, ~15min S3 expiry), FAILED, or EXPIRED. For one-shot \"give me the CSV\" use run_pseudo_sql_and_download instead. Supply idempotencyKey to dedupe across retries; same key + DIFFERENT query returns the prior job's result (server-side primary)."
+    },
+    {
+      "name": "get_pseudo_sql_export",
+      "description": "Poll a pseudo-SQL export job. Returns { jobId, status, rowCount?, truncated?, downloadUrl?, error? }. Terminal states: COMPLETED, FAILED, EXPIRED. `downloadUrl` is S3 pre-signed with ~15min expiry — fetch immediately. If a fetch returns 403 (expired), call this tool again for a fresh URL."
+    },
+    {
+      "name": "run_pseudo_sql_and_download",
+      "description": "One-shot composite: kickoff async export → poll every 2s → return { jobId, status, downloadUrl, buffer? | localPath? }. Default 25s timeout (safe under typical 30s MCP provider timeout, configurable up to 90s). Idempotency-Key auto-set to sha256(query).slice(0,16) so same-query repeats dedupe. Default returns CSV buffer; pass downloadToFile=true to write to ~/Downloads/pseudo-sql-<jobId>.csv. On TIMED_OUT returns { status:'TIMED_OUT', jobId } — caller can retry via get_pseudo_sql_export. Use for \"run this query and give me the CSV\" flows; use export_pseudo_sql + get_pseudo_sql_export for fine-grained control."
     },
     {
       "name": "plan_recipe",
-      "description": "Offline. Plan an IFRS transaction (schedule + journals) WITHOUT posting. Returns RecipePlan: capsuleType, capsuleName, requiredAccounts, needsContact, steps (journal|bill|invoice|cash-in|cash-out), calculator output.\n\nSupported (13): loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nUSE FOR: depreciation (sl/ddb/150db), amortization, ECL, lease (IFRS 16), hire purchase, loan, IAS 37 provisions, deferred revenue, fixed deposits, asset disposal, accrued expenses, leave-accrual, dividends. Never hand-construct.\n\nfx-reval EXCEPTION: Jaz auto-handles period-end IAS 21.23 FX translation. fx-reval is VERIFICATION ONLY — do NOT execute_recipe(recipe: 'fx-reval'), it double-posts.\n\nNEXT STEP: call execute_recipe with same params + startDate.\n\nALIASES (file→engine): prepaid-amortization→prepaid-expense, bank-loan→loan, ifrs16-lease→lease, bad-debt-provision→ecl, accrued-expenses→accrued-expense, fx-revaluation→fx-reval, declining-balance→depreciation. Pass the engine name."
+      "description": "Offline. Plan an IFRS transaction (schedule + journals) WITHOUT posting. Returns RecipePlan: capsuleType, capsuleName, requiredAccounts, needsContact, steps (journal|bill|invoice|cash-in|cash-out), calculator output.\n\nSupported (13): loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nUSE FOR: depreciation (sl/ddb/150db), amortization, ECL, lease (IFRS 16), hire purchase, loan, IAS 37 provisions, deferred revenue, fixed deposits, asset disposal, accrued expenses, leave-accrual, dividends. Never hand-construct.\n\nALTERNATIVE — server-side: 5 of these (loan/lease/prepaid-expense/deferred-revenue/accrued-expense) also available via capsuleRecipe payload on create_bill/create_invoice/create_journal/create_cash_in (creates capsule + scheduler atoms in one shot). Offline = plan, post manually; server-side = commit now.\n\nfx-reval EXCEPTION: Jaz auto-handles period-end IAS 21.23 FX translation. fx-reval is VERIFICATION ONLY — do NOT execute_recipe(recipe: 'fx-reval'), it double-posts.\n\nNEXT STEP: execute_recipe + startDate (offline) OR preview_capsule_recipe + capsuleRecipe payload on trigger mutation (server-side).\n\nALIASES (file→engine): prepaid-amortization→prepaid-expense, bank-loan→loan, ifrs16-lease→lease, bad-debt-provision→ecl, accrued-expenses→accrued-expense, fx-revaluation→fx-reval, declining-balance→depreciation. Pass the engine name."
     },
     {
       "name": "execute_recipe",
-      "description": "Execute a recipe end-to-end — calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).\n\nSupported: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nRequires startDate. Auto-resolves accounts from CoA. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps."
+      "description": "Execute a recipe end-to-end — calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).\n\nSupported: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nALTERNATIVE — for 5 recipes (loan, lease, prepaid-expense, deferred-revenue, accrued-expense) server-side capsule-recipe engine is also available via capsuleRecipe payload on create_bill/create_invoice/create_journal/create_cash_in.\n\nRequires startDate. Auto-resolves accounts from CoA. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps."
+    },
+    {
+      "name": "list_capsule_recipes",
+      "description": "Server-side recipe lifecycle (NOT the offline calculator — for offline planning use plan_recipe + execute_recipe). List all registered IFRS capsule recipes with per-version JSON Schemas. Source of truth for recipeName values used in capsuleRecipe payloads on trigger mutations (create_bill, create_journal, create_cash_in, etc.) — DON'T hard-code the 5 enum values. Each descriptor carries displayName, capsuleType, requiresBaseTransaction, allowedBaseTransactionTypes[], expectedAtomTypes[], and versions[] with inputSchema (JSON Schema Draft 7) per version."
+    },
+    {
+      "name": "get_capsule_recipe",
+      "description": "Server-side recipe lifecycle. Get one capsule recipe descriptor by enum name (e.g. PREPAID_AMORTIZATION, LOAN_AMORTIZATION, ACCRUAL_REVERSAL, DEFERRED_REVENUE, IFRS16_LEASE). Use list_capsule_recipes to discover available names. Returns the per-version inputSchema describing exactly which fields capsuleRecipe.inputs needs."
+    },
+    {
+      "name": "preview_capsule_recipe",
+      "description": "Server-side recipe lifecycle (NOT the offline calculator — for offline planning use plan_recipe). Compute the blueprint a recipe would build for given inputs WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. Use BEFORE triggering via the capsuleRecipe payload on a base-trx mutation to validate inputs + preview the schedule. The base-transaction triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing — supply all three to auto-fill totalAmount/currency/anchor dates from an existing base-trx, OR omit all three for a pure compute preview."
+    },
+    {
+      "name": "resume_capsule_recipe",
+      "description": "Server-side recipe lifecycle. Resume a FAILED recipe job from the leg that failed. NOT idempotent — each call counts toward the 3-attempt limit. After 3 same-leg failures the job is terminally BLOCKED_AFTER_3_RESUME_ATTEMPTS and only rollback_capsule_recipe remains. Returns the updated CapsuleRecipeJob handle with status, resumeAttempts, terminalReason."
+    },
+    {
+      "name": "rollback_capsule_recipe",
+      "description": "Server-side recipe lifecycle. Delete every scheduler atom posted by this capsule's recipe. dryRun=true returns the would-delete list without deleting (idempotent, safe to call repeatedly). dryRun=false performs the delete. Status enum: SUCCESS | BLOCKED | PARTIAL_ROLLBACK | DRY_RUN. PARTIAL_ROLLBACK with blockedAtomResourceIds[] means some atoms are referenced downstream — retry idempotent; escalate if persistent. Capsules NOT created via the recipe engine return 422 RECIPE_ROLLBACK_JOB_NOT_FOUND (\"nothing to roll back\")."
     },
     {
       "name": "create_scheduled_journal",
@@ -592,7 +628,7 @@
     },
     {
       "name": "update_journal",
-      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize."
+      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. Optional capsuleRecipe retro-attaches an IFRS recipe (mutually exclusive with capsuleResourceId)."
     },
     {
       "name": "bulk_update_journals",
@@ -776,11 +812,11 @@
     },
     {
       "name": "create_subscription",
-      "description": "Subscription — auto-generates invoices on schedule WITH proration. DIFFERENT from scheduled_invoice: subscriptions prorate partial periods (credit notes for mid-period changes), but currency/tax/account are immutable after creation. Use for software licenses, retainers, recurring SaaS. Invoices only (no bills).\n\naccountResourceId + taxProfileResourceId apply to ALL line items (immutable). interval: WEEKLY | MONTHLY | QUARTERLY | YEARLY. reference REQUIRED.\n\nDynamic strings (reference/lineItem name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — relative to transaction date."
+      "description": "Subscription — auto-generates invoices on schedule WITH proration. DIFFERENT from scheduled_invoice: subscriptions prorate partial periods (credit notes for mid-period changes), but currency/tax/account are immutable after creation. Use for software licenses, retainers, recurring SaaS. Invoices only (no bills).\n\naccountResourceId + taxProfileResourceId apply to ALL line items (immutable). interval: WEEKLY | MONTHLY | QUARTERLY | YEARLY. reference REQUIRED. proratedConfig (optional) tunes the first period; response carries bundledPeriodEndDate + bundledAmount when includeNextPeriod=true.\n\nDynamic strings (reference/lineItem name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — relative to transaction date."
     },
     {
       "name": "update_subscription",
-      "description": "Update an existing subscription (interval, end date, or transaction template). When the user asks to update a subscription, use this tool directly. NOTE: accountResourceId and taxProfileResourceId on line items are immutable after creation — to change them, cancel and recreate."
+      "description": "Update an existing subscription (interval, end date, transaction template, or proratedConfig). When the user asks to update a subscription, use this tool directly. NOTE: accountResourceId and taxProfileResourceId on line items are immutable after creation — to change them, cancel and recreate. proratedConfig fields can be amended on update (proratedStartDate, proratedAdjustmentLineText, itemResourceId, includeNextPeriod)."
     },
     {
       "name": "delete_subscription",

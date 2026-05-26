@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.4.41
+version: 5.5.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 141 production gotchas, error
@@ -446,6 +446,32 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 140. **IFRS 18 accountType values (effective 2027)** — `create_account` / `update_account` / `bulk_upsert_chart_of_accounts` accept the 9 IFRS 18 classification types alongside the classic 12: **Discontinued Expense**, **Discontinued Income**, **Finance Cost**, **Financing Income**, **Goodwill**, **Income Tax Expense**, **Investing Expense**, **Investing Income**, **Investment**. `normalizeAccountType` (in `core/api/guards.ts`) maps unambiguous variants client-side: "income tax" / "tax expense" → "Income Tax Expense", "finance costs" → "Finance Cost", "investments" → "Investment". **Ambiguous variants are intentionally NOT auto-mapped** — under IFRS 18, "interest expense" can land in EITHER Finance Cost (financing activities) OR Operating / Investing Expense depending on the entity's main business activity, and "interest income" can land in EITHER Financing Income OR Investing Income. The agent must pick the explicit canonical string for those cases instead of relying on a guess that could misclassify the account. Pass any value to `accountType` (POST/PUT will receive it as `classificationType` per rule 21). The classic types still work — IFRS 18 is purely additive.
 
 141. **`bulk_upsert_chart_of_accounts` — sync bulk-upsert with PARTIAL_SUCCESS** — wraps `POST /api/v1/chart-of-accounts/bulk-upsert` (max 500 per call). Returns synchronously (no jobId polling): `{ resourceIds: string[], failedRows: ImportedRowError[], failedCount: number }` per rule 136. Each successful row contributes one `resourceId`; each failure surfaces a `failedRows[]` entry with `rowIndex` (1-based per the API), `columnName`, `columnValue`, `errorCode`, `errorMessage`. **Dedup is by NAME, not code** — collisions emit `ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED` per row (other rows in the batch still succeed). Provide `resourceId` per account to update; omit to create. Accepts the classic 12 + 9 IFRS 18 `accountType` values per rule 140 (variants normalized client-side). For one-off creates with auto-dedup-on-name (returns existing if found), use `create_account` instead. CLI counterpart: `clio accounts bulk-upsert --input <file.json>`.
+
+142. **`capsuleRecipe` payload is mutually exclusive with `capsuleResourceId`** on trigger mutations (create/update of invoice, bill, journal, cash_in, cash_out). Use `capsuleRecipe` to CREATE a new capsule via the recipe engine; use `capsuleResourceId` to ATTACH a base-trx to an existing capsule. Sending both returns 422 (`excluded_with` validator).
+
+143. **Capsule recipe publish is best-effort post-commit.** On success the trigger-mutation response carries `capsuleRecipeJob: { jobResourceId, capsuleResourceId, subscriptionFBPath, totalRecords, idempotentHit, recipeKey }` (verified live 2026-05-27). **Note `jobResourceId` (NOT `resourceId`)** on the trigger-mutation payload — this is the polling key. If the base-trx commits but the recipe publish fails, `capsuleRecipeJob` is null and the base-trx is still saved. Recovery: poll `search_background_jobs` filtered by **`baseTransactionResourceId`** — NOT `capsuleResourceId` (the capsule may not exist yet if the recipe never started). The standalone `resume_capsule_recipe(capsuleResourceId)` response IS the full `CapsuleRecipeJob` shape with `resourceId` (distinct from the inline trigger-mutation payload).
+
+144. **`recipeName` IS enum-constrained at the API layer** (verified live 2026-05-27): closed enum `LOAN_AMORTIZATION | ACCRUAL_REVERSAL | PREPAID_AMORTIZATION | DEFERRED_REVENUE | IFRS16_LEASE` on `POST /capsule-recipes/preview` and on `capsuleRecipe.recipeName` payloads on trigger mutations. Send a string not in the set → 422 validation_error. Don't hard-code the 5 values in motherboard descriptions — discover via `list_capsule_recipes` (the source of truth) and pass the discovered name through.
+
+145. **Pseudo-SQL `truncated:true` does NOT mean "you hit the cap"** — it means "more rows matched than were returned in this preview". Inspect `rowCount` vs preview cap (100) or your LIMIT to interpret. If you need every row, switch to `export_pseudo_sql`.
+
+146. **Pseudo-SQL export `downloadUrl` is S3 pre-signed with ~15min expiry** (`X-Amz-Expires=900`). Fetch immediately; don't store the URL. If a fetch returns 403 (expired), call `get_pseudo_sql_export(jobId)` again for a fresh URL.
+
+147. **Cashflow report** (`download_export(exportType='cashflow')`) returns the org's CASHFLOW template (IAS 7). If no template configured, returns 404 `template_not_found`. Configure via Jaz settings before invoking.
+
+148. **`resume_capsule_recipe` after `terminalReason=BLOCKED_AFTER_3_RESUME_ATTEMPTS` is unavailable.** Only path forward is `rollback_capsule_recipe(capsuleResourceId)` or manual cleanup via Jaz admin. Resume is NOT idempotent — each call counts toward the 3-attempt limit.
+
+149. **`rollback_capsule_recipe` returning `status=PARTIAL_ROLLBACK`** with `blockedAtomResourceIds[]` is safe to retry (rollback is idempotent on already-deleted atoms). Persistent partial-rollback typically indicates an atom is referenced downstream; escalate to ops if retry doesn't resolve.
+
+150. **`preview_capsule_recipe` and trigger mutations return 422 `RECIPE_INVALID_BASE_TRANSACTION_TYPE`** if `baseTransactionType` is not in the recipe's `allowedBaseTransactionTypes` (see descriptor at `get_capsule_recipe`). Example: PREPAID_AMORTIZATION only allows PURCHASE; supplying SALE returns 422.
+
+151. **Sending BOTH `capsuleRecipe` AND `capsuleResourceId`** on the same trigger mutation returns 422 (`excluded_with` validator — same lock as Rule 142). Pick one based on intent.
+
+152. **`saveAsDraft: true` + `capsuleRecipe` payload** — recipe is stashed in the draft's `pending_capsule_recipe` JSONB column and fires on draft activation (not on draft create). The base-trx commits as DRAFT immediately; the recipe job is created later when the draft is activated via `convert_drafts_to_active`.
+
+153. **Pseudo-SQL `Idempotency-Key` dedup is server-side primary key** — same key + DIFFERENT query body returns the prior job's result (the server does NOT cross-check the new query body). For agent reliability, `run_pseudo_sql_and_download` auto-keys from `sha256(query).slice(0,16)` so dedup is query-tied automatically. If you call `export_pseudo_sql` directly with a manual key, treat it as a per-intent token — don't reuse across different queries.
+
+154. **`rollback_capsule_recipe` on a non-recipe capsule** (a capsule created by the legacy `create_capsule` tool or imported, not by the recipe engine) returns 422 `RECIPE_ROLLBACK_JOB_NOT_FOUND` ("No CAPSULE_RECIPE job found for capsule X in organization Y — nothing to roll back"). Rollback only works on capsules whose lifecycle was managed by the recipe engine. For legacy capsules, use `delete_capsule` instead.
 
 ## Supporting Files
 
