@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.5.1] - 2026-05-27
+
+Internal release automation update. No user-facing changes since v5.5.0.
+
+Fixes the post-deploy fire-test smoke suite (sections 61–63, pseudo-SQL preview / validation / export probes) which was crashing on every fire run since v5.5.0 because `$FREKI_URL` was referenced unset and tripped `set -u`. Added a default so the smoke script can run end-to-end against the public Jaz API without extra env wiring.
+
 ## [5.5.0] - 2026-05-27
 
 The Jaz public REST surface added IFRS capsule recipes + pseudo-SQL since v5.4.x. v5.5.0 wraps both end-to-end across the agent stack — 9 new tools, 10 existing trigger mutations gain optional recipe-trigger payload, two new skill docs, 13 new agent rules, plus subscriptions proration expansion.
