@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.5.3] - 2026-05-27
+
+Internal release. Cloud email channel deployment-manifest fix: the reply-callback target was pointing at a non-existent in-cluster DNS name + wrong port. No user-facing changes since v5.5.2.
+
 ## [5.5.2] - 2026-05-27
 
 Internal release. Email-channel infrastructure prep: tightened secret handling on the inbound auth path, restored a wire-format detail for downstream tooling, and added deploy-time guards against missing configuration. No user-facing changes since v5.5.1.
