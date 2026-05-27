@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.6.8] - 2026-05-28
+
+Internal release. Email channel deploy workflow now applies the Service manifest alongside the Deployment (previously only the Deployment was applied, leaving cluster DNS without a record of the Service on first-time deploys). No user-facing changes since v5.6.7.
+
 ## [5.6.7] - 2026-05-28
 
 ### Fixed — capsuleRecipe silent-null on trigger mutations (smoke tests 65 + 66)

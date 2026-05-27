@@ -1,6 +1,6 @@
 ---
 name: jaz-pseudo-sql
-version: 5.6.7
+version: 5.6.8
 description: >-
   Use this skill when answering ad-hoc data questions that aren't covered by
   download_export (canonical reports — anomaly, audit, aging, P&L, BS, GL,
