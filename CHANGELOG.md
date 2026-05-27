@@ -1,5 +1,28 @@
 # Changelog
 
+## [5.6.0] - 2026-05-27
+
+### Added — live pseudo-SQL schema discovery
+
+- New `get_pseudo_sql_schema` tool returns the live curated catalog (70+ tables, 91+ join edges, 47+ allowlisted functions) AND the downloadable canonical agent skills doc (`jaz-pseudo-sql.md`, ~30 KB Agent Skills standard) in one call. Drop the `.md` body into your context as the syntax guide; treat the `tables[] / joins[] / functions[]` arrays as the column-list source. Call this BEFORE writing any pseudo-SQL query.
+- Response carries a stable 16-char hex `version` field — cache by it within a session, refresh only on mismatch.
+- New jaz-api Rule 155 lays down the call-first / version-cache-key contract.
+
+### Changed
+
+- `jaz-pseudo-sql` skill body now points at `get_pseudo_sql_schema` as the canonical schema source. The frontmatter Tools list, "Source of truth" section, and tool-selection section all reference the new tool.
+- Pseudo-SQL has been split into its own `pseudo_sql` namespace (was bundled under `operational_reports`). Cleaner search-routing signal for ad-hoc-SQL intents.
+
+### Removed
+
+- The static `references/curated-schema.md` snapshot inside the `jaz-pseudo-sql` skill. It was a hand-derived 6-table probe that drifted instantly against the real 70-table catalog. The new tool replaces it with live data.
+
+### Internal
+
+- New `clio mcp-call <tool> [--args '<json>']` CLI command for invoking MCP tools directly from the CLI. Used by smoke + debug workflows when an MCP tool has no `clio` shadow (read-only tools like `get_pseudo_sql_schema`, `list_capsule_recipes`, etc.). Always emits JSON on stdout. Not an agent surface; zero token-budget impact.
+- All pseudo-SQL + capsule-recipe smoke sections (61-66) now invoke MCP tools via `clio mcp-call` instead of raw HTTP — matches the rest of the smoke suite's `$CLIO ...` pattern and eliminates the `FREKI_URL` env var contract that drifted across the v5.5.0 → v5.5.1 releases.
+- Smoke section 67 exercises `get_pseudo_sql_schema` end-to-end against the demo org (catalog floors + version stability + agentSkillsDoc structural marker).
+
 ## [5.5.3] - 2026-05-27
 
 Internal release. Cloud email channel deployment-manifest fix: the reply-callback target was pointing at a non-existent in-cluster DNS name + wrong port. No user-facing changes since v5.5.2.

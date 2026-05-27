@@ -29,7 +29,7 @@ Surfaces when the query is syntactically valid but semantically rejected — wro
 |---|---|---|
 | `only SELECT queries are supported` | DELETE / UPDATE / INSERT verb | Rewrite as SELECT. The DSL is read-only by design. |
 | `a query must SELECT FROM at least one table` | `SELECT 1` (constant-only) | Add `FROM <table>` from the curated set. |
-| `unknown table "<name>"` (note: lowercased) | Table not in curated schema | Check `curated-schema.md` for the inventory. Common typos: plural vs singular (`invoice` vs `invoices`), wrong case. |
+| `unknown table "<name>"` (note: lowercased) | Table not in curated schema | Call `get_pseudo_sql_schema` for the live inventory. Common typos: plural vs singular (`invoice` vs `invoices`), wrong case. |
 
 ## Export-specific terminal states
 

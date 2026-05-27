@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.5.3
+version: 5.6.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 141 production gotchas, error
@@ -472,6 +472,8 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 153. **Pseudo-SQL `Idempotency-Key` dedup is server-side primary key** — same key + DIFFERENT query body returns the prior job's result (the server does NOT cross-check the new query body). For agent reliability, `run_pseudo_sql_and_download` auto-keys from `sha256(query).slice(0,16)` so dedup is query-tied automatically. If you call `export_pseudo_sql` directly with a manual key, treat it as a per-intent token — don't reuse across different queries.
 
 154. **`rollback_capsule_recipe` on a non-recipe capsule** (a capsule created by the legacy `create_capsule` tool or imported, not by the recipe engine) returns 422 `RECIPE_ROLLBACK_JOB_NOT_FOUND` ("No CAPSULE_RECIPE job found for capsule X in organization Y — nothing to roll back"). Rollback only works on capsules whose lifecycle was managed by the recipe engine. For legacy capsules, use `delete_capsule` instead.
+
+155. **Pseudo-SQL schema is canonical — call `get_pseudo_sql_schema` before any query.** The response returns the live curated catalog (tables / columns / joins / functions) PLUS the canonical `jaz-pseudo-sql.md` skill body in `agentSkillsDoc.content`. Drop the `.md` body into context as the syntax-rules source; treat `tables[] / joins[] / functions[]` as the column-list source. **Cache contract:** the `version` field is a stable 16-char hex hash; within a session, cache by version and don't re-call unless you have reason to believe the schema changed (e.g. a fresh backend deploy mid-session). Don't re-fetch on a wall-clock timer (upstream is `private, no-cache, must-revalidate`). A static curated-schema snapshot used to ship with the `jaz-pseudo-sql` skill before v5.6.0; it was dropped because it was structurally guaranteed to drift. Never write a query from a memorized column list.
 
 ## Supporting Files
 

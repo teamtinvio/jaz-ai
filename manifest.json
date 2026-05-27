@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.5.3",
+  "version": "5.6.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -585,6 +585,10 @@
     {
       "name": "run_pseudo_sql_and_download",
       "description": "One-shot composite: kickoff async export → poll every 2s → return { jobId, status, downloadUrl, buffer? | localPath? }. Default 25s timeout (safe under typical 30s MCP provider timeout, configurable up to 90s). Idempotency-Key auto-set to sha256(query).slice(0,16) so same-query repeats dedupe. Default returns CSV buffer; pass downloadToFile=true to write to ~/Downloads/pseudo-sql-<jobId>.csv. On TIMED_OUT returns { status:'TIMED_OUT', jobId } — caller can retry via get_pseudo_sql_export. Use for \"run this query and give me the CSV\" flows; use export_pseudo_sql + get_pseudo_sql_export for fine-grained control."
+    },
+    {
+      "name": "get_pseudo_sql_schema",
+      "description": "Live pseudo-SQL catalog (tables/columns/joins/functions) + agentSkillsDoc.content = canonical jaz-pseudo-sql.md (~30KB syntax guide). Call before any query. `version` is a stable cache key."
     },
     {
       "name": "plan_recipe",

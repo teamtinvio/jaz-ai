@@ -1,6 +1,6 @@
 # Query patterns by user intent
 
-Patterns vetted against the curated schema (see `curated-schema.md`). Each example uses `preview_pseudo_sql` for quick agent-loop questions; switch to `run_pseudo_sql_and_download` (or `export_pseudo_sql` + `get_pseudo_sql_export`) when you need the full result set as a CSV.
+Patterns vetted against the curated schema (call `get_pseudo_sql_schema` for the live inventory). Each example uses `preview_pseudo_sql` for quick agent-loop questions; switch to `run_pseudo_sql_and_download` (or `export_pseudo_sql` + `get_pseudo_sql_export`) when you need the full result set as a CSV.
 
 ---
 
@@ -84,7 +84,7 @@ ORDER BY balance DESC
 
 **"FX-exposed customer credit notes"**
 
-(`customer_credit_notes` table not yet column-confirmed; see `curated-schema.md` candidates list.)
+(`customer_credit_notes` table not yet column-confirmed; call `get_pseudo_sql_schema` and inspect its `tables[]` for the current column list.)
 
 ---
 
