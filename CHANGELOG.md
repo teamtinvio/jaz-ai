@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.6.7] - 2026-05-28
+
+### Fixed — capsuleRecipe silent-null on trigger mutations (smoke tests 65 + 66)
+
+When a trigger mutation (create_invoice / create_bill / create_journal / create_cash_in / create_cash_out) carries an inline `capsuleRecipe` payload that the post-commit publish can't accept, the API returns 201 with no `capsuleRecipeJob` field and no error reason on the body. The smoke suite's tests 65 + 66 hit this from v5.5.0 onwards and quietly failed for 20+ hours — three causes were tangled in: hardcoded `SGD` currency against a USD test org, attaching SALE-only DEFERRED_REVENUE to a journal, and using an Expense account in a Liability slot. None of these were visible on the response.
+
+- Smoke test now derives the recipe currency from the org's account currencies (no more hardcoded SGD against USD orgs), uses ACCRUAL_REVERSAL (JOURNAL_MANUAL-compatible) for the journal-path capsuleRecipe test, and auto-creates an Accrued Liability account where needed. The soft 422 fallback on the journal happy-path test (which masked the silent-null bug) has been removed — it now hard-asserts a non-null `jobResourceId`. All 8 inline FAIL paths in sections 65 + 66 now feed `record_fire_failure()` so fire-test issues carry actual per-failure detail instead of `FAILURES_JSON: []`.
+- New jaz-api Rule 156 codifies the single-currency v1 recipe constraint (recipe currency + every input account currency + base trx currency must all match — preview returns `ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH`, trigger silently nulls).
+- New jaz-api Rule 157 codifies the `x-accountClass` slot constraint on every `*AccountResourceId` input field, with the exact JSON path (`data.versions[0].inputSchema`, not the top-level field which is null).
+- Rule 143 (silent-null failure mode) expanded: lists all three known causes, gives the canonical diagnosis sequence (`preview_capsule_recipe` first, then `search_background_jobs` by `baseTransactionResourceId`), and documents the pre-flight gate.
+- Rule 150 corrected: trigger mutations do NOT return 422 on a base-type mismatch — only `preview_capsule_recipe` does. The trigger silently nulls.
+- All 10 capsuleRecipe-bearing tool descriptions now call out which base trx type each mutation accepts + the silent-null trap + `preview_capsule_recipe` as the pre-flight gate. `transaction-recipes` skill carries a three-gate pre-flight checklist + diagnosis flow.
+
+### Internal
+
+- `+216 tok` param-description surface (Rule 143 callout on shared `CAPSULE_RECIPE_PARAM`), `+52 tok` tool-description surface (per-mutation base-type guidance). Token budgets bumped accordingly with rationale. Net spend prevents the exact regression that just cost 20+ hours of fire-test failures.
+
 ## [5.6.6] - 2026-05-27
 
 Internal release. Fixes two independent bugs blocking the cloud email channel from coming up: the daemon's readiness check was probing a URL that didn't exist (always returned 503), and the production startup validator was treating channel-specific env vars as fatal on a deployment that doesn't use them. No user-facing changes since v5.6.5.

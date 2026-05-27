@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.6.6",
+  "version": "5.6.7",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -128,11 +128,11 @@
     },
     {
       "name": "create_invoice",
-      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\nREQUIRED: contactResourceId (search first), and accountResourceId per lineItem when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\", exchangeRate: 1.35 }`. Dates YYYY-MM-DD.\n\nreference MUST be unique per org — auto-generate with timestamp if user doesn't specify (e.g. INV-20260309-1430). Duplicate → 422.\n\nOptional capsuleRecipe (e.g. DEFERRED_REVENUE for a subscription) triggers an IFRS capsule recipe alongside the commit. Mutually exclusive with capsuleResourceId."
+      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\nREQUIRED: contactResourceId (search first), and accountResourceId per lineItem when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\", exchangeRate: 1.35 }`. Dates YYYY-MM-DD.\n\nreference MUST be unique per org — auto-generate with timestamp if user doesn't specify (e.g. INV-20260309-1430). Duplicate → 422.\n\nOptional capsuleRecipe (SALE base only — DEFERRED_REVENUE). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "update_invoice",
-      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches an IFRS recipe to a draft on activation (mutually exclusive with capsuleResourceId)."
+      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "delete_invoice",
@@ -168,11 +168,11 @@
     },
     {
       "name": "create_bill",
-      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — generate one with a timestamp if user doesn't specify. Optional capsuleRecipe (e.g. PREPAID_AMORTIZATION) triggers an IFRS capsule recipe alongside the commit — split a prepaid bill into monthly journals in one shot. Mutually exclusive with capsuleResourceId."
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — generate one with a timestamp if user doesn't specify. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "update_bill",
-      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches an IFRS recipe to the draft on activation (mutually exclusive with capsuleResourceId)."
+      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "delete_bill",
@@ -204,7 +204,7 @@
     },
     {
       "name": "create_journal",
-      "description": "Create a journal entry. IMPORTANT:\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount.\n- Total debits MUST equal total credits — the API rejects unbalanced journals.\n- Search accounts first to get the correct resourceIds.\n- Double-check your math: sum all DEBIT amounts and all CREDIT amounts — they must be equal.\n\nOptional capsuleRecipe (e.g. DEFERRED_REVENUE for unearned-revenue recognition, ACCRUAL_REVERSAL for month-end accruals) triggers an IFRS capsule recipe alongside the journal commit. Mutually exclusive with capsuleResourceId."
+      "description": "Create a journal entry. IMPORTANT:\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount.\n- Total debits MUST equal total credits — the API rejects unbalanced journals.\n- Search accounts first to get the correct resourceIds.\n- Double-check your math: sum all DEBIT amounts and all CREDIT amounts — they must be equal.\n\nOptional capsuleRecipe (JOURNAL_MANUAL base — ACCRUAL_REVERSAL, IFRS16_LEASE, LOAN_AMORTIZATION). DEFERRED_REVENUE/PREPAID_AMORTIZATION silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "create_transfer_trial_balance",
@@ -452,7 +452,7 @@
     },
     {
       "name": "create_cash_in",
-      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts) — any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, type (DEBIT/CREDIT), amount }. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability) — NOT bank/cash and NOT controlled accounts (AR/AP).\n\nOptional capsuleRecipe — cash_in is the canonical trigger for LOAN_AMORTIZATION (cash-in = loan disbursement, recipe builds the repayment schedule). Mutually exclusive with capsuleResourceId."
+      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts) — any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, type (DEBIT/CREDIT), amount }. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability) — NOT bank/cash and NOT controlled accounts (AR/AP).\n\nOptional capsuleRecipe (JOURNAL_DIRECT_CASH_IN base — LOAN_AMORTIZATION: cash-in = loan disbursement, recipe builds repayment schedule). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "list_cash_out",
@@ -460,7 +460,7 @@
     },
     {
       "name": "create_cash_out",
-      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, type: 'DEBIT' (typical for the expense leg), amount > 0 }. Offset accounts must be regular P&L or balance-sheet accounts — NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", type: \"DEBIT\", amount: 100 }.\n\nOptional capsuleRecipe — useful for loan repayment patterns (cash-out as installment). Mutually exclusive with capsuleResourceId."
+      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, type: 'DEBIT' (typical for the expense leg), amount > 0 }. Offset accounts must be regular P&L or balance-sheet accounts — NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", type: \"DEBIT\", amount: 100 }.\n\nOptional capsuleRecipe — no v1 recipe lists JOURNAL_DIRECT_CASH_OUT; passing capsuleRecipe here silently nulls. Use create_cash_in or create_journal for LOAN_AMORTIZATION. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "get_cash_in",
@@ -468,7 +468,7 @@
     },
     {
       "name": "update_cash_in",
-      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches an IFRS recipe (mutually exclusive with capsuleResourceId)."
+      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "get_cash_out",
@@ -476,7 +476,7 @@
     },
     {
       "name": "update_cash_out",
-      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches an IFRS recipe (mutually exclusive with capsuleResourceId)."
+      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "list_cash_transfers",
@@ -604,11 +604,11 @@
     },
     {
       "name": "get_capsule_recipe",
-      "description": "Server-side recipe lifecycle. Get one capsule recipe descriptor by enum name (e.g. PREPAID_AMORTIZATION, LOAN_AMORTIZATION, ACCRUAL_REVERSAL, DEFERRED_REVENUE, IFRS16_LEASE). Use list_capsule_recipes to discover available names. Returns the per-version inputSchema describing exactly which fields capsuleRecipe.inputs needs."
+      "description": "Get one capsule recipe descriptor by enum name. inputSchema at `data.versions[0].inputSchema` (NOT top-level). Carries `allowedBaseTransactionTypes`, `x-accountClass` per *AccountResourceId slot, `x-baseTrxBinding` for auto-fills. Use list_capsule_recipes for available names."
     },
     {
       "name": "preview_capsule_recipe",
-      "description": "Server-side recipe lifecycle (NOT the offline calculator — for offline planning use plan_recipe). Compute the blueprint a recipe would build for given inputs WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. Use BEFORE triggering via the capsuleRecipe payload on a base-trx mutation to validate inputs + preview the schedule. The base-transaction triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing — supply all three to auto-fill totalAmount/currency/anchor dates from an existing base-trx, OR omit all three for a pure compute preview."
+      "description": "Compute the blueprint a recipe would build, WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. **Pre-flight gate** before sending capsuleRecipe payloads — trigger mutations silently null on publish failure but preview surfaces every problem as a clean 422 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH, RECIPE_INVALID_BASE_TRANSACTION_TYPE, etc — Rule 143). The base-trx triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing — supply all three to auto-fill totalAmount/currency/anchor dates, OR omit all three for a pure compute preview."
     },
     {
       "name": "resume_capsule_recipe",
@@ -632,7 +632,7 @@
     },
     {
       "name": "update_journal",
-      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. Optional capsuleRecipe retro-attaches an IFRS recipe (mutually exclusive with capsuleResourceId)."
+      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "bulk_update_journals",

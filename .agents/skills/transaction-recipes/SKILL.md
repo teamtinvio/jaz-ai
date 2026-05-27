@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.6.6
+version: 5.6.7
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -299,10 +299,26 @@ A second path: 5 IFRS recipes (Loan Amortization, Accrual Reversal, Prepaid Amor
 
 **Trigger-mutation payload** — to create a base-trx AND fire a recipe in one shot, pass `capsuleRecipe: {recipeName, recipeVersion?, inputs}` to the create/update mutation. Mutually exclusive with `capsuleResourceId` (the "attach to existing capsule" path).
 
-**Recovery flow**:
-- `capsuleRecipeJob` is null on the response → recipe never started server-side. Poll `search_background_jobs` filtered by `baseTransactionResourceId` (NOT `capsuleResourceId` — which may not exist yet).
-- Job status `FAILED` → use `resume_capsule_recipe` (≤3 attempts) OR `rollback_capsule_recipe(dryRun=true)` first then `rollback_capsule_recipe(dryRun=false)`.
-- Capsule wasn't created via the recipe engine → rollback returns 422 `RECIPE_ROLLBACK_JOB_NOT_FOUND`; use `delete_capsule` for legacy capsules.
+### Three pre-flight gates BEFORE sending `capsuleRecipe` (else the response silently nulls)
+
+The trigger mutation is **best-effort post-commit**: if the recipe publish fails inside customer-service, the base-trx still commits, the response still returns 201, but `capsuleRecipeJob` is null and **no error reason is surfaced on the response body**. Three causes of silent null — gate every one of them before sending:
+
+| Gate | Constraint | Pre-flight check |
+|---|---|---|
+| **Base trx type** | `recipeName` must match a trigger mutation in the recipe's `allowedBaseTransactionTypes`. PREPAID_AMORTIZATION→PURCHASE, DEFERRED_REVENUE→SALE, ACCRUAL_REVERSAL→JOURNAL_MANUAL, IFRS16_LEASE→JOURNAL_MANUAL, LOAN_AMORTIZATION→JOURNAL_DIRECT_CASH_IN \| JOURNAL_MANUAL | `get_capsule_recipe(name).allowedBaseTransactionTypes` ↔ trigger mutation |
+| **Currency** | Recipe `currency`, every `*AccountResourceId` account's `currencyCode`, and base trx `currencyCode` ALL must match (v1 recipes are single-currency) | `get_account(<id>).currencyCode` for every input account |
+| **Account class** | Each `*AccountResourceId` slot has an `x-accountClass` constraint in the recipe inputSchema (Asset/Liability/Expense/Revenue) | `get_capsule_recipe(name).versions[0].inputSchema.properties.<field>['x-accountClass']` vs `get_account(<id>).accountClass` |
+
+**The canonical pre-flight is one call**: `preview_capsule_recipe(recipeName, inputs)`. Pure-compute (no side effects). Surfaces every input/class/currency violation as a clean 422 with a concrete `error_type`. The trigger mutation does NOT surface these — it just returns 201 with no `capsuleRecipeJob`. Always preview first if you can't trust the inputs.
+
+See `jaz-api` Rule 143 (silent-null failure mode + diagnosis sequence), Rule 144 (closed enum on `recipeName`), Rule 150 (RECIPE_INVALID_BASE_TRANSACTION_TYPE — preview-only, NOT trigger), Rule 156 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH), Rule 157 (x-accountClass slot constraint).
+
+**Recovery flow** (when `capsuleRecipeJob` is null on the response):
+
+1. **Re-run `preview_capsule_recipe`** with the same `recipeName` + `inputs`. The 422 you get back is the exact reason the trigger mutation silently nulled. Fix the input and retry.
+2. **Poll `search_background_jobs --filter '{"baseTransactionResourceId":{"eq":"<id>"}}'`** — if a `FAILED` job exists, `errorDetails` has the publish failure. If no job exists, the publish never queued (validation rejected pre-queue).
+3. **Job status `FAILED`** → `resume_capsule_recipe` (≤3 attempts) OR `rollback_capsule_recipe(dryRun=true)` first, then `rollback_capsule_recipe(dryRun=false)`.
+4. **Capsule wasn't created via the recipe engine** → rollback returns 422 `RECIPE_ROLLBACK_JOB_NOT_FOUND`; use `delete_capsule` for legacy capsules.
 
 **DO NOT** use server-side execution for `fx-reval` — Jaz auto-handles ALL period-end IAS 21.23 FX translation; double-posting risk identical to the offline `execute_recipe(recipe: 'fx-reval')` warning.
 
