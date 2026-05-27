@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.7.2] - 2026-05-28
+
+Internal release — server-side daemon fixes. No user-facing changes since v5.7.1.
+
 ## [5.7.1] - 2026-05-28
 
 Patch on top of v5.7.0.
