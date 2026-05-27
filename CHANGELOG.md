@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.5.2] - 2026-05-27
+
+Internal release. Email-channel infrastructure prep: tightened secret handling on the inbound auth path, restored a wire-format detail for downstream tooling, and added deploy-time guards against missing configuration. No user-facing changes since v5.5.1.
+
 ## [5.5.1] - 2026-05-27
 
 Internal release automation update. No user-facing changes since v5.5.0.
