@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.6.1] - 2026-05-27
+
+Internal release. Cloud email channel deploy workflow now reads the kubeconfig from the team-standard secret name, matching the convention used by every other deploy in this org. No user-facing changes since v5.6.0.
+
 ## [5.6.0] - 2026-05-27
 
 ### Added — live pseudo-SQL schema discovery
