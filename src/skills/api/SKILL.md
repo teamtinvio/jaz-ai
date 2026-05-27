@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.6.9
+version: 5.6.10
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 141 production gotchas, error
@@ -488,10 +488,6 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 156. **v1 capsule recipes are single-currency — `ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH`.** The recipe `currency` field, every `*AccountResourceId` account's `currencyCode`, and the base transaction's `currencyCode` ALL MUST match. Preview returns 422 `ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH` with a concrete message (e.g. "account X is denominated in USD but the recipe currency is SGD"). **Trigger mutation silently nulls `capsuleRecipeJob`** (Rule 143). Practical recipe: never hardcode `currency`; derive from `get_account(prepaidAssetAccountResourceId).currencyCode` (or the base trx currency) and use the same value as the recipe input. The recipe descriptor's `currency.x-baseTrxBinding: "strict"` field marks this — when present, the value is bound to (and must equal) `trx.currencyCode` post-commit. Caught by smoke runs since v5.5.0 — tests 65/66 hardcoded `SGD` and silently nulled against a USD fire-test org for 20+ hours.
 
 157. **Recipe input `*AccountResourceId` fields are account-class-locked — `x-accountClass` in inputSchema is authoritative.** Each `*AccountResourceId` slot on a recipe's input schema carries an `x-accountClass` constraint (`"Asset"`, `"Liability"`, `"Expense"`, `"Revenue"`, `"Equity"`). Passing an account whose class doesn't match the slot's `x-accountClass` is rejected post-commit and silently nulls `capsuleRecipeJob` (Rule 143). Schema location: `get_capsule_recipe(name).data.versions[0].inputSchema.properties.<fieldName>['x-accountClass']` — **note `versions[0].inputSchema`, NOT `inputSchema` at the top level**. Examples: PREPAID_AMORTIZATION needs `prepaidAssetAccountResourceId: Asset` + `expenseAccountResourceId: Expense`; DEFERRED_REVENUE needs `deferredRevenueAccountResourceId: Liability` + `revenueAccountResourceId: Revenue`; ACCRUAL_REVERSAL needs `expenseAccountResourceId: Expense` + `accruedLiabilityAccountResourceId: Liability`. Always pre-validate via `get_account(resourceId).accountClass` against the slot constraint, or just call `preview_capsule_recipe(recipeName, inputs)` to surface every class violation as a clean 422.
-
-### Error Recovery
-
-158. **Tool error envelopes may carry a structured `repair` suggestion (W1.3).** When a `create_*` / `update_*` / `get_*` tool fails with a high-confidence pattern (404 not found, 422 missing FK, duplicate reference, tax-profile direction mismatch), the response is enriched with `repair: { tool, arguments, reason }`. The `tool` field is ALWAYS read-only AND verified to exist in the registry. Consumption pattern: if `repair` is present, call `execute_tool(repair.tool, repair.arguments)` directly to recover; do NOT retry the original write tool until the repair surfaces the correct resourceId/reference. Full envelope shape, pattern list, and worked example in `references/errors.md` (Repair Suggestions section). Purely additive — no match → no `repair`, fall back to free-text `hint`. Infinite-loop protection comes from the agent-loop repetition guard (same tool+input retried 3× is blocked).
 
 ## Supporting Files
 

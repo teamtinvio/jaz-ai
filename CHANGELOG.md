@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.6.10] - 2026-05-28
+
+Internal release. Pre-release audit now also runs at commit time, in addition to the existing release-time check. No user-facing changes since v5.6.9.
+
 ## [5.6.9] - 2026-05-28
 
 Internal release. Email channel daemon now sends the correct delegated-auth headers when calling the upstream API on behalf of an organization user (previously sent unrecognized header names, causing the upstream to reject every request with 401). No user-facing changes since v5.6.8.
