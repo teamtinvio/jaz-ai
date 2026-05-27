@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.6.6] - 2026-05-27
+
+Internal release. Fixes two independent bugs blocking the cloud email channel from coming up: the daemon's readiness check was probing a URL that didn't exist (always returned 503), and the production startup validator was treating channel-specific env vars as fatal on a deployment that doesn't use them. No user-facing changes since v5.6.5.
+
 ## [5.6.5] - 2026-05-27
 
 Internal release. Rewrote the v5.6.3 changelog entry to match the team's audience-facing template. No user-facing changes since v5.6.4.
