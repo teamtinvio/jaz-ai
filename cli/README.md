@@ -19,7 +19,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 
 - [Three Ways In](#three-ways-in) — CLI, MCP, Skills
 - [CLI](#cli) — 55 command groups
-- [MCP Server](#mcp-server) — 284 tools for AI agents
+- [MCP Server](#mcp-server) — 285 tools for AI agents
 - [Skills](#skills) — Teach any AI the Jaz API
 - [Setup](#setup) — Auth, multi-org, automation
 

@@ -1,5 +1,37 @@
 # Changelog
 
+## [5.7.0] - 2026-05-28
+
+Agent stack speed + delight pass. Wave 1 of the speed/delight masterplan ships as one release.
+
+### Added — agent error recovery
+
+When a tool call fails with a known-recoverable cause (resource not found, missing foreign key, duplicate reference, tax-direction mismatch), the response now carries a structured `repair` block telling the agent exactly which read-only tool to call next instead of leaving it to guess from free-text. The block always points at a `search_*` / `list_*` / `get_*` / `view_*` / `describe_*` tool — never a write or destructive one. Agents that decode the block recover in one turn instead of the usual three or four. The Telegram and ChatKit operator views surface the same suggestion as a "Suggested next step" line below the error.
+
+### Added — pre-flight guard on finalize
+
+Finalizing an invoice, bill, customer credit note, or supplier credit note without `accountResourceId` on every line item now fails fast with the same structured `repair` pointer (suggested next tool: `search_accounts`) without burning a round trip on the API. Applies to `create_*` calls with `saveAsDraft: false` and to all four `finalize_*` calls. Drafts still allow missing line item account IDs as before.
+
+### Added — write tools can return the full entity
+
+`create_invoice`, `create_bill`, `create_journal`, `create_contact`, and `create_item` now accept `returnFullEntity: true`. The agent gets the populated entity back from the create call instead of the previous `{ resourceId }` stub, so the standard "create then re-fetch" round trip collapses to one turn. Default behavior is unchanged.
+
+### Added — MCP flat mode with parallel-safe annotations
+
+Hosts that benefit from a full eager tool list (Claude Code in particular) can opt into `JAZ_MCP_FLAT=1` to receive every tool with per-tool `readOnlyHint`, `destructiveHint`, `idempotentHint`, and `openWorldHint` annotations on `tools/list`. With the hints in hand, the host parallelizes read-only chains roughly 2x. Default mode is unchanged (3-meta-tool lazy discovery at ~363 tokens) for hosts that prefer the smaller handshake.
+
+### Added — operator-visible run metrics
+
+Set `CLIO_CLI_METRICS=1` to print a one-line summary at the end of every invocation: turns, input/output/cached tokens, cost, wall-clock duration, and time-to-first-token where streaming applies. The same line appears in MCP stdio mode so hosts that surface stderr in tool-call panels can show it. Coexists with the existing daemon Prometheus metrics — different audiences, both work. Off by default.
+
+### Added — instrumentation for stack operators
+
+New Prometheus histograms for time-to-first-token (`clio_llm_ttft_seconds`) and prompt cache hit ratio (`clio_llm_cache_hit_ratio`). New per-turn structured log line (`_event: "agent.turn"`) makes multi-turn cost and repair-loop patterns analyzable. PII redaction in the daemon logger now covers contact name, email, phone, and line-item description fields at three nesting depths.
+
+### Notes
+
+All changes hold the existing tool count (285) and overall manifest token cost. No breaking changes. Internal-only telemetry and ops tooling that supports this work is documented separately and not part of the public extension surface.
+
 ## [5.6.10] - 2026-05-28
 
 Internal release. Pre-release audit now also runs at commit time, in addition to the existing release-time check. No user-facing changes since v5.6.9.
