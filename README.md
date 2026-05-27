@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
   <img src="https://img.shields.io/badge/MCP_tools-284-blue?style=for-the-badge" alt="284 MCP Tools">
-  <img src="https://img.shields.io/badge/API_rules-157-green?style=for-the-badge" alt="157 API Rules">
+  <img src="https://img.shields.io/badge/API_rules-158-green?style=for-the-badge" alt="158 API Rules">
   <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 Skills">
   <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
@@ -142,7 +142,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 
 | Layer | What it is | Use it alone when |
 |-------|------------|-------------------|
-| **Skills** | Domain knowledge as markdown (157 API rules, 16 recipes, 12 jobs, conversion playbooks, practitioner workflows). The agent reads these at session start. | Your AI tool reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
+| **Skills** | Domain knowledge as markdown (158 API rules, 16 recipes, 12 jobs, conversion playbooks, practitioner workflows). The agent reads these at session start. | Your AI tool reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
 | **CLI** (`jaz-clio`) | A `clio` binary: 56 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
 | **MCP server** (`clio mcp`) | The same binary in MCP mode: 284 Jaz tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
@@ -235,9 +235,9 @@ Each engagement template names the exact Jaz tools, recipes, and calculators to 
 
 | Reference | Lines | Content |
 |-----------|-------|---------|
-| `SKILL.md` | 541 | 157 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `SKILL.md` | 545 | 158 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
 | `endpoints.md` | 2342 | Request/response examples for every core endpoint |
-| `errors.md` | 860 | Error catalog with root causes and fixes |
+| `errors.md` | 914 | Error catalog with root causes and fixes |
 | `field-map.md` | 678 | Intuitive name → actual field name mapping |
 | `search-reference.md` | 769 | Filter fields, sort fields, operators for 28 search endpoints |
 | `full-api-surface.md` | 759 | Complete endpoint catalog (80+), enums, limits |

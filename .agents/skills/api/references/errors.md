@@ -858,3 +858,57 @@ Journals support a top-level `currency` object to create entries in a foreign cu
 ---
 
 *Last updated: 2026-03-13 — Added: Nano-classifier errors (classes field, double-wrapped GET), payment record errors (cashflow vs payment IDs), sub-resource raw array errors. Previous: Cash entry path migration, Quick Fix errors.*
+
+---
+
+## Repair Suggestions (W1.3)
+
+When a Jaz tool call fails, the MCP `execute_tool` response (and the daemon-side executor return) may now carry a structured `repair` block alongside the existing `error` / `hint` fields. The block is built by the motherboard registry (`src/core/registry/repair-hints.ts`); the API server is unchanged.
+
+### Shape
+
+```json
+{
+  "error": "lineItems[0].accountResourceId is required if [saveAsDraft] is false",
+  "status": 422,
+  "endpoint": "/api/v1/invoices",
+  "hint": "Validation error — check field values against the tool description.",
+  "repair": {
+    "tool": "search_accounts",
+    "arguments": {},
+    "reason": "Line item missing accountResourceId. Search for the right GL account first (e.g. by name or accountType), then retry with the resourceId on each line item."
+  }
+}
+```
+
+The `repair` field is OMITTED entirely when no high-confidence pattern matches. The agent then falls back to the free-text `hint` field (existing behavior).
+
+### Safety invariants
+
+- `repair.tool` always starts with a read-only prefix: `search_*`, `list_*`, `get_*`, `view_*`, `describe_*`. Never a write or destructive tool.
+- `repair.tool` is verified to exist in the registry before the suggestion ships. Bogus names (typos, naive plurals) are silently dropped.
+- Recursion bounded by the existing agent-loop repetition guard (`MAX_REPEAT = 2`): same tool+input retried 3× is blocked.
+
+### Patterns matched in v1
+
+| Trigger | Suggested tool | Used when input contains |
+|---|---|---|
+| `status === 404` or `not found` | `search_contacts` | `contactResourceId` (string) AND error mentions "contact" |
+| `status === 404` on `get_*` / `update_*` / `delete_*` / `finalize_*` / `pay_*` | `search_<entity>s` (only if exists in registry) | any `resourceId` |
+| `status === 422` mentioning `accountResourceId` | `search_accounts` | (no input requirement) |
+| `status === 422` + `duplicate` / `already exists` on `create_*` | `search_<entity>s` filtered by `reference` | `reference` (string) |
+| `status === 422` + tax-profile direction mismatch | `search_tax_profiles` | (no input requirement) |
+
+Non-API errors (validation, schema, network) do NOT carry a repair suggestion — pattern-matching free-text is too brittle. The existing `hint` field covers those cases.
+
+### Recommended agent consumption
+
+```
+1. Receive tool error result with `repair` field present.
+2. Call execute_tool(repair.tool, repair.arguments).
+3. Use the search result to construct a corrected payload.
+4. Retry the original tool ONCE with the corrected payload.
+5. If it still fails, do NOT loop — surface the error to the user.
+```
+
+Repair suggestions are advisory, not authoritative. The agent may ignore them when context (recent tool calls, user intent) suggests a different approach is better.
