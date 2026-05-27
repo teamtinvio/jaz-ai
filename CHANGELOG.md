@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.6.2] - 2026-05-27
+
+Internal release. Cloud email channel deploy pipeline now runs end-to-end on the deploy host: build, image import, and cluster updates all happen over a single SSH session. Matches the deploy pattern already used by the other cloud channels. No user-facing changes since v5.6.1.
+
 ## [5.6.1] - 2026-05-27
 
 Internal release. Cloud email channel deploy workflow now reads the kubeconfig from the team-standard secret name, matching the convention used by every other deploy in this org. No user-facing changes since v5.6.0.
