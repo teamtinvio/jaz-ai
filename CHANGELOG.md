@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.6.9] - 2026-05-28
+
+Internal release. Email channel daemon now sends the correct delegated-auth headers when calling the upstream API on behalf of an organization user (previously sent unrecognized header names, causing the upstream to reject every request with 401). No user-facing changes since v5.6.8.
+
 ## [5.6.8] - 2026-05-28
 
 Internal release. Email channel deploy workflow now applies the Service manifest alongside the Deployment (previously only the Deployment was applied, leaving cluster DNS without a record of the Service on first-time deploys). No user-facing changes since v5.6.7.
