@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.6.5] - 2026-05-27
+
+Internal release. Rewrote the v5.6.3 changelog entry to match the team's audience-facing template. No user-facing changes since v5.6.4.
+
+## [5.6.4] - 2026-05-27
+
+Internal release. Fire-test callback now reports honest pass/fail counts when smoke crashes mid-run instead of defaulting to "0/0" — fixes the deceptive `❌ fire tests failed (0/0)` Slack render that filed empty-detail issues on trigger repos.
+
+- `.github/workflows/fire.yml` now log-scrapes per-test PASS/FAIL/SKIP markers when `RESULTS_JSON:` and `Results:` summary lines are both absent (smoke crash signature). On the crashed fire-output from run 26508315685, the new fallback recovers `944/1/6` (pass/fail/skip) where the old logic reported `0/0/0`.
+- New callback fields `crashed: bool` and `last_section: string` flow through to Sentinel so the Slack render can distinguish "crashed mid-run at section X" from a real test-failure regression. Backwards-compatible — old Sentinel ignores unknown fields.
+
+No user-facing changes since v5.6.3.
+
+## [5.6.3] - 2026-05-27
+
+Internal release. CI smoke-test harness reliability fixes. No user-facing changes since v5.6.2.
+
 ## [5.6.2] - 2026-05-27
 
 Internal release. Cloud email channel deploy pipeline now runs end-to-end on the deploy host: build, image import, and cluster updates all happen over a single SSH session. Matches the deploy pattern already used by the other cloud channels. No user-facing changes since v5.6.1.
