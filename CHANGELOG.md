@@ -1,5 +1,29 @@
 # Changelog
 
+## [5.8.0] - 2026-05-28
+
+Sprint 2 wave-2 ship. Daemon-side instrumentation + Anthropic prompt-cache pre-warm.
+
+### Faster first response after the daemon starts
+
+When `clio serve` boots with `LLM_PROVIDER=anthropic`, the daemon now seeds the Anthropic prompt cache during startup so the first real message after a daemon boot reads from cache instead of paying the cache-write cost. First-message time to first token drops by roughly one to two seconds. Opt out with `CLIO_DISABLE_PREWARM=1`. The pre-warm is fire-and-forget so daemon startup is not blocked.
+
+OpenAI deployments skip the pre-warm automatically (different cache-pricing model). An equivalent prewarm for OpenAI Responses API context caching is on the follow-up list.
+
+### Instrumentation for stack operators
+
+Three new Prometheus metric families on the daemon `/metrics` endpoint:
+
+- `clio_workflow_ttfmo_seconds{workflow, channel}`: time to first content event per workflow class. Workflow labels derive from the rubric corpus so the label space grows with the agent surface, not a hard-coded list. Tool-first turns count tool_start as the first event; see help text for the exact semantics.
+- `clio_agent_repair_loops_total{channel, anchor_tool}`: count of sessions where the agent followed a repair suggestion and the original tool errored again. Informational only at this stage (no CI gate) until validated against a real-traffic labeled corpus.
+- `clio_agent_repair_loop_size{channel}`: distribution of consecutive failed retries within a repair loop.
+
+Each completed session also emits a `_event: session.complete` structured log line that rolls up turns, tool calls, repair loops, cost, workflow class, and cache hit ratio. Per-turn `agent.turn` log lines now also carry `isRepair: boolean` on each tool call so downstream consumers can trace the repair-loop pattern at turn resolution.
+
+### Notes
+
+No breaking changes. Tool count unchanged at 285. Default behavior preserved across every channel. Every new capability is opt-in via env var or surfaced only when the daemon is configured with a matching provider.
+
 ## [5.7.2] - 2026-05-28
 
 Internal release — server-side daemon fixes. No user-facing changes since v5.7.1.

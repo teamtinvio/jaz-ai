@@ -1,6 +1,6 @@
 {
   "name": "jaz-clio",
-  "version": "5.7.2",
+  "version": "5.8.0",
   "description": "Clio: Command Line Interface Operator for Jaz AI.",
   "type": "module",
   "bin": {
@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc && node --input-type=module -e \"import{readFileSync,writeFileSync}from'fs';const c=readFileSync('dist/index.js','utf8');if(!c.startsWith('#!')){writeFileSync('dist/index.js','#!/usr/bin/env node\\n'+c)}\"",
-    "postbuild": "cp -r src/agent/prompts dist/agent/prompts",
+    "postbuild": "cp -r src/agent/prompts dist/agent/prompts && mkdir -p dist/eval/rubrics && cp src/eval/rubrics/*.json dist/eval/rubrics/",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
