@@ -20,7 +20,7 @@ Offline tools (no API key needed): `plan_recipe`, `search_help_center`, all `pra
 2. **Transaction dates are `valueDate`** (YYYY-MM-DD) — never `issueDate` / `invoiceDate` / `date`.
 3. **Line item text field is `name`** — never `description`.
 4. **`saveAsDraft` defaults `false`** at the API; CLI/MCP create-tools default `true`. Set explicitly when the user says "finalize".
-5. **Pagination uses `limit` / `offset`** — sort is required when `offset` is set.
+5. **Pagination uses `limit` / `offset`** — `offset` is a 0-indexed page number (offset=1 = second page), not a row-skip. Sort is required when `offset` is set.
 6. **Create responses return `{ resourceId }` only** — re-GET to load the full entity.
 
 ## Transactions — never hand-construct journals for IFRS

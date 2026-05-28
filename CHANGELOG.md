@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.8.1] - 2026-05-28
+
+### Fixed
+
+Pagination guidance for agents is now consistent everywhere. Search and list `offset` is a 0-indexed page number (offset 1 = the second page of `limit` rows), not a row-skip count. The MCP server instructions, the API skill rules, and the agent operating-rules file now all state this clearly, matching the CLI reference docs that already did. Six CLI `--offset` help texts that still read a bare "Offset" now read "Page number offset (0-indexed)" like the rest. No behavior change: the underlying pagination has always worked this way.
+
 ## [5.8.0] - 2026-05-28
 
 Sprint 2 wave-2 ship. Daemon-side instrumentation + Anthropic prompt-cache pre-warm.
