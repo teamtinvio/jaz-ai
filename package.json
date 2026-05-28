@@ -20,6 +20,7 @@
     "token-budget:check": "node scripts/token-budget-tighten.mjs",
     "token-budget:tighten": "node scripts/token-budget-tighten.mjs --apply",
     "manifest:size": "node scripts/manifest-size.mjs",
+    "audit:repair-loop": "vitest run src/__tests__/eval/repair-loop-precision.test.ts",
     "prepublishOnly": "bash scripts/sync-cli-assets.sh && npm run build"
   },
   "keywords": [
