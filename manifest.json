@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.8.1",
+  "version": "5.9.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -764,7 +764,7 @@
     },
     {
       "name": "view_auto_reconciliation",
-      "description": "Generate auto-reconciliation suggestions for a bank account. READ-ONLY — does NOT write reconciliations. To execute a reconciliation, use quick_reconcile (bulk async) or apply_bank_rule (rule-driven async) or one of the per-entry reconcile_* tools (sync). Returns magic match suggestions."
+      "description": "Generate auto-reconciliation suggestions for a bank account. READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation. Pass `includeRaw:true` to also get the unmapped payload. On high-volume accounts the engine can 500 (OOM) → the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher."
     },
     {
       "name": "list_fixed_assets",
@@ -1160,11 +1160,23 @@
     },
     {
       "name": "reconcile_invoice_receipt",
-      "description": "⚠️ BSE must have `paymentDirection: PAYIN` (money in — AR). Produce via `bank add-records` with a POSITIVE amount (creates `credit_amount > 0` → PAYIN). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Create an invoice and auto-reconcile it to a bank statement entry (AR). Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. NOT idempotent."
+      "description": "CREATES A NEW invoice and auto-reconciles it to a bank statement entry (AR). To match an EXISTING open invoice instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYIN` (money in — AR). Produce via `bank add-records` with a POSITIVE amount (creates `credit_amount > 0` → PAYIN). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. NOT idempotent."
     },
     {
       "name": "reconcile_bill_receipt",
-      "description": "⚠️ BSE must have `paymentDirection: PAYOUT` (money out — AP). Produce via `bank add-records` with a NEGATIVE amount (creates `debit_amount > 0` → PAYOUT). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Create a bill and auto-reconcile it to a bank statement entry (AP). Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. NOT idempotent."
+      "description": "CREATES A NEW bill and auto-reconciles it to a bank statement entry (AP). To match an EXISTING open bill instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYOUT` (money out — AP). Produce via `bank add-records` with a NEGATIVE amount (creates `debit_amount > 0` → PAYOUT). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. NOT idempotent."
+    },
+    {
+      "name": "reconcile_with_payments",
+      "description": "USE THIS to match a bank statement entry to an EXISTING open bill / invoice / payment (NOT reconcile_bill_receipt or reconcile_invoice_receipt, which CREATE a new bill/invoice). Pass the open transaction's cashflowTransactionResourceId (from search_cashflow_transactions or a view_auto_reconciliation suggestion) in businessTransactionPayments[] — this CREATES the payment AND reconciles in one call; no pay_bill / pay_invoice first. FX is resolved server-side — pass NO rate for the common case (only supply paymentAmount + currencySettings for the rare bill-currency ≠ bank-currency case). Sync — returns the reconciled entry status. NOT idempotent: a blind retry double-creates a payment; confirm reconciled-state via search_bank_records(status: RECONCILED) before retrying."
+    },
+    {
+      "name": "reconcile_magic_match",
+      "description": "Bulk-accept MAGIC_MATCH suggestions: reconcile many bank entries against EXISTING open business transactions and/or payments in one call (max 500 entries). Feed entries from view_auto_reconciliation suggestions. Returns a per-entry split { reconciled[], failed[] } — a 200 with a non-empty failed[] is a PARTIAL success; surface failed entries (with their errorCode) and loop. Entry-level idempotency-keyed server-side. Use reconcile_with_payments for a single precise match; use this to accept a batch of suggestions at once."
+    },
+    {
+      "name": "reconcile_learned_prediction",
+      "description": "Accept an ML learned-prediction suggestion to reconcile a bank entry. predictedPayload + predictedPayloadSchemaVersion are passed through VERBATIM from a view_auto_reconciliation suggestion (recommendationType MAGIC_RECONCILE_WITH_CASH_IN_OUT) — do not construct them by hand. Pass retryToken to force a fresh journal on an edit-then-retry; omit it for an idempotent replay. Sync — returns the reconciled entry status. On failure (stale/invalid payload), fall back to reconcile_with_payments — do NOT retry the same opaque payload."
     },
     {
       "name": "validate_drafts",

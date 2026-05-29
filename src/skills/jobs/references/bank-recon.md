@@ -10,18 +10,24 @@
 - **`search_accounts(filter: {accountType: {eq: 'Bank Accounts'}})`** — step 1 alternative: same data via standard CoA-search envelope if downstream wants pagination.
 - **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', valueDateRange: {from, to}, limit: 200, sort: 'valueDate:asc')`** — step 2: per-account work queue.
 - **`search_bank_records(accountResourceId: <id>, status: 'POSSIBLE_DUPLICATE')`** — step 3: handle dups FIRST or you'll double-create reconciling them.
-- **`view_auto_reconciliation(bankAccountResourceId: <id>, recommendationType: 'MAGIC_MATCH' | 'MAGIC_RECONCILE_WITH_CASH_TRANSFER' | 'MAGIC_RECONCILE_WITH_BANK_RULE' | 'MAGIC_QUICK_RECONCILE' | 'MAGIC_RECONCILE_WITH_CASH_IN_OUT')`** — step 4: READ-ONLY auto-match suggestions. `MAGIC_RECONCILE_WITH_CASH_IN_OUT` returns Learned-Predictions (LP) suggestions sourced from past reconciliations on similar bank-entry shapes. Does NOT write. NOTE: documented 500 quirk on high-volume accounts — see error table.
+- **`view_auto_reconciliation(bankAccountResourceId: <id>, recommendationType: 'MAGIC_MATCH' | 'MAGIC_RECONCILE_WITH_CASH_TRANSFER' | 'MAGIC_RECONCILE_WITH_BANK_RULE' | 'MAGIC_QUICK_RECONCILE' | 'MAGIC_RECONCILE_WITH_CASH_IN_OUT', autoCommitMaxAmount?: <number>)`** — step 4: READ-ONLY auto-match suggestions. Returns **execution-ready `suggestions[]`** — each carries `recommendedTool`, `execute` (ready-to-pass args), `confidenceTier`, and `autoCommitEligible`. This is the entry point for the auto-match decision gate (step 4a). `MAGIC_RECONCILE_WITH_CASH_IN_OUT` returns Learned-Predictions. Does NOT write. NOTE: 500 quirk on high-volume accounts → degrades to `{degraded:true}`; scope by period or fall back to the cascade matcher (see error table).
 - **`search_cashflow_transactions(filter: {organizationAccountResourceId: <bank-id>, totalAmount: {eq: <amt>}, valueDate: {between: [<-3d>, <+3d>]}})`** — step 5 manual match: search book-side transactions for the same amount within ±3 day window.
 
 ### MCP tools — execute reconciliation (NOT idempotent — see error table)
-- **`apply_bank_rule(actionShortcutResourceId: <rule-id>, businessTransactionResourceIds: [<bank-entry-ids>])`** — step 4: rule-driven recon (async; returns jobId).
-- **`quick_reconcile(bankAccountResourceId, journalsForReconciliation: [...])`** — step 4: bulk async (max 500 per call); returns jobId.
-- **`reconcile_invoice_receipt(...)`** — step 4: 1:1 match of bank entry to AR invoice.
-- **`reconcile_bill_receipt(...)`** — step 4: 1:1 match to AP bill.
-- **`reconcile_direct_cash_entry(...)`** — step 4: bank entry to a single cash-in / cash-out line.
-- **`reconcile_cash_journal(...)`** — step 4: bank entry to a multi-line cash journal.
-- **`reconcile_manual_journal(...)`** — step 4: bank entry to a manual journal.
-- **`reconcile_cash_transfer(...)`** — step 4: inter-account transfer.
+**Match to EXISTING (preferred — no duplicates):**
+- **`reconcile_with_payments(bankStatementEntryResourceId, businessTransactionPayments: [{cashflowTransactionResourceId, transactionAmount}], matchedPayments?, matchedBatchPayments?, adjustment?)`** — **the primary match path.** Match a bank entry to an EXISTING open bill/invoice/payment; creates the payment AND reconciles in one call (no `pay_bill`/`pay_invoice` first). FX auto-resolved server-side — pass no rate. Sync.
+- **`reconcile_magic_match(bankAccountResourceId, entries: [{workflowType:'MAGIC_MATCH', bankStatementEntryResourceId, matchedBusinessTransactions}])`** — bulk-accept MAGIC_MATCH suggestions (max 500). Returns `{reconciled[], failed[]}` — a non-empty `failed[]` is a partial success; loop on it.
+- **`reconcile_learned_prediction(bankStatementEntryResourceId, learnedPredictionResourceId, predictedPayload, predictedPayloadSchemaVersion, retryToken?)`** — accept an ML learned-prediction (payload passed verbatim from a `MAGIC_RECONCILE_WITH_CASH_IN_OUT` suggestion).
+- **`apply_bank_rule(actionShortcutResourceId, businessTransactionResourceIds)`** — rule-driven recon (async; returns jobId).
+- **`quick_reconcile(bankAccountResourceId, journalsForReconciliation)`** — bulk async (max 500); returns jobId.
+
+**CREATE new (only when no existing open transaction matches):**
+- **`reconcile_invoice_receipt(...)`** — CREATE a new AR invoice + reconcile. ⚠️ To match an EXISTING invoice use `reconcile_with_payments` instead.
+- **`reconcile_bill_receipt(...)`** — CREATE a new AP bill + reconcile. ⚠️ To match an EXISTING bill use `reconcile_with_payments` instead.
+- **`reconcile_direct_cash_entry(...)`** — bank entry to a single cash-in / cash-out line (no source document).
+- **`reconcile_cash_journal(...)`** — bank entry to a multi-line cash journal.
+- **`reconcile_manual_journal(...)`** — bank entry to a manual journal.
+- **`reconcile_cash_transfer(...)`** — inter-account transfer.
 
 ### MCP tools — create missing transactions
 - **`mcp magic create --file <pdf>` / `create_business_transaction_from_attachment(...)`** — step 6 path B: OCR + autofill bill or invoice from receipt PDF/JPG.
@@ -94,20 +100,37 @@ clio jobs bank-recon match \
   --json
 ```
 
-Returns matches with confidence scores: `exact` (Phase 1 hash), `fuzzy-high` (Phase 2 weighted ≥ 0.85), `fuzzy-medium` (0.70-0.85), `nm-confident` (Phase 5). For each match returned:
+Returns matches with confidence scores: `exact` (Phase 1 hash), `fuzzy-high` (Phase 2 weighted ≥ 0.85), `fuzzy-medium` (0.70-0.85), `nm-confident` (Phase 5). For each match returned — **prefer MATCH-EXISTING over CREATE-NEW** to avoid duplicating a bill/invoice the org already has:
 
 | Match type | Tool to invoke |
 |------------|----------------|
-| AR invoice ↔ bank cash-in | `reconcile_invoice_receipt(bankRecordResourceId, invoiceResourceId, paymentMethod, ...)` |
-| AP bill ↔ bank cash-out | `reconcile_bill_receipt(bankRecordResourceId, billResourceId, paymentMethod, ...)` |
-| Cash entry (single line) ↔ bank | `reconcile_direct_cash_entry(...)` |
+| **AP bill ↔ bank cash-out (MATCH EXISTING open bill)** | **`reconcile_with_payments(bankStatementEntryResourceId, businessTransactionPayments:[{cashflowTransactionResourceId, transactionAmount}])`** ← primary |
+| **AR invoice ↔ bank cash-in (MATCH EXISTING open invoice)** | **`reconcile_with_payments(...)`** ← primary |
+| Existing payment ↔ bank | `reconcile_with_payments(..., matchedPayments:[...])` |
+| Bulk accept magic suggestions | `reconcile_magic_match(bankAccountResourceId, entries:[...])` → `{reconciled[],failed[]}` |
+| Learned-prediction (cash-in-out) | `reconcile_learned_prediction(...)` |
+| AR invoice — CREATE NEW (no existing match) | `reconcile_invoice_receipt(...)` |
+| AP bill — CREATE NEW (no existing match) | `reconcile_bill_receipt(...)` |
+| Cash entry (single line, no document) ↔ bank | `reconcile_direct_cash_entry(...)` |
 | Cash journal (multi-line) ↔ bank | `reconcile_cash_journal(...)` |
 | Manual journal ↔ bank | `reconcile_manual_journal(...)` |
 | Inter-account transfer | `reconcile_cash_transfer(...)` |
-| Bulk same-shape (>5 items) | `quick_reconcile(bankAccountResourceId, journalsForReconciliation: [...])` (async, returns jobId) |
-| Bank rule applies | `apply_bank_rule(actionShortcutResourceId, businessTransactionResourceIds: [...])` (async) |
+| Bulk same-shape (>5 items) | `quick_reconcile(...)` (async, returns jobId) |
+| Bank rule applies | `apply_bank_rule(...)` (async) |
 
-For `view_auto_reconciliation` suggestions outside the cascade: invoke once per account, walk the suggestions, commit via the matching `reconcile_*`. Pure read — no execution side effect.
+## Step 4a — Auto-match decision gate (the end-to-end driver)
+
+Call `view_auto_reconciliation`. It returns execution-ready `suggestions[]`. On high-volume accounts the engine can 500 (OOM) and the tool returns `{degraded:true}` — recover via the `clio jobs bank-recon match` cascade matcher (Step 4, above), which doesn't hit this endpoint. Walk the suggestions:
+
+- **`autoCommitEligible === true`** (high confidence, has an `execute` plan, under any amount cap) → **auto-commit**: call the suggestion's `recommendedTool` with its `execute` args. For many high-confidence matches, prefer ONE `reconcile_magic_match` call (server idempotency-keyed) over looping `reconcile_with_payments` (non-idempotent).
+- **everything else** (medium/low tier, `recommendedTool` undefined, CREATE-NEW, or amount over threshold) → **checkpoint**: surface to the user for confirmation. **The amount threshold is a HARD VETO over confidence** — a high-confidence but large match still checkpoints (pass `autoCommitMaxAmount` to enforce in code).
+- **`{degraded:true}`** (500) → fall back to the `clio jobs bank-recon match` cascade (Step 4, above).
+
+**Safety (recon is NOT idempotent):** before EACH auto-commit, re-check `search_bank_records(status:'RECONCILED')` for that entry (guards a concurrent second agent — `reconcile_with_payments` has no client idempotency key). Enforce a per-run auto-commit cap; above it, checkpoint the remainder rather than firing hundreds of irreversible sequential writes.
+
+## Step 4b — Match a bank entry to an existing open bill/invoice
+
+When you have a specific open bill/invoice to match (e.g. from `search_cashflow_transactions`), pass its `cashflowTransactionResourceId` to `reconcile_with_payments` — one call creates the payment AND reconciles. **No `pay_bill`/`pay_invoice` first.** Cross-currency (bank ccy ≠ bill ccy) is auto-resolved server-side — pass no rate; only the rare bill-ccy≠bank-ccy case needs explicit `paymentAmount` + `currencySettings`. On `TOTAL_RECONCILIATION_AMOUNT_MISMATCHED...`, put the delta into an `adjustment.cashAdjustmentEntries[]` leg (over/under-payment or FX write-off — the platform does NOT auto-post FX gain/loss) so the total equals the bank entry, then resend.
 
 ## Step 5 — Manual match (residuals)
 
@@ -207,10 +230,15 @@ Per account: `bookBalance == bankStatementBalance ± documentedTimingDifference`
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| `view_auto_reconciliation` | 500 on high-volume account | Documented quirk — service can OOM on accounts with thousands of unreconciled rows. Workaround: invoke per-period (`valueDateRange: {from, to}`) instead of all-time, OR fall back to `clio jobs bank-recon match` cascade which doesn't hit this endpoint. |
-| `view_auto_reconciliation` | 404 | Endpoint not enabled for the org's plan tier. Use cascade matcher only. |
+| `view_auto_reconciliation` | 500 on high-volume account → returns `{degraded:true}` | Documented OOM quirk on accounts with thousands of unreconciled rows. The tool degrades (doesn't throw): scope per-period (`valueDateRange`) OR fall back to `clio jobs bank-recon match` cascade. |
+| `view_auto_reconciliation` | 404 → returns `{notSupported:true}` | Endpoint not enabled for the org's plan tier. Use cascade matcher only. |
 | `quick_reconcile` | PARTIAL_SUCCESS jobId | Async result. Poll `search_background_jobs(filter: {resourceId: {eq: <jobId>}})` until terminal. Read `data[0].errorDetails[]` for per-row failures; loop back to step 4 for the failed rows. |
 | `quick_reconcile` / `reconcile_*` | (any) — NOT idempotent (rule 124) | On 500 / network error, do NOT retry. Confirm reconciled state via `view_auto_reconciliation` OR `search_bank_records(status: 'RECONCILED')` first. |
+| `reconcile_with_payments` | (any 5xx/network) — NOT idempotent, **no client key** | A blind retry **double-creates a payment**. ALWAYS re-check `search_bank_records(status:'RECONCILED')` for the entry before retrying. (magic_match is entry-level idempotency-keyed; learned_prediction takes a `retryToken`.) |
+| `reconcile_magic_match` | 200 with non-empty `failed[]` | PARTIAL success — `reconciled[]` succeeded, `failed[]` carries per-entry `errorCode`. Surface failures + loop only on the failed entries. **All-fail** (empty `reconciled[]`) = hard stop, surface. A re-submit returns already-done entries in `reconciled[]` (not `failed[]`) — don't treat them as new failures. |
+| `reconcile_learned_prediction` | error (stale/invalid `predictedPayload`) | Do NOT retry the same opaque payload. Fall back to `reconcile_with_payments` or manual match. `retryToken` forces a fresh journal on an intentional edit-retry; omit for idempotent replay. |
+| `reconcile_with_payments` | 422 `TOTAL_RECONCILIATION_AMOUNT_MISMATCHED...` | Payments + adjustments ≠ bank entry amount. Add the delta as an `adjustment.cashAdjustmentEntries[]` leg (over/under-payment or FX write-off) so the total matches, then resend. |
+| `reconcile_with_payments` | 422 `...does not exist` / invalid status | The BT isn't an open bill/invoice (wrong id, already paid, or draft). Re-fetch via `search_cashflow_transactions`; finalize if draft. |
 | `reconcile_invoice_receipt` | 422 `invoice_status_invalid` | Matched invoice still DRAFT. `finalize_invoice(resourceId: <id>)` first. |
 | `reconcile_invoice_receipt` | 422 `amount_mismatch` | Bank amount ≠ invoice balance. Either partial payment (post via `create_invoice_payment` with partial amount, then reconcile), or wrong match (revisit step 4/5). |
 | `apply_bank_rule` | 422 `rule_action_unsupported` | Rule's configured action doesn't match the bank entry shape (e.g., rule expects positive amount, entry is negative). Edit the rule via `update_bank_rule`. |

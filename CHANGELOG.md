@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.9.0] - 2026-05-29
+
+Reconciliation — the workflow most often handed to an agent to finish — can now match a bank statement line to an **existing** open bill, invoice, or payment, instead of only creating a new one.
+
+### Match a bank line to an existing open bill or invoice
+
+Ask the agent to "reconcile this bank entry against bill X" and it records the payment against the open bill and reconciles the line in one step — no need to mark the bill paid first. Three new actions: match to existing bills/invoices/payments, bulk-accept suggested matches, and accept a learned-match suggestion. Foreign-currency entries are handled automatically — the exchange rate is resolved for you, so a USD bill paid from a USD account reconciles without entering a rate.
+
+### Smarter auto-reconciliation suggestions
+
+Auto-reconciliation suggestions now come back ready to act on: each one names the action to take and carries a confidence level, so the agent can clear high-confidence matches end-to-end and surface only the ones that need a human look. Matching an existing transaction is now the default — creating a duplicate is the fallback only when nothing matches.
+
 ## [5.8.1] - 2026-05-28
 
 ### Fixed

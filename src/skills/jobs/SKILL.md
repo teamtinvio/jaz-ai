@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 5.8.1
+version: 5.9.0
 description: >-
   Use this skill for recurring accounting workflows — month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -48,7 +48,7 @@ Period-close jobs build on each other. Quarter = month + extras. Year = quarter 
 
 | Job | CLI Command | Description |
 |-----|-------------|-------------|
-| **Bank Recon** (`generate_bank_recon_blueprint`) | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. Paired tool: `clio jobs bank-recon match`. *Used in: monthly-close engagement (run as part of every period close; see `jaz-practice/references/monthly-close.md`).* |
+| **Bank Recon** (`generate_bank_recon_blueprint`) | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path — create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate (auto-commit high-confidence, checkpoint the rest — see `references/bank-recon.md` Step 4a). Paired tool: `clio jobs bank-recon match`. *Used in: monthly-close engagement (run as part of every period close; see `jaz-practice/references/monthly-close.md`).* |
 | **Document Collection** (`generate_document_collection_blueprint`) | `clio jobs document-collection` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for agent upload. Paired tool: `clio jobs document-collection ingest`. *Used in: onboarding flow (initial client doc capture; see `jaz-practice/references/onboarding.md`) and the open phase of every engagement (monthly-close, quarterly-gst, annual-statutory).* |
 | **GST/VAT Filing** (`generate_gst_vat_blueprint`) | `clio jobs gst-vat --period YYYY-QN` | Tax ledger review, discrepancy check, filing summary. *Used in: quarterly-gst engagement (see `jaz-practice/references/quarterly-gst.md`).* |
 | **Payment Run** (`generate_payment_run_blueprint`) | `clio jobs payment-run` | Select outstanding bills by due date, process payments. *Used in: monthly-close engagement (AP cycle inside the period close; see `jaz-practice/references/monthly-close.md`).* |

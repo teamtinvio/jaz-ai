@@ -223,6 +223,17 @@ clio jobs bank-recon match --input data.json --find-all --json
 | `1:N` | Multiple bank records match one transaction | Split payment (1 payment across 2 bank entries) |
 | `N:M` | Multiple bank records match multiple transactions | Complex group match within a contact |
 
+### Committing a match → route to the right reconcile tool
+
+The matcher finds matches against transactions the org **already has** — so commit via the MATCH-EXISTING path, not create-new:
+
+- A 1:1 (or N:1) match to an **existing open bill/invoice** at `exact` / `fuzzy-high` (≥0.85) confidence → **`reconcile_with_payments`** (pass the matched transaction's `cashflowTransactionResourceId` in `businessTransactionPayments[]`). Do NOT use `reconcile_invoice_receipt`/`reconcile_bill_receipt` — those CREATE a duplicate.
+- A batch of high-confidence matches → **`reconcile_magic_match`** in one call.
+- Only when the matcher finds NO existing transaction → create one (`reconcile_invoice_receipt`/`reconcile_bill_receipt` or `create_cash_*`).
+- `fuzzy-medium` (0.70–0.85) / `nm-confident` → surface for confirmation before committing (checkpoint), don't auto-commit.
+
+See `bank-recon.md` Step 4a for the full auto-commit-vs-checkpoint decision gate.
+
 ---
 
 ## Worked Example

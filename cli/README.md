@@ -19,7 +19,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 
 - [Three Ways In](#three-ways-in) — CLI, MCP, Skills
 - [CLI](#cli) — 55 command groups
-- [MCP Server](#mcp-server) — 285 tools for AI agents
+- [MCP Server](#mcp-server) — 288 tools for AI agents
 - [Skills](#skills) — Teach any AI the Jaz API
 - [Setup](#setup) — Auth, multi-org, automation
 
@@ -54,7 +54,7 @@ clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-
 
 ## MCP Server
 
-285 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports. Includes the v5.2.0 `practice_*` tools (init, onboard_client, list_clients, load_client, create_engagement, load_engagement) so an agent in Claude Desktop or Claude Code can scaffold and load client workspaces conversationally.
+288 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports. Includes the v5.2.0 `practice_*` tools (init, onboard_client, list_clients, load_client, create_engagement, load_engagement) so an agent in Claude Desktop or Claude Code can scaffold and load client workspaces conversationally.
 
 **Claude Code:**
 ```bash

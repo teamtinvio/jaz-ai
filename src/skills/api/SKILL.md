@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.8.1
+version: 5.9.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 141 production gotchas, error
@@ -402,9 +402,10 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 
 ### Reconciliation actions (write-side)
 
-123. **8 reconciliation action endpoints under `/api/v1/reconciliations/*`** — these *commit* a reconciliation decision against a bank statement entry, distinct from `view_auto_reconciliation` (which queries `/search-magic-reconciliation` for *suggestions*). Two are async, six are sync:
+123. **11 reconciliation action endpoints under `/api/v1/reconciliations/*`** — these *commit* a reconciliation decision against a bank statement entry, distinct from `view_auto_reconciliation` (which queries `/search-magic-reconciliation` for *suggestions*):
     - **Async (jobId):** `quick_reconcile` (bulk match entries to journals, max 500), `apply_bank_rule` (bulk apply a rule to entries, max 500). Poll `search_background_jobs` filtered by `resourceId`; on `PARTIAL_SUCCESS` read `data[0].errorDetails` for per-row failures.
-    - **Sync (single bank entry):** `reconcile_direct_cash_entry`, `reconcile_cash_journal`, `reconcile_manual_journal`, `reconcile_cash_transfer`, `reconcile_invoice_receipt`, `reconcile_bill_receipt`. Each returns `{bankStatementEntryResourceId, status, reference, valueDate}`.
+    - **Sync (single bank entry):** `reconcile_direct_cash_entry`, `reconcile_cash_journal`, `reconcile_manual_journal`, `reconcile_cash_transfer`, `reconcile_invoice_receipt`, `reconcile_bill_receipt`, `reconcile_with_payments` (match EXISTING — see Rule 158), `reconcile_learned_prediction`. Each returns `{bankStatementEntryResourceId, status, reference, valueDate}`.
+    - **Sync bulk:** `reconcile_magic_match` (bulk-accept MAGIC_MATCH suggestions, max 500) returns `{reconciled[], failed[]}`.
 
 124. **Recon prefill from the bank statement entry** — when caller omits `valueDate`, `dueDate`, payment `amount`, or direction (cash-in vs cash-out), the API fills these from the bank entry. Best-effort: a missing entry lookup logs a warning and forwards the payload as-is. Caller can always override by passing the field explicitly.
 
@@ -531,6 +532,13 @@ Supports `--json` for structured output. 186 articles across 20 sections. Automa
 - **Scheduled invoices/bills**: Wrap as `{ status, startDate, endDate, repeat, invoice/bill: { reference, valueDate, dueDate, contactResourceId, lineItems, saveAsDraft: false } }`. `reference` is required.
 - **Scheduled journals**: Flat: `{ status, startDate, endDate, repeat, valueDate, schedulerEntries, reference }`. `valueDate` is required.
 - **FX currency (invoices, bills, credit notes, AND journals)**: `currency: { sourceCurrency: "USD" }` (auto-fetches platform rate) or `currency: { sourceCurrency: "USD", exchangeRate: 1.35 }` (custom rate). Same object form on all transaction types. **Never use `currencyCode` string** — silently ignored.
+
+158. **Match-to-EXISTING reconciliation — `reconcile_with_payments` / `reconcile_magic_match` / `reconcile_learned_prediction`.** These reconcile a bank entry against transactions/payments the org ALREADY has, vs `invoice_receipt`/`bill_receipt` which CREATE new ones. Prefer match-to-existing to avoid duplicates.
+    - **`reconcile_with_payments`** — the headline. `businessTransactionPayments[]` each carry an open bill/invoice's `cashflowTransactionResourceId` (from `search_cashflow_transactions` or a suggestion's `cftBtResourceId`) + `transactionAmount`; the endpoint CREATES the payment AND reconciles in one call — **no `pay_bill`/`pay_invoice` first.** Also accepts `matchedPayments[]` (existing payments) / `matchedBatchPayments[]` / `adjustment` (over/under-payment + FX write-off). Guard: ≥1 match array non-empty. **FX is auto-resolved server-side — pass NO `currencySettings`/rate for the common case.** Only the rare bill-currency ≠ bank-currency case needs explicit `paymentAmount` (bank ccy) + `currencySettings`. FX gain/loss is NOT auto-posted — post it via `adjustment.cashAdjustmentEntries[]` to an FX account. Errors: `PAYMENT_AMOUNT_REQUIRED_IN_BUSINESS_TRANSACTION_SOURCE_CURRENCY` (cross-ccy missing paymentAmount), `INVALID_EXCHANGE_RATE_ERROR` (adjustment leg in non-functional ccy missing rate), `TOTAL_RECONCILIATION_AMOUNT_MISMATCHED_WITH_STATEMENT_ENTRY_AMOUNT` (sum ≠ entry → add adjustment leg). **NOT idempotent, no client key — a blind retry double-creates a payment; re-check `search_bank_records(status:'RECONCILED')` before retry.**
+    - **`reconcile_magic_match`** — bulk-accept MAGIC_MATCH suggestions (max 500 entries). Returns `{reconciled[], failed[]}` — a 200 with non-empty `failed[]` is a PARTIAL success (per-entry `errorCode`); loop on failed only. Entry-level idempotency-keyed server-side (re-submit returns done entries in `reconciled[]`).
+    - **`reconcile_learned_prediction`** — accept an ML prediction. `predictedPayload` + `predictedPayloadSchemaVersion` come VERBATIM from a `view_auto_reconciliation` (MAGIC_RECONCILE_WITH_CASH_IN_OUT) suggestion — never hand-construct. `retryToken` forces a fresh journal on edit-retry; omit for idempotent replay. On failure (stale payload), fall back to `reconcile_with_payments` — don't retry the blob.
+
+159. **`view_auto_reconciliation` returns execution-ready `suggestions[]` — the suggestion→commit seam.** Each suggestion carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge `bankAccountResourceId` for `reconcile_magic_match`), `confidenceTier` (high/medium/low, code-derived), and `autoCommitEligible` (true ⇒ high confidence + executable plan + under any `autoCommitMaxAmount` cap). **Decision gate:** `autoCommitEligible===true` → auto-commit via `recommendedTool`+`execute`; everything else → surface for confirmation. **Amount threshold is a HARD VETO over confidence** (pass `autoCommitMaxAmount`). Field mapping under the hood: `cftBtResourceId`→`cashflowTransactionResourceId` (single → `reconcile_with_payments`), `cftBtResourceIds[]`/`isBatch`→`matchedBusinessTransactions` (batch → `reconcile_magic_match`), `recommendationType`→tool, `confidenceScore`→tier. Pass `includeRaw:true` for the unmapped payload. On 500 (high-volume OOM) it returns `{degraded:true}` — scope by period or use the `clio jobs bank-recon match` cascade. NOT idempotent applies to every commit — see Rules 125 + 158.
 
 ## See Also
 
