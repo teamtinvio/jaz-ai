@@ -398,10 +398,12 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | JSON body | multipart/form-data | FILE mode requires multipart — JSON returns 400 |
 | Sync response | Async extraction | Response = upload confirmation; extraction & autofill run async |
 | `status` field | `subscriptionFBPath` | Firebase path for tracking extraction progress |
+| email body → save to file first | `html` + `sourceType: "HTML"` | Raw email/document HTML, rendered to PDF server-side — no file step |
 
 **Content-Type depends on sourceType:**
 - `sourceType: "FILE"` → `Content-Type: multipart/form-data` (MUST use multipart)
 - `sourceType: "URL"` → `Content-Type: application/json` (JSON body works)
+- `sourceType: "HTML"` → `html` field (JSON or multipart) carrying the raw HTML body (max 5 MB; rendered to PDF server-side)
 
 ---
 

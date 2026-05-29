@@ -362,7 +362,7 @@ Also: `clio reports pdf` — generate PDF from a message/document.
 ### `clio magic` — AI document extraction
 | Subcommand | Key flags |
 |------------|-----------|
-| `create <file>` | `--type` (invoice, bill, credit-note-customer, credit-note-supplier), `--wait`, `--password` |
+| `create` | one of `--file <path>` / `--url <url>` / `--html <string\|@file>`; `--type` (invoice, bill, credit-note-customer, credit-note-supplier); `--merged` (split a multi-doc PDF). `--html` takes raw HTML (e.g. an email body), rendered to a PDF server-side. Encrypted PDFs: `name__pw__password.pdf`. |
 | `status <workflowIds>` | Comma-separated workflow IDs |
 | `search` | `--type`, `--status`, `--from`, `--to`, `--limit`, `--offset` |
 

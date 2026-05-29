@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.10.0] - 2026-05-29
+
+### Create a transaction straight from email HTML
+
+When you have an invoice or bill as an email body (or any raw HTML) rather than a file, the agent can now create the draft transaction directly from that HTML. It is rendered and extracted in one step, with no need to save it to a file first. `create_bt_from_attachment` gains an `html` input, and `clio magic create` gains a `--html` flag (an inline string, or `@path` to read from a file). Uploading a file or pointing at a URL works exactly as before.
+
 ## [5.9.0] - 2026-05-29
 
 Reconciliation — the workflow most often handed to an agent to finish — can now match a bank statement line to an **existing** open bill, invoice, or payment, instead of only creating a new one.

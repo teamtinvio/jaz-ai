@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.9.0",
+  "version": "5.10.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -648,7 +648,7 @@
     },
     {
       "name": "create_bt_from_attachment",
-      "description": "Create a business transaction (invoice/bill/credit note) from an uploaded file using AI extraction. Processing is async."
+      "description": "Create a business transaction (invoice/bill/credit note) from a file, a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async."
     },
     {
       "name": "get_magic_workflow_status",

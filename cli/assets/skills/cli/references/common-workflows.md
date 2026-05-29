@@ -232,8 +232,11 @@ Ingest documents, extract data via AI, and review results.
 # Ingest a folder of mixed PDFs (invoices, bills, bank statements)
 clio jobs ingest ./inbox/ --json
 
-# Or extract a single document
-clio magic create ./invoice-from-supplier.pdf --type bill --wait --json
+# Or extract a single document (file, URL, or raw HTML)
+clio magic create --file ./invoice-from-supplier.pdf --type bill --json
+
+# From raw HTML — e.g. an email body (rendered to a PDF, then extracted)
+clio magic create --html @./email-body.html --type invoice --json
 
 # Check workflow status
 clio magic status "wf-id-1,wf-id-2,wf-id-3" --json
@@ -241,6 +244,6 @@ clio magic status "wf-id-1,wf-id-2,wf-id-3" --json
 # Search past magic workflows
 clio magic search --type bill --status COMPLETED --from 2026-03-01 --json
 
-# For encrypted PDFs
-clio magic create ./encrypted-file.pdf --type invoice --password "secret123" --wait
+# For encrypted PDFs — embed the password in the filename via __pw__
+clio magic create --file ./encrypted-file__pw__secret123.pdf --type invoice --json
 ```

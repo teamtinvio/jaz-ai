@@ -1118,7 +1118,7 @@ Processing is **asynchronous** — the API response confirms file upload immedia
 - `CUSTOMER_CREDIT_NOTE` → creates a draft customer CN (response type: `SALE_CREDIT_NOTE`)
 - `SUPPLIER_CREDIT_NOTE` → creates a draft supplier CN (response type: `PURCHASE_CREDIT_NOTE`)
 
-**Two modes** — content type depends on `sourceType`:
+**Three modes** — content type depends on `sourceType`:
 
 #### FILE mode (multipart/form-data) — most common
 
@@ -1171,6 +1171,26 @@ Content-Type: application/json
 / Response: same shape as FILE mode
 ```
 
+#### HTML mode (raw email/document body)
+
+Use when you hold the invoice/bill as raw HTML (e.g. an email body) rather than a file. The backend renders the HTML to a PDF, then runs the same extraction pipeline.
+
+```json
+/ Request:
+POST /api/v1/magic/createBusinessTransactionFromAttachment
+Content-Type: application/json
+
+{
+  "businessTransactionType": "INVOICE",
+  "sourceType": "HTML",
+  "html": "<html>…invoice markup…</html>"
+}
+
+/ Response: same shape as FILE mode
+```
+
+`html` is the raw HTML string (max 5 MB); also works as a multipart field. No file or PDF conversion step is needed.
+
 **What Jaz Magic extracts and autofills:**
 - Line items (description, quantity, unit price, amounts)
 - Contact name and details (matched against existing contacts)
@@ -1191,8 +1211,8 @@ Content-Type: application/json
 - JSON body with `sourceType: "FILE"` always fails (400) — MUST use multipart
 - `workflowResourceId` in `validFiles[]` is for tracking via `POST /magic/workflows/search`
 - `subscriptionFBPath` is the Firebase path for real-time status updates
-- All three fields (`sourceFile`/`sourceURL`, `businessTransactionType`, `sourceType`) are required — omitting any returns 422
-- File types confirmed: PDF, JPG/JPEG, PNG, HEIC, XLS, XLSX, EML (max 1 MB)
+- All three fields (the source — `sourceFile`/`sourceURL`/`html` — plus `businessTransactionType` and `sourceType`) are required — omitting any returns 422
+- File types confirmed: PDF, JPG/JPEG, PNG, HEIC, XLS, XLSX, EML (max 1 MB). HTML mode (`sourceType: "HTML"`) takes the raw HTML body instead of a file (max 5 MB); an `.eml` file is still FILE mode, not HTML mode.
 
 ---
 
