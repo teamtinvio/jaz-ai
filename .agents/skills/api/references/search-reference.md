@@ -700,6 +700,70 @@ Standard pattern with limit/offset/filter/sort. Used for managing bank reconcili
 
 ---
 
+### 24. POST /api/v1/sale-orders/search
+
+Also covers `POST /api/v1/sale-quotes/search` — same filter shape (`SaleOrderFilter` / `SaleQuoteFilter`).
+
+**Filter fields** (`SaleOrderFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `reference` | StringExpression | Order/quote number |
+| `status` | StringExpression | DRAFT, CREATED, ACCEPTED, CONFIRMED, VOID |
+| `contactResourceId` | StringExpression | |
+| `contact` | ContactNestedFilter | Nested: name, resourceId, status |
+| `saleQuoteResourceId` | StringExpression | (Sale Orders) source quote link |
+| `currencyCode` | StringExpression | |
+| `valueDate` | DateExpression | |
+| `dueDate` | DateExpression | |
+| `terms` | IntExpression | Payment terms (days) |
+| `tags` | Nested: `name` (StringExpression) | |
+| `totalAmount` | BigDecimalExpression | |
+| `expectedTotal` | BigDecimalExpression | |
+| `approvedAt` | DateExpression | |
+| `createdAt` | DateTimeExpression | RFC3339 input |
+| `updatedAt` | DateTimeExpression | RFC3339 input |
+
+**Logical**: `and`, `or`, `andGroup`, `orGroup`
+
+**Sort fields**: `resourceId`, `reference`, `status`, `contactResourceId`, `valueDate`, `dueDate`, `terms`, `currencyCode`, `totalAmount`, `createdAt`, `updatedAt`
+
+> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_ORDERED) appears on responses but is **not** a filter field. There is no order→invoice link field — raise the invoice separately.
+
+---
+
+### 25. POST /api/v1/purchase-orders/search
+
+Also covers `POST /api/v1/purchase-requests/search` — same filter shape (`PurchaseOrderFilter` / `PurchaseRequestFilter`).
+
+**Filter fields** (`PurchaseOrderFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `reference` | StringExpression | Order/request number |
+| `status` | StringExpression | DRAFT, ACTIVE, ACCEPTED, CONFIRMED, VOID |
+| `contactResourceId` | StringExpression | Supplier |
+| `contact` | ContactNestedFilter | Nested: name, resourceId, status |
+| `purchaseRequestResourceId` | StringExpression | (Purchase Orders) source request link |
+| `currencyCode` | StringExpression | |
+| `valueDate` | DateExpression | |
+| `dueDate` | DateExpression | |
+| `terms` | IntExpression | Payment terms (days) |
+| `tags` | Nested: `name` (StringExpression) | |
+| `totalAmount` | BigDecimalExpression | |
+| `expectedTotal` | BigDecimalExpression | |
+| `approvedAt` | DateExpression | |
+| `createdAt` | DateTimeExpression | RFC3339 input |
+| `updatedAt` | DateTimeExpression | RFC3339 input |
+
+**Logical**: `and`, `or`, `andGroup`, `orGroup`
+
+**Sort fields**: `resourceId`, `reference`, `status`, `contactResourceId`, `valueDate`, `dueDate`, `terms`, `currencyCode`, `totalAmount`, `createdAt`, `updatedAt`
+
+> `orderState` appears on responses but is **not** a filter field. There is no order→bill link field — raise the bill separately.
+
+---
+
 ## Quick Lookup: Common Search Patterns
 
 ### Find all invoices for a contact

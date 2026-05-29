@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.11.0] - 2026-05-30
+
+### Sales orders and purchase orders
+
+Full support for the documents that come before an invoice or a bill: **sale quotes**, **sale orders**, **purchase requests**, and **purchase orders**. Create, view, search, update, and move them through their lifecycle (accept a quote or request, confirm an order, void, delete).
+
+A sale order can be raised from an accepted quote, and a purchase order from an accepted request — the link is kept, and the quote/request shows how much of it has been ordered. The agent guides you through the right order of steps (e.g. accept the quote before raising the order) and explains the fix when something is out of sequence. The full command set, including bulk actions, is available in the CLI under `clio sale-orders` and `clio purchase-orders`.
+
 ## [5.10.1] - 2026-05-29
 
 ### Read invoice / bill rows directly from CSV and Excel attachments

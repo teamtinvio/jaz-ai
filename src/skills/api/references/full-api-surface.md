@@ -74,6 +74,27 @@
 | POST | `/bills/bulk-upsert` | Bulk create/update bills (max 500) — **async**, returns `{ jobId }`. Natural key: `billReference`. ISO 8601 dates only. |
 | POST | `/bills/line-items/bulk-upsert` | Bulk create/update bills with nested line items (max 500) — **async**, returns `{ jobId }`. |
 
+### Orders (Sale Quotes, Sale Orders, Purchase Requests, Purchase Orders)
+Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-orders`, `purchase-requests`, or `purchase-orders`. Quotes/requests use `accept`; orders use `confirm`. See `references/orders.md`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/{entity}` | List |
+| GET | `/{entity}/:resourceId` | Get single |
+| POST | `/{entity}` | Create. Sale Order links via `saleQuoteResourceId`; Purchase Order via `purchaseRequestResourceId` (parent must be issued — saveAsDraft:false — not a draft). |
+| POST | `/{entity}/search` | Advanced search with filters |
+| PUT | `/{entity}/:resourceId` | Update |
+| DELETE | `/{entity}/:resourceId` | Delete (DRAFT only — else use void) |
+| POST | `/{entity}/:resourceId/void` | Void (cancel) |
+| POST | `/sale-quotes\|purchase-requests/:resourceId/accept` | Accept (→ ACCEPTED) |
+| POST | `/sale-orders\|purchase-orders/:resourceId/confirm` | Confirm (→ CONFIRMED) |
+| POST | `/{entity}/:resourceId/fast-fix` | Quick-fix details (`{ attributes }`) |
+| POST | `/{entity}/bulk-void` | Bulk void (`{ resourceIds }`) |
+| POST | `/sale-quotes\|purchase-requests/bulk-accept` | Bulk accept (`{ resourceIds }`) |
+| POST | `/sale-orders\|purchase-orders/bulk-confirm` | Bulk confirm (`{ resourceIds }`) |
+| POST | `/{entity}/bulk-delete` | Bulk delete drafts (`{ resourceIds }`) |
+| POST | `/sale-orders\|purchase-orders/line-items/bulk-upsert` | Bulk line-item upsert |
+
 ### Customer Credit Notes
 | Method | Path | Description |
 |--------|------|-------------|

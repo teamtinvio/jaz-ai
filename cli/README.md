@@ -3,11 +3,11 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/v/jaz-clio?style=for-the-badge&logo=npm" alt="npm"></a>
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/dm/jaz-clio?style=for-the-badge&label=downloads" alt="npm downloads"></a>
-  <img src="https://img.shields.io/badge/tools-265-blue?style=for-the-badge" alt="265 Tools">
+  <img src="https://img.shields.io/badge/tools-297-blue?style=for-the-badge" alt="297 Tools">
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
-265 tools. 13 financial calculators. 12 job playbooks. 130 API rules. 16 IFRS recipes.
+297 tools. 13 financial calculators. 12 job playbooks. 130 API rules. 16 IFRS recipes.
 
 ```bash
 npm install -g jaz-clio
@@ -19,7 +19,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 
 - [Three Ways In](#three-ways-in) — CLI, MCP, Skills
 - [CLI](#cli) — 55 command groups
-- [MCP Server](#mcp-server) — 288 tools for AI agents
+- [MCP Server](#mcp-server) — 297 tools for AI agents
 - [Skills](#skills) — Teach any AI the Jaz API
 - [Setup](#setup) — Auth, multi-org, automation
 
@@ -27,7 +27,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 
 | | What happens | Try it |
 |---|---|---|
-| **CLI** | 55 command groups, every accounting operation | `clio invoices list` |
+| **CLI** | 57 command groups, every accounting operation | `clio invoices list` |
 | **MCP** | Plug into Claude Code, Cursor, Codex, Copilot | `clio mcp` |
 | **Skills** | Teach any AI tool the Jaz API | `clio init` |
 
@@ -54,7 +54,7 @@ clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-
 
 ## MCP Server
 
-287 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports. Includes the v5.2.0 `practice_*` tools (init, onboard_client, list_clients, load_client, create_engagement, load_engagement) so an agent in Claude Desktop or Claude Code can scaffold and load client workspaces conversationally.
+297 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports. Includes the v5.2.0 `practice_*` tools (init, onboard_client, list_clients, load_client, create_engagement, load_engagement) so an agent in Claude Desktop or Claude Code can scaffold and load client workspaces conversationally.
 
 **Claude Code:**
 ```bash

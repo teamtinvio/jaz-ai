@@ -44,6 +44,16 @@ Transaction fees are added to cash spent (not deducted like invoices). RGL = `(C
 
 ---
 
+## Orders (Quotes, Sale Orders, Purchase Requests, Purchase Orders)
+
+Pre-invoice / pre-bill documents. Sales pipeline: **Sale Quote** (estimate/quotation) → **Sale Order** → Invoice. Purchase pipeline: **Purchase Request** (requisition) → **Purchase Order** (PO) → Bill.
+
+Key capabilities: a Sale Order links to its source quote via `saleQuoteResourceId` (and a PO to its request via `purchaseRequestResourceId`) — the parent must be **issued** (created with `saveAsDraft:false`, i.e. CREATED/ACTIVE), not a DRAFT. Quotes/requests advance with **accept** (from the issued state), orders with **confirm**. Fulfillment is tracked on the parent via `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_ORDERED). There is no convert endpoint and no order→invoice link field yet — raise the invoice/bill separately. Delete is draft-only; use void otherwise.
+
+**API**: per entity (`sale-quotes`, `sale-orders`, `purchase-requests`, `purchase-orders`): CRUD `GET/POST/PUT/DELETE`, `POST /…/search`, `POST /…/:id/{accept|confirm}`, `POST /…/:id/void`, `POST /…/:id/fast-fix`, `POST /…/bulk-{accept|confirm|void|delete}`; orders also `POST /…/line-items/bulk-upsert`. Agent surface: `sale_orders` + `purchase_orders` namespaces (create/get/search/update/transition). See `references/orders.md`.
+
+---
+
 ## Customer Credits
 
 Credit notes that reduce amounts owed by customers — issued for returns, discounts, or corrections. Can be applied to invoices (same currency only) or refunded to customers. Statuses: draft, credit available, fully applied.

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.10.1",
+  "version": "5.11.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -189,6 +189,46 @@
     {
       "name": "apply_credits_to_bill",
       "description": "Apply supplier credit note(s) to a bill. IMPORTANT: The credit note must be FINALIZED first (status UNAPPLIED, not DRAFT). If it is still a draft, call finalize_supplier_credit_note first. Then search_supplier_credit_notes with status UNAPPLIED to find available credits for the contact, and pass creditNoteResourceId and amountApplied for each."
+    },
+    {
+      "name": "create_sale_order",
+      "description": "Create a Sale Quote or Sale Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` auto-generates (timestamped) if omitted — must be unique per org.\n\nSALE_QUOTE: a draft estimate by default (saveAsDraft true → DRAFT). Lifecycle DRAFT → (issue: saveAsDraft:false) → CREATED → (transition_sale_order ACCEPT) → ACCEPTED. To order from a quote, create it with saveAsDraft:false — a DRAFT quote can be neither linked nor accepted.\nSALE_ORDER: created directly as CREATED (no draft state). Link to a quote via saleQuoteResourceId — the quote MUST be CREATED or ACCEPTED (not DRAFT/VOID). Lifecycle CREATED → CONFIRMED (transition_sale_order CONFIRM).\n\naccountResourceId is required on each lineItem when the document is not a draft. There is no order→invoice link field — raise the invoice separately with create_invoice."
+    },
+    {
+      "name": "get_sale_order",
+      "description": "Get a Sale Quote or Sale Order by resourceId — line items, totals, status, orderState (fulfillment), and saleQuoteResourceId link."
+    },
+    {
+      "name": "search_sale_orders",
+      "description": "Search Sale Quotes or Sale Orders (by documentType). Filter by status, contact, date, amount, currency, tag. Use the filter param for advanced/nested queries."
+    },
+    {
+      "name": "update_sale_order",
+      "description": "Update an editable Sale Quote or Sale Order (reference, dates, line items, notes, custom fields). Line items are fully replaced — pass the complete array."
+    },
+    {
+      "name": "transition_sale_order",
+      "description": "Advance or cancel a Sale Quote / Sale Order lifecycle. action:\n- ACCEPT — Sale Quote only (CREATED → ACCEPTED). The quote must already be issued (saveAsDraft:false); a DRAFT can't be accepted. A CREATED quote is already linkable, so accept is optional.\n- CONFIRM — Sale Order only (CREATED → CONFIRMED).\n- VOID — either, when not a draft (cancels the document).\n- DELETE — DRAFT only; for anything non-draft use VOID."
+    },
+    {
+      "name": "create_purchase_order",
+      "description": "Create a Purchase Request or Purchase Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` auto-generates (timestamped) if omitted — must be unique per org.\n\nPURCHASE_REQUEST: draft requisition by default (saveAsDraft true → DRAFT). Lifecycle DRAFT → (issue: saveAsDraft:false) → ACTIVE → (transition_purchase_order ACCEPT) → ACCEPTED. To order from a request, create it with saveAsDraft:false — a DRAFT request can be neither linked nor accepted.\nPURCHASE_ORDER: draft by default; create with saveAsDraft:false to make it ACTIVE. Link to a request via purchaseRequestResourceId — the request MUST be ACTIVE or ACCEPTED (not DRAFT/VOID). Lifecycle DRAFT → ACTIVE → CONFIRMED (transition_purchase_order CONFIRM).\n\naccountResourceId is required on each lineItem when not a draft. There is no order→bill link field — raise the bill separately with create_bill."
+    },
+    {
+      "name": "get_purchase_order",
+      "description": "Get a Purchase Request or Purchase Order by resourceId — line items, totals, status, orderState (fulfillment), and purchaseRequestResourceId link."
+    },
+    {
+      "name": "search_purchase_orders",
+      "description": "Search Purchase Requests or Purchase Orders (by documentType). Filter by status, contact, date, amount, currency, tag. Use the filter param for advanced/nested queries."
+    },
+    {
+      "name": "update_purchase_order",
+      "description": "Update an editable Purchase Request or Purchase Order (reference, dates, line items, notes, custom fields). Line items are fully replaced — pass the complete array."
+    },
+    {
+      "name": "transition_purchase_order",
+      "description": "Advance or cancel a Purchase Request / Purchase Order lifecycle. action:\n- ACCEPT — Purchase Request only (ACTIVE → ACCEPTED). The request must already be issued (saveAsDraft:false); a DRAFT can't be accepted. An ACTIVE request is already linkable, so accept is optional.\n- CONFIRM — Purchase Order only (ACTIVE → CONFIRMED).\n- VOID — either, when not a draft (cancels the document).\n- DELETE — DRAFT only; for anything non-draft use VOID."
     },
     {
       "name": "list_journals",
