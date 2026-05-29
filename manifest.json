@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.10.0",
+  "version": "5.10.1",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -423,14 +423,6 @@
       "description": "Update an EXISTING exchange rate record by its resourceId. Requires the rate resourceId from list_currency_rates. WARNING: If the user says \"update the rate\" or \"set the rate\", they almost always mean add_currency_rate (which creates/overwrites for a date). Only use this tool when explicitly modifying an existing rate record by ID."
     },
     {
-      "name": "start_currency_rates_import_job",
-      "description": "Start an async job to import currency rates from a CSV file URL."
-    },
-    {
-      "name": "get_currency_rates_import_job_status",
-      "description": "Check the status of a currency rates import job."
-    },
-    {
       "name": "bulk_upsert_currency_rates",
       "description": "Max 500 exchange rates per call. Auto-enables currencies not yet enabled in the org — no need to call add_currency first. Requires rateDirection per rate. Response surfaces per-row failures: `failedRows[]` (each with rowIndex, columnName, columnValue, errorCode, errorMessage) + `failedCount` alongside `resourceIds[]` for successful inserts. Omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (no temporal gap)."
     },
@@ -568,7 +560,7 @@
     },
     {
       "name": "download_export",
-      "description": "Analytical / financial / audit report XLSX. Returns { fileName, fileUrl } (pre-signed, ~5 min).\n\nUse this tool (not export_records) for: analysis-* (anomalous-invoices/bills, cashflow-anomalies, gl-journal-audit, exchange-rate-audit, receivables-customer-risk, cash-expense-health); statements (trial-balance, balance-sheet, profit-and-loss, cashflow, general-ledger, cash-balance); aging (ar-report, ap-report); summaries (sales, sales-payments, purchase, purchase-payments, customer-revenue, product-sales, periodic-revenue, supplier-expense, product-purchase, periodic-expense, credit-note, sales-cost-margin); inventory movement (sale-/purchase-inventory-movement); statement-of-account-export.\n\nNOT for raw entity dumps (invoices/bills/contacts as rows) — use export_records. For ad-hoc custom SELECT queries against the curated reporting schema — use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow exportType returns the IAS 7 templated report (org-configured); 404 template_not_found if no template (see jaz-api Rule 147)."
+      "description": "Analytical / financial / audit report XLSX. Returns { fileName, fileUrl } (pre-signed, ~5 min).\n\nUse this tool (not export_records) for analytical / audit reports: anomaly detection (anomalous invoices/bills/cashflow), audit (GL journal, exchange-rate), risk (receivables, cash/expense health), statements (trial balance, P&L, BS, GL, cashflow, cash-balance), aging (AR/AP), summaries, inventory movement, ledgers, statement-of-account. `exportType` is enum-constrained (see param) — exact spelling required.\n\nNOT for raw entity dumps (invoices/bills/contacts as rows) — use export_records. For ad-hoc custom SELECT queries against the curated reporting schema — use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow returns the IAS 7 templated report (org-configured); 404 template_not_found if no template (see jaz-api Rule 147)."
     },
     {
       "name": "preview_pseudo_sql",
@@ -669,6 +661,10 @@
     {
       "name": "fetch_attachment_table",
       "description": "Fetch extracted table data from an attachment (OCR/AI extraction result)."
+    },
+    {
+      "name": "read_spreadsheet_rows",
+      "description": "Parse rows from a CSV/Excel URL. Returns rows as JSON objects keyed by header (max 500/call, paginatable via offset/limit). Excel response includes availableSheets[] — re-call with sheetIndex if the first sheet is Instructions. Use BEFORE bulk_upsert_* when the user attaches a tabular file."
     },
     {
       "name": "message_to_pdf",

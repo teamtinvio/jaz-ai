@@ -1,6 +1,6 @@
 {
   "name": "jaz-clio",
-  "version": "5.10.0",
+  "version": "5.10.1",
   "description": "Clio: Command Line Interface Operator for Jaz AI.",
   "type": "module",
   "bin": {
@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc && node --input-type=module -e \"import{readFileSync,writeFileSync}from'fs';const c=readFileSync('dist/index.js','utf8');if(!c.startsWith('#!')){writeFileSync('dist/index.js','#!/usr/bin/env node\\n'+c)}\"",
-    "postbuild": "cp -r src/agent/prompts dist/agent/prompts && mkdir -p dist/eval/rubrics && cp src/eval/rubrics/*.json dist/eval/rubrics/",
+    "postbuild": "rm -rf dist/agent/prompts && cp -r src/agent/prompts dist/agent/prompts && mkdir -p dist/eval/rubrics && cp src/eval/rubrics/*.json dist/eval/rubrics/",
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
@@ -55,11 +55,14 @@
     "adm-zip": "^0.5.16",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
+    "exceljs": "^4.4.0",
     "figures": "^6.1.0",
     "financial": "^0.2.4",
     "log-update": "^7.2.0",
     "node-telegram-bot-api": "^0.67.0",
     "ora": "^8.1.1",
+    "papaparse": "^5.5.3",
+    "undici": "^6.26.0",
     "update-notifier": "^7.3.1",
     "yaml": "^2.8.2"
   },
@@ -68,6 +71,7 @@
     "@types/adm-zip": "^0.5.6",
     "@types/node": "^22.10.1",
     "@types/node-telegram-bot-api": "^0.64.14",
+    "@types/papaparse": "^5.5.2",
     "@types/sanitize-html": "^2.16.1",
     "esbuild": "^0.27.3",
     "pino-pretty": "^13.1.3",

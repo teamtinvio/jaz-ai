@@ -6,7 +6,7 @@ Source of truth lives in the installed skills (`.claude/skills/jaz-*/SKILL.md` o
 
 ## Discovery
 
-The Jaz MCP server exposes 288 tools across 34 namespaces via 3 meta-tools. **Use the meta-tool flow — never enumerate tools blindly.**
+The Jaz MCP server exposes 287 tools across 34 namespaces via 3 meta-tools. **Use the meta-tool flow — never enumerate tools blindly.**
 
 1. `search_tools(query)` → top-N tool names + namespaces.
 2. `describe_tools(names)` → full parameter schemas.

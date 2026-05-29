@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.10.1] - 2026-05-29
+
+### Read invoice / bill rows directly from CSV and Excel attachments
+
+When a user shares a CSV or Excel attachment for bulk action — exchange rates, opening balances, account mappings — the agent can now read rows directly via `read_spreadsheet_rows` instead of asking the user to paste them. Pagination (`offset`, `limit`), multi-sheet workbooks (`sheetIndex` + `availableSheets`), and presigned S3 URLs are all supported. CSV cell precision is preserved (financial decimals, leading-zero codes, FX trailing zeros).
+
+### Inbound-email body as a transaction source
+
+When an invoice or bill sits in the email body itself (no file attached), the agent creates the draft directly from the body — no copy-paste, no file step. Works alongside the `html` parameter from 5.10.0 (which other channels still use).
+
+### Safer attachment URL fetching
+
+SSRF guard + bounded streaming fetch closes a few footguns: link-local and cloud-metadata-service IPs are blocked, DNS-rebind TOCTOU is plugged with a re-resolve at fetch time, and large bodies are capped (20 MB for spreadsheets).
+
 ## [5.10.0] - 2026-05-29
 
 ### Create a transaction straight from email HTML

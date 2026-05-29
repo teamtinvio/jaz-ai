@@ -100,8 +100,8 @@ clio currencies add USD
 # Set the exchange rate for the period
 clio currency-rates add USD --rate 1.3450 --from 2026-03-01 --to 2026-03-31
 
-# Or import rates automatically from ECB/MAS
-clio currency-rates import USD --from 2026-03-01 --to 2026-03-31
+# For bulk updates, prepare a JSON file and use bulk-upsert (max 500 rates/call)
+clio currency-rates bulk-upsert --input rates.json
 
 # Create an invoice in USD (org base is SGD)
 clio invoices create \
