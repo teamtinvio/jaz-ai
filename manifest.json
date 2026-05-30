@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.12.0",
+  "version": "5.12.1",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -699,16 +699,8 @@
       "description": "Delete an attachment from a business transaction."
     },
     {
-      "name": "fetch_attachment_table",
-      "description": "Fetch extracted table data from an attachment (OCR/AI extraction result)."
-    },
-    {
       "name": "read_spreadsheet_rows",
       "description": "Parse rows from a CSV/Excel URL. Returns rows as JSON objects keyed by header (max 500/call, paginatable via offset/limit). Excel response includes availableSheets[] — re-call with sheetIndex if the first sheet is Instructions. Use BEFORE bulk_upsert_* when the user attaches a tabular file."
-    },
-    {
-      "name": "message_to_pdf",
-      "description": "Convert a markdown message to a downloadable PDF document."
     },
     {
       "name": "generate_month_end_blueprint",

@@ -1098,10 +1098,6 @@ DELETE /api/v1/invoices/fe7a92fa-.../attachments/a2f1aa45-...
 → 200 { "reference": "INV-001", "resourceId": "fe7a92fa-...", "attachments": [] }
 ```
 
-### GET /api/v1/attachments/:attachmentId/table
-
-Fetch OCR/AI-extracted table data from an attachment.
-
 ---
 
 ## 14h. Jaz Magic — Extraction & Autofill

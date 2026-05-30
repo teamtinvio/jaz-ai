@@ -55,7 +55,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 297 MCP tools, 
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.12.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.12.1", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -69,14 +69,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 297 MCP tools, 
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.12.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.12.1", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.12.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat_...`) also work for multi-org.
+Pin `jaz-clio@5.12.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat_...`) also work for multi-org.
 
 ### OpenAI Responses API
 
@@ -236,7 +236,7 @@ Each engagement template names the exact Jaz tools, recipes, and calculators to 
 | Reference | Lines | Content |
 |-----------|-------|---------|
 | `SKILL.md` | 549 | 159 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
-| `endpoints.md` | 2362 | Request/response examples for every core endpoint |
+| `endpoints.md` | 2358 | Request/response examples for every core endpoint |
 | `errors.md` | 914 | Error catalog with root causes and fixes |
 | `field-map.md` | 680 | Intuitive name → actual field name mapping |
 | `search-reference.md` | 833 | Filter fields, sort fields, operators for 28 search endpoints |
@@ -342,7 +342,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.12.0", "mcp"],
+  "args": ["-y", "jaz-clio@5.12.1", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

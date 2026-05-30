@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.12.1] - 2026-05-31
+
+### Removed two tools that never worked
+
+Two tools pointed at API endpoints that don't exist, so they always failed: converting a message to a PDF and fetching extracted table data from an attachment. They've been removed (along with their `clio reports pdf` and `clio attachments table` commands) so the agent no longer offers actions that can only error out — plus an unused internal inventory-search helper that was never exposed as a tool. Reading tabular files still works via the spreadsheet reader, and document extraction still works via the attachment/Magic flow.
+
 ## [5.12.0] - 2026-05-31
 
 ### Customize the text a recipe generates
