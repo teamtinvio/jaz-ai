@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.11.1] - 2026-05-30
+
+### More report types deliver as real files
+
+When you ask the agent for a report file ("send me the trial balance as Excel", "the P&L as a PDF"), the right file lands in the channel instead of inline data. Coverage now spans the full set of analytical, financial, and audit exports — trial balance, balance sheet, profit & loss, cashflow, AR/AP aging, customer/supplier/product summaries, anomaly analyses, statement of account, tax ledger, equity movement, bank reconciliation, fixed assets, and journal summary, among others.
+
+PDF output is now supported for balance sheet, profit & loss, trial balance, and cashflow. All other reports continue to deliver as XLSX.
+
+### Inviting and updating administrators works end-to-end
+
+Inviting a teammate with admin access — or moving an existing user to admin or revoking their access on a specific module — used to fail with a confusing validation error. Both flows now go through cleanly from the agent and from `clio org-users invite` / `clio org-users update`.
+
 ## [5.11.0] - 2026-05-30
 
 ### Sales orders and purchase orders

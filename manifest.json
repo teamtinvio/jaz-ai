@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.11.0",
+  "version": "5.11.1",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -580,11 +580,11 @@
     },
     {
       "name": "invite_org_user",
-      "description": "Invite a new user to the organization."
+      "description": "Invite a new user to the organization.\n\nuserType drives access:\n- ADMIN: full access to every module — moduleRoles is ignored.\n- CUSTOM_USER: per-module access — supply moduleRoles for each module the user should reach.\n\nModules (8): ORGANIZATION, USER_MANAGEMENT, BILLING, ACCOUNTING, SALES, PURCHASES, REPORTS, FIXED_ASSET. Any module omitted for a CUSTOM_USER defaults to no access."
     },
     {
       "name": "update_org_user",
-      "description": "Update an organization user's module roles."
+      "description": "Update an organization user's access. Provide userType to change their access tier, moduleRoles to change per-module access, or both.\n\nmoduleRoles behaves as a PARTIAL MERGE: modules you do not include keep their existing role on the user. To revoke access for a specific module, send it with roleCode NO_ACCESS — do NOT just omit it."
     },
     {
       "name": "remove_org_user",
@@ -600,7 +600,7 @@
     },
     {
       "name": "download_export",
-      "description": "Analytical / financial / audit report XLSX. Returns { fileName, fileUrl } (pre-signed, ~5 min).\n\nUse this tool (not export_records) for analytical / audit reports: anomaly detection (anomalous invoices/bills/cashflow), audit (GL journal, exchange-rate), risk (receivables, cash/expense health), statements (trial balance, P&L, BS, GL, cashflow, cash-balance), aging (AR/AP), summaries, inventory movement, ledgers, statement-of-account. `exportType` is enum-constrained (see param) — exact spelling required.\n\nNOT for raw entity dumps (invoices/bills/contacts as rows) — use export_records. For ad-hoc custom SELECT queries against the curated reporting schema — use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow returns the IAS 7 templated report (org-configured); 404 template_not_found if no template (see jaz-api Rule 147)."
+      "description": "Analytical / financial / audit report file (XLSX or PDF). Returns { fileName, fileUrl } (pre-signed, ~5 min). Use this tool, not export_records, for anomaly / audit / risk analyses, statements, aging, summaries, ledgers, statement-of-account.\n\nPer-type date / scope (wrong set → 422 \"X is required\"):\n- balance-sheet → snapshotDate\n- cashflow, equity-movement → primaryStartDate + primaryEndDate (secondary* optional)\n- bank-closing-balance → reportDate\n- bank-reconciliation-* → startDate + endDate + bankAccountResourceId\n- fixed-assets-reconciliation-summary → startDate + endDate + accountResourceId (fixed-asset UUIDs; search fixed_assets first)\n- trial-balance, cash-balance, ar-report, ap-report → endDate\n- other summaries (P&L, GL, sales/purchase, tax, fixed-assets-register, etc.) → startDate + endDate\n\nFor raw entity rows use export_records; for ad-hoc SELECT use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow returns the IAS 7 templated report (404 template_not_found if none configured, jaz-api Rule 147)."
     },
     {
       "name": "preview_pseudo_sql",
@@ -1008,7 +1008,7 @@
     },
     {
       "name": "bulk_invite_org_users",
-      "description": "Invite multiple users to the organization in one call. Accepts an array of user objects.\nEach user needs: email, firstName, lastName, moduleRoles. Returns per-user pass/fail results."
+      "description": "Invite multiple users to the organization in one call. Accepts an array of user objects. Each user follows the same contract as invite_org_user. Returns per-user pass/fail results."
     },
     {
       "name": "bulk_create_contacts",
