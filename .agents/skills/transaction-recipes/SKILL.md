@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.11.2
+version: 5.12.0
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -321,6 +321,27 @@ See `jaz-api` Rule 143 (silent-null failure mode + diagnosis sequence), Rule 144
 4. **Capsule wasn't created via the recipe engine** → rollback returns 422 `RECIPE_ROLLBACK_JOB_NOT_FOUND`; use `delete_capsule` for legacy capsules.
 
 **DO NOT** use server-side execution for `fx-reval` — Jaz auto-handles ALL period-end IAS 21.23 FX translation; double-posting risk identical to the offline `execute_recipe(recipe: 'fx-reval')` warning.
+
+### Template Customization (optional) — `templateOverrides`
+
+A recipe generates text for the capsule title/description, each scheduled posting's label/description, the journal-line memos, and the schedule reference. To customize any of those, pass `templateOverrides` alongside `inputs` on `preview_capsule_recipe` and on the `capsuleRecipe` trigger payload:
+
+```
+capsuleRecipe: {
+  recipeName: "LOAN_AMORTIZATION",
+  inputs: { ... },
+  templateOverrides: [
+    { slotKey: "capsule.title", template: "Loan {{loanReference}}" },
+    { slotKey: "leg.description.payment", template: "" }   // empty string clears a nullable slot
+  ]
+}
+```
+
+Discovery + rules:
+- **Discover the slots first**: `get_capsule_recipe(name).data.versions[].templateSlots[]` lists each `slotKey`, its `uiLabel`, `defaultTemplate`, `supportedVariables`, and `nullable`. Send only the slots you change.
+- Each `slotKey` MUST be one the recipe publishes; every `{{var}}` in `template` MUST be in that slot's `supportedVariables`; `template` ≤2000 chars; an empty `template` clears a `nullable` slot (omit the entry to keep the default; a non-nullable slot rejects a blank).
+- **Preview is the gate.** `preview_capsule_recipe` surfaces override mistakes as clean 422 `ERR_RECIPE_OVERRIDE_*` codes. On the trigger path, an invalid override falls under the same best-effort silent-null behavior as everything else in the payload (see the three gates above) — so preview before you trigger.
+- CLI: `clio capsule-recipes get <name>` prints the slots; `clio capsule-recipes preview --recipe <name> --inputs '{...}' --template-override capsule.title='Loan {{loanReference}}'` (repeatable).
 
 ## See Also
 

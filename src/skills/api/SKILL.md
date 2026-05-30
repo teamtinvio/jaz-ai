@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.11.2
+version: 5.12.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 141 production gotchas, error
@@ -460,7 +460,7 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
   2. **Poll `search_background_jobs --filter '{"baseTransactionResourceId":{"eq":"<id>"}}'`** — if a `FAILED` job exists, its `errorDetails` has the publish failure reason. **If no job exists for the base-trx, the publish never queued** (validation rejected pre-queue in customer-service).
   3. **`resume_capsule_recipe(capsuleResourceId)`** is only available if a capsule WAS created — i.e. the recipe partially ran. For pre-queue rejections (3 causes above), no capsule exists; the only recovery is to re-issue the trigger mutation with corrected inputs.
   
-  Pre-flight gate (recommended for agents and integrations): always call `preview_capsule_recipe(recipeName, inputs)` before the trigger mutation. Preview is pure-compute (no side effects) and surfaces every input/account/currency problem with a clear error_type — eliminates the silent-null class entirely.
+  Pre-flight gate (recommended for agents and integrations): always call `preview_capsule_recipe(recipeName, inputs)` before the trigger mutation. Preview is pure-compute (no side effects) and surfaces every input/account/currency problem with a clear error_type — eliminates the silent-null class entirely. **Same gate covers `templateOverrides`** (Customize Recipe): pass `capsuleRecipe.templateOverrides: [{slotKey, template}]` to customize generated text (capsule title/description, leg labels, line memos, schedule reference). Valid slotKeys + `{{variables}}` come from `get_capsule_recipe → versions[].templateSlots[]`; `slotKey` ≤128 chars (no dups), `template` ≤2000 (empty string clears a nullable slot). Invalid overrides return 422 `ERR_RECIPE_OVERRIDE_*` (UNKNOWN_RECIPE / MISSING_SLOT_KEY / DUPLICATE_SLOT / UNKNOWN_SLOT / NON_NULLABLE_BLANK / TEMPLATE_TOO_LONG / UNKNOWN_VARIABLE) on preview but silently null on the trigger path — so preview first.
 
 144. **`recipeName` IS enum-constrained at the API layer** (verified live 2026-05-27): closed enum `LOAN_AMORTIZATION | ACCRUAL_REVERSAL | PREPAID_AMORTIZATION | DEFERRED_REVENUE | IFRS16_LEASE` on `POST /capsule-recipes/preview` and on `capsuleRecipe.recipeName` payloads on trigger mutations. Send a string not in the set → 422 validation_error. Don't hard-code the 5 values in motherboard descriptions — discover via `list_capsule_recipes` (the source of truth) and pass the discovered name through.
 

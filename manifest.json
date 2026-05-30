@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.11.2",
+  "version": "5.12.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -636,11 +636,11 @@
     },
     {
       "name": "get_capsule_recipe",
-      "description": "Get one capsule recipe descriptor by enum name. inputSchema at `data.versions[0].inputSchema` (NOT top-level). Carries `allowedBaseTransactionTypes`, `x-accountClass` per *AccountResourceId slot, `x-baseTrxBinding` for auto-fills. Use list_capsule_recipes for available names."
+      "description": "Get one capsule recipe descriptor by enum name. inputSchema at `data.versions[0].inputSchema` (NOT top-level). Carries `allowedBaseTransactionTypes`, `x-accountClass` per *AccountResourceId slot, `x-baseTrxBinding` for auto-fills, and `versions[].templateSlots[]` — the slotKeys + supportedVariables you can pass to capsuleRecipe.templateOverrides (Customize Recipe). Use list_capsule_recipes for available names."
     },
     {
       "name": "preview_capsule_recipe",
-      "description": "Compute the blueprint a recipe would build, WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. **Pre-flight gate** before sending capsuleRecipe payloads — trigger mutations silently null on publish failure but preview surfaces every problem as a clean 422 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH, RECIPE_INVALID_BASE_TRANSACTION_TYPE, etc — Rule 143). The base-trx triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing — supply all three to auto-fill totalAmount/currency/anchor dates, OR omit all three for a pure compute preview."
+      "description": "Compute the blueprint a recipe would build, WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. **Pre-flight gate** before sending capsuleRecipe payloads — trigger mutations silently null on publish failure but preview surfaces every problem as a clean 422 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH, RECIPE_INVALID_BASE_TRANSACTION_TYPE, ERR_RECIPE_OVERRIDE_* — Rule 143). Also the gate for templateOverrides: invalid slotKeys/variables come back as ERR_RECIPE_OVERRIDE_* here. The base-trx triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing — supply all three to auto-fill totalAmount/currency/anchor dates, OR omit all three for a pure compute preview."
     },
     {
       "name": "resume_capsule_recipe",

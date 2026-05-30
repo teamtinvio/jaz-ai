@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.12.0] - 2026-05-31
+
+### Customize the text a recipe generates
+
+When you trigger an IFRS recipe (prepaid amortization, deferred revenue, loan, lease, accrual & reversal), you can now customize the text it produces — the capsule title and description, the label and description on each scheduled entry, the journal-line memos, and the schedule reference. Change only the parts you want; everything else keeps its default wording. Preview a recipe first to see which text it lets you edit and confirm your changes before anything posts.
+
+### New commands to work with recipes directly
+
+A new `capsule-recipes` command group lets you list the available recipes, inspect a recipe's inputs and editable text slots, preview the full schedule before posting, and resume or roll back a recipe run.
+
 ## [5.11.2] - 2026-05-30
 
 ### Searching quotes and orders works
