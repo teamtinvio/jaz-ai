@@ -83,10 +83,8 @@ clio sale-orders get <quoteId> -t quote --json | jq .orderState
 
 Purchase side is symmetric: `create -t request --finalize` (→ ACTIVE) → (optional) `accept` → `create -t order --request <id> --finalize` → `confirm`.
 
-## Known issues
-
-- **Order `/search` currently returns 500 server-side.** As of 2026-05-30, `POST` to `sale-quotes/search`, `sale-orders/search`, `purchase-requests/search`, and `purchase-orders/search` returns `500 Internal Server Error` for any body (even the minimal `{sort, limit, offset}`), while `invoices/search` and `bills/search` work with the identical shape. This is a server-side API defect, not a client bug — `search_sale_orders` / `search_purchase_orders` send a valid request and will work once the backend search resolver is fixed. Until then, use `list` (GET) + `get` to browse orders.
-
 ## Search
 
 `search_sale_orders` / `search_purchase_orders` take `documentType` plus the standard filter set (reference, status, contact, contactResourceId, currencyCode, date range, amount range, tag). The `status` enum is the per-side union (sales: DRAFT/CREATED/ACCEPTED/CONFIRMED/VOID; purchases: DRAFT/ACTIVE/ACCEPTED/CONFIRMED/VOID). For advanced/nested queries (e.g. filter by `saleQuoteResourceId`), pass the raw `filter` object. See `search-reference.md` §24–25 and `search-enums.md` §25–26.
+
+Search behaves exactly like the other entities: `sortBy` is an array, `order` is `ASC`/`DESC`, and an `offset` must be paired with a sort. Duplicate `sortBy` values are rejected (`422 — must contain unique values`).

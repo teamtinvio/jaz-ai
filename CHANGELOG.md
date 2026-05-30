@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.11.2] - 2026-05-30
+
+### Searching quotes and orders works
+
+Searching sale quotes, sale orders, purchase requests, and purchase orders — by status, contact, date, amount, or reference — now returns results reliably. A server-side issue had been causing these searches to fail; that is fixed, and the agent guidance now reflects that order search is fully available alongside list and get.
+
 ## [5.11.1] - 2026-05-30
 
 ### More report types deliver as real files
