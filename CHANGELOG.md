@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.12.2] - 2026-05-31
+
+Internal release automation update — a CI guardrail that detects when the Jaz API surface changes underneath the tools. No user-facing changes since v5.12.1.
+
 ## [5.12.1] - 2026-05-31
 
 ### Removed two tools that never worked
