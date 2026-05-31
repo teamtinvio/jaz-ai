@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.13.2] - 2026-06-01
+
+### Safer multi-organization handling
+
+When you connect more than one organization and the list cannot be loaded for a moment, the agent now declines organization-specific actions with a clear message instead of risking the wrong organization. A brief hiccup loading your organizations no longer drops the ones it already knows about.
+
 ## [5.13.1] - 2026-06-01
 
 ### Personal access tokens now authenticate
