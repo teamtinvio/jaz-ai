@@ -4124,6 +4124,236 @@
       ],
       "type": "object"
     },
+    "ConvertPurchaseOrderToBillClientRequest": {
+      "properties": {
+        "dueDate": {
+          "description": "Bill due date (format YYYY-MM-DD)",
+          "example": "2026-05-20",
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Override internal notes",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "reference": {
+          "description": "Bill reference (must be unique within the org)",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "saveAsDraft": {
+          "default": false,
+          "description": "Save bill as draft (false → ACTIVE)",
+          "type": "boolean"
+        },
+        "tags": {
+          "description": "Tags to apply (replaces source tags if provided)",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "terms": {
+          "description": "Override payment terms",
+          "enum": [
+            0,
+            7,
+            15,
+            30,
+            45,
+            60
+          ],
+          "type": "integer"
+        },
+        "valueDate": {
+          "description": "Bill value date (format YYYY-MM-DD)",
+          "example": "2026-04-20",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dueDate",
+        "reference",
+        "valueDate"
+      ],
+      "type": "object"
+    },
+    "ConvertPurchaseRequestToBillClientRequest": {
+      "properties": {
+        "dueDate": {
+          "description": "Bill due date (format YYYY-MM-DD)",
+          "example": "2026-05-20",
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Override internal notes",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "reference": {
+          "description": "Bill reference (must be unique within the org)",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "saveAsDraft": {
+          "default": false,
+          "description": "Save bill as draft (false → ACTIVE)",
+          "type": "boolean"
+        },
+        "tags": {
+          "description": "Tags to apply (replaces source tags if provided)",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "terms": {
+          "description": "Override payment terms",
+          "enum": [
+            0,
+            7,
+            15,
+            30,
+            45,
+            60
+          ],
+          "type": "integer"
+        },
+        "valueDate": {
+          "description": "Bill value date (format YYYY-MM-DD)",
+          "example": "2026-04-20",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dueDate",
+        "reference",
+        "valueDate"
+      ],
+      "type": "object"
+    },
+    "ConvertSaleOrderToInvoiceClientRequest": {
+      "properties": {
+        "dueDate": {
+          "description": "Invoice due date (format YYYY-MM-DD)",
+          "example": "2026-05-20",
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Override internal notes (not shown on documents)",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "invoiceNotes": {
+          "description": "Override invoice notes shown on the document",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "reference": {
+          "description": "Invoice reference (must be unique within the org — cannot reuse the quote's reference)",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "saveAsDraft": {
+          "default": false,
+          "description": "Save invoice as draft. When false (or omitted) the invoice is created as ACTIVE.",
+          "type": "boolean"
+        },
+        "tags": {
+          "description": "Tags to apply (replaces source tags if provided)",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "terms": {
+          "description": "Override payment terms (defaults to the source quote's terms if omitted)",
+          "enum": [
+            0,
+            7,
+            15,
+            30,
+            45,
+            60
+          ],
+          "type": "integer"
+        },
+        "valueDate": {
+          "description": "Invoice value date (format YYYY-MM-DD)",
+          "example": "2026-04-20",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dueDate",
+        "reference",
+        "valueDate"
+      ],
+      "type": "object"
+    },
+    "ConvertSaleQuoteToInvoiceClientRequest": {
+      "properties": {
+        "dueDate": {
+          "description": "Invoice due date (format YYYY-MM-DD)",
+          "example": "2026-05-20",
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Override internal notes (not shown on documents)",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "invoiceNotes": {
+          "description": "Override invoice notes shown on the document",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "reference": {
+          "description": "Invoice reference (must be unique within the org — cannot reuse the quote's reference)",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "saveAsDraft": {
+          "default": false,
+          "description": "Save invoice as draft. When false (or omitted) the invoice is created as ACTIVE.",
+          "type": "boolean"
+        },
+        "tags": {
+          "description": "Tags to apply (replaces source tags if provided)",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "terms": {
+          "description": "Override payment terms (defaults to the source quote's terms if omitted)",
+          "enum": [
+            0,
+            7,
+            15,
+            30,
+            45,
+            60
+          ],
+          "type": "integer"
+        },
+        "valueDate": {
+          "description": "Invoice value date (format YYYY-MM-DD)",
+          "example": "2026-04-20",
+          "type": "string"
+        }
+      },
+      "required": [
+        "dueDate",
+        "reference",
+        "valueDate"
+      ],
+      "type": "object"
+    },
     "CreateActionShortcutClientRequest": {
       "properties": {
         "appliesToReconciliationAccount": {
@@ -4227,6 +4457,14 @@
           },
           "maxItems": 200,
           "type": "array"
+        },
+        "purchaseOrderResourceId": {
+          "description": "Source Purchase Order resource ID — when creating a bill from a purchase order. arap stamps the linkage. Mutually exclusive with purchaseRequestResourceId.",
+          "type": "string"
+        },
+        "purchaseRequestResourceId": {
+          "description": "Source Purchase Request resource ID — when creating a bill from a purchase request. arap auto-creates an intermediate purchase order if needed. Mutually exclusive with purchaseOrderResourceId.",
+          "type": "string"
         },
         "reference": {
           "description": "Give it a reference name",
@@ -5492,6 +5730,14 @@
         },
         "reference": {
           "description": "Give it a reference name",
+          "type": "string"
+        },
+        "saleOrderResourceId": {
+          "description": "Source Sale Order resource ID — when creating an invoice from a sale order. arap stamps the linkage. Mutually exclusive with saleQuoteResourceId.",
+          "type": "string"
+        },
+        "saleQuoteResourceId": {
+          "description": "Source Sale Quote resource ID — when creating an invoice from a sale quote. arap auto-creates an intermediate sale order if needed. Mutually exclusive with saleOrderResourceId.",
           "type": "string"
         },
         "saveAsDraft": {
@@ -11099,6 +11345,196 @@
       },
       "type": "object"
     },
+    "OrderFamilyLineItemFilter": {
+      "properties": {
+        "and": {
+          "description": "AND clause",
+          "type": "object"
+        },
+        "andGroup": {
+          "description": "AND group",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "btResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Parent business transaction resource id (the order/quote/request the line belongs to)"
+        },
+        "contactName": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Contact name (denormalised on the line)"
+        },
+        "contactResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Contact resource id"
+        },
+        "createdAtDateTime": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateTimeExpression"
+            }
+          ],
+          "description": "Created-at timestamp"
+        },
+        "currencyCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Currency code (ISO 4217)"
+        },
+        "isOpen": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Line \"is open\" flag (true → not yet fully consumed downstream)"
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Line item name"
+        },
+        "or": {
+          "description": "OR clause",
+          "type": "object"
+        },
+        "orGroup": {
+          "description": "OR group",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "organizationAccountName": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Organization account name"
+        },
+        "organizationAccountResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Organization account resource id"
+        },
+        "reference": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Parent BT reference"
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Line item resource id"
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Parent BT status"
+        },
+        "taxProfileName": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Tax profile name"
+        },
+        "taxProfileResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Tax profile resource id"
+        },
+        "totalItemAmount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BigDecimalExpression"
+            }
+          ],
+          "description": "Total line amount (quantity × unitPrice − line discount + line tax)"
+        },
+        "valueDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Parent BT value date"
+        }
+      },
+      "type": "object"
+    },
+    "OrderFamilyLineItemFilterGroup": {
+      "properties": {
+        "and": {
+          "type": "object"
+        },
+        "or": {
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "OrderFamilyLineItemSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort order",
+          "enum": [
+            "ASC",
+            "asc",
+            "DESC",
+            "desc"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Columns to sort by (matches the API-wide `sortBy` array convention)",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 25,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "type": "object"
+    },
     "OrganizationAccountNestedFilter": {
       "properties": {
         "accountClass": {
@@ -16396,6 +16832,46 @@
             }
           ],
           "description": "Sort By (resourceId status userResourceId userType user.FirstName user.LastName user.Email user.PhoneRegistered user.Status)"
+        }
+      },
+      "type": "object"
+    },
+    "SearchOrderFamilyLineItemsClientRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/OrderFamilyLineItemFilter"
+            }
+          ],
+          "description": "Filter criteria"
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results to return (1–1000)",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Page offset (0-indexed). Sort is required when using offset.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\"",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/OrderFamilyLineItemSortFilter"
+            }
+          ],
+          "description": "Sort by"
         }
       },
       "type": "object"
@@ -22685,7 +23161,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -22805,7 +23281,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -22861,7 +23337,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -22926,7 +23402,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -22991,7 +23467,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23104,7 +23580,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23218,7 +23694,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23272,7 +23748,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23335,7 +23811,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23409,7 +23885,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23465,7 +23941,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23523,7 +23999,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23581,7 +24057,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23639,7 +24115,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23707,7 +24183,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23761,7 +24237,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23824,7 +24300,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23880,7 +24356,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -23941,7 +24417,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24004,7 +24480,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24060,7 +24536,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24123,7 +24599,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24186,7 +24662,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24219,6 +24695,59 @@
         ]
       }
     },
+    "/api/v1/bills/{resourceId}/download": {
+      "get": {
+        "description": "Generate and return the bill PDF document URL.",
+        "operationId": "download-bill",
+        "parameters": [
+          {
+            "description": "Bill Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download a Bill (PDF)",
+        "tags": [
+          "Bills"
+        ]
+      }
+    },
     "/api/v1/bills/{resourceId}/payments": {
       "get": {
         "consumes": [
@@ -24242,7 +24771,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24305,7 +24834,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24368,7 +24897,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24425,7 +24954,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24482,7 +25011,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24537,7 +25066,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24601,7 +25130,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -24650,7 +25179,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -24717,7 +25246,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -24791,7 +25320,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -24879,7 +25408,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -24972,7 +25501,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -25050,7 +25579,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25106,7 +25635,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25164,7 +25693,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25220,7 +25749,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25274,7 +25803,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25337,7 +25866,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25399,7 +25928,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25455,7 +25984,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25513,7 +26042,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25569,7 +26098,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25623,7 +26152,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25686,7 +26215,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25742,7 +26271,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25804,7 +26333,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25860,7 +26389,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25916,7 +26445,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -25979,7 +26508,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26041,7 +26570,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26097,7 +26626,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26153,7 +26682,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26216,7 +26745,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26278,7 +26807,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26334,7 +26863,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26390,7 +26919,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26448,7 +26977,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26510,7 +27039,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26566,7 +27095,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26624,7 +27153,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26680,7 +27209,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26734,7 +27263,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26797,7 +27326,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26865,7 +27394,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26921,7 +27450,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -26979,7 +27508,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27037,7 +27566,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27093,7 +27622,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27147,7 +27676,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27210,7 +27739,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27272,7 +27801,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27328,7 +27857,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27386,7 +27915,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27442,7 +27971,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27496,7 +28025,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27559,7 +28088,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27621,7 +28150,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27677,7 +28206,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27735,7 +28264,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27793,7 +28322,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27849,7 +28378,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27903,7 +28432,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -27966,7 +28495,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28037,7 +28566,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -28109,7 +28638,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28165,7 +28694,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28223,7 +28752,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28279,7 +28808,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28333,7 +28862,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28396,7 +28925,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28470,7 +28999,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28526,7 +29055,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28584,7 +29113,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28642,7 +29171,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28710,7 +29239,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28764,7 +29293,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28827,7 +29356,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28883,7 +29412,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -28944,7 +29473,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29007,7 +29536,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29063,7 +29592,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29119,7 +29648,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29182,7 +29711,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29240,7 +29769,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29298,7 +29827,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29356,7 +29885,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29414,7 +29943,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29472,7 +30001,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29530,7 +30059,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29588,7 +30117,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29646,7 +30175,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29710,7 +30239,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29768,7 +30297,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29832,7 +30361,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29896,7 +30425,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -29954,7 +30483,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30018,7 +30547,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30082,7 +30611,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30146,7 +30675,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30210,7 +30739,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30274,7 +30803,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30338,7 +30867,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30402,7 +30931,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30466,7 +30995,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30530,7 +31059,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30588,7 +31117,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30646,7 +31175,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30710,7 +31239,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30774,7 +31303,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30838,7 +31367,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30902,7 +31431,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -30966,7 +31495,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31030,7 +31559,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31088,7 +31617,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31146,7 +31675,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31204,7 +31733,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31262,7 +31791,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31320,7 +31849,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31384,7 +31913,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31448,7 +31977,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31506,7 +32035,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31564,7 +32093,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31622,7 +32151,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31680,7 +32209,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31744,7 +32273,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31802,7 +32331,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31860,7 +32389,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31918,7 +32447,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -31976,7 +32505,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32040,7 +32569,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32111,7 +32640,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32171,7 +32700,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -32241,7 +32770,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -32311,7 +32840,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -32379,7 +32908,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32451,7 +32980,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32509,7 +33038,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32572,7 +33101,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32628,7 +33157,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32691,7 +33220,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32749,7 +33278,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32805,7 +33334,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32863,7 +33392,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32921,7 +33450,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -32977,7 +33506,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33031,7 +33560,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33094,7 +33623,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33152,7 +33681,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33210,7 +33739,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33268,7 +33797,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33326,7 +33855,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33384,7 +33913,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33442,7 +33971,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33506,7 +34035,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33570,7 +34099,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33634,7 +34163,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33692,7 +34221,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33756,7 +34285,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33820,7 +34349,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33884,7 +34413,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -33948,7 +34477,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34006,7 +34535,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34064,7 +34593,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34128,7 +34657,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34192,7 +34721,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34256,7 +34785,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34320,7 +34849,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34384,7 +34913,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34448,7 +34977,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34512,7 +35041,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34570,7 +35099,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34640,7 +35169,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34696,7 +35225,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34759,7 +35288,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34815,7 +35344,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34890,7 +35419,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -34946,7 +35475,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35004,7 +35533,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35062,7 +35591,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35120,7 +35649,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35188,7 +35717,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35242,7 +35771,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35305,7 +35834,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35361,7 +35890,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35422,7 +35951,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35485,7 +36014,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35541,7 +36070,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35604,7 +36133,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35667,7 +36196,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35723,7 +36252,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35785,7 +36314,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35848,7 +36377,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35911,7 +36440,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -35967,7 +36496,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36025,7 +36554,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36083,7 +36612,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36139,7 +36668,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36193,7 +36722,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36256,7 +36785,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36319,7 +36848,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36375,7 +36904,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36433,7 +36962,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36491,7 +37020,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36559,7 +37088,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36613,7 +37142,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36676,7 +37205,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36732,7 +37261,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36793,7 +37322,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36856,7 +37385,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -36903,7 +37432,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "500": {
@@ -37203,7 +37732,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37266,7 +37795,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37322,7 +37851,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37380,7 +37909,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37455,7 +37984,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37511,7 +38040,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37569,7 +38098,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37625,7 +38154,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37679,7 +38208,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37742,7 +38271,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37789,7 +38318,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37852,7 +38381,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37909,7 +38438,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -37966,7 +38495,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38036,7 +38565,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38100,7 +38629,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38164,7 +38693,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38226,7 +38755,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38297,7 +38826,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38344,7 +38873,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38402,7 +38931,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38458,7 +38987,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38521,7 +39050,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38579,7 +39108,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38637,7 +39166,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38693,7 +39222,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38747,7 +39276,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38810,7 +39339,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38872,7 +39401,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38928,7 +39457,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38984,7 +39513,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39038,7 +39567,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39101,7 +39630,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39163,7 +39692,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39219,7 +39748,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39277,7 +39806,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39333,7 +39862,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39402,7 +39931,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39465,7 +39994,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39528,7 +40057,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39589,7 +40118,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39659,7 +40188,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39715,7 +40244,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39769,7 +40298,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39832,7 +40361,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39895,7 +40424,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -39953,7 +40482,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -40009,7 +40538,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -40123,7 +40652,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -40181,7 +40710,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -40233,7 +40762,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -40285,7 +40814,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -40337,7 +40866,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -40365,6 +40894,64 @@
           }
         ],
         "summary": "Bulk Upsert Purchase Orders (Line Items)",
+        "tags": [
+          "Purchase Orders"
+        ]
+      }
+    },
+    "/api/v1/purchase-orders/line-items/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search line items across purchase orders with structured filters, sorting, and pagination.",
+        "operationId": "search-purchase-order-line-item",
+        "parameters": [
+          {
+            "description": "Search payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchOrderFamilyLineItemsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Purchase Order Line Items",
         "tags": [
           "Purchase Orders"
         ]
@@ -40448,7 +41035,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -40493,7 +41080,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -40550,7 +41137,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -40583,6 +41170,168 @@
         ]
       }
     },
+    "/api/v1/purchase-orders/{resourceId}/attachments": {
+      "get": {
+        "description": "Retrieve the attachments on a purchase order.",
+        "operationId": "list-purchase-order-attachments",
+        "parameters": [
+          {
+            "description": "Purchase Order Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Purchase Order Attachments",
+        "tags": [
+          "Purchase Orders"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "Upload a file and attach it to a purchase order.",
+        "operationId": "create-purchase-order-attachment",
+        "parameters": [
+          {
+            "description": "Purchase Order Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Attachment file to upload (supported: PDF, PNG, JPEG, HEIC, XLS, XLSX, EML). Max 10 MB.",
+            "in": "formData",
+            "name": "file",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Add Attachment to Purchase Order",
+        "tags": [
+          "Purchase Orders"
+        ]
+      }
+    },
+    "/api/v1/purchase-orders/{resourceId}/attachments/{attachmentResourceId}": {
+      "delete": {
+        "description": "Remove an attachment from a purchase order.",
+        "operationId": "delete-purchase-order-attachment",
+        "parameters": [
+          {
+            "description": "Purchase Order Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Attachment Resource ID",
+            "in": "path",
+            "name": "attachmentResourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Remove Purchase Order Attachment",
+        "tags": [
+          "Purchase Orders"
+        ]
+      }
+    },
     "/api/v1/purchase-orders/{resourceId}/confirm": {
       "post": {
         "description": "Approve an ACTIVE purchase order (transitions ACTIVE → CONFIRMED). VOID orders cannot be confirmed.",
@@ -40603,7 +41352,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -40631,6 +41380,77 @@
           }
         ],
         "summary": "Confirm a Purchase Order",
+        "tags": [
+          "Purchase Orders"
+        ]
+      }
+    },
+    "/api/v1/purchase-orders/{resourceId}/convert-to-bill": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a bill from an existing purchase order. The new bill inherits the order's contact, line items, tax flags, and currency. The caller supplies a fresh reference + value/due dates and optional overrides.",
+        "operationId": "create-purchase-order-convert-to-bill",
+        "parameters": [
+          {
+            "description": "Purchase Order Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Convert payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ConvertPurchaseOrderToBillClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Convert Purchase Order to Bill",
         "tags": [
           "Purchase Orders"
         ]
@@ -40668,7 +41488,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -40732,7 +41552,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -40840,7 +41660,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -40898,7 +41718,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -40950,7 +41770,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -41002,7 +41822,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -41024,6 +41844,64 @@
           }
         ],
         "summary": "Bulk Void Purchase Requests",
+        "tags": [
+          "Purchase Requests"
+        ]
+      }
+    },
+    "/api/v1/purchase-requests/line-items/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search line items across purchase requests with structured filters, sorting, and pagination.",
+        "operationId": "search-purchase-request-line-item",
+        "parameters": [
+          {
+            "description": "Search payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchOrderFamilyLineItemsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Purchase Request Line Items",
         "tags": [
           "Purchase Requests"
         ]
@@ -41107,7 +41985,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -41152,7 +42030,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -41209,7 +42087,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -41262,7 +42140,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -41290,6 +42168,239 @@
           }
         ],
         "summary": "Accept a Purchase Request",
+        "tags": [
+          "Purchase Requests"
+        ]
+      }
+    },
+    "/api/v1/purchase-requests/{resourceId}/attachments": {
+      "get": {
+        "description": "Retrieve the attachments on a purchase request.",
+        "operationId": "list-purchase-request-attachments",
+        "parameters": [
+          {
+            "description": "Purchase Request Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Purchase Request Attachments",
+        "tags": [
+          "Purchase Requests"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "Upload a file and attach it to a purchase request.",
+        "operationId": "create-purchase-request-attachment",
+        "parameters": [
+          {
+            "description": "Purchase Request Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Attachment file to upload (supported: PDF, PNG, JPEG, HEIC, XLS, XLSX, EML). Max 10 MB.",
+            "in": "formData",
+            "name": "file",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Add Attachment to Purchase Request",
+        "tags": [
+          "Purchase Requests"
+        ]
+      }
+    },
+    "/api/v1/purchase-requests/{resourceId}/attachments/{attachmentResourceId}": {
+      "delete": {
+        "description": "Remove an attachment from a purchase request.",
+        "operationId": "delete-purchase-request-attachment",
+        "parameters": [
+          {
+            "description": "Purchase Request Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Attachment Resource ID",
+            "in": "path",
+            "name": "attachmentResourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Remove Purchase Request Attachment",
+        "tags": [
+          "Purchase Requests"
+        ]
+      }
+    },
+    "/api/v1/purchase-requests/{resourceId}/convert-to-bill": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a bill from an existing purchase request. The new bill inherits contact, line items, tax flags, and currency. arap may auto-create an intermediate purchase order. The caller supplies a fresh reference + value/due dates and optional overrides.",
+        "operationId": "create-purchase-request-convert-to-bill",
+        "parameters": [
+          {
+            "description": "Purchase Request Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Convert payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ConvertPurchaseRequestToBillClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Convert Purchase Request to Bill",
         "tags": [
           "Purchase Requests"
         ]
@@ -41327,7 +42438,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -41391,7 +42502,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -42723,7 +43834,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -42781,7 +43892,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -42839,7 +43950,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -42897,7 +44008,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -42955,7 +44066,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43013,7 +44124,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43071,7 +44182,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43129,7 +44240,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43187,7 +44298,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43245,7 +44356,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43303,7 +44414,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43367,7 +44478,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43420,7 +44531,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43478,7 +44589,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43535,7 +44646,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse"
+                  "$ref": "#/definitions/BaseResponse_2"
                 },
                 {
                   "properties": {
@@ -43729,7 +44840,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43787,7 +44898,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -43839,7 +44950,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -43891,7 +45002,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -43943,7 +45054,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -43971,6 +45082,64 @@
           }
         ],
         "summary": "Bulk Upsert Sale Orders (Line Items)",
+        "tags": [
+          "Sale Orders"
+        ]
+      }
+    },
+    "/api/v1/sale-orders/line-items/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search line items across sale orders with structured filters, sorting, and pagination.",
+        "operationId": "search-sale-order-line-item",
+        "parameters": [
+          {
+            "description": "Search payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchOrderFamilyLineItemsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Sale Order Line Items",
         "tags": [
           "Sale Orders"
         ]
@@ -44054,7 +45223,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44099,7 +45268,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44156,7 +45325,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -44189,6 +45358,168 @@
         ]
       }
     },
+    "/api/v1/sale-orders/{resourceId}/attachments": {
+      "get": {
+        "description": "Retrieve the attachments on a sale order.",
+        "operationId": "list-sale-order-attachments",
+        "parameters": [
+          {
+            "description": "Sale Order Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Sale Order Attachments",
+        "tags": [
+          "Sale Orders"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "Upload a file and attach it to a sale order.",
+        "operationId": "create-sale-order-attachment",
+        "parameters": [
+          {
+            "description": "Sale Order Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Attachment file to upload (supported: PDF, PNG, JPEG, HEIC, XLS, XLSX, EML). Max 10 MB.",
+            "in": "formData",
+            "name": "file",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Add Attachment to Sale Order",
+        "tags": [
+          "Sale Orders"
+        ]
+      }
+    },
+    "/api/v1/sale-orders/{resourceId}/attachments/{attachmentResourceId}": {
+      "delete": {
+        "description": "Remove an attachment from a sale order.",
+        "operationId": "delete-sale-order-attachment",
+        "parameters": [
+          {
+            "description": "Sale Order Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Attachment Resource ID",
+            "in": "path",
+            "name": "attachmentResourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Remove Sale Order Attachment",
+        "tags": [
+          "Sale Orders"
+        ]
+      }
+    },
     "/api/v1/sale-orders/{resourceId}/confirm": {
       "post": {
         "description": "Approve an ACTIVE sale order (transitions ACTIVE → CONFIRMED). VOID orders cannot be confirmed.",
@@ -44209,7 +45540,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44237,6 +45568,77 @@
           }
         ],
         "summary": "Confirm a Sale Order",
+        "tags": [
+          "Sale Orders"
+        ]
+      }
+    },
+    "/api/v1/sale-orders/{resourceId}/convert-to-invoice": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create an invoice from an existing sale order. The new invoice inherits the order's contact, line items, tax flags, currency, and bill-to/bill-from. The caller supplies a fresh reference + value/due dates and optional overrides.",
+        "operationId": "create-sale-order-convert-to-invoice",
+        "parameters": [
+          {
+            "description": "Sale Order Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Convert payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ConvertSaleOrderToInvoiceClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Convert Sale Order to Invoice",
         "tags": [
           "Sale Orders"
         ]
@@ -44274,7 +45676,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44338,7 +45740,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44446,7 +45848,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -44504,7 +45906,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -44556,7 +45958,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -44608,7 +46010,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "422": {
@@ -44630,6 +46032,64 @@
           }
         ],
         "summary": "Bulk Void Sale Quotes",
+        "tags": [
+          "Sale Quotes"
+        ]
+      }
+    },
+    "/api/v1/sale-quotes/line-items/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search line items across sale quotes with structured filters, sorting, and pagination.",
+        "operationId": "search-sale-quote-line-item",
+        "parameters": [
+          {
+            "description": "Search payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchOrderFamilyLineItemsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Sale Quote Line Items",
         "tags": [
           "Sale Quotes"
         ]
@@ -44713,7 +46173,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44758,7 +46218,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44815,7 +46275,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -44868,7 +46328,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44896,6 +46356,239 @@
           }
         ],
         "summary": "Accept a Sale Quote",
+        "tags": [
+          "Sale Quotes"
+        ]
+      }
+    },
+    "/api/v1/sale-quotes/{resourceId}/attachments": {
+      "get": {
+        "description": "Retrieve the attachments on a sale quote.",
+        "operationId": "list-sale-quote-attachments",
+        "parameters": [
+          {
+            "description": "Sale Quote Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Sale Quote Attachments",
+        "tags": [
+          "Sale Quotes"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "Upload a file and attach it to a sale quote.",
+        "operationId": "create-sale-quote-attachment",
+        "parameters": [
+          {
+            "description": "Sale Quote Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Attachment file to upload (supported: PDF, PNG, JPEG, HEIC, XLS, XLSX, EML). Max 10 MB.",
+            "in": "formData",
+            "name": "file",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Add Attachment to Sale Quote",
+        "tags": [
+          "Sale Quotes"
+        ]
+      }
+    },
+    "/api/v1/sale-quotes/{resourceId}/attachments/{attachmentResourceId}": {
+      "delete": {
+        "description": "Remove an attachment from a sale quote.",
+        "operationId": "delete-sale-quote-attachment",
+        "parameters": [
+          {
+            "description": "Sale Quote Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Attachment Resource ID",
+            "in": "path",
+            "name": "attachmentResourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Remove Sale Quote Attachment",
+        "tags": [
+          "Sale Quotes"
+        ]
+      }
+    },
+    "/api/v1/sale-quotes/{resourceId}/convert-to-invoice": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create an invoice from an existing sale quote. The new invoice inherits contact, line items, tax flags, currency, and bill-to/bill-from from the quote. The caller supplies a fresh reference + value/due dates and optional overrides for notes/terms/tags. arap may auto-create an intermediate sale order when the quote is in CREATED status.",
+        "operationId": "create-sale-quote-convert-to-invoice",
+        "parameters": [
+          {
+            "description": "Sale Quote Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Convert payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ConvertSaleQuoteToInvoiceClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Convert Sale Quote to Invoice",
         "tags": [
           "Sale Quotes"
         ]
@@ -44933,7 +46626,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -44997,7 +46690,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "404": {
@@ -45096,7 +46789,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45152,7 +46845,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45208,7 +46901,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45262,7 +46955,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45325,7 +47018,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45393,7 +47086,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45454,7 +47147,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45523,7 +47216,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45588,7 +47281,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45635,7 +47328,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45691,7 +47384,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45747,7 +47440,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45801,7 +47494,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45864,7 +47557,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45932,7 +47625,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -45993,7 +47686,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46062,7 +47755,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46124,7 +47817,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46180,7 +47873,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46236,7 +47929,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46290,7 +47983,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46353,7 +48046,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46422,7 +48115,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46483,7 +48176,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46546,7 +48239,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46593,7 +48286,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46649,7 +48342,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46705,7 +48398,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46759,7 +48452,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46822,7 +48515,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46890,7 +48583,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -46951,7 +48644,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47020,7 +48713,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47078,7 +48771,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47141,7 +48834,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47199,7 +48892,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47255,7 +48948,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47313,7 +49006,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47381,7 +49074,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47437,7 +49130,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47495,7 +49188,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47553,7 +49246,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47621,7 +49314,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47675,7 +49368,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47738,7 +49431,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47794,7 +49487,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47855,7 +49548,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47918,7 +49611,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -47951,6 +49644,59 @@
         ]
       }
     },
+    "/api/v1/supplier-credit-notes/{resourceId}/download": {
+      "get": {
+        "description": "Generate and return the supplier credit note PDF document URL.",
+        "operationId": "download-supplier-credit-note",
+        "parameters": [
+          {
+            "description": "Supplier Credit Note Resource ID",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse_2"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download a Supplier Credit Note (PDF)",
+        "tags": [
+          "Supplier Credit"
+        ]
+      }
+    },
     "/api/v1/supplier-credit-notes/{resourceId}/refunds": {
       "get": {
         "consumes": [
@@ -47974,7 +49720,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48037,7 +49783,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48099,7 +49845,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48155,7 +49901,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48213,7 +49959,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48269,7 +50015,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48323,7 +50069,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48386,7 +50132,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48448,7 +50194,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48504,7 +50250,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48562,7 +50308,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48618,7 +50364,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48672,7 +50418,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48735,7 +50481,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48797,7 +50543,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48855,7 +50601,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48913,7 +50659,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -48969,7 +50715,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -49037,7 +50783,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {

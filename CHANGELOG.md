@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.13.0] - 2026-05-31
+
+### Turn a quote or order into an invoice or bill in one step
+
+You can now convert a sale quote or sale order straight into an invoice, and a purchase request or purchase order straight into a bill. The line items, contact and amounts carry over, and you can set the new document's reference, dates, payment terms and notes. Each conversion creates a brand-new invoice or bill — it doesn't move or consume the original — so you can review it before anything posts.
+
+### Order attachments, line-item search, and more PDF downloads
+
+- Attachments now work on sale quotes, sale orders, purchase requests and purchase orders — not just invoices and bills.
+- A new line-item search finds individual order lines across your quotes and orders (by description, account, amount, open/closed state, or date) — handy for questions like "what's still open for this customer".
+- You can now download a bill or a supplier credit note as a PDF, alongside the existing invoice and customer-credit-note downloads.
+- When you build an invoice or bill yourself, you can link it back to the originating order for a clean paper trail.
+
 ## [5.12.2] - 2026-05-31
 
 Internal release automation update — a CI guardrail that detects when the Jaz API surface changes underneath the tools. No user-facing changes since v5.12.1.

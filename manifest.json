@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.12.2",
+  "version": "5.13.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -179,6 +179,10 @@
       "description": "Delete a draft bill."
     },
     {
+      "name": "download_bill_pdf",
+      "description": "Download a bill as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered)."
+    },
+    {
       "name": "pay_bill",
       "description": "Record a payment against a bill. Bill must be APPROVED before payment — draft or voided bills cannot be paid."
     },
@@ -229,6 +233,22 @@
     {
       "name": "transition_purchase_order",
       "description": "Advance or cancel a Purchase Request / Purchase Order lifecycle. action:\n- ACCEPT — Purchase Request only (ACTIVE → ACCEPTED). The request must already be issued (saveAsDraft:false); a DRAFT can't be accepted. An ACTIVE request is already linkable, so accept is optional.\n- CONFIRM — Purchase Order only (ACTIVE → CONFIRMED).\n- VOID — either, when not a draft (cancels the document).\n- DELETE — DRAFT only; for anything non-draft use VOID."
+    },
+    {
+      "name": "convert_sale_order_to_invoice",
+      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults false (the new invoice is ACTIVE). The source must not be VOID."
+    },
+    {
+      "name": "convert_purchase_order_to_bill",
+      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults false (the new bill is ACTIVE). The source must not be VOID."
+    },
+    {
+      "name": "search_sale_order_line_items",
+      "description": "Search the LINE ITEMS across Sale Quotes or Sale Orders (line-item level, not document level). Filter by line text, parent order, contact, account, amount, open state, date. Use the filter param for advanced/nested queries."
+    },
+    {
+      "name": "search_purchase_order_line_items",
+      "description": "Search the LINE ITEMS across Purchase Requests or Purchase Orders (line-item level, not document level). Filter by line text, parent order, contact, account, amount, open state, date. Use the filter param for advanced/nested queries."
     },
     {
       "name": "list_journals",
@@ -425,6 +445,10 @@
     {
       "name": "delete_supplier_credit_note",
       "description": "Delete a draft supplier credit note."
+    },
+    {
+      "name": "download_supplier_credit_note_pdf",
+      "description": "Download a supplier credit note as PDF. Returns { fileUrl } (may be pending/empty if not yet rendered)."
     },
     {
       "name": "update_supplier_credit_note",
@@ -688,15 +712,15 @@
     },
     {
       "name": "get_attachments",
-      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note)."
+      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note, or order document)."
     },
     {
       "name": "add_attachment",
-      "description": "Add an attachment to a business transaction. Provide sourceUrl (downloads and uploads as file) or attachmentId (links existing)."
+      "description": "Add an attachment to a business transaction. Provide sourceUrl (downloads and uploads as file) or attachmentId (links existing). Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them."
     },
     {
       "name": "delete_attachment",
-      "description": "Delete an attachment from a business transaction."
+      "description": "Delete an attachment from a business transaction (invoice, bill, journal, credit note, or order document)."
     },
     {
       "name": "read_spreadsheet_rows",
