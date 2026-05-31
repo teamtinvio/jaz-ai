@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.13.1] - 2026-06-01
+
+### Personal access tokens now authenticate
+
+Personal access tokens (the `pat-…` keys for multi-org access) were rejected because of a prefix mismatch, so they never worked. They now authenticate correctly — set one as your `JAZ_API_KEY` just like a `jk-…` key.
+
 ## [5.13.0] - 2026-05-31
 
 ### Turn a quote or order into an invoice or bill in one step
