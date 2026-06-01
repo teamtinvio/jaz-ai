@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.13.7] - 2026-06-02
+
+Internal release automation update. No user-facing changes since v5.13.6. (Corrects the MCP flat-mode tool annotation `openWorldHint` — it now reflects whether a tool reaches a party outside the organization's own Jaz data, defaulting false for the closed bookkeeping domain, instead of being hardcoded true. Affects the hosted/flat MCP surface only.)
+
 ## [5.13.6] - 2026-06-02
 
 Internal release automation update. No user-facing changes since v5.13.5. (The hosted MCP endpoint now resolves the organization from the OAuth token instead of requiring a request header, so a remote connector forwards only the bearer. Daemon/infrastructure only.)

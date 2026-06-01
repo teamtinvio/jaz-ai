@@ -38358,7 +38358,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies",
+        "operationId": "list-organization-currencies-2",
         "parameters": [
           {
             "default": 100,
@@ -38419,7 +38419,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency",
+        "operationId": "create-organization-currency-2",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -38478,7 +38478,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency",
+        "operationId": "get-organization-currency-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38535,7 +38535,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates",
+        "operationId": "list-organization-currency-rates-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38603,7 +38603,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate",
+        "operationId": "create-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38669,7 +38669,7 @@
         ],
         "deprecated": true,
         "description": "Delete Organization Currency Custom Rate",
-        "operationId": "delete-organization-currency-rate-2",
+        "operationId": "delete-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38731,7 +38731,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency Custom Rate",
-        "operationId": "get-organization-currency-rate-2",
+        "operationId": "get-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38793,7 +38793,7 @@
         ],
         "deprecated": true,
         "description": "Edit a Organization Currency Custom Rate",
-        "operationId": "update-organization-currency-rate-2",
+        "operationId": "update-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -39669,7 +39669,7 @@
           "application/json"
         ],
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies-2",
+        "operationId": "list-organization-currencies",
         "parameters": [
           {
             "default": 100,
@@ -39729,7 +39729,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency-2",
+        "operationId": "create-organization-currency",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -39845,7 +39845,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency-2",
+        "operationId": "get-organization-currency",
         "parameters": [
           {
             "description": "Currency Code",
@@ -39901,7 +39901,7 @@
           "application/json"
         ],
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates-2",
+        "operationId": "list-organization-currency-rates",
         "parameters": [
           {
             "description": "Currency Code",
@@ -39968,7 +39968,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate-2",
+        "operationId": "create-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40033,7 +40033,7 @@
           "application/json"
         ],
         "description": "Delete Organization Currency Custom Rate",
-        "operationId": "delete-organization-currency-rate",
+        "operationId": "delete-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40094,7 +40094,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency Custom Rate",
-        "operationId": "get-organization-currency-rate",
+        "operationId": "get-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40155,7 +40155,7 @@
           "application/json"
         ],
         "description": "Edit a Organization Currency Custom Rate",
-        "operationId": "update-organization-currency-rate",
+        "operationId": "update-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
