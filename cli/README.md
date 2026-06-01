@@ -22,6 +22,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 - [MCP Server](#mcp-server) — 301 tools for AI agents
 - [Skills](#skills) — Teach any AI the Jaz API
 - [Setup](#setup) — Auth, multi-org, automation
+- [Semantic help-center search](#help-center-semantic-search-optional) — Optional OpenAI-backed retrieval
 
 ## Three Ways In
 
@@ -105,6 +106,16 @@ clio auth whoami              # Verify
 **Multiple orgs:** `clio auth add` each key, then `clio auth switch <label>` or `--org <label>` per command.
 
 **Automation:** Every CLI command supports `--json` for structured output. Set `JAZ_API_KEY` as an env var for scripts and CI pipelines.
+
+## Help-center semantic search (optional)
+
+`search_help_center` ships with built-in BM25 lexical search over the bundled help-center corpus and a precomputed embedding index. Set `CLIO_HELP_CENTER_OPENAI_API_KEY` to enable hybrid retrieval (semantic + BM25 via RRF) — strict opt-in, no fallback to other OpenAI env vars.
+
+When set, the CLI sends embedding requests for **only the user's query** to `https://api.openai.com/v1/embeddings` and nowhere else. The precomputed article vectors are locked to `text-embedding-3-small`; keys for other embedding models will be silently unused since cosine similarity requires the same model on both sides.
+
+Recommended posture: create a project-scoped OpenAI key restricted to embedding models with a low monthly cap. On auth failure (401/403) the CLI prints a single warning to stderr and falls back to BM25 — subsequent failures stay silent.
+
+**CLI-only.** The MCPB bundle ships without the embedding index (~2.6 MB skipped for bundle weight), so `CLIO_HELP_CENTER_OPENAI_API_KEY` has no effect for MCPB installs — those continue to use BM25 only regardless of whether the env var is set.
 
 ## Privacy
 

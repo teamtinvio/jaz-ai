@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.13.3] - 2026-06-01
+
+### Smarter help-center search (opt-in)
+
+`search_help_center` now does hybrid retrieval (semantic + BM25) when `CLIO_HELP_CENTER_OPENAI_API_KEY` is set, finding articles whose meaning matches your question even when wording doesn't. BM25 lexical search continues to work unchanged for users who don't opt in.
+
 ## [5.13.2] - 2026-06-01
 
 ### Safer multi-organization handling

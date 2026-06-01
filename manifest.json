@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.13.2",
+  "version": "5.13.3",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1244,7 +1244,7 @@
     },
     {
       "name": "search_help_center",
-      "description": "Offline. Search the Jaz help center for how-to articles, feature guides, and accounting concepts. Use this for \"how do I...\" or \"what is...\" questions about Jaz: bank reconciliation, GST/VAT filing, multi-currency, fixed assets, custom fields, integrations, and so on. Returns top matching articles with title, section, snippet, and source URL.\n\nWorks without an API key — bundle ships the help center corpus locally."
+      "description": "Search the Jaz help center for how-to articles, feature guides, and accounting concepts. Use this for \"how do I...\" or \"what is...\" questions about Jaz: bank reconciliation, GST/VAT filing, multi-currency, fixed assets, custom fields, integrations, and so on. Returns top matching articles with title, section, content, and source URL."
     },
     {
       "name": "practice_init",
