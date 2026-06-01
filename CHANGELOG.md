@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.13.6] - 2026-06-02
+
+Internal release automation update. No user-facing changes since v5.13.5. (The hosted MCP endpoint now resolves the organization from the OAuth token instead of requiring a request header, so a remote connector forwards only the bearer. Daemon/infrastructure only.)
+
 ## [5.13.5] - 2026-06-02
 
 Internal release automation update. No user-facing changes since v5.13.4. (Adds the public-hosting layer for the remote MCP endpoint — DNS-rebinding Host allowlist, per-IP rate limit, and the K3s manifests/workflow for mcp.jaz.ai. Daemon/infrastructure only, not part of the desktop extension.)
