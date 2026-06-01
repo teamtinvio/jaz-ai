@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.13.4] - 2026-06-02
+
+Internal release automation update. No user-facing changes since v5.13.3. (Adds a hosted MCP Streamable-HTTP endpoint to the serve daemon — groundwork for remote connectors, not part of the desktop extension.)
+
 ## [5.13.3] - 2026-06-01
 
 ### Smarter help-center search (opt-in)
