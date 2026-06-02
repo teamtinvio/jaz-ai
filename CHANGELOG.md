@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.13.8] - 2026-06-02
+
+Internal release automation update. No user-facing changes since v5.13.7. (Adds the directory-grade "namespace mode" for the hosted MCP connector at mcp.jaz.ai — ~37 resource-scoped namespace tools, generated from the registry, that keep all ~300 operations reachable within the ChatGPT/Claude connector tool budgets and review rules. Hosted/connector surface only; Claude Code and the desktop extension keep the existing meta-tool surface.)
+
 ## [5.13.7] - 2026-06-02
 
 Internal release automation update. No user-facing changes since v5.13.6. (Corrects the MCP flat-mode tool annotation `openWorldHint` — it now reflects whether a tool reaches a party outside the organization's own Jaz data, defaulting false for the closed bookkeeping domain, instead of being hardcoded true. Affects the hosted/flat MCP surface only.)
