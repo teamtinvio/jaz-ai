@@ -393,7 +393,7 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`
 **Link field**: `saleQuoteResourceId` (on Sale Orders — the source quote)
 
-> The `status` enum is the union across both sale documents: a **Sale Quote** moves `DRAFT → CREATED → ACCEPTED` (then `VOID`); a **Sale Order** is created as `CREATED → CONFIRMED` (then `VOID`). Fulfillment is reported on the parent quote via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_ORDERED`) — a response field, not a search filter.
+> The `status` enum is the union across both sale documents: a **Sale Quote** moves `DRAFT → CREATED → ACCEPTED` (then `VOID`); a **Sale Order** is created as `CREATED → CONFIRMED` (then `VOID`). Fulfillment is reported on the parent quote via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_INVOICED`) — an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
 
 ---
 
@@ -409,7 +409,7 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`
 **Link field**: `purchaseRequestResourceId` (on Purchase Orders — the source request)
 
-> The `status` enum is the union across both purchase documents: a **Purchase Request** moves `DRAFT → ACTIVE → ACCEPTED` (then `VOID`); a **Purchase Order** moves `DRAFT → ACTIVE → CONFIRMED` (then `VOID`). Fulfillment is reported on the parent request via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_ORDERED`) — a response field, not a search filter.
+> The `status` enum is the union across both purchase documents: a **Purchase Request** moves `DRAFT → ACTIVE → ACCEPTED` (then `VOID`); a **Purchase Order** moves `DRAFT → ACTIVE → CONFIRMED` (then `VOID`). Fulfillment is reported on the parent request via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_BILLED`) — an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
 
 ---
 

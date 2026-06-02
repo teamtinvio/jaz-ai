@@ -728,7 +728,7 @@ Also covers `POST /api/v1/sale-quotes/search` — same filter shape (`SaleOrderF
 
 **Sort fields**: `resourceId`, `reference`, `status`, `contactResourceId`, `valueDate`, `dueDate`, `terms`, `currencyCode`, `totalAmount`, `createdAt`, `updatedAt`
 
-> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_ORDERED) appears on responses but is **not** a filter field. There is no order→invoice link field — raise the invoice separately.
+> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_INVOICED for quotes, FULLY_BILLED for requests — an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired) appears on responses but is **not** a filter field.
 
 ---
 
@@ -760,7 +760,7 @@ Also covers `POST /api/v1/purchase-requests/search` — same filter shape (`Purc
 
 **Sort fields**: `resourceId`, `reference`, `status`, `contactResourceId`, `valueDate`, `dueDate`, `terms`, `currencyCode`, `totalAmount`, `createdAt`, `updatedAt`
 
-> `orderState` appears on responses but is **not** a filter field. There is no order→bill link field — raise the bill separately.
+> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_BILLED for requests — an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired) appears on responses but is **not** a filter field.
 
 ---
 

@@ -32,7 +32,7 @@ Quote→Order / Request→PO linking is a **create-time reference field**:
 
 **The parent must be ISSUED (not DRAFT/VOID).** A CREATED/ACCEPTED quote (or ACTIVE/ACCEPTED request) is linkable — accept is **optional** (CREATED already links). Linking to a `DRAFT`/`VOID` parent returns `SALE_QUOTE_STATUS_INVALID_FOR_ORDER_CONVERSION` ("must not be in VOID or DRAFT status to create sale order"). The `create_*` tools pre-flight this: for a DRAFT parent the `repair` hint says to issue it (create with `saveAsDraft:false`) — **not** to accept it (accept fails on DRAFT). So: to order from a quote/request, create the quote/request with `saveAsDraft:false`.
 
-Once an order is created from an issued quote, the parent quote's `orderState` advances to `FULLY_ORDERED` (verified live). `orderState` (`NOT_ORDERED` / `PARTIALLY_ORDERED` / `FULLY_ORDERED`) is a **response field**, not a search filter.
+Creating and confirming an order from an issued quote rolls the parent quote's `orderState` up to reflect downstream progress (arap order-status rollup, 2026-06): a confirmed order **not yet invoiced** shows `PARTIALLY_ORDERED` (verified live); the terminal `FULLY_INVOICED` is reached only once every linked order is fully invoiced. Purchase requests mirror this with `FULLY_BILLED`. `orderState` is a **response field**, not a search filter — values: `NOT_ORDERED` / `PARTIALLY_ORDERED` / `FULLY_INVOICED` (quotes) / `FULLY_BILLED` (requests). The older `FULLY_ORDERED` value was retired by this rollup.
 
 ## Conversion: Order → Invoice / Order → Bill
 
@@ -90,7 +90,7 @@ clio sale-orders accept <quoteId> --json
 clio sale-orders create -t order --quote <quoteId> --contact <id> --lines '[…]' --date 2026-05-30 --json
 # 4. Confirm the order (CREATED → CONFIRMED)
 clio sale-orders confirm <orderId> --json
-# 5. The parent quote now shows orderState = FULLY_ORDERED
+# 5. The parent quote now rolls up to orderState = PARTIALLY_ORDERED (confirmed order, not yet invoiced)
 clio sale-orders get <quoteId> -t quote --json | jq .orderState
 # 6. Convert the confirmed order into an invoice (creates a NEW invoice)
 clio sale-orders convert-to-invoice <orderId> -t order --date 2026-05-30 --due 2026-06-29 --json

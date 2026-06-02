@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.13.12] - 2026-06-03
+
+Internal release. No user-facing changes since v5.13.11. (Smoke test + jaz-api skill docs updated to track an upstream Orders change: a sale-quote / purchase-request `orderState` is now an order+invoice rollup — `PARTIALLY_ORDERED` while a confirmed order is not yet fully invoiced/billed, then terminal `FULLY_INVOICED` / `FULLY_BILLED`; the old `FULLY_ORDERED` value was retired. Test and documentation accuracy only.)
+
 ## [5.13.9] - 2026-06-02
 
 Internal release automation update. No user-facing changes since v5.13.8. (Excludes local-only filesystem tools — the `practice` practitioner-workspace scaffolding — from the hosted mcp.jaz.ai connector surface, where they'd run against the server rather than the user. They remain available on the Claude Code / desktop-extension surface. Hosted/connector only.)
