@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.13.10
+version: 5.13.11
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
