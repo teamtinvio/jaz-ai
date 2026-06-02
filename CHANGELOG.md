@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.13.9] - 2026-06-02
+
+Internal release automation update. No user-facing changes since v5.13.8. (Excludes local-only filesystem tools — the `practice` practitioner-workspace scaffolding — from the hosted mcp.jaz.ai connector surface, where they'd run against the server rather than the user. They remain available on the Claude Code / desktop-extension surface. Hosted/connector only.)
+
 ## [5.13.8] - 2026-06-02
 
 Internal release automation update. No user-facing changes since v5.13.7. (Adds the directory-grade "namespace mode" for the hosted MCP connector at mcp.jaz.ai — ~37 resource-scoped namespace tools, generated from the registry, that keep all ~300 operations reachable within the ChatGPT/Claude connector tool budgets and review rules. Hosted/connector surface only; Claude Code and the desktop extension keep the existing meta-tool surface.)

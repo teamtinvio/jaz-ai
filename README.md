@@ -55,7 +55,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 301 MCP tools, 
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.13.8", "mcp"],
+      "args": ["-y", "jaz-clio@5.13.9", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -69,14 +69,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 301 MCP tools, 
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.13.8", "mcp"],
+      "args": ["-y", "jaz-clio@5.13.9", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.13.8` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.13.9` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### OpenAI Responses API
 
@@ -342,7 +342,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.13.8", "mcp"],
+  "args": ["-y", "jaz-clio@5.13.9", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
