@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.14.4] - 2026-06-03
+
+More results per lean search. Because the compact summary rows are far smaller, the agent now fetches up to 50 of them per page by default (was 20) on the supported entities — more coverage in a single call, fewer back-and-forth round trips. Full-detail searches still default to 20, and an explicit limit always wins.
+
 ## [5.14.3] - 2026-06-03
 
 The compact `view` option is now consistent across every surface. The CLI gains `--view lean` on `search` and `list` for the supported entities (invoices, bills, contacts, items, journals, customer/supplier credit notes, sale/purchase orders) — summary rows for a quick scan, defaulting to full as before. The agent skill docs now spell out the page-then-drill pattern (search lean to find a record, then read it in full).
