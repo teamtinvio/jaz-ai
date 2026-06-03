@@ -44,6 +44,7 @@ clio calc lease --payment 5000 --term 36 --rate 5 # IFRS 16 (offline, instant)
 clio jobs month-end --period 2026-03              # Step-by-step close playbook
 clio magic create --file receipt.pdf              # AI extracts → draft transaction
 clio invoices search --query 'status:unpaid AND $500+'  # Structured per-entity search
+clio invoices search --query 'status:unpaid' --view lean # Compact summary rows (id + key fields), then drill in with get
 clio practice init --firm-name "My Firm"          # Set up a client workspace at ~/Documents/Jaz Practice
 clio practice onboard --name "Acme Pte Ltd" --fy-end 12-31 --gst quarterly
 clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-03

@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.14.2
+version: 5.14.3
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 141 production gotchas, error
@@ -161,7 +161,7 @@ The rest of this skill — field names, gotchas, error catalog, dependency order
 37a. **Data exports use simpler field names**: P&L export uses `startDate`/`endDate` (NOT `primarySnapshotDate`). AR/AP export uses `endDate`.
 
 ### Pagination
-38. **All list/search endpoints use `limit`/`offset` pagination** — NOT `page`/`size`. **`offset` is a 0-indexed PAGE NUMBER, not a row-skip** (offset=1 = second page of `limit` rows). Default limit=100, offset=0. Max limit=1000, max offset=65536. `page`/`size` params are silently ignored. Response shape: `{ totalPages, totalElements, truncated, data: [...] }`. When `truncated: true`, a `_meta: { fetchedRows, maxRows }` field explains why (offset cap or `--max-rows` soft cap — default 10,000). Use `--max-rows <n>` to override. Always check `truncated` before assuming the full dataset was returned.
+38. **All list/search endpoints use `limit`/`offset` pagination** — NOT `page`/`size`. **`offset` is a 0-indexed PAGE NUMBER, not a row-skip** (offset=1 = second page of `limit` rows). Default limit=100, offset=0. Max limit=1000, max offset=65536. `page`/`size` params are silently ignored. Response shape: `{ totalPages, totalElements, truncated, data: [...] }`. When `truncated: true`, a `_meta: { fetchedRows, maxRows }` field explains why (offset cap or `--max-rows` soft cap — default 10,000). Use `--max-rows <n>` to override. Always check `truncated` before assuming the full dataset was returned. **Payload tier (`view`) — page-then-drill:** `search_*` and the lean `list_*` tools (invoices, bills, contacts, items, journals, customer/supplier credit notes, sale/purchase orders) return a **compact summary row by default** (`view:"lean"` — id + reference/status/date/contact/amount). Search lean to FIND a record, then read it in full via its `get_*`; pass `view:"full"` only when you need whole rows up front (heavier — avoid for broad searches). Other collections always return full. CLI defaults to full; use `--view lean`.
 
 ### Other
 39. **Currency rates use `/organization-currencies/:code/rates`** — note the HYPHENATED path (NOT `/organization/currencies`). Enable currencies first via `POST /organization/currencies`, then set rates via `POST /organization-currencies/:code/rates` with body `{ "rate": 0.74, "rateApplicableFrom": "YYYY-MM-DD" }` (see Rule 49 for direction). Cannot set rates for org base currency. Full CRUD: POST (create), GET (list), GET/:id, PUT/:id, DELETE/:id.
