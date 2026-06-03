@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.14.2] - 2026-06-03
+
+Lighter list tools too. The compact-by-default behaviour added for search now also applies to the list tools that have a summary view (list_invoices, list_bills, list_contacts, list_items, list_journals, list_customer_credit_notes, list_supplier_credit_notes): they return summary rows by default and drill into the full record on demand. Pass view "full" for complete rows.
+
 ## [5.14.1] - 2026-06-03
 
 More reliable handling of large search results. When a search or list result is too big to return in full, the agent now drops whole records from the end (and notes how many) instead of cutting off mid-record. The result stays readable, so the agent can still act on what it got and knows to narrow the search.
