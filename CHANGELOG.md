@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.14.1] - 2026-06-03
+
+More reliable handling of large search results. When a search or list result is too big to return in full, the agent now drops whole records from the end (and notes how many) instead of cutting off mid-record. The result stays readable, so the agent can still act on what it got and knows to narrow the search.
+
 ## [5.14.0] - 2026-06-03
 
 Faster, lighter search. The agent's search tools (search_invoices, search_bills, search_contacts, search_journals, and the rest) now return a compact summary row per result by default: the key fields needed to find a record (id, reference, status, date, contact, amount), then drill into the full record on demand with its get tool. This cuts the data each search pulls by roughly 10x, so the agent answers "find the unpaid invoice for Acme" style questions faster and at lower cost. Pass view "full" on a search when you want complete rows up front.
