@@ -9378,14 +9378,6 @@
           "maxItems": 100,
           "type": "array"
         },
-        "platformCode": {
-          "description": "Platform Code",
-          "enum": [
-            "BEPPO",
-            "JAZ"
-          ],
-          "type": "string"
-        },
         "userType": {
           "description": "User Type",
           "enum": [
@@ -16077,6 +16069,15 @@
             }
           ],
           "description": "Sort By (resourceId status userResourceId userType user.FirstName user.LastName user.Email user.PhoneRegistered user.Status)"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id + key scalars + contact name); \"full\" (default) returns the complete bill shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -16334,6 +16335,15 @@
             }
           ],
           "description": "Sort By (resourceId status userResourceId userType user.FirstName user.LastName user.Email user.PhoneRegistered user.Status)"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, name, email, customer/supplier flags, currency, status); \"full\" (default) returns the complete contact shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -16414,6 +16424,15 @@
             }
           ],
           "description": "Sort By (resourceId status userResourceId userType user.FirstName user.LastName user.Email user.PhoneRegistered user.Status)"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, reference, status, valueDate, contactResourceId, totalAmount); \"full\" (default) returns the complete credit note shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -16714,6 +16733,15 @@
             }
           ],
           "description": "Sort By (resourceId status userResourceId userType user.FirstName user.LastName user.Email user.PhoneRegistered user.Status)"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id + key scalars + contact name); \"full\" (default) returns the complete invoice shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -16754,6 +16782,15 @@
             }
           ],
           "description": "Sort By (resourceId status userResourceId userType user.FirstName user.LastName user.Email user.PhoneRegistered user.Status)"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, itemCode, internalName/name, status, sale/purchase price, unit); \"full\" (default) returns the complete item shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -16794,6 +16831,15 @@
             }
           ],
           "description": "Sort By (resourceId status userResourceId userType user.FirstName user.LastName user.Email user.PhoneRegistered user.Status)"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, reference, status, valueDate, type, debit/credit totals, currency); \"full\" (default) returns the complete journal shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -17120,6 +17166,15 @@
             }
           ],
           "description": "Sort by"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, reference, status, orderState, valueDate, dueDate, contactResourceId, totalAmount, currencyCode); \"full\" (default) returns the complete order shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -17200,6 +17255,15 @@
             }
           ],
           "description": "Sort by"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, reference, status, orderState, valueDate, dueDate, contactResourceId, totalAmount, currencyCode); \"full\" (default) returns the complete order shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -17401,6 +17465,15 @@
             }
           ],
           "description": "Sort By (resourceId status userResourceId userType user.FirstName user.LastName user.Email user.PhoneRegistered user.Status)"
+        },
+        "view": {
+          "default": "full",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, reference, status, valueDate, contactResourceId, totalAmount); \"full\" (default) returns the complete credit note shape.",
+          "enum": [
+            "lean",
+            "full"
+          ],
+          "type": "string"
         }
       },
       "type": "object"
@@ -23940,6 +24013,17 @@
             "in": "query",
             "name": "queryBy",
             "type": "string"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id + key scalars + contact name); full (default) returns the complete bill shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
+            "type": "string"
           }
         ],
         "produces": [
@@ -28205,6 +28289,17 @@
             "in": "query",
             "name": "offset",
             "type": "integer"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id, name, email, customer/supplier flags, currency, status); full (default) returns the complete contact shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
+            "type": "string"
           }
         ],
         "produces": [
@@ -29053,6 +29148,17 @@
             "description": "Field to search by",
             "in": "query",
             "name": "queryBy",
+            "type": "string"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, contactResourceId, totalAmount); full (default) returns the complete credit note shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
             "type": "string"
           }
         ],
@@ -35474,6 +35580,17 @@
             "in": "query",
             "name": "queryBy",
             "type": "string"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id + key scalars + contact name); full (default) returns the complete invoice shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
+            "type": "string"
           }
         ],
         "produces": [
@@ -36495,6 +36612,17 @@
             "in": "query",
             "name": "offset",
             "type": "integer"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id, itemCode, internalName/name, status, sale/purchase price, unit); full (default) returns the complete item shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
+            "type": "string"
           }
         ],
         "produces": [
@@ -36903,6 +37031,17 @@
             "in": "query",
             "name": "offset",
             "type": "integer"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, type, debit/credit totals, currency); full (default) returns the complete journal shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
+            "type": "string"
           }
         ],
         "produces": [
@@ -38637,7 +38776,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates",
+        "operationId": "list-organization-currency-rates-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38705,7 +38844,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate",
+        "operationId": "create-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38771,7 +38910,7 @@
         ],
         "deprecated": true,
         "description": "Delete Organization Currency Custom Rate",
-        "operationId": "delete-organization-currency-rate",
+        "operationId": "delete-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38833,7 +38972,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency Custom Rate",
-        "operationId": "get-organization-currency-rate",
+        "operationId": "get-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38895,7 +39034,7 @@
         ],
         "deprecated": true,
         "description": "Edit a Organization Currency Custom Rate",
-        "operationId": "update-organization-currency-rate",
+        "operationId": "update-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40003,7 +40142,7 @@
           "application/json"
         ],
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates-2",
+        "operationId": "list-organization-currency-rates",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40070,7 +40209,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate-2",
+        "operationId": "create-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40135,7 +40274,7 @@
           "application/json"
         ],
         "description": "Delete Organization Currency Custom Rate",
-        "operationId": "delete-organization-currency-rate-2",
+        "operationId": "delete-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40196,7 +40335,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency Custom Rate",
-        "operationId": "get-organization-currency-rate-2",
+        "operationId": "get-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40257,7 +40396,7 @@
           "application/json"
         ],
         "description": "Edit a Organization Currency Custom Rate",
-        "operationId": "update-organization-currency-rate-2",
+        "operationId": "update-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40701,6 +40840,17 @@
             "in": "query",
             "name": "offset",
             "type": "integer"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id, reference, status, orderState, valueDate, dueDate, contactResourceId, totalAmount, currencyCode); full (default) returns the complete order shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
+            "type": "string"
           }
         ],
         "produces": [
@@ -44889,6 +45039,17 @@
             "in": "query",
             "name": "offset",
             "type": "integer"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id, reference, status, orderState, valueDate, dueDate, contactResourceId, totalAmount, currencyCode); full (default) returns the complete order shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
+            "type": "string"
           }
         ],
         "produces": [
@@ -49166,6 +49327,17 @@
             "description": "Search query",
             "in": "query",
             "name": "query",
+            "type": "string"
+          },
+          {
+            "default": "full",
+            "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, contactResourceId, totalAmount); full (default) returns the complete credit note shape",
+            "enum": [
+              "lean",
+              "full"
+            ],
+            "in": "query",
+            "name": "view",
             "type": "string"
           }
         ],

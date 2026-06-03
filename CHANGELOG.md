@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.14.0] - 2026-06-03
+
+Faster, lighter search. The agent's search tools (search_invoices, search_bills, search_contacts, search_journals, and the rest) now return a compact summary row per result by default: the key fields needed to find a record (id, reference, status, date, contact, amount), then drill into the full record on demand with its get tool. This cuts the data each search pulls by roughly 10x, so the agent answers "find the unpaid invoice for Acme" style questions faster and at lower cost. Pass view "full" on a search when you want complete rows up front.
+
 ## [5.13.12] - 2026-06-03
 
 Internal release. No user-facing changes since v5.13.11. (Smoke test + jaz-api skill docs updated to track an upstream Orders change: a sale-quote / purchase-request `orderState` is now an order+invoice rollup — `PARTIALLY_ORDERED` while a confirmed order is not yet fully invoiced/billed, then terminal `FULLY_INVOICED` / `FULLY_BILLED`; the old `FULLY_ORDERED` value was retired. Test and documentation accuracy only.)
