@@ -16072,7 +16072,7 @@
         },
         "view": {
           "default": "full",
-          "description": "Response payload tier: \"lean\" returns a summary row (id + key scalars + contact name); \"full\" (default) returns the complete bill shape.",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, reference, status, valueDate, dueDate, contactResourceId, totalAmount, currencyCode, contact name); \"full\" (default) returns the complete bill shape.",
           "enum": [
             "lean",
             "full"
@@ -16736,7 +16736,7 @@
         },
         "view": {
           "default": "full",
-          "description": "Response payload tier: \"lean\" returns a summary row (id + key scalars + contact name); \"full\" (default) returns the complete invoice shape.",
+          "description": "Response payload tier: \"lean\" returns a summary row (id, reference, status, valueDate, dueDate, contactResourceId, totalAmount, currencyCode, contact name); \"full\" (default) returns the complete invoice shape.",
           "enum": [
             "lean",
             "full"
@@ -24016,7 +24016,7 @@
           },
           {
             "default": "full",
-            "description": "Response payload tier: lean returns a summary row (id + key scalars + contact name); full (default) returns the complete bill shape",
+            "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, dueDate, contactResourceId, totalAmount, currencyCode, contact name); full (default) returns the complete bill shape",
             "enum": [
               "lean",
               "full"
@@ -35583,7 +35583,7 @@
           },
           {
             "default": "full",
-            "description": "Response payload tier: lean returns a summary row (id + key scalars + contact name); full (default) returns the complete invoice shape",
+            "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, dueDate, contactResourceId, totalAmount, currencyCode, contact name); full (default) returns the complete invoice shape",
             "enum": [
               "lean",
               "full"
@@ -38719,7 +38719,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency",
+        "operationId": "get-organization-currency-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38910,7 +38910,7 @@
         ],
         "deprecated": true,
         "description": "Delete Organization Currency Custom Rate",
-        "operationId": "delete-organization-currency-rate-2",
+        "operationId": "delete-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38972,7 +38972,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency Custom Rate",
-        "operationId": "get-organization-currency-rate-2",
+        "operationId": "get-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -39034,7 +39034,7 @@
         ],
         "deprecated": true,
         "description": "Edit a Organization Currency Custom Rate",
-        "operationId": "update-organization-currency-rate-2",
+        "operationId": "update-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40086,7 +40086,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency-2",
+        "operationId": "get-organization-currency",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40274,7 +40274,7 @@
           "application/json"
         ],
         "description": "Delete Organization Currency Custom Rate",
-        "operationId": "delete-organization-currency-rate",
+        "operationId": "delete-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40335,7 +40335,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency Custom Rate",
-        "operationId": "get-organization-currency-rate",
+        "operationId": "get-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40396,7 +40396,7 @@
           "application/json"
         ],
         "description": "Edit a Organization Currency Custom Rate",
-        "operationId": "update-organization-currency-rate",
+        "operationId": "update-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",

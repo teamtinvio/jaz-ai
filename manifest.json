@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.14.4",
+  "version": "5.15.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -84,7 +84,7 @@
     },
     {
       "name": "update_account",
-      "description": "Update an existing chart of accounts entry (name or code)."
+      "description": "Update an existing chart of accounts entry (name, code, or lock date)."
     },
     {
       "name": "bulk_upsert_chart_of_accounts",
@@ -128,7 +128,7 @@
     },
     {
       "name": "create_invoice",
-      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\nREQUIRED: contactResourceId (search first), and accountResourceId per lineItem when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\", exchangeRate: 1.35 }`. Dates YYYY-MM-DD.\n\nreference MUST be unique per org — auto-generate with timestamp if user doesn't specify (e.g. INV-20260309-1430). Duplicate → 422.\n\nOptional capsuleRecipe (SALE base only — DEFERRED_REVENUE). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143."
+      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\naccountResourceId per lineItem required only when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\", exchangeRate: 1.35 }`. Dates YYYY-MM-DD.\n\nreference MUST be unique per org — auto-generate with timestamp if user doesn't specify (e.g. INV-20260309-1430). Duplicate → 422.\n\nOptional capsuleRecipe (SALE base only — DEFERRED_REVENUE). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143."
     },
     {
       "name": "update_invoice",
@@ -404,7 +404,7 @@
     },
     {
       "name": "create_customer_credit_note",
-      "description": "Create a customer credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- contactResourceId required — search contacts first.\n- reference MUST be unique — generate one with a timestamp if user doesn't specify."
+      "description": "Create a customer credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- reference MUST be unique — generate one with a timestamp if user doesn't specify."
     },
     {
       "name": "delete_customer_credit_note",
@@ -440,7 +440,7 @@
     },
     {
       "name": "create_supplier_credit_note",
-      "description": "Create a supplier credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- contactResourceId required — search contacts first."
+      "description": "Create a supplier credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description."
     },
     {
       "name": "delete_supplier_credit_note",

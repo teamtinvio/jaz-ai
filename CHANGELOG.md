@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.15.0] - 2026-06-04
+
+Two improvements to everyday bookkeeping. Chart of accounts now supports period lock dates: set a lock date when you create or update a ledger account to block recording or changing transactions on or before that date, and the lock date is kept intact when you rename the account. And creating invoices, bills, and credit notes no longer requires a contact up front — save the document now and assign the customer or supplier later.
+
 ## [5.14.4] - 2026-06-03
 
 More results per lean search. Because the compact summary rows are far smaller, the agent now fetches up to 50 of them per page by default (was 20) on the supported entities — more coverage in a single call, fewer back-and-forth round trips. Full-detail searches still default to 20, and an explicit limit always wins.
