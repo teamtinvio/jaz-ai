@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.16.0",
+  "version": "5.16.1",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -68,7 +68,7 @@
   "tools": [
     {
       "name": "get_organization",
-      "description": "Get organization details (name, currency, country, lock date, fiscal year end)."
+      "description": "Get organization details: name, base currency, country, and financial year end."
     },
     {
       "name": "list_accounts",
@@ -84,7 +84,7 @@
     },
     {
       "name": "update_account",
-      "description": "Update an existing chart of accounts entry (name, code, or lock date)."
+      "description": "Update a chart of accounts entry — rename, re-code, set its period lock date, or remove an existing lock date. Setting lockDate (YYYY-MM-DD) is how an individual ledger account is locked for a period: it blocks recording or editing any transaction on that account dated on or before the lock date. Pass clearLockDate to remove (unlock) an existing lock."
     },
     {
       "name": "bulk_upsert_chart_of_accounts",
