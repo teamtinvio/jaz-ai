@@ -19,7 +19,7 @@
 - **`apply_credit_to_invoice(...)` / `create_customer_credit_note(...)`** — step 6 specific write-off pattern: when individual invoices are deemed unrecoverable, write them off via credit note OR direct payment with `paymentMethod: 'DEBT_WRITE_OFF'` (per memory rule).
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/annual-statutory.md` step 4d (Y4 in `year-end-close.md`) for FY-end ECL; from `practice/references/quarterly-gst.md` step 8 if quarterly cadence is set; rarely from monthly-close (mental check during step 8 variance only).
+- Operational context: invoked during year-end close (Y4 in `year-end-close.md`) for FY-end ECL; during the GST/VAT filing cycle if quarterly cadence is set; rarely during month-end close (mental check during variance review only).
 - Sibling: `provisions.md` (engine `provision`) — IAS 37 provisions with PV unwinding pattern, more complex than this recipe.
 - IFRS / accounting context: IFRS 9.5.5.15 (simplified approach mandatory for trade receivables); IFRS 9.B5.5.35 (provision matrix). For specific large customers in stage-3 (objective evidence of impairment): supplement this recipe with specific impairment via `create_customer_credit_note` per customer.
 
@@ -69,15 +69,15 @@ clio calc ecl \
 
 Returns: `{ totalReceivables: 185000, calculatedEcl: 5750, existingProvision: 5000, topUpRequired: 750, perBucket: [{bucket: 'current', balance: 100000, lossRate: 0.005, ecl: 500}, ...] }`. Top-up of $750 needed.
 
-`--rates` defaults: tune to client historical loss rate (per `CLIENT.ecl_loss_rate_matrix`). Common starting point for SMBs: `0.5,2,5,10,50` (%) for the 5 buckets. Auditor will sample-test the rates against actual historical losses — keep documentation of how rates were derived.
+`--rates` defaults: tune to the entity's historical loss rate. Common starting point for SMBs: `0.5,2,5,10,50` (%) for the 5 buckets. Auditor will sample-test the rates against actual historical losses — keep documentation of how rates were derived.
 
-If `topUpRequired` is below `CLIENT.materiality_threshold`: skip the recipe entirely; document in `ENGAGEMENT.md` ("ECL change immaterial: $X below threshold $Y").
+If `topUpRequired` is below the entity's materiality threshold: skip the recipe entirely; document the decision in your working notes ("ECL change immaterial: $X below threshold $Y").
 
 ### Step 2 — Plan the recipe
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'ecl',
   receivables: [
     {bucket: 'current', balance: 100000, lossRate: 0.005},
@@ -88,8 +88,8 @@ plan_recipe(
   ],
   existingProvision: 5000,
   currency: 'SGD',
-  glAllowance: <CLIENT.coa_mapping['Allowance for Doubtful Debts']>,
-  glBadDebtExpense: <CLIENT.coa_mapping['Bad Debt Expense']>,
+  glAllowance: <resourceId of 'Allowance for Doubtful Debts' account>,
+  glBadDebtExpense: <resourceId of 'Bad Debt Expense' account>,
   valueDate: '2025-12-31',
   capsuleType: 'ECL Provision',
   capsuleName: 'FY2025 Year-End ECL True-Up'
@@ -182,18 +182,18 @@ Write-offs reduce both the gross AR balance AND offset against the existing Allo
 
 ## Variations
 
-- **Quarterly cadence**: same recipe, run quarterly with `valueDate: <quarter-end>`. Practice playbook controls the cadence per `CLIENT.ecl_review_frequency` (`monthly` | `quarterly` | `annual`). Most SMBs run annual (FY-end only) or quarterly.
+- **Quarterly cadence**: same recipe, run quarterly with `valueDate: <quarter-end>`. The review cadence (`monthly` | `quarterly` | `annual`) depends on the entity's policy. Most SMBs run annual (FY-end only) or quarterly.
 - **Specific high-risk customer with stage-3 impairment**: combine simplified-approach ECL recipe (collective) + Path A or B specific write-off (individual). Run the collective AFTER the specific write-offs so the buckets reflect post-write-off balances.
 - **Multi-currency AR**: ECL is per-currency. Run the recipe per currency (each with its own `Allowance for Doubtful Debts — <currency>` if you want segregation, or aggregate into one base-currency Allowance). Jaz auto-handles FX revaluation of the AR + Allowance balances per IAS 21.23 (do NOT invoke `fx-reval`).
-- **Forward-looking macroeconomic adjustments** (IFRS 9 paragraphs B5.5.51-54): apply a multiplier to the `--rates` to reflect current/expected economic conditions. E.g., recession overlay: `--rates 1.0,3,7,15,60` instead of `0.5,2,5,10,50`. Document the rationale in `ENGAGEMENT.md`.
+- **Forward-looking macroeconomic adjustments** (IFRS 9 paragraphs B5.5.51-54): apply a multiplier to the `--rates` to reflect current/expected economic conditions. E.g., recession overlay: `--rates 1.0,3,7,15,60` instead of `0.5,2,5,10,50`. Document the rationale in your working notes.
 - **POCI assets** (purchased or originated credit-impaired): NOT supported by this simplified-approach recipe. Use stage-3 specific impairment via Path A/B for each.
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/annual-statutory.md` step 4d (Y4) — year-end ECL true-up. Practice playbook reads `CLIENT.ecl_loss_rate_matrix` for the bucket rates and `CLIENT.materiality_threshold` for skip-or-post decision.
-- `practice/references/quarterly-gst.md` step 8 (where applicable) — quarterly ECL review for clients on quarterly cadence.
-- `practice/references/monthly-close.md` step 8 — mental ECL cross-check during variance analysis only; formal recipe runs annually/quarterly.
+- Year-end close (Y4) — year-end ECL true-up against the bucket rates and the materiality threshold for the skip-or-post decision.
+- GST/VAT filing cycle (where applicable) — quarterly ECL review for entities on a quarterly cadence.
+- Month-end close — mental ECL cross-check during variance analysis only; formal recipe runs annually/quarterly.
 - `audit-prep.md` step 8 — supporting schedule via the most recent `ECL Provision` capsule + the underlying `clio calc ecl` JSON. Auditor tests rate appropriateness against actual historical loss data.
 - Sibling `provisions.md` (engine `provision`) — IAS 37 provisions with PV unwinding (more complex pattern).

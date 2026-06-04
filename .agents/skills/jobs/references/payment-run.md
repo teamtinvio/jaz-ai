@@ -1,11 +1,10 @@
 # Payment Run
 
-> Process outstanding supplier bills in a structured weekly or fortnightly batch through the Jaz API surface. Driver tool: `generate_payment_run_blueprint`.
+> Process outstanding supplier bills in a structured weekly or fortnightly batch through the Jaz platform tools. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs payment-run` prints this same phased checklist.)
 
 ## Tools, recipes, calculators this job uses
 
-### MCP tools (jaz-api)
-- **`generate_payment_run_blueprint`** — used in step 1: emit phased blueprint for the cutoff date.
+### Platform tools (jaz-api)
 - **`search_bills(filter: {status: 'UNPAID', balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sort: 'dueDate:asc', limit: 200)`** — used in step 2: pull due bills (paginate via `offset` if `>200`).
 - **`generate_aged_ap(period_end: <cutoff>)`** — used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
 - **`generate_bank_balance_summary(period_end: <cutoff>)`** — used in step 5: confirm cash availability before approving the batch.
@@ -19,7 +18,7 @@
 - **`clio jobs payment-run outstanding --due-before <YYYY-MM-DD> --currency SGD --json`** — fetch outstanding bills grouped by supplier (uses API key; equivalent to step 2 + step 4 grouping in one call).
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 8 (run between mid-month and month-end so the close has fewer outstanding payables) and from `practice/references/quarterly-gst.md` step 9 (final pre-filing payment run).
+- Run inside the month-end close (between mid-month and month-end, so the close has fewer outstanding payables) and as a final pre-filing run before GST/VAT filing.
 - Sibling jobs: `credit-control.md` (the AR-side mirror), `supplier-recon.md` (run BEFORE payment-run to catch disputed bills that should be excluded).
 - API rules: `jaz-api/SKILL.md` rules 4-8 (payment field names — `paymentAmount` vs `transactionAmount` for FX), rule 24 (`currency` field shape), rule 50a (search `query` DSL). The 6 required payment fields are: `paymentAmount`, `transactionAmount`, `accountResourceId`, `paymentMethod`, `reference`, `valueDate` (jaz-api rule 7).
 
@@ -35,13 +34,9 @@ search_payments(filter: {reference: {startsWith: 'PAYRUN-2025-02-28-'}})
 
 If results: surface "A payment run with prefix `PAYRUN-2025-02-28-*` already executed on this date (`<n>` payments totalling `<amt>`). Confirm intent — re-run will create duplicate payments." Halt unless practitioner confirms.
 
-## Step 1 — Emit blueprint
+## Step 1 — Set the run window
 
-```
-generate_payment_run_blueprint(period_end: '2025-02-28', currency: <CLIENT.base_currency>)
-```
-
-Save to `recurring/<period>/payment-run-<run-date>/blueprint.json`. The blueprint produces the phased structure this playbook follows.
+Pick the cutoff date for the run (the bills you'll clear are those due on or before it). (Local CLI: `clio jobs payment-run --due-before 2025-02-28` prints the phased checklist for this cutoff.)
 
 ## Step 2 — Identify bills
 
@@ -67,9 +62,9 @@ For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, 
 generate_aged_ap(period_end: '2025-02-28')
 ```
 
-Verify: `sum(search_bills.balanceAmount) ≈ generate_aged_ap.totalOutstanding` (within `CLIENT.materiality_threshold`). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling — surface to practitioner.
+Verify: `sum(search_bills.balanceAmount) ≈ generate_aged_ap.totalOutstanding` (within the materiality threshold). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling — surface to the user.
 
-Flag any bill in the 60d+ bucket — these need priority OR dispute resolution. Cross-reference `practice/references/monthly-close.md` step 8 sub-clause "disputed bills" to exclude.
+Flag any bill in the 60d+ bucket — these need priority OR dispute resolution. Exclude bills the user has flagged as disputed.
 
 ## Step 4 — Group by supplier
 
@@ -87,7 +82,7 @@ generate_bank_balance_summary(period_end: '2025-02-28')
 
 For each `bankAccountResourceId` you'll pay from: confirm `availableBalance >= sum of payments to be drawn from it`. If insufficient: defer the bottom of the priority stack to the next run; surface the deferred list to practitioner with explanation.
 
-Apply `CLIENT.cash_buffer_days` from CLIENT.md (default: 14 days operating expenses) — never drain to zero. Compute buffer-required from last 30 days' opex via `generate_profit_and_loss(period_start: <-30d>, period_end: <today>)`.
+Apply the org's cash-buffer policy (default: 14 days operating expenses) — never drain to zero. Compute buffer-required from last 30 days' opex via `generate_profit_and_loss(period_start: <-30d>, period_end: <today>)`.
 
 ## Step 6 — Record payments
 
@@ -152,15 +147,16 @@ Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)
 
 ## Variations
 
-- **Priority-based payment ordering:** `sort: 'dueDate:asc'` covers chronological. For overdue-first, sort by `daysOverdue:desc`. For supplier-strategic, get the practitioner to mark `CLIENT.priority_suppliers[]` and process those first.
+- **Priority-based payment ordering:** `sort: 'dueDate:asc'` covers chronological. For overdue-first, sort by `daysOverdue:desc`. For supplier-strategic, ask the user which suppliers are priority and process those first.
 - **Multi-currency runs:** Split the run by currency. SGD bills → SGD bank; USD bills → USD bank or SWIFT-routed. The actual bank disbursement is handled outside Jaz (via the bank's portal); Jaz records the payment after it clears.
 - **Approval workflow (multi-signatory SMBs):** Build the batch in step 5, get out-of-band approval, then execute step 6 only after sign-off. Do NOT post payments before the actual bank transfer is initiated — Jaz payments are not "payment instructions", they record completed payments.
 - **Early-payment discounts:** If supplier offers `2% 10 Net 30`, computing the equivalent annualized return is `(2% / 98%) × (365 / 20) ≈ 37.2%`. Take it when cash allows. Apply the discount as: pay `transactionAmount = bill.balanceAmount × 0.98`, then post a separate journal Dr Bank Charges/Discount Income for the 2% saved (cleaner than partial payment of the original bill).
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 8 — payment-run is invoked between mid-month and month-end so the close has fewer outstanding payables to defer. Practice playbook reads `CLIENT.cash_buffer_days` and `CLIENT.bank_accounts[]` for the gate logic.
-- `practice/references/quarterly-gst.md` step 9 — pre-filing payment-run to clear deductible-input-tax bills so they appear in the quarter's filing. Skip bills with `status: DRAFT` (they don't have GST claims yet).
-- `practice/references/onboarding.md` — typically NOT invoked during onboarding (opening balances are set via the conversion flow, not a payment run).
+- `month-end-close.md` — run between mid-month and month-end so the close has fewer outstanding payables to defer.
+- `gst-vat-filing.md` — a pre-filing payment-run clears deductible-input-tax bills so they appear in the quarter's filing. Skip bills with `status: DRAFT` (they don't have GST claims yet).
+- `supplier-recon.md` — run BEFORE payment-run to exclude disputed bills and catch missing ones.
+- `credit-control.md` — the AR-side mirror.

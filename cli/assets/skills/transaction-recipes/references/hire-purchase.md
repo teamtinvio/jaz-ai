@@ -103,13 +103,13 @@ Month 60: final depreciation post. NBV = 0. Decommission FA via `update_fixed_as
 ## Variations
 
 - **Purchase option**: HP without explicit ownership transfer but with a purchase option reasonably certain to be exercised (e.g., bargain purchase). Same recipe — `usefulLifeMonths > termMonths` flag.
-- **Lease vs HP for tax**: SG IRAS treats HP differently from operating lease for tax purposes. Document the IFRS 16 capitalized treatment vs the tax-deductible payment-as-expense treatment. Practitioner adds a tax-only adjustment in Form C-S computation (`practice/references/annual-statutory.md` step 7).
+- **Lease vs HP for tax**: SG IRAS treats HP differently from operating lease for tax purposes. Document the IFRS 16 capitalized treatment vs the tax-deductible payment-as-expense treatment. Add a tax-only adjustment in the Form C-S computation during year-end close.
 - **Multiple assets under one HP agreement** (e.g., fleet of vehicles on one master HP): one capsule per asset; each asset gets its own `create_fixed_asset` invocation. Master HP financing is split across capsules pro-rata to asset cost.
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- See `ifrs16-lease.md` cross-references — same engagement contexts (monthly-close step 7, `jobs/references/year-end-close.md` Y6 for current/non-current reclass).
+- See `ifrs16-lease.md` cross-references — same operational contexts (month-end close, `jobs/references/year-end-close.md` Y6 for current/non-current reclass).
 - Sibling recipe `ifrs16-lease.md` — full step-by-step + error table + non-HP variations.
 - `asset-disposal.md` — when HP'd asset is eventually sold/scrapped (typically after month 60 = end of useful life).

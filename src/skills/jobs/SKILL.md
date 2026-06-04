@@ -1,24 +1,31 @@
 ---
 name: jaz-jobs
-version: 5.15.0
+version: 5.16.0
 description: >-
   Use this skill for recurring accounting workflows — month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
   supplier recon, audit prep, fixed asset review, and Singapore Form C-S tax
-  computation. 12 job playbooks with CLI blueprints and paired tools. Also use
-  when the user mentions closing the books, period-end, tax filing, or any
-  operational accounting task.
+  computation. 12 job playbooks that sequence real platform tools into complete
+  business processes. Also use when the user mentions closing the books,
+  period-end, tax filing, or any operational accounting task.
 license: MIT
-compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill. For individual transaction patterns, load the jaz-recipes skill. For the engagement-type wrapper that invokes these blueprints inside a client workspace, load the jaz-practice skill (see `jaz-practice/references/<engagement-type>.md` for canonical engagement-type definitions).
+compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill. For individual transaction patterns, load the jaz-recipes skill.
 ---
 
 # Jobs Skill
 
 You are helping an **SMB accountant or bookkeeper** complete recurring accounting tasks in Jaz — period-end closes, bank reconciliation, tax filing, payment processing, and operational reviews. These are the real jobs that keep the books accurate and the business compliant.
 
-> **Jaz-native, not generic.** Every job in this skill names specific Jaz MCP tools (`search_invoices`, `quick_reconcile`, `bulk_finalize_drafts`, `generate_*_blueprint`, `download_export`), Jaz reconciliation modes, and Jaz capsule patterns. It is NOT an interchangeable accounting workflow reference; it is the operating manual for running these processes through the Jaz API surface. When the playbook says "match bank entries", it means call `clio jobs bank-recon match` (the 5-phase cascade matcher built into the CLI), not "use any matching algorithm".
+> **Jaz-native, not generic.** Every job in this skill names specific Jaz tools (`search_invoices`, `quick_reconcile`, `bulk_finalize_drafts`, `reconcile_with_payments`, report tools like `generate_trial_balance`, `download_export`), Jaz reconciliation modes, and Jaz capsule patterns. It is NOT an interchangeable accounting workflow reference; it is the operating manual for running these processes through the Jaz platform tools. When the playbook says "match bank entries", it means call the 5-phase cascade matcher (`clio jobs bank-recon match` for a local CLI run, or follow the cascade logic in `references/bank-match.md` and drive the `reconcile_*` tools directly), not "use any matching algorithm".
 
-**Jobs combine recipes, calculators, and API calls into complete business processes.** If recipes are ingredients, jobs are the meal. Within a practitioner engagement (`jaz-practice` skill), the engagement-type playbook (`practice/references/<type>.md`) is the canonical end-to-end orchestration — the references in this skill describe the building-block jobs the engagement playbook invokes.
+**Jobs combine recipes, calculators, and platform tools into complete business processes.** If recipes are ingredients, jobs are the meal. Each per-job reference is the canonical end-to-end orchestration: it lists the phases, and for each step names the exact report tool, recipe, or API call to run.
+
+## How to run a job
+
+You orchestrate the **real platform tools directly**, following the phase sequence in the per-job reference:
+
+- **Hosted / MCP agent (no shell):** the per-job reference is your checklist. Walk its phases in order and call the named platform tools — `plan_recipe` / `execute_recipe`, `search_invoices` / `search_bills` / `search_bank_records`, the `generate-reports/*` report tools (`generate_trial_balance`, `generate_aged_ar`, `generate_vat_ledger`, …), `reconcile_*`, `create_journal`, `bulk_finalize_drafts`, `update_account` lockDate, and so on. There is no separate "blueprint tool" to call — the reference IS the plan.
+- **Local CLI convenience:** if you're running `clio` in a terminal (e.g. Claude Code), `clio jobs <type> --json` prints the same phased checklist for the period so a human or script can follow it. This is a convenience, not the main path for a hosted agent — the platform tools above are the path that actually does the work.
 
 ## When to Use This Skill
 
@@ -38,41 +45,43 @@ You are helping an **SMB accountant or bookkeeper** complete recurring accountin
 
 Period-close jobs build on each other. Quarter = month + extras. Year = quarter + extras. Each level runs **standalone by default** (includes all steps from lower levels). Use `--incremental` to generate only the extras.
 
-| Job | CLI Command | Description |
-|-----|-------------|-------------|
-| **Month-End Close** (`generate_month_end_blueprint`) | `clio jobs month-end --period YYYY-MM` | 5 phases: pre-close prep, accruals, valuations, verification, lock. The foundation. *Used in: monthly-close engagement (see `jaz-practice/references/monthly-close.md`).* |
-| **Quarter-End Close** (`generate_quarter_end_blueprint`) | `clio jobs quarter-end --period YYYY-QN` | Month-end for each month + GST/VAT, ECL review, bonus accruals, intercompany, provisions. *Used in: monthly-close engagement (3-month roll-up at quarter boundary; see `jaz-practice/references/monthly-close.md`).* |
-| **Year-End Close** (`generate_year_end_blueprint`) | `clio jobs year-end --period YYYY` | Quarter-end for each quarter + true-ups, dividends, CYE rollover, audit prep, final lock. *Used in: annual-statutory engagement (see `jaz-practice/references/annual-statutory.md`).* |
+| Job | CLI (local convenience) | Description |
+|-----|-------------------------|-------------|
+| **Month-End Close** | `clio jobs month-end --period YYYY-MM` | 5 phases: pre-close prep, accruals, valuations, verification, lock. The foundation. |
+| **Quarter-End Close** | `clio jobs quarter-end --period YYYY-QN` | Month-end for each month + GST/VAT, ECL review, bonus accruals, intercompany, provision unwinding. |
+| **Year-End Close** | `clio jobs year-end --period YYYY` | Quarter-end for each quarter + true-ups, dividends, retained-earnings rollover, audit prep, final lock. |
 
 ### Ad-Hoc Jobs
 
-| Job | CLI Command | Description |
-|-----|-------------|-------------|
-| **Bank Recon** (`generate_bank_recon_blueprint`) | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path — create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate (auto-commit high-confidence, checkpoint the rest — see `references/bank-recon.md` Step 4a). Paired tool: `clio jobs bank-recon match`. *Used in: monthly-close engagement (run as part of every period close; see `jaz-practice/references/monthly-close.md`).* |
-| **Document Collection** (`generate_document_collection_blueprint`) | `clio jobs document-collection` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for agent upload. Paired tool: `clio jobs document-collection ingest`. *Used in: onboarding flow (initial client doc capture; see `jaz-practice/references/onboarding.md`) and the open phase of every engagement (monthly-close, quarterly-gst, annual-statutory).* |
-| **GST/VAT Filing** (`generate_gst_vat_blueprint`) | `clio jobs gst-vat --period YYYY-QN` | Tax ledger review, discrepancy check, filing summary. *Used in: quarterly-gst engagement (see `jaz-practice/references/quarterly-gst.md`).* |
-| **Payment Run** (`generate_payment_run_blueprint`) | `clio jobs payment-run` | Select outstanding bills by due date, process payments. *Used in: monthly-close engagement (AP cycle inside the period close; see `jaz-practice/references/monthly-close.md`).* |
-| **Credit Control** (`generate_credit_control_blueprint`) | `clio jobs credit-control` | AR aging review, overdue chase list, bad debt assessment. *Used in: ad-hoc engagement (run on-demand when AR aging deteriorates; not tied to a recurring engagement type).* |
-| **Supplier Recon** (`generate_supplier_recon_blueprint`) | `clio jobs supplier-recon` | AP vs supplier statement, identify mismatches. *Used in: annual-statutory engagement (audit AP confirmations; see `jaz-practice/references/annual-statutory.md`) and ad-hoc engagement (when statement mismatches surface mid-period).* |
-| **Audit Preparation** (`generate_audit_prep_blueprint`) | `clio jobs audit-prep --period YYYY` | Compile reports, schedules, reconciliations for auditor/tax. *Used in: annual-statutory engagement (see `jaz-practice/references/annual-statutory.md`).* |
-| **FA Review** (`generate_fa_review_blueprint`) | `clio jobs fa-review` | Fixed asset register review, disposal/write-off processing. *Used in: annual-statutory engagement (asset register sign-off as part of year-end; see `jaz-practice/references/annual-statutory.md`).* |
-| **Statutory Filing** (`generate_statutory_filing_blueprint`) | `clio jobs statutory-filing` | Corporate income tax computation and filing. Paired tools: `clio jobs statutory-filing sg-cs`, `clio jobs statutory-filing sg-ca`. *Used in: annual-statutory engagement (see `jaz-practice/references/annual-statutory.md`).* |
+| Job | CLI (local convenience) | Description |
+|-----|-------------------------|-------------|
+| **Bank Recon** | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path — create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate (auto-commit high-confidence, checkpoint the rest — see `references/bank-recon.md` Step 4a). Cascade matcher: `clio jobs bank-recon match`. |
+| **Document Collection** | `clio jobs document-collection` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for upload via Jaz Magic. Ingest helper: `clio jobs document-collection ingest`. |
+| **GST/VAT Filing** | `clio jobs gst-vat --period YYYY-QN` | Tax ledger review, discrepancy check, filing summary. |
+| **Payment Run** | `clio jobs payment-run` | Select outstanding bills by due date, process payments. |
+| **Credit Control** | `clio jobs credit-control` | AR aging review, overdue chase list, bad debt assessment. Run on-demand when AR aging deteriorates. |
+| **Supplier Recon** | `clio jobs supplier-recon` | AP vs supplier statement, identify mismatches. Run for major suppliers and at year-end for audit AP confirmations. |
+| **Audit Preparation** | `clio jobs audit-prep --period YYYY` | Compile reports, schedules, reconciliations for auditor/tax. |
+| **FA Review** | `clio jobs fa-review` | Fixed asset register review, disposal/write-off processing. Run as part of year-end. |
+| **Statutory Filing** | `clio jobs statutory-filing` | Corporate income tax computation. CLI engines: `clio jobs statutory-filing sg-cs` (Form C-S computation), `clio jobs statutory-filing sg-ca` (capital allowance schedule). See the SG Form C-S section below. |
 
 ## How Jobs Work
 
-Each job produces a **blueprint** — a phased checklist of steps, each annotated with:
+Each per-job reference is a **phased checklist** of steps. Each step names:
 
-- **API call** — the exact endpoint + request body to execute the step
+- **API call** — the exact platform tool + request body to execute the step
 - **Recipe reference** — link to the transaction-recipes skill for complex accounting patterns
-- **Calculator command** — `clio calc` command for financial calculations
+- **Calculator command** — `clio calc` command for independent financial cross-checks
 - **Verification check** — how to confirm the step was completed correctly
 - **Conditional flag** — steps that only apply in certain situations (e.g., "only if multi-currency org")
 
-**For AI agents:** Read the blueprint and execute each step using the jaz-api skill for payloads.
-**For developers:** Use `--json` output to build automation pipelines.
-**For accountants:** Use the formatted checklist to work through the close systematically.
+**For AI agents (hosted or CLI):** walk the phases in the per-job reference and call the named platform tools directly. Use the jaz-api skill for payload shapes.
+**For developers / scripts:** `clio jobs <type> --json` prints the phased checklist as JSON to drive automation pipelines.
+**For accountants:** use the formatted checklist (`clio jobs <type>`) to work through the close systematically.
 
-## CLI Usage
+## CLI Usage (local convenience)
+
+These commands print the phased checklist for a period. They are a terminal convenience — a hosted agent drives the platform tools named in each reference directly.
 
 ```bash
 # Period-close (standalone = full plan, --incremental = extras only)
@@ -96,10 +105,9 @@ clio jobs fa-review [--json]
 |-------|------|
 | **jaz-api** | Provides the exact API payloads for each step (field names, gotchas, error handling) |
 | **jaz-recipes** | Provides the accounting patterns for complex steps (accruals, FX reval, ECL, etc.) |
-| **jaz-jobs** (this skill) | Combines recipes + API into sequenced, verifiable business processes |
-| **jaz-practice** | Wraps these blueprints inside the practitioner's client + engagement context. The 12 blueprints map to engagement types: month-end / quarter-end / bank-recon / payment-run → monthly-close; gst-vat → quarterly-gst; year-end / audit-prep / fa-review / supplier-recon / statutory-filing → annual-statutory; document-collection → onboarding flow + every engagement open phase; credit-control → ad-hoc. |
+| **jaz-jobs** (this skill) | Combines recipes + platform tools into sequenced, verifiable business processes |
 
-**Load all three skills together** for the complete picture. Jobs reference recipes by name — an AI agent should read the referenced recipe for implementation details. When invoked from inside a client folder, jaz-practice supplies the CLIENT.md context (COA, materiality, JAZ_API_KEY override) that these blueprints consume.
+**Load all three skills together** for the complete picture. Jobs reference recipes by name — read the referenced recipe for implementation details.
 
 ## Supporting Files
 

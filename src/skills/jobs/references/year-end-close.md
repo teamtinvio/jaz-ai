@@ -1,14 +1,13 @@
 # Year-End Close
 
-> Annual close = quarter-end close × 4 + annual-only extras (FA reconciliation, true-ups, dividends, retained earnings rollover, statutory tax provision). Driver tool: `generate_year_end_blueprint`. For most SMBs, annual extras add 2-5 days on top of the quarterly close cadence.
+> Annual close = quarter-end close × 4 + annual-only extras (FA reconciliation, true-ups, dividends, retained earnings rollover, statutory tax provision). Walk the phases below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs year-end --period <YYYY>` prints this same phased checklist.) For most SMBs, annual extras add 2-5 days on top of the quarterly close cadence.
 
 ## Tools, recipes, calculators this job uses
 
-### MCP tools — orchestration
-- **`generate_year_end_blueprint(period: <YYYY>, currency: <base>)`** — step 0: emit the phased year-end checklist.
-- **`generate_quarter_end_blueprint(...)`** — invoked four times in standalone mode (Q1, Q2, Q3, Q4) before annual extras run.
+### Orchestration
+- **`quarter-end-close.md`** — invoked four times in standalone mode (Q1, Q2, Q3, Q4) before annual extras run.
 
-### MCP tools — annual extras
+### Platform tools — annual extras
 - **`generate_fa_summary(period_end: <FY-end>)`** — Y1 FA reconciliation: full-year depreciation movement per asset.
 - **`generate_fa_recon_summary(period_start: <FY-start>, period_end: <FY-end>)`** — Y1 verification: opening NBV + additions − disposals − depreciation = closing NBV.
 - **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED']}})`** — Y1 enumeration of FAs.
@@ -19,13 +18,13 @@
 - **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — Y4 IFRS 9 ECL year-end true-up against `generate_aged_ar`.
 - **`update_account(resourceId: <CoA root>, lockDate: <FY-end>)`** — Y8 final lock.
 
-### MCP tools — current/non-current reclassification (manual annual journals)
+### Platform tools — current/non-current reclassification (manual annual journals)
 - **`search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}})`** + per-capsule `clio calc loan` to compute next-12-months principal portion.
 - **`search_capsules(filter: {capsuleType: {eq: 'Lease'}})`** + per-capsule `clio calc lease` for IFRS 16 reclassification.
 - **`create_journal(...)`** for the reclassification entries (Dr Loan Payable Non-Current / Cr Loan Payable Current; Dr Lease Liability Non-Current / Cr Lease Liability Current).
 
-### MCP tools — handoff to audit-prep
-- See `audit-prep.md` — year-end-close hands off to audit-prep job which produces the report pack + supporting schedules + audit analyses.
+### Handoff to audit-prep
+- See `audit-prep.md` — year-end-close hands off to the audit-prep job, which produces the report pack + supporting schedules + audit analyses.
 
 ### Calculators (cross-check, no API key needed)
 - **`clio calc depreciation --cost --salvage --life --method --frequency annual --json`** — Y1 per-asset cross-check.
@@ -35,9 +34,9 @@
 - **`clio calc dividend --amount <total> --withholding-rate <%> --json`** — Y3 dividend computation.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/annual-statutory.md` step 4 (the year-end-close job is the bridge between final monthly close and audit-prep). Practice playbook reads `CLIENT.fy_end`, `CLIENT.statutory_audit_required`, `CLIENT.tax_jurisdiction`, `CLIENT.dividend_policy`, `CLIENT.headcount` (for leave true-up).
-- Sibling jobs: `quarter-end-close.md` (must run for all 4 quarters before this job's annual extras), `audit-prep.md` (consumes year-end-close output), `statutory-filing.md` (Form C-S / PH ITR consuming audit-prep pack).
-- Recipes invoked: `dividend.md`, `bad-debt-provision.md` (engine name `ecl`), `employee-accruals.md` (true-ups, manual journals).
+- Org inputs this job needs (confirm with the user when not already on file): the FY-end, whether a statutory audit is required, the tax jurisdiction (`SG` | `PH`), the dividend policy, and headcount (for the leave true-up).
+- Sibling jobs: `quarter-end-close.md` (must run for all 4 quarters before this job's annual extras), `audit-prep.md` (consumes year-end-close output), and the SG Form C-S statutory filing (consumes the audit-prep pack — see the SG Form C-S section in `SKILL.md`).
+- Recipes invoked: `dividend`, `ecl` (year-end bad-debt true-up), `accrued-expense` (employee true-ups, plus manual journals). See the transaction-recipes skill.
 
 ---
 
@@ -48,13 +47,9 @@
 
 Quarters MUST be closed in order: Q1 locked → Q2 close → ... Annual extras assume monthly + quarterly cadence is current.
 
-## Step 0 — Emit blueprint
+## Phase sequence
 
-```
-generate_year_end_blueprint(period: '2025', currency: <CLIENT.base_currency>)
-```
-
-Save to `recurring/annual/2025/year-end-close/blueprint.json`.
+Standalone: run all quarter-end-close steps for Q1-Q4 (Phase 1-7), then the annual extras + final lock + audit-prep handoff (Phase 8 onward). Incremental (`--incremental` on the local CLI): annual extras only. (Local CLI: `clio jobs year-end --period 2025` prints the same phased checklist.)
 
 ## Phase 1-7 — Quarterly closes (×4) — IF standalone mode
 
@@ -73,7 +68,7 @@ For Jaz native straight-line depreciation: should be automatic and correct. Veri
 
 For non-SL assets (DDB, 150DB) where `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db')` was used: each capsule pre-emitted 12 future-dated DRAFT journals at recipe-execution time. Confirm all 12 are FINALIZED via `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})` — should be empty. If non-empty: route back to `month-end-close.md` step 9.
 
-Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond `CLIENT.materiality_threshold` → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, startDate: <FY-start>, endDate: <FY-end>})`) — typical cause is a disposal posted without `update_fixed_asset(status: 'DISPOSED')`.
+Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond the materiality threshold → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, startDate: <FY-start>, endDate: <FY-end>})`) — typical cause is a disposal posted without `update_fixed_asset(status: 'DISPOSED')`.
 
 ### Y2 — Annual true-ups (manual journals)
 
@@ -101,18 +96,18 @@ If accrued > actual: reverse the excess (Dr Leave Liability / Cr Leave Expense).
 
 **Bonus true-up:** mirror pattern, against `tag: 'bonus-accrual'` and actual bonuses declared by management.
 
-**Other recurring accruals**: per `CLIENT.recurring_accruals[]`, compare actual bills received during FY against accruals posted. Any mismatch beyond materiality → manual true-up journal.
+**Other recurring accruals**: for each recurring accrual the org runs, compare actual bills received during the FY against accruals posted. Any mismatch beyond materiality → manual true-up journal.
 
 ### Y3 — Dividend declaration + payment
 
-If `CLIENT.dividend_policy.declared_for_FY > 0`:
+If the org declared a final dividend for the FY:
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from the CoA, not real plan_recipe params.
   recipe: 'dividend',
   amount: <gross-dividend>,
-  withholdingRate: <CLIENT.dividend_policy.withholding_rate>,
+  withholdingRate: <dividend withholding rate>,
   declarationDate: '2025-12-31',
   paymentDate: '<paymentDate>',
   glRetainedEarnings: <CoA Retained Earnings>,
@@ -133,13 +128,13 @@ For interim dividends declared during the year: those should already be posted i
 generate_aged_ar(period_end: '2025-12-31')
 ```
 
-Bucket AR by aging band per `CLIENT.ecl_loss_rate_matrix` (current 0.5%, 30d 2%, 60d 5%, 90d 10%, 120d+ 50% — tune per client historical loss data).
+Bucket AR by aging band per the org's ECL loss-rate matrix (current 0.5%, 30d 2%, 60d 5%, 90d 10%, 120d+ 50% — tune per the org's historical loss data).
 
 ```
-clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates 0.5,2,5,10,50 --existing-provision <ep> --currency <CLIENT.base_currency> --json
+clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates 0.5,2,5,10,50 --existing-provision <ep> --currency <base currency> --json
 ```
 
-If top-up needed > `CLIENT.materiality_threshold`:
+If top-up needed > the materiality threshold:
 
 ```
 plan_recipe(recipe: 'ecl', receivables: <buckets>, ratesPerBucket: <rates>, existingProvisionAccount: <Allowance for Doubtful Debts>, glBadDebtExpense: <Bad Debt Expense>, valueDate: '2025-12-31', capsuleType: 'ECL Provision', capsuleName: 'FY2025 ECL Year-End True-Up')
@@ -186,7 +181,7 @@ Mirror for IFRS 16 lease liability (`Lease Liability Non-Current` → `Lease Lia
 generate_trial_balance(period_end: '2025-12-31')
 ```
 
-Save to `recurring/annual/2025/tb-final.json`. Assert: BS Total Assets = Total Liabilities + Total Equity; P&L Net Profit ties to Equity Movement closing balance.
+Save the final FY trial balance. Assert: BS Total Assets = Total Liabilities + Total Equity; P&L Net Profit ties to Equity Movement closing balance.
 
 Run completeness gates:
 ```
@@ -215,12 +210,12 @@ Invoke `audit-prep.md` job. Year-end-close output (TB final, all reports, all re
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| `generate_year_end_blueprint` | 422 `quarters_not_closed` (standalone mode) | One or more quarters incomplete. Route back to the missing `quarter-end-close.md`. Use `--incremental` only when all 4 quarters are locked. |
+| Phase 1-7 (standalone) | Quarters not all closed | One or more quarters incomplete. Route back to the missing `quarter-end-close.md`. Run annual extras only once all 4 quarters are locked. |
 | Y1 FA recon | NBV doesn't tie | Investigate disposed assets posted without status update. `search_fixed_assets(filter: {status: 'ACTIVE'})` then check each against current physical existence. |
 | Y3 `execute_recipe` for dividend | 422 `dividends_payable_account_missing` | Create `Dividends Payable` account (`Current Liability`) via `create_account` first. |
 | Y4 ECL | top-up amount surprisingly large | Possibly the existing provision is stale (no monthly mental ECL check ran). Confirm `--existing-provision` matches `TB[Allowance for Doubtful Debts].balance`. If yes, real impairment event occurred — surface to practitioner. |
 | Y6 reclassification | Existing reclassification entry from prior year still present | Reverse the prior-year reclassification first (it sits in opening balances). The reclassification entry is per-FY; should be reset at the start of each FY. |
-| Y7 completeness gate | Drafts present at FY-end | Either clear (finalize) or document in `ENGAGEMENT.risk_areas`. NEVER hand pack to auditor with FY-period drafts. |
+| Y7 completeness gate | Drafts present at FY-end | Either clear (finalize) or document the residuals and surface to the user. NEVER hand the pack to the auditor with FY-period drafts. |
 | Y8 lock | 422 `lock_violates_open_journal` | Run Y7 again — a draft snuck in. |
 
 ---
@@ -229,14 +224,13 @@ Invoke `audit-prep.md` job. Year-end-close output (TB final, all reports, all re
 
 - **Run in January for prior FY.** Standalone mode includes all 4 quarter closes; allow 5-10 days for full FY catch-up if quarterly cadence has slipped.
 - **External audit timeline:** auditor typically arrives 4-6 weeks after FY-end. Year-end-close + audit-prep should complete within 6 weeks of FY-end. Faster = cheaper audit.
-- **Reclassification reversal:** the Y6 entries are FY-specific. Year 2's monthly-close.md step 1 (or a Y1 reverse step in next year's year-end-close) should reverse them before fresh classification.
+- **Reclassification reversal:** the Y6 entries are FY-specific. Next year's first monthly close (or a Y1 reverse step in next year's year-end-close) should reverse them before fresh classification.
 - **Form C-S timing:** SG IRAS deadline is November 30 of the FOLLOWING year. ECI: within 3 months of FY-end. Plan year-end-close to feed audit-prep within 3 months for ECI compliance.
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/annual-statutory.md` step 4 — orchestrates this job after the final monthly close for Dec. Practice playbook owns the CLIENT.md-driven dividend / leave true-up / reclassification context.
 - `audit-prep.md` — Y9 handoff. Year-end-close output is required input.
-- `statutory-filing.md` (or the SG Form C-S wizard at `practice/references/annual-statutory.md` step 7) — consumes the audit-prep pack post Y9.
+- SG Form C-S statutory filing (see the SG Form C-S section in `SKILL.md`) — consumes the audit-prep pack post Y9.
 - `month-end-close.md`, `quarter-end-close.md` — prerequisites; Phase 1-7 invokes them in standalone mode.

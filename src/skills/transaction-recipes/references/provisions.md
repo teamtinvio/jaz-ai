@@ -18,7 +18,7 @@
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly finalize.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/annual-statutory.md` step 4e (Y5 in `year-end-close.md`) for year-end provision remeasurement, and `practice/references/monthly-close.md` step 7 (verify scheduler, finalize this period's unwinding DRAFT).
+- Operational context: invoked during year-end close (Y5 in `year-end-close.md`) for year-end provision remeasurement, and during month-end close (verify scheduler, finalize this period's unwinding DRAFT).
 - Sibling: `bad-debt-provision.md` (engine name `ecl` — IFRS 9 ECL, simpler one-shot pattern, no PV unwinding); `fixed-deposit.md` (similar PV-unwinding mechanic but for a financial asset).
 - IFRS / accounting context: IAS 37.45 (PV when material); IAS 37.59 (use a pre-tax discount rate that reflects current market assessments of time value AND risks specific to the obligation); IAS 37.59 Note (do NOT double-count risks via rate AND cash flow estimates).
 
@@ -48,7 +48,7 @@ Save schedule to `workpapers/<period>/provision-warranty-FY2025.json`.
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'provision',
   amount: 500000,
   annualRate: 4,
@@ -56,10 +56,10 @@ plan_recipe(
   startDate: '2025-01-01',
   settlementDate: '2030-01-01',
   currency: 'SGD',
-  glProvision: <CLIENT.coa_mapping['Provision for Warranties']>,
-  glExpense: <CLIENT.coa_mapping['Warranty Expense']>,
-  glFinanceCost: <CLIENT.coa_mapping['Finance Cost']>,
-  bankAccountResourceId: <CLIENT.bank_accounts[i].jaz_resource_id>,
+  glProvision: <resourceId of 'Provision for Warranties' account>,
+  glExpense: <resourceId of 'Warranty Expense' account>,
+  glFinanceCost: <resourceId of 'Finance Cost' account>,
+  bankAccountResourceId: <bank account resourceId>,
   capsuleType: 'Provisions',
   capsuleName: 'Warranty Provision — FY2025-FY2029'
 )
@@ -152,9 +152,9 @@ If actual settlement amount differs from estimated $500,000 (highly likely for w
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/annual-statutory.md` step 4e (Y5) — year-end provision remeasurement per IAS 37.59. Practice playbook reviews each `Provisions` capsule's underlying assumptions vs current data; triggers manual remeasurement if needed.
-- `practice/references/monthly-close.md` step 7 — finalize this period's pre-emitted unwinding DRAFT for each existing provision capsule.
+- Year-end close (Y5) — year-end provision remeasurement per IAS 37.59. Review each `Provisions` capsule's underlying assumptions vs current data; trigger manual remeasurement if needed.
+- Month-end close — finalize this period's pre-emitted unwinding DRAFT for each existing provision capsule.
 - `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Provisions'}})` + per-capsule recompute via `clio calc provision`. Auditor tests assumptions (cash flow estimate, discount rate, term).
 - Sibling `bad-debt-provision.md` (engine name `ecl`) — much simpler IFRS 9 ECL pattern, no PV unwinding.

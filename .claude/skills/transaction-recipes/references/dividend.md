@@ -19,7 +19,7 @@
 - **`generate_equity_movement(period_start, period_end)`** — step 5: dividends appear as a distinct line item in equity movement, separate from net profit.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/annual-statutory.md` step 4 (Y3 in `year-end-close.md`) for FY-end final dividend; from `practice/references/monthly-close.md` ad-hoc when interim dividend is declared mid-year.
+- Operational context: invoked during year-end close (Y3 in `year-end-close.md`) for the FY-end final dividend; ad-hoc during month-end close when an interim dividend is declared mid-year.
 - Sibling: NONE (dividend is one-shot, doesn't share patterns with other recipes).
 - IFRS / accounting context: dividends declared but not yet paid are a current liability (Dividends Payable per IAS 1.54(k)); dividends paid reduce equity directly via Retained Earnings (NOT P&L).
 
@@ -54,17 +54,17 @@ clio calc dividend --amount 200000 --withholding-rate 10 --currency PHP --json
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'dividend',
   amount: 200000,
   withholdingRate: 0,
   declarationDate: '2025-12-31',
   paymentDate: '2026-03-15',
   currency: 'SGD',
-  glRetainedEarnings: <CLIENT.coa_mapping['Retained Earnings']>,
-  glDividendsPayable: <CLIENT.coa_mapping['Dividends Payable']>,
-  glWithholdingPayable: <CLIENT.coa_mapping['Withholding Tax Payable']>,
-  bankAccountResourceId: <CLIENT.bank_accounts[i].jaz_resource_id>,
+  glRetainedEarnings: <resourceId of 'Retained Earnings' account>,
+  glDividendsPayable: <resourceId of 'Dividends Payable' account>,
+  glWithholdingPayable: <resourceId of 'Withholding Tax Payable' account>,
+  bankAccountResourceId: <bank account resourceId>,
   shareholder: 'TIN Holdings Pte Ltd',
   capsuleType: 'Dividends',
   capsuleName: 'FY2025 Final Dividend'
@@ -81,9 +81,9 @@ Returns `RecipePlan` with `requiredAccounts: ['Retained Earnings', 'Dividends Pa
 For each account in `requiredAccounts`:
 - `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Retained Earnings` → `Shareholders Equity`; `Dividends Payable` → `Current Liability`; `Withholding Tax Payable` → `Current Liability`.
 
-If `Dividends Payable` doesn't exist: `create_account(name: 'Dividends Payable', accountType: 'Current Liability', currency: <CLIENT.base_currency>)` first. This is a common gap in CoAs that haven't paid dividends before.
+If `Dividends Payable` doesn't exist: `create_account(name: 'Dividends Payable', accountType: 'Current Liability', currency: <base currency>)` first. This is a common gap in CoAs that haven't paid dividends before.
 
-Bank account: resolve `bankAccountResourceId` via `list_bank_accounts()` if `CLIENT.bank_accounts[i].jaz_resource_id` is empty.
+Bank account: resolve `bankAccountResourceId` via `list_bank_accounts()` if the bank account resourceId isn't already known.
 
 Shareholder contact: optional but recommended for narrative tagging. `search_contacts(filter: {name: {eq: <shareholder>}})`. If empty: `create_contact(name: <shareholder>, customer: false, supplier: false)` — mark as "other" / shareholder type if your CoA has a custom field for that.
 
@@ -145,9 +145,9 @@ After payment AND WHT remittance:
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/annual-statutory.md` step 4 (Y3 in year-end-close) — final FY dividend declaration AFTER the FY's audited net profit is determined. Practice playbook reads `CLIENT.dividend_policy.declared_for_FY` and `CLIENT.dividend_policy.withholding_rate` to drive recipe inputs.
-- `practice/references/monthly-close.md` — interim dividends declared mid-year are posted in the month they were declared. Recipe runs once at declaration; payment cash-out finalizes when the actual bank disbursement happens (typically next month).
+- Year-end close (Y3 in year-end-close) — final FY dividend declaration AFTER the FY's audited net profit is determined. The declared amount and withholding rate drive the recipe inputs.
+- Month-end close — interim dividends declared mid-year are posted in the month they were declared. Recipe runs once at declaration; payment cash-out finalizes when the actual bank disbursement happens (typically next month).
 - `audit-prep.md` step 8 — auditor reviews `generate_equity_movement` to verify dividends are correctly classified as equity reduction (not P&L expense).
 - `statutory-filing.md` — SG Form C-S Box 12 (dividends paid during YA) reads from this capsule's payment cash-out entries.

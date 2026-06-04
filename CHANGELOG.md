@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.16.0] - 2026-06-04
+
+Focused the agent toolset on core Jaz accounting operations. The period-close and operational job checklists (month-end, quarter-end, year-end, bank reconciliation, GST/VAT, payment run, credit control, supplier reconciliation, audit prep, fixed-asset review, document collection, statutory filing) now run through the jobs skill and the `clio jobs` command instead of standalone tools. The local practitioner-workspace scaffolding tools have been retired. Everyday accounting tools (invoices, bills, journals, payments, reconciliation, recipes, reports) are unchanged.
+
 ## [5.15.0] - 2026-06-04
 
 Two improvements to everyday bookkeeping. Chart of accounts now supports period lock dates: set a lock date when you create or update a ledger account to block recording or changing transactions on or before that date, and the lock date is kept intact when you rename the account. And creating invoices, bills, and credit notes no longer requires a contact up front — save the document now and assign the customer or supplier later.

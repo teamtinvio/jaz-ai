@@ -19,7 +19,7 @@
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly finalize.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (existing FD capsules — finalize this month's accrual; new FD setups during the period — invoke recipe).
+- Operational context: invoked during month-end close (existing FD capsules — finalize this month's accrual; new FD setups during the period — invoke recipe).
 - Sibling: `bank-loan.md` (mirror pattern — money out instead of in, interest expense vs income); `provisions.md` (similar PV-unwinding pattern but for liabilities).
 - IFRS / accounting context: IFRS 9.4.1 (amortized cost classification — hold to collect, SPPI). IFRS 9.5.4.1 (effective interest method). For FDs that don't meet SPPI (e.g., structured deposits with embedded derivatives): use FVTPL or FVOCI classification — different recipe pattern needed (NOT this recipe).
 
@@ -55,10 +55,10 @@ plan_recipe(
   termMonths: 12,
   startDate: '2025-01-01',
   currency: 'SGD',
-  glFdReceivable: <CLIENT.coa_mapping['Fixed Deposit Receivable']>,
-  glAccruedInterestReceivable: <CLIENT.coa_mapping['Accrued Interest Receivable']>,
-  glInterestIncome: <CLIENT.coa_mapping['Interest Income']>,
-  bankAccountResourceId: <CLIENT.bank_accounts[i].jaz_resource_id>,
+  glFdReceivable: <resourceId of 'Fixed Deposit Receivable' account>,
+  glAccruedInterestReceivable: <resourceId of 'Accrued Interest Receivable' account>,
+  glInterestIncome: <resourceId of 'Interest Income' account>,
+  bankAccountResourceId: <bank account resourceId>,
   bank: 'DBS Bank',
   capsuleType: 'Fixed Deposit',
   capsuleName: 'DBS FD — SGD 100,000 — 12 months — 3.5% (FY2025)'
@@ -141,9 +141,9 @@ If the bank auto-rolls the FD at maturity: do NOT close the capsule. Instead, po
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 7 — invoked monthly to finalize this period's pre-emitted accrual DRAFT for each existing FD capsule. New FD placements during the period: invoke recipe; this period's accrual auto-included in the bulk_finalize queue.
-- `practice/references/annual-statutory.md` step 4 — final FY accrual cross-check + classification (current vs non-current depending on remaining term at FY-end).
+- Month-end close — invoked monthly to finalize this period's pre-emitted accrual DRAFT for each existing FD capsule. New FD placements during the period: invoke recipe; this period's accrual auto-included in the bulk_finalize queue.
+- Year-end close — final FY accrual cross-check + classification (current vs non-current depending on remaining term at FY-end).
 - `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Fixed Deposit'}})` + per-capsule recompute via `clio calc fixed-deposit`. Auditor reconciles to bank confirmation letters.
 - `bank-loan.md` — mirror pattern (money out instead of in, expense vs income).

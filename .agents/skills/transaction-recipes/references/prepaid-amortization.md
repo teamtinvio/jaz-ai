@@ -19,7 +19,7 @@
 - **`search_capsules(filter: {capsuleType: {eq: 'Prepaid Expenses'}, name: {eq: <capsule.name>}})`** — used to detect duplicate setup in re-runs.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (initial setup of new prepaids; ongoing recognition runs from the scheduler created here).
+- Operational context: invoked during month-end close (initial setup of new prepaids; ongoing recognition runs from the scheduler created here).
 - IFRS / accounting context: IAS 38 (intangible) does NOT apply — this is a current asset under IAS 1. The capsule type "Prepaid Expenses" maps to `accountType: Current Asset` per `jaz-api/SKILL.md` rule 21.
 - Sibling recipe: `deferred-revenue.md` (mirror image — upfront receipt, monthly recognition).
 
@@ -39,14 +39,14 @@ Returns: `{ perPeriodAmount, recognitionStartDate, recognitionEndDate, schedule[
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'prepaid-expense',
   amount: 12000,
   periods: 12,
   startDate: '2025-01-01',
   currency: 'SGD',
-  glAsset: <CLIENT.coa_mapping['Prepaid Insurance']>,
-  glExpense: <CLIENT.coa_mapping['Insurance Expense']>,
+  glAsset: <resourceId of 'Prepaid Insurance' account>,
+  glExpense: <resourceId of 'Insurance Expense' account>,
   capsuleType: 'Prepaid Expenses',
   capsuleName: 'FY2025 Office Insurance',
   vendor: 'AXA Insurance Singapore'
@@ -62,10 +62,10 @@ Returns a `RecipePlan` with:
 ### Step 3 — Resolve dependencies
 
 For every account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty, halt and surface: "Prepaid recipe references GL account `<accountName>` not in CoA / `CLIENT.coa_mapping`. Create via `create_account` or remap CLIENT.md before retry."
+- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty, halt and surface: "Prepaid recipe references GL account `<accountName>` not in CoA. Create via `create_account` or remap the account before retry."
 
 For the vendor (because `needsContact: true`):
-- `search_contacts(filter: {name: {eq: <vendor>}})`. If empty: halt and surface: "Vendor `<vendor>` not in Jaz contacts. Create via `create_contact(...)` or remap CLIENT.md before retry."
+- `search_contacts(filter: {name: {eq: <vendor>}})`. If empty: halt and surface: "Vendor `<vendor>` not in Jaz contacts. Create via `create_contact(...)` or remap the vendor before retry."
 
 ### Step 4 — Execute
 
@@ -117,7 +117,7 @@ After the FINAL period (period N+1) is finalized:
 | `execute_recipe` | 422 `currency_not_enabled` | The recipe currency isn't enabled for the org. `add_currency(currencyCode: ...)` first; rates default-resolve from the latest `list_currency_rates`. |
 | `execute_recipe` | 409 `capsule_already_exists` | Re-run on the same `capsuleName` is rejected. Either pick a different name (e.g. include policy number) or `search_capsules` to find the existing one and append additional bills/journals via `update_capsule`. |
 | `finalize_bill` | 422 `bill_unbalanced` | Engine-emitted bills are always balanced. If you see this, the source schema changed — escalate (do not retry). |
-| Scheduler | Missing recognition journal at month-end | Verify `schedulerResourceId` is `status: ACTIVE`. If `PAUSED`, the scheduler was halted manually (likely by practitioner during a period-end review). Resume via `update_scheduler` or document in `ENGAGEMENT.md`. |
+| Scheduler | Missing recognition journal at month-end | Verify `schedulerResourceId` is `status: ACTIVE`. If `PAUSED`, the scheduler was halted manually during a period-end review. Resume via `update_scheduler` or document the pause in your working notes. |
 
 ---
 
@@ -130,7 +130,7 @@ After the FINAL period (period N+1) is finalized:
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 7 — invoked here only on initial setup of a new prepaid; ongoing recognition runs from the scheduler. Practice playbook reads `CLIENT.coa_mapping` and `CLIENT.recurring_accruals[]` (when the prepaid is structured as a recurring accrual rather than ad-hoc).
-- `practice/references/onboarding.md` — initial trial-balance load may include a non-zero prepaid balance. Conversion via `jaz-conversion/SKILL.md § Option 2 Quick` posts the opening balance via the `Conversion Clearing` account; the recipe then sets up forward recognition only (no historical recognition).
+- Month-end close — invoked here only on initial setup of a new prepaid; ongoing recognition runs from the scheduler.
+- Data migration — initial trial-balance load may include a non-zero prepaid balance. Conversion via `jaz-conversion/SKILL.md § Option 2 Quick` posts the opening balance via the `Conversion Clearing` account; the recipe then sets up forward recognition only (no historical recognition).

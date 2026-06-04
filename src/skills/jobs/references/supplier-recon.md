@@ -1,11 +1,10 @@
 # Supplier Statement Reconciliation
 
-> Compare AP balance per Jaz vs supplier's statement. Identify missing bills, duplicate payments, pricing discrepancies, timing differences. Driver tool: `generate_supplier_recon_blueprint`.
+> Compare AP balance per Jaz vs supplier's statement. Identify missing bills, duplicate payments, pricing discrepancies, timing differences. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs supplier-recon` prints this same phased checklist.)
 
 ## Tools, recipes, calculators this job uses
 
-### MCP tools
-- **`generate_supplier_recon_blueprint(period: <YYYY-MM>, currency: <base>)`** — step 0: emit blueprint.
+### Platform tools
 - **`search_contacts(filter: {supplier: true, name: {eq: <supplier>}})`** — step 1: resolve the supplier resourceId. Use fuzzy match if exact fails.
 - **`get_contact(resourceId: <supplier id>)`** — step 1 detail: pull the supplier's payment terms, contact info.
 - **`search_bills(filter: {contactResourceId: <supplier id>, valueDate: {between: [<period-start>, <period-end>]}}, limit: 200)`** — step 2: pull all bills from this supplier in the period. Paginate.
@@ -15,16 +14,14 @@
 - **`create_bill(...)`** / **`apply_credit_to_bill(...)`** / **`create_supplier_credit_note(...)`** — step 6: post any missing items identified during recon.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 11 ad-hoc per supplier; from `practice/references/annual-statutory.md` step 4 (year-end mandatory recon for major suppliers).
+- Run ad-hoc per major supplier, and at year-end as a mandatory recon for major suppliers (feeds `audit-prep.md` AP confirmations).
 - Sibling jobs: `payment-run.md` (run BEFORE supplier-recon to capture pending payments; or AFTER to settle balances identified in recon), `audit-prep.md` step 6 AP aging.
 
 ---
 
-## Step 0 — Emit blueprint
+## Steps
 
-```
-generate_supplier_recon_blueprint(period: '2025-01', currency: <CLIENT.base_currency>)
-```
+Walk steps 1-8 below. (Local CLI: `clio jobs supplier-recon --supplier "<name>" --period 2025-01` prints the same phased checklist.)
 
 ## Step 1 — Resolve supplier
 
@@ -50,7 +47,7 @@ search_bills(
 )
 ```
 
-Per bill: `{resourceId, reference, valueDate, currency, originalAmount, balanceAmount, status, dueDate}`. Save to `recurring/monthly/<period>/supplier-recon/<supplier-slug>/jaz-bills.json`.
+Per bill: `{resourceId, reference, valueDate, currency, originalAmount, balanceAmount, status, dueDate}`. Keep the Jaz-side bill list for the recon pack.
 
 For an opening-balance recon: also pull the supplier's pre-period balance via `generate_aged_ap(period_end: <period-start - 1 day>)` and filter to this supplier.
 
@@ -94,7 +91,7 @@ Practitioner provides the supplier's statement (PDF, email, paper). Per-line-ite
 
 ## Step 7 — Post corrections + verify
 
-For each missing bill / credit note: post via `create_bill` / `create_supplier_credit_note`. For each duplicate payment: post correcting journal. Document the audit trail in `recurring/monthly/<period>/supplier-recon/<supplier-slug>/corrections.md`.
+For each missing bill / credit note: post via `create_bill` / `create_supplier_credit_note`. For each duplicate payment: post correcting journal. Document the audit trail (per-correction narrative) for the recon pack.
 
 After corrections:
 ```
@@ -105,11 +102,11 @@ Filter to supplier. New closing balance should match the supplier statement clos
 
 ## Step 8 — Save reconciliation pack
 
-Save to `recurring/monthly/<period>/supplier-recon/<supplier-slug>/`:
-- `supplier-statement.pdf` (received from supplier)
-- `jaz-bills.json` + `jaz-payments.json` + `jaz-credit-notes.json`
-- `recon-summary.md` — per-discrepancy analysis + corrections posted
-- Auditor will request these for major suppliers.
+Keep, per supplier:
+- the supplier statement (received from supplier)
+- the Jaz-side bills + payments + credit notes
+- a recon summary — per-discrepancy analysis + corrections posted
+- The auditor will request these for major suppliers.
 
 ---
 
@@ -119,7 +116,7 @@ Save to `recurring/monthly/<period>/supplier-recon/<supplier-slug>/`:
 |--------|-------|----------|
 | Step 1 | Supplier name doesn't fuzzy-match | Practitioner-side spelling difference. Surface candidates; let practitioner pick. |
 | Step 2 | Bill count > page limit | Paginate via `offset`. |
-| Step 6 | Currency mismatch on supplier statement | Standard FX handling — supplier records in supplier's base currency, Jaz records in CLIENT.base_currency. Compare in supplier's currency for parity check; FX gap goes to FX gain/loss separately. |
+| Step 6 | Currency mismatch on supplier statement | Standard FX handling — supplier records in the supplier's base currency, Jaz records in the org's base currency. Compare in the supplier's currency for the parity check; FX gap goes to FX gain/loss separately. |
 | Step 7 | `create_bill` 422 `valueDate_in_locked_period` | The missing bill belongs to a locked period. Lift lock via `update_account` lockDate, post, re-lock. Surface to practitioner — auditor will see late posting. |
 | Step 7 | `apply_credit_to_bill` 422 `credit_exceeds_balance` | Trying to apply more credit than the bill has remaining. Practitioner judgment — split the credit across multiple bills OR carry forward. |
 
@@ -134,9 +131,9 @@ Save to `recurring/monthly/<period>/supplier-recon/<supplier-slug>/`:
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 11 — ad-hoc per major supplier.
-- `practice/references/annual-statutory.md` step 4 — mandatory year-end recon for major suppliers; output feeds audit-prep.
+- `month-end-close.md` — run ad-hoc per major supplier inside the period close.
+- `year-end-close.md` / `audit-prep.md` — mandatory year-end recon for major suppliers; output feeds the audit pack.
 - `payment-run.md` — typically run after supplier-recon (pay any newly-identified bills, defer disputed).
 - `audit-prep.md` step 6 — AP aging year-end requires supplier confirmations for major balances; supplier-recon files are the supporting evidence.

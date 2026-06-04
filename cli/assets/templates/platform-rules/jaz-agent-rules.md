@@ -6,13 +6,13 @@ Source of truth lives in the installed skills (`.claude/skills/jaz-*/SKILL.md` o
 
 ## Discovery
 
-The Jaz MCP server exposes 301 tools across 37 namespaces via 3 meta-tools. **Use the meta-tool flow — never enumerate tools blindly.**
+The Jaz MCP server exposes 283 tools across 37 namespaces via 3 meta-tools. **Use the meta-tool flow — never enumerate tools blindly.**
 
 1. `search_tools(query)` → top-N tool names + namespaces.
 2. `describe_tools(names)` → full parameter schemas.
 3. `execute_tool(name, args)` → run.
 
-Offline tools (no API key needed): `plan_recipe`, `search_help_center`, all `practice_*`, all `generate_*_blueprint`. The MCP server says `Offline.` at the start of those tools' descriptions.
+Offline tools (no API key needed): `plan_recipe`, `search_help_center`. The MCP server says `Offline.` at the start of those tools' descriptions.
 
 ## API contract — the 6 rules that prevent 90% of 422s
 
@@ -37,14 +37,6 @@ Exception: `fx-reval` is verification-only — Jaz auto-handles period-end IAS 2
 - `bulk_upsert_*` tools accept up to 500 rows per call. Async tools return a `jobId` — poll `search_background_jobs(filter:{resourceId:{eq:jobId}})` until SUCCESS / FAILED / PARTIAL_SUCCESS.
 - On `PARTIAL_SUCCESS`: succeeded rows are committed. Inspect `errorDetails[].rowIndex` and re-submit only failed rows.
 - Sync `bulk_upsert_chart_of_accounts` returns `failedRows[]` inline — no polling.
-
-## Practitioner workspace (multi-client agencies)
-
-If `~/Documents/Jaz Practice/` exists (or `PRACTICE_HOME` is set), the user is operating across multiple Jaz orgs:
-
-1. `practice_list_clients` first — identify which client this task is for.
-2. `practice_load_client` — loads CLIENT.md (FY end, GST scheme, COA, banks, recurring accruals).
-3. For close / GST / year-end work, ensure an `ENGAGEMENT.md` exists for the period (`practice_create_engagement` if not). Follow `jaz-practice/references/<engagement-type>.md` as the canonical playbook.
 
 ## Safety
 

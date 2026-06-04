@@ -1,10 +1,10 @@
 # Building Blocks for Jobs
 
-> Shared concepts every job uses. Names of MCP tools + Jaz primitives + recipe-engine entry points + practitioner-engagement orchestration. Read this before any per-job reference.
+> Shared concepts every job uses. Names of platform tools + Jaz primitives + recipe-engine entry points. Read this before any per-job reference.
 
 ## Accounting periods
 
-Jaz uses a **financial year** (FY) that may not match calendar year. The org's `fy_end` (`MM-DD`) determines period boundaries. Read from `CLIENT.fy_end` per practice playbook.
+Jaz uses a **financial year** (FY) that may not match calendar year. The org's financial-year-end (`MM-DD`) determines period boundaries. Confirm it with the user before deriving period boundaries.
 
 | Format | Pattern | Example |
 |--------|---------|---------|
@@ -13,8 +13,8 @@ Jaz uses a **financial year** (FY) that may not match calendar year. The org's `
 | Year | `YYYY` | `2025` = FY 2025 |
 
 Period derivation:
-- Calendar-year org (`fy_end: '12-31'`): `2025-Q1` = `2025-01-01` to `2025-03-31`.
-- June FY org (`fy_end: '06-30'`): `2025-Q1` = `2024-07-01` to `2024-09-30` (FY2025 starts Jul 2024).
+- Calendar-year org (FY-end `12-31`): `2025-Q1` = `2025-01-01` to `2025-03-31`.
+- June FY org (FY-end `06-30`): `2025-Q1` = `2024-07-01` to `2024-09-30` (FY2025 starts Jul 2024).
 
 **Period boundaries matter for:**
 - `search_*` filters — `{valueDate: {between: [<period-start>, <period-end>]}}` per `jaz-api/SKILL.md` rule 2.
@@ -90,7 +90,7 @@ Group GL by capsule for the auditor:
 generate_general_ledger(period_start, period_end, groupBy: 'CAPSULE')
 ```
 
-## MCP tools every job uses
+## Platform tools every job uses
 
 | Tool | Job usage |
 |------|-----------|
@@ -107,38 +107,38 @@ generate_general_ledger(period_start, period_end, groupBy: 'CAPSULE')
 | `bulk_finalize_drafts` | Monthly-close + every job that finalizes pre-emitted DRAFTs |
 | `update_account` lockDate | Period close |
 
-## Engagement playbooks
+## Job sequencing
 
-Jobs are invoked from practitioner engagement playbooks. Practice playbooks own the CLIENT.md / ENGAGEMENT.md context, the per-row loops (per bank account, per recurring accrual, per FA), and the cross-job orchestration:
+Period-close jobs layer on each other; the ad-hoc jobs slot into the period close or run on demand:
 
-| Engagement type | Playbook | Jobs invoked |
-|-----------------|----------|--------------|
-| `monthly-close` | `practice/references/monthly-close.md` | month-end-close (foundation), bank-recon (step 3), document-collection (step 2 if late docs), per-recipe finalize (steps 7-11) |
-| `quarterly-gst` | `practice/references/quarterly-gst.md` | quarter-end-close, gst-vat-filing (Q1), credit-control (Q1 review) |
-| `annual-statutory` | `practice/references/annual-statutory.md` | year-end-close (orchestrator), audit-prep (step 5), fa-review (step 4b), supplier-recon (step 4 majors), statutory-filing / SG Form C-S (step 7) |
-| `onboarding` | `practice/references/onboarding.md` | jaz-conversion (Phase 0-4), document-collection (initial doc batch) |
+| Job | Builds on / invokes |
+|-----|---------------------|
+| `month-end-close` | foundation — bank-recon (step 3), document-collection (capture late bills), per-recipe finalize (accruals, prepaid, deferred, depreciation, loan) |
+| `quarter-end-close` | month-end-close ×3 + GST/VAT filing, ECL review, bonus true-up, intercompany recon, provision unwinding |
+| `year-end-close` | quarter-end-close ×4 + FA reconciliation, true-ups, dividends, retained-earnings rollover; hands off to audit-prep |
+| `audit-prep` | runs after year-end-close; consumes fa-review, supplier-recon (majors), bank-recon outputs; feeds statutory-filing |
+| `gst-vat-filing` | the canonical Q1 detail of quarter-end-close |
+| `payment-run` / `credit-control` / `supplier-recon` | ad-hoc AP / AR / supplier maintenance; run on demand or inside the period close |
 
-When a job runs OUTSIDE an engagement (rare — typically ad-hoc spot use): the agent does NOT have CLIENT.md context. Halt or surface assumptions to practitioner.
+Each job's per-row loops (per bank account, per recurring accrual, per fixed asset) and the org-specific values it needs (FY-end, materiality threshold, CoA mapping, recurring accruals, bank accounts) come from the org's setup in Jaz and from the user. Confirm these with the user when they aren't already on file; never assume.
 
-## Multi-org auth (intercompany / multi-entity engagements)
+## Multi-org work (intercompany / multi-entity)
 
-Per `CLIENT.jaz_api_key_override`: each entity has its own Jaz org and API key. Multi-org operations (intercompany, consolidation, transfer-pricing) require explicit context switch:
+Each entity is a separate Jaz org. Multi-org operations (intercompany, consolidation, transfer-pricing) must pin the org **explicitly per call** with `org_id` (from `list_organizations`), never via ambient session / `--org` alias / `JAZ_API_KEY` env state:
 
-1. `practice_load_client(<entity-a slug>)` → loads Entity A's API key + CLIENT.md.
-2. Run any per-entity tools under that context.
-3. `practice_load_client(<entity-b slug>)` → switches to Entity B.
-4. Run mirror operations under Entity B's context.
+1. Confirm Entity A via `get_organization(org_id: <Entity A org>)`, then run Entity A's legs with `org_id: <Entity A org>`.
+2. Confirm Entity B via `get_organization(org_id: <Entity B org>)`, then run the mirror legs with `org_id: <Entity B org>`.
 
-NEVER mix. Wrong API key → wrong org → catastrophic data corruption. See `intercompany.md` recipe for the canonical pattern.
+Every leg carries its own explicit `org_id` — a wrong "active" org silently posts to the wrong tenant and corrupts both books. See the `intercompany` recipe for the canonical pattern.
 
 ## Error handling conventions across jobs
 
 | Severity | Behavior |
 |----------|----------|
 | 422 expected (per documented contract) | Per-source recovery in the per-job error table; surface specific fix path |
-| 422 unexpected | Halt; surface to practitioner with the raw error message |
+| 422 unexpected | Halt; surface to the user with the raw error message |
 | 500 | Retry once with 5s backoff; on second 500 surface "escalate to support with `requestId`" |
-| 404 (resource gone) | Likely stale `CLIENT.md` reference (e.g., `bank_accounts[i].jaz_resource_id`). Re-resolve via search; update CLIENT.md; surface |
+| 404 (resource gone) | Stale resource id (e.g., a cached `bank_account` resourceId). Re-resolve via search; surface |
 | Async PARTIAL_SUCCESS | Read `data[0].errorDetails[]`; loop back to re-execute failed rows only |
 | NOT idempotent on retry | Per `jaz-api/SKILL.md` rule 124 — confirm state via search before retrying |
 
@@ -147,5 +147,4 @@ NEVER mix. Wrong API key → wrong org → catastrophic data corruption. See `in
 ## Cross-references
 
 - `transaction-recipes/references/building-blocks.md` — recipe-side primitives (capsules, schedulers, the engine itself, recipe-name aliases). Pair with this file for full context.
-- `practice/references/monthly-close.md` / `quarterly-gst.md` / `annual-statutory.md` / `onboarding.md` — engagement-type playbooks. The canonical orchestration layer.
 - `jaz-api/SKILL.md` — endpoint-by-endpoint API rules. Cited per-job for specific gotchas.

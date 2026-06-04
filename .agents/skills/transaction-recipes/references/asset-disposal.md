@@ -12,7 +12,7 @@
 - **`clio calc asset-disposal --cost <c> --salvage <s> --life <years> --acquired <YYYY-MM-DD> --disposed <YYYY-MM-DD> --proceeds <p> --method <sl|ddb|150db> --currency <code> --json`** — used in step 1: computes accumulated depreciation to disposal date, net book value, gain/loss. Returns `{ accumulatedDepreciation, netBookValue, proceeds, gainOrLoss, classification: 'gain' | 'loss' }`.
 
 ### Tools (jaz-api / direct)
-- **`get_fixed_asset(resourceId: <id>)`** — step 1: pull the asset's actual `cost`, `acquisitionDate`, `usefulLifeMonths`, `depreciationMethod`, `salvageValue` to feed the calculator (don't trust CLIENT.md — auditor wants the FA-register values).
+- **`get_fixed_asset(resourceId: <id>)`** — step 1: pull the asset's actual `cost`, `acquisitionDate`, `usefulLifeMonths`, `depreciationMethod`, `salvageValue` to feed the calculator (use the live FA-register values — auditor wants those, not a cached estimate).
 - **`generate_fa_summary(period_end: <disposalDate>)`** — step 1 alt: pull NBV directly from Jaz's running FA register. If this matches your independent calc, use it as the authoritative NBV. If they diverge: investigate (likely a missing depreciation journal).
 - **`search_capsules(filter: {capsuleType: {eq: 'Asset Disposal'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check. Each disposal is unique; duplicate disposal journals would corrupt the FA register reconciliation.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation — Vehicles', 'Gain on Disposal', 'Loss on Disposal']}})`** — step 3.
@@ -20,7 +20,7 @@
 - **`generate_trial_balance(period_end: <disposalDate>)`** — step 6: verify cost + accumulated depreciation cleared; gain/loss in P&L.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/annual-statutory.md` step 4b (FA disposals discovered during year-end review) or ad-hoc from `practice/references/monthly-close.md` if disposal happens mid-period.
+- Operational context: invoked during year-end close (FA disposals discovered during the year-end review) or ad-hoc during month-end close if a disposal happens mid-period.
 - Sibling: `declining-balance.md` (depreciation up to the disposal date — engine handles this internally via the calculator); `capital-wip.md` (the inverse — adding to FA, not disposing).
 - IFRS / accounting context: IAS 16.67-72 (derecognition); IAS 16.71 (gain on disposal classified as Other Income, NOT revenue); IAS 16.68 (gain/loss = net proceeds − carrying amount).
 
@@ -69,11 +69,11 @@ plan_recipe(
   proceeds: 18000,
   method: 'sl',
   currency: 'SGD',
-  glAsset: <CLIENT.coa_mapping['Vehicles']>,
-  glAccumDep: <CLIENT.coa_mapping['Accumulated Depreciation — Vehicles']>,
-  glGainOnDisposal: <CLIENT.coa_mapping['Gain on Disposal']>,
-  glLossOnDisposal: <CLIENT.coa_mapping['Loss on Disposal']>,
-  bankAccountResourceId: <CLIENT.bank_accounts[i].jaz_resource_id>,
+  glAsset: <resourceId of 'Vehicles' account>,
+  glAccumDep: <resourceId of 'Accumulated Depreciation — Vehicles' account>,
+  glGainOnDisposal: <resourceId of 'Gain on Disposal' account>,
+  glLossOnDisposal: <resourceId of 'Loss on Disposal' account>,
+  bankAccountResourceId: <bank account resourceId>,
   fixedAssetResourceId: <FA UUID>,
   capsuleType: 'Asset Disposal',
   capsuleName: 'Disposal — Delivery Vehicle (Truck-001) — 2026-03-15'
@@ -96,7 +96,7 @@ For gain (proceeds > NBV): engine debits Cash, debits Accum Dep, credits Vehicle
 For each account in `requiredAccounts`:
 - `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: asset → `Non-Current Asset`; accum dep → `Non-Current Asset` contra; **`Gain on Disposal` → `Other Revenue`** (NOT Operating Revenue per IAS 16.71); `Loss on Disposal` → `Other Expense` (or `Operating Expense`, jurisdiction-specific).
 
-Bank account: resolve via `list_bank_accounts()` if `CLIENT.bank_accounts[i].jaz_resource_id` is empty. For scrap (no proceeds): `bankAccountResourceId` is required only if there's a disposal-cost cash-out (e.g., scrap fee paid to disposal vendor) — pass it for safety even if proceeds are zero.
+Bank account: resolve via `list_bank_accounts()` if the bank account resourceId isn't already known. For scrap (no proceeds): `bankAccountResourceId` is required only if there's a disposal-cost cash-out (e.g., scrap fee paid to disposal vendor) — pass it for safety even if proceeds are zero.
 
 ### Step 4 — Execute
 
@@ -192,10 +192,10 @@ Should reflect the disposal in the year's movement: `openingNbv − depreciation
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/annual-statutory.md` step 4b — FA disposals discovered during year-end review trigger this recipe per asset.
-- `practice/references/monthly-close.md` — ad-hoc invocation when a disposal happens mid-period; practice playbook adds the new disposal capsule to the engagement journal.
+- Year-end close — FA disposals discovered during the year-end review trigger this recipe per asset.
+- Month-end close — ad-hoc invocation when a disposal happens mid-period.
 - `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Asset Disposal'}, valueDate: {between: [<FY-start>, <FY-end>]}})` plus per-capsule recompute via `clio calc asset-disposal`. Auditor tests proceeds against bank statements, NBV against FA register.
 - `fa-review.md` job — annual FA register review identifies candidates for disposal (assets fully depreciated, assets no longer in use, assets damaged) → invoke this recipe per identified disposal.
 - Sibling recipe `declining-balance.md` — depreciation up to the disposal date; complete all DRAFT depreciation finalizations BEFORE running this recipe to ensure NBV is correct.

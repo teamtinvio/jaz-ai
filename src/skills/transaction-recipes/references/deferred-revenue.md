@@ -21,7 +21,7 @@
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT recognition journal.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (finalize this period's pre-emitted journal for existing capsules; create a new capsule for any new deferred arrangement starting this period).
+- Operational context: invoked during month-end close (finalize this period's pre-emitted journal for existing capsules; create a new capsule for any new deferred arrangement starting this period).
 - Sibling recipes: `prepaid-amortization.md` (mirror — same engine pattern, opposite direction).
 - IFRS / accounting context: IFRS 15 — revenue recognition over time when control transfers gradually (subscriptions, retainers, multi-period service contracts). The recipe assumes ratable straight-line recognition; for stage-based / milestone billing, use a different pattern (see Variations).
 
@@ -49,14 +49,14 @@ Returns: `{ perPeriodAmount: 2000, recognitionStartDate: '2025-01-31', recogniti
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'deferred-revenue',
   amount: 24000,
   periods: 12,
   startDate: '2025-01-01',
   currency: 'SGD',
-  glDeferredLiability: <CLIENT.coa_mapping['Deferred Revenue']>,
-  glRevenue: <CLIENT.coa_mapping['Subscription Revenue']>,
+  glDeferredLiability: <resourceId of 'Deferred Revenue' account>,
+  glRevenue: <resourceId of 'Subscription Revenue' account>,
   capsuleType: 'Deferred Revenue',
   capsuleName: 'FY2025 Acme Annual License',
   customer: 'Acme Pte Ltd'
@@ -75,7 +75,7 @@ For each account in `requiredAccounts`:
 - `search_accounts(filter: {name: {eq: <accountName>}})`. If empty: halt. Suggested classifications: `Deferred Revenue` → `Current Liability`; `Subscription Revenue` (or whatever revenue line) → `Operating Revenue`.
 
 Customer:
-- `search_contacts(filter: {customer: true, name: {eq: 'Acme Pte Ltd'}})`. If empty: halt and surface "Customer `Acme Pte Ltd` not in Jaz contacts (or not flagged customer: true). Create via `create_contact(customer: true, ...)` or remap CLIENT.md before retry."
+- `search_contacts(filter: {customer: true, name: {eq: 'Acme Pte Ltd'}})`. If empty: halt and surface "Customer `Acme Pte Ltd` not in Jaz contacts (or not flagged customer: true). Create via `create_contact(customer: true, ...)` or remap the customer before retry."
 
 ### Step 4 — Execute
 
@@ -138,9 +138,9 @@ If customer cancels mid-term: invoke ad-hoc adjustment — delete remaining DRAF
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 7 — invoked monthly to finalize this period's pre-emitted recognition journal per existing Deferred Revenue capsule, AND to plan/execute new capsules when a fresh deferred arrangement starts in the period.
-- `practice/references/onboarding.md` — opening trial balance may include opening Deferred Revenue (subscriptions in flight at conversion date). Conversion (`jaz-conversion/SKILL.md § Option 2`) loads the opening balance via clearing account; this recipe then sets up forward recognition only (do NOT model historical periods retroactively).
-- `practice/references/annual-statutory.md` step 1 — final monthly close before year-end-close handles the December recognition journal; year-end-close confirms Deferred Revenue is correctly classified as current vs non-current liability for BS presentation.
+- Month-end close — invoked monthly to finalize this period's pre-emitted recognition journal per existing Deferred Revenue capsule, AND to plan/execute new capsules when a fresh deferred arrangement starts in the period.
+- Data migration — opening trial balance may include opening Deferred Revenue (subscriptions in flight at conversion date). Conversion (`jaz-conversion/SKILL.md § Option 2`) loads the opening balance via clearing account; this recipe then sets up forward recognition only (do NOT model historical periods retroactively).
+- Year-end close — the final monthly close before year-end handles the December recognition journal; year-end close confirms Deferred Revenue is correctly classified as current vs non-current liability for BS presentation.
 - Sibling recipe `prepaid-amortization.md` — same engine pattern from the buyer's perspective.

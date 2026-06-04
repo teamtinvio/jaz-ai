@@ -18,7 +18,7 @@
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT depreciation journal.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 5 (only when an asset uses non-SL method — Jaz native FA handles SL automatically). For SL: `create_fixed_asset` directly via `fixed-assets` tool family; do NOT use this recipe.
+- Operational context: invoked during month-end close (only when an asset uses a non-SL method — Jaz native FA handles SL automatically). For SL: `create_fixed_asset` directly via `fixed-assets` tool family; do NOT use this recipe.
 - Sibling: `asset-disposal.md` for end-of-life de-recognition; `ifrs16-lease.md` (lease engine) which uses SL depreciation via the FA register because ROU is always SL under IFRS 16.
 - IFRS / accounting context: IAS 16.62 — depreciation method should reflect the pattern of consumption of the asset's economic benefits. DDB / 150DB are valid alternatives to SL when usage is front-loaded (vehicles, technology). NOT for buildings, land improvements (always SL).
 
@@ -45,7 +45,7 @@ Returns: `{ totalDepreciation: 45000, schedule: [{period: 1, openingBookValue: 5
 DDB rate formula: `2 / useful-life-years = 40% annual` for 5-year life.
 150DB rate: `1.5 / useful-life-years = 30% annual` for 5-year life.
 
-Save schedule to `workpapers/<period>/depreciation-<asset-id>.json` for the engagement archive (audit will sample-test).
+Save schedule to `workpapers/<period>/depreciation-<asset-id>.json` for the workpaper record (audit will sample-test).
 
 ### Step 2 — Plan the recipe
 
@@ -59,9 +59,9 @@ plan_recipe(
   frequency: 'monthly',
   startDate: '2025-01-01',
   currency: 'SGD',
-  glAsset: <CLIENT.coa_mapping['Vehicles']>,
-  glAccumDep: <CLIENT.coa_mapping['Accumulated Depreciation — Vehicles']>,
-  glDepExpense: <CLIENT.coa_mapping['Depreciation Expense']>,
+  glAsset: <resourceId of 'Vehicles' account>,
+  glAccumDep: <resourceId of 'Accumulated Depreciation — Vehicles' account>,
+  glDepExpense: <resourceId of 'Depreciation Expense' account>,
   capsuleType: 'Depreciation',
   capsuleName: 'DDB Depreciation — 5 years (Delivery Vehicle FY2025)'
 )
@@ -134,10 +134,10 @@ After the FINAL period (month 60):
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 5 — invoked monthly only when an asset uses non-SL. SL depreciation runs through Jaz native FA register automatically (no recipe needed).
-- `practice/references/annual-statutory.md` step 4a — full FY-end depreciation reconciliation: sum 12 monthly journals against `clio calc depreciation --frequency annual` cross-check; auditor will sample-test.
-- `practice/references/onboarding.md` — opening accumulated depreciation loaded via conversion (Conversion Clearing > Accumulated Depreciation account); recipe runs forward from the migration date with `cost: <NBV at migration>` instead of original cost. Useful-life-years should be `remaining life`, not original.
+- Month-end close — invoked monthly only when an asset uses non-SL. SL depreciation runs through Jaz native FA register automatically (no recipe needed).
+- Year-end close — full FY-end depreciation reconciliation: sum 12 monthly journals against `clio calc depreciation --frequency annual` cross-check; auditor will sample-test.
+- Data migration — opening accumulated depreciation loaded via conversion (Conversion Clearing > Accumulated Depreciation account); recipe runs forward from the migration date with `cost: <NBV at migration>` instead of original cost. Useful-life-years should be `remaining life`, not original.
 - Sibling recipe `asset-disposal.md` — end-of-life de-recognition.
 - `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Depreciation'}})` + per-capsule `clio calc depreciation` recompute.

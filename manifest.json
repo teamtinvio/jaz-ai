@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.15.0",
+  "version": "5.16.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -727,54 +727,6 @@
       "description": "Parse rows from a CSV/Excel URL. Returns rows as JSON objects keyed by header (max 500/call, paginatable via offset/limit). Excel response includes availableSheets[] — re-call with sheetIndex if the first sheet is Instructions. Use BEFORE bulk_upsert_* when the user attaches a tabular file."
     },
     {
-      "name": "generate_month_end_blueprint",
-      "description": "Offline. Generate a month-end close checklist with phases, steps, recipe references, and API calls. Returns a structured JobBlueprint."
-    },
-    {
-      "name": "generate_quarter_end_blueprint",
-      "description": "Offline. Generate a quarter-end close checklist. Set incremental=true to skip month-end phases (assumes months are already closed)."
-    },
-    {
-      "name": "generate_year_end_blueprint",
-      "description": "Offline. Generate a year-end close checklist. Set incremental=true to skip quarter/month phases (assumes already closed)."
-    },
-    {
-      "name": "generate_bank_recon_blueprint",
-      "description": "Offline. Generate a bank reconciliation job checklist — match bank statement entries to ledger transactions."
-    },
-    {
-      "name": "generate_gst_vat_blueprint",
-      "description": "Offline. Generate a GST/VAT filing job checklist — verify tax transactions, reconcile GST accounts, prepare F5 return."
-    },
-    {
-      "name": "generate_payment_run_blueprint",
-      "description": "Offline. Generate a payment run job checklist — identify outstanding bills, verify bank details, batch payments."
-    },
-    {
-      "name": "generate_credit_control_blueprint",
-      "description": "Offline. Generate a credit control job checklist — chase overdue invoices, send reminders, escalate aged debt."
-    },
-    {
-      "name": "generate_supplier_recon_blueprint",
-      "description": "Offline. Generate a supplier reconciliation job checklist — match supplier statements to AP ledger."
-    },
-    {
-      "name": "generate_audit_prep_blueprint",
-      "description": "Offline. Generate an audit preparation job checklist — verify completeness, prepare supporting schedules, organize documents."
-    },
-    {
-      "name": "generate_fa_review_blueprint",
-      "description": "Offline. Generate a fixed asset review job checklist — verify asset register, reconcile depreciation, check disposals."
-    },
-    {
-      "name": "generate_document_collection_blueprint",
-      "description": "Offline. Generate a document collection job checklist — identify missing invoices, receipts, and supporting docs for the period."
-    },
-    {
-      "name": "generate_statutory_filing_blueprint",
-      "description": "Offline. Generate a statutory filing job checklist — prepare corporate income tax computation, file returns."
-    },
-    {
       "name": "validate_invoice_draft",
       "description": "Check if an invoice draft is ready to finalize. Returns missing fields, structured validation report, and ready status. Use before finalize_invoice to prevent errors."
     },
@@ -1245,30 +1197,6 @@
     {
       "name": "search_help_center",
       "description": "Search the Jaz help center for how-to articles, feature guides, and accounting concepts. Use this for \"how do I...\" or \"what is...\" questions about Jaz: bank reconciliation, GST/VAT filing, multi-currency, fixed assets, custom fields, integrations, and so on. Returns top matching articles with title, section, content, and source URL."
-    },
-    {
-      "name": "practice_init",
-      "description": "Offline. Scaffold the practitioner workspace at ~/Documents/Jaz Practice (or PRACTICE_HOME env override). Creates clients/, templates/, and a starter PRACTICE.md from the firm name. Idempotent on re-run. Filesystem-only. Run once before practice_onboard_client."
-    },
-    {
-      "name": "practice_list_clients",
-      "description": "Offline. List all clients in the practitioner workspace. Returns slugs and last-active engagement per client. Filesystem-only. Use as a dashboard entry point before practice_load_client."
-    },
-    {
-      "name": "practice_load_client",
-      "description": "Offline. Read a client's CLIENT.md master file. Returns the full record (legal entity, FY, COA mapping notes, banks, recurring accruals, recurring engagements, etc.) plus the list of active engagements. Filesystem-only. Use this to give the agent client context before invoking jaz-jobs blueprints or jaz-recipes recipes."
-    },
-    {
-      "name": "practice_onboard_client",
-      "description": "Offline. Scaffold a new client folder and write the initial CLIENT.md. Captures legal entity, FY end, GST scheme, banks, recurring accruals, recurring engagements. Optionally sets a per-client JAZ_API_KEY override for multi-org agencies. Filesystem-only. After this, call practice_create_engagement for the first period."
-    },
-    {
-      "name": "practice_create_engagement",
-      "description": "Offline. Scaffold a new engagement folder under a client. Creates ENGAGEMENT.md from the type-specific template plus inputs/, workpapers/, deliverables/ subdirs. Filesystem-only. Engagement type drives which jaz-jobs blueprint and jaz-recipes recipes the agent should invoke. period is REQUIRED for monthly-close (YYYY-MM), quarterly-gst (YYYY-QN), and annual-statutory (YYYY) — only onboarding and adhoc accept free-text or omitted period."
-    },
-    {
-      "name": "practice_load_engagement",
-      "description": "Offline. Read an engagement's ENGAGEMENT.md file. Returns scope, status, period, queries, decisions log. Pair with practice_load_client to get full context before driving jaz-jobs / jaz-recipes work."
     }
   ]
 }

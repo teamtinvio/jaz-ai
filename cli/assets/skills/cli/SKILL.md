@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.15.0
+version: 5.16.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -15,7 +15,7 @@ compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 
 # Clio CLI Skill
 
-> **Audience note:** for power users and CI/automation. Most practitioners using Claude Desktop or `jaz-practice` workflows can ignore this skill — the practice MCP tools (`practice_*`) cover the day-to-day flows. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output.
+> **Audience note:** for power users and CI/automation. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output. For day-to-day accounting inside Claude Desktop / Cowork, the MCP tools cover the common flows without dropping to the CLI.
 
 You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 55 command groups, 13 calculators, 12 job blueprints, 274 agent tools. Also fully compatible with Juan Accounting (same API, same endpoints).
 
@@ -38,9 +38,8 @@ You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting pl
 | IFRS transaction recipes (depreciation, leases, loans) | **jaz-recipes** |
 | Month-end close, bank recon, GST filing workflows | **jaz-jobs** |
 | Migration from Xero/QuickBooks/Sage | **jaz-conversion** |
-| Client + engagement workspace (CLIENT.md, ENGAGEMENT.md, engagement types) | **jaz-practice** |
 
-Use **jaz-cli** when running commands. Use **jaz-api** when debugging API errors or understanding field mappings. Practice scaffolding tools (`practice_init`, `practice_onboard_client`, `practice_list_clients`, `practice_load_client`, `practice_create_engagement`, `practice_load_engagement`) live in the MCP server, not the CLI — they are invoked from inside Claude Desktop / Cowork rather than from the terminal.
+Use **jaz-cli** when running commands. Use **jaz-api** when debugging API errors or understanding field mappings.
 
 ## Auth Precedence
 
@@ -368,4 +367,3 @@ See [references/agent-gotchas.md](./references/agent-gotchas.md) for the full li
 - **jaz-recipes** — 16 IFRS-compliant transaction recipes with calculators and capsules
 - **jaz-jobs** — 12 accounting job playbooks (month-end close, bank recon, GST/VAT filing, etc.)
 - **jaz-conversion** — Data migration workflows from Xero, QuickBooks, Sage, MYOB, and Excel
-- **jaz-practice** — Practitioner workspace + engagement-type wrapper (CLIENT.md, ENGAGEMENT.md, onboarding / monthly-close / quarterly-gst / annual-statutory). Practice tools (`practice_init`, `practice_onboard_client`, etc.) live in the MCP surface, not the CLI.

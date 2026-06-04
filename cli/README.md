@@ -3,11 +3,11 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/v/jaz-clio?style=for-the-badge&logo=npm" alt="npm"></a>
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/dm/jaz-clio?style=for-the-badge&label=downloads" alt="npm downloads"></a>
-  <img src="https://img.shields.io/badge/tools-301-blue?style=for-the-badge" alt="301 Tools">
+  <img src="https://img.shields.io/badge/tools-283-blue?style=for-the-badge" alt="283 Tools">
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
-301 tools. 13 financial calculators. 12 job playbooks. 130 API rules. 16 IFRS recipes.
+283 tools. 13 financial calculators. 12 job playbooks. 130 API rules. 16 IFRS recipes.
 
 ```bash
 npm install -g jaz-clio
@@ -19,7 +19,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 
 - [Three Ways In](#three-ways-in) — CLI, MCP, Skills
 - [CLI](#cli) — 55 command groups
-- [MCP Server](#mcp-server) — 301 tools for AI agents
+- [MCP Server](#mcp-server) — 283 tools for AI agents
 - [Skills](#skills) — Teach any AI the Jaz API
 - [Setup](#setup) — Auth, multi-org, automation
 - [Semantic help-center search](#help-center-semantic-search-optional) — Optional OpenAI-backed retrieval
@@ -45,18 +45,15 @@ clio jobs month-end --period 2026-03              # Step-by-step close playbook
 clio magic create --file receipt.pdf              # AI extracts → draft transaction
 clio invoices search --query 'status:unpaid AND $500+'  # Structured per-entity search
 clio invoices search --query 'status:unpaid' --view lean # Compact summary rows (id + key fields), then drill in with get
-clio practice init --firm-name "My Firm"          # Set up a client workspace at ~/Documents/Jaz Practice
-clio practice onboard --name "Acme Pte Ltd" --fy-end 12-31 --gst quarterly
-clio practice create-engagement acme-pte-ltd --type monthly-close --period 2026-03
 ```
 
-55 command groups. 16 report types. 13 calculators. 12 job playbooks. New in v5.2.0: practitioner workspace (`clio practice`). Every command supports `--json`. Run `clio --help` for the full list.
+55 command groups. 16 report types. 13 calculators. 12 job playbooks. Every command supports `--json`. Run `clio --help` for the full list.
 
 ---
 
 ## MCP Server
 
-301 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports. Includes the v5.2.0 `practice_*` tools (init, onboard_client, list_clients, load_client, create_engagement, load_engagement) so an agent in Claude Desktop or Claude Code can scaffold and load client workspaces conversationally.
+283 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports.
 
 **Claude Code:**
 ```bash

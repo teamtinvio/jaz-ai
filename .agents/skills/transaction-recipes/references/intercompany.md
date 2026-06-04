@@ -4,7 +4,7 @@
 
 ## Why no engine
 
-Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity A invoices Entity B; Entity B records Entity A's invoice as a bill). The recipe engine operates within a single org context. Multi-org coordination is the practitioner's responsibility — `practice/references/onboarding.md` and the multi-org auth pattern (`CLIENT.jaz_api_key_override` per client folder) drive the orchestration.
+Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity A invoices Entity B; Entity B records Entity A's invoice as a bill). The recipe engine operates within a single org context. Multi-org coordination is the caller's responsibility — each entity has its own Jaz org and API key, and the agent must switch the active credentials between legs (see Multi-org auth below).
 
 ## Tools, recipes, calculators this recipe uses
 
@@ -20,15 +20,14 @@ Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity
 - **`search_bills(filter: {capsuleResourceId: {eq: <Entity B IC capsule>}})`** — pull all Entity B intercompany bills.
 - **`generate_general_ledger(accountResourceId: <Intercompany Receivable>, period_end: <date>)` / same for Intercompany Payable** — eliminate at consolidation.
 
-### Multi-org auth (CRITICAL)
-- Per `CLIENT.jaz_api_key_override`: each entity has its own Jaz org and API key. Intercompany agent must:
-  1. Run Entity A invoice creation under Entity A's API key (resolved via `practice_load_client('entity-a')`).
-  2. Switch context to Entity B (re-resolve API key via `practice_load_client('entity-b')`).
-  3. Run Entity B bill creation under Entity B's API key.
-- NEVER mix. Cross-org pollution corrupts both entities' books.
+### Multi-org targeting (CRITICAL)
+Each entity is a separate Jaz org. Pin the org **explicitly per call** with `org_id` (from `list_organizations`). NEVER rely on ambient session, `--org` alias, or `JAZ_API_KEY` env state — a wrong "active" org silently posts to the wrong tenant and corrupts both entities' books.
+  1. Verify, then post Entity A: confirm `get_organization(org_id: <Entity A org>)` returns Entity A's legal entity, then create the Entity A invoice with `org_id: <Entity A org>`.
+  2. Verify, then post Entity B: confirm `get_organization(org_id: <Entity B org>)` returns Entity B's legal entity, then create the Entity B bill with `org_id: <Entity B org>`.
+  3. Every leg carries its own explicit `org_id` — never depend on which org was targeted last.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (intercompany leg of monthly close, only for clients with active intercompany arrangements per `CLIENT.intercompany_arrangements[]`).
+- Operational context: invoked during month-end close (intercompany leg of the close, only for entities with active intercompany arrangements).
 - Sibling: `dividend.md` (cross-entity equity distribution — also requires multi-org coordination).
 - IFRS / accounting context: IAS 24 (related-party disclosure); intercompany balances ELIMINATE at consolidation per IFRS 10.B86 (consolidation procedures).
 
@@ -38,9 +37,9 @@ Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity
 
 ### Step 0 — Identify the arrangement
 
-Read `CLIENT.intercompany_arrangements[]` from BOTH entities' CLIENT.md (cross-validation: Entity A's outbound charges should match Entity B's inbound charges). Each arrangement has: `name`, `from_entity`, `to_entity`, `amount`, `frequency`, `gl_revenue` (Entity A side), `gl_expense` (Entity B side), `transfer_pricing_basis`.
+Confirm the intercompany arrangement from BOTH entities' records (cross-validation: Entity A's outbound charges should match Entity B's inbound charges). Each arrangement has: `name`, `from_entity`, `to_entity`, `amount`, `frequency`, `gl_revenue` (Entity A side), `gl_expense` (Entity B side), `transfer_pricing_basis`.
 
-If the two entities' arrangements don't match: halt and surface to practitioner — likely a setup gap or one side wasn't updated when terms changed.
+If the two entities' arrangements don't match: halt and surface it — likely a setup gap or one side wasn't updated when terms changed.
 
 ### Step 1 — Capsules (one per entity)
 
@@ -173,12 +172,12 @@ For consolidation (if the practitioner manages a group): the matched IC balances
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| Step 2 / 3 | API key mix-up — Entity A's invoice posted to Entity B's org | DELETE the wrongly-posted entry immediately. Re-resolve API key via `practice_load_client('correct entity')`. Re-post. THIS IS THE #1 IC ERROR — surface multi-org context to practitioner before each call. |
+| Step 2 / 3 | Wrong-org posting — Entity A's invoice posted to Entity B's org | DELETE the wrongly-posted entry immediately. Re-post with the correct explicit `org_id`, after confirming it via `get_organization(org_id: <entity>)`. THIS IS THE #1 IC ERROR — pass and verify `org_id` on every leg; never rely on which org was active last. |
 | Step 5 | IC Receivable in A ≠ IC Payable in B | Investigate per-transaction: pull both `search_invoices(capsuleResourceId)` and `search_bills(capsuleResourceId)`, line-by-line compare amounts, valueDates, references. Common: one side posted Jan 31, other posted Feb 1 — timing diff that should resolve next period. Or one side posted USD-denominated and the other SGD — currency confusion. |
 | Cross-FX intercompany | Entity A in SGD, Entity B in USD — IC Receivable in A doesn't match USD-equivalent in B | Both sides should agree on the transaction-currency amount (e.g., USD 15,000). Translation to base currency happens at each entity's books separately. Reconciliation at the SOURCE currency level, not base. |
-| Transfer-pricing dispute (IRAS audit) | (process — separate from posting) | IC charges must satisfy arm's-length principle (SG: ITA s34D / OECD TPG). Maintain a transfer-pricing study. Practice playbook should reference `CLIENT.transfer_pricing_documentation`. |
-| Both entities forget to post | (audit risk) | Year-end audit-prep step — auditor reconciles IC balances. Build a quarterly review into the engagement playbook. |
-| Settlement reference mismatch | Bank-recon doesn't match IC payment to bill payment | Use a consistent `IC-PAY-YYYY-MM-XX` reference convention. Document in `practice/references/monthly-close.md` step 7. |
+| Transfer-pricing dispute (IRAS audit) | (process — separate from posting) | IC charges must satisfy arm's-length principle (SG: ITA s34D / OECD TPG). Maintain a transfer-pricing study and keep the supporting documentation on file. |
+| Both entities forget to post | (audit risk) | Year-end audit-prep step — auditor reconciles IC balances. Build a quarterly review into the close routine. |
+| Settlement reference mismatch | Bank-recon doesn't match IC payment to bill payment | Use a consistent `IC-PAY-YYYY-MM-XX` reference convention. Document the convention in your working notes. |
 
 ---
 
@@ -192,10 +191,10 @@ For consolidation (if the practitioner manages a group): the matched IC balances
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 7 — invoked monthly per active IC arrangement in `CLIENT.intercompany_arrangements[]`. Practice playbook orchestrates multi-org context switching (load entity A → post → load entity B → post → reconcile).
-- `practice/references/annual-statutory.md` step 4g — full FY IC reconciliation; auditor sample-tests.
+- Month-end close — invoked monthly per active IC arrangement. Orchestrates multi-org context switching (select entity A → post → select entity B → post → reconcile).
+- Year-end close — full FY IC reconciliation; auditor sample-tests.
 - `audit-prep.md` step 8 — IC balances supporting schedule; auditor independently confirms with the counter-entity.
 - Sibling `dividend.md` — cross-entity equity distribution; same multi-org coordination pattern.
-- `practice/references/onboarding.md` — multi-org practitioner workflow setup; CLIENT.md per entity with `jaz_api_key_override` per client.
+- Data migration — multi-org setup: one Jaz org and API key per entity.

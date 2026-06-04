@@ -1,11 +1,10 @@
 # GST/VAT Filing
 
-> Produce the filing-ready summary + supporting detail for IRAS F5 (SG) or BIR Form 2550Q (PH). Does NOT file — produces the numbers + supporting detail. Driver tool: `generate_gst_vat_blueprint`.
+> Produce the filing-ready summary + supporting detail for IRAS F5 (SG) or BIR Form 2550Q (PH). Does NOT file — produces the numbers + supporting detail. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs gst-vat --period <YYYY-QN>` prints this same phased checklist.)
 
 ## Tools, recipes, calculators this job uses
 
-### MCP tools
-- **`generate_gst_vat_blueprint(period: <YYYY-Q[1-4]>)`** — step 0: emit phased blueprint.
+### Platform tools
 - **`generate_vat_ledger(period_start: <period-start>, period_end: <period-end>)`** — step 1: the canonical tax ledger. Returns input + output tax totals + per-tax-profile breakdown.
 - **`search_tax_profiles(filter: {})`** — step 2 setup verification: confirm all expected tax profiles exist (`SR`, `ZR`, `ES`, `IES`, `OS`, `TX`, `BL`, `OP`, `EP`, `RC` for SG; `VAT-RC`, `VAT-EXP`, `VAT-ZR`, `VAT-EXM`, `VAT-EXC` for PH).
 - **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, limit: 200)`** — step 3 output-tax detail: per-invoice GST cross-check against tax ledger.
@@ -15,17 +14,15 @@
 - **`generate_trial_balance(period_end: <period-end>)`** — step 7 GST account reconciliation: `GST Control` / `Input Tax Recoverable` / `Output Tax Payable` accounts.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/quarterly-gst.md` end-to-end. Practice playbook reads `CLIENT.gst_scheme`, `CLIENT.gst_registration_number`, `CLIENT.country_code`.
+- Org inputs this job needs (confirm with the user when not already on file): the GST scheme, the GST registration number, and the country code (`SG` | `PH`).
 - Sibling jobs: `quarter-end-close.md` Q1 (this job is the canonical Q1 detail), `month-end-close.md` (monthly tax-profile maintenance feeds this).
 - API rules: `jaz-api/SKILL.md` rule 100 (tax-profile scoping), rule 45 (withholding tax codes for PH), rule 98 (WHT codes).
 
 ---
 
-## Step 0 — Emit blueprint
+## Steps
 
-```
-generate_gst_vat_blueprint(period: '2025-Q1')
-```
+Walk steps 1-8 below. (Local CLI: `clio jobs gst-vat --period 2025-Q1` prints the same phased checklist.)
 
 ## Step 1 — Pull the tax ledger
 
@@ -33,7 +30,7 @@ generate_gst_vat_blueprint(period: '2025-Q1')
 generate_vat_ledger(period_start: '2025-01-01', period_end: '2025-03-31')
 ```
 
-Save to `recurring/quarterly/2025-Q1/vat-ledger.json`. Returns:
+Save the quarter's VAT ledger. Returns:
 - `outputTax`: per-tax-profile breakdown of GST collected on sales
 - `inputTax`: per-tax-profile breakdown of GST paid on purchases
 - `netPayable`: outputTax total - claimable inputTax total
@@ -45,7 +42,7 @@ Save to `recurring/quarterly/2025-Q1/vat-ledger.json`. Returns:
 search_tax_profiles(filter: {})
 ```
 
-For SG (CLIENT.country_code: 'SG'), verify all standard profiles exist:
+For SG (country code `SG`), verify all standard profiles exist:
 - `SR` (Standard-rated 9%): sales of taxable goods/services
 - `ZR` (Zero-rated): exports, international services
 - `ES` (Exempt): financial services, sale/lease of residential property
@@ -57,7 +54,7 @@ For SG (CLIENT.country_code: 'SG'), verify all standard profiles exist:
 - `EP` (Exempt purchase)
 - `RC` (Reverse charge): imports of services from overseas suppliers
 
-For PH (CLIENT.country_code: 'PH'):
+For PH (country code `PH`):
 - `VAT-RC`: regular vatable transactions 12%
 - `VAT-EXP`: exempt VAT
 - `VAT-ZR`: zero-rated (exports)
@@ -130,7 +127,7 @@ download_export(exportType: 'analysis-exchange-rate-audit', startDate: '2025-01-
 
 Returns XLSX with FX rates outside expected band for the period. FX invoices use the rate at value date to compute GST in base currency — wrong rate means wrong GST. Investigate flagged rows before filing.
 
-For PH (CLIENT.country_code: 'PH'): also run `download_export(exportType: 'analysis-anomalous-bills', ...)` — BIR audits flag unusual bill patterns; pre-empt.
+For PH (country code `PH`): also run `download_export(exportType: 'analysis-anomalous-bills', ...)` — BIR audits flag unusual bill patterns; pre-empt.
 
 ## Step 7 — GST account reconciliation
 
@@ -167,7 +164,7 @@ Produce the filing summary:
 - Line 19 (VAT Payable/Refundable)
 - Plus per-month 2550M sub-totals
 
-Save filing summary to `recurring/quarterly/2025-Q1/filing-summary.json`. Practitioner files via the appropriate portal (myTax / BIR). This job does NOT auto-file.
+Save the filing summary for the quarter. The user files via the appropriate portal (myTax / BIR). This job does NOT auto-file.
 
 ---
 
@@ -192,13 +189,12 @@ Save filing summary to `recurring/quarterly/2025-Q1/filing-summary.json`. Practi
 - **PH 2550M monthly filings** (in addition to quarterly 2550Q) must be filed within 25 days after each month-end. Quarterly 2550Q reconciles the 3 monthly returns.
 - **Reverse-charge supplies** (SG imported services per GST Act s14): supplier doesn't charge GST; you self-account. Tag with `RC` profile so both output AND input legs post.
 - **Partial-exemption** (mixed taxable + exempt supplies): apportion input tax. Per IRAS Reg 28 — complex; flag to practitioner if `taxProfile: ES` invoices exist.
-- **Audit defense**: keep the per-quarter `vat-ledger.json` + `filing-summary.json` + supporting per-invoice/bill detail in `recurring/quarterly/<period>/`. IRAS audits within 5 years; PH BIR within 3.
+- **Audit defense**: keep the per-quarter VAT ledger + filing summary + supporting per-invoice/bill detail. IRAS audits within 5 years; PH BIR within 3.
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/quarterly-gst.md` — orchestrates this job. CLIENT.md drives gst_scheme + registration_number.
 - `quarter-end-close.md` Q1 — this job is the canonical Q1 detail of quarter-end close.
 - `audit-prep.md` step 9 — annual reconciliation: sum of 4 quarterly filings = annual VAT ledger.
-- `statutory-filing.md` — separate filing flow (Form C-S corporate income tax), not GST.
+- SG Form C-S statutory filing (see the SG Form C-S section in `SKILL.md`) — separate filing flow (corporate income tax), not GST.

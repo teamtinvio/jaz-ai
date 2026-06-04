@@ -14,14 +14,14 @@
 ### Tools (jaz-api / direct)
 - **`search_journals(filter: {tag: <accrual.name>, valueDate: <prior-period>-end})`** — step 1 estimation: pull last period's posted accrual amount when `estimation_method: 'prior_month'`.
 - **`search_journals(filter: {tag: <accrual.name>, valueDate: {between: [<-3 months>, <today>]}})`** — step 1 alt: trailing 3-month average when `estimation_method: 'trailing_3m_avg'`.
-- **`search_contacts(filter: {name: {eq: <vendor>}})`** — step 3: resolve vendor (per `CLIENT.recurring_accruals[i].vendor`).
+- **`search_contacts(filter: {name: {eq: <vendor>}})`** — step 3: resolve the accrual's vendor.
 - **`search_accounts(filter: {name: {in: ['<expense GL>', '<accrued liability GL>']}})`** — step 3: confirm both sides of the journal exist in CoA.
 - **`search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: 'DRAFT'})`** — step 5 monthly: find this period's pre-emitted DRAFT for finalization.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5: finalize this period's accrual + reversal pair.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verification: confirm Accrued Expenses balance and net P&L impact.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 4 PER `CLIENT.recurring_accruals[]` row whose `last_posted < period_end`. Engagement playbook orchestrates the per-row loop and reads `estimation_method`, `gl_account`, `vendor`, `fixed_amount`, `budget_amount` from CLIENT.md.
+- Operational context: invoked during month-end close, once per recurring accrual whose last-posted period precedes the current period end. The close loop supplies the estimation method, GL account, vendor, and fixed/budget amount for each accrual.
 - Sibling recipes: `prepaid-amortization.md` (mirror — paid upfront, recognized over time vs incurred over time, billed later); `employee-accruals.md` (the same engine for leave / 13th month bonuses, but with monthly-only, no reversal needed since those accumulate).
 - IFRS / accounting context: matching principle (IFRS Conceptual Framework). The reversal pattern eliminates double-counting when the actual bill arrives.
 
@@ -31,12 +31,12 @@
 
 ### Step 1 — Compute the per-period amount
 
-Per `CLIENT.recurring_accruals[i].estimation_method`:
+Per the accrual's estimation method:
 
 - **`prior_month`**: pull last period's posted amount via `search_journals(filter: {tag: <accrual.name>, valueDate: <prior-period>-end})`. Use that amount.
 - **`trailing_3m_avg`**: pull last 3 months' posted amounts and average.
-- **`budget`**: read from `CLIENT.recurring_accruals[i].budget_amount`.
-- **`fixed_amount`**: use `CLIENT.recurring_accruals[i].fixed_amount` directly.
+- **`budget`**: use the accrual's budget amount.
+- **`fixed_amount`**: use the accrual's fixed amount directly.
 
 Cross-check with the calculator:
 
@@ -50,14 +50,14 @@ Returns `{ totalAccrued: 3000, schedule: [{accrualDate: '2025-01-31', reversalDa
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'accrued-expense',
   amount: 3000,
   periods: 1,
   startDate: '2025-01-31',
   currency: 'SGD',
-  glExpense: <CLIENT.recurring_accruals[i].gl_account>,
-  glAccruedLiability: <CLIENT.coa_mapping['Accrued Expenses']>,
+  glExpense: <accrual expense account resourceId>,
+  glAccruedLiability: <resourceId of 'Accrued Expenses' account>,
   vendor: 'PowerCo Singapore',
   capsuleType: 'Accrued Expenses',
   capsuleName: 'Electricity Accrual — Jan 2025'
@@ -71,7 +71,7 @@ Returns: `RecipePlan` with `requiredAccounts: [<expense GL>, 'Accrued Expenses']
 ### Step 3 — Resolve dependencies
 
 For both accounts in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty: halt and surface "Accrual references GL account `<accountName>` not in `CLIENT.coa_mapping` / Jaz CoA. Create via `create_account` (suggested classifications: expense → `Operating Expense`; accrued liability → `Current Liability`) or remap CLIENT.md before retry."
+- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty: halt and surface "Accrual references GL account `<accountName>` not in Jaz CoA. Create via `create_account` (suggested classifications: expense → `Operating Expense`; accrued liability → `Current Liability`) or remap the account before retry."
 
 Vendor: confirm via `search_contacts(filter: {name: {eq: <vendor>}})` for tagging on the journal narrative — but this recipe does NOT require a contact for posting (no AR/AP).
 
@@ -121,7 +121,7 @@ When the actual quarterly bill arrives (typically Mar 31, $9,000 total): post a 
 | `bulk_finalize_drafts` | 422 `journal_unbalanced` | Engine-emitted journals are always balanced. If you see this, the source schema changed — escalate (do not retry). |
 | Verification | Net P&L impact stuck after reversal posts | Likely the reversal hasn't been finalized yet. `search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: <reversal-date>, status: 'DRAFT'})` — if non-empty, finalize. |
 | Verification | Accrued Expenses balance nonzero after the actual bill posts AND all reversals run | Either the bill amount diverged from the accrual estimate (post a true-up journal: Dr/Cr `<expense GL>` for the difference) OR a reversal was missed. Audit via `generate_general_ledger(accountResourceId: 'Accrued Expenses', period_end: <today>)`. |
-| Practitioner posts the actual bill against `Accrued Expenses` instead of `<expense GL>` | (process error) | If they do this, the reversal AND the bill both touch `Accrued Expenses` — net to zero on liability, but expense gets double-recognized. Reverse the bill, re-post against `<expense GL>`. Document in `ENGAGEMENT.risk_areas`. |
+| Actual bill posted against `Accrued Expenses` instead of `<expense GL>` | (process error) | The reversal AND the bill both touch `Accrued Expenses` — net to zero on liability, but expense gets double-recognized. Reverse the bill, re-post against `<expense GL>`. Note the risk in your working notes. |
 
 ---
 
@@ -135,9 +135,9 @@ When the actual quarterly bill arrives (typically Mar 31, $9,000 total): post a 
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 4 — invoked PER `CLIENT.recurring_accruals[]` row whose `last_posted < period_end`. Practice playbook reads `estimation_method`, `gl_account`, `vendor`, `fixed_amount`, `budget_amount` per row.
-- `practice/references/quarterly-gst.md` step 4 — same per-row loop, plus quarter-specific accruals (e.g. ECL top-up if AR aging shifted, employee bonus accruals if contractually due quarterly).
-- `practice/references/annual-statutory.md` step 4a — full FY-end accrual sweep + employee bonus accrual + dividend declarations.
-- `practice/references/onboarding.md` — opening balance load may include opening accrued liabilities; conversion handles those, this recipe runs forward only from the migration date.
+- Month-end close — invoked once per recurring accrual whose last-posted period precedes the current period end.
+- GST/VAT filing cycle — same per-accrual loop, plus quarter-specific accruals (e.g. ECL top-up if AR aging shifted, employee bonus accruals if contractually due quarterly).
+- Year-end close — full FY-end accrual sweep + employee bonus accrual + dividend declarations.
+- Data migration — opening balance load may include opening accrued liabilities; conversion handles those, this recipe runs forward only from the migration date.

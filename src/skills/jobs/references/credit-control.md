@@ -1,11 +1,10 @@
 # Credit Control / AR Chase
 
-> Systematically chase overdue customer invoices, assess collection risk, identify bad debt. Driver tool: `generate_credit_control_blueprint`.
+> Systematically chase overdue customer invoices, assess collection risk, identify bad debt. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs credit-control` prints this same phased checklist.)
 
 ## Tools, recipes, calculators this job uses
 
-### MCP tools
-- **`generate_credit_control_blueprint(period: <YYYY-MM>, overdueDays: <n>, currency: <base>)`** — step 0: emit blueprint.
+### Platform tools
 - **`generate_aged_ar(period_end: <date>)`** — step 1: AR aging report with bucket breakdown.
 - **`search_invoices(filter: {status: {eq: 'UNPAID'}, dueDate: {lt: <date>}, contactResourceId: <customer>}, sort: 'dueDate:asc', limit: 200)`** — step 2: per-customer overdue detail. Paginate.
 - **`get_contact(resourceId: <customer id>)`** — step 2: pull contact info (email, phone, primary contact).
@@ -16,17 +15,15 @@
 - **`download_export(exportType: 'analysis-receivables-customer-risk', startDate, endDate)`** — step 8: pre-empt audit by surfacing high-risk customers.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 4 (AR aging review + flag overdue) and ad-hoc whenever overdue threshold is hit.
+- Run inside the month-end close (AR aging review + flag overdue) and ad-hoc whenever the overdue threshold is hit.
 - Sibling jobs: `bank-recon.md` (newly-cleared customer payments shift the aging), `audit-prep.md` step 6 (year-end AR aging review).
-- Recipes: `bad-debt-provision.md` (engine `ecl`) for collective provision; path A/B for specific write-offs.
+- Recipes: `ecl` for the collective provision; path A/B for specific write-offs. See the transaction-recipes skill.
 
 ---
 
-## Step 0 — Emit blueprint
+## Steps
 
-```
-generate_credit_control_blueprint(period: '2025-01', overdueDays: 30, currency: <CLIENT.base_currency>)
-```
+Walk steps 1-8 below. (Local CLI: `clio jobs credit-control --overdue-days 30` prints the same phased checklist.)
 
 ## Step 1 — AR aging snapshot
 
@@ -34,11 +31,11 @@ generate_credit_control_blueprint(period: '2025-01', overdueDays: 30, currency: 
 generate_aged_ar(period_end: '2025-01-31')
 ```
 
-Save to `recurring/monthly/<period>/credit-control/aging.json`. Returns aging buckets (current, 30d, 60d, 90d, 120d+) per customer. Total per bucket informs collection priority.
+Save the AR aging snapshot. Returns aging buckets (current, 30d, 60d, 90d, 120d+) per customer. Total per bucket informs collection priority.
 
 ## Step 2 — Identify overdue invoices per customer
 
-For each customer with `60d` or `90d` or `120d+` balance > `CLIENT.materiality_threshold`:
+For each customer with `60d` or `90d` or `120d+` balance > the materiality threshold:
 
 ```
 search_invoices(
@@ -69,7 +66,7 @@ Returns: `{ cadence, outlierFlags[], severitySummary, patternDivergenceFlags, ou
 - **Severity** (`LOW` / `MEDIUM` / `HIGH`): customer-specific risk index.
 - **Pattern divergence**: a customer who's never been overdue is now — escalate.
 
-Save to `recurring/monthly/<period>/credit-control/contact-signals-<customer-slug>.json`.
+Keep the contact-signals output per customer.
 
 ## Step 4 — Categorize for action
 
@@ -89,7 +86,7 @@ The contact-signals `outstandingSnapshot.recoverabilityScore` (0-100) is a usefu
 
 ## Step 5 — Document chase activities
 
-For each customer chased: log in `recurring/monthly/<period>/credit-control/chase-log.md` with:
+For each customer chased: keep a chase log with:
 - Date contacted
 - Method (email / phone / letter)
 - Person spoken to
@@ -100,7 +97,7 @@ Capsule alternative: `create_capsule(capsuleType: 'Bad Debt Write-off', title: '
 
 ## Step 6 — Specific write-off (stage-3 impairment)
 
-For customers where objective evidence of impairment exists (formal insolvency, repeated dishonor, ceased trading): write off the bills per `bad-debt-provision.md` step 6.
+For customers where objective evidence of impairment exists (formal insolvency, repeated dishonor, ceased trading): write off the bills (specific stage-3 impairment) via one of the two paths below.
 
 **Path A — credit note** (preferred for paper trail):
 ```
@@ -140,13 +137,13 @@ Future-receivable reversal: if the customer eventually pays after write-off (rar
 
 ## Step 7 — ECL collective top-up (if material aging shift)
 
-If the AR aging shifted materially this period (e.g., $50K moved from current to 90d+): invoke `bad-debt-provision.md` recipe for the collective top-up.
+If the AR aging shifted materially this period (e.g., $50K moved from current to 90d+): invoke the `ecl` recipe for the collective top-up.
 
 ```
-clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <CLIENT.ecl_loss_rate_matrix> --existing-provision <TB Allowance balance> --json
+clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <org ECL loss-rate matrix> --existing-provision <TB Allowance balance> --json
 ```
 
-If `topUpRequired > CLIENT.materiality_threshold`:
+If `topUpRequired > materiality threshold`:
 ```
 plan_recipe(recipe: 'ecl', ..., capsuleResourceId: <credit-control capsule OR new ECL Provision capsule>)
 execute_recipe(...)
@@ -188,9 +185,9 @@ Returns XLSX with high-risk customer flags (rising aging trends, recently-defaul
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 4 — AR aging review + chase activity log.
+- `month-end-close.md` — AR aging review + chase activity log inside the period close.
 - `quarter-end-close.md` Q2 — formal ECL provision review (collective).
 - `audit-prep.md` step 6 — year-end AR aging; specific impairments documented via path A/B with capsules.
-- Recipes: `bad-debt-provision.md` (engine `ecl`).
+- Recipes: `ecl`. See the transaction-recipes skill.

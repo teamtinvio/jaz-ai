@@ -20,7 +20,7 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Calculator (cross-check, no API key needed)
-- **`clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <period-end> --currency <code> --base-currency <CLIENT.base_currency> --json`** — independent gain/loss computation. Returns `{ gainLoss, baseCurrencyValueAtClose, classification: 'gain' | 'loss' }`. Use this to verify what Jaz auto-posted, not to feed `execute_recipe`.
+- **`clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <period-end> --currency <code> --base-currency <base currency> --json`** — independent gain/loss computation. Returns `{ gainLoss, baseCurrencyValueAtClose, classification: 'gain' | 'loss' }`. Use this to verify what Jaz auto-posted, not to feed `execute_recipe`.
 
 ### Tools (jaz-api / direct) — verification only
 - **`generate_general_ledger(period_end: <date>, accountResourceId: <FX Unrealized Gain | Loss>)`** — pull what Jaz auto-posted to the FX accounts during the period.
@@ -34,7 +34,7 @@
 - ~~`execute_recipe(recipe: 'fx-reval', ...)`~~ — **double-posts. Never invoke in a production org.**
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 6 only as a VERIFICATION step (cross-check Jaz's auto-posted reval against an independent calculation; surface variance to practitioner). Same in `quarterly-gst.md` and `annual-statutory.md`.
+- Operational context: invoked during month-end close only as a VERIFICATION step (cross-check Jaz's auto-posted reval against an independent calculation; surface any variance). Same during the GST/VAT filing cycle and year-end close.
 - IFRS / accounting context: IAS 21.23 (closing-rate translation of monetary items); IAS 21.16 (non-monetary items stay at historical rate). Jaz implements IAS 21.23 automatically.
 
 ---
@@ -91,7 +91,7 @@ Returns `{ gainLoss, baseCurrencyValueAtClose }`. This is what the FX gain/loss 
 
 ### Step 4 — Reconcile expected vs actual
 
-Sum your independent gain/loss across all foreign balances. Compare against the FX gain/loss totals from step 1. They should agree within `CLIENT.materiality_threshold`.
+Sum your independent gain/loss across all foreign balances. Compare against the FX gain/loss totals from step 1. They should agree within the entity's materiality threshold.
 
 If they don't agree:
 - **Likely cause 1:** Jaz used a different `book rate` than your independent calc assumed. Settlement-realized FX (when an FX invoice/bill was actually paid in the period) shifts the book rate forward.
@@ -123,7 +123,7 @@ This file feeds `audit-prep.md` step 8 supporting schedules. Auditors love indep
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| Independent calc disagrees with Jaz | Variance > `CLIENT.materiality_threshold` | Investigate per "Likely causes" in step 4. Common false positive: book rate drift after a settlement event mid-period. Re-run with the post-settlement book rate. |
+| Independent calc disagrees with Jaz | Variance > the entity's materiality threshold | Investigate per "Likely causes" in step 4. Common false positive: book rate drift after a settlement event mid-period. Re-run with the post-settlement book rate. |
 | `list_currency_rates` returns empty for `period_end` | No closing rate set | Practitioner must `add_currency_rate(...)` for the period-end. Without it, Jaz can't translate either — this is also why your variance is suspect (Jaz may have used the most recent rate before period-end as a fallback, not the actual closing rate). |
 | Practitioner asks to post a manual reval anyway | (process error) | Halt and explain: Jaz already posted. Manual posting will double-count. If they insist there's a real correction needed, route through a manual journal against `FX Unrealized Gain/Loss` with a clear narrative — NOT through `execute_recipe`. |
 
@@ -137,9 +137,9 @@ If you genuinely need to know whether auto-FX is enabled for a specific org: che
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 6 — VERIFICATION ONLY. Confirm Jaz's auto-posted FX gain/loss matches independent calc; surface variance only.
-- `practice/references/quarterly-gst.md` step 6 — same.
-- `practice/references/annual-statutory.md` step 4c — FY-end FX verification feeds audit-prep step 8 supporting schedules; auditors want the independent recomputation alongside Jaz's auto-posted journals.
+- Month-end close — VERIFICATION ONLY. Confirm Jaz's auto-posted FX gain/loss matches independent calc; surface variance only.
+- GST/VAT filing cycle — same.
+- Year-end close — FY-end FX verification feeds audit-prep step 8 supporting schedules; auditors want the independent recomputation alongside Jaz's auto-posted journals.
 - `audit-prep.md` step 8 — receives the verification file as a supporting schedule.

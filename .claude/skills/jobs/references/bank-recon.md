@@ -1,11 +1,10 @@
 # Bank Reconciliation
 
-> Clear unreconciled bank statement entries by matching, creating, or flagging. Highest-leverage book-accuracy job in Jaz — clean cash means everything else has a fighting chance. Driver tool: `generate_bank_recon_blueprint`.
+> Clear unreconciled bank statement entries by matching, creating, or flagging. Highest-leverage book-accuracy job in Jaz — clean cash means everything else has a fighting chance. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs bank-recon` prints this same phased checklist.)
 
 ## Tools, recipes, calculators this job uses
 
-### MCP tools — discovery + auto-match
-- **`generate_bank_recon_blueprint(period: <YYYY-MM>, currency: <base>)`** — step 0: emit phased recon checklist.
+### Platform tools — discovery + auto-match
 - **`list_bank_accounts()`** — step 1: pull all bank-type CoA accounts (per `jaz-api/SKILL.md` rule 18: GET `/bank-accounts` returns flat array `[{...}]`, NOT the standard paginated `{ data, totalElements, totalPages }` shape — normalize before consuming).
 - **`search_accounts(filter: {accountType: {eq: 'Bank Accounts'}})`** — step 1 alternative: same data via standard CoA-search envelope if downstream wants pagination.
 - **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', valueDateRange: {from, to}, limit: 200, sort: 'valueDate:asc')`** — step 2: per-account work queue.
@@ -13,7 +12,7 @@
 - **`view_auto_reconciliation(bankAccountResourceId: <id>, recommendationType: 'MAGIC_MATCH' | 'MAGIC_RECONCILE_WITH_CASH_TRANSFER' | 'MAGIC_RECONCILE_WITH_BANK_RULE' | 'MAGIC_QUICK_RECONCILE' | 'MAGIC_RECONCILE_WITH_CASH_IN_OUT', autoCommitMaxAmount?: <number>)`** — step 4: READ-ONLY auto-match suggestions. Returns **execution-ready `suggestions[]`** — each carries `recommendedTool`, `execute` (ready-to-pass args), `confidenceTier`, and `autoCommitEligible`. This is the entry point for the auto-match decision gate (step 4a). `MAGIC_RECONCILE_WITH_CASH_IN_OUT` returns Learned-Predictions. Does NOT write. NOTE: 500 quirk on high-volume accounts → degrades to `{degraded:true}`; scope by period or fall back to the cascade matcher (see error table).
 - **`search_cashflow_transactions(filter: {organizationAccountResourceId: <bank-id>, totalAmount: {eq: <amt>}, valueDate: {between: [<-3d>, <+3d>]}})`** — step 5 manual match: search book-side transactions for the same amount within ±3 day window.
 
-### MCP tools — execute reconciliation (NOT idempotent — see error table)
+### Platform tools — execute reconciliation (NOT idempotent — see error table)
 **Match to EXISTING (preferred — no duplicates):**
 - **`reconcile_with_payments(bankStatementEntryResourceId, businessTransactionPayments: [{cashflowTransactionResourceId, transactionAmount}], matchedPayments?, matchedBatchPayments?, adjustment?)`** — **the primary match path.** Match a bank entry to an EXISTING open bill/invoice/payment; creates the payment AND reconciles in one call (no `pay_bill`/`pay_invoice` first). FX auto-resolved server-side — pass no rate. Sync.
 - **`reconcile_magic_match(bankAccountResourceId, entries: [{workflowType:'MAGIC_MATCH', bankStatementEntryResourceId, matchedBusinessTransactions}])`** — bulk-accept MAGIC_MATCH suggestions (max 500). Returns `{reconciled[], failed[]}` — a non-empty `failed[]` is a partial success; loop on it.
@@ -29,12 +28,12 @@
 - **`reconcile_manual_journal(...)`** — bank entry to a manual journal.
 - **`reconcile_cash_transfer(...)`** — inter-account transfer.
 
-### MCP tools — create missing transactions
+### Platform tools — create missing transactions
 - **`mcp magic create --file <pdf>` / `create_business_transaction_from_attachment(...)`** — step 6 path B: OCR + autofill bill or invoice from receipt PDF/JPG.
 - **`create_cash_in_entry(...)` / `create_cash_out_entry(...)`** — step 6 path C: bank fees, interest, FX charges that have no source document.
 - **`create_bank_rule(...)`** — preventive: build a rule for any recurring pattern you handled this run (subscription, rent, utility) so it auto-applies next time.
 
-### MCP tools — verification
+### Platform tools — verification
 - **`generate_bank_recon_summary(period_end, accountResourceId)`** — step 7: per-account formal recon statement.
 - **`generate_bank_recon_details(period_end, accountResourceId)`** — step 7: line-level recon detail for audit pack.
 - **`generate_bank_balance_summary(period_end)`** — step 8: book balance vs bank statement balance per account.
@@ -43,17 +42,15 @@
 - **`clio jobs bank-recon match --input <records.json> --tolerance 0.01 --date-window 14 --max-group 5 --json`** — the 5-phase cascade matcher (Phase 1 exact 1:1 hash join, Phase 2 fuzzy 1:1 greedy with weighted scoring, Phase 3 N:1, Phase 4 1:N, Phase 5 N:M). Returns matches sorted by confidence — feed each into the appropriate `reconcile_*` tool. See `bank-match.md` for the full algorithm.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 3 (mandatory pre-close gate). Practice playbook reads `CLIENT.bank_accounts[]` for the per-account loop.
-- Sibling job: `bank-match.md` (the cascade matcher algorithm + scoring weights). Practitioner-facing recon step always invokes `bank-match` for any account with > ~10 unreconciled items.
+- Invoked by `month-end-close.md` step 3 (mandatory pre-close gate) — loop over each of the org's bank accounts.
+- Sibling job: `bank-match.md` (the cascade matcher algorithm + scoring weights). Always run the cascade matcher for any account with > ~10 unreconciled items.
 - API rules: `jaz-api/SKILL.md` rules 18 (bank-accounts envelope), 26 (cash entries `accountResourceId` shape), 50a (search query DSL), 124 (recon NOT idempotent).
 
 ---
 
-## Step 0 — Emit blueprint
+## Steps
 
-```
-generate_bank_recon_blueprint(period: '2025-01', currency: <CLIENT.base_currency>)
-```
+Walk steps 1-8 below. (Local CLI: `clio jobs bank-recon --period 2025-01` prints the same phased checklist.)
 
 ## Step 1 — Discover bank accounts
 
@@ -93,7 +90,7 @@ For accounts with > ~10 unreconciled rows, use the cascade matcher first:
 
 ```
 clio jobs bank-recon match \
-  --input recurring/monthly/<period>/bank-records-<account-name>.json \
+  --input <bank-records-for-account>.json \
   --tolerance 0.01 \
   --date-window 14 \
   --max-group 5 \
@@ -199,7 +196,7 @@ create_bank_rule(
 ```
 Next month's same charge auto-reconciles via `apply_bank_rule`.
 
-**Path D — flag for investigation:** if no match and no source document, surface to practitioner with the `extContactName + description` and the `netAmount`. Common: personal transactions, refunds, intercompany unrecorded, bank-feed errors. Document in `ENGAGEMENT.risk_areas`.
+**Path D — flag for investigation:** if no match and no source document, surface to the user with the `extContactName + description` and the `netAmount`. Common: personal transactions, refunds, intercompany unrecorded, bank-feed errors. Record the unresolved item so it carries forward.
 
 ## Step 7 — Verify per account
 
@@ -214,7 +211,7 @@ generate_bank_recon_summary(period_end: '2025-01-31', accountResourceId: B.resou
 generate_bank_recon_details(period_end: '2025-01-31', accountResourceId: B.resourceId)
 ```
 
-Save both to `recurring/monthly/<period>/bank-recon-<account-name>.{json,details.json}`. Audit-prep step 7 will require these files.
+Keep both the summary and the line-level detail per account — audit-prep step 7 will require them.
 
 ## Step 8 — Cross-account verify
 
@@ -243,7 +240,7 @@ Per account: `bookBalance == bankStatementBalance ± documentedTimingDifference`
 | `reconcile_invoice_receipt` | 422 `amount_mismatch` | Bank amount ≠ invoice balance. Either partial payment (post via `create_invoice_payment` with partial amount, then reconcile), or wrong match (revisit step 4/5). |
 | `apply_bank_rule` | 422 `rule_action_unsupported` | Rule's configured action doesn't match the bank entry shape (e.g., rule expects positive amount, entry is negative). Edit the rule via `update_bank_rule`. |
 | `create_cash_out_entry` | 422 `lock_date_violated` | `valueDate` in locked period. Lift lock via `update_account` lockDate, post, re-lock. |
-| Step 7 `unreconciledCount > 0` after step 6 | (residual misses) | Surface to practitioner with categorized residual ("3 bank charges to expense via path C, 1 unidentified deposit pending client query"). Document in `ENGAGEMENT.risk_areas`. Do NOT progress to monthly-close step 4 with open items. |
+| Step 7 `unreconciledCount > 0` after step 6 | (residual misses) | Surface to the user with categorized residual ("3 bank charges to expense via path C, 1 unidentified deposit pending client query"). Record the residuals. Do NOT progress the month-end close with open items. |
 
 ---
 
@@ -256,8 +253,9 @@ Per account: `bookBalance == bankStatementBalance ± documentedTimingDifference`
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 3 — invoked for every bank account in `CLIENT.bank_accounts[]`. Practice playbook owns the per-account orchestration.
-- `practice/references/quarterly-gst.md` step 3 — same recon job, scoped to the quarter; F5 Box-1 cash receipts must reconcile against bank cash-in totals.
-- `practice/references/annual-statutory.md` step 3 — final pre-FYE recon. Output feeds into `audit-prep.md` step 7 (NON-NEGOTIABLE deliverable: `unreconciledCount == 0` per account).
+- `month-end-close.md` step 3 — invoked for every bank account as a mandatory pre-close gate.
+- `quarter-end-close.md` — same recon job scoped to the quarter; F5 Box-1 cash receipts must reconcile against bank cash-in totals.
+- `audit-prep.md` step 7 — the final pre-FYE recon output feeds the audit pack (NON-NEGOTIABLE deliverable: `unreconciledCount == 0` per account).
+- `bank-match.md` — the cascade matcher algorithm.

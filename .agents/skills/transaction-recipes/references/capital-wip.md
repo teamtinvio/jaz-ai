@@ -22,7 +22,7 @@ CWIP costs accumulate as construction progresses — multiple bills from contrac
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify CWIP balance is zero post-transfer; FA balance reflects new asset.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (per active capital project per `CLIENT.capital_projects[]`); from `practice/references/annual-statutory.md` step 4h (year-end review of CWIP balances — IAS 16.20 capitalization criteria; flag any CWIP not capitalized for > 12 months as potential expense).
+- Operational context: invoked during month-end close (per active capital project); during year-end close (year-end review of CWIP balances — IAS 16.20 capitalization criteria; flag any CWIP not capitalized for > 12 months as potential expense).
 - Sibling: `bank-loan.md` (financing the construction often ties together — the loan funds the CWIP); `declining-balance.md` / `asset-disposal.md` for post-capitalization lifecycle.
 - IFRS / accounting context: IAS 16.16-22 (cost components includable in PP&E during construction); IAS 16.23 (capitalization stops when asset is in location and condition for intended use); IAS 23 (borrowing costs eligible for capitalization on qualifying assets).
 
@@ -95,7 +95,7 @@ At each month-end during construction:
 generate_general_ledger(accountResourceId: <CWIP GL>, period_start: <project start>, period_end: <month-end>)
 ```
 
-Confirm the accumulated CWIP balance matches expectations vs `CLIENT.capital_projects[i].estimated_cost`. Variance > 10% → flag to practitioner for budget review.
+Confirm the accumulated CWIP balance matches expectations vs the project's estimated cost. Variance > 10% → flag for budget review.
 
 ```
 search_bills(filter: {capsuleResourceId: {eq: <project capsule id>}, status: {ne: 'PAID'}})
@@ -157,7 +157,7 @@ create_fixed_asset(
 )
 ```
 
-`usefulLifeMonths` per `CLIENT.capex_useful_life_matrix[asset-type]` (or practitioner judgment). Common defaults: office renovations 60 months, computer hardware 36 months, motor vehicles 60 months, buildings 240 months.
+`usefulLifeMonths` per the entity's capex useful-life policy for the asset type (or your judgment). Common defaults: office renovations 60 months, computer hardware 36 months, motor vehicles 60 months, buildings 240 months.
 
 From this point forward, Jaz auto-posts SL depreciation each month-end. NO manual depreciation journal required.
 
@@ -179,7 +179,7 @@ Should show `cost: <final CWIP balance>, accumulatedDepreciation: 0, NBV: <cost>
 
 Close the project capsule (or keep ACTIVE for traceability — the FA still references it):
 ```
-// Capsule has no `status` field — record closure manually via `update_capsule(title: '<original> [CLOSED]')` or in ENGAGEMENT.md notes
+// Capsule has no `status` field — record closure manually via `update_capsule(title: '<original> [CLOSED]')` or in your working notes
 ```
 
 ---
@@ -210,10 +210,10 @@ Close the project capsule (or keep ACTIVE for traceability — the FA still refe
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 7 — review active CWIP per project; flag any pending completion.
-- `practice/references/annual-statutory.md` step 4h — year-end review: any CWIP balance > 12 months without completion should be questioned (auditor will). Either complete the transfer, or impair if abandoned.
+- Month-end close — review active CWIP per project; flag any pending completion.
+- Year-end close — any CWIP balance > 12 months without completion should be questioned (auditor will). Either complete the transfer, or impair if abandoned.
 - `audit-prep.md` step 8 — supporting schedule: per project capsule, all bills + transfer journal + FA registration. Auditor traces from individual bills → CWIP balance → FA cost.
 - `bank-loan.md` — if construction is loan-financed, pair this recipe with the loan recipe; capitalize interest during construction per IAS 23.
 - `asset-disposal.md` — when the eventual FA is later disposed (typically many years after construction).

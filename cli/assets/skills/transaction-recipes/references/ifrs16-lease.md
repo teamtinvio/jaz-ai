@@ -21,7 +21,7 @@
 - **`generate_fa_summary(period_end: <date>)`** — step 5 verify Jaz auto-posted ROU depreciation.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 7 (verify scheduler / pre-emitted unwinding journal + verify Jaz FA posted ROU depreciation), `jobs/references/year-end-close.md` Y6 (current/non-current reclassification of the next 12 months' principal portion).
+- Operational context: invoked during month-end close (verify scheduler / pre-emitted unwinding journal + verify Jaz FA posted ROU depreciation) and at `jobs/references/year-end-close.md` Y6 (current/non-current reclassification of the next 12 months' principal portion).
 - Sibling recipes: `bank-loan.md` (similar amortization pattern but no FA dimension); `hire-purchase.md` (shares the lease engine but with different useful-life-months per asset).
 - IFRS / accounting context: IFRS 16 paragraphs 22-25 (recognition), 36 (subsequent measurement), 47 (lease liability re-measurement).
 
@@ -43,23 +43,23 @@ If a result returns: halt and surface "Lease capsule `<name>` already exists. Re
 clio calc lease --payment 5000 --term 36 --rate 5 --start-date 2025-01-01 --currency SGD --json
 ```
 
-Returns: `{ presentValue: 167287.43, totalInterest: 12712.57, schedule: [{period, openingLiability, interest, principal, payment, closingLiability}, ...36] }`. Save to `workpapers/<period>/lease-amortization.json` for the engagement archive.
+Returns: `{ presentValue: 167287.43, totalInterest: 12712.57, schedule: [{period, openingLiability, interest, principal, payment, closingLiability}, ...36] }`. Save to `workpapers/<period>/lease-amortization.json` for the workpaper record.
 
 ### Step 2 — Plan the recipe
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'lease',
   monthlyPayment: 5000,
   termMonths: 36,
   annualRate: 5,
   startDate: '2025-01-01',
   currency: 'SGD',
-  glRouAsset: <CLIENT.coa_mapping['Right-of-Use Asset']>,
-  glLeaseLiability: <CLIENT.coa_mapping['Lease Liability']>,
-  glInterestExpense: <CLIENT.coa_mapping['Interest Expense — Leases']>,
-  bankAccountResourceId: <CLIENT.bank_accounts[i].jaz_resource_id>,
+  glRouAsset: <resourceId of 'Right-of-Use Asset' account>,
+  glLeaseLiability: <resourceId of 'Lease Liability' account>,
+  glInterestExpense: <resourceId of 'Interest Expense — Leases' account>,
+  bankAccountResourceId: <bank account resourceId>,
   capsuleType: 'Lease',
   capsuleName: 'Office Lease — Marina One — 36 months',
   lessor: 'Marina One Holdings'
@@ -82,7 +82,7 @@ Lessor:
 - `search_contacts(filter: {supplier: true, name: {eq: 'Marina One Holdings'}})`. If empty: `create_contact(supplier: true, ...)`.
 
 Bank account:
-- Resolve `bankAccountResourceId` via `list_bank_accounts()` if `CLIENT.bank_accounts[i].jaz_resource_id` is empty.
+- Resolve `bankAccountResourceId` via `list_bank_accounts()` if the bank account resourceId isn't already known.
 
 ### Step 4 — Execute
 
@@ -90,7 +90,7 @@ Bank account:
 execute_recipe(recipe: 'lease', ...same args..., accountMap: <resolved>, contactName: <resolved>, bankAccountName: <resolved>)
 ```
 
-Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId | 'skipped'}], summary: {total: 38, created: 37, skipped: 1, notes: ['Step 2 (fixed-asset): Register ROU asset in Jaz FA module — see practice playbook step 4 manual action.']} }`. The recipe creates **37 entries upfront** (1 initial journal + 36 unwinding journals). All journals attach to the same capsule.
+Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId | 'skipped'}], summary: {total: 38, created: 37, skipped: 1, notes: ['Step 2 (fixed-asset): Register ROU asset in Jaz FA module — see step 4 manual action below.']} }`. The recipe creates **37 entries upfront** (1 initial journal + 36 unwinding journals). All journals attach to the same capsule.
 
 **Manual step required (engine cannot auto-create):**
 
@@ -168,10 +168,10 @@ After the FINAL period (month 36):
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 7 — invoked monthly to finalize this period's pre-emitted unwinding DRAFT (5a) + verify Jaz auto-posted ROU depreciation (5b).
+- Month-end close — invoked monthly to finalize this period's pre-emitted unwinding DRAFT (5a) + verify Jaz auto-posted ROU depreciation (5b).
 - `jobs/references/year-end-close.md` Y6 — current/non-current reclassification (manual annual journal) + auditor sample-test of the lease schedule via `clio calc lease`.
-- `practice/references/onboarding.md` — opening lease balances loaded via conversion (`jaz-conversion/SKILL.md § Option 2` with the Conversion Clearing > Lease account); recipe runs forward only from migration date.
+- Data migration — opening lease balances loaded via conversion (`jaz-conversion/SKILL.md § Option 2` with the Conversion Clearing > Lease account); recipe runs forward only from migration date.
 - `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Lease'}})` + per-capsule `clio calc lease` recompute. Auditor reconciles to TB Lease Liability + ROU Asset NBV.
 - Sibling recipe `hire-purchase.md` — same engine, different useful-life parameter.

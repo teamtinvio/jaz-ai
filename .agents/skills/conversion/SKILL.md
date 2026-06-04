@@ -1,16 +1,14 @@
 ---
 name: jaz-conversion
-version: 5.15.0
+version: 5.16.0
 description: >-
   Use this skill when migrating accounting data into Jaz — importing from Xero,
   QuickBooks, Sage, MYOB, or Excel exports. Covers the full conversion pipeline:
   analyzing source files, mapping Chart of Accounts, contacts, tax profiles, and
   items, creating clearing accounts, running TTB (trial transaction balance),
   and verifying TB. Also use when the user mentions data migration, conversion,
-  import, or switching accounting software. Triggered during the jaz-practice
-  onboarding flow whenever a new client's prior firm uses Xero, QuickBooks,
-  Sage, or MYOB — see `jaz-practice/references/onboarding.md` for the
-  client-folder-aware wrapper that invokes this skill.
+  import, or switching accounting software — whenever a customer's prior system
+  is Xero, QuickBooks, Sage, MYOB, or an Excel-based ledger.
 ---
 
 # Jaz Conversion Skill
@@ -20,8 +18,6 @@ You are performing an **accounting data conversion** — migrating a customer's 
 > **Jaz-native, not generic.** The clearing-account pattern, the CoA-bulk-upsert all-or-nothing semantics, the `currencyCode`-string-silently-ignored-on-invoices gotcha, the `bulk_upsert_invoices` PARTIAL_SUCCESS path — every rule in this skill is an opinion shaped by Jaz's specific API behavior, not by generic migration theory. Source-system mapping (Xero, QB, Sage) is included only as input parsing; everything downstream is Jaz-shaped.
 
 **This skill provides Jaz-contextual conversion domain knowledge. For API details (field names, endpoints, gotchas), load the `jaz-api` skill alongside this one.**
-
-**Engagement context:** when this skill is invoked from inside a `jaz-practice` client folder, the onboarding flow (`practice_onboard_client`) loads CLIENT.md to capture FY-end, GST scheme, banking, and the prior firm's name — then routes to this skill for the actual data move. After conversion completes (Step 7 verification), the practitioner closes the onboarding engagement and the recurring engagement cadence (monthly-close / quarterly-gst / annual-statutory) takes over. See `jaz-practice/references/onboarding.md` for the complete sequence.
 
 ## Guided in-app data transfer
 
@@ -164,4 +160,3 @@ If TB doesn't match, identify the discrepancy:
 - **jaz-api** — Field names, endpoints, error codes, and gotchas (load alongside this skill)
 - **jaz-recipes** — Transaction recipes for complex IFRS scenarios encountered during conversion
 - **jaz-jobs** — Post-conversion operational workflows (month-end close, bank recon, etc.)
-- **jaz-practice** — Client-folder + engagement wrapper. The onboarding flow (`practice_onboard_client` + `jaz-practice/references/onboarding.md`) is the typical entry point for invoking this skill: it captures CLIENT.md basics, scaffolds the client folder, and routes to this skill for the data move. After verification passes, the recurring engagement cadence (monthly-close / quarterly-gst / annual-statutory) begins.

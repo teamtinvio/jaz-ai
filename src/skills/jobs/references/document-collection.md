@@ -1,11 +1,10 @@
 # Document Collection
 
-> Scan + classify client docs (invoices, bills, credit notes, bank statements) from local dirs or cloud links (Dropbox, Google Drive, OneDrive); decrypt encrypted PDFs (`qpdf`); upload via Jaz Magic. Driver tool: `generate_document_collection_blueprint`.
+> Scan + classify client docs (invoices, bills, credit notes, bank statements) from local dirs or cloud links (Dropbox, Google Drive, OneDrive); decrypt encrypted PDFs (`qpdf`); upload via Jaz Magic. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs document-collection` prints this same phased checklist; the `ingest` subcommand below does the local/cloud scan.)
 
 ## Tools, recipes, calculators this job uses
 
-### MCP tools
-- **`generate_document_collection_blueprint(period: <YYYY-MM>)`** — step 0: emit blueprint with the file-classification heuristics + upload sequence.
+### Platform tools
 - **`mcp magic create --file <pdf>` / `create_business_transaction_from_attachment(sourceFile, businessTransactionType: 'BILL'|'INVOICE'|'CREDIT_NOTE', sourceType: 'FILE')`** — step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction.
 - **`finalize_bill(...)` / `finalize_invoice(...)` / `finalize_customer_credit_note(...)`** — step 5: finalize practitioner-reviewed Magic-extracted DRAFTs.
 - **`import_bank_statement(bankAccountResourceId, sourceFile, sourceType: 'FILE')`** — step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
@@ -20,17 +19,15 @@
 - **`qpdf`** binary — required for encrypted PDF decryption. Document-collection ingest detects encryption + invokes qpdf transparently. If qpdf missing: surface install instruction (`brew install qpdf` on macOS, `apt-get install qpdf` on Linux).
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 2 (collecting late-arriving bills before close), and from `practice/references/onboarding.md` (initial doc collection from prior firm + first month).
+- Run at the start of the month-end close (collecting late-arriving bills) and during initial client setup (first doc collection from prior firm + first month).
 - Sibling jobs: `bank-recon.md` (consumes bank statements imported here), `audit-prep.md` step 13 (data exports vs documents traceability).
 - API rules: `jaz-api/SKILL.md` rules 57-63 (Jaz Magic / PDF-JPG OCR specifics).
 
 ---
 
-## Step 0 — Emit blueprint
+## Steps
 
-```
-generate_document_collection_blueprint(period: '2025-01')
-```
+Walk steps 1-8 below. (Local CLI: `clio jobs document-collection --period 2025-01` prints the same phased checklist.)
 
 ## Step 1 — Identify the source
 
@@ -40,7 +37,7 @@ Source can be:
 - Google Drive shared link: `https://drive.google.com/drive/folders/<folder-id>`
 - OneDrive shared link: `https://1drv.ms/f/s!<token>`
 
-Per `CLIENT.document_collection.preferred_source` if practitioner pre-configured.
+Use the org's preferred source if the user has one in mind; otherwise ask.
 
 ## Step 2 — Ingest
 
@@ -67,7 +64,7 @@ Classification heuristics:
 - Filename contains `statement` / `stmt` / `bank` → BANK_STATEMENT
 - Per-file content sniff for PDFs (header parsing) — confidence boost when filename is ambiguous
 
-Save the ingest result to `recurring/monthly/<period>/document-collection/ingest.json` for the engagement.
+Keep the ingest result for the period.
 
 ## Step 3 — Decrypt encrypted PDFs (if any)
 
@@ -160,7 +157,7 @@ For `FAILED` Magic jobs: file may be unreadable (corrupted PDF, image-only witho
 
 ## Step 8 — Save audit trail
 
-Per file processed: capture `{originalPath, classifiedAs, magicJobId, resultingResourceId, finalizedTimestamp}` in `recurring/monthly/<period>/document-collection/audit.json`.
+Per file processed: capture `{originalPath, classifiedAs, magicJobId, resultingResourceId, finalizedTimestamp}` in a per-period audit record.
 
 Auditor sample-test traces from a posted bill back to the source PDF. Audit trail makes that trivial.
 
@@ -171,7 +168,7 @@ Auditor sample-test traces from a posted bill back to the source PDF. Audit trai
 | Source | Error | Recovery |
 |--------|-------|----------|
 | Step 2 ingest | Cloud link returns 404 / shared-link expired | Practitioner re-shares link; re-run ingest. |
-| Step 2 ingest | Local directory empty | Check `CLIENT.document_collection.staging_dir` matches reality. |
+| Step 2 ingest | Local directory empty | Confirm the staging directory with the user — the path may be wrong. |
 | Step 3 decryption | `qpdf` binary missing | `brew install qpdf` (macOS) / `apt-get install qpdf` (Linux). Re-run with `--decrypt`. |
 | Step 3 decryption | Password wrong (file remains encrypted) | Surface to practitioner with the file path. Manual decryption + re-ingest. |
 | Step 4 Magic | 422 `unsupported_file_type` | Convert to PDF / JPG first. Excel / Word formats not supported by Magic OCR. |
@@ -187,16 +184,16 @@ Auditor sample-test traces from a posted bill back to the source PDF. Audit trai
 ## Tips
 
 - **Cloud ingest > local.** Practitioners often have client docs in shared Dropbox folders. Ingesting directly from the link skips the manual download step.
-- **Encrypt convention.** `__pw__` token in filename is a safe practitioner workaround when forwarding password-protected client PDFs. Document this in `practice/references/onboarding.md`.
+- **Encrypt convention.** `__pw__` token in filename is a safe workaround when forwarding password-protected client PDFs. Share this convention with the client during onboarding.
 - **Magic confidence bands.** > 0.85 = auto-finalize after light review; 0.70-0.85 = practitioner-review-then-finalize; < 0.70 = manual posting (Magic was wrong about something material).
 - **Bank statement import** is the highest-leverage path. A 1-min import handles 50-200 bank records. Manual entry for the same is hours.
-- **Per-month audit folder**: `recurring/monthly/<period>/document-collection/` is a lightweight audit pack; auditor finds it instantly without asking.
+- **Keep a per-month audit record** of every processed file (source path → resulting transaction). It is a lightweight audit pack the auditor can trace instantly.
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 2 — invoked at the start of monthly close to capture late-arriving bills.
-- `practice/references/onboarding.md` — invoked during initial client setup; first batch is often large (prior-firm export + current month).
-- `bank-recon.md` — consumes step 6 bank-statement imports.
-- `audit-prep.md` step 13 — XLSX exports plus document-collection audit.json provide the auditor with full traceability.
+- `month-end-close.md` step 2 — run at the start of the monthly close to capture late-arriving bills.
+- Initial client setup — run during onboarding; the first batch is often large (prior-firm export + current month).
+- `bank-recon.md` — consumes the step 6 bank-statement imports.
+- `audit-prep.md` step 13 — XLSX exports plus the per-file audit record give the auditor full traceability.

@@ -33,7 +33,7 @@ The two patterns share the same `Employee Benefits` capsule type but use differe
 - For year-end true-up: see `year-end-close.md` Y2 — manual journal pattern with HR-supplied actuals.
 
 ### Cross-references
-- Within an engagement: invoked from `practice/references/monthly-close.md` step 4 (monthly leave) and `practice/references/annual-statutory.md` step 4f (Y2 in `year-end-close.md` — bonus accrual true-up).
+- Operational context: invoked during month-end close (monthly leave) and during year-end close (Y2 in `year-end-close.md` — bonus accrual true-up).
 - Sibling: `accrued-expenses.md` (the engine that drives the bonus pattern); `dividend.md` (annual P&L distribution to shareholders, mirror to bonus).
 - IFRS / accounting context: IAS 19.11 (short-term employee benefits — recognized as expense in the period the service is rendered); IAS 19.13 (accrual of leave entitlement); IAS 19.19 (recognition criteria for bonuses — present obligation + reliable estimate).
 
@@ -61,7 +61,7 @@ Returns: `{ totalAnnualCost: 84000, perPeriodAmount: 7000, schedule: [{period: 1
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'leave-accrual',
   headcount: 20,
   daysPerEmployee: 14,
@@ -69,8 +69,8 @@ plan_recipe(
   periods: 12,
   startDate: '2025-01-01',
   currency: 'SGD',
-  glLeaveExpense: <CLIENT.coa_mapping['Leave Expense']>,
-  glLeaveLiability: <CLIENT.coa_mapping['Leave Liability']>,
+  glLeaveExpense: <resourceId of 'Leave Expense' account>,
+  glLeaveLiability: <resourceId of 'Leave Liability' account>,
   capsuleType: 'Employee Benefits',
   capsuleName: 'Annual Leave Accrual — FY2025'
 )
@@ -106,10 +106,10 @@ If a current-quarter result returns: halt. One bonus capsule per quarter.
 
 ### Step 1B — Cross-check + estimate
 
-Estimate quarterly bonus per `CLIENT.bonus_policy.estimation_method`:
+Estimate quarterly bonus per the entity's bonus policy estimation method:
 - `revenue_pct` (e.g., 5% of quarterly revenue): pull `generate_profit_and_loss(period_start: <quarter-start>, period_end: <quarter-end>)`, multiply Operating Revenue by the percentage.
 - `prior_quarter`: pull last quarter's posted bonus journal via `search_journals(filter: {tag: 'bonus-accrual', valueDate: <prior-quarter>-end})`.
-- `fixed_amount`: read from `CLIENT.bonus_policy.fixed_amount` per quarter.
+- `fixed_amount`: use the bonus policy's fixed amount per quarter.
 
 ```
 clio calc accrued-expense --amount <est> --periods 1 --start-date 2025-03-31 --json
@@ -119,14 +119,14 @@ clio calc accrued-expense --amount <est> --periods 1 --start-date 2025-03-31 --j
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA / CLIENT.md, not real plan_recipe params.
+  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'accrued-expense',
   amount: <est>,
   periods: 1,
   startDate: '2025-03-31',
   currency: 'SGD',
-  glExpense: <CLIENT.coa_mapping['Bonus Expense']>,
-  glAccruedLiability: <CLIENT.coa_mapping['Bonus Payable']>,
+  glExpense: <resourceId of 'Bonus Expense' account>,
+  glAccruedLiability: <resourceId of 'Bonus Payable' account>,
   vendor: 'Employee Bonus Pool',
   capsuleType: 'Employee Benefits',
   capsuleName: 'Bonus Accrual — Q1 2025'
@@ -172,8 +172,8 @@ Per quarter-end-close (`quarter-end-close.md`):
 
 ---
 
-## Cross-references back to engagements
+## Cross-references
 
-- `practice/references/monthly-close.md` step 4 — monthly leave-accrual finalize per existing leave capsule.
-- `practice/references/annual-statutory.md` step 4f (Y2 in `year-end-close.md`) — both leave and bonus true-ups against actuals; transition from accrual to actual cash payment in early Q1 next FY. (No quarterly bonus-accrual step exists in `quarterly-gst.md` — true-up runs annually only.)
+- Month-end close — monthly leave-accrual finalize per existing leave capsule.
+- Year-end close (Y2 in `year-end-close.md`) — both leave and bonus true-ups against actuals; transition from accrual to actual cash payment in early Q1 next FY. (No quarterly bonus-accrual step — true-up runs annually only.)
 - Sibling `accrued-expenses.md` — the engine that drives the bonus pattern; full error table + variations there.
