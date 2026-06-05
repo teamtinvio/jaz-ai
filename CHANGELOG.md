@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.16.3] - 2026-06-05
+
+Reading rows from an attached spreadsheet now works reliably. Excel (.xlsx) attachments parse correctly, and multi-sheet workbooks are handled cleanly: a blank cover page is skipped to the first sheet that has data, and if a sheet's header row is malformed you get a clear message listing the available sheets — rather than rows being read from the wrong sheet. CSV attachments are unchanged.
+
 ## [5.16.2] - 2026-06-05
 
 Documentation cleanup. The agent's API reference no longer lists a set of bulk-update and legacy search endpoints that have been retired from the platform, so the agent won't surface or attempt calls that are no longer available. Everyday accounting commands and behavior are unchanged.

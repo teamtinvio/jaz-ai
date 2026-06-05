@@ -7686,82 +7686,6 @@
       ],
       "type": "object"
     },
-    "CustomerCreditRefund": {
-      "properties": {
-        "accountResourceId": {
-          "description": "Cash-Out Account Resource ID (UUID Format)",
-          "type": "string"
-        },
-        "currency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTExchangeRate"
-            }
-          ],
-          "description": "Currency code (ISO 4217)"
-        },
-        "paymentMethod": {
-          "description": "Payment Method",
-          "enum": [
-            "CASH",
-            "CREDIT_CARD",
-            "BANK_TRANSFER",
-            "E_WALLET",
-            "CHEQUE",
-            "WITHHOLDING_TAX_CERTIFICATE",
-            "CLEARING_SETTLEMENT",
-            "DEBT_WRITE_OFF",
-            "INTER_COMPANY",
-            "OTHER",
-            "PAYMENT_GATEWAY"
-          ],
-          "type": "string"
-        },
-        "reference": {
-          "description": "Give it a reference name",
-          "type": "string"
-        },
-        "refundAmount": {
-          "minimum": 0,
-          "type": "number"
-        },
-        "saveAsDraft": {
-          "default": true,
-          "description": "Save Invoice as Draft? 'false' will convert the draft to active status",
-          "type": "boolean"
-        },
-        "sendEmail": {
-          "description": "Send an Email",
-          "type": "boolean"
-        },
-        "transactionAmount": {
-          "description": "Transaction Amount",
-          "minimum": 0,
-          "type": "number"
-        },
-        "transactionFee": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/PaymentTransactionFee"
-            }
-          ],
-          "description": "Transaction Fee"
-        },
-        "valueDate": {
-          "description": "valueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        }
-      },
-      "required": [
-        "accountResourceId",
-        "paymentMethod",
-        "reference",
-        "refundAmount",
-        "transactionAmount",
-        "valueDate"
-      ],
-      "type": "object"
-    },
     "CustomerCreditTo": {
       "properties": {
         "billingAddress": {
@@ -10048,812 +9972,6 @@
       "required": [
         "bankStatementEntryResourceId",
         "workflowType"
-      ],
-      "type": "object"
-    },
-    "MagicUpdateBillClientRequest": {
-      "properties": {
-        "contactResourceId": {
-          "description": "Contact Resource ID (UUIDv4)",
-          "type": "string"
-        },
-        "currency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTCurrency"
-            }
-          ],
-          "description": "Currency code (ISO 4217)"
-        },
-        "dueDate": {
-          "description": "dueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        },
-        "internalNotes": {
-          "description": "Internal Notes for Void Invoice",
-          "maxLength": 1000,
-          "type": "string"
-        },
-        "isTaxVATApplicable": {
-          "description": "Is Tax VAT Applicable?",
-          "type": "boolean"
-        },
-        "isTaxWithholdingApplicable": {
-          "type": "boolean"
-        },
-        "lineItems": {
-          "description": "Will override existing invoice line items",
-          "items": {
-            "$ref": "#/definitions/CreateBillClientRequestLineItem"
-          },
-          "maxItems": 200,
-          "type": "array"
-        },
-        "payments": {
-          "description": "Record Payments List",
-          "items": {
-            "$ref": "#/definitions/CreateBillClientRequestPayment"
-          },
-          "maxItems": 200,
-          "type": "array"
-        },
-        "query": {
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "reference": {
-          "description": "Give it a reference name",
-          "type": "string"
-        },
-        "saveAsDraft": {
-          "default": true,
-          "description": "Save Invoice as Draft? 'false' will convert the draft to active status",
-          "type": "boolean"
-        },
-        "sendEmail": {
-          "description": "Send an Email",
-          "type": "boolean"
-        },
-        "submitForApproval": {
-          "type": "boolean"
-        },
-        "tags": {
-          "description": "Give some tags",
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 50,
-          "type": "array"
-        },
-        "taxInclusion": {
-          "description": "Should Tax be included? Required if 'isTaxVATApplicable' is present.",
-          "type": "boolean"
-        },
-        "terms": {
-          "description": "Give a term to calculate DueDate, must be one of: 0,7,15,30,45,60",
-          "enum": [
-            0,
-            7,
-            15,
-            30,
-            45,
-            60
-          ],
-          "type": "integer"
-        },
-        "valueDate": {
-          "description": "valueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        },
-        "vatSupplierFxRate": {
-          "description": "VAT Supplier Fx Rate",
-          "minimum": 0,
-          "type": "number"
-        }
-      },
-      "required": [
-        "query"
-      ],
-      "type": "object"
-    },
-    "MagicUpdateCashEntryRequest": {
-      "properties": {
-        "accountResourceId": {
-          "description": "Cash account resource ID (UUIDv4)",
-          "type": "string"
-        },
-        "contactResourceId": {
-          "description": "Contact resource ID (UUIDv4)",
-          "type": "string"
-        },
-        "currency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/MJCurrency"
-            }
-          ],
-          "description": "Transaction currency (ISO 4217)"
-        },
-        "internalNotes": {
-          "description": "Internal notes",
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "lines": {
-          "description": "Cash entry lines (replaces existing lines, required if finalizing)",
-          "items": {
-            "$ref": "#/definitions/CashEntryLine"
-          },
-          "maxItems": 100,
-          "minItems": 1,
-          "type": "array"
-        },
-        "query": {
-          "description": "Natural language query for AI-assisted search",
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "reference": {
-          "description": "Reference name",
-          "type": "string"
-        },
-        "saveAsDraft": {
-          "default": true,
-          "description": "Save as draft (false = finalize)",
-          "type": "boolean"
-        },
-        "tags": {
-          "description": "Tracking tags",
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 100,
-          "type": "array"
-        },
-        "taxInclusion": {
-          "description": "Whether tax is included in line amounts",
-          "type": "boolean"
-        },
-        "valueDate": {
-          "description": "valueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        }
-      },
-      "required": [
-        "query"
-      ],
-      "type": "object"
-    },
-    "MagicUpdateContactClientRequest": {
-      "properties": {
-        "billingAddress": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/ContactBillingAddress"
-            }
-          ],
-          "description": "Billing Address Info"
-        },
-        "currencyCode": {
-          "description": "Currency Code (ISO 4217)",
-          "type": "string"
-        },
-        "customer": {
-          "description": "Is Customer?",
-          "type": "boolean"
-        },
-        "customerAccountResourceId": {
-          "description": "Customer Account Resource Id (uuidv4)",
-          "type": "string"
-        },
-        "customerCreditNoteEmailTemplateResourceId": {
-          "description": "Customer Credit Note Email Template Resource Id",
-          "type": "string"
-        },
-        "customerCreditNoteTemplateResourceId": {
-          "description": "Customer Credit Note Template Resource Id",
-          "type": "string"
-        },
-        "customerInvoiceNotes": {
-          "description": "Customer Invoice Notes",
-          "type": "string"
-        },
-        "customerInvoiceTemplateResourceId": {
-          "description": "Customer Invoice Template Resource Id",
-          "type": "string"
-        },
-        "customerPaymentAccountResourceId": {
-          "description": "Customer Payment Account Resource Id",
-          "type": "string"
-        },
-        "customerPaymentMethod": {
-          "description": "Customer Payment Method",
-          "enum": [
-            "CASH",
-            "CREDIT_CARD",
-            "BANK_TRANSFER",
-            "E_WALLET",
-            "CHEQUE",
-            "WITHHOLDING_TAX_CERTIFICATE",
-            "CLEARING_SETTLEMENT",
-            "DEBT_WRITE_OFF",
-            "INTER_COMPANY",
-            "OTHER",
-            "PAYMENT_GATEWAY"
-          ],
-          "type": "string"
-        },
-        "customerPaymentTerms": {
-          "description": "Customer Payment Terms",
-          "enum": [
-            "ON_DELIVERY",
-            "NET_7",
-            "NET_15",
-            "NET_30",
-            "NET_45",
-            "NET_60",
-            "CUSTOM"
-          ],
-          "type": "string"
-        },
-        "customerReceiptTemplateResourceId": {
-          "description": "Customer Receipt Template Resource Id",
-          "type": "string"
-        },
-        "customerRefundEmailTemplateResourceId": {
-          "description": "Customer Refund Email Template Resource Id",
-          "type": "string"
-        },
-        "customerRefundTemplateResourceId": {
-          "description": "Customer Refund Template Resource Id",
-          "type": "string"
-        },
-        "customerStatementScheduleEmailTemplateResourceId": {
-          "description": "Customer Statement Schedule Email Template Resource Id",
-          "type": "string"
-        },
-        "customerStatementTemplateResourceId": {
-          "description": "Customer Statement Template Resource Id",
-          "type": "string"
-        },
-        "customerTaxProfileResourceId": {
-          "description": "Customer Tax Profile ResourceId",
-          "type": "string"
-        },
-        "customerVatType": {
-          "description": "Customer Vat Type",
-          "enum": [
-            "NO_VAT",
-            "INCLUSIVE",
-            "EXCLUSIVE"
-          ],
-          "type": "string"
-        },
-        "email": {
-          "description": "Email address",
-          "type": "string"
-        },
-        "emails": {
-          "description": "List of contact emails",
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 50,
-          "type": "array"
-        },
-        "jazMagicAutoFill": {
-          "description": "AI auto-fill mode for contact creation",
-          "enum": [
-            "AUTOFILL_LINE_ITEMS",
-            "AUTOFILL_SUMMARY_TOOLS",
-            "AUTOFILL_OFF"
-          ],
-          "type": "string"
-        },
-        "name": {
-          "description": "Contact name",
-          "type": "string"
-        },
-        "notes": {
-          "description": "Give Notes",
-          "type": "string"
-        },
-        "phone": {
-          "description": "Contact Phone",
-          "type": "string"
-        },
-        "query": {
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "registrationId": {
-          "description": "Registration Id",
-          "type": "string"
-        },
-        "shippingAddresses": {
-          "description": "Shipping Addresses",
-          "items": {
-            "$ref": "#/definitions/ContactShippingAddress"
-          },
-          "maxItems": 100,
-          "type": "array"
-        },
-        "supplier": {
-          "description": "Is Supplier?",
-          "type": "boolean"
-        },
-        "supplierAccountResourceId": {
-          "description": "Supplier Account Resource Id (uuidv4)",
-          "type": "string"
-        },
-        "supplierPaymentAccountResourceId": {
-          "description": "Supplier Payment Account Resource Id",
-          "type": "string"
-        },
-        "supplierPaymentMethod": {
-          "description": "Supplier Payment Method",
-          "enum": [
-            "CASH",
-            "CREDIT_CARD",
-            "BANK_TRANSFER",
-            "E_WALLET",
-            "CHEQUE",
-            "WITHHOLDING_TAX_CERTIFICATE",
-            "CLEARING_SETTLEMENT",
-            "DEBT_WRITE_OFF",
-            "INTER_COMPANY",
-            "OTHER",
-            "PAYMENT_GATEWAY"
-          ],
-          "type": "string"
-        },
-        "supplierPaymentTerms": {
-          "description": "Supplier Payment Terms",
-          "enum": [
-            "ON_DELIVERY",
-            "NET_7",
-            "NET_15",
-            "NET_30",
-            "NET_45",
-            "NET_60",
-            "CUSTOM"
-          ],
-          "type": "string"
-        },
-        "supplierTaxInclusion": {
-          "description": "Supplier Tax Inclusion",
-          "type": "boolean"
-        },
-        "supplierTaxProfileResourceId": {
-          "description": "Supplier Tax Profile Resource Id",
-          "type": "string"
-        },
-        "supplierVatType": {
-          "enum": [
-            "NO_VAT",
-            "INCLUSIVE",
-            "EXCLUSIVE"
-          ],
-          "type": "string"
-        },
-        "taxId": {
-          "description": "Tax Id",
-          "type": "string"
-        },
-        "website": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "query"
-      ],
-      "type": "object"
-    },
-    "MagicUpdateCustomerCreditClientRequest": {
-      "properties": {
-        "contactResourceId": {
-          "description": "Contact Resource ID (UUIDv4)",
-          "type": "string"
-        },
-        "creditFrom": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/CreateCustomerCreditClientRequestCreditTo"
-            }
-          ],
-          "description": "Credit From Info - will be auto filled if empty"
-        },
-        "creditTo": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/CustomerCreditTo"
-            }
-          ],
-          "description": "Credit To Info"
-        },
-        "currency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTCurrency"
-            }
-          ],
-          "description": "Currency code (ISO 4217)"
-        },
-        "dueDate": {
-          "description": "dueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        },
-        "internalNotes": {
-          "description": "Internal Notes for Void Invoice",
-          "type": "string"
-        },
-        "isTaxVATApplicable": {
-          "description": "Is Tax VAT Applicable?",
-          "type": "boolean"
-        },
-        "lineItems": {
-          "description": "Will override existing invoice line items",
-          "items": {
-            "$ref": "#/definitions/CustomerCreditLineItem"
-          },
-          "maxItems": 200,
-          "type": "array"
-        },
-        "notes": {
-          "description": "Give Notes",
-          "type": "string"
-        },
-        "query": {
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "reference": {
-          "description": "Give it a reference name",
-          "type": "string"
-        },
-        "refunds": {
-          "description": "Record Refunds",
-          "items": {
-            "$ref": "#/definitions/CustomerCreditRefund"
-          },
-          "maxItems": 200,
-          "type": "array"
-        },
-        "saveAsDraft": {
-          "default": true,
-          "description": "Save Invoice as Draft? 'false' will convert the draft to active status",
-          "type": "boolean"
-        },
-        "submitForApproval": {
-          "type": "boolean"
-        },
-        "tags": {
-          "description": "Give some tags",
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 50,
-          "type": "array"
-        },
-        "taxInclusion": {
-          "description": "Should Tax be included? Required if 'isTaxVATApplicable' is present.",
-          "type": "boolean"
-        },
-        "valueDate": {
-          "description": "valueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        }
-      },
-      "required": [
-        "query"
-      ],
-      "type": "object"
-    },
-    "MagicUpdateInvoiceClientRequest": {
-      "properties": {
-        "billFrom": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/CreateInvoiceClientRequestBillFrom"
-            }
-          ],
-          "description": "Bill From Info - will be auto filled if empty"
-        },
-        "billTo": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/CreateInvoiceClientRequestBillTo"
-            }
-          ],
-          "description": "Bill To Info"
-        },
-        "contactResourceId": {
-          "description": "Contact Resource ID (UUIDv4)",
-          "type": "string"
-        },
-        "currency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTCurrency"
-            }
-          ],
-          "description": "Currency code (ISO 4217)"
-        },
-        "dueDate": {
-          "description": "dueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        },
-        "internalNotes": {
-          "description": "Internal Notes for Void Invoice",
-          "type": "string"
-        },
-        "invoiceNotes": {
-          "description": "Add Invoice Notes",
-          "type": "string"
-        },
-        "isTaxVATApplicable": {
-          "description": "Is Tax VAT Applicable?",
-          "type": "boolean"
-        },
-        "lineItems": {
-          "description": "Will override existing invoice line items",
-          "items": {
-            "$ref": "#/definitions/CreateInvoiceClientRequestLineItem"
-          },
-          "maxItems": 200,
-          "type": "array"
-        },
-        "payments": {
-          "description": "Record Payments List",
-          "items": {
-            "$ref": "#/definitions/CreateInvoiceClientRequestPayment"
-          },
-          "maxItems": 200,
-          "type": "array"
-        },
-        "query": {
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "reference": {
-          "description": "Give it a reference name",
-          "type": "string"
-        },
-        "saveAsDraft": {
-          "default": true,
-          "description": "Save Invoice as Draft? 'false' will convert the draft to active status",
-          "type": "boolean"
-        },
-        "sendEmail": {
-          "description": "Send an Email",
-          "type": "boolean"
-        },
-        "shipping": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTShipping"
-            }
-          ],
-          "description": "Shipping details"
-        },
-        "shippingAmount": {
-          "minimum": 0,
-          "type": "number"
-        },
-        "submitForApproval": {
-          "type": "boolean"
-        },
-        "tags": {
-          "description": "Give some tags",
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 50,
-          "type": "array"
-        },
-        "taxInclusion": {
-          "description": "Should Tax be included? Required if 'isTaxVATApplicable' is present.",
-          "type": "boolean"
-        },
-        "valueDate": {
-          "description": "valueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        }
-      },
-      "required": [
-        "query"
-      ],
-      "type": "object"
-    },
-    "MagicUpdateJournalClientRequest": {
-      "properties": {
-        "contactResourceId": {
-          "description": "Contact Resource ID (UUIDv4)",
-          "type": "string"
-        },
-        "internalNotes": {
-          "description": "Internal notes",
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "journalEntries": {
-          "description": "Journal entries (replaces existing on update, required if active)",
-          "items": {
-            "$ref": "#/definitions/JournalEntry"
-          },
-          "maxItems": 200,
-          "minItems": 2,
-          "type": "array"
-        },
-        "query": {
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "reference": {
-          "description": "Give it a reference name",
-          "type": "string"
-        },
-        "saveAsDraft": {
-          "default": true,
-          "description": "Save as draft (false = finalize)",
-          "type": "boolean"
-        },
-        "tags": {
-          "description": "Give some tags",
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 50,
-          "type": "array"
-        },
-        "taxInclusion": {
-          "description": "Should Tax be included? Required if 'isTaxVATApplicable' is present.",
-          "type": "boolean"
-        },
-        "taxVatApplicable": {
-          "default": false,
-          "description": "Is Tax VAT Applicable?",
-          "type": "boolean"
-        },
-        "valueDate": {
-          "description": "valueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        }
-      },
-      "required": [
-        "query"
-      ],
-      "type": "object"
-    },
-    "MagicUpdateOrganizationAccountClientRequest": {
-      "properties": {
-        "accountType": {
-          "maxLength": 100,
-          "type": "string"
-        },
-        "classificationType": {
-          "description": "Give the classification type, this can be aquired from 'account-classifications' API",
-          "maxLength": 100,
-          "type": "string"
-        },
-        "code": {
-          "description": "Give a code",
-          "maxLength": 100,
-          "type": "string"
-        },
-        "currency": {
-          "description": "Currency code (ISO 4217)",
-          "type": "string"
-        },
-        "description": {
-          "description": "Account description",
-          "maxLength": 1000,
-          "type": "string"
-        },
-        "lockDate": {
-          "description": "lockDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        },
-        "name": {
-          "description": "Account name",
-          "type": "string"
-        },
-        "query": {
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "status": {
-          "default": "INACTIVE",
-          "description": "Record status",
-          "enum": [
-            "ACTIVE",
-            " INACTIVE"
-          ],
-          "type": "string"
-        }
-      },
-      "required": [
-        "query"
-      ],
-      "type": "object"
-    },
-    "MagicUpdateSupplierCreditClientRequest": {
-      "properties": {
-        "contactResourceId": {
-          "description": "Contact Resource ID (UUIDv4)",
-          "type": "string"
-        },
-        "currency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTCurrency"
-            }
-          ],
-          "description": "Currency code (ISO 4217)"
-        },
-        "dueDate": {
-          "description": "dueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        },
-        "internalNotes": {
-          "description": "Internal Notes for Void Invoice",
-          "type": "string"
-        },
-        "isTaxVATApplicable": {
-          "description": "Is Tax VAT Applicable?",
-          "type": "boolean"
-        },
-        "lineItems": {
-          "description": "Will override existing invoice line items",
-          "items": {
-            "$ref": "#/definitions/SupplierCreditLineItem"
-          },
-          "maxItems": 200,
-          "type": "array"
-        },
-        "query": {
-          "maxLength": 65536,
-          "type": "string"
-        },
-        "reference": {
-          "description": "Give it a reference name",
-          "type": "string"
-        },
-        "refunds": {
-          "description": "Record Refunds",
-          "items": {
-            "$ref": "#/definitions/SupplierCreditRefund"
-          },
-          "maxItems": 200,
-          "type": "array"
-        },
-        "saveAsDraft": {
-          "default": true,
-          "description": "Save Invoice as Draft? 'false' will convert the draft to active status",
-          "type": "boolean"
-        },
-        "submitForApproval": {
-          "type": "boolean"
-        },
-        "tags": {
-          "description": "Give some tags",
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 50,
-          "type": "array"
-        },
-        "taxInclusion": {
-          "description": "Should Tax be included? Required if 'isTaxVATApplicable' is present.",
-          "type": "boolean"
-        },
-        "valueDate": {
-          "description": "valueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        }
-      },
-      "required": [
-        "query"
       ],
       "type": "object"
     },
@@ -18145,78 +17263,6 @@
       ],
       "type": "object"
     },
-    "SupplierCreditRefund": {
-      "properties": {
-        "accountResourceId": {
-          "description": "Cash-Out Account Resource ID (UUID Format)",
-          "type": "string"
-        },
-        "currency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTExchangeRate"
-            }
-          ],
-          "description": "Currency code (ISO 4217)"
-        },
-        "paymentMethod": {
-          "description": "Payment Method",
-          "enum": [
-            "CASH",
-            "CREDIT_CARD",
-            "BANK_TRANSFER",
-            "E_WALLET",
-            "CHEQUE",
-            "WITHHOLDING_TAX_CERTIFICATE",
-            "PAYMENT_GATEWAY"
-          ],
-          "type": "string"
-        },
-        "reference": {
-          "description": "Give it a reference name",
-          "type": "string"
-        },
-        "refundAmount": {
-          "minimum": 0,
-          "type": "number"
-        },
-        "saveAsDraft": {
-          "default": true,
-          "description": "Save Invoice as Draft? 'false' will convert the draft to active status",
-          "type": "boolean"
-        },
-        "sendEmail": {
-          "description": "Send an Email",
-          "type": "boolean"
-        },
-        "transactionAmount": {
-          "description": "Transaction Amount",
-          "minimum": 0,
-          "type": "number"
-        },
-        "transactionFee": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/PaymentTransactionFee"
-            }
-          ],
-          "description": "Transaction Fee"
-        },
-        "valueDate": {
-          "description": "valueDate in the organization's timezone (format YYYY-MM-DD)",
-          "type": "string"
-        }
-      },
-      "required": [
-        "accountResourceId",
-        "paymentMethod",
-        "reference",
-        "refundAmount",
-        "transactionAmount",
-        "valueDate"
-      ],
-      "type": "object"
-    },
     "TagFilter": {
       "properties": {
         "and": {
@@ -23298,7 +22344,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -23418,7 +22464,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -23474,7 +22520,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -23539,7 +22585,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -23604,7 +22650,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -23717,7 +22763,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -23831,7 +22877,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -23885,7 +22931,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -23948,7 +22994,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24003,18 +23049,6 @@
             "type": "integer"
           },
           {
-            "description": "Search query",
-            "in": "query",
-            "name": "query",
-            "type": "string"
-          },
-          {
-            "description": "Field to search by",
-            "in": "query",
-            "name": "queryBy",
-            "type": "string"
-          },
-          {
             "default": "full",
             "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, dueDate, contactResourceId, totalAmount, currencyCode, contact name); full (default) returns the complete bill shape",
             "enum": [
@@ -24033,7 +23067,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24089,7 +23123,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24147,7 +23181,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24205,7 +23239,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24263,7 +23297,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24331,7 +23365,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24385,7 +23419,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24448,7 +23482,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24504,7 +23538,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24565,7 +23599,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24628,7 +23662,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24684,7 +23718,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24747,7 +23781,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24810,7 +23844,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24863,7 +23897,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24919,7 +23953,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -24982,7 +24016,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25045,7 +24079,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25102,7 +24136,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25159,7 +24193,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25214,7 +24248,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25278,7 +24312,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25327,7 +24361,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -25394,7 +24428,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -25468,7 +24502,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -25556,7 +24590,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -25649,7 +24683,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -25727,7 +24761,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25783,7 +24817,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25841,7 +24875,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25897,7 +24931,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -25951,7 +24985,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26014,7 +25048,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26076,7 +25110,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26132,7 +25166,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26190,7 +25224,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26246,7 +25280,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26300,7 +25334,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26363,7 +25397,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26419,7 +25453,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26481,7 +25515,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26537,7 +25571,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26593,7 +25627,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26656,7 +25690,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26718,7 +25752,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26774,7 +25808,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26830,7 +25864,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26893,7 +25927,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -26955,7 +25989,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27011,7 +26045,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27067,7 +26101,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27125,7 +26159,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27187,7 +26221,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27243,7 +26277,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27301,7 +26335,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27357,7 +26391,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27411,7 +26445,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27474,7 +26508,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27527,12 +26561,6 @@
             "in": "query",
             "name": "offset",
             "type": "integer"
-          },
-          {
-            "description": "Search query",
-            "in": "query",
-            "name": "query",
-            "type": "string"
           }
         ],
         "produces": [
@@ -27542,7 +26570,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27598,7 +26626,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27656,7 +26684,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27714,7 +26742,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27770,7 +26798,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27824,7 +26852,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27887,7 +26915,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -27949,7 +26977,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28005,7 +27033,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28063,7 +27091,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28119,7 +27147,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28173,7 +27201,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28236,7 +27264,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28309,7 +27337,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28365,7 +27393,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28423,7 +27451,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28481,7 +27509,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28537,7 +27565,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28591,7 +27619,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28654,7 +27682,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28725,7 +27753,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -28797,7 +27825,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28853,7 +27881,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28911,7 +27939,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -28967,7 +27995,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29021,7 +28049,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29084,7 +28112,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29139,18 +28167,6 @@
             "type": "integer"
           },
           {
-            "description": "Search query",
-            "in": "query",
-            "name": "query",
-            "type": "string"
-          },
-          {
-            "description": "Field to search by",
-            "in": "query",
-            "name": "queryBy",
-            "type": "string"
-          },
-          {
             "default": "full",
             "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, contactResourceId, totalAmount); full (default) returns the complete credit note shape",
             "enum": [
@@ -29169,7 +28185,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29225,7 +28241,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29283,7 +28299,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29341,7 +28357,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29409,7 +28425,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29463,7 +28479,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29526,7 +28542,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29582,7 +28598,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29643,7 +28659,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29706,7 +28722,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29762,7 +28778,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29818,7 +28834,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29881,7 +28897,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29939,7 +28955,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -29997,7 +29013,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30055,7 +29071,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30113,7 +29129,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30171,7 +29187,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30229,7 +29245,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30287,7 +29303,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30345,7 +29361,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30409,7 +29425,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30467,7 +29483,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30531,7 +29547,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30595,7 +29611,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30653,7 +29669,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30717,7 +29733,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30781,7 +29797,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30845,7 +29861,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30909,7 +29925,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -30973,7 +29989,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31037,7 +30053,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31101,7 +30117,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31165,7 +30181,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31229,7 +30245,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31287,7 +30303,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31345,7 +30361,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31409,7 +30425,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31473,7 +30489,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31537,7 +30553,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31601,7 +30617,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31665,7 +30681,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31729,7 +30745,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31787,7 +30803,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31845,7 +30861,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31903,7 +30919,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -31961,7 +30977,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32019,7 +31035,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32083,7 +31099,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32147,7 +31163,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32205,7 +31221,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32263,7 +31279,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32321,7 +31337,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32379,7 +31395,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32443,7 +31459,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32501,7 +31517,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32559,7 +31575,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32617,7 +31633,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32675,7 +31691,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32739,7 +31755,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32810,7 +31826,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -32870,7 +31886,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -32940,7 +31956,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -33010,7 +32026,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -33078,7 +32094,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33150,7 +32166,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33208,7 +32224,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33271,7 +32287,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33327,7 +32343,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33390,7 +32406,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33448,7 +32464,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33504,7 +32520,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33562,7 +32578,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33620,7 +32636,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33676,7 +32692,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33730,7 +32746,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33793,7 +32809,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33851,7 +32867,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33909,7 +32925,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -33967,7 +32983,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34025,7 +33041,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34083,7 +33099,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34141,7 +33157,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34205,7 +33221,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34269,7 +33285,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34333,7 +33349,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34391,7 +33407,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34455,7 +33471,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34519,7 +33535,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34583,7 +33599,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34647,7 +33663,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34705,7 +33721,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34763,7 +33779,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34827,7 +33843,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34891,7 +33907,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -34955,7 +33971,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35019,7 +34035,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35083,7 +34099,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35147,7 +34163,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35211,7 +34227,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35269,7 +34285,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35339,7 +34355,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35395,7 +34411,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35458,7 +34474,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35514,7 +34530,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35570,18 +34586,6 @@
             "type": "integer"
           },
           {
-            "description": "Search query",
-            "in": "query",
-            "name": "query",
-            "type": "string"
-          },
-          {
-            "description": "Field to search by",
-            "in": "query",
-            "name": "queryBy",
-            "type": "string"
-          },
-          {
             "default": "full",
             "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, dueDate, contactResourceId, totalAmount, currencyCode, contact name); full (default) returns the complete invoice shape",
             "enum": [
@@ -35600,7 +34604,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35656,7 +34660,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35714,7 +34718,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35772,7 +34776,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35830,7 +34834,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35898,7 +34902,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -35952,7 +34956,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36015,7 +35019,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36071,7 +35075,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36132,7 +35136,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36195,7 +35199,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36251,7 +35255,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36314,7 +35318,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36377,7 +35381,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36433,7 +35437,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36495,7 +35499,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36558,7 +35562,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36632,7 +35636,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36688,7 +35692,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36746,7 +35750,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36804,7 +35808,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36860,7 +35864,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36914,7 +35918,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -36977,7 +35981,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37051,7 +36055,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37107,7 +36111,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37165,7 +36169,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37223,7 +36227,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37291,7 +36295,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37345,7 +36349,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37408,7 +36412,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37464,7 +36468,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37525,7 +36529,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37588,7 +36592,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -37635,7 +36639,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "500": {
@@ -37935,7 +36939,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38036,7 +37040,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38092,7 +37096,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/BaseResponse_2"
             }
           },
           "400": {
@@ -38150,7 +37154,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38225,7 +37229,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38281,7 +37285,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38339,7 +37343,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38395,7 +37399,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38449,7 +37453,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38512,7 +37516,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38559,7 +37563,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38599,7 +37603,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies-2",
+        "operationId": "list-organization-currencies",
         "parameters": [
           {
             "default": 100,
@@ -38622,7 +37626,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38660,7 +37664,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency-2",
+        "operationId": "create-organization-currency",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -38679,7 +37683,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38736,7 +37740,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38776,7 +37780,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates-2",
+        "operationId": "list-organization-currency-rates",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38806,7 +37810,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38844,7 +37848,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate-2",
+        "operationId": "create-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -38870,7 +37874,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38934,7 +37938,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -38996,7 +38000,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39067,7 +38071,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39114,7 +38118,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39172,7 +38176,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39228,7 +38232,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39291,7 +38295,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39349,7 +38353,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39407,7 +38411,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39463,7 +38467,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39517,7 +38521,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39580,7 +38584,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39642,7 +38646,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39698,7 +38702,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39754,7 +38758,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39808,7 +38812,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39871,7 +38875,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39910,7 +38914,7 @@
           "application/json"
         ],
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies",
+        "operationId": "list-organization-currencies-2",
         "parameters": [
           {
             "default": 100,
@@ -39933,7 +38937,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -39970,7 +38974,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency",
+        "operationId": "create-organization-currency-2",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -39989,7 +38993,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40047,7 +39051,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40103,7 +39107,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40142,7 +39146,7 @@
           "application/json"
         ],
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates",
+        "operationId": "list-organization-currency-rates-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40172,7 +39176,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40209,7 +39213,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate",
+        "operationId": "create-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -40235,7 +39239,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40298,7 +39302,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40359,7 +39363,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40429,7 +39433,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40485,7 +39489,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40539,7 +39543,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40602,7 +39606,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40665,7 +39669,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40723,7 +39727,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40779,7 +39783,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40904,7 +39908,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -40962,7 +39966,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -41014,7 +40018,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -41066,7 +40070,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -41118,7 +40122,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -41287,7 +40291,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -41332,7 +40336,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -41389,7 +40393,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -41442,7 +40446,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -41497,7 +40501,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -41557,7 +40561,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -41604,7 +40608,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -41669,7 +40673,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -41740,7 +40744,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -41804,7 +40808,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -41912,7 +40916,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -41970,7 +40974,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -42022,7 +41026,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -42074,7 +41078,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -42237,7 +41241,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -42282,7 +41286,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -42339,7 +41343,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -42392,7 +41396,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -42445,7 +41449,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -42500,7 +41504,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -42560,7 +41564,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -42619,7 +41623,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -42690,7 +41694,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -42754,7 +41758,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -44086,7 +43090,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44144,7 +43148,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44202,7 +43206,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44260,7 +43264,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44318,7 +43322,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44376,7 +43380,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44434,7 +43438,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44492,7 +43496,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44550,7 +43554,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44608,7 +43612,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44666,7 +43670,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44730,7 +43734,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44783,7 +43787,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44841,7 +43845,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -44898,7 +43902,7 @@
             "schema": {
               "allOf": [
                 {
-                  "$ref": "#/definitions/BaseResponse_2"
+                  "$ref": "#/definitions/BaseResponse"
                 },
                 {
                   "properties": {
@@ -45103,7 +44107,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -45161,7 +44165,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -45213,7 +44217,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -45265,7 +44269,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -45317,7 +44321,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -45486,7 +44490,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -45531,7 +44535,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -45588,7 +44592,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -45641,7 +44645,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -45696,7 +44700,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -45756,7 +44760,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -45803,7 +44807,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -45868,7 +44872,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -45939,7 +44943,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -46003,7 +45007,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -46111,7 +45115,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -46169,7 +45173,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -46221,7 +45225,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -46273,7 +45277,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "422": {
@@ -46436,7 +45440,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -46481,7 +45485,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -46538,7 +45542,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -46591,7 +45595,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -46644,7 +45648,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -46699,7 +45703,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -46759,7 +45763,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -46818,7 +45822,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -46889,7 +45893,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -46953,7 +45957,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "404": {
@@ -47052,7 +46056,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47108,7 +46112,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47164,7 +46168,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47218,7 +46222,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47281,7 +46285,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47349,7 +46353,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47410,7 +46414,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47479,7 +46483,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47544,7 +46548,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47591,7 +46595,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47647,7 +46651,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47703,7 +46707,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47757,7 +46761,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47820,7 +46824,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47888,7 +46892,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -47949,7 +46953,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48018,7 +47022,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48080,7 +47084,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48136,7 +47140,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48192,7 +47196,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48246,7 +47250,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48309,7 +47313,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48378,7 +47382,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48439,7 +47443,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48502,7 +47506,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48549,7 +47553,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48605,7 +47609,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48661,7 +47665,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48715,7 +47719,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48778,7 +47782,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48846,7 +47850,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48907,7 +47911,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -48976,7 +47980,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49034,7 +48038,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49097,7 +48101,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49155,7 +48159,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49211,7 +48215,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49269,7 +48273,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49324,12 +48328,6 @@
             "type": "integer"
           },
           {
-            "description": "Search query",
-            "in": "query",
-            "name": "query",
-            "type": "string"
-          },
-          {
             "default": "full",
             "description": "Response payload tier: lean returns a summary row (id, reference, status, valueDate, contactResourceId, totalAmount); full (default) returns the complete credit note shape",
             "enum": [
@@ -49348,7 +48346,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49404,7 +48402,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49462,7 +48460,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49520,7 +48518,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49588,7 +48586,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49642,7 +48640,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49705,7 +48703,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49761,7 +48759,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49822,7 +48820,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49885,7 +48883,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49938,7 +48936,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -49994,7 +48992,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50057,7 +49055,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50119,7 +49117,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50175,7 +49173,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50233,7 +49231,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50289,7 +49287,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50343,7 +49341,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50406,7 +49404,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50468,7 +49466,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50524,7 +49522,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50582,7 +49580,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50638,7 +49636,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50692,7 +49690,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50755,7 +49753,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50817,7 +49815,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50875,7 +49873,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50933,7 +49931,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -50989,7 +49987,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
@@ -51057,7 +50055,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse_2"
+              "$ref": "#/definitions/BaseResponse"
             }
           },
           "400": {
