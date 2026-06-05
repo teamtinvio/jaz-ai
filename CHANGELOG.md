@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.17.1] - 2026-06-06
+
+Sharper tool search. When you search for a specific operation (for example "invoices download"), the exact tool now surfaces first instead of the generic list — a keyword that points to one tool outweighs the namespace name that every tool in the group shares.
+
 ## [5.17.0] - 2026-06-05
 
 Drop a whole folder, ZIP, or share link of mixed accounting paperwork and let the agent sort and file it for you. Three new capabilities, available to the CLI, the MCP tools, and the AI agent:
