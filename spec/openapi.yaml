@@ -37603,7 +37603,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies",
+        "operationId": "list-organization-currencies-2",
         "parameters": [
           {
             "default": 100,
@@ -37664,7 +37664,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency",
+        "operationId": "create-organization-currency-2",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -38914,7 +38914,7 @@
           "application/json"
         ],
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies-2",
+        "operationId": "list-organization-currencies",
         "parameters": [
           {
             "default": 100,
@@ -38974,7 +38974,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency-2",
+        "operationId": "create-organization-currency",
         "parameters": [
           {
             "description": "Add organization currencies payload",

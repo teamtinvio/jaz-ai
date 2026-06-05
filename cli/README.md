@@ -53,7 +53,7 @@ clio invoices search --query 'status:unpaid' --view lean # Compact summary rows 
 
 ## MCP Server
 
-283 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports.
+286 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports.
 
 **Claude Code:**
 ```bash

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.16.4",
+  "version": "5.17.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -709,6 +709,18 @@
     {
       "name": "get_magic_workflow_status",
       "description": "Get the current status of specific magic workflow(s) by resourceId(s). Returns workflow details including status, document type, and results."
+    },
+    {
+      "name": "wait_for_magic_workflows",
+      "description": "Poll magic extraction workflow(s) until each reaches a terminal state — transaction created (a draft is ready), OCR succeeded/failed, or errored — or until the wait budget elapses. Use after create_bt_from_attachment / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll."
+    },
+    {
+      "name": "classify_documents",
+      "description": "Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Files in unrecognized folders come back as needs-review. Returns a manifest (per-file type + confidence + counts) plus a collectionId; review it, then call extract_documents with that collectionId to create the drafts. Source must be an https URL: a direct .zip/file link (e.g. an uploaded attachment) or a Dropbox / Google Drive / OneDrive share link. (Local folder paths are CLI-only.)"
+    },
+    {
+      "name": "extract_documents",
+      "description": "Create draft transactions from a classified document collection (see classify_documents). Uploads each file to the right AI-extraction endpoint — invoices/bills/credit notes via business-transaction extraction, bank statements via statement import — de-duplicates identical files, and returns the workflow ids to poll with wait_for_magic_workflows. Processing is async; drafts appear once the workflows reach a terminal state. Pass the collectionId from classify_documents."
     },
     {
       "name": "get_attachments",

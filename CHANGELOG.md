@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.17.0] - 2026-06-05
+
+Drop a whole folder, ZIP, or share link of mixed accounting paperwork and let the agent sort and file it for you. Three new capabilities, available to the CLI, the MCP tools, and the AI agent:
+
+- Auto-sort a pile of documents. Point it at a folder, a .zip, or an https link (a direct file/zip URL, or a Dropbox / Google Drive / OneDrive share) and it classifies every file into invoices, bills, customer and supplier credit notes, and bank statements, without creating anything yet, so you can review the breakdown first.
+- Extract the whole batch in one go. Confirm, and it sends each document to AI extraction (bank statements imported as statements, everything else as draft transactions), skipping duplicate files automatically. A merged PDF that holds several documents is split apart on the way in.
+- Wait for the results. A new step polls the extraction jobs and reports when each document's draft is ready, or why it failed, so a long batch finishes cleanly instead of leaving you guessing.
+
 ## [5.16.4] - 2026-06-05
 
 Fixed AI document-extraction status checks hanging. `clio magic status --wait` (and any flow that waits for extraction to finish) used to wait the full timeout instead of noticing when a document had finished extracting. It now recognizes completed, failed, and partially-completed workflows correctly, and checks them all in a single batched request.
