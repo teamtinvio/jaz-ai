@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.16.4] - 2026-06-05
+
+Fixed AI document-extraction status checks hanging. `clio magic status --wait` (and any flow that waits for extraction to finish) used to wait the full timeout instead of noticing when a document had finished extracting. It now recognizes completed, failed, and partially-completed workflows correctly, and checks them all in a single batched request.
+
 ## [5.16.3] - 2026-06-05
 
 Reading rows from an attached spreadsheet now works reliably. Excel (.xlsx) attachments parse correctly, and multi-sheet workbooks are handled cleanly: a blank cover page is skipped to the first sheet that has data, and if a sheet's header row is malformed you get a clear message listing the available sheets — rather than rows being read from the wrong sheet. CSV attachments are unchanged.
