@@ -199,7 +199,7 @@ Fixed assets lock their linked line items — cannot edit account, amounts, or e
 
 **Jaz Magic**: The extraction & autofill engine. When users start from an attachment (PDF, JPG, document image), Jaz Magic is the correct path — it handles OCR, line item detection, contact matching, and CoA auto-mapping via ML learning, producing a complete draft transaction. Contact-level settings control extraction behavior: line items (detailed extraction), summary totals (single amount), or none. Up to 10 images can be merged into a single PDF. **Do not manually parse attachments to construct `POST /invoices` or `POST /bills` — always use Jaz Magic when the input is a file.**
 
-**API**: `POST /magic/createBusinessTransactionFromAttachment` (**attachment → draft transaction** — the primary endpoint for file-based creation), `POST /magic/importBankStatementFromAttachment` (bank statements), `PUT /invoices/magic-update`, `PUT /bills/magic-update`, `PUT /journals/magic-update`, `GET /invoices/magic-search`, `GET /bills/magic-search` (all magic endpoints use `x-magic-api-key`)
+**API**: `POST /magic/createBusinessTransactionFromAttachment` (**attachment → draft transaction** — the primary endpoint for file-based creation), `POST /magic/importBankStatementFromAttachment` (bank statements)
 
 ---
 
@@ -229,7 +229,7 @@ Fixed assets lock their linked line items — cannot edit account, amounts, or e
 
 **User Roles**: Admin (full access), Preparer (create drafts, submit for approval), Member (own drafts only). Granular permissions by module (AR, AP, Treasury, Journals).
 
-**API**: CRUD `GET/POST/PUT/DELETE /chart-of-accounts`, `POST /chart-of-accounts/bulk-upsert`, `POST /chart-of-accounts/search`, `GET /tax-profiles`, `POST /tax-profiles/search`, CRUD `GET/POST/PUT/DELETE /tags`, `POST /tags/search`, CRUD `GET/POST/PUT/DELETE /custom-fields`, `POST /custom-fields/search`, `POST /organization/currencies` (enable), `DELETE /organization/currencies/:code` (disable), `POST /organization-currencies/:code/rates` (set FX rate, CRUD), `GET /organization` (org details), CRUD `GET/POST/PUT/DELETE /organization/bookmarks`, CRUD `GET/POST/PUT/DELETE /nano-classifiers`, `POST /nano-classifiers/search`, `GET /organization-users`, `POST /organization-users/search`. Reference data: `GET /account-classifications`, `GET /withholding-tax-codes`, `GET /tax-types`, `GET /modules`, `GET /search` (Typesense full-text)
+**API**: CRUD `GET/POST/PUT/DELETE /chart-of-accounts`, `POST /chart-of-accounts/bulk-upsert`, `POST /chart-of-accounts/search`, `GET /tax-profiles`, `POST /tax-profiles/search`, CRUD `GET/POST/PUT/DELETE /tags`, `POST /tags/search`, CRUD `GET/POST/PUT/DELETE /custom-fields`, `POST /custom-fields/search`, `POST /organization/currencies` (enable), `DELETE /organization/currencies/:code` (disable), `POST /organization-currencies/:code/rates` (set FX rate, CRUD), `GET /organization` (org details), CRUD `GET/POST/PUT/DELETE /organization/bookmarks`, CRUD `GET/POST/PUT/DELETE /nano-classifiers`, `POST /nano-classifiers/search`, `GET /organization-users`, `POST /organization-users/search`. Reference data: `GET /account-classifications`, `GET /withholding-tax-codes`, `GET /tax-types`, `GET /modules`
 
 ---
 

@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
   <img src="https://img.shields.io/badge/MCP_tools-283-blue?style=for-the-badge" alt="283 MCP Tools">
-  <img src="https://img.shields.io/badge/API_rules-159-green?style=for-the-badge" alt="159 API Rules">
+  <img src="https://img.shields.io/badge/API_rules-158-green?style=for-the-badge" alt="158 API Rules">
   <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 Skills">
   <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
@@ -55,7 +55,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.16.1", "mcp"],
+      "args": ["-y", "jaz-clio@5.16.2", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -69,14 +69,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.16.1", "mcp"],
+      "args": ["-y", "jaz-clio@5.16.2", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.16.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.16.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### OpenAI Responses API
 
@@ -141,7 +141,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 
 | Layer | What it is | Use it alone when |
 |-------|------------|-------------------|
-| **Skills** | Domain knowledge as markdown (159 API rules, 16 recipes, 12 jobs, conversion playbooks). The agent reads these at session start. | Your AI tool reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
+| **Skills** | Domain knowledge as markdown (158 API rules, 16 recipes, 12 jobs, conversion playbooks). The agent reads these at session start. | Your AI tool reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
 | **CLI** (`jaz-clio`) | A `clio` binary: 58 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
 | **MCP server** (`clio mcp`) | The same binary in MCP mode: 283 Jaz tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
@@ -224,12 +224,12 @@ Run period work conversationally — describe it to any agent:
 
 | Reference | Lines | Content |
 |-----------|-------|---------|
-| `SKILL.md` | 548 | 159 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `SKILL.md` | 544 | 158 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
 | `endpoints.md` | 2358 | Request/response examples for every core endpoint |
 | `errors.md` | 914 | Error catalog with root causes and fixes |
 | `field-map.md` | 680 | Intuitive name → actual field name mapping |
 | `search-reference.md` | 833 | Filter fields, sort fields, operators for 28 search endpoints |
-| `full-api-surface.md` | 780 | Complete endpoint catalog (80+), enums, limits |
+| `full-api-surface.md` | 759 | Complete endpoint catalog (80+), enums, limits |
 | `dependencies.md` | 140 | Resource creation order (currencies → CoA → transactions) |
 | `feature-glossary.md` | 258 | Business context per feature |
 
@@ -331,7 +331,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.16.1", "mcp"],
+  "args": ["-y", "jaz-clio@5.16.2", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

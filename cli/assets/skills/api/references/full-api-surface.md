@@ -29,7 +29,6 @@
 | POST | `/chart-of-accounts/search` | Advanced search with filters |
 | PUT | `/chart-of-accounts/:resourceId` | Update account |
 | DELETE | `/chart-of-accounts/:resourceId` | Delete account |
-| PUT | `/chart-of-accounts/magic-update` | AI-enhanced update (x-magic-api-key) |
 
 ### Invoices
 | Method | Path | Description |
@@ -49,7 +48,6 @@
 | GET | `/invoices/:resourceId/attachments` | List attachments |
 | POST | `/invoices/:resourceId/attachments` | Upload attachment |
 | DELETE | `/invoices/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| PUT | `/invoices/magic-update` | AI-enhanced update (x-magic-api-key) |
 | POST | `/invoices/bulk-upsert` | Bulk create/update invoices (max 500) — **async**, returns `{ jobId }`. Natural key: `invoiceReference`. ISO 8601 dates only. |
 | POST | `/invoices/line-items/bulk-upsert` | Bulk create/update invoices with nested line items (max 500) — **async**, returns `{ jobId }`. |
 
@@ -70,7 +68,6 @@
 | GET | `/bills/:resourceId/attachments` | List attachments |
 | POST | `/bills/:resourceId/attachments` | Upload attachment |
 | DELETE | `/bills/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| PUT | `/bills/magic-update` | AI-enhanced update (x-magic-api-key) |
 | POST | `/bills/bulk-upsert` | Bulk create/update bills (max 500) — **async**, returns `{ jobId }`. Natural key: `billReference`. ISO 8601 dates only. |
 | POST | `/bills/line-items/bulk-upsert` | Bulk create/update bills with nested line items (max 500) — **async**, returns `{ jobId }`. |
 
@@ -107,7 +104,6 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | GET | `/customer-credit-notes/:resourceId/download` | Download PDF |
 | POST | `/customer-credit-notes/:resourceId/refunds` | Record refund(s) |
 | GET | `/customer-credit-notes/:resourceId/refunds` | List refunds |
-| PUT | `/customer-credit-notes/magic-update` | AI update |
 | POST | `/customer-credit-notes/bulk-upsert` | Bulk create/update (max 500) — **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. |
 
 ### Supplier Credit Notes
@@ -121,7 +117,6 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | DELETE | `/supplier-credit-notes/:resourceId` | Delete |
 | POST | `/supplier-credit-notes/:resourceId/refunds` | Record refund(s) |
 | GET | `/supplier-credit-notes/:resourceId/refunds` | List refunds |
-| PUT | `/supplier-credit-notes/magic-update` | AI update |
 | POST | `/supplier-credit-notes/bulk-upsert` | Bulk create/update (max 500) — **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. |
 
 ### Journals
@@ -136,7 +131,6 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | GET | `/journals/:resourceId/attachments` | List attachments |
 | POST | `/journals/:resourceId/attachments` | Upload attachment |
 | DELETE | `/journals/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| PUT | `/journals/magic-update` | AI update |
 | POST | `/journals/bulk-upsert` | Bulk create/update manual journals (max 500) — **async**, returns `{ jobId }`. Natural key: `reference`. Multi-leg `entries[]` per row. ISO 8601 dates only. |
 
 ### Cash Entries
@@ -146,12 +140,10 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | GET | `/cash-in-entries` | List cash-in |
 | GET | `/cash-in-entries/:resourceId` | Get cash-in by ID |
 | PUT | `/cash-in-entries/:resourceId` | Update cash-in |
-| PUT | `/cash-in-entries/magic-update` | AI update |
 | POST | `/cash-out-entries` | Create cash-out |
 | GET | `/cash-out-entries` | List cash-out |
 | GET | `/cash-out-entries/:resourceId` | Get cash-out by ID |
 | PUT | `/cash-out-entries/:resourceId` | Update cash-out |
-| PUT | `/cash-out-entries/magic-update` | AI update |
 | POST | `/cash-transfers` | Create cash transfer |
 | GET | `/cash-transfers` | List cash transfers |
 | GET | `/cash-transfers/:resourceId` | Get transfer by ID |
@@ -238,7 +230,6 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/contacts/search` | Advanced search |
 | PUT | `/contacts/:resourceId` | Update |
 | DELETE | `/contacts/:resourceId` | Delete |
-| PUT | `/contacts/magic-update` | AI update |
 | POST | `/contacts/bulk-upsert` | Bulk create/update contacts (max 500) — **async**, returns `{ jobId }`. Poll `/background-jobs/search` with `filter.resourceId`. |
 
 ### Contact Groups
@@ -450,17 +441,6 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/magic/createBusinessTransactionFromAttachment` | **Jaz Magic: Extraction & Autofill.** Upload PDF/JPG → full extraction pipeline (OCR, line items, contact matching, CoA ML learning) → draft transaction with all fields autofilled. Supports `INVOICE`, `BILL`, `CUSTOMER_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE`. FILE mode = multipart (`sourceFile` blob), URL mode = JSON (`sourceURL`). Async — returns `workflowResourceId` for tracking via workflow search. Request maps: `INVOICE`→`SALE`, `BILL`→`PURCHASE`, `CUSTOMER_CREDIT_NOTE`→`SALE_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE`→`PURCHASE_CREDIT_NOTE`. |
 | POST | `/magic/workflows/search` | **Workflow search.** Track magic upload status across BT extractions and bank imports. Filter by `resourceId`, `documentType` (SALE/PURCHASE/SALE_CREDIT_NOTE/PURCHASE_CREDIT_NOTE/BANK_STATEMENT), `status` (SUBMITTED/PROCESSING/COMPLETED/FAILED), `fileName`, `fileType`, `createdAt`. Response includes `businessTransactionDetails.businessTransactionResourceId` (the draft BT ID) when COMPLETED. |
 | POST | `/magic/importBankStatementFromAttachment` | Convert bank statement → entries |
-| PUT | `/invoices/magic-update` | AI-enhanced invoice update |
-| PUT | `/bills/magic-update` | AI-enhanced bill update |
-| PUT | `/customer-credit-notes/magic-update` | AI-enhanced CN update |
-| PUT | `/supplier-credit-notes/magic-update` | AI-enhanced CN update |
-| PUT | `/journals/magic-update` | AI-enhanced journal update |
-| PUT | `/cash-in-entries/magic-update` | AI-enhanced cash-in update |
-| PUT | `/cash-out-entries/magic-update` | AI-enhanced cash-out update |
-| PUT | `/contacts/magic-update` | AI-enhanced contact update |
-| PUT | `/chart-of-accounts/magic-update` | AI-enhanced CoA update |
-| ~~GET~~ | ~~`/invoices/magic-search`~~ | ~~AI-powered sales search~~ — **Do not use.** Requires `x-magic-api-key`. Use `POST /invoices/search` instead. |
-| ~~GET~~ | ~~`/bills/magic-search`~~ | ~~AI-powered purchase search~~ — **Do not use.** Requires `x-magic-api-key`. Use `POST /bills/search` instead. |
 
 ---
 
@@ -546,7 +526,6 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 |--------|------|-------------|
 | GET | `/account-classifications` | List all account classification types |
 | GET | `/withholding-tax-codes` | List withholding tax codes |
-| GET | `/search` | Full-text search (Typesense-backed) |
 
 ### Bookmarks
 | Method | Path | Description |

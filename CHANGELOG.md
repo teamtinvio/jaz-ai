@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.16.2] - 2026-06-05
+
+Documentation cleanup. The agent's API reference no longer lists a set of bulk-update and legacy search endpoints that have been retired from the platform, so the agent won't surface or attempt calls that are no longer available. Everyday accounting commands and behavior are unchanged.
+
 ## [5.16.1] - 2026-06-04
 
 Chart of accounts period locks can now be removed, not just set. Building on 5.15.0 (which added setting a lock date when you create or update a ledger account), you can now clear an account's lock date to re-open that period for editing. Setting and keeping lock dates is unchanged.
