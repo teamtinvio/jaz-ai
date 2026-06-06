@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.17.1",
+  "version": "5.18.1",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -780,7 +780,7 @@
     },
     {
       "name": "view_auto_reconciliation",
-      "description": "Generate auto-reconciliation suggestions for a bank account. READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation. Pass `includeRaw:true` to also get the unmapped payload. On high-volume accounts the engine can 500 (OOM) → the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher."
+      "description": "Generate auto-reconciliation suggestions for a bank account. READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation — pass `includeReviewDetails:true` to also get `review[]` (the not-auto lines enriched with the bank line + the matched bill/invoice) for a side-by-side \"does this match?\" card. Pass `includeRaw:true` to also get the unmapped payload. On high-volume accounts the engine can 500 (OOM) → the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher."
     },
     {
       "name": "list_fixed_assets",

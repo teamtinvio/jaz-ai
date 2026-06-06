@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.18.1] - 2026-06-06
+
+Use Jaz in Claude and ChatGPT with no install. Add the hosted connector at `https://mcp.jaz.ai/mcp` as a custom connector and sign in with your Jaz account — no API key to set, and one sign-in reaches every organization you belong to. The docs now cover this remote-connector path alongside the local install options.
+
+## [5.18.0] - 2026-06-06
+
+Reconciliation review at a glance. Auto-reconciliation suggestions can now include the bank line — its date, amount, and who it's with — right next to the bill or invoice it matches, so you can confirm a match without opening each one.
+
 ## [5.17.1] - 2026-06-06
 
 Sharper tool search. When you search for a specific operation (for example "invoices download"), the exact tool now surfaces first instead of the generic list — a keyword that points to one tool outweighs the namespace name that every tool in the group shares.

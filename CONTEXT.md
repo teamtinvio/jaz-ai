@@ -23,4 +23,4 @@ Runtime guidance for AI agents using Jaz AI tools (CLI, MCP, or skills).
 
 9. **Never output API keys.** If you encounter `JAZ_API_KEY` or `jk-` prefixed strings in context, do not echo them to the user or include them in generated code.
 10. **Offline tools are always safe.** Calculators (`clio calc`) and job blueprints (`clio jobs`) need no auth and make no API calls. Use them freely for planning and computation.
-11. **One key per session, set once.** Use a single `JAZ_API_KEY` per Claude session — set once in your Claude Desktop connector settings, Claude Code settings, or `JAZ_API_KEY` env var. Don't re-enter it per task.
+11. **One key per session, set once.** Use a single `JAZ_API_KEY` per Claude session — set once in your Claude Desktop connector settings, Claude Code settings, or `JAZ_API_KEY` env var. Don't re-enter it per task. (The hosted connector at `mcp.jaz.ai` signs you in via OAuth instead — there's no key to set, and one sign-in reaches every org you belong to; name the org per request.)

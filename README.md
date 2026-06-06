@@ -39,6 +39,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
 
 | Your agent | Install |
 |------------|---------|
+| **Claude.ai · ChatGPT · Cowork** (hosted — no install) | Add a custom connector → `https://mcp.jaz.ai/mcp` → sign in. See [Remote connector](#remote-connector--no-install). |
 | **Claude Code** | `/plugin marketplace add teamtinvio/jaz-ai` |
 | **Claude Desktop** | Install the `.mcpb` from [latest release](https://github.com/teamtinvio/jaz-ai/releases/latest) |
 | **Cursor / Windsurf** | Add the stdio MCP config (below) |
@@ -55,7 +56,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.17.1", "mcp"],
+      "args": ["-y", "jaz-clio@5.18.1", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -69,29 +70,40 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.17.1", "mcp"],
+      "args": ["-y", "jaz-clio@5.18.1", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.17.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.18.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+
+### Remote connector · no install
+
+Bring Jaz into **Claude** (claude.ai, Desktop, mobile, Cowork) and **ChatGPT** with no install and no API key in any config — just sign in.
+
+1. In Claude: **Settings → Connectors → Add custom connector** (ChatGPT: **Add a connector**).
+2. Enter the URL `https://mcp.jaz.ai/mcp`.
+3. Sign in with your Jaz account (email one-time code or passkey) and **Allow**.
+
+It uses OAuth 2.1 + PKCE — the agent receives a scoped, time-limited token tied to your account, never your password. One sign-in reaches **every organization you belong to**; name the org in your request (e.g. *"in Acme Pte Ltd, list unpaid invoices"*), and access to each is checked on every call. Same tool surface as the local server, with honest read-only / write / destructive hints. Bookkeeping only: it records entries and reads data — it moves no money.
 
 ### OpenAI Responses API
 
-The Responses API only accepts **HTTP MCP** (no stdio). To use Jaz from a Responses API tool, host the MCP server behind HTTP and point at it:
+The Responses API only accepts **HTTP MCP** (no stdio). Point it at the hosted Jaz connector:
 
 ```json
 {
   "type": "mcp",
   "server_label": "jaz",
-  "server_url": "https://your-hosted-jaz-mcp/",
+  "server_url": "https://mcp.jaz.ai/mcp",
+  "headers": { "Authorization": "Bearer <your-oauth-token>" },
   "require_approval": "never"
 }
 ```
 
-A managed hosted endpoint isn't published yet; use the OpenAI Codex CLI / Agents SDK path above for stdio in the meantime.
+The endpoint is OAuth-gated (no static API key) — obtain a token through the [remote connector](#remote-connector--no-install) sign-in and pass it as a bearer token. To use a plain API key instead, take the OpenAI Codex CLI / Agents SDK stdio path above.
 
 **Just want skills** (no MCP, any agent on the [Agent Skills](https://agentskills.io) standard):
 
@@ -145,7 +157,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 | **CLI** (`jaz-clio`) | A `clio` binary: 58 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
 | **MCP server** (`clio mcp`) | The same binary in MCP mode: 283 Jaz tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
-Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together.
+Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install) — same tools either way.
 
 ## Quick start
 
@@ -331,7 +343,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.17.1", "mcp"],
+  "args": ["-y", "jaz-clio@5.18.1", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
@@ -381,6 +393,8 @@ Or use multi-org mode and skip restarts: comma-separated keys (`jk-aaa,jk-bbb`) 
 ## Privacy & security
 
 Runs entirely on your machine. API calls go directly from your machine to the Jaz API over HTTPS. No telemetry. The API key lives locally in `~/.config/jaz-clio/credentials.json`.
+
+The **hosted remote connector** (`mcp.jaz.ai`) is different by design: you connect over OAuth 2.1 + PKCE (no API key stored anywhere, never your password), requests run server-side over HTTPS, and the connector reaches the organizations your Jaz account belongs to — access is checked on every call.
 
 Full policy: [jaz.ai/legal](https://jaz.ai/legal). Vulnerability disclosure: [SECURITY.md](SECURITY.md).
 
