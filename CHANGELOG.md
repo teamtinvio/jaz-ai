@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.18.3] - 2026-06-07
+
+Internal test-suite hardening. No user-facing changes since v5.18.2.
+
 ## [5.18.2] - 2026-06-07
 
 Internal release. No user-facing changes since v5.18.1.
