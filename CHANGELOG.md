@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.18.2] - 2026-06-07
+
+Internal release. No user-facing changes since v5.18.1.
+
 ## [5.18.1] - 2026-06-06
 
 Use Jaz in Claude and ChatGPT with no install. Add the hosted connector at `https://mcp.jaz.ai/mcp` as a custom connector and sign in with your Jaz account — no API key to set, and one sign-in reaches every organization you belong to. The docs now cover this remote-connector path alongside the local install options.
