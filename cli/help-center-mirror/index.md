@@ -1,4 +1,4 @@
-Auto-generated from [help.jaz.ai](https://help.jaz.ai) — 2026-06-01 — 186 articles
+Auto-generated from [help.jaz.ai](https://help.jaz.ai) — 2026-06-08 — 187 articles
 
 | Section | Articles | File |
 |---|---|---|
@@ -8,7 +8,7 @@ Auto-generated from [help.jaz.ai](https://help.jaz.ai) — 2026-06-01 — 186 ar
 | Customer Credits | 19 | [customer-credits.md](customer-credits.md) |
 | Supplier Credits | 18 | [supplier-credits.md](supplier-credits.md) |
 | Deposits | 1 | [deposits.md](deposits.md) |
-| Journal Entries | 3 | [journal-entries.md](journal-entries.md) |
+| Journal Entries | 4 | [journal-entries.md](journal-entries.md) |
 | Reports | 14 | [reports.md](reports.md) |
 | Contacts | 5 | [contacts.md](contacts.md) |
 | Products | 5 | [products.md](products.md) |

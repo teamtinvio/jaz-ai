@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 5.18.3
+version: 5.19.0
 description: >-
   Use this skill for recurring accounting workflows — month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,

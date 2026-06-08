@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.18.3",
+  "version": "5.19.0",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -100,7 +100,7 @@
     },
     {
       "name": "get_contact",
-      "description": "Get full contact details by resourceId."
+      "description": "Fetch a contact by internal resourceId. To search by other fields, use `search_contacts`."
     },
     {
       "name": "get_contact_signals",
@@ -124,7 +124,7 @@
     },
     {
       "name": "get_invoice",
-      "description": "Get full invoice details including line items, payments, totals."
+      "description": "Fetch an invoice by internal resourceId. To search by other fields, use `search_invoices`."
     },
     {
       "name": "create_invoice",
@@ -164,7 +164,7 @@
     },
     {
       "name": "get_bill",
-      "description": "Get full bill details."
+      "description": "Fetch a bill by internal resourceId. To search by other fields, use `search_bills`."
     },
     {
       "name": "create_bill",
@@ -200,7 +200,7 @@
     },
     {
       "name": "get_sale_order",
-      "description": "Get a Sale Quote or Sale Order by resourceId — line items, totals, status, orderState (fulfillment), and saleQuoteResourceId link."
+      "description": "Fetch a Sale Quote or Sale Order by internal resourceId. To search by other fields, use `search_sale_orders`."
     },
     {
       "name": "search_sale_orders",
@@ -220,7 +220,7 @@
     },
     {
       "name": "get_purchase_order",
-      "description": "Get a Purchase Request or Purchase Order by resourceId — line items, totals, status, orderState (fulfillment), and purchaseRequestResourceId link."
+      "description": "Fetch a Purchase Request or Purchase Order by internal resourceId. To search by other fields, use `search_purchase_orders`."
     },
     {
       "name": "search_purchase_orders",
@@ -320,7 +320,7 @@
     },
     {
       "name": "get_item",
-      "description": "Get full item details by resourceId."
+      "description": "Fetch an item by internal resourceId. To search by other fields, use `search_items`."
     },
     {
       "name": "create_item",
@@ -376,7 +376,7 @@
     },
     {
       "name": "get_capsule",
-      "description": "Get full capsule details by resourceId."
+      "description": "Fetch a capsule by internal resourceId. To search by other fields, use `search_capsules`."
     },
     {
       "name": "create_capsule",
@@ -400,7 +400,7 @@
     },
     {
       "name": "get_customer_credit_note",
-      "description": "Get full customer credit note details including line items."
+      "description": "Fetch a customer credit note by internal resourceId. To search by other fields, use `search_customer_credit_notes`."
     },
     {
       "name": "create_customer_credit_note",
@@ -436,7 +436,7 @@
     },
     {
       "name": "get_supplier_credit_note",
-      "description": "Get full supplier credit note details including line items."
+      "description": "Fetch a supplier credit note by internal resourceId. To search by other fields, use `search_supplier_credit_notes`."
     },
     {
       "name": "create_supplier_credit_note",
@@ -520,7 +520,7 @@
     },
     {
       "name": "get_cash_in",
-      "description": "Get a cash-in entry by resourceId."
+      "description": "Fetch a cash-in entry by internal resourceId. To search by other fields, use `search_cashflow_transactions`."
     },
     {
       "name": "update_cash_in",
@@ -528,7 +528,7 @@
     },
     {
       "name": "get_cash_out",
-      "description": "Get a cash-out entry by resourceId."
+      "description": "Fetch a cash-out entry by internal resourceId. To search by other fields, use `search_cashflow_transactions`."
     },
     {
       "name": "update_cash_out",
@@ -1209,6 +1209,10 @@
     {
       "name": "search_help_center",
       "description": "Search the Jaz help center for how-to articles, feature guides, and accounting concepts. Use this for \"how do I...\" or \"what is...\" questions about Jaz: bank reconciliation, GST/VAT filing, multi-currency, fixed assets, custom fields, integrations, and so on. Returns top matching articles with title, section, content, and source URL."
+    },
+    {
+      "name": "present_questions",
+      "description": "Present the user with a bounded multiple-choice question as an interactive pick-list, instead of asking in prose. Use as your FINAL action when you need the user to choose among a KNOWN, finite set of options to continue (e.g. \"which bank account?\", \"which of these duplicate bills?\"). List the options and stop — the user's pick arrives as their next message and starts a new turn. Do NOT use for open-ended input (names, amounts, free text — ask in plain prose) or for confirming destructive actions (confirm in prose). This is terminal: do not call further tools or re-list the options in text afterward."
     }
   ]
 }

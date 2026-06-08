@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.19.0] - 2026-06-09
+
+- Aged receivables and payables now return a compact aging-bucket summary by default; ask for the per-contact breakdown to dig in.
+- Steadier lookups by name or number — a name or reference is searched for, not mistaken for an internal id.
+- Clearer numbers — negatives show in parentheses.
+
 ## [5.18.3] - 2026-06-07
 
 Internal test-suite hardening. No user-facing changes since v5.18.2.
