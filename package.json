@@ -1,6 +1,6 @@
 {
   "name": "jaz-clio",
-  "version": "5.19.0",
+  "version": "5.20.0",
   "description": "Clio: Command Line Interface Operator for Jaz AI.",
   "type": "module",
   "bin": {
@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc && node --input-type=module -e \"import{readFileSync,writeFileSync}from'fs';const c=readFileSync('dist/index.js','utf8');if(!c.startsWith('#!')){writeFileSync('dist/index.js','#!/usr/bin/env node\\n'+c)}\"",
-    "postbuild": "rm -rf dist/agent/prompts && cp -r src/agent/prompts dist/agent/prompts && mkdir -p dist/eval/rubrics && cp src/eval/rubrics/*.json dist/eval/rubrics/",
+    "postbuild": "rm -rf dist/agent/prompts && cp -r src/agent/prompts dist/agent/prompts && mkdir -p dist/eval/rubrics && cp src/eval/rubrics/*.json dist/eval/rubrics/ && cp src/core/registry/dashboard-routes-manifest.json dist/core/registry/dashboard-routes-manifest.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "eval:agent:live": "bash scripts/agent-eval-live.sh",

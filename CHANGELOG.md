@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.0] - 2026-06-10
+
+- Get a direct link to anywhere in Jaz. Ask for a report, a list, or a specific record — a sale, a bill, a credit note — and get back a URL that opens it straight away, pointed at the right organization.
+
 ## [5.19.0] - 2026-06-09
 
 - Aged receivables and payables now return a compact aging-bucket summary by default; ask for the per-contact breakdown to dig in.
