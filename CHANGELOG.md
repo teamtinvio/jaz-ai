@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.2] - 2026-06-10
+
+- Deep-link destination discovery recovers from no-match searches: when a term like "card details" finds nothing, it now suggests retrying with broader product-area terms ("billing", "settings") instead of returning an empty result.
+
 ## [5.20.1] - 2026-06-10
 
 Internal release automation update. No user-facing changes since v5.20.0.
