@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.1] - 2026-06-10
+
+Internal release automation update. No user-facing changes since v5.20.0.
+
 ## [5.20.0] - 2026-06-10
 
 - Get a direct link to anywhere in Jaz. Ask for a report, a list, or a specific record — a sale, a bill, a credit note — and get back a URL that opens it straight away, pointed at the right organization.
