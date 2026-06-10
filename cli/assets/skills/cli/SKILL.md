@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.20.2
+version: 5.20.3
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -274,6 +274,10 @@ See `references/command-catalog.md` for the full catalog with subcommands and fl
 Offline commands (no auth needed): `calc`, `jobs` (blueprints only), `capsule-transaction --plan`, `help-center`, `init`, `versions`, `update`
 
 Everything else requires authentication (API key).
+
+## Dashboard Deep Links (no CLI command — by design)
+
+The navigation tools (`get_dashboard_url`, `find_dashboard_destinations`) build dashboard URLs for the user ("open this invoice", "take me to the P&L"). They are agent/MCP tools only — read-only tools get no CLI twin (one canonical surface per operation). Never hand-construct a dashboard URL in a script; if you need a link, call the MCP tool. Full usage rules live in the jaz-api skill under "Dashboard Deep Links".
 
 ## Error Handling
 

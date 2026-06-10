@@ -56,7 +56,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.2", "mcp"],
+      "args": ["-y", "jaz-clio@5.20.3", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -70,14 +70,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.2", "mcp"],
+      "args": ["-y", "jaz-clio@5.20.3", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.20.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.20.3` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -236,7 +236,7 @@ Run period work conversationally — describe it to any agent:
 
 | Reference | Lines | Content |
 |-----------|-------|---------|
-| `SKILL.md` | 544 | 158 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `SKILL.md` | 548 | 158 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
 | `endpoints.md` | 2358 | Request/response examples for every core endpoint |
 | `errors.md` | 914 | Error catalog with root causes and fixes |
 | `field-map.md` | 680 | Intuitive name → actual field name mapping |
@@ -343,7 +343,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.20.2", "mcp"],
+  "args": ["-y", "jaz-clio@5.20.3", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

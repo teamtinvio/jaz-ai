@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.2",
+  "version": "5.20.3",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1220,7 +1220,7 @@
     },
     {
       "name": "get_dashboard_url",
-      "description": "Build a deep link to a dashboard screen or record so you can hand the user a URL (\"here is the page: <url>\"). `destination` is a key from find_dashboard_destinations — a screen (e.g. \"sales.transactions.active-sales\", \"reports.profit-and-loss\") or a record modal (e.g. \"sales.modal.view-sale\", \"sales.modal.new-sale\", \"settings.modal.user_management\"). For a record-specific modal (view/edit/duplicate a particular record) pass `resourceId` (the Jaz resourceId of that record); omit it for screens and for create/\"new\" modals. The link opens in the user's current org. Returns { url, kind, label }."
+      "description": "Build a deep link to a dashboard screen or record so you can hand the user a URL (\"here is the page: <url>\"). `destination` is a key from find_dashboard_destinations — a screen (e.g. \"sales.transactions.active-sales\", \"reports.profit-and-loss\") or a record modal (e.g. \"sales.modal.view-sale\", \"sales.modal.new-sale\", \"settings.modal.user_management\"). For a record-specific modal (view/edit/duplicate a particular record) pass `resourceId` (the Jaz resourceId of that record); omit it for screens and for create/\"new\" modals. The link opens in the user's current org. Returns { url, kind, label }. Never write dashboard URLs or destination keys from memory — always resolve them through these tools."
     }
   ]
 }

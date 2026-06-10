@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.20.3] - 2026-06-10
+
+- Tool search understands natural phrasing better: filler words no longer skew results, so requests like "take me to reports" or "share a link to this" reliably surface the navigation tools.
+- The bundled agent skills now document dashboard deep links end to end — coding agents build links with the navigation tools instead of guessing URLs.
+
 ## [5.20.2] - 2026-06-10
 
 - Deep-link destination discovery recovers from no-match searches: when a term like "card details" finds nothing, it now suggests retrying with broader product-area terms ("billing", "settings") instead of returning an empty result.

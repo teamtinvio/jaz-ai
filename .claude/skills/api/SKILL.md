@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.20.2
+version: 5.20.3
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 141 production gotchas, error
@@ -515,6 +515,10 @@ Supports `--json` for structured output. 186 articles across 20 sections. Automa
 **When to use `clio help-center` vs reading raw files:**
 - Use `clio help-center` when you need specific answers (returns only relevant articles, saves context)
 - Read `help-center-mirror/*.md` directly only when you need to scan an entire section comprehensively
+
+## Dashboard Deep Links (navigation tools)
+
+When the user wants to OPEN, SEE, or SHARE something in the Jaz dashboard ("open this invoice", "take me to the P&L"), hand them a real URL via two agent (MCP) tools — deliberately no CLI command: `find_dashboard_destinations` discovers the destination key (filter by `query`/`resource`/`kind`; keys are named by product area, not task wording — on zero matches retry broader: "billing", not "card"), and `get_dashboard_url` turns a key into `{ url, kind, label }`. Screens are dotted route paths (`reports.profit-and-loss`); record modals are `<resource>.modal.<type>` (`sales.modal.view-sale`). Record-specific modals (view/edit/duplicate one record) REQUIRE `resourceId` — the same Jaz resourceId from the search/get that found the record; screens and create/"new" modals take none (a resourceId on a screen is rejected). NEVER write a dashboard URL by hand and NEVER guess a destination key — routes are not guessable, and a wrong link is worse than no link; if `get_dashboard_url` errors, follow its hint (near-matches + discovery pointer) and say the link could not be built rather than improvising one. The org query param is appended automatically when the surface knows the acting org; API-key surfaces open in the user's current org on the app.jaz.ai host. Examples: "open invoice INV-042" → `search_invoices` → `get_dashboard_url("sales.modal.view-sale", resourceId)`; "take me to the P&L" → `get_dashboard_url("reports.profit-and-loss")`; "where do I manage users?" → `find_dashboard_destinations("user")` → `get_dashboard_url("settings.modal.user_management")`.
 
 ## Recommended Client Patterns
 
