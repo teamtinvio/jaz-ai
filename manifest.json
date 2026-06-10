@@ -704,7 +704,7 @@
     },
     {
       "name": "create_bt_from_attachment",
-      "description": "Create a business transaction (invoice/bill/credit note) from a file, a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async."
+      "description": "Create a business transaction (invoice/bill/credit note) from a file, a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. When the host conversation provides a file with the call, omit all source arguments — the file is used automatically."
     },
     {
       "name": "get_magic_workflow_status",
@@ -728,7 +728,7 @@
     },
     {
       "name": "add_attachment",
-      "description": "Add an attachment to a business transaction. Provide sourceUrl (downloads and uploads as file) or attachmentId (links existing). Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them."
+      "description": "Add an attachment to a business transaction. Provide sourceUrl (downloads and uploads as file) or attachmentId (links existing); a file provided by the host conversation is used when neither is given. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them."
     },
     {
       "name": "delete_attachment",
