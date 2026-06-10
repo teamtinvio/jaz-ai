@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.3",
+  "version": "5.20.4",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1212,7 +1212,7 @@
     },
     {
       "name": "present_questions",
-      "description": "Present the user with a bounded multiple-choice question as an interactive pick-list, instead of asking in prose. Use as your FINAL action when you need the user to choose among a KNOWN, finite set of options to continue (e.g. \"which bank account?\", \"which of these duplicate bills?\"). List the options and stop — the user's pick arrives as their next message and starts a new turn. Do NOT use for open-ended input (names, amounts, free text — ask in plain prose) or for confirming destructive actions (confirm in prose). This is terminal: do not call further tools or re-list the options in text afterward."
+      "description": "Present the user with a bounded multiple-choice question (or a short sequence of them) as an interactive pick-list, instead of asking in prose. Use as your FINAL action when the user must choose among a KNOWN, finite set of options you ALREADY have from context (a prior search/list result, org defaults, or your own knowledge) to continue (e.g. \"which bank account?\", \"which of these duplicate bills?\"). Give 2-4 options per question — curate to the most likely, never dump a long list — and at most 4 questions; set multiSelect per question when more than one may apply. List the options and stop — the user's pick arrives as their next message and starts a new turn. Ask several questions at once when more than one thing is unspecified. Prose-ask only when there's no bounded set to offer (a free-text name or amount), to confirm destructive actions, or instead of fetching data just to populate options. Terminal: do not call further tools or re-list the options in text afterward."
     },
     {
       "name": "find_dashboard_destinations",

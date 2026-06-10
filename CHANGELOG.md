@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.4] - 2026-06-11
+
+Internal release. No user-facing changes to the extension since v5.20.3.
+
 ## [5.20.3] - 2026-06-10
 
 - Tool search understands natural phrasing better: filler words no longer skew results, so requests like "take me to reports" or "share a link to this" reliably surface the navigation tools.
