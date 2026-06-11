@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.7] - 2026-06-11
+
+Internal type-safety and test hardening. No user-facing changes since v5.20.6.
+
 ## [5.20.6] - 2026-06-11
 
 - Microsoft 365 Copilot support: connect Jaz to a Copilot Studio agent through the hosted connector. OAuth sign-in, no install. The README documents the full setup, plus the local VS Code path for the Microsoft stack.
