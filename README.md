@@ -2,9 +2,9 @@
 
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
-  <img src="https://img.shields.io/badge/MCP_tools-283-blue?style=for-the-badge" alt="283 MCP Tools">
-  <img src="https://img.shields.io/badge/API_rules-158-green?style=for-the-badge" alt="158 API Rules">
-  <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 Skills">
+  <img src="https://img.shields.io/badge/tools-289-blue?style=for-the-badge" alt="289 tools">
+  <img src="https://img.shields.io/badge/API_rules-158-green?style=for-the-badge" alt="158 API rules">
+  <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 skills">
   <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
   <img src="https://img.shields.io/badge/jobs-12-teal?style=for-the-badge" alt="12 Jobs">
@@ -17,7 +17,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/stargazers"><img src="https://img.shields.io/github/stars/teamtinvio/jaz-ai?style=flat-square&logo=github" alt="GitHub stars"></a>
 </p>
 
-The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 6 skills, 16 IFRS recipes, 13 calculators, 12 close playbooks. Designed for any agent: Claude, GPT, Gemini, Copilot, Cursor. Hyper token economics, one-shot discovery, structured errors that an LLM can recover from.
+The complete agent surface for [Jaz](https://jaz.ai) accounting. 289 tools, 6 skills, 16 IFRS recipes, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, one-shot tool selection, structured errors an agent can recover from.
 
 > Also fully compatible with [Juan Accounting](https://juan.ac) (same API surface).
 
@@ -39,7 +39,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
 
 | Your agent | Install |
 |------------|---------|
-| **Claude.ai · ChatGPT · Cowork** (hosted — no install) | Add a custom connector → `https://mcp.jaz.ai/mcp` → sign in. See [Remote connector](#remote-connector--no-install). |
+| **Claude.ai · ChatGPT · Cowork** (hosted, no install) | Add a custom connector → `https://mcp.jaz.ai/mcp` → sign in. See [Remote connector](#remote-connector--no-install). |
 | **Claude Code** | `/plugin marketplace add teamtinvio/jaz-ai` |
 | **Claude Desktop** | Install the `.mcpb` from [latest release](https://github.com/teamtinvio/jaz-ai/releases/latest) |
 | **Cursor / Windsurf** | Add the stdio MCP config (below) |
@@ -56,38 +56,38 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 283 MCP tools, 
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.4", "mcp"],
+      "args": ["-y", "jaz-clio@5.20.5", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-**VS Code MCP config** (`.vscode/mcp.json` — workspace-scoped — used by VS Code itself and the GitHub Copilot Chat extension):
+**VS Code MCP config** (`.vscode/mcp.json`, workspace-scoped, read by VS Code and the GitHub Copilot Chat extension):
 
 ```json
 {
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.4", "mcp"],
+      "args": ["-y", "jaz-clio@5.20.5", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.20.4` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.20.5` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
-Bring Jaz into **Claude** (claude.ai, Desktop, mobile, Cowork) and **ChatGPT** with no install and no API key in any config — just sign in.
+Bring Jaz into **Claude** (claude.ai, Desktop, mobile, Cowork) and **ChatGPT** with no install and no API key in any config. Just sign in.
 
 1. In Claude: **Settings → Connectors → Add custom connector** (ChatGPT: **Add a connector**).
 2. Enter the URL `https://mcp.jaz.ai/mcp`.
 3. Sign in with your Jaz account (email one-time code or passkey) and **Allow**.
 
-It uses OAuth 2.1 + PKCE — the agent receives a scoped, time-limited token tied to your account, never your password. One sign-in reaches **every organization you belong to**; name the org in your request (e.g. *"in Acme Pte Ltd, list unpaid invoices"*), and access to each is checked on every call. Same tool surface as the local server, with honest read-only / write / destructive hints. Bookkeeping only: it records entries and reads data — it moves no money.
+It uses OAuth 2.1 + PKCE: the agent receives a scoped, time-limited token tied to your account, never your password. One sign-in reaches **every organization you belong to**; name the org in your request (e.g. *"in Acme Pte Ltd, list unpaid invoices"*), and access to each is checked on every call. Same tool surface as the local server, with honest read-only / write / destructive hints. Bookkeeping only: it records entries and reads data. It moves no money.
 
 ### OpenAI Responses API
 
@@ -103,7 +103,7 @@ The Responses API only accepts **HTTP MCP** (no stdio). Point it at the hosted J
 }
 ```
 
-The endpoint is OAuth-gated (no static API key) — obtain a token through the [remote connector](#remote-connector--no-install) sign-in and pass it as a bearer token. To use a plain API key instead, take the OpenAI Codex CLI / Agents SDK stdio path above.
+The endpoint is OAuth-gated (no static API key). Obtain a token through the [remote connector](#remote-connector--no-install) sign-in and pass it as a bearer token. To use a plain API key instead, take the OpenAI Codex CLI / Agents SDK stdio path above.
 
 **Just want skills** (no MCP, any agent on the [Agent Skills](https://agentskills.io) standard):
 
@@ -116,9 +116,9 @@ npx jaz-clio init --check          # report drift between installed agent-rules 
 
 Skills install to `.agents/skills/` (Agent Skills standard, used by Cursor, Copilot, Codex, Antigravity, Windsurf, Goose, Roo Code, Junie, Amp, and more) or `.claude/skills/` (Claude Code).
 
-`init` also writes a one-page `jaz-agent-rules.md` block to the path your platform reads on workspace open, so any agent (Claude / GPT / Gemini / Copilot / Cursor) starts every session with the meta-tool discovery flow, the 6 API gotchas, and the recipe-engine carve-out (no double-posting on `fx-reval`).
+`init` also writes a one-page `jaz-agent-rules.md` block to the path your platform reads on workspace open, so any agent (Claude / GPT / Gemini / Copilot / Cursor) starts every session with the meta-tool discovery flow, the 6 API gotchas, and the recipe-engine carve-outs.
 
-The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.Y.Z -->` / `<!-- END jaz-agent-rules -->`), so re-running `init` updates only the Jaz block — your own rules above and below stay untouched. Run `clio init --check` to report drift between your installed version and the current package version (exit 1 = drift, exit 0 = current).
+The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.Y.Z -->` / `<!-- END jaz-agent-rules -->`), so re-running `init` updates only the Jaz block; your own rules above and below stay untouched. Run `clio init --check` to report drift between your installed version and the current package version (exit 1 = drift, exit 0 = current).
 
 | Platform | Rules file path |
 |---|---|
@@ -131,19 +131,19 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 
 ## What you get
 
-- **283 MCP tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and flags idempotency. The LLM picks right on the first call.
+- **289 tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and flags idempotency. The LLM picks right on the first call.
 - **6 skills** with the production-grade rules and playbooks any agent needs:
 
 | Skill | What it teaches an agent |
 |-------|--------------------------|
-| **jaz-api** | 141 production rules, every endpoint, error catalog, field aliases, response shapes |
+| **jaz-api** | 158 API rules, every endpoint, error catalog, field aliases, response shapes |
 | **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
 | **jaz-conversion** | Xero / QuickBooks / Sage / MYOB / Excel migration, CoA mapping, FX, clearing accounts, TB verification |
 | **jaz-jobs** | 12 close playbooks (month-end / quarter-end / year-end / bank-recon / GST-VAT / payment-run / credit-control / supplier-recon / audit-prep / FA-review / statutory-filing) + Singapore Form C-S |
 | **jaz-recipes** | 16 IFRS recipes (loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal, etc.) + 13 calculators |
+| **jaz-pseudo-sql** | Read-only SQL over the curated reporting schema: ad-hoc questions, joins and aggregates, sync preview or async CSV export |
 
 - **3 meta-tools** (`search_tools`, `describe_tools`, `execute_tool`) for deferred discovery so the full catalog never has to load into context.
-- **OpenAPI spec** at `spec/openapi.yaml` synced weekly from the source.
 - **Help center mirror** at `help-center-mirror/` synced weekly from Intercom.
 - **Structured-search DSL** for natural-feeling queries (`status:unpaid amount:>500 contact:Acme`).
 
@@ -155,9 +155,9 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 |-------|------------|-------------------|
 | **Skills** | Domain knowledge as markdown (158 API rules, 16 recipes, 12 jobs, conversion playbooks). The agent reads these at session start. | Your AI tool reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
 | **CLI** (`jaz-clio`) | A `clio` binary: 58 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
-| **MCP server** (`clio mcp`) | The same binary in MCP mode: 283 Jaz tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
+| **MCP server** (`clio mcp`) | The same binary in MCP mode: 289 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
-Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install) — same tools either way.
+Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install). Same tools either way.
 
 ## Quick start
 
@@ -191,7 +191,7 @@ Built so any LLM sees the right tool fast and calls it once.
 
 | What | How |
 |------|-----|
-| **MCP delivery** | 3 meta-tools (~600 tokens) instead of 283 (~78KB). LLM searches into the catalog only when needed. |
+| **MCP delivery** | 3 meta-tools (~600 tokens) instead of all 289 tools (~78KB). LLM searches into the catalog only when needed. |
 | **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
 | **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
 | **Discovery ranker** | In-memory, no network round-trip. Scans tool name + description + searchHint + namespace. |
@@ -206,12 +206,11 @@ Built so any LLM sees the right tool fast and calls it once.
 - **Disambiguation is explicit.** Tools that look similar carry "USE THIS, not X" preambles. No more guessing.
 - **Errors are structured.** Server validation failures return field-level details so the agent can self-correct.
 - **Multi-org is native.** Comma-separated keys (`jk-aaa,jk-bbb`) or PATs unlock cross-org tools (`list_organizations`, per-call `org_id`).
-- **OpenAPI spec at `spec/openapi.yaml`** for code-gen pipelines and custom SDKs.
 - **CONTEXT.md** captures runtime rules-of-engagement (bootstrap with `clio context --json`, search before create, mutate as draft first, never echo API keys).
 
 ## For accountants
 
-Run period work conversationally — describe it to any agent:
+Run period work conversationally. Describe it to any agent:
 
 > Close March for Acme. Bank-recon DBS Current first.
 > File GST for Q1.
@@ -220,7 +219,6 @@ Run period work conversationally — describe it to any agent:
 
 ## Reference
 
-- **[CLAUDE.md](CLAUDE.md)** · architecture, source structure, version-bump procedure, contributor guide
 - **[CONTEXT.md](CONTEXT.md)** · runtime rules-of-engagement for agents using the stack
 - **[CHANGELOG.md](CHANGELOG.md)** · release notes
 - **[Skills source](src/skills/)** · all 6 skills (jaz-api / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-pseudo-sql)
@@ -234,16 +232,16 @@ Run period work conversationally — describe it to any agent:
 
 ### jaz-api
 
-| Reference | Lines | Content |
-|-----------|-------|---------|
-| `SKILL.md` | 548 | 158 rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
-| `endpoints.md` | 2358 | Request/response examples for every core endpoint |
-| `errors.md` | 914 | Error catalog with root causes and fixes |
-| `field-map.md` | 680 | Intuitive name → actual field name mapping |
-| `search-reference.md` | 833 | Filter fields, sort fields, operators for 28 search endpoints |
-| `full-api-surface.md` | 759 | Complete endpoint catalog (80+), enums, limits |
-| `dependencies.md` | 140 | Resource creation order (currencies → CoA → transactions) |
-| `feature-glossary.md` | 258 | Business context per feature |
+| Reference | Content |
+|-----------|---------|
+| `SKILL.md` | 158 API rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `endpoints.md` | Request/response examples for every core endpoint |
+| `errors.md` | Error catalog with root causes and fixes |
+| `field-map.md` | Intuitive name → actual field name mapping |
+| `search-reference.md` | Filter fields, sort fields, operators for 28 search endpoints |
+| `full-api-surface.md` | Complete endpoint catalog, enums, limits |
+| `dependencies.md` | Resource creation order (currencies → CoA → transactions) |
+| `feature-glossary.md` | Business context per feature |
 
 ### jaz-recipes (16 IFRS recipes + 13 calculators)
 
@@ -343,7 +341,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.20.4", "mcp"],
+  "args": ["-y", "jaz-clio@5.20.5", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
@@ -367,11 +365,11 @@ Each skill folder must contain `SKILL.md` plus its reference files. Manual copie
 npm's global directory needs elevated permissions on macOS/Linux without nvm.
 
 ```bash
-# Option A — nvm (recommended)
+# Option A: nvm (recommended)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 nvm install --lts && npm install -g jaz-clio
 
-# Option B — fix npm permissions
+# Option B: fix npm permissions
 mkdir -p ~/.npm-global && npm config set prefix ~/.npm-global
 export PATH="$HOME/.npm-global/bin:$PATH"   # Add to ~/.bashrc or ~/.zshrc
 npm install -g jaz-clio
@@ -394,7 +392,7 @@ Or use multi-org mode and skip restarts: comma-separated keys (`jk-aaa,jk-bbb`) 
 
 Runs entirely on your machine. API calls go directly from your machine to the Jaz API over HTTPS. No telemetry. The API key lives locally in `~/.config/jaz-clio/credentials.json`.
 
-The **hosted remote connector** (`mcp.jaz.ai`) is different by design: you connect over OAuth 2.1 + PKCE (no API key stored anywhere, never your password), requests run server-side over HTTPS, and the connector reaches the organizations your Jaz account belongs to — access is checked on every call.
+The **hosted remote connector** (`mcp.jaz.ai`) is different by design: you connect over OAuth 2.1 + PKCE (no API key stored anywhere, never your password), requests run server-side over HTTPS, and the connector reaches the organizations your Jaz account belongs to; access is checked on every call.
 
 Full policy: [jaz.ai/legal](https://jaz.ai/legal). Vulnerability disclosure: [SECURITY.md](SECURITY.md).
 
@@ -406,4 +404,4 @@ Full policy: [jaz.ai/legal](https://jaz.ai/legal). Vulnerability disclosure: [SE
 
 ## License
 
-[MIT](LICENSE) · Copyright (c) 2026 Tinvio / Jaz · Clio is a registered trademark of Tinvio.
+[MIT](LICENSE) · Copyright (c) 2026 Jaz · Clio is a registered trademark.

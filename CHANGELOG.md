@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.5] - 2026-06-11
+
+- Documentation refresh: accurate tool and capability counts, leaner and cleaner READMEs.
+
 ## [5.20.4] - 2026-06-11
 
 Internal release. No user-facing changes to the extension since v5.20.3.

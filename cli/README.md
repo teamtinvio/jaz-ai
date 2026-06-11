@@ -3,11 +3,11 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/v/jaz-clio?style=for-the-badge&logo=npm" alt="npm"></a>
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/dm/jaz-clio?style=for-the-badge&label=downloads" alt="npm downloads"></a>
-  <img src="https://img.shields.io/badge/tools-283-blue?style=for-the-badge" alt="283 Tools">
+  <img src="https://img.shields.io/badge/tools-289-blue?style=for-the-badge" alt="289 tools">
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
-283 tools. 13 financial calculators. 12 job playbooks. 130 API rules. 16 IFRS recipes.
+289 tools. 58 command groups. 13 calculators. 12 job playbooks. 158 API rules. 16 IFRS recipes.
 
 ```bash
 npm install -g jaz-clio
@@ -17,18 +17,18 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 
 ## Contents
 
-- [Three Ways In](#three-ways-in) — CLI, MCP, Skills
-- [CLI](#cli) — 55 command groups
-- [MCP Server](#mcp-server) — 283 tools for AI agents
-- [Skills](#skills) — Teach any AI the Jaz API
-- [Setup](#setup) — Auth, multi-org, automation
-- [Semantic help-center search](#help-center-semantic-search-optional) — Optional OpenAI-backed retrieval
+- [Three Ways In](#three-ways-in) · CLI, MCP, Skills
+- [CLI](#cli) · 58 command groups
+- [MCP Server](#mcp-server) · 289 tools for AI agents
+- [Skills](#skills) · Teach any AI the Jaz API
+- [Setup](#setup) · Auth, multi-org, automation
+- [Semantic help-center search](#help-center-semantic-search-optional) · Optional OpenAI-backed retrieval
 
 ## Three Ways In
 
 | | What happens | Try it |
 |---|---|---|
-| **CLI** | 57 command groups, every accounting operation | `clio invoices list` |
+| **CLI** | Every accounting operation as a command | `clio invoices list` |
 | **MCP** | Plug into Claude Code, Cursor, Codex, Copilot | `clio mcp` |
 | **Skills** | Teach any AI tool the Jaz API | `clio init` |
 
@@ -47,15 +47,15 @@ clio invoices search --query 'status:unpaid AND $500+'  # Structured per-entity 
 clio invoices search --query 'status:unpaid' --view lean # Compact summary rows (id + key fields), then drill in with get
 ```
 
-55 command groups. 16 report types. 13 calculators. 12 job playbooks. Every command supports `--json`. Run `clio --help` for the full list.
+58 command groups. 16 report types. 13 calculators. 12 job playbooks. Every command supports `--json`. Run `clio --help` for the full list.
 
 ---
 
 ## MCP Server
 
-289 CLI tools, available to any AI agent that speaks MCP. Runs locally — no cloud, no ports.
+289 tools, available to any AI agent that speaks MCP. Runs locally: no cloud, no ports.
 
-> **No install at all?** Claude.ai, ChatGPT, and Cowork can use Jaz via the **hosted connector** — add `https://mcp.jaz.ai/mcp` as a custom connector and sign in (OAuth, no key). The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
+> **No install at all?** Claude.ai, ChatGPT, and Cowork can use Jaz via the **hosted connector**: add `https://mcp.jaz.ai/mcp` as a custom connector and sign in (OAuth, no key). The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
 
 **Claude Code:**
 ```bash
@@ -75,7 +75,7 @@ claude mcp add jaz -- npx jaz-clio mcp
 }
 ```
 
-**Multi-org** — comma-separated keys or a personal access token:
+**Multi-org**: comma-separated keys or a personal access token:
 ```json
 { "env": { "JAZ_API_KEY": "jk-org1-key,jk-org2-key" } }
 ```
@@ -84,7 +84,7 @@ claude mcp add jaz -- npx jaz-clio mcp
 
 ## Skills
 
-141 production-tested API rules. Field name mappings. Error recovery patterns. 12 job playbooks. Installable into any AI-aware project.
+158 API rules from production testing. Field-name maps. Error-recovery patterns. 12 job playbooks. Installable into any AI-aware project.
 
 ```bash
 clio init                            # auto-detect tool + install skills + agent-rules
@@ -109,13 +109,7 @@ clio auth whoami              # Verify
 
 ## Help-center semantic search (optional)
 
-`search_help_center` ships with built-in BM25 lexical search over the bundled help-center corpus and a precomputed embedding index. Set `CLIO_HELP_CENTER_OPENAI_API_KEY` to enable hybrid retrieval (semantic + BM25 via RRF) — strict opt-in, no fallback to other OpenAI env vars.
-
-When set, the CLI sends embedding requests for **only the user's query** to `https://api.openai.com/v1/embeddings` and nowhere else. The precomputed article vectors are locked to `text-embedding-3-small`; keys for other embedding models will be silently unused since cosine similarity requires the same model on both sides.
-
-Recommended posture: create a project-scoped OpenAI key restricted to embedding models with a low monthly cap. On auth failure (401/403) the CLI prints a single warning to stderr and falls back to BM25 — subsequent failures stay silent.
-
-**CLI-only.** The MCPB bundle ships without the embedding index (~2.6 MB skipped for bundle weight), so `CLIO_HELP_CENTER_OPENAI_API_KEY` has no effect for MCPB installs — those continue to use BM25 only regardless of whether the env var is set.
+`search_help_center` uses built-in BM25 lexical search over the bundled help-center corpus. Set `CLIO_HELP_CENTER_OPENAI_API_KEY` to add semantic retrieval: the CLI embeds only your query via the OpenAI embeddings API (`text-embedding-3-small`, the model the bundled index was built with) and merges both rankings. On auth failure it warns once and falls back to BM25. Use a project-scoped key restricted to embedding models with a low monthly cap. CLI-only: MCPB installs ship without the embedding index and always use BM25.
 
 ## Privacy
 
