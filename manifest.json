@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.7",
+  "version": "5.20.8",
   "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -676,15 +676,15 @@
     },
     {
       "name": "create_scheduled_journal",
-      "description": "Recurring journal. Use `schedulerEntries` (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT|CREDIT), name. Use `repeat` (NOT frequency/interval): WEEKLY|MONTHLY|QUARTERLY|YEARLY. Debits must equal credits. Flat structure — reference, valueDate, saveAsDraft at top level.\n\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}."
+      "description": "Recurring journal. Use `schedulerEntries` (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT|CREDIT), name. Use `repeat` (NOT frequency/interval): ONE_TIME|DAILY|WEEKLY|MONTHLY|YEARLY. Debits must equal credits. Flat structure — reference, valueDate, saveAsDraft at top level.\n\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}."
     },
     {
       "name": "create_scheduled_invoice",
-      "description": "Recurring invoice. Use for fixed-amount recurrence where you want per-period control over currency / tax / line items. DIFFERENT from subscriptions: no proration, but currency/tax/items can differ per occurrence.\n\nCRITICAL: saveAsDraft MUST be false (API rejects INVALID_SALE_STATUS). Use `repeat` (NOT frequency/interval): WEEKLY | MONTHLY | QUARTERLY | YEARLY. Each lineItem needs name, unitPrice, quantity, accountResourceId.\n\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}."
+      "description": "Recurring invoice. Use for fixed-amount recurrence where you want per-period control over currency / tax / line items. DIFFERENT from subscriptions: no proration, but currency/tax/items can differ per occurrence.\n\nCRITICAL: saveAsDraft MUST be false (API rejects INVALID_SALE_STATUS). Use `repeat` (NOT frequency/interval): ONE_TIME | DAILY | WEEKLY | MONTHLY | YEARLY. Each lineItem needs name, unitPrice, quantity, accountResourceId.\n\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}."
     },
     {
       "name": "create_scheduled_bill",
-      "description": "Create a scheduled (recurring) bill. CRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_PURCHASE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): WEEKLY, MONTHLY, QUARTERLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — relative to transaction date."
+      "description": "Create a scheduled (recurring) bill. CRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_PURCHASE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — relative to transaction date."
     },
     {
       "name": "update_journal",
@@ -1016,7 +1016,7 @@
     },
     {
       "name": "create_nano_classifier",
-      "description": "Create a nano classifier (tracking category). Provide a type name and list of class names. printable defaults to true (NOTE: printable: false is currently rejected by a server bug — always use true)."
+      "description": "Create a nano classifier (tracking category). Provide a type name and list of class names. printable defaults to true."
     },
     {
       "name": "update_nano_classifier",

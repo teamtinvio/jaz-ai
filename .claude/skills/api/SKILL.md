@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.20.7
+version: 5.20.8
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 158 production gotchas, error
@@ -376,7 +376,7 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 113. **Nano-classifier API gotchas** — CREATE uses `classes: string[]` (NOT `classNames` or `[{className}]`). `printable: boolean` is required — defaults to `false` (most classifiers are not printable). GET single is double-wrapped: `{data: {data: [...], totalElements, totalPages}}` — extract the first element from the inner paginated response. GET/LIST response returns classes as `[{className, resourceId}]` (objects), while CREATE accepts plain `string[]`.
 
 ### Scheduler Response Asymmetry
-114. **Scheduler response uses `interval`, not `repeat`** — POST/PUT uses `repeat` field (values: `WEEKLY`, `MONTHLY`, `QUARTERLY`, `YEARLY`). GET response returns `interval` field (same values). PUT accepts the full transaction template (`invoice`, `bill`, or journal entries at top level), not just schedule metadata — same structure as POST.
+114. **Scheduler response uses `interval`, not `repeat`** — POST/PUT uses `repeat` field (values: `ONE_TIME`, `DAILY`, `WEEKLY`, `MONTHLY`, `YEARLY`; `QUARTERLY` is rejected with 422). GET response returns `interval` field (same values; legacy rows may still show `QUARTERLY`). PUT accepts the full transaction template (`invoice`, `bill`, or journal entries at top level), not just schedule metadata — same structure as POST.
 
 ### Payment Record CRUD
 115. **Payment record CRUD** — `GET /payments/:resourceId` returns `{data: PaymentRecord}` (wrapped). Payment resourceIds come from invoice/bill GET response → `paymentRecords[].resourceId`. **Cashflow transaction IDs ≠ payment IDs** — don't mix them. `POST /cashflow-transactions/search` returns cashflow IDs, while payment CRUD uses separate payment IDs from the parent document.

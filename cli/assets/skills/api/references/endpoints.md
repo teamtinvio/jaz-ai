@@ -1353,7 +1353,7 @@ Same but with `"bill"` wrapper instead of `"invoice"`.
 
 **CRITICAL notes from live testing**:
 - Recurrence field is `repeat` — NOT `frequency` or `interval`. Using `frequency` or `interval` silently defaults to ONE_TIME.
-- Valid `repeat` values: `"WEEKLY"`, `"MONTHLY"`, `"QUARTERLY"`, `"YEARLY"`
+- Valid `repeat` values: `"ONE_TIME"`, `"DAILY"`, `"WEEKLY"`, `"MONTHLY"`, `"YEARLY"` (`"QUARTERLY"` is rejected with 422)
 - `saveAsDraft: false` is REQUIRED on the wrapped invoice/bill. Using `saveAsDraft: true` causes `INVALID_SALE_STATUS` (invoices) or `INVALID_PURCHASE_STATUS` (bills).
 - Since `saveAsDraft: false`, every line item MUST have `accountResourceId`.
 - Response uses `interval` field (not `repeat`): `{ "status": "ACTIVE", "interval": "MONTHLY", ... }`
@@ -1395,7 +1395,7 @@ Subscriptions auto-generate invoices on schedule with proration support. **Diffe
 - `proratedConfig` is **REQUIRED** on create, update, and cancel. Omitting it causes 500 (server null pointer).
 - `businessTransactionType` is NOT in the OAS — the API ignores it. Don't send it.
 - Uses `repeat` + `invoice` wrapper — same structure as scheduled invoices (`POST /scheduled/invoices`).
-- `repeat`: `"WEEKLY"`, `"MONTHLY"`, `"QUARTERLY"`, `"YEARLY"`.
+- `repeat`: `"ONE_TIME"`, `"DAILY"`, `"WEEKLY"`, `"MONTHLY"`, `"YEARLY"` (`"QUARTERLY"` is rejected with 422).
 - `saveAsDraft: false` is REQUIRED inside the `invoice` wrapper.
 - Currency, tax, and account details are the SAME for all items and CANNOT be changed after creation.
 - Mid-period cancellations or amount changes auto-generate prorated credit notes.
@@ -2186,7 +2186,7 @@ Accepts scheduling fields AND the full invoice template (same structure as POST)
 ```json
 // Request:
 {
-  "repeat": "QUARTERLY",
+  "repeat": "MONTHLY",
   "startDate": "2026-03-01",
   "endDate": "2027-03-01",
   "invoice": {

@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.8] - 2026-06-11
+
+- Sturdier tool definitions: every write tool's parameters are now checked against the platform API schema in CI, so enum values and required fields can never silently drift out of date.
+
 ## [5.20.7] - 2026-06-11
 
 Internal type-safety and test hardening. No user-facing changes since v5.20.6.

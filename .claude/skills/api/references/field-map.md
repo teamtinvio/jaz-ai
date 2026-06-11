@@ -432,7 +432,7 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `frequency` | `repeat` | Creation field. `"WEEKLY"`, `"MONTHLY"`, `"QUARTERLY"`, `"YEARLY"`. NOT `frequency` or `interval` |
+| `frequency` | `repeat` | Creation field. `"ONE_TIME"`, `"DAILY"`, `"WEEKLY"`, `"MONTHLY"`, `"YEARLY"` (`"QUARTERLY"` rejected, 422). NOT `frequency` or `interval` |
 | `interval` (response) | `interval` | Response field. Shows the recurrence after creation. Different name from creation! |
 | (flat payload) | `{ invoice: {...} }` or `{ bill: {...} }` | Document wrapped in type key |
 | `saveAsDraft: true` | `saveAsDraft: false` | MUST be false — true causes INVALID_SALE_STATUS / INVALID_PURCHASE_STATUS |
