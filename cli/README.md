@@ -55,7 +55,7 @@ clio invoices search --query 'status:unpaid' --view lean # Compact summary rows 
 
 289 tools, available to any AI agent that speaks MCP. Runs locally: no cloud, no ports.
 
-> **No install at all?** Claude.ai, ChatGPT, and Cowork can use Jaz via the **hosted connector**: add `https://mcp.jaz.ai/mcp` as a custom connector and sign in (OAuth, no key). The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
+> **No install at all?** Claude.ai, ChatGPT, Cowork, and Microsoft Copilot Studio can use Jaz via the **hosted connector**: add `https://mcp.jaz.ai/mcp` as a custom connector (Claude/ChatGPT) or MCP tool (Copilot Studio) and sign in (OAuth, no key). The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
 
 **Claude Code:**
 ```bash

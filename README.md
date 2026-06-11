@@ -40,6 +40,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 289 tools, 6 sk
 | Your agent | Install |
 |------------|---------|
 | **Claude.ai · ChatGPT · Cowork** (hosted, no install) | Add a custom connector → `https://mcp.jaz.ai/mcp` → sign in. See [Remote connector](#remote-connector--no-install). |
+| **Microsoft 365 Copilot · Copilot Studio** (hosted, no install) | Add an MCP tool → `https://mcp.jaz.ai/mcp` → OAuth sign-in. See [Microsoft 365 Copilot](#microsoft-365-copilot--copilot-studio). |
 | **Claude Code** | `/plugin marketplace add teamtinvio/jaz-ai` |
 | **Claude Desktop** | Install the `.mcpb` from [latest release](https://github.com/teamtinvio/jaz-ai/releases/latest) |
 | **Cursor / Windsurf** | Add the stdio MCP config (below) |
@@ -56,7 +57,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 289 tools, 6 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.5", "mcp"],
+      "args": ["-y", "jaz-clio@5.20.6", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -70,14 +71,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 289 tools, 6 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.5", "mcp"],
+      "args": ["-y", "jaz-clio@5.20.6", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.20.5` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.20.6` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -88,6 +89,20 @@ Bring Jaz into **Claude** (claude.ai, Desktop, mobile, Cowork) and **ChatGPT** w
 3. Sign in with your Jaz account (email one-time code or passkey) and **Allow**.
 
 It uses OAuth 2.1 + PKCE: the agent receives a scoped, time-limited token tied to your account, never your password. One sign-in reaches **every organization you belong to**; name the org in your request (e.g. *"in Acme Pte Ltd, list unpaid invoices"*), and access to each is checked on every call. Same tool surface as the local server, with honest read-only / write / destructive hints. Bookkeeping only: it records entries and reads data. It moves no money.
+
+### Microsoft 365 Copilot · Copilot Studio
+
+Bring Jaz into Microsoft 365 Copilot through a Copilot Studio agent. Cloud to cloud: no install, no API key in any config.
+
+1. In [Copilot Studio](https://copilotstudio.microsoft.com), open your agent and go to **Tools → Add a tool → New tool → Model Context Protocol**.
+2. Enter the server name (Jaz), a short description, and the URL `https://mcp.jaz.ai/mcp`.
+3. Authentication: **OAuth 2.0 → Dynamic discovery** → **Create** → **Next**.
+4. On the **Add tool** dialog, select **Create a new connection**, sign in with your Jaz account, and **Allow**.
+5. Select **Add to agent**, then publish the agent to Microsoft 365 Copilot or Teams as usual.
+
+Same tool surface and per-call organization checks as the [remote connector](#remote-connector--no-install); the sign-in here uses OAuth 2.0 dynamic client registration. If your tenant restricts custom connectors, a Power Platform admin needs to allow this one.
+
+**Prefer a local install on the Microsoft stack?** Copilot Studio is cloud-only and cannot run local MCP servers. Use VS Code with GitHub Copilot Chat instead: the [VS Code MCP config](#install--30-seconds) runs Jaz locally with an API key, and `npx jaz-clio init --platform copilot` installs the skills to `.github/copilot-instructions.md`.
 
 ### OpenAI Responses API
 
@@ -341,7 +356,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.20.5", "mcp"],
+  "args": ["-y", "jaz-clio@5.20.6", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
