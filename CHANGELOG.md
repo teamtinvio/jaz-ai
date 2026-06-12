@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.12] - 2026-06-12
+
+- Connector icon now uses a transparent background for clean rendering in dark-mode UIs.
+
 ## [5.20.11] - 2026-06-12
 
 Internal release. No user-facing changes since v5.20.10.
