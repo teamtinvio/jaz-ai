@@ -1,6 +1,6 @@
 {
   "name": "jaz-ai",
-  "version": "5.20.12",
+  "version": "5.20.13",
   "description": "Complete AI agent stack for Jaz Accounting. 289 tools, 158 API rules, 16 IFRS recipes, 13 calculators, 12 job playbooks. Multi-org support. Data migration (Xero/QB/Sage/MYOB). Singapore Form C-S tax. For Claude Code, Copilot, Cursor, Codex, and any MCP-compatible agent.",
   "author": {
     "name": "Jaz",

@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.13] - 2026-06-12
+
+- Connector icon sourced from high-resolution design asset for sharper rendering.
+
 ## [5.20.12] - 2026-06-12
 
 - Connector icon now uses a transparent background for clean rendering in dark-mode UIs.
