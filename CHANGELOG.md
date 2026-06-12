@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.11] - 2026-06-12
+
+Internal release. No user-facing changes since v5.20.10.
+
 ## [5.20.10] - 2026-06-12
 
 - Updated connector description.
