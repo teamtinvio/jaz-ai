@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.9] - 2026-06-12
+
+- Smarter dashboard deep links: destination search understands everyday transaction vocabulary (invoice, bill, credit note), and an empty lookup now suggests broader product-area terms to retry with — so the agent lands on the right dashboard page or record link instead of giving up.
+
 ## [5.20.8] - 2026-06-11
 
 - Sturdier tool definitions: every write tool's parameters are now checked against the platform API schema in CI, so enum values and required fields can never silently drift out of date.
