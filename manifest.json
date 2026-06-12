@@ -2,8 +2,8 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.9",
-  "description": "Jaz in your agents: full-featured accounting, finance, and reporting.",
+  "version": "5.20.10",
+  "description": "Fastest way to manage money.",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
     "name": "Jaz",

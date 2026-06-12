@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.10] - 2026-06-12
+
+- Updated connector description.
+
 ## [5.20.9] - 2026-06-12
 
 - Smarter dashboard deep links: destination search understands everyday transaction vocabulary (invoice, bill, credit note), and an empty lookup now suggests broader product-area terms to retry with — so the agent lands on the right dashboard page or record link instead of giving up.
