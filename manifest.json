@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.13",
+  "version": "5.20.14",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -58,8 +58,8 @@
   "user_config": {
     "api_key": {
       "type": "string",
-      "title": "Jaz API Key or Access Token",
-      "description": "Enter a Jaz API key or access token. Get one from jaz.ai > Settings.",
+      "title": "Jaz API Key or Personal Access Token",
+      "description": "Jaz API key or personal access token. Separate multiple API keys with commas.",
       "required": false,
       "sensitive": true
     }

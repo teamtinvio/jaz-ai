@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.14] - 2026-06-15
+
+- Clearer setup field for your Jaz API key: the hint now shows you can paste a personal access token, or several API keys separated by commas to connect multiple organizations.
+
 ## [5.20.13] - 2026-06-12
 
 - Connector icon sourced from high-resolution design asset for sharper rendering.
