@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.17] - 2026-06-17
+
+- Forwarded receipt and invoice emails now reliably create a draft from the original document — including when you reply later to confirm (e.g. "just create it"). Previously a follow-up reply could lose the forwarded document and fall back to reading the email text, producing an inaccurate draft.
+
 ## [5.20.16] - 2026-06-17
 
 Internal release. No user-facing changes since v5.20.15.
