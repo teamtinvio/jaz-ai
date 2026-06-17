@@ -5,23 +5,18 @@ Source: https://help.jaz.ai/en/articles/9115439-draft-supplier-credits
 
 - Yes, a supplier credit note can be saved as a draft even if all the mandatory fields are not filled.
 
-**Q2. How can I convert a draft supplier credit note to an active one?**
+**Q2. Can I switch between draft supplier credit notes while editing?**
+
+- Yes. Click the list icon beside **Edit Draft Credit Note** to switch between draft supplier credit notes.**Q3. How can I convert a draft supplier credit note to an active one?**
 
 - Any draft supplier credit note can be converted to active only after all the mandatory fields are filled.
 
-**Q3. How do I bulk convert draft supplier credits to active?**
+**Q4. How do I bulk convert draft supplier credits to active?**
 
-- Select the draft supplier credits using the checkboxes → click **Check and Convert**. This will:
-  - Validate which supplier credits can be converted
-  - Show errors for those that can’t
-- If you proceed, only eligible supplier credits will be converted.
-
-**Q4. How do I bulk approve draft supplier credits?**
-
-- Select the draft supplier credits using the checkboxes → click **Check and Approve**. This will:
-  - Validate which supplier credits can be approved
-  - Show errors for those that can’t
-- If you proceed, only eligible supplier credits will be approved.
+- Select the draft credit notes using the checkboxes, then click **Check and Convert**.
+- Jaz validates which credit notes can be converted and flags those with errors.
+- Review the results. Signals are available to help you assess trends within a contact before confirming.
+- Confirm to proceed. Only eligible credit notes will be converted.
 
 **Q5. Can I save a supplier credit refund record as a draft?**
 

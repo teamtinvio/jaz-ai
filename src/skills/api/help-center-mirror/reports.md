@@ -778,6 +778,16 @@ Source: https://help.jaz.ai/en/articles/14834673-organization-exports
 
 - A report of historical exchange rates by date and currency, including conversion values and sources.
 
+**Q3. What is the FX Gains and Loss Report?**
+
+- A report that summarizes your organization's foreign exchange gains and losses across transactions.
+- The report includes four sheets:
+  - **FX Summary**: an overview of total foreign exchange gains and losses for the period.
+  - **AR & AP FX Details**: foreign exchange gains and losses from outstanding receivables and payables.
+  - **Bank FX Details**: foreign exchange gains and losses from bank transactions.
+  - **Exchange Rates**: the exchange rates applied during the selected period.
+- Data shown is based on the report period selected.
+
 ---
 
 ### Purchases Data

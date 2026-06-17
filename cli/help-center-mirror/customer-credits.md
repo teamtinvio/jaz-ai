@@ -28,32 +28,27 @@ Source: https://help.jaz.ai/en/articles/9101352-draft-customer-credits
 
 - Yes, a customer credit note can be saved as a draft even if all the mandatory fields are not filled.
 
-**Q2. How can I convert a draft customer credit note to an active one?**
+**Q2. Can I switch between draft customer credit notes while editing?**
+
+- Yes. Click the list icon beside **Edit Draft Credit Note** to switch between draft customer credit notes.**Q3. How can I convert a draft customer credit note to an active one?**
 
 - Any draft bill can be converted to active only after all the mandatory fields are filled.
 
-**Q3. Can I save a customer credit refund record as a draft?**
+**Q4. Can I save a customer credit refund record as a draft?**
 
 - Similar to a customer credit note, a refund can also be saved as a draft against a credit note.
 
-**Q4. How can I convert a draft refund record to an active one?**
+**Q5. How can I convert a draft refund record to an active one?**
 
 - For customer credits, any draft refunds are converted only if the credit note is also converted to active.
 - Hence, to record the refund, the customer credit note must be converted to active status.
 
-**Q5. How do I bulk convert draft customer credits to active?**
+**Q6. How do I bulk convert draft customer credits to active?**
 
-- Select the draft customer credits using the checkboxes → click **Check and Convert**. This will:
-  - Validate which customer credits can be converted
-  - Show errors for those that can’t
-- If you proceed, only eligible customer credits will be converted.
-
-**Q6. How do I bulk approve draft customer credits?**
-
-- Select the draft customer credits using the checkboxes → click **Check and Approve**. This will:
-  - Validate which customer credits can be approved
-  - Show errors for those that can’t
-- If you proceed, only eligible customer credits will be approved.
+- Select the draft credit notes using the checkboxes, then click **Check and Convert**.
+- Jaz validates which credit notes can be converted and flags those with errors.
+- Review the results. Signals are available to help you assess trends within a contact before confirming.
+- Confirm to proceed. Only eligible credit notes will be converted.
 
 **Q7. Can I delete a draft customer credit?**
 

@@ -65,54 +65,56 @@ Source: https://help.jaz.ai/en/articles/9062346-draft-invoices-payments
 
 - Yes, an invoice can be saved as a draft even if all the mandatory fields are not filled.
 
-**Q2. How can I convert a draft invoice to an active one?**
+**Q2. Can I switch between draft invoice transactions while editing?**
+
+- Yes. Click the list icon beside **Edit Draft Invoice** to switch between draft invoices.**Q3. How can I convert a draft invoice to an active one?**
 
 - Any draft bill can be converted to active only after all the mandatory fields are filled.
 
-**Q3. How do I bulk convert draft invoices to active?**
+**Q4. How do I bulk convert draft invoices to active?**
 
-- Select the draft invoices using the checkboxes → click **Check and Convert**. This will:
-  - Validate which invoices can be converted
-  - Show errors for those that can’t
-- If you proceed, only eligible invoices will be converted.
+- Select the draft invoices using the checkboxes, then click **Check and Convert**.
+- Jaz validates which invoices can be converted and flags those with errors.
+- Review the results. Signals are available to help you assess trends within a contact before confirming.
+- Confirm to proceed. Only eligible invoices will be converted.
 
-**Q4. How do I bulk approve draft invoices?**
+**Q5. How do I bulk approve draft invoices?**
 
 - Select the draft invoices using the checkboxes → click **Check and Approve**. This will:
   - Validate which invoices can be approved
   - Show errors for those that can’t
 - If you proceed, only eligible invoices will be approved.
 
-**Q5. Can I save payment records as drafts?**
+**Q6. Can I save payment records as drafts?**
 
 - Yes. Similar to draft invoices, you can save a draft payment.
 
-**Q6. How can I convert draft payment records to active ones?**
+**Q7. How can I convert draft payment records to active ones?**
 
 - Find the draft payment on an invoice and ensure all the mandatory fields are filled.
 - You should then be able to convert it to active.
 
-**Q7. Can I delete a draft invoice?**
+**Q8. Can I delete a draft invoice?**
 
 - Yes, you can delete a draft invoice. If the invoice had a draft payment linked, it will also be deleted.
 
-**Q8. Can I delete a draft invoice payment?**
+**Q9. Can I delete a draft invoice payment?**
 
 - Similar to draft bills, draft invoice payments can also be deleted.
 
-**Q9. Do draft invoices affect my financial reports?**
+**Q10. Do draft invoices affect my financial reports?**
 
 - No, it does not. Financial reports are only affected once the invoices are active.
 
-**Q10. Do draft invoice payments affect my financial reports?**
+**Q11. Do draft invoice payments affect my financial reports?**
 
 - No, it does not. Financial reports are only affected once the payments are active.
 
-**Q11. Can I create a non-base currency draft invoice?**
+**Q12. Can I create a non-base currency draft invoice?**
 
 - Yes, the currency setting on an invoice does not affect the ability to save it as a draft.
 
-**Q12. Can I create a non-base currency draft invoice payment?**
+**Q13. Can I create a non-base currency draft invoice payment?**
 
 - Yes, you can save an invoice payment as a draft even if it is in non-base currency.
 

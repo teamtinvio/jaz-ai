@@ -155,7 +155,7 @@ Source: https://help.jaz.ai/en/articles/9066648-access-management
 
 **Q3. How do I import users?**
 
-- Go to **Settings** >**Access Management **> New User dropdown and choose**Import Users **>** Download template**
+- Go to **Settings** →**Access Management **→**New User dropdown **and choose**Import Users **→** Download template**
 - Import users are only limited to a maximum of 100 users per import and each row will be imported as a single user.
 
 **Q4. What can users with member access for Invoices (AR)/Bills (AP) do?**
@@ -921,53 +921,70 @@ Source: https://help.jaz.ai/en/articles/10729638-pdf-templates
 **Q1. What transactions can I customize?**
 
 - You can customize PDF templates for the following transactions:
-  - Invoice
-    - Note: Delivery Slip and Quotation PDFs will use the invoice template set for the transaction.
-  - Invoice Payment
-  - Customer Credit
-  - Customer Refund
-  - Customer Statements
-    - Statement of Accounts
-    - Statement of Balances
+  - Invoices
+    - Invoice
+    - Delivery Slip
+    - Invoice Payment
+  - Customer Credits
+    - Customer Credit
+    - Customer Refund
   - Orders
     - Sales Quote
     - Purchase Order
     - Delivery Slip
+  - Customer Statements
+    - Statement of Balances and Accounts
 
 **Q2. How do I create a new PDF template?**
 
-- Go to Settings > Templates > PDFs, then select a tab (Invoices, Customer Credits, or Statements) and click New Template.
-
-**Q3. What sections in the PDF can I edit?**
+- Go to **Settings** →**Templates** → **PDFs**, then select a tab (Invoices, Customer Credits, Orders or Statements) and click New Template.**Q3. What sections in the PDF can I edit?**
 
 - You can edit the following sections within a PDF:
-  - **General**
-Choose from 5 template styles (Classic, Bento, Formal, Overlay, Smooth), customize template name, colors, fonts, and add a unique logo per template.
-  - **Header**
-Customize title, document details, references, dates, terms, company info, contact details, GST ID, delivery, and address format.
-  - **Table**
-Enable/disable tax info, adjust row spacing (Standard, Compact, Relaxed), and customize column headers, widths, and visibility.
-  - **Total**
-Enable/disable the total section, adjust spacing, configure balance labels, and add a tax summary for detailed breakdowns.
+  - **General
+​**Choose from 5 template styles (Classic, Bento, Formal, Overlay, Smooth), customize template name, colors, fonts, and add a unique logo per template.
+  - **Header
+​**Customize title, document details, references, dates, terms, company info, contact details, GST/VAT ID, delivery, and address format.
+  - **Table
+​**Enable/disable tax info, adjust row spacing (Standard, Compact, Relaxed), and customize column headers, widths, and visibility.
+  - **Total
+​**Enable/disable the total section, adjust spacing, configure balance labels, and add a tax summary for detailed breakdowns.
 Note: Applies to all templates except customer statement
-  - **Footer**
-Enable payment options for invoices and edit note titles for both invoices and customer credits.
-Note: Applies to all templates except invoice payment and customer refund
+  - **Footer
+​**Enable payment options for invoices and edit note titles for both invoices and customer credits.
+    - Note: Applies to all templates except invoice payment and customer refund
+  - **Supporting Table
+​**Enable a table that is appended as a separate page after the main document
+    - Note: Applies to all PDFs that can be emailed in Jaz: Invoices, Customer Credit Note, Sales Quote, and Purchase Order
 - To apply the changes made in these sections, click Update Preview.
 
-**Q4. Can I duplicate templates or organize them?**
+Q4. How do I use Supporting Table?
+
+- Open or create an Outgoing Template (Invoice, Customer Credit Note, Sales Quote, or Purchase Order) and enable Supporting Table.
+  - Note: The supporting table always appears on a separate page after the main document. For example, if your PDF occupies two pages, supporting table will appear on the third page.
+
+- Enter a title for the table. This title will appear in the generated PDF.
+
+- Add up to 10 columns. Set the alignment and width for each — widths always total 100% and auto-adjust.
+
+- On the transaction where the template applies, click the Supporting Table icon. The table appears in edit mode at the bottom of the transaction.
+
+- Fill in the column details. Use the settings icon inside the table to disable any columns you don't need.
+
+- Preview the PDF before saving to confirm the layout.
+
+**Q5. Can I duplicate templates or organize them?**
 
 - Yes, you can duplicate templates.
 
-**Q5. What are default templates, and how do they work?**
+**Q6. What are default templates, and how do they work?**
 
 - There are two types of default templates:
   - **Template default for the organization:** This is the default for all contacts unless a specific contact default is set.
-  - **Template default for a contact:** Applied when a specific PDF template is set under [Contacts](https://help.jaz.ai/en/articles/8938009-contacts#h_b41c57e3da). It overrides the organization default when the contact is selected during transaction creation or editing.**Q6. Can I set default PDF templates during the contact import process?**
+  - **Template default for a contact:** Applied when a specific PDF template is set under [Contacts](https://help.jaz.ai/en/articles/8938009-contacts#h_b41c57e3da). It overrides the organization default when the contact is selected during transaction creation or editing.**Q7. Can I set default PDF templates during the contact import process?**
 
 - Yes, default templates can be assigned during contact import. The contact import template includes columns for selecting a PDF template per contact.
 
-**Q7. What happens if I update an existing template?**
+**Q8. What happens if I update an existing template?**
 
 - Updating a template applies changes to future transactions but previous PDFs remain unaffected.
 
@@ -1455,21 +1472,43 @@ Source: https://help.jaz.ai/en/articles/12773859-cashflow-statement-template
 
 **Q1. How do I create a new Cashflow Statement template?**
 
-- Go to **Settings** >**Templates** > **Reports** >**Accounting Tab**, then click**New Template** (Cashflow Statement).
-- Alternatively, in **Reports** >**Cashflow**, click the template selector (top right) and choose New Template.**Q2. What settings can I customize in my Cashflow Statement template?**
+- Go to **Settings → Templates → Reports → Financial**, then click**+ New Template (Cashflow Statement)**.
+- Alternatively, go to **Reports→Cashflow**, click the template selector at the top right, and choose**+ New Template**.**Q2. What Cashflow Statement templates are available?**
+
+- Jaz provides two Cashflow Statement templates:
+  - **Standard (IAS 7)**: uses Net Profit as the basis for Operating Activities.
+  - **IFRS 18**: aligns the presentation of operating cash flows with the new IFRS 18 categories by separating the reconciliation into:
+    - **Operating Profit**: representing cash generated from core business operations.
+    - **Finance, Tax & Non-Operating Items**: representing the effects of financing costs, income taxes, and items outside core operations.
+    - This approach provides greater transparency by distinguishing cash flows arising from operating performance from those related to financing, taxes, and non-operating activities.
+  - All other sections (Investing Activities, Financing Activities, and Non-cash Transactions) are the same across both templates.
+
+**Q3. What settings can I customize in my Cashflow Statement template?**
 
 - The Cashflow Statement template has three tabs: General, PDF, and Actions.
-  - General: Edit template name, baseline period, header, sorting, and footer.
-  - PDF: Customize layout, header, and footer for PDF version of the report.
-    - Note: PDF preview and export are only supported for up to 8 columns.
-  - Actions: Perform specific functions on a selected column or row.
+  - **General**: edit template name, baseline period, header, sorting, and footer.
+  - **PDF**: customize layout, header, and footer for the PDF version of the report.
+  - **Actions**: configure settings for a selected row or column (see Q8).
+- Note: PDF preview and export are only supported for up to 8 columns.
 
-**Q3. What columns are supported in the Cashflow Statement template?**
+**Q4. What is the baseline period?**
 
-- Comparative Periods: Choose date range, comparison type (day/month/quarter/year), and display order.
-- Variance: Show changes between two columns (amount or %). Multiple allowed. Requires at least two periods.
+- The baseline period controls how report dates are set relative to the date the report is run.
+- The available options are:
+  - This Month
+  - Financial Quarter
+  - Financial Year
+  - Last Month
+  - Last Financial Quarter
+  - Last Financial Year
 
-**Q4. How do I add or delete columns in the Cashflow Statement template?**
+**Q5. What columns are supported in the Cashflow Statement template?**
+
+- **Comparative Periods**: choose a date range, comparison type (day, month, quarter, or year), and display order.
+- **Variance**: shows the change between two columns as an amount or percentage. Requires at least two period columns. Multiple variance columns are allowed.
+- **Year-to-Date**: shows cumulative amounts from the start of the calendar or financial year to the current period. You can configure the period type and range:
+  - **Through Today**: year-to-date from the start of the year through today's actual date. Shows performance as at the current date.
+  - **Through Period End**: year-to-date from the start of the year through the end of the selected period. Used for formal reports and period comparisons.**Q6. How do I add or delete columns in the Cashflow Statement template?**
 
 - By default, only the baseline period column is shown.
 - To add columns:
@@ -1478,52 +1517,67 @@ Source: https://help.jaz.ai/en/articles/12773859-cashflow-statement-template
   - Hover over a column line and add Variance once at least two comparison periods are available.
 - To delete a column, click the column, then under Actions, select Delete Column.
 
-**Q5. What are the different types of rows in the Cashflow Statement template?**
+**Q7. What are the different types of rows in the Cashflow Statement template?**
 
 - The Cashflow Statement template contains rows for Cash Summary, Operating Activities, Investing Activities, and Financing Activities.
-  - Group Rows: Represent each major activity category. You can only edit the group name.
-  - Text Rows: Allow you to insert custom text and can be added to both the group and child levels.
+  - **Group Rows:** Represent each major activity category. You can only edit the group name.
+  - **Text Rows (Child Rows)**: custom text rows you can insert within a group. These can be added at both the group and child levels.**Q8. What actions are available in the Actions tab?**
 
-**Q6. How do I add or delete rows in the Cashflow Statement template?**
+- Available actions depend on whether a row or column is selected.
+  - **If a row is selected:**
+    - You can rename the following row types:
+      - User-defined text rows
+      - Group titles
+      - Non-cash Investing & Financing Transactions
+      - Cash Summary
+- **If a column is selected:**
+  - **Comparative Period**: configure the number of comparative months.
+  - **Variance**: set whether to display as a percentage or amount, and choose which period columns to compare.
+  - **Year-to-Date**: choose the period type (calendar or financial year) and set the period range (Through Today or Through Period End).**Q9. How do I add or delete rows in the Cashflow Statement template?**
 
-- To add a Text Row, hover and select **+Text Row**(available for both group and child levels).
-- Note: It is not possible to group rows in the Cashflow Statement template.
+- To add a text row, hover over a row and select **+ Text Row**. Text rows can be added at both the group and child levels.
+- Note: It is not possible to add group rows in the Cashflow Statement template.
 
-**Q7. Can I rename group-level rows in the Cashflow Statement template?**
+**Q10. Can I rename or edit a Cashflow Statement template?**
 
-- Yes, click on the group row and rename accordingly.
+- Yes. Open the template and make your changes directly. There are no restrictions on editing.
+- Updates apply immediately. Reports run after saving will reflect the changes.
 
-**Q8. What is the decorator function in Template Style for?**
+**Q11. Can I duplicate a Cashflow Statement template?**
 
-- Turning on decorators for Template styles adds a horizontal line on top of the report.
+- Yes. Go to Settings **→** Templates**→** Reports, hover over the template, click the 3-dot icon, and select **Duplicate**.**Q12. Can I set a default Cashflow Statement template?**
 
-**Q9. What is the uppercase function in Fonts for?**
+- Yes. Go to Settings **→**Templates**→** Reports, hover over the template, and click **Set as Default**.**Q13. Can I delete a Cashflow Statement template?**
 
-- Turning on uppercase converts all text in the report to uppercase.
+- Yes. Hover over the template, click the three-dot icon, and select **Delete**.
+- Note: If the template is set as the default, you must assign another template as the default before it can be deleted.
 
-**Q10. Can I add a logo to my Cashflow Statement Template?**
+**Q14. What is the decorator function in Template Style for?**
 
-- Yes, go to **Template Settings** >**PDF** > Add a logo
-- Logo file should only be up to 1mb with min width: 120px and min height: 60px
+- Enabling decorators adds a horizontal line at the top of the report.
 
-**Q11. Can I change the display currency?**
+**Q15. What is the uppercase function in Fonts for?**
 
-- Yes, to change the display currency, click the base currency.
-- The report will be converted from base currency to display currency at the exchange rate on report date. If there're multiple periods, all periods will be converted at the same exchange rate.
+- Enabling uppercase converts all text in the report to uppercase
 
-**Q12. What is the dynamic string in the PDF Date Title for?**
+**Q16. Can I add a logo to my Cashflow Statement template?**
 
-- You can use the dynamic string for dates to configure your date title according to your preferred format.
+- Yes. Go to **Template Settings → Reports → Add a Logo.**
+- The logo file must be no larger than 1 MB, with a minimum width of 120px and minimum height of 60px.
 
-**Q13. How do I add a group within a group row?**
+**Q17. Can I change the display currency?**
 
-- This is not possible in the Cashflow Statement template.
+- Yes. Click the base currency to change the display currency.
+- The report converts all values from base currency to the selected display currency using the exchange rate on the report date. If multiple periods are shown, the same exchange rate applies to all periods.
 
-**Q14. How do I duplicate a Cashflow Statement template?**
+**Q18. What is the dynamic string in the PDF Date Title for?**
 
-- Go to **Settings** >**Templates** > **Reports**, hover over the template, click the three-dot icon, and select Duplicate.**Q15. What happens when I update a Cashflow Statement template?**
+- The dynamic string lets you configure the date title format in PDF exports using placeholders.
+  - Example: “For the period of #{{DateFrom}} to #{{DateTo}}” will display as "For the period of 06/01/2026 to 06/30/2026" when the report is generated.
 
-- Changes apply automatically. For previously downloaded reports, redownload them to apply updates.
+**Q19. What happens when I update a Cashflow Statement template?**
+
+- Changes apply immediately. For previously downloaded reports, redownload them to reflect the latest template updates.
 
 ---
 
@@ -1658,124 +1712,136 @@ Source: https://help.jaz.ai/en/articles/12773930-profit-loss-template
 
 **Q1. How do I create a new Profit & Loss template?**
 
-- Go to **Settings** >**Templates** > **Reports** >**Accounting Tab**, then click New Template (Profit & Loss).
-- Alternatively, in **Reports** >**Profit & Loss**, click the template selector (top right) and choose New Template.**Q2. What settings can I customize in my Profit & Loss template?**
+- Go to** Settings → Templates → Reports → Financial**, then click**+ New Template (Profit & Loss)**.
+- Alternatively, go to **Reports → Profit & Loss**, click the template selector at the top right, and choose**+ New Template.Q2. What Profit & Loss templates are available?**
 
-- Profit & Loss template has three tabs: General, PDF, and Actions.
-  - General: Edit template name, baseline period, header, sorting, and footer.
-  - PDF: Customize layout, header, and footer for PDF version of the report.
+- Jaz provides two Profit & Loss templates:
+  - **Standard:** organizes income and expenses into Operating Revenue, Cost of Sale, Operating Expense, Other Revenue, and Other Expense, with subtotals for Gross Profit, Operating Profit, Other Profit, and Net Profit.
+  - **IFRS 18:** Structures the Profit and Loss statement into five groups:
+    - **Operating:** Core business income and expenses, with Gross Profit and Operating Profit subtotals.
+    - **Investing:**Income and expenses from investing activities, with Total Investing and Profit Before Financing and Income Tax subtotals.
+    - **Financing:** Income and expenses related to financing activities, with Total Financing and Profit Before Income Tax subtotals.
+    - **Income Tax:**Income tax expense, with a Profit from Continuing Operations subtotal.
+    - **Discontinued Operations:** Results from discontinued operations, with Net Discontinued Operations and Net Profit subtotals.**Q3. What settings can I customize in my Profit & Loss template?**
+
+- The Profit & Loss template has three tabs: General, PDF, and Actions.
+  - **General:** edit template name, baseline period, header, sorting, and footer.
+  - **PDF:** customize layout, header, and footer for the PDF version of the report.
+  - **Actions:** configure settings for a selected row or column.
     - Note: PDF preview and export are only supported for up to 8 columns.
-  - Actions: Perform specific functions on a selected column or row.
 
-**Q3. What columns are supported in the Profit & Loss template?**
+**Q4. What is the baseline period?**
 
-- Comparative Periods: Choose date range, comparison type (day/month/quarter/year), and display order.
-- Variance: Show changes between two columns (amount or %). Multiple allowed.
-- Year-to-Date: Show totals from start of year to selected period. Multiple allowed.
-- Account Code: Display Chart of Account codes. Only one allowed.
+- The baseline period controls how report dates are set relative to the date the report is run.
+- The available options are:
+  - This Month
+  - Financial Quarter
+  - Financial Year
+  - Last Month
+  - Last Financial Quarter
+  - Last Financial Year
 
-**Q4. How do I add or delete columns in the Profit & Loss template?**
+**Q5. What columns are supported in the Profit & Loss template?**
+
+- **Comparative Periods:** choose a date range, comparison type (day, month, quarter, or year), and display order.
+- **Variance:** shows the change between two columns as an amount or percentage. Multiple variance columns are allowed.
+- **Year-to-Date:** shows cumulative totals from the start of the year to the selected period. Multiple allowed.
+- **Account Code:** displays Chart of Accounts codes. Only one Account Code column is allowed.**Q6. How do I add or delete columns in the Profit & Loss template?**
 
 - By default, only the baseline period column is shown.
 - To add columns:
-  - Click Compare to add additional period columns.
+  - Click **Compare** to add additional period columns.
   - Hover over a column line to add Year-to-Date or Account Code columns.
-  - Hover over a column line and add Variance once at least two comparison periods are available.
-- To delete a column, click the column, then under Actions, select Delete Column.
+  - Hover over a column line to add a Variance column once at least two period columns are available.
+- To delete a column, click the column, then under Actions, select **Delete Column**.**Q7. What are the different types of rows in the Profit & Loss template?**
 
-**Q5. What are the different types of rows in the Profit & Loss template?**
-
-- Accounts that are included in the Profit & Loss template are grouped into Group-level Rows (bold texts) and Child-level Rows.
-- Group-level Rows represent a group of accounts where you can:
+- **Group-level Rows:** represent a group of accounts. You can:
   - Rename the group.
   - Show or hide group totals.
   - Hide the group if all child rows are hidden.
   - Set account criteria to define which accounts are included.
   - Set negative balance rules.
-- Child-level Rows represent individual account rows where you can:
+- **Child-level Rows:** represent individual account rows. You can:
   - Create new account groups.
   - Set negative balance rules.
-  - Group selected accounts together by choosing Create New Account Group (accounts below will be grouped under it).
-- Text Rows allow you to insert custom text and can be added to both group and child levels.
+  - Group selected accounts together using **Create New Account Group**.
+- **Text Rows:** custom text rows that can be added at both group and child levels.**Q8. How do I add or delete rows in the Profit & Loss template?**
 
-**Q6. How do I add or delete rows in the Profit & Loss template?**
+- To add a Group Row, hover over a row line and click **+ Account Group**. Enter the group name and account criteria.
+- To add a Text Row, hover over a row and select **Add Text Row**. Text rows can be added at both group and child levels.**Q9. Can I rename group-level rows in the Profit & Loss template?**
 
-- To add a Group Row, hover over a row line and click +Account Group. Enter the group name and account criteria.
-- To add a Text Row, hover and select Add Text Row (available for both group and child levels).
+- Yes. Click on the group row and rename accordingly.
 
-**Q7. Can I rename group-level rows in the Profit & Loss template?**
+**Q10. Can I add a sub-group within a group row?**
 
-- Yes, click on the group row and rename accordingly.
+- Yes. You can add sub-groups within an existing group row.
 
-**Q8. What is the decorator function in Template Style for?**
+**Q11. What is the Negative Balance rule and how do I use it?**
 
-- Turning on decorators for Template styles adds a horizontal line on top of the report.
+- The Negative Balance rule defines what happens when an account amount falls below zero. Rules can be applied at both the group and child levels.
+- **Group Row Rules:** choose conditions such as "if accounts are negative" or "if the entire group is negative." You can move negative balances to another group or convert them to positive values.
+- **Child Row Rules:** when an individual account is negative, you can move it to a selected group.
+  - Note: Child row rules take precedence over group row rules. Check for conflicts when both are applied.
 
-**Q9. What is the uppercase function in Fonts for?**
+**Q12. How do I combine or split accounts in the Profit & Loss template?**
 
-- Turning on uppercase converts all text in the report to uppercase.
-
-**Q10. Can I add a logo to my Profit and Loss Template?**
-
-- Yes, go to **Template Settings** >**PDF** > Add a logo
-- Logo file should only be up to 1mb with min width: 120px and min height: 60px
-
-**Q11. Can I change the display currency?**
-
-- Yes, to change the display currency, click the base currency.
-- The report will be converted from base currency to display currency at the exchange rate on report date. If there're multiple periods, all periods will be converted at the same exchange rate.
-
-**Q12. What is the dynamic string in the PDF Date Title for?**
+- To combine accounts into a single row or group:
+  - Press Cmd/Ctrl + Left Click to select specific accounts individually, or Shift + Left Click to select a range.
+  - From the Actions tab, choose to combine into a single row or group.
+- To split a combined row or group, select the row and from the Actions tab, select **Split Accounts** or**Remove Group**.**Q12. What is the dynamic string in the PDF Date Title for?**
 
 - You can use the dynamic string for dates to configure your date title according to your preferred format.
 
-**Q13. Can I add another group within a group row?**
+**Q13. How do I hide an account row with zero balance?**
 
-- Yes, you can add sub-groups within a group row.
-
-**Q14. My account is not appearing in my Profit & Loss template, what do I do?**
+- Select the row and enable **Hide Row if Zero Balance**.**Q14. My account is not appearing in my Profit & Loss template. What do I do?**
 
 - Check your Chart of Accounts to ensure the account type is included in the Profit & Loss report.
+- Also verify that the account meets the criteria set for the relevant group row in your template.
 
-**Q15. What is the Negative Balance rule and how do I use it?**
+**Q15. If I add a new account to my COA, will it automatically appear in my template?**
 
-- The Negative Balance rule defines what happens when an account amount falls below zero. Rules can be applied at both the Group-level Row and Child-level Row.
-  - Group Row Rules
-    - Choose conditions such as “if accounts are negative” or “if the entire group is negative.”
-    - Move negative balances to another group or convert them to positive values.
-  - Child Row Rules
-    - When an individual account is negative, you can move it to a selected group.
-    - Note: Account-level (child row) rules take precedence over group-level rules. Check for conflicts when both are applied.
+- Yes. New accounts added to your COA will automatically appear in your Profit & Loss template based on the criteria set for each group.
 
-**Q16. How do I combine accounts into one row or one group?**
+**Q16. What is the decorator function in Template Style for?**
 
-- You can combine multiple accounts into a single group row or group.
-- To select multiple accounts:
-  - Press Cmd/Ctrl + Left Click: Select specific accounts individually.
-  - Press Shift + Left Click: Select a range of accounts.
-- Then from the action tab, choose to combine into a single row or a group.
+- Enabling decorators adds a horizontal line at the top of the report.
 
-**Q17. How do I split combined accounts in Profit and Loss Template?**
+**Q17. What is the uppercase function in Fonts for?**
 
-- You can split a combined account row or group by selecting the row and from the action tab, select split accounts or remove group.
+- Enabling uppercase converts all text in the report to uppercase.
 
-**Q18. How do I hide an account row with zero balance?**
+**Q18. Can I add a logo to my Profit & Loss template?**
 
-- Yes. Select the row and check Hide Row if Zero Balance.
+- Yes. Go to **Settings → Template → Reports → Profit & Loss Add a Logo.**
+- The logo file must be no larger than 1 MB, with a minimum width of 120px and minimum height of 60px.
 
-**Q19. How do I duplicate a Profit & Loss template?**
+**Q19. Can I change the display currency?**
 
-- Go to **Settings** >**Templates** > **Reports**, hover over the template, click the three-dot icon, and select Duplicate.**Q20. What happens when I update a Profit & Loss template?**
+- Yes. Click the base currency to change the display currency.
+- The report converts all values from base currency to the selected display currency using the exchange rate on the report date. If multiple periods are shown, the same exchange rate applies to all periods.
 
-- Changes apply automatically. For previously downloaded reports, redownload them to apply updates.
+**Q20. What is the dynamic string in the PDF Date Title for?**
 
-**Q21. Can I have more than one template for different situations?**
+- The dynamic string lets you configure the date title format in PDF exports using placeholders.
+- Example: “For the period of #{{DateFrom}} to #{{DateTo}}” will display as "For the period of 06/01/2026 to 06/30/2026" when the report is generated.
 
-- Yes, you can create multiple Profit & Loss Templates to cover different report situations.
+**Q21. Can I set a default Profit & Loss template?**
 
-**Q22. If I add a new account to my COA, will it automatically show up in my template?**
+- Yes. Go to **Settings → Templates → Reports**, hover over the template, and click**Set as Default**.**Q22. Can I duplicate a Profit & Loss template?**
 
-- Yes, any new account added to your COA will automatically appear in your Profit & Loss template based on the criteria you’ve set for your groups.
+- Yes. Go to **Settings → Templates → Reports →hover over the template →**click the 3-dot icon, and select **Duplicate**.**Q23. Can I delete a Profit & Loss template?**
+
+- Yes. Hover over the template, click the 3-dot icon, and select **Delete**.
+- Note: If the template is set as the default, you must assign another template as the default before it can be deleted.
+
+**Q24. Can I have more than one template for different situations?**
+
+- Yes. You can create multiple Profit & Loss templates to cover different reporting needs.
+
+**Q25. What happens when I update a Profit & Loss template?**
+
+- Changes apply immediately. For previously downloaded reports, redownload them to reflect the latest template updates.
 
 ---
 

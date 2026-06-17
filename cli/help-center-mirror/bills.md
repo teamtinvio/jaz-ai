@@ -36,23 +36,6 @@ Source: https://help.jaz.ai/en/articles/9104226-apply-supplier-credit
 
 ---
 
-### Bill Approval Records
-Source: https://help.jaz.ai/en/articles/9115415-bill-approval-records
-
-**Q1. What is a bill approval record?**
-
-- A bill approval record shows the contents of a bill that has been approved.
-- It lists out the items that have been approved for purchase, the quantities, prices, and amounts charged for it.
-- At the bottom of the bill approval record, you can also find an audit record for the bill approval - indicating who submitted the bill for approval, and who approved the bill.
-- Refer: [Can I download an active bill approval record PDF?](https://help.jaz.ai/en/articles/9104237-bill-downloads#h_1b9c44dc7a)
-
-**Q2. How can I download a bill approval record?**
-
-- After a submitted bill is approved, download
-- For more information on submitting bills for approval and approving bills, see [Approvals](https://help.jaz.ai/en/articles/8938045-approvals)
-
----
-
 ### Bill Downloads
 Source: https://help.jaz.ai/en/articles/9104237-bill-downloads
 
@@ -121,54 +104,56 @@ Source: https://help.jaz.ai/en/articles/9104224-draft-bills-payments
 
 - Yes, a bill can be saved as a draft even if all the mandatory fields are not filled.
 
-**Q2. How can I convert a draft bill to an active one?**
+**Q2. Can I switch between draft bill transactions while editing?**
+
+- Yes. Click the list icon beside **Edit Draft Bill** to switch between draft bills.**Q3. How can I convert a draft bill to an active one?**
 
 - Any draft bill can be converted to active only after all the mandatory fields are filled.
 
-**Q3. How do I bulk convert draft bills to active?**
+**Q4. How do I bulk convert draft bills to active?**
 
-- Select the draft bills using the checkboxes → click **Check and Convert**. This will:
-  - Validate which bills can be converted
-  - Show errors for those that can’t
-- If you proceed, only eligible bills will be converted.
+- Select the draft bills using the checkboxes, then click **Check and Convert**.
+- Jaz validates which bills can be converted and flags those with errors.
+- Review the results. Signals are available to help you assess trends within a contact before confirming.
+- Confirm to proceed. Only eligible bills will be converted.
 
-**Q4. How do I bulk approve draft bills?**
+**Q5. How do I bulk approve draft bills?**
 
 - Select the draft bills using the checkboxes → click **Check and Approve**. This will:
   - Validate which bills can be approved
   - Show errors for those that can’t
 - If you proceed, only eligible bills will be approved.
 
-**Q5. Can I save bill payment records as drafts?**
+**Q6. Can I save bill payment records as drafts?**
 
 - Similar to bill records, bill payments can also be saved as a draft.
 
-**Q6. How can I convert draft payment records to active ones?**
+**Q7. How can I convert draft payment records to active ones?**
 
 - For bills, any draft payments are converted only if the bill is also converted to active.
 - Hence, to record the payment, the bill must be converted to active status.
 
-**Q7. Can I delete a draft bill?**
+**Q8. Can I delete a draft bill?**
 
 - Yes, you can delete a draft bill. If the bill had a draft payment linked, it will also be deleted.
 
-**Q8. Can I delete a draft bill payment?**
+**Q9. Can I delete a draft bill payment?**
 
 - Similar to draft bills, draft bill payments can also be deleted.
 
-**Q9. Do draft bills affect my financial reports?**
+**Q10. Do draft bills affect my financial reports?**
 
 - No, it does not. Financial reports are only affected once the bills are active.
 
-**Q10. Do draft bill payments affect my financial reports?**
+**Q11. Do draft bill payments affect my financial reports?**
 
 - No, it does not. Financial reports are only affected once the payments are active.
 
-**Q11. Can I create a non-base currency draft bill?**
+**Q12. Can I create a non-base currency draft bill?**
 
 - Yes, the currency setting on a bill does not affect the ability to save it as a draft.
 
-**Q12. Can I create a non-base currency draft bill payment?**
+**Q13. Can I create a non-base currency draft bill payment?**
 
 - Yes, you can save a bill payment as a draft even if it is in non-base currency.
 

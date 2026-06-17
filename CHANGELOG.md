@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.15] - 2026-06-17
+
+Internal release. No user-facing changes since v5.20.14.
+
 ## [5.20.14] - 2026-06-15
 
 - Clearer setup field for your Jaz API key: the hint now shows you can paste a personal access token, or several API keys separated by commas to connect multiple organizations.
