@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.18] - 2026-06-18
+
+- Links in email and chat replies now point somewhere real. When a document you send is still being prepared in the background, the reply tells you it's on its way and takes you to your Drafts tab — instead of a "review draft" link that could land on a missing page. Replies also include a link only when it's the useful next step, not on every message.
+
 ## [5.20.17] - 2026-06-17
 
 - Forwarded receipt and invoice emails now reliably create a draft from the original document — including when you reply later to confirm (e.g. "just create it"). Previously a follow-up reply could lose the forwarded document and fall back to reading the email text, producing an inaccurate draft.
