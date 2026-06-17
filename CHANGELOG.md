@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.16] - 2026-06-17
+
+Internal release. No user-facing changes since v5.20.15.
+
 ## [5.20.15] - 2026-06-17
 
 Internal release. No user-facing changes since v5.20.14.
