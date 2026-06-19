@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.19] - 2026-06-19
+
+- ChatGPT and Claude connectors now reliably create bills and invoices instead of getting stuck. When you attach an invoice or bill, they reach for AI extraction and create the draft for you, and they no longer claim a tool is missing when it isn't. For documents that are still being prepared, they tell you it's on its way to your Drafts rather than inventing a link.
+
 ## [5.20.18] - 2026-06-18
 
 - Links in email and chat replies now point somewhere real. When a document you send is still being prepared in the background, the reply tells you it's on its way and takes you to your Drafts tab — instead of a "review draft" link that could land on a missing page. Replies also include a link only when it's the useful next step, not on every message.
