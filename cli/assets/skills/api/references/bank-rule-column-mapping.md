@@ -1,6 +1,12 @@
 # Bank-rule column-value mapping (reconcileWithDirectCashEntry)
 
-A bank rule's `reconcileWithDirectCashEntry` shortcut can resolve fields **per row** from a custom bank-statement column instead of hard-coding them. This is the "Set X by" capability: read a column, match its value, and resolve to a target (GL account, tax profile, classifier, contact, or tag).
+A bank rule's `reconcileWithDirectCashEntry` shortcut can resolve fields **per row** from a custom bank-statement column instead of hard-coding them. This is the "Set X by" capability: read a column, match its value, and resolve to a target (GL account, tax profile, nano-classifier, contact, or tag).
+
+## Background: Bank Fields
+
+The columns referenced by `columnKey` are **Bank Fields** — typed custom columns (`DATE` / `STRING` / `AMOUNT`) defined per bank account and captured when a statement is imported. They make any statement column (branch code, bank charge, cost centre, settlement ref) first-class: usable in a rule's **conditions** (matching) and in its **outputs** (the maps below). `AMOUNT` fields keep their sign; `amountSourceColumnKey` uses the **absolute** value.
+
+Scope note: the maps here are the rule **outputs** (what `create_bank_rule` / `update_bank_rule` set via `configuration`). The rule **conditions** (which statement lines the rule matches, including by Bank Field) are held in a linked search shortcut (`relatedSearchShortcutResourceIds`) configured in the product, not by these tools.
 
 ## ColumnValueMapConfig shape
 
@@ -33,7 +39,7 @@ Inside `configuration.reconcileWithDirectCashEntry`:
   - `amountSourceColumnKey` — "Set amount by": take the line's amount from the **absolute value** of a custom AMOUNT column. **Mutually exclusive with `amount`** — omit `amount` when this is set (sending both is rejected).
   - `organizationAccountResourceIdMap` — "Set Account by" (in lieu of a static `organizationAccountResourceId`).
   - `taxProfileResourceIdMap` — "Set Tax by".
-  - `classifierConfigMap` — "Set Classifier by" (target = classifier class UUID).
+  - `classifierConfigMap` — "Set Classifier by" (target = nano-classifier / classifier class UUID; see `list_nano_classifiers`).
 
 ## Reference-string column tokens
 

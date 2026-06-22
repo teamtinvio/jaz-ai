@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.21",
+  "version": "5.20.22",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -521,6 +521,46 @@
     {
       "name": "search_purchase_items",
       "description": "Search purchase items by name, reference, or currency."
+    },
+    {
+      "name": "list_catalogs",
+      "description": "List catalogs (product/service groupings)."
+    },
+    {
+      "name": "get_catalog",
+      "description": "Get a catalog by resourceId (includes its items)."
+    },
+    {
+      "name": "search_catalogs",
+      "description": "Search catalogs by name, description, status, or contact group."
+    },
+    {
+      "name": "create_catalog",
+      "description": "Create a catalog. status defaults to INACTIVE. items[] are catalog-item rows; contactGroupResourceIds[] scopes it to contact groups."
+    },
+    {
+      "name": "update_catalog",
+      "description": "Update a catalog. FULL REPLACEMENT — GET first, merge, then send the complete body; omitting items or contactGroupResourceIds DROPS them."
+    },
+    {
+      "name": "delete_catalog",
+      "description": "Delete a catalog."
+    },
+    {
+      "name": "list_organization_report_templates",
+      "description": "List saved organization report templates."
+    },
+    {
+      "name": "get_organization_report_template",
+      "description": "Get a saved report template by resourceId."
+    },
+    {
+      "name": "search_organization_report_templates",
+      "description": "Search report templates by type, category, or default flag."
+    },
+    {
+      "name": "move_transaction_capsules",
+      "description": "Move business transactions from one capsule to another. Pass the transaction resourceIds, the source capsule (oldCapsuleResourceId), and the destination (newCapsuleResourceId)."
     },
     {
       "name": "create_tax_profile",

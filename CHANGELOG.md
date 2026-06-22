@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.22] - 2026-06-22
+
+- More on-hand for the agent: it can now manage catalogs (named groupings of your products/services), browse your saved report templates, and move transactions from one capsule to another. The bank-rule help also now explains column-based mapping in full (how a statement column drives the account, tax, classifier, contact, or tag).
+
 ## [5.20.21] - 2026-06-22
 
 - The agent can now look up a few more things on its own: which features your organization has enabled, your account classifications, and your purchasable items — handy when it's helping you set up accounts or purchase documents.
