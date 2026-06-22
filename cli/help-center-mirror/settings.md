@@ -861,6 +861,62 @@ Source: https://help.jaz.ai/en/articles/9094240-transfer-trial-balance
 
 ---
 
+### E-Sign Templates
+Source: https://help.jaz.ai/en/articles/15562970-e-sign-templates
+
+**Q1. What transactions can I use e-sign templates for?**
+
+- E-sign templates can be used for Sales Quotes.
+
+**Q2. How do I create an e-sign template?**
+
+- Go to **Settings → Templates → E-Signs → + New Template**.**Q3. What can I set up under General?**
+
+- Template Name: identifies the template
+- Description: appears when choosing the template; use it to give context on when to use it within your organization
+- Default expiry days: number of days from send before the document expires
+- Decline reason requirement: require signers to provide a reason when declining
+- Cancel reason requirement: require a reason when cancelling a request
+- **Post-Completion settings**
+  - Action on completion:
+    - **Do nothing:** no automated action
+    - **Auto-accept quote:** the quote is accepted
+    - **Auto-accept & invoice:** the quote is accepted and an active invoice is created
+  - Action on expiry:
+    - **Auto-cancel:** cancels the quote
+    - **Alert, then cancel:** notifies all parties, then cancels the quote
+    - **Manual only:** no automated action; quote must be edited manually**Q4. What can I set up under Emails?**
+
+- Edit the invitation, reminder, and completion email content
+- Insert email strings to pull in dynamic values from your organization
+- Click Preview to see how an email will look before saving
+
+**Q5. What can I set up under Signers?**
+
+- Add default external and internal signers
+- External signers receive a signing link by email; internal signers sign in-app
+- These are defaults only: senders can override any signer at send time
+- Append PDFs: attach default PDFs to the quote, up to 8 MB total and 10 files
+
+**Q6. What can I set up under Reminders?**
+
+- Reminder schedule: how often reminder emails are sent to signers; set to 0 to send reminders until the document expires
+- Movement alerts: toggle to notify the sender when a request has had no activity
+- Alert after [X] days: set the number of inactive days before a movement alert is sent
+- Sender notification cadence: how often the sender is notified of progress
+  - **Every event:** viewed, signed, declined, etc.
+  - **Milestones only:** notified each time someone signs
+  - **Completion only:** notified when the document is fully signed
+  - **None:** no notifications**Q7. How do I use an e-sign template?**
+
+- Go to **Sales → Orders → Quotes → Pending → select a quote → click the E-Sign icon → choose the template**. All settings from the template are applied as defaults for that e-sign request.**Q8. Can I duplicate an e-sign template?**
+
+- Yes. **Hover over the template → click the 3-dot icon → select Duplicate**.**Q9. What happens if I update an existing template?**
+
+- Updates apply to future e-sign requests only. E-sign requests already sent are not affected unless you resend them.
+
+---
+
 ### Email Templates
 Source: https://help.jaz.ai/en/articles/10729542-email-templates
 

@@ -1,4 +1,4 @@
-Auto-generated from [help.jaz.ai](https://help.jaz.ai) — 2026-06-15 — 188 articles
+Auto-generated from [help.jaz.ai](https://help.jaz.ai) — 2026-06-22 — 189 articles
 
 | Section | Articles | File |
 |---|---|---|
@@ -19,5 +19,5 @@ Auto-generated from [help.jaz.ai](https://help.jaz.ai) — 2026-06-15 — 188 ar
 | Collaboration | 1 | [collaboration.md](collaboration.md) |
 | Fixed Assets | 2 | [fixed-assets.md](fixed-assets.md) |
 | AI Agents | 3 | [ai-agents.md](ai-agents.md) |
-| Settings | 30 | [settings.md](settings.md) |
+| Settings | 31 | [settings.md](settings.md) |
 | Security & Privacy | 2 | [security-privacy.md](security-privacy.md) |

@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.20.19
+version: 5.20.20
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 158 production gotchas, error
@@ -286,7 +286,6 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 90. **Bank rules search uses `/bank-rules/search`** — Standard search pattern with filter/sort/limit/offset. Filter fields: `appliesToReconciliationAccount`, `name`, `reference`, `resourceId`, `actionType`, `businessTransactionType`. Sort fields: `resourceId`, `name`, `actionType`, `businessTransactionType`, `reference`, `appliesToReconciliationAccount`, `createdAt`.
 90a. **Bank rules create field is `appliesToReconciliationAccount`** (NOT `appliesToReconciliationAccountResourceId`) — the bank account UUID. `configuration` must nest under `reconcileWithDirectCashEntry` key. `configuration.reconcileWithDirectCashEntry.reference` is REQUIRED (omitting causes GENERAL_ERROR). `amountAllocationType`: use `"PERCENTAGE"` or `"FIXED"` — `"FIXED_AND_PERCENTAGE"` is read-only (include both `fixedAllocation` + `percentageAllocation` arrays and the server infers it). Optional config fields: `contactResourceId`, `internalNotes`, `tags`, `currencySettings`, `taxCurrencySettings`, `classifierConfig` on allocation lines.
 90b. **Bank rules PUT is FULL REPLACEMENT** — `PUT /bank-rules/:id` replaces the entire rule. Must send `resourceId`, `appliesToReconciliationAccount`, and full `configuration` every time. Omitting any required field causes GENERAL_ERROR. Use read-modify-write pattern: GET current rule, merge changes, PUT full payload. Same pattern as items PUT (Rule 72) and capsules PUT (Rule 73).
-
 90c. **Bank rule POST canonical create payload** (verified live 2026-04, NOT obvious from any single field error):
 ```json
 {
@@ -313,6 +312,8 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 **Dynamic strings**: `name` and `reference` support `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescription}}` placeholders — replaced with bank record values during reconciliation.
 
 **actionShortcutResourceId** for `apply_bank_rule` IS the rule's own `resourceId` from create response (no separate "action shortcut" entity).
+
+90d. **Bank rules support column-value mapping** — `reconcileWithDirectCashEntry` can resolve fields per row from a custom bank-statement column: `amountSourceColumnKey` (set amount by a column; mutually exclusive with `amount`), `organizationAccountResourceIdMap`/`taxProfileResourceIdMap`/`classifierConfigMap` on each `fixedAllocation` line, and `contactResourceIdMap`/`tagsMap` on the shortcut. Each `*Map` is a `ColumnValueMapConfig` (`columnKey` + ordered `mappings[]`, first match wins, blank `matchValue` = catch-all); `targetResourceId` is a UUID (tag NAME for `tagsMap`). `reference` also takes `{{column:<key>}}` / `{{column_abs:<key>}}` tokens. Full shape: `references/bank-rule-column-mapping.md`.
 
 ### Fixed Assets
 91. **Fixed asset search does NOT support `createdAt` sort** — Valid sort fields: `resourceId`, `name`, `purchaseDate`, `typeName`, `purchaseAmount`, `bookValueNetBookValueAmount`, `depreciationMethod`, `status`. Using `createdAt` returns 422. Default to `purchaseDate` DESC.

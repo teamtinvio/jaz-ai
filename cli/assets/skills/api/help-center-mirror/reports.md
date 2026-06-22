@@ -406,6 +406,7 @@ Source: https://help.jaz.ai/en/articles/13904552-gst-ledger
   - None
   - GST Profile
   - GST Type
+  - IRAS F5
 
 **Q5. Can I filter GST transactions?**
 
@@ -469,7 +470,21 @@ You may also click Add New Template to create a customized GST Ledger layout.
 **Q11. Does the GST Ledger support multi-currency?**
 
 - Yes. If your organization uses multi-currency, the GST Ledger can display amounts in both the source currency and the tax currency, depending on the columns selected in the report.
-- **Note:** The tax currency is always the organization’s base currency, which is defined during organization creation.**Q12. What is the difference between base currency and source currency in the GST Ledger?**
+- **Note:** The tax currency is always the organization’s base currency, which is defined during organization creation.**Q12. How do I record import GST for IRAS F5 reporting?**
+
+For records dated 1 April 2026 onward, record each import as two separate entries:
+- **Goods bill:** Record the supplier bill as normal, coded with no GST (out of scope). The overseas supplier does not charge Singapore GST.
+- **Customs / freight-forwarder charge:** Record a separate bill for the GST charge. Enter one line with the exact GST amount shown on the import permit and apply the “Imports (Taxable)” tax profile.
+
+How it is reported on Jaz:
+- **Input tax (F5 Box 7):** Recorded as it is.
+- **Taxable purchase value (F5 Box 5):** Derived by dividing the GST by the prevailing rate (9%).**Example:** If Customs assesses SGD 121.50 on the permit, enter SGD 121.50 on the customs charge bill. Jaz will report Box 7 = 121.50 and Box 5 = 1,350.00.
+
+This method ensures the F5 input tax matches the import permit exactly, including for foreign-currency imports where Customs applies its own exchange rate.
+
+Records dated before 1 April 2026 do not need to be updated.
+
+**Q13. What is the difference between base currency and source currency in the GST Ledger?**
 
 - **Base Currency**
   - The base currency is the organization’s default currency configured during organization creation. This also serves as the tax currency used in the GST Ledger.

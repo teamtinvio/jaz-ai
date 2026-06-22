@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.19",
+  "version": "5.20.20",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -768,7 +768,7 @@
     },
     {
       "name": "create_bank_rule",
-      "description": "Bank reconciliation rule — auto-matches bank records. Use directly on user request, don't just list existing.\n\nRequired: name, appliesToReconciliationAccount (bank account UUID, no \"ResourceId\" suffix), configuration.\n\nconfiguration MUST nest under reconcileWithDirectCashEntry. Inside: reference (REQUIRED), amountAllocationType (\"PERCENTAGE\" | \"FIXED\" — server infers from arrays, don't send \"FIXED_AND_PERCENTAGE\"), percentageAllocation[] / fixedAllocation[].\n\nMinimum: `{ reconcileWithDirectCashEntry: { amountAllocationType: \"PERCENTAGE\", reference: \"{{bankReference}}\", percentageAllocation: [{ organizationAccountResourceId, amount: 100 }] } }`\n\nOptional inside configuration: contactResourceId, internalNotes, tags, currencySettings, taxCurrencySettings, taxInclusion, taxVatApplicable.\n\nDynamic strings (name + reference): {{bankReference}}, {{bankPayee}}, {{bankDescription}}."
+      "description": "Bank reconciliation rule — auto-matches bank records. Use directly on request; don't just list existing.\n\nRequired: name, appliesToReconciliationAccount (bank account UUID, no \"ResourceId\" suffix), configuration.\n\nconfiguration MUST nest under reconcileWithDirectCashEntry: reference (REQUIRED), amountAllocationType (\"PERCENTAGE\" | \"FIXED\" — don't send \"FIXED_AND_PERCENTAGE\"), percentageAllocation[] / fixedAllocation[] of { organizationAccountResourceId, amount }. Advanced: column-value mapping — amountSourceColumnKey + the *Map fields drive amount/account/tax/classifier/contact/tags from a bank column (amount XOR amountSourceColumnKey).\n\nOptional fields, the minimum payload, and the mapping shape: jaz-api skill (bank rules). Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}."
     },
     {
       "name": "update_bank_rule",
