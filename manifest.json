@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.20",
+  "version": "5.20.21",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -497,6 +497,30 @@
     {
       "name": "list_tax_types",
       "description": "List available tax types. Use the tax type code when creating tax profiles."
+    },
+    {
+      "name": "list_modules",
+      "description": "List the modules (features/capabilities) enabled for the organization."
+    },
+    {
+      "name": "get_module",
+      "description": "Get details for a single org module by resourceId."
+    },
+    {
+      "name": "list_account_classifications",
+      "description": "List account classifications (reference list for categorising chart-of-accounts entries)."
+    },
+    {
+      "name": "list_purchase_items",
+      "description": "List purchase-side catalog items."
+    },
+    {
+      "name": "get_purchase_item",
+      "description": "Get a single purchase item by resourceId."
+    },
+    {
+      "name": "search_purchase_items",
+      "description": "Search purchase items by name, reference, or currency."
     },
     {
       "name": "create_tax_profile",

@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.20.21] - 2026-06-22
+
+- The agent can now look up a few more things on its own: which features your organization has enabled, your account classifications, and your purchasable items — handy when it's helping you set up accounts or purchase documents.
+
+## [5.20.20] - 2026-06-22
+
+- When setting up a bank reconciliation rule, the agent now understands column-based mapping — pulling the amount, account, tax, classifier, contact, or tags for each row from a column in your bank statement, instead of a single fixed value.
+
 ## [5.20.19] - 2026-06-19
 
 - ChatGPT and Claude connectors now reliably create bills and invoices instead of getting stuck. When you attach an invoice or bill, they reach for AI extraction and create the draft for you, and they no longer claim a tool is missing when it isn't. For documents that are still being prepared, they tell you it's on its way to your Drafts rather than inventing a link.
