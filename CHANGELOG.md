@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.25] - 2026-06-23
+
+- Internal release. Fixes a post-deploy smoke test (account lookup by name) and hardens it against test-data drift. No user-facing changes to the extension.
+
 ## [5.20.24] - 2026-06-23
 
 - Internal release. Fixes a streaming failure in the hosted agent service where replies died mid-response (`Premature close`) on Node 22 — the OpenAI client now uses the platform's native fetch instead of node-fetch. No user-facing changes to the extension.
