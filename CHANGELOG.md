@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.26] - 2026-06-24
+
+- Internal release automation update. Hardens the post-deploy smoke test's bank-account-by-name guard against accumulated test-data drift in the shared fire sandbox. No user-facing changes to the extension since v5.20.25.
+
 ## [5.20.25] - 2026-06-23
 
 - Internal release. Fixes a post-deploy smoke test (account lookup by name) and hardens it against test-data drift. No user-facing changes to the extension.
