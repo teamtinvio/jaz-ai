@@ -4471,10 +4471,6 @@
           "description": "Display name for the bank rule",
           "minLength": 1,
           "type": "string"
-        },
-        "relatedSearchShortcutResourceIds": {
-          "description": "UUID of a related search shortcut (from /search-shortcuts API)",
-          "type": "string"
         }
       },
       "required": [
@@ -16749,87 +16745,6 @@
       },
       "type": "object"
     },
-    "SearchSearchShortcutRequest": {
-      "properties": {
-        "filter": {
-          "$ref": "#/definitions/SearchShortcutFilter"
-        },
-        "limit": {
-          "default": 100,
-          "description": "Maximum number of results to return (1–1000)",
-          "maximum": 1000,
-          "minimum": 1,
-          "type": "integer"
-        },
-        "offset": {
-          "default": 0,
-          "description": "Page offset (0-indexed). Sort is required when using offset.",
-          "maximum": 65536,
-          "minimum": 0,
-          "type": "integer"
-        },
-        "query": {
-          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\"",
-          "maxLength": 1000,
-          "type": "string"
-        },
-        "sort": {
-          "$ref": "#/definitions/SearchShortcutSortFilter"
-        },
-        "viewStatus": {
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "SearchShortcutFilter": {
-      "properties": {
-        "and": {
-          "type": "object"
-        },
-        "businessTransactionType": {
-          "$ref": "#/definitions/StringExpression"
-        },
-        "creatorResourceId": {
-          "$ref": "#/definitions/StringExpression"
-        },
-        "name": {
-          "$ref": "#/definitions/StringExpression"
-        },
-        "or": {
-          "type": "object"
-        },
-        "resourceId": {
-          "$ref": "#/definitions/StringExpression"
-        }
-      },
-      "type": "object"
-    },
-    "SearchShortcutSortFilter": {
-      "properties": {
-        "order": {
-          "enum": [
-            "ASC",
-            "asc",
-            "DESC",
-            "desc"
-          ],
-          "type": "string"
-        },
-        "sortBy": {
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 13,
-          "type": "array",
-          "uniqueItems": true
-        }
-      },
-      "required": [
-        "sortBy"
-      ],
-      "type": "object"
-    },
     "SearchSupplierCreditNoteRequest": {
       "properties": {
         "filter": {
@@ -19892,10 +19807,6 @@
         "name": {
           "description": "Updated display name for the bank rule",
           "minLength": 1,
-          "type": "string"
-        },
-        "relatedSearchShortcutResourceIds": {
-          "description": "UUID of a related search shortcut (from /search-shortcuts API)",
           "type": "string"
         },
         "resourceId": {
@@ -37881,7 +37792,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies",
+        "operationId": "list-organization-currencies-2",
         "parameters": [
           {
             "default": 100,
@@ -37942,7 +37853,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency",
+        "operationId": "create-organization-currency-2",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -38001,7 +37912,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency-2",
+        "operationId": "get-organization-currency",
         "parameters": [
           {
             "description": "Currency Code",
@@ -39192,7 +39103,7 @@
           "application/json"
         ],
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies-2",
+        "operationId": "list-organization-currencies",
         "parameters": [
           {
             "default": 100,
@@ -39252,7 +39163,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency-2",
+        "operationId": "create-organization-currency",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -39368,7 +39279,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency",
+        "operationId": "get-organization-currency-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -44372,7 +44283,7 @@
     "/api/v1/rollback/journals/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a journal. Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-journal-version-2",
+        "operationId": "get-rollback-journal-version",
         "parameters": [
           {
             "description": "Journal Resource ID",
@@ -44446,7 +44357,7 @@
     "/api/v1/rollback/journals/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a journal at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-journal-version",
+        "operationId": "get-rollback-journal-version-2",
         "parameters": [
           {
             "description": "Journal Resource ID",
@@ -44600,7 +44511,7 @@
     "/api/v1/rollback/purchases/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a purchase (bill). Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-purchase-version-2",
+        "operationId": "get-rollback-purchase-version",
         "parameters": [
           {
             "description": "Purchase Resource ID",
@@ -44674,7 +44585,7 @@
     "/api/v1/rollback/purchases/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a purchase (bill) at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-purchase-version",
+        "operationId": "get-rollback-purchase-version-2",
         "parameters": [
           {
             "description": "Purchase Resource ID",
@@ -44828,7 +44739,7 @@
     "/api/v1/rollback/sales/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a sale (invoice). Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-sale-version",
+        "operationId": "get-rollback-sale-version-2",
         "parameters": [
           {
             "description": "Sale Resource ID",
@@ -44902,7 +44813,7 @@
     "/api/v1/rollback/sales/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a sale (invoice) at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-sale-version-2",
+        "operationId": "get-rollback-sale-version",
         "parameters": [
           {
             "description": "Sale Resource ID",
@@ -49033,183 +48944,6 @@
         ]
       }
     },
-    "/api/v1/search-shortcuts": {
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "description": "Retrieve all search shortcuts with pagination",
-        "operationId": "list-search-shortcuts",
-        "parameters": [
-          {
-            "default": 100,
-            "description": "Limit results",
-            "in": "query",
-            "name": "limit",
-            "type": "integer"
-          },
-          {
-            "default": 0,
-            "description": "Page number offset (0-indexed)",
-            "in": "query",
-            "name": "offset",
-            "type": "integer"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "List search shortcuts",
-        "tags": [
-          "Search Shortcut"
-        ]
-      }
-    },
-    "/api/v1/search-shortcuts/search": {
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "description": "Search saved search shortcuts with filters, pagination, and sorting",
-        "operationId": "search-search-shortcut",
-        "parameters": [
-          {
-            "description": "Search search shortcuts payload",
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/SearchSearchShortcutRequest"
-            }
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Search Saved Shortcuts",
-        "tags": [
-          "Search Shortcut"
-        ]
-      }
-    },
-    "/api/v1/search-shortcuts/{resourceId}": {
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "description": "Retrieve a search shortcut by resource ID",
-        "operationId": "get-search-shortcut",
-        "parameters": [
-          {
-            "description": "Search Shortcut Resource ID",
-            "in": "path",
-            "name": "resourceId",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse_2"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Get search shortcut",
-        "tags": [
-          "Search Shortcut"
-        ]
-      }
-    },
     "/api/v1/statement-of-account-export": {
       "post": {
         "consumes": [
@@ -51240,10 +50974,6 @@
     {
       "description": "Export statement of account reports",
       "name": "Statement of Account"
-    },
-    {
-      "description": "Manage search shortcuts",
-      "name": "Search Shortcut"
     },
     {
       "description": "Export search results from any entity table as a downloadable XLSX file. Apply the same filters and search queries used in table views, preview record counts before exporting, and discover available columns per entity type.",

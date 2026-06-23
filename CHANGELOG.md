@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.24] - 2026-06-23
+
+- Internal release. Fixes a streaming failure in the hosted agent service where replies died mid-response (`Premature close`) on Node 22 — the OpenAI client now uses the platform's native fetch instead of node-fetch. No user-facing changes to the extension.
+
 ## [5.20.22] - 2026-06-22
 
 - More on-hand for the agent: it can now manage catalogs (named groupings of your products/services), browse your saved report templates, and move transactions from one capsule to another. The bank-rule help also now explains column-based mapping in full (how a statement column drives the account, tax, classifier, contact, or tag).
