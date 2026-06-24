@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.28] - 2026-06-25
+
+- Hand the agent a whole folder of paperwork and it sorts and files it for you. Paste a Dropbox, Google Drive, or OneDrive folder share link (or a .zip of mixed documents) and the agent now classifies each file into invoices, bills, credit notes, and bank statements, then creates the drafts. Previously it asked you to paste each file link one at a time. Single documents work exactly as before.
+
 ## [5.20.27] - 2026-06-24
 
 - Adds a read-only `clio resolve <account|contact|bank|tax-profile> <name>` command that returns the resourceId for a name (the same lookup the agent uses), and routes the post-deploy smoke test through it so test and product share one resolver. Also makes the smoke fixtures durable so the shared test sandbox stops accumulating undeletable accounts. No change to existing extension behavior.

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.27",
+  "version": "5.20.28",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -768,7 +768,7 @@
     },
     {
       "name": "create_bt_from_attachment",
-      "description": "Create a business transaction (invoice/bill/credit note) from a file, a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. When the host conversation provides a file with the call, omit all source arguments — the file is used automatically."
+      "description": "Create a business transaction (invoice/bill/credit note) from a SINGLE file, a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. When the host conversation provides a file with the call, omit all source arguments — the file is used automatically. For a FOLDER, a .zip, a Dropbox/Drive/OneDrive folder share link, or several/mixed documents at once, use classify_documents (then extract_documents) instead — do not call this per-file."
     },
     {
       "name": "get_magic_workflow_status",
@@ -780,7 +780,7 @@
     },
     {
       "name": "classify_documents",
-      "description": "Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Files in unrecognized folders come back as needs-review. Returns a manifest (per-file type + confidence + counts) plus a collectionId; review it, then call extract_documents with that collectionId to create the drafts. Source must be an https URL: a direct .zip/file link (e.g. an uploaded attachment) or a Dropbox / Google Drive / OneDrive share link. (Local folder paths are CLI-only.)"
+      "description": "Use this when the user points at a FOLDER, a .zip, a Dropbox / Google Drive / OneDrive folder share link, or a pile/batch of mixed documents (\"create docs from this Dropbox folder link\", \"here is a folder of invoices and bills\"). Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Files in unrecognized folders come back as needs-review. Returns a manifest (per-file type + confidence + counts) plus a collectionId; review it, then call extract_documents with that collectionId to create the drafts. Source must be an https URL: a direct .zip/file link (e.g. an uploaded attachment) or a Dropbox / Google Drive / OneDrive share link. (Local folder paths are CLI-only.)"
     },
     {
       "name": "extract_documents",
