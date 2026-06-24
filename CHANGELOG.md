@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.29] - 2026-06-25
+
+- When the agent files a whole folder or batch of documents, it now replies right away that the drafts are being prepared and will appear in your Drafts as they finish, instead of pausing on a long completion check that — on a big batch — could look like an error even though everything succeeded. The drafts are created exactly as before; only the wait-and-report behavior changed.
+
 ## [5.20.28] - 2026-06-25
 
 - Hand the agent a whole folder of paperwork and it sorts and files it for you. Paste a Dropbox, Google Drive, or OneDrive folder share link (or a .zip of mixed documents) and the agent now classifies each file into invoices, bills, credit notes, and bank statements, then creates the drafts. Previously it asked you to paste each file link one at a time. Single documents work exactly as before.
