@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.27] - 2026-06-24
+
+- Adds a read-only `clio resolve <account|contact|bank|tax-profile> <name>` command that returns the resourceId for a name (the same lookup the agent uses), and routes the post-deploy smoke test through it so test and product share one resolver. Also makes the smoke fixtures durable so the shared test sandbox stops accumulating undeletable accounts. No change to existing extension behavior.
+
 ## [5.20.26] - 2026-06-24
 
 - Internal release automation update. Hardens the post-deploy smoke test's bank-account-by-name guard against accumulated test-data drift in the shared fire sandbox. No user-facing changes to the extension since v5.20.25.

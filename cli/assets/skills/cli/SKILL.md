@@ -1,14 +1,14 @@
 ---
 name: jaz-cli
-version: 5.20.26
+version: 5.20.27
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
-  or chaining multi-step accounting workflows from the terminal. Covers all 48
+  or chaining multi-step accounting workflows from the terminal. Covers all 60
   command groups, auth precedence, output formats, entity resolution, and common
   workflow patterns. Also use when the user asks how to use clio, what commands
   are available, or how to automate accounting tasks from the command line.
-  Covers all 59 command groups and 305 tools.
+  Covers all 60 command groups and 305 tools.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 ---
@@ -17,7 +17,7 @@ compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 
 > **Audience note:** for power users and CI/automation. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output. For day-to-day accounting inside Claude Desktop / Cowork, the MCP tools cover the common flows without dropping to the CLI.
 
-You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 59 command groups, 13 calculators, 12 job blueprints, 305 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
+You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 60 command groups, 13 calculators, 12 job blueprints, 305 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
 
 ## When to Use This Skill
 
@@ -109,6 +109,15 @@ clio journals create --account "1000"           # Resolves by account code
 ```
 
 > **IMPORTANT for agents:** Fuzzy matching works for `--contact` and top-level `--account` flags. It does NOT work inside `--lines` JSON arrays. Line item `accountResourceId` must be a UUID or exact account name.
+
+**Resolve a name to a resourceId without writing anything:**
+```bash
+clio resolve account "Operating Expense" --json   # → {"resourceId":"...","displayName":"..."}
+clio resolve bank "DBS Current" --json
+clio resolve contact "Acme" --json
+clio resolve tax-profile "Standard GST" --json
+```
+`clio resolve <account|contact|bank|tax-profile> <name>` runs the **same** resolver the write flags use (UUID→exact→fuzzy) and exits non-zero with candidates on an ambiguous/no match. Prefer it over `accounts search … | jq` when you just need the id: search is fuzzy and paginated (an exact name can be buried on a polluted org), whereas `resolve` fetches the full set and prefers an exact hit.
 
 ## Pagination
 

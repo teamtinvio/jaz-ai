@@ -7,7 +7,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
-305 tools. 59 command groups. 13 calculators. 12 job playbooks. 158 API rules. 16 IFRS recipes.
+305 tools. 60 command groups. 13 calculators. 12 job playbooks. 158 API rules. 16 IFRS recipes.
 
 ```bash
 npm install -g jaz-clio
@@ -18,7 +18,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 ## Contents
 
 - [Three Ways In](#three-ways-in) · CLI, MCP, Skills
-- [CLI](#cli) · 59 command groups
+- [CLI](#cli) · 60 command groups
 - [MCP Server](#mcp-server) · 305 tools for AI agents
 - [Skills](#skills) · Teach any AI the Jaz API
 - [Setup](#setup) · Auth, multi-org, automation
@@ -47,7 +47,7 @@ clio invoices search --query 'status:unpaid AND $500+'  # Structured per-entity 
 clio invoices search --query 'status:unpaid' --view lean # Compact summary rows (id + key fields), then drill in with get
 ```
 
-59 command groups. 16 report types. 13 calculators. 12 job playbooks. Every command supports `--json`. Run `clio --help` for the full list.
+60 command groups. 16 report types. 13 calculators. 12 job playbooks. Every command supports `--json`. Run `clio --help` for the full list.
 
 ---
 
