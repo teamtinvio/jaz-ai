@@ -71,10 +71,14 @@ Turn APPROVED claims into journal entries, and record books-only employee payout
   gateway transfer; `amount` / `paymentAccountResourceId` / `valueDate` required, `reference`
   auto-generated. **`search_employee_payouts`** lists them (filter by employee, reference,
   payout status/type).
-- **`create_claim_from_attachment`** (write, multipart) — OCR a receipt URL into a DRAFT
-  claim. **Wire field is `sourceURL` (capital URL)** — unlike the BT create-from-attachment's
-  `sourceUrl`. Response is an async workflow handle; the claim materialises later (search
-  claims, status DRAFT).
+- **`create_claim_from_attachment`** (write, multipart) — OCR a receipt into a DRAFT
+  claim from a **file**, a **URL**, or **raw HTML** (an email body). **Wire field is
+  `sourceURL` (capital URL)** — unlike the BT create-from-attachment's `sourceUrl`. On the
+  email channel pass `attachmentId: "email-body"` to use the inbound body (the server
+  renders HTML → PDF); when the host attaches a file to the call, omit all source args.
+  CLI: `clio claims from-attachment (--file <path> | --source-url <url> | --html @<path>)`.
+  Response is an async workflow handle; the claim materialises later (search claims,
+  status DRAFT).
 
 ---
 

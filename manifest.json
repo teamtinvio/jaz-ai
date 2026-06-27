@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.34",
+  "version": "5.20.35",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -780,7 +780,7 @@
     },
     {
       "name": "create_claim_from_attachment",
-      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction. Provide sourceURL (the receipt file URL). Optional contact, claim profile, currency, value date. Returns a workflow handle — the claim materialises asynchronously; search claims (status DRAFT) to find it."
+      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction — from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments — the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. Optional contact, claim profile, currency, value date. Returns a workflow handle — the claim materialises asynchronously; search claims (status DRAFT) to find it."
     },
     {
       "name": "classify_documents",

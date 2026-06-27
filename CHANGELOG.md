@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.35] - 2026-06-28
+
+- File an expense claim straight from an emailed receipt. `create_claim_from_attachment` (and `clio claims from-attachment`) now accept the email body itself or raw HTML — not just a file or a link — so a receipt that arrives in an email becomes a draft claim with no manual re-keying, the same way bills already work.
+
 ## [5.20.34] - 2026-06-28
 
 - Create an expense claim straight from a receipt on your computer (not just a link): the new `--file` option uploads a local PDF, photo, or scan and the assistant extracts a draft claim from it.
