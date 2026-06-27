@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.20.30
+version: 5.20.31
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -8,7 +8,7 @@ description: >-
   command groups, auth precedence, output formats, entity resolution, and common
   workflow patterns. Also use when the user asks how to use clio, what commands
   are available, or how to automate accounting tasks from the command line.
-  Covers all 63 command groups and 323 tools.
+  Covers all 64 command groups and 340 tools.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 ---
@@ -17,7 +17,7 @@ compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 
 > **Audience note:** for power users and CI/automation. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output. For day-to-day accounting inside Claude Desktop / Cowork, the MCP tools cover the common flows without dropping to the CLI.
 
-You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 63 command groups, 13 calculators, 12 job blueprints, 323 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
+You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 64 command groups, 13 calculators, 12 job blueprints, 340 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
 
 ## When to Use This Skill
 

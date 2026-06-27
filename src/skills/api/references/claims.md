@@ -1,4 +1,58 @@
-# Claim Settings — Claim Types, Claim Profiles, Posting Rules
+# Claims — Records, Lifecycle, Bulk + Claim Settings
+
+The employee-expense **Claims** feature. This reference covers the **claim records**
+(search / edit / lifecycle / bulk) and the **Claim Settings** master data (types /
+profiles / posting rules). Claim → journal conversion + employee payouts are a
+separate surface.
+
+## Claim records (`claims` + `claim_processing` namespaces)
+
+CLI: `clio claims …`. **Claims have no bare list or create** — a claim is born DRAFT
+via document attachment or conversion, then mutated. List = `search_claims`.
+
+### Status flow (server-enforced — surface the 422, don't pre-validate)
+
+`DRAFT → SUBMITTED → APPROVED → CONVERTED` (CONVERTED = the customer-facing
+**"Processed"**), with `REJECTED` / `CANCELLED` branches.
+
+| Action | Tool | Legal from | Body |
+|--------|------|-----------|------|
+| Edit | `update_claim` | DRAFT | partial; `claimItems` non-empty REPLACES all, `[]` clears |
+| Submit | `submit_claim` (or `update_claim` saveAsDraft=false) | DRAFT | none |
+| Approve | `approve_claim` | SUBMITTED | none |
+| Reject | `reject_claim` | SUBMITTED / APPROVED | `rejectionReason` (1-1000) |
+| Cancel | `cancel_claim` | DRAFT / SUBMITTED | `cancellationReason` (1-1000) |
+| Unpost | `unpost_claim` | CONVERTED | none (reverses conversion → APPROVED) |
+| Delete | `delete_claim` | DRAFT / REJECTED / CANCELLED | none |
+
+Single lifecycle ops are **SYNC** and return the updated claim. Illegal transitions
+return `422` with a clear code, e.g. `CLAIM_NOT_SUBMITTABLE` ("Only DRAFT claims can
+be submitted (current status: APPROVED)"). Don't pre-check — call and surface the error.
+
+### Bulk actions are ASYNC
+
+`bulk_submit / approve / reject / cancel / delete_claims` (max 500 ids) return **HTTP 202**
++ a job handle `{ jobId, subscriptionFBPath, status: "QUEUED", totalRecords, totalChunks }`.
+Per-item processing happens in the background — **poll `search_background_jobs` by `jobId`**
+for results (a queued job doesn't pre-validate item state). bulk_reject/cancel take one
+shared reason for the batch.
+
+### Update semantics (verified live)
+
+`update_claim` is **partial**: omitted fields are unchanged; no GET-merge needed for
+scalars. `claimItems` is a **full replacement set** (non-empty replaces every line,
+`[]` clears, omit = no change). Attachments are per-row upsert (resourceId = edit, omit =
+add, `deleted:true` = remove); `delete_claim_attachment` removes one and returns the claim.
+`contactResourceId` and `vendorName` are mutually exclusive.
+
+### Pickers (bare arrays)
+
+`get_claim_tracking_tags` and `get_claim_custom_field_values` return a **bare array**,
+not a `{data}` envelope.
+
+---
+
+## Claim Settings (`claim_settings` + `posting_rules` namespaces)
 
 Configuration for the employee-expense **Claims** feature (Settings → Claim Settings).
 Three master-data entities, each with full CRUD + search. Employees, claims, and

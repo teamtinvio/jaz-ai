@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.20.31] - 2026-06-28
+
+- Work employee expense claims end to end. The assistant can now find claims (by status, employee, vendor, reference, date, or amount), edit a draft's line items and details, and move a claim through its lifecycle — submit, approve, reject, cancel, unpost, or delete — with the same rules your team sees in the app. It can also action many claims at once (bulk submit, approve, reject, cancel, or delete), which runs in the background and hands back a job you can track.
+
+## [5.20.30] - 2026-06-27
+
+- Set up your expense-claim configuration from the assistant or CLI: create and manage claim types (expense categories), claim profiles (per-employee approval and spend-limit policies), and posting rules (how approved claims group into journal entries).
+
 ## [5.20.29] - 2026-06-25
 
 - When the agent files a whole folder or batch of documents, it now replies right away that the drafts are being prepared and will appear in your Drafts as they finish, instead of pausing on a long completion check that — on a big batch — could look like an error even though everything succeeded. The drafts are created exactly as before; only the wait-and-report behavior changed.

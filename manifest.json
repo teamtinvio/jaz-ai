@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.30",
+  "version": "5.20.31",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1085,6 +1085,74 @@
     {
       "name": "delete_posting_rule",
       "description": "Delete a posting rule. The org default cannot be deleted while default (set another default first)."
+    },
+    {
+      "name": "search_claims",
+      "description": "Search/list employee-expense claims. Status: DRAFT|SUBMITTED|APPROVED|CONVERTED|REJECTED|CANCELLED (CONVERTED = \"Processed\"). Claims have no bare list/create — born via attachment/conversion."
+    },
+    {
+      "name": "get_claim",
+      "description": "Get a claim incl. line items, employee, amounts, status."
+    },
+    {
+      "name": "update_claim",
+      "description": "Update a DRAFT claim (partial — omitted fields unchanged). claimItems non-empty REPLACES all lines, [] clears. Set saveAsDraft=false to validate + submit in one call. Only DRAFT claims are editable."
+    },
+    {
+      "name": "delete_claim",
+      "description": "Delete a claim. Only DRAFT / REJECTED / CANCELLED claims are deletable (else 422)."
+    },
+    {
+      "name": "delete_claim_attachment",
+      "description": "Remove one attachment (receipt) from a claim. Returns the updated claim."
+    },
+    {
+      "name": "submit_claim",
+      "description": "Submit a DRAFT claim for approval (DRAFT → SUBMITTED). Server enforces the transition."
+    },
+    {
+      "name": "approve_claim",
+      "description": "Approve a SUBMITTED claim (SUBMITTED → APPROVED). Approved claims become convertible to journals."
+    },
+    {
+      "name": "reject_claim",
+      "description": "Reject a SUBMITTED/APPROVED claim with a reason (→ REJECTED)."
+    },
+    {
+      "name": "cancel_claim",
+      "description": "Cancel a DRAFT/SUBMITTED claim with a reason (→ CANCELLED)."
+    },
+    {
+      "name": "unpost_claim",
+      "description": "Unpost a CONVERTED claim — reverses the journal conversion back to APPROVED."
+    },
+    {
+      "name": "bulk_submit_claims",
+      "description": "Bulk-submit DRAFT claims (ASYNC). Returns a job handle {jobId,...}; poll search_background_jobs by jobId for per-item results. Max 500 ids."
+    },
+    {
+      "name": "bulk_approve_claims",
+      "description": "Bulk-approve SUBMITTED claims (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids."
+    },
+    {
+      "name": "bulk_reject_claims",
+      "description": "Bulk-reject claims with one shared reason (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids."
+    },
+    {
+      "name": "bulk_cancel_claims",
+      "description": "Bulk-cancel claims with one shared reason (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids."
+    },
+    {
+      "name": "bulk_delete_claims",
+      "description": "Bulk-delete claims (ASYNC; only DRAFT/REJECTED/CANCELLED are deletable). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids."
+    },
+    {
+      "name": "get_claim_tracking_tags",
+      "description": "List the tracking-tag values available across claims (picker; returns a bare array)."
+    },
+    {
+      "name": "get_claim_custom_field_values",
+      "description": "List the custom-field values available across claims (picker; returns a bare array)."
     },
     {
       "name": "list_inventory_items",
