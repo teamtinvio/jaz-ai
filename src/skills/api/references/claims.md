@@ -78,6 +78,30 @@ Turn APPROVED claims into journal entries, and record books-only employee payout
 
 ---
 
+## Employees (`employees` namespace)
+
+The expense-claim members. CLI: `clio employees …`. `list = search_employees` (no
+bare list endpoint).
+
+- **`add_employee`** — `name` + **`userResourceId` are required** (the server rejects
+  a create without a user to bind: `422 EMPLOYEE_USER_RESOURCE_ID_MISSING`). Binding is
+  **PERMANENT**. A claim profile is required too (the org default applies if omitted).
+  Dedups by email (per-org unique).
+- **`update_employee`** — partial (omit = no change; email `""` clears). **Archive with
+  `active: false`** (reversible — prefer over `delete_employee`). `userResourceId` is NOT
+  editable here; use **`bind_employee_user`** (one-way, permanent). `clearEmploymentType`
+  unsets the classification.
+- **`delete_employee`** — server validates the employee is settled (else error). Prefer archive.
+- **`search_employees`** / **`search_employee_balances`** — the second is the balance
+  directory (per-currency reimbursement owed). `search_employee_payouts` lives in `claim_processing`.
+- **EmploymentType**: `FULL_TIME` `PART_TIME` `CONTRACTOR` `INTERN` `TEMPORARY` `CONSULTANT`.
+- **Import**: `preprocess_employees_file` (sync — pass a sheet `fileUrl`, returns a row
+  preview) → `import_employees` (`create`/`update`/`delete` arrays, **max 100 each**;
+  sync-validates rows with row-level 422s, then queues an async job — poll
+  `search_background_jobs`). Create rows need a bound user + claim profile.
+
+---
+
 ## Claim Settings (`claim_settings` + `posting_rules` namespaces)
 
 Configuration for the employee-expense **Claims** feature (Settings → Claim Settings).

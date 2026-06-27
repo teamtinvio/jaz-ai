@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.33] - 2026-06-28
+
+- Manage your employees (expense-claim members) end to end: add, edit, search, and archive them, look up reimbursement balances owed, link an employee to a login user, and bulk-import a whole roster from a sheet (preview the rows first, then import).
+
 ## [5.20.32] - 2026-06-28
 
 - Close the loop on expense claims. The assistant can now preview and post approved claims into journal entries, record employee reimbursements and advances as books entries, and look those payouts up. It can also create a claim straight from a receipt link — scan the document and a draft claim appears. (Recording books entries only — no money is moved out.)
