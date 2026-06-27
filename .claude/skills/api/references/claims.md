@@ -5,6 +5,20 @@ The employee-expense **Claims** feature. This reference covers the **claim recor
 profiles / posting rules). Claim → journal conversion + employee payouts are a
 separate surface.
 
+## Bill vs claim routing + self-claims (agent)
+
+A receipt is a BILL (a vendor's invoice) or a CLAIM (an employee's reimbursed expense)
+— different tools. Decide by intent, else by capability: call `get_my_context` and read
+`moduleRoles` — PURCHASES ≠ NO_ACCESS → bill (`create_bt_from_attachment`); else
+EMPLOYEE_CLAIMS ≠ NO_ACCESS → claim (`create_claim_from_attachment`). The always-on
+`claims-routing` policy carries the full rule.
+
+`create_claim_from_attachment` makes an UNBOUND draft (async, no claim id). Bind the
+employee once it materialises (`search_claims` status DRAFT → `update_claim`
+`employeeResourceId`): no other employee named → the caller's own
+(`get_my_context.employee`; null = not set up for claims, don't invent one); a named
+employee → `search_employees` then bind that id.
+
 ## Claim records (`claims` + `claim_processing` namespaces)
 
 CLI: `clio claims …`. **Claims have no bare list or create** — a claim is born DRAFT

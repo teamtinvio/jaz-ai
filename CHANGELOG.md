@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.37] - 2026-06-28
+
+- The assistant now tells a vendor bill apart from your own expense claim and routes each correctly. A receipt for something you paid out of pocket becomes a reimbursement claim filed to you (it knows who you are and what you're allowed to do), while a supplier's invoice becomes a bill — no more treating an employee expense as a vendor bill.
+
 ## [5.20.36] - 2026-06-28
 
 - The assistant can now look up your own profile — who you are, the employee record linked to your login, and which areas you have access to — so it can act on your behalf, like filing an expense claim for you and knowing whether a receipt should become a bill or a claim.

@@ -1,12 +1,12 @@
 {
   "name": "jaz-ai",
-  "version": "5.20.36",
+  "version": "5.20.37",
   "description": "Accounting tools for AI agents and accountants: 158 API rules, 13 calculators, 16 IFRS recipes, 12 jobs.",
   "contextFileName": "CONTEXT.md",
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.36", "mcp"]
+      "args": ["-y", "jaz-clio@5.20.37", "mcp"]
     }
   }
 }
