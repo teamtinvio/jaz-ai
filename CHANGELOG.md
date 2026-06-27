@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.34] - 2026-06-28
+
+- Create an expense claim straight from a receipt on your computer (not just a link): the new `--file` option uploads a local PDF, photo, or scan and the assistant extracts a draft claim from it.
+
 ## [5.20.33] - 2026-06-28
 
 - Manage your employees (expense-claim members) end to end: add, edit, search, and archive them, look up reimbursement balances owed, link an employee to a login user, and bulk-import a whole roster from a sheet (preview the rows first, then import).
