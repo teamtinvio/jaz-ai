@@ -3,11 +3,11 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/v/jaz-clio?style=for-the-badge&logo=npm" alt="npm"></a>
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/dm/jaz-clio?style=for-the-badge&label=downloads" alt="npm downloads"></a>
-  <img src="https://img.shields.io/badge/tools-305-blue?style=for-the-badge" alt="305 tools">
+  <img src="https://img.shields.io/badge/tools-323-blue?style=for-the-badge" alt="323 tools">
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
-305 tools. 60 command groups. 13 calculators. 12 job playbooks. 158 API rules. 16 IFRS recipes.
+323 tools. 63 command groups. 13 calculators. 12 job playbooks. 158 API rules. 16 IFRS recipes.
 
 ```bash
 npm install -g jaz-clio
@@ -18,8 +18,8 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 ## Contents
 
 - [Three Ways In](#three-ways-in) · CLI, MCP, Skills
-- [CLI](#cli) · 60 command groups
-- [MCP Server](#mcp-server) · 305 tools for AI agents
+- [CLI](#cli) · 63 command groups
+- [MCP Server](#mcp-server) · 323 tools for AI agents
 - [Skills](#skills) · Teach any AI the Jaz API
 - [Setup](#setup) · Auth, multi-org, automation
 - [Semantic help-center search](#help-center-semantic-search-optional) · Optional OpenAI-backed retrieval
@@ -47,13 +47,13 @@ clio invoices search --query 'status:unpaid AND $500+'  # Structured per-entity 
 clio invoices search --query 'status:unpaid' --view lean # Compact summary rows (id + key fields), then drill in with get
 ```
 
-60 command groups. 16 report types. 13 calculators. 12 job playbooks. Every command supports `--json`. Run `clio --help` for the full list.
+63 command groups. 16 report types. 13 calculators. 12 job playbooks. Every command supports `--json`. Run `clio --help` for the full list.
 
 ---
 
 ## MCP Server
 
-305 tools, available to any AI agent that speaks MCP. Runs locally: no cloud, no ports.
+323 tools, available to any AI agent that speaks MCP. Runs locally: no cloud, no ports.
 
 > **No install at all?** Claude.ai, ChatGPT, Cowork, and Microsoft Copilot Studio can use Jaz via the **hosted connector**: add `https://mcp.jaz.ai/mcp` as a custom connector (Claude/ChatGPT) or MCP tool (Copilot Studio) and sign in (OAuth, no key). The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
 

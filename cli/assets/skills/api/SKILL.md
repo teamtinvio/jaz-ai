@@ -1,13 +1,13 @@
 ---
 name: jaz-api
-version: 5.20.29
+version: 5.20.30
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 158 production gotchas, error
   recovery (422/400/404/500), search filters, pagination, and edge cases for
   every endpoint — invoices, bills, credit notes, journals, cash entries,
   payments, contacts, CoA, items, tax profiles, bank records, fixed assets,
-  schedulers, subscriptions, attachments, and Jaz Magic extraction. Also use
+  schedulers, subscriptions, attachments, claim settings, and Jaz Magic extraction. Also use
   when building API clients, seeding test data, or adding new endpoint support.
 license: MIT
 compatibility: Requires Jaz API key (x-jk-api-key header). Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown.
@@ -31,7 +31,7 @@ The rest of this skill — field names, gotchas, error catalog, dependency order
 
 **Core fundamentals (read first, every integration):** Identifiers & Dates 1–3; Names & Fields 9–13; Transaction Creation 14–16; Chart of Accounts 17–22; Payments / Cross-Currency 4–8; Journals & Cash 23–26; Credit Notes & Refunds 27–28; Reports 36–37; Tax Profile Scoping 100; Transaction References 104; Draft Finalization Pipeline 81–88; Jaz Magic / PDF-JPG 57–63; Currency Rates 39, 49, 105; Withholding Tax 45, 98.
 
-**Integration depth (API clients, pipelines, batch jobs, MCP/CLI):** Bulk Upsert (Items/Contacts/Rates); Background Jobs (filter `resourceId` not `jobId`); Export Records; Pagination (38); Search & Filter (50–56); Response Shape Gotchas (66–73); Cash Entry Response Shape (74–77); Entity Resolution (78–80); Bank Rules (89–90c); Fixed Assets (91–92c); Subscriptions & Scheduled (93–94); niche endpoints (95–102); Journals balance (103); Quick Fix (107, 111); TTB (108); Dynamic Strings (109–110); Sub-Resource Shapes (112); Nano-Classifier (113); Scheduler Asymmetry (114); Payment Record CRUD (115–117); Bulk Upserts transactions (118–122); Reconciliation write-side (123–127); Drafts lifecycle (128–135); Orders — Sale Quotes / Sale Orders / Purchase Requests / Purchase Orders (`references/orders.md`).
+**Integration depth (API clients, pipelines, batch jobs, MCP/CLI):** Bulk Upsert (Items/Contacts/Rates); Background Jobs (filter `resourceId` not `jobId`); Export Records; Pagination (38); Search & Filter (50–56); Response Shape Gotchas (66–73); Cash Entry Response Shape (74–77); Entity Resolution (78–80); Bank Rules (89–90c); Fixed Assets (91–92c); Subscriptions & Scheduled (93–94); niche endpoints (95–102); Journals balance (103); Quick Fix (107, 111); TTB (108); Dynamic Strings (109–110); Sub-Resource Shapes (112); Nano-Classifier (113); Scheduler Asymmetry (114); Payment Record CRUD (115–117); Bulk Upserts transactions (118–122); Reconciliation write-side (123–127); Drafts lifecycle (128–135); Orders — Sale Quotes / Sale Orders / Purchase Requests / Purchase Orders (`references/orders.md`); Claim Settings — Claim Types / Claim Profiles / Posting Rules (`references/claims.md`).
 
 ## When to Use This Skill
 

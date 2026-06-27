@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.29",
+  "version": "5.20.30",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1013,6 +1013,78 @@
     {
       "name": "update_tax_profile",
       "description": "Update an existing tax profile (name, rate, or status)."
+    },
+    {
+      "name": "create_claim_type",
+      "description": "Create a claim type (expense category for employee claims). Dedups by name."
+    },
+    {
+      "name": "update_claim_type",
+      "description": "Update a claim type. Omitted fields unchanged; clearFields NULLs optional fields."
+    },
+    {
+      "name": "search_claim_types",
+      "description": "Search claim types."
+    },
+    {
+      "name": "list_claim_types",
+      "description": "List claim types (alphabetical)."
+    },
+    {
+      "name": "get_claim_type",
+      "description": "Get a claim type incl. nested expense account + tax profile."
+    },
+    {
+      "name": "delete_claim_type",
+      "description": "Soft-delete a claim type (name becomes reusable)."
+    },
+    {
+      "name": "create_claim_profile",
+      "description": "Create a claim profile (per-employee policy bundle: approver, limits, visible types, balance account). Dedups by name. taxMode EXCLUSIVE is rejected."
+    },
+    {
+      "name": "update_claim_profile",
+      "description": "Update a claim profile. Omitted fields unchanged; clearFields NULLs optional fields. Balance account cannot change while an employee has a non-zero balance."
+    },
+    {
+      "name": "search_claim_profiles",
+      "description": "Search claim profiles."
+    },
+    {
+      "name": "list_claim_profiles",
+      "description": "List claim profiles (alphabetical)."
+    },
+    {
+      "name": "get_claim_profile",
+      "description": "Get a claim profile incl. nested balance account."
+    },
+    {
+      "name": "delete_claim_profile",
+      "description": "Soft-delete a claim profile."
+    },
+    {
+      "name": "create_posting_rule",
+      "description": "Create a posting rule (how approved claims group into journals at conversion). outerAxis + innerAxis + lineDescriptionTemplate required. Dedups by name."
+    },
+    {
+      "name": "update_posting_rule",
+      "description": "Update a posting rule. Omitted fields unchanged."
+    },
+    {
+      "name": "search_posting_rules",
+      "description": "Search posting rules."
+    },
+    {
+      "name": "list_posting_rules",
+      "description": "List posting rules (alphabetical)."
+    },
+    {
+      "name": "get_posting_rule",
+      "description": "Get a posting rule."
+    },
+    {
+      "name": "delete_posting_rule",
+      "description": "Delete a posting rule. The org default cannot be deleted while default (set another default first)."
     },
     {
       "name": "list_inventory_items",
