@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.36] - 2026-06-28
+
+- The assistant can now look up your own profile — who you are, the employee record linked to your login, and which areas you have access to — so it can act on your behalf, like filing an expense claim for you and knowing whether a receipt should become a bill or a claim.
+
 ## [5.20.35] - 2026-06-28
 
 - File an expense claim straight from an emailed receipt. `create_claim_from_attachment` (and `clio claims from-attachment`) now accept the email body itself or raw HTML — not just a file or a link — so a receipt that arrives in an email becomes a draft claim with no manual re-keying, the same way bills already work.

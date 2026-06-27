@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
-  <img src="https://img.shields.io/badge/tools-354-blue?style=for-the-badge" alt="354 tools">
+  <img src="https://img.shields.io/badge/tools-355-blue?style=for-the-badge" alt="355 tools">
   <img src="https://img.shields.io/badge/API_rules-158-green?style=for-the-badge" alt="158 API rules">
   <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 skills">
   <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
@@ -17,7 +17,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/stargazers"><img src="https://img.shields.io/github/stars/teamtinvio/jaz-ai?style=flat-square&logo=github" alt="GitHub stars"></a>
 </p>
 
-The complete agent surface for [Jaz](https://jaz.ai) accounting. 354 tools, 6 skills, 16 IFRS recipes, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, one-shot tool selection, structured errors an agent can recover from.
+The complete agent surface for [Jaz](https://jaz.ai) accounting. 355 tools, 6 skills, 16 IFRS recipes, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, one-shot tool selection, structured errors an agent can recover from.
 
 > Also fully compatible with [Juan Accounting](https://juan.ac) (same API surface).
 
@@ -57,7 +57,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 354 tools, 6 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.35", "mcp"],
+      "args": ["-y", "jaz-clio@5.20.36", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -71,14 +71,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 354 tools, 6 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.20.35", "mcp"],
+      "args": ["-y", "jaz-clio@5.20.36", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.20.35` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.20.36` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -146,7 +146,7 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 
 ## What you get
 
-- **354 tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and flags idempotency. The LLM picks right on the first call.
+- **355 tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and flags idempotency. The LLM picks right on the first call.
 - **6 skills** with the production-grade rules and playbooks any agent needs:
 
 | Skill | What it teaches an agent |
@@ -170,7 +170,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 |-------|------------|-------------------|
 | **Skills** | Domain knowledge as markdown (158 API rules, 16 recipes, 12 jobs, conversion playbooks). The agent reads these at session start. | Your AI tool reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
 | **CLI** (`jaz-clio`) | A `clio` binary: 65 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
-| **MCP server** (`clio mcp`) | The same binary in MCP mode: 354 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
+| **MCP server** (`clio mcp`) | The same binary in MCP mode: 355 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
 Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install). Same tools either way.
 
@@ -206,7 +206,7 @@ Built so any LLM sees the right tool fast and calls it once.
 
 | What | How |
 |------|-----|
-| **MCP delivery** | 3 meta-tools (~600 tokens) instead of all 354 tools (~78KB). LLM searches into the catalog only when needed. |
+| **MCP delivery** | 3 meta-tools (~600 tokens) instead of all 355 tools (~78KB). LLM searches into the catalog only when needed. |
 | **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
 | **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
 | **Discovery ranker** | In-memory, no network round-trip. Scans tool name + description + searchHint + namespace. |
@@ -356,7 +356,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.20.35", "mcp"],
+  "args": ["-y", "jaz-clio@5.20.36", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

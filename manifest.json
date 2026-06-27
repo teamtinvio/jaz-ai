@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.35",
+  "version": "5.20.36",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -69,6 +69,10 @@
     {
       "name": "get_organization",
       "description": "Get organization details: name, base currency, country, and financial year end."
+    },
+    {
+      "name": "get_my_context",
+      "description": "Resolve the CALLER's own context — identity, the employee bound to their login (if any), and per-module access (moduleRoles). Use to route a receipt (bill if PURCHASES access, expense claim if EMPLOYEE_CLAIMS access) and to file a self-claim (bind employee.resourceId). A service api-key usually has no bound employee."
     },
     {
       "name": "list_accounts",
