@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.32] - 2026-06-28
+
+- Close the loop on expense claims. The assistant can now preview and post approved claims into journal entries, record employee reimbursements and advances as books entries, and look those payouts up. It can also create a claim straight from a receipt link — scan the document and a draft claim appears. (Recording books entries only — no money is moved out.)
+
 ## [5.20.31] - 2026-06-28
 
 - Work employee expense claims end to end. The assistant can now find claims (by status, employee, vendor, reference, date, or amount), edit a draft's line items and details, and move a claim through its lifecycle — submit, approve, reject, cancel, unpost, or delete — with the same rules your team sees in the app. It can also action many claims at once (bulk submit, approve, reject, cancel, or delete), which runs in the background and hands back a job you can track.

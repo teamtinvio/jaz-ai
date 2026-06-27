@@ -50,6 +50,32 @@ add, `deleted:true` = remove); `delete_claim_attachment` removes one and returns
 `get_claim_tracking_tags` and `get_claim_custom_field_values` return a **bare array**,
 not a `{data}` envelope.
 
+### Conversion + payouts (`claim_processing`)
+
+Turn APPROVED claims into journal entries, and record books-only employee payouts.
+
+- **`preview_claims_conversion`** (read) — shows the journals a batch would produce:
+  `{ expenseSubTotal, previewJournals, reimbursementDceCount, skippedDceCount }`, with
+  non-APPROVED claims under `erroredClaims`. **Always preview and confirm `erroredClaims`
+  is empty before converting.** Needs a default posting rule or an explicit
+  `postingRuleResourceId` (else `422 AGGREGATION_RULE_NOT_FOUND`).
+- **`convert_claims_to_journal`** (write, atomic) — `valueDate` (YYYY-MM-DD) required;
+  `idempotencyKey` auto-generated (pass your own to dedup across calls; it must NOT start
+  with `CONV:` / `CONV-`). Returns `{ committedJournalResourceIds, convertedClaimResourceIds,
+  expenseSubTotal, idempotencyKey }`; the claim moves to **CONVERTED** ("Processed").
+  Reverse with `unpost_claim`.
+- **Payout flow**: `POST` (journals only) or `POST_AND_RECORD` (+ a books-only
+  reimbursement DCE). The real-money **disburse** path (PayMongo) is **not exposed** — this
+  surface records, it never disburses.
+- **`record_employee_payout`** (write) — a books-only DCE (reimbursement or advance), no
+  gateway transfer; `amount` / `paymentAccountResourceId` / `valueDate` required, `reference`
+  auto-generated. **`search_employee_payouts`** lists them (filter by employee, reference,
+  payout status/type).
+- **`create_claim_from_attachment`** (write, multipart) — OCR a receipt URL into a DRAFT
+  claim. **Wire field is `sourceURL` (capital URL)** — unlike the BT create-from-attachment's
+  `sourceUrl`. Response is an async workflow handle; the claim materialises later (search
+  claims, status DRAFT).
+
 ---
 
 ## Claim Settings (`claim_settings` + `posting_rules` namespaces)
