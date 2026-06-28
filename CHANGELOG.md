@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.40] - 2026-06-28
+
+- Removed the claim-profile digest-email toggle (`digestEmailEnabled`, the `--digest-email` flag on `clio claim-profiles`). The setting is being retired from the product, so it's no longer exposed via the assistant, the CLI, or search filters.
+
 ## [5.20.39] - 2026-06-28
 
 - Internal documentation update — the CLI command reference now covers the employee-claims commands (claims, employees, claim-types, claim-profiles, posting-rules). No user-facing product changes since 5.20.38.

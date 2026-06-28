@@ -144,7 +144,7 @@ One MCP namespace wraps all three: **`claim_settings`**. CLI: `clio claim-types 
 | Entity | What it is | Key fields |
 |--------|-----------|-----------|
 | **Claim Type** | An expense category (e.g. "Travel", "Meals"). | `name` (unique/org), `expenseAccountResourceId`, `taxProfileResourceId`, `classifierConfig`, `isDefault` |
-| **Claim Profile** | A per-employee policy bundle (who approves, spend limits, which types are visible, the liability account). | `name` (unique/org), `approverUserResourceId`, `visibleClaimTypeIds[]`, `visibleTaxProfileIds[]`, `visibleClassifierIds[]`, `visibleVendorResourceIds[]`, `allowedCurrencies[]`, `minClaimAmount`, `maxClaimAmount`, `maxPerPeriodAmount`, `perPeriod`, `employeeBalanceAccountResourceId`, `digestEmailEnabled`, `taxMode`, `isDefault` |
+| **Claim Profile** | A per-employee policy bundle (who approves, spend limits, which types are visible, the liability account). | `name` (unique/org), `approverUserResourceId`, `visibleClaimTypeIds[]`, `visibleTaxProfileIds[]`, `visibleClassifierIds[]`, `visibleVendorResourceIds[]`, `allowedCurrencies[]`, `minClaimAmount`, `maxClaimAmount`, `maxPerPeriodAmount`, `perPeriod`, `employeeBalanceAccountResourceId`, `taxMode`, `isDefault` |
 | **Posting Rule** | How approved claims group into journals at conversion (the "Posting Rules" tab). | `name` (unique/org), `outerAxis`, `innerAxis`, `lineDescriptionTemplate`, `journalReferenceTemplate`, `defaultBankAccountResourceId`, `defaultIncludeReimbursementPayout`, `isDefault` |
 
 ## Enums (use EXACT values)
