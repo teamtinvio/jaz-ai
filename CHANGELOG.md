@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.39] - 2026-06-28
+
+- Internal documentation update — the CLI command reference now covers the employee-claims commands (claims, employees, claim-types, claim-profiles, posting-rules). No user-facing product changes since 5.20.38.
+
 ## [5.20.38] - 2026-06-28
 
 - Create an expense claim directly, without a receipt to attach. The new `create_claim` (and `clio claims create`) files a claim from the details you give — employee, vendor, amount, line items — and either saves it as a draft or validates and submits it in one step.

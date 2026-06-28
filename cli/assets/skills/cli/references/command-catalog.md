@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 55 command groups. Organized by domain.
+Complete reference for all 65 command groups. Organized by domain.
 
 ---
 
@@ -225,6 +225,67 @@ Same subcommands and flags as `cash-in`.
 | `create` | `--type`, `--classes`, `--input` |
 | `update <id>` | `--input` |
 | `delete <id>` | |
+
+---
+
+## Employee Claims & Settings
+
+### `clio claims` — Employee-expense claims
+| Subcommand | Key flags |
+|------------|-----------|
+| `search` (alias `list`) | `--status`, `--employee`, `--contact`, `--limit`, `--offset`, `--json` |
+| `get <id>` | `--json` |
+| `create` | `--value-date`*, `--currency`*, `--employee`, `--contact` / `--vendor-name` (XOR), `--items <json>`, `--custom-fields <json>`, `--tags`, `--submit` |
+| `update <id>` | partial; `--items` non-empty REPLACES all lines, `--submit` |
+| `submit` / `approve` / `unpost <id>` | lifecycle (server-enforced transitions) |
+| `reject` / `cancel <id>` | `--reason` (1-1000), required |
+| `bulk-submit` / `bulk-approve` / `bulk-delete` | `--ids <csv>` (1-500) — async, returns jobId |
+| `bulk-reject` / `bulk-cancel` | `--ids <csv>`, `--reason` — async, returns jobId |
+| `delete <id>` | DRAFT / REJECTED / CANCELLED only |
+| `delete-attachment <id> <attId>` | remove one receipt |
+| `from-attachment` | `--file` / `--source-url` / `--html` (inline or `@path`) — OCR a receipt into a DRAFT claim (async) |
+| `preview-conversion` | `--ids`, `--posting-rule`, `--payout-flow` |
+| `convert` | `--ids`, `--value-date`*, `--posting-rule`, `--include-payout`, `--idempotency-key` |
+| `record-payout` | `--employee`, `--amount`, `--payment-account`, `--payout-for` (REIMBURSEMENT / ADVANCE) |
+| `tracking-tags` / `custom-field-values` | picker arrays |
+
+### `clio employees` — Claim members
+| Subcommand | Key flags |
+|------------|-----------|
+| `search` (alias `list`) | `--name`, `--status`, `--limit`, `--offset`, `--json` |
+| `balances` (alias `search-balances`) | per-employee, per-currency reimbursement owed |
+| `get <id>` | `--json` |
+| `create` | `--name`, `--user`* (bind login), `--claim-profile`, `--employment-type`, `--email`, `--manager`, `--approver` |
+| `update <id>` | `--name`, `--claim-profile`, `--employment-type`, `--archive` / `--activate`, `--clear-employment-type` |
+| `bind-user <id> <userId>` | permanently bind a login user (one-way) |
+| `delete <id>` | only if settled (no outstanding balance) |
+| `preprocess <fileUrl>` | `--file-type` (CSV / XLS / XLSX) — preview rows before import |
+| `import` | `--create` / `--update` / `--delete` (JSON arrays) — async, returns jobId |
+
+EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPORARY` · `CONSULTANT`
+
+### `clio claim-types` — Expense categories (master data)
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` / `get <id>` / `search` | `--limit`, `--offset`, `--all`, `--json` |
+| `create` | `--name`, `--expense-account <id>`, `--tax-profile <id>`, `--default` |
+| `update <id>` / `delete <id>` | partial update; default-protected delete |
+
+### `clio claim-profiles` — Per-employee spend policies (master data)
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` / `get <id>` / `search` | `--limit`, `--offset`, `--all`, `--json` |
+| `create` | `--name` (+ approval / limit / account options) |
+| `update <id>` / `delete <id>` | partial update; cannot delete the org default |
+
+### `clio posting-rules` — Claim→journal grouping (master data)
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` / `get <id>` / `search` | `--limit`, `--offset`, `--all`, `--json` |
+| `create` | `--name`, `--outer-axis`, `--inner-axis`, `--line-template`, `--journal-reference-template`, `--default-bank-account`, `--default` |
+| `update <id>` / `delete <id>` | partial update; cannot delete the org default |
+
+`*` = required.
 
 ---
 

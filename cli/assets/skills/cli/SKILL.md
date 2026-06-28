@@ -1,14 +1,14 @@
 ---
 name: jaz-cli
-version: 5.20.38
+version: 5.20.39
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
-  or chaining multi-step accounting workflows from the terminal. Covers all 60
+  or chaining multi-step accounting workflows from the terminal. Covers all 65
   command groups, auth precedence, output formats, entity resolution, and common
   workflow patterns. Also use when the user asks how to use clio, what commands
   are available, or how to automate accounting tasks from the command line.
-  Covers all 65 command groups and 356 tools.
+  Covers all 65 command groups and 356 tools, including employee-expense claims.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 ---
@@ -257,6 +257,8 @@ Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $
 **Contacts & Configuration**: `contacts`, `contact-groups`, `accounts`, `items`, `tags`, `currencies`, `currency-rates`, `tax-profiles`, `custom-fields`, `bookmarks`, `nano-classifiers`
 
 **Bank & Reconciliation**: `bank` (accounts, get, records, add-records, import, auto-recon), `bank-rules`
+
+**Employee Claims & Settings**: `claims` (lifecycle + `create` + `from-attachment` + convert + payout), `employees`, `claim-types`, `claim-profiles`, `posting-rules`
 
 **Fixed Assets & Inventory**: `fixed-assets` (alias: `fa`), `inventory` (alias: `inv`)
 
