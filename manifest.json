@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.37",
+  "version": "5.20.38",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1096,11 +1096,15 @@
     },
     {
       "name": "search_claims",
-      "description": "Search/list employee-expense claims. Status: DRAFT|SUBMITTED|APPROVED|CONVERTED|REJECTED|CANCELLED (CONVERTED = \"Processed\"). Claims have no bare list/create — born via attachment/conversion."
+      "description": "Search/list employee-expense claims. Status: DRAFT|SUBMITTED|APPROVED|CONVERTED|REJECTED|CANCELLED (CONVERTED = \"Processed\"). Claims are born via create_claim, attachment, or conversion (no bare list — use search)."
     },
     {
       "name": "get_claim",
       "description": "Get a claim incl. line items, employee, amounts, status."
+    },
+    {
+      "name": "create_claim",
+      "description": "Create an employee-expense claim directly (bare create, no attachment). Vendor is EITHER contactResourceId OR vendorName, never both. saveAsDraft defaults to true (lands DRAFT with relaxed line validation); set false to validate + submit in one call (lands SUBMITTED)."
     },
     {
       "name": "update_claim",

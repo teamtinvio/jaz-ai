@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.38] - 2026-06-28
+
+- Create an expense claim directly, without a receipt to attach. The new `create_claim` (and `clio claims create`) files a claim from the details you give — employee, vendor, amount, line items — and either saves it as a draft or validates and submits it in one step.
+
 ## [5.20.37] - 2026-06-28
 
 - The assistant now tells a vendor bill apart from your own expense claim and routes each correctly. A receipt for something you paid out of pocket becomes a reimbursement claim filed to you (it knows who you are and what you're allowed to do), while a supplier's invoice becomes a bill — no more treating an employee expense as a vendor bill.

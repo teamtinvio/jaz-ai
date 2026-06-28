@@ -21,8 +21,8 @@ employee → `search_employees` then bind that id.
 
 ## Claim records (`claims` + `claim_processing` namespaces)
 
-CLI: `clio claims …`. **Claims have no bare list or create** — a claim is born DRAFT
-via document attachment or conversion, then mutated. List = `search_claims`.
+CLI: `clio claims …`. A claim is born DRAFT via **`create_claim`** (bare create),
+document attachment, or conversion, then mutated. No bare list — `search_claims` is the list.
 
 ### Status flow (server-enforced — surface the 422, don't pre-validate)
 
@@ -31,6 +31,7 @@ via document attachment or conversion, then mutated. List = `search_claims`.
 
 | Action | Tool | Legal from | Body |
 |--------|------|-----------|------|
+| Create | `create_claim` | — | `valueDate` + `currencyCode` required; vendor = `contactResourceId` XOR `vendorName`; `saveAsDraft` defaults true (→ DRAFT), false validates + submits (→ SUBMITTED) |
 | Edit | `update_claim` | DRAFT | partial; `claimItems` non-empty REPLACES all, `[]` clears |
 | Submit | `submit_claim` (or `update_claim` saveAsDraft=false) | DRAFT | none |
 | Approve | `approve_claim` | SUBMITTED | none |
@@ -50,6 +51,14 @@ be submitted (current status: APPROVED)"). Don't pre-check — call and surface 
 Per-item processing happens in the background — **poll `search_background_jobs` by `jobId`**
 for results (a queued job doesn't pre-validate item state). bulk_reject/cancel take one
 shared reason for the batch.
+
+### Create semantics
+
+`create_claim` is the bare create (no attachment). `valueDate` + `currencyCode` are
+required; `contactResourceId` / `vendorName` are mutually exclusive (vendor is optional —
+the server accepts a vendorless draft). `saveAsDraft` defaults **true** → DRAFT with relaxed
+line validation; pass **false** to fully validate + submit in one call (→ SUBMITTED). Line
+items / custom fields / tags use the same shape as `update_claim`.
 
 ### Update semantics (verified live)
 
