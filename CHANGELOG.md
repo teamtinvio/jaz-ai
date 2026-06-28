@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.41] - 2026-06-29
+
+- Documentation polish: the README reference catalog now lists the claims, orders, bank-rule, and search references, and the copy is standardized on "agent". No user-facing product changes since 5.20.40.
+
 ## [5.20.40] - 2026-06-28
 
 - Removed the claim-profile digest-email toggle (`digestEmailEnabled`, the `--digest-email` flag on `clio claim-profiles`). The setting is being retired from the product, so it's no longer exposed via the assistant, the CLI, or search filters.

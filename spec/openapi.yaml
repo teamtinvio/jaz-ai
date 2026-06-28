@@ -4120,9 +4120,6 @@
         "createdAt": {
           "$ref": "#/definitions/DateExpression"
         },
-        "digestEmailEnabled": {
-          "$ref": "#/definitions/BooleanExpression"
-        },
         "employeeBalanceAccountResourceId": {
           "$ref": "#/definitions/StringExpression"
         },
@@ -5606,10 +5603,6 @@
         "approverUserResourceId": {
           "description": "Default approver user (UUIDv4).",
           "type": "string"
-        },
-        "digestEmailEnabled": {
-          "description": "Digest-email setting for employees on this profile (default off).",
-          "type": "boolean"
         },
         "employeeBalanceAccountResourceId": {
           "description": "Per-employee liability CoA (UUIDv4). Schema-optional, but REQUIRED for reimbursement\nconversion (includeReimbursementPayout); must be a CURRENT_LIABILITY account in the org.\nOnce set with a non-zero balance it cannot be changed/cleared (server-enforced).",
@@ -21756,9 +21749,6 @@
           "type": "boolean"
         },
         "clearVisibleVendorResourceIds": {
-          "type": "boolean"
-        },
-        "digestEmailEnabled": {
           "type": "boolean"
         },
         "employeeBalanceAccountResourceId": {
@@ -42158,7 +42148,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency-2",
+        "operationId": "get-organization-currency",
         "parameters": [
           {
             "description": "Currency Code",
@@ -42215,7 +42205,7 @@
         ],
         "deprecated": true,
         "description": "Resolve the organization's effective functional-to-source FX rate for a currency at a date: the org's custom rate when one is configured, otherwise the platform daily rate (the same rate the platform applies for revaluation). Returns rateFunctionalToSource (1 base currency = X source currency).",
-        "operationId": "list-organization-currency-effective-rate",
+        "operationId": "list-organization-currency-effective-rate-2",
         "parameters": [
           {
             "description": "Source currency code (ISO 4217)",
@@ -43588,7 +43578,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency",
+        "operationId": "get-organization-currency-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -43644,7 +43634,7 @@
           "application/json"
         ],
         "description": "Resolve the organization's effective functional-to-source FX rate for a currency at a date: the org's custom rate when one is configured, otherwise the platform daily rate (the same rate the platform applies for revaluation). Returns rateFunctionalToSource (1 base currency = X source currency).",
-        "operationId": "list-organization-currency-effective-rate-2",
+        "operationId": "list-organization-currency-effective-rate",
         "parameters": [
           {
             "description": "Source currency code (ISO 4217)",

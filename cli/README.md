@@ -30,7 +30,7 @@ Requires **Node.js 18+** ([nodejs.org](https://nodejs.org)). Also fully compatib
 |---|---|---|
 | **CLI** | Every accounting operation as a command | `clio invoices list` |
 | **MCP** | Plug into Claude Code, Cursor, Codex, Copilot | `clio mcp` |
-| **Skills** | Teach any AI tool the Jaz API | `clio init` |
+| **Skills** | Teach any agent the Jaz API | `clio init` |
 
 ---
 
@@ -85,15 +85,15 @@ claude mcp add jaz -- npx jaz-clio mcp
 
 ## Skills
 
-158 API rules from production testing. Field-name maps. Error-recovery patterns. 12 job playbooks. Installable into any AI-aware project.
+158 API rules from production testing: field-name maps, error-recovery patterns, response-shape quirks. Plus 12 job playbooks. Installable into any agent project.
 
 ```bash
-clio init                            # auto-detect tool + install skills + agent-rules
+clio init                            # auto-detect agent + install skills + agent-rules
 clio init --platform cursor          # explicit platform
 clio init --no-rules                 # skills only, skip the agent-rules file
 ```
 
-Auto-detects the AI tool (Claude Code, Codex, Copilot, Cursor, Antigravity, Gemini, Windsurf, Goose) and installs the right skill files. `init` also writes a one-page `jaz-agent-rules.md` to the path your platform reads on workspace open (`CLAUDE.md` / `AGENTS.md` / `.github/copilot-instructions.md` / `.cursor/rules/jaz.mdc` / `.windsurf/rules/jaz.md` / `GEMINI.md`) so any agent starts every session with the meta-tool flow, the 6 API gotchas, and the recipe-engine carve-outs.
+Auto-detects the agent (Claude Code, Codex, Copilot, Cursor, Antigravity, Gemini, Windsurf, Goose) and installs the right skill files. `init` also writes a one-page `jaz-agent-rules.md` to the path your platform reads on workspace open (`CLAUDE.md` / `AGENTS.md` / `.github/copilot-instructions.md` / `.cursor/rules/jaz.mdc` / `.windsurf/rules/jaz.md` / `GEMINI.md`) so any agent starts every session with the meta-tool flow, the 6 API gotchas, and the recipe-engine carve-outs.
 
 ---
 
@@ -110,7 +110,7 @@ clio auth whoami              # Verify
 
 ## Help-center semantic search (optional)
 
-`search_help_center` uses built-in BM25 lexical search over the bundled help-center corpus. Set `CLIO_HELP_CENTER_OPENAI_API_KEY` to add semantic retrieval: the CLI embeds only your query via the OpenAI embeddings API (`text-embedding-3-small`, the model the bundled index was built with) and merges both rankings. On auth failure it warns once and falls back to BM25. Use a project-scoped key restricted to embedding models with a low monthly cap. CLI-only: MCPB installs ship without the embedding index and always use BM25.
+`search_help_center` uses keyword search over the bundled help-center corpus by default. Set `CLIO_HELP_CENTER_OPENAI_API_KEY` to add semantic search (matches on intent, not just exact keywords): the CLI embeds only your query via the OpenAI embeddings API (`text-embedding-3-small`, the model the bundled index was built with) and merges both rankings. On auth failure it warns once and falls back to keyword search. Use a project-scoped key restricted to embedding models with a low monthly cap. CLI-only: MCPB installs ship without the embedding index and always use keyword search.
 
 ## Privacy
 
