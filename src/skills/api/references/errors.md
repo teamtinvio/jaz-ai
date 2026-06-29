@@ -871,6 +871,22 @@ Journals support a top-level `currency` object to create entries in a foreign cu
 **Cause**: A lifecycle transition was attempted from an illegal status, e.g. submitting a non-DRAFT claim ("Only DRAFT claims can be submitted (current status: APPROVED)").
 **Fix**: Check the current status (`get_claim`) and use the legal transition. Don't pre-check — surface the error.
 
+### "CLAIM_SUBMIT_TAX_REQUIRED_INCLUSIVE" (422)
+**Cause**: A claim was submitted under a claim profile whose `taxMode` is `INCLUSIVE`, but a line carries no tax ("The claim profile is INCLUSIVE — the claim must be tax-inclusive and every line item must carry a tax profile"). Lines inherit tax from their **claim type's** `taxProfileResourceId`; a claim type created without one yields tax-less lines that can't submit under an INCLUSIVE profile. (A `NO_TAX` profile has no such requirement.)
+**Fix**: Give the claim type a `taxProfileResourceId` (e.g. a Standard-Rated Purchases profile — find one via `search_tax_profiles`) so its lines inherit tax, or set tax on the line, then resubmit. The draft saves fine without tax — this only fires at submit.
+
+### "CLAIM_TYPE_EXPENSE_ACCOUNT_REQUIRED" (422)
+**Cause**: `create_claim_type` was called without `expenseAccountResourceId` ("ClaimType expenseAccountResourceId is required"). The field reads as optional in the schema but the server requires it on create.
+**Fix**: Find an expense GL account via `search_accounts` — `accountType` is a **display label** (`"Operating Expense"`, `"Direct Costs"`), NOT an enum like `"EXPENSE"` (which returns zero rows) — then pass its `resourceId` as `expenseAccountResourceId`.
+
+### "EMPLOYEE_USER_NOT_FOUND" (422)
+**Cause**: `add_employee` / `bind_employee_user` was given a `userResourceId` that isn't a user ("User not found for userResourceId …"). The usual mistake: passing an org-user record's own `resourceId` instead of its `userResourceId`.
+**Fix**: Use `search_org_users` and read the member's **`userResourceId`** field (not the org-user record's `resourceId`), then retry. Each user binds to at most one employee, and the binding is permanent once set.
+
+### "EMPLOYEE_CLAIM_PROFILE_REQUIRED" (422)
+**Cause**: `add_employee` was called without `claimProfileResourceId` ("A claim profile is required for an employee — it carries the employee balance account used to convert and pay claims"). The claim profile is **server-required** — the org default is NOT auto-applied for employees (unlike claims), even when a default profile exists.
+**Fix**: Pick a profile via `search_claim_profiles` and pass its `resourceId` as `claimProfileResourceId`. The profile is locked while the employee has unsettled claims.
+
 ---
 
 ## Repair Suggestions (W1.3)

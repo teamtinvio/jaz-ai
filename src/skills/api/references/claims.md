@@ -53,6 +53,13 @@ be submitted (current status: APPROVED)"). Don't pre-check — call and surface 
 `422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT`. A DRAFT (the default) saves without one — set
 one via `update_claim` before submitting. Don't pre-validate; surface the 422.
 
+**Tax under an INCLUSIVE profile.** If the claim's profile has `taxMode: INCLUSIVE`, every
+line must carry a tax profile to **submit**, else `422 CLAIM_SUBMIT_TAX_REQUIRED_INCLUSIVE`
+("the claim must be tax-inclusive and every line item must carry a tax profile"). Lines
+inherit tax from their **claim type's** `taxProfileResourceId` — so under an INCLUSIVE org,
+give claim types a tax profile (e.g. Standard-Rated Purchases) and they just work. DRAFT
+saves without tax; only submit enforces it. A `NO_TAX` profile has no such requirement.
+
 ### Visibility & approval (server-enforced — don't replicate client-side)
 
 - **Manager pending-approval scope**: a manager's pending queue is the claims they
@@ -118,7 +125,11 @@ Turn APPROVED claims into journal entries, and record books-only employee payout
   (gateway direct-debit-backed real-money payout), `REIMBURSEMENT_PAYOUT`, `ADVANCE`.
   `DISBURSEMENT` / `DIRECT_ENTRY` rows originate from the gateway/conversion flows and are
   **read-only here** (this surface never disburses) — `payoutType` is a different axis from
-  `record_employee_payout`'s `payoutFor`.
+  `record_employee_payout`'s `payoutFor`. **Note the two views of one row:** a payout you
+  record echoes `payoutType` `REIMBURSEMENT_PAYOUT` / `ADVANCE` in its create response, but
+  `search_employee_payouts` then reports that same row as `DIRECT_ENTRY` (its books-only-DCE
+  class) — match payouts by `reference`/`employeeResourceId`, not by expecting the recorded
+  type to reappear in search.
 - **`create_claim_from_attachment`** (write, multipart) — OCR a receipt into a DRAFT
   claim from a **file**, a **URL**, or **raw HTML** (an email body). **Wire field is
   `sourceURL` (capital URL)** — unlike the BT create-from-attachment's `sourceUrl`. On the
@@ -140,9 +151,12 @@ bare list endpoint).
 
 - **`add_employee`** — `name`, **`userResourceId`, and `claimProfileResourceId` are
   required** (the server rejects a create without a user to bind:
-  `422 EMPLOYEE_USER_RESOURCE_ID_MISSING`). Binding is **PERMANENT** (rotation blocked once
-  set). An **offline employee** (no user bound yet) can still arise via import — bind it
-  later with `bind_employee_user`. Dedups by email (per-org unique).
+  `422 EMPLOYEE_USER_RESOURCE_ID_MISSING`). **`userResourceId` is the user's resourceId —
+  read it as the `userResourceId` FIELD on an org-user (`search_org_users`), NOT the
+  org-user record's own `resourceId`; passing the membership id returns
+  `422 EMPLOYEE_USER_NOT_FOUND`.** Each user binds to at most one employee. Binding is
+  **PERMANENT** (rotation blocked once set). An **offline employee** (no user bound yet) can
+  still arise via import — bind it later with `bind_employee_user`. Dedups by email (per-org unique).
 - **The approver comes from the claim profile, not the employee.** An employee's approver
   is `claimProfile.approverUserResourceId` (set on the Claim Profile) — the employee record
   has no own approver field. To change who approves, edit the profile or move the employee
@@ -201,6 +215,7 @@ One MCP namespace wraps all three: **`claim_settings`**. CLI: `clio claim-types 
 6. **`employeeBalanceAccountResourceId` must be a CURRENT_LIABILITY account** and is required before a profile's employees can be reimbursed at conversion. Once an employee on the profile has a non-zero balance, it can't be changed/cleared.
 7. **Profile constraints (server-enforced):** `minClaimAmount ≤ maxClaimAmount`; `maxPerPeriodAmount` requires `perPeriod`.
 8. **Posting Rule templates** are Handlebars-style: `lineDescriptionTemplate` (required, e.g. `"{employeeName} - {claimType}"`) and the optional `journalReferenceTemplate` for the parent journal header.
+9. **Claim type create requires `expenseAccountResourceId`** (`422 CLAIM_TYPE_EXPENSE_ACCOUNT_REQUIRED`) even though the field reads as optional. Find an expense GL via `search_accounts` — `accountType` is a **display label** (`"Operating Expense"`, `"Direct Costs"`), NOT `"EXPENSE"` (which returns zero rows). Under an **INCLUSIVE** profile also set `taxProfileResourceId`, else the type's lines can't submit (see *Tax under an INCLUSIVE profile*, above).
 
 ## Search
 

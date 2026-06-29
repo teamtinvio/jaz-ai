@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.42",
+  "version": "5.20.43",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1024,7 +1024,7 @@
     },
     {
       "name": "create_claim_type",
-      "description": "Create a claim type (expense category for employee claims). Dedups by name."
+      "description": "Create a claim type (expense category for employee claims). Dedups by name. expenseAccountResourceId is server-required."
     },
     {
       "name": "update_claim_type",
@@ -1184,7 +1184,7 @@
     },
     {
       "name": "add_employee",
-      "description": "Create an employee (expense-claim member). The server requires userResourceId (a login user to bind — binding is PERMANENT) and a claim profile (the org default applies if omitted). Dedups by email."
+      "description": "Create an employee (expense-claim member). The server requires userResourceId (a login user to bind — binding is PERMANENT) and claimProfileResourceId (REQUIRED — carries the employee balance account; the org default is NOT auto-applied). Dedups by email."
     },
     {
       "name": "update_employee",

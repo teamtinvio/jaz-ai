@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.43] - 2026-06-30
+
+- When setting up claims, the assistant now points straight to the fix instead of a raw error: a claim type needs an expense account, an employee must bind to the right team-member account, and on a tax-inclusive policy every claim line needs a tax category — each now comes with a one-step suggestion to resolve it.
+
 ## [5.20.42] - 2026-06-30
 
 - Snap an expense receipt and it files to you automatically — no extra step to say who it's for. To file on someone else's behalf, name the employee (`clio claims from-attachment --employee`); a claims manager/admin can do that.
