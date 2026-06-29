@@ -247,6 +247,7 @@ Same subcommands and flags as `cash-in`.
 | `preview-conversion` | `--ids`, `--posting-rule`, `--payout-flow` |
 | `convert` | `--ids`, `--value-date`*, `--posting-rule`, `--include-payout`, `--idempotency-key` |
 | `record-payout` | `--employee`, `--amount`, `--payment-account`, `--payout-for` (REIMBURSEMENT / ADVANCE) |
+| `payouts` (search) | `--employee`, `--reference`, `--payout-status`, `--payout-type` (DIRECT_ENTRY / DISBURSEMENT / REIMBURSEMENT_PAYOUT / ADVANCE) — list recorded payouts |
 | `tracking-tags` / `custom-field-values` | picker arrays |
 
 ### `clio employees` — Claim members
@@ -255,9 +256,9 @@ Same subcommands and flags as `cash-in`.
 | `search` (alias `list`) | `--name`, `--status`, `--limit`, `--offset`, `--json` |
 | `balances` (alias `search-balances`) | per-employee, per-currency reimbursement owed |
 | `get <id>` | `--json` |
-| `create` | `--name`, `--user`* (bind login), `--claim-profile`, `--employment-type`, `--email`, `--manager`, `--approver` |
+| `create` | `--name`, `--user`* (bind login), `--claim-profile`*, `--employment-type`, `--email`, `--manager` |
 | `update <id>` | `--name`, `--claim-profile`, `--employment-type`, `--archive` / `--activate`, `--clear-employment-type` |
-| `bind-user <id> <userId>` | permanently bind a login user (one-way) |
+| `bind-user <id> <userId>` | bind a login user to an offline employee (no user yet) — one-way, only while unbound |
 | `delete <id>` | only if settled (no outstanding balance) |
 | `preprocess <fileUrl>` | `--file-type` (CSV / XLS / XLSX) — preview rows before import |
 | `import` | `--create` / `--update` / `--delete` (JSON arrays) — async, returns jobId |

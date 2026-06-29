@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.20.42] - 2026-06-30
+
+- Snap an expense receipt and it files to you automatically — no extra step to say who it's for. To file on someone else's behalf, name the employee (`clio claims from-attachment --employee`); a claims manager/admin can do that.
+- A claim now needs a reference before it can be submitted (drafts still save without one).
+- Payout search now includes gateway disbursements alongside direct book entries.
+- Removed the employee "default approver" field — an employee's approver now comes from their claim profile.
+
 ## [5.20.41] - 2026-06-29
 
 - Documentation polish: the README reference catalog now lists the claims, orders, bank-rule, and search references, and the copy is standardized on "agent". No user-facing product changes since 5.20.40.

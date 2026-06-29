@@ -861,6 +861,18 @@ Journals support a top-level `currency` object to create entries in a foreign cu
 
 ---
 
+## Claims Errors
+
+### "CLAIM_REFERENCE_REQUIRED_AT_SUBMIT" (422)
+**Cause**: A claim was submitted without a `reference` — via `create_claim`/`update_claim` with `saveAsDraft: false`, `submit_claim`, or `bulk_submit_claims`. A DRAFT can be saved without one, but submitting requires it.
+**Fix**: Set `reference` (e.g. `update_claim`), then submit. Don't pre-validate — surface the 422.
+
+### "CLAIM_NOT_SUBMITTABLE" (422)
+**Cause**: A lifecycle transition was attempted from an illegal status, e.g. submitting a non-DRAFT claim ("Only DRAFT claims can be submitted (current status: APPROVED)").
+**Fix**: Check the current status (`get_claim`) and use the legal transition. Don't pre-check — surface the error.
+
+---
+
 ## Repair Suggestions (W1.3)
 
 When a Jaz tool call fails, the MCP `execute_tool` response (and the daemon-side executor return) may now carry a structured `repair` block alongside the existing `error` / `hint` fields. The block is built by the motherboard registry (`src/core/registry/repair-hints.ts`); the API server is unchanged.

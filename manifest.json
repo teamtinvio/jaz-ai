@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.20.41",
+  "version": "5.20.42",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -72,7 +72,7 @@
     },
     {
       "name": "get_my_context",
-      "description": "Resolve the CALLER's own context — identity, the employee bound to their login (if any), and per-module access (moduleRoles). Use to route a receipt (bill if PURCHASES access, expense claim if EMPLOYEE_CLAIMS access) and to file a self-claim (bind employee.resourceId). A service api-key usually has no bound employee."
+      "description": "Resolve the CALLER's own context — identity, the employee bound to their login (if any), and per-module access (moduleRoles). Use to route a receipt (bill if PURCHASES access, expense claim if EMPLOYEE_CLAIMS access). A service api-key usually has no bound employee. Magic claim drafts auto-bind the uploader server-side — no need to read employee.resourceId to bind one."
     },
     {
       "name": "list_accounts",
@@ -784,7 +784,7 @@
     },
     {
       "name": "create_claim_from_attachment",
-      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction — from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments — the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. Optional contact, claim profile, currency, value date. Returns a workflow handle — the claim materialises asynchronously; search claims (status DRAFT) to find it."
+      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction — from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments — the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. The draft is born BOUND to the uploader's own employee automatically; to file for someone else pass employeeResourceId (server requires a claims Manager/Admin). Optional contact, claim profile, currency, value date. Returns a workflow handle; the claim appears in Drafts asynchronously (no manual bind step)."
     },
     {
       "name": "classify_documents",
@@ -1104,11 +1104,11 @@
     },
     {
       "name": "create_claim",
-      "description": "Create an employee-expense claim directly (bare create, no attachment). Vendor is EITHER contactResourceId OR vendorName, never both. saveAsDraft defaults to true (lands DRAFT with relaxed line validation); set false to validate + submit in one call (lands SUBMITTED)."
+      "description": "Create an employee-expense claim directly (bare create, no attachment). Vendor is EITHER contactResourceId OR vendorName, never both. saveAsDraft defaults to true (lands DRAFT with relaxed line validation); set false to validate + submit in one call (lands SUBMITTED). reference is REQUIRED when submitting (saveAsDraft=false) — omitting it returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT; a DRAFT saves without one."
     },
     {
       "name": "update_claim",
-      "description": "Update a DRAFT claim (partial — omitted fields unchanged). claimItems non-empty REPLACES all lines, [] clears. Set saveAsDraft=false to validate + submit in one call. Only DRAFT claims are editable."
+      "description": "Update a DRAFT claim (partial — omitted fields unchanged). claimItems non-empty REPLACES all lines, [] clears. Set saveAsDraft=false to validate + submit in one call — reference is REQUIRED at submit (else 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT); a DRAFT save needs none. Only DRAFT claims are editable."
     },
     {
       "name": "delete_claim",
@@ -1120,7 +1120,7 @@
     },
     {
       "name": "submit_claim",
-      "description": "Submit a DRAFT claim for approval (DRAFT → SUBMITTED). Server enforces the transition."
+      "description": "Submit a DRAFT claim for approval (DRAFT → SUBMITTED). Server enforces the transition. The claim must carry a reference — a referenceless DRAFT returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (set it via update_claim first)."
     },
     {
       "name": "approve_claim",
@@ -1140,7 +1140,7 @@
     },
     {
       "name": "bulk_submit_claims",
-      "description": "Bulk-submit DRAFT claims (ASYNC). Returns a job handle {jobId,...}; poll search_background_jobs by jobId for per-item results. Max 500 ids."
+      "description": "Bulk-submit DRAFT claims (ASYNC). Returns a job handle {jobId,...}; poll search_background_jobs by jobId for per-item results. Max 500 ids. Each claim must have a reference — referenceless claims fail per-item with CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (check the job result)."
     },
     {
       "name": "bulk_approve_claims",
@@ -1208,7 +1208,7 @@
     },
     {
       "name": "bind_employee_user",
-      "description": "Bind a login user to an employee. ONE-WAY and PERMANENT once set — cannot be changed later."
+      "description": "Bind a login user to an OFFLINE employee (one with no user bound yet — e.g. created via import without a binding email). ONE-WAY and PERMANENT: allowed only while unbound; rebind is blocked once set."
     },
     {
       "name": "preprocess_employees_file",

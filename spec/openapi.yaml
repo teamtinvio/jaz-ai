@@ -41044,7 +41044,7 @@
         "consumes": [
           "multipart/form-data"
         ],
-        "description": "Upload a receipt (sourceType=FILE), pull one from a URL (sourceType=URL), or render raw HTML such as an email body to a PDF (sourceType=HTML); the file is stored and run through the Magic OCR pipeline, which extracts the expense and materialises a draft claim. Optional contactResourceId / claimProfileResourceId / currencyCode / valueDate / internalNotes override the OCR-extracted values. NOTE: useful enrichment depends on classification-service PR #511 being deployed; until then the draft carries minimal extracted data.",
+        "description": "Upload a receipt (sourceType=FILE), pull one from a URL (sourceType=URL), or render raw HTML such as an email body to a PDF (sourceType=HTML); the file is stored and run through the Magic OCR pipeline, which extracts the expense and materialises a draft claim. Optional contactResourceId / claimProfileResourceId / currencyCode / valueDate / internalNotes override the OCR-extracted values. Optional employeeResourceId binds the draft to a specific employee (on-behalf-of) — omit it to auto-bind the uploader's own employee; naming another employee requires a claims Manager/Admin. NOTE: useful enrichment depends on classification-service PR #511 being deployed; until then the draft carries minimal extracted data.",
         "operationId": "magic-create-claim-from-attachment",
         "parameters": [
           {
@@ -41106,6 +41106,12 @@
             "description": "Internal notes override",
             "in": "formData",
             "name": "internalNotes",
+            "type": "string"
+          },
+          {
+            "description": "Employee to bind the draft to, on-behalf-of (UUIDv4). Omit to auto-bind the uploader's own employee; naming another requires a claims Manager/Admin.",
+            "in": "formData",
+            "name": "employeeResourceId",
             "type": "string"
           }
         ],
@@ -42028,7 +42034,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies",
+        "operationId": "list-organization-currencies-2",
         "parameters": [
           {
             "default": 100,
@@ -42089,7 +42095,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency",
+        "operationId": "create-organization-currency-2",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -42402,7 +42408,7 @@
         ],
         "deprecated": true,
         "description": "Delete Organization Currency Custom Rate",
-        "operationId": "delete-organization-currency-rate",
+        "operationId": "delete-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -42464,7 +42470,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency Custom Rate",
-        "operationId": "get-organization-currency-rate",
+        "operationId": "get-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -42526,7 +42532,7 @@
         ],
         "deprecated": true,
         "description": "Edit a Organization Currency Custom Rate",
-        "operationId": "update-organization-currency-rate",
+        "operationId": "update-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -43402,7 +43408,7 @@
           "application/json"
         ],
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies-2",
+        "operationId": "list-organization-currencies",
         "parameters": [
           {
             "default": 100,
@@ -43462,7 +43468,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency-2",
+        "operationId": "create-organization-currency",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -43828,7 +43834,7 @@
           "application/json"
         ],
         "description": "Delete Organization Currency Custom Rate",
-        "operationId": "delete-organization-currency-rate-2",
+        "operationId": "delete-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -43889,7 +43895,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency Custom Rate",
-        "operationId": "get-organization-currency-rate-2",
+        "operationId": "get-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -43950,7 +43956,7 @@
           "application/json"
         ],
         "description": "Edit a Organization Currency Custom Rate",
-        "operationId": "update-organization-currency-rate-2",
+        "operationId": "update-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -49383,7 +49389,7 @@
     "/api/v1/rollback/sales/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a sale (invoice). Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-sale-version-2",
+        "operationId": "get-rollback-sale-version",
         "parameters": [
           {
             "description": "Sale Resource ID",
@@ -49457,7 +49463,7 @@
     "/api/v1/rollback/sales/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a sale (invoice) at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-sale-version",
+        "operationId": "get-rollback-sale-version-2",
         "parameters": [
           {
             "description": "Sale Resource ID",

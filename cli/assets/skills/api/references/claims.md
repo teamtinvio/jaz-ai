@@ -13,11 +13,14 @@ A receipt is a BILL (a vendor's invoice) or a CLAIM (an employee's reimbursed ex
 EMPLOYEE_CLAIMS ≠ NO_ACCESS → claim (`create_claim_from_attachment`). The always-on
 `claims-routing` policy carries the full rule.
 
-`create_claim_from_attachment` makes an UNBOUND draft (async, no claim id). Bind the
-employee once it materialises (`search_claims` status DRAFT → `update_claim`
-`employeeResourceId`): no other employee named → the caller's own
-(`get_my_context.employee`; null = not set up for claims, don't invent one); a named
-employee → `search_employees` then bind that id.
+`create_claim_from_attachment` makes an async DRAFT born **BOUND to the uploader's own
+employee** automatically (server resolves it at enqueue) — no `search_claims` +
+`update_claim` post-hoc bind. To file for someone ELSE, pass `employeeResourceId` (from
+`search_employees`); the server gates that to a claims Manager/Admin (surface its error,
+don't pre-check). No bound employee on the uploader (a service / shared-key identity) →
+the server leaves it unbound; relay that ("not set up for claims"), don't invent one. The
+OCR'd draft may also carry no `reference` — if a later submit returns
+`CLAIM_REFERENCE_REQUIRED_AT_SUBMIT`, set one via `update_claim`.
 
 ## Claim records (`claims` + `claim_processing` namespaces)
 
@@ -31,9 +34,9 @@ document attachment, or conversion, then mutated. No bare list — `search_claim
 
 | Action | Tool | Legal from | Body |
 |--------|------|-----------|------|
-| Create | `create_claim` | — | `valueDate` + `currencyCode` required; vendor = `contactResourceId` XOR `vendorName`; `saveAsDraft` defaults true (→ DRAFT), false validates + submits (→ SUBMITTED) |
+| Create | `create_claim` | — | `valueDate` + `currencyCode` required; vendor = `contactResourceId` XOR `vendorName`; `saveAsDraft` defaults true (→ DRAFT), false validates + submits (→ SUBMITTED) — **`reference` required when submitting** |
 | Edit | `update_claim` | DRAFT | partial; `claimItems` non-empty REPLACES all, `[]` clears |
-| Submit | `submit_claim` (or `update_claim` saveAsDraft=false) | DRAFT | none |
+| Submit | `submit_claim` (or `update_claim` saveAsDraft=false) | DRAFT | none (the claim must already carry a `reference`) |
 | Approve | `approve_claim` | SUBMITTED | none |
 | Reject | `reject_claim` | SUBMITTED / APPROVED | `rejectionReason` (1-1000) |
 | Cancel | `cancel_claim` | DRAFT / SUBMITTED | `cancellationReason` (1-1000) |
@@ -43,6 +46,23 @@ document attachment, or conversion, then mutated. No bare list — `search_claim
 Single lifecycle ops are **SYNC** and return the updated claim. Illegal transitions
 return `422` with a clear code, e.g. `CLAIM_NOT_SUBMITTABLE` ("Only DRAFT claims can
 be submitted (current status: APPROVED)"). Don't pre-check — call and surface the error.
+
+**`reference` is mandatory at submit.** Any path that lands a claim in SUBMITTED —
+`create_claim`/`update_claim` with `saveAsDraft:false`, `submit_claim`, or
+`bulk_submit_claims` — requires a non-empty `reference`; omitting it returns
+`422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT`. A DRAFT (the default) saves without one — set
+one via `update_claim` before submitting. Don't pre-validate; surface the 422.
+
+### Visibility & approval (server-enforced — don't replicate client-side)
+
+- **Manager pending-approval scope**: a manager's pending queue is the claims they
+  approve MINUS their own submissions (you can't approve your own).
+- **Designated approver can't edit**: the approver on a claim can't edit it — only the
+  owner/submitter edits the DRAFT.
+- **Manager sees the whole org**: `search_employees` / `search_claims` for a manager span
+  the full organisation; `get_employee` is visible to **INDIVIDUAL+** access.
+- **Un-post reverts the whole group**: `unpost_claim` reverses the entire aggregation
+  group the claim converted in (back to APPROVED), not just the one claim.
 
 ### Bulk actions are ASYNC
 
@@ -92,16 +112,24 @@ Turn APPROVED claims into journal entries, and record books-only employee payout
   surface records, it never disburses.
 - **`record_employee_payout`** (write) — a books-only DCE (reimbursement or advance), no
   gateway transfer; `amount` / `paymentAccountResourceId` / `valueDate` required, `reference`
-  auto-generated. **`search_employee_payouts`** lists them (filter by employee, reference,
-  payout status/type).
+  auto-generated. Its `payoutFor` is `REIMBURSEMENT` / `ADVANCE` only.
+- **`search_employee_payouts`** lists payouts (filter by employee, reference, payout
+  status/type). `payoutType` values: `DIRECT_ENTRY` (books-only DCE), `DISBURSEMENT`
+  (gateway direct-debit-backed real-money payout), `REIMBURSEMENT_PAYOUT`, `ADVANCE`.
+  `DISBURSEMENT` / `DIRECT_ENTRY` rows originate from the gateway/conversion flows and are
+  **read-only here** (this surface never disburses) — `payoutType` is a different axis from
+  `record_employee_payout`'s `payoutFor`.
 - **`create_claim_from_attachment`** (write, multipart) — OCR a receipt into a DRAFT
   claim from a **file**, a **URL**, or **raw HTML** (an email body). **Wire field is
   `sourceURL` (capital URL)** — unlike the BT create-from-attachment's `sourceUrl`. On the
   email channel pass `attachmentId: "email-body"` to use the inbound body (the server
   renders HTML → PDF); when the host attaches a file to the call, omit all source args.
-  CLI: `clio claims from-attachment (--file <path> | --source-url <url> | --html @<path>)`.
-  Response is an async workflow handle; the claim materialises later (search claims,
-  status DRAFT).
+  The draft is born **bound to the uploader's own employee** automatically; pass
+  `employeeResourceId` (claims Manager/Admin only) to file for someone else. CLI:
+  `clio claims from-attachment (--file <path> | --source-url <url> | --html @<path>) [--employee <id>]`.
+  Response is an async workflow handle; the claim appears in Drafts (no bind step needed).
+  Until upstream classification enrichment is live, an OCR'd draft may carry only minimal
+  extracted data — expect to fill lines via `update_claim`.
 
 ---
 
@@ -110,17 +138,26 @@ Turn APPROVED claims into journal entries, and record books-only employee payout
 The expense-claim members. CLI: `clio employees …`. `list = search_employees` (no
 bare list endpoint).
 
-- **`add_employee`** — `name` + **`userResourceId` are required** (the server rejects
-  a create without a user to bind: `422 EMPLOYEE_USER_RESOURCE_ID_MISSING`). Binding is
-  **PERMANENT**. A claim profile is required too (the org default applies if omitted).
-  Dedups by email (per-org unique).
+- **`add_employee`** — `name`, **`userResourceId`, and `claimProfileResourceId` are
+  required** (the server rejects a create without a user to bind:
+  `422 EMPLOYEE_USER_RESOURCE_ID_MISSING`). Binding is **PERMANENT** (rotation blocked once
+  set). An **offline employee** (no user bound yet) can still arise via import — bind it
+  later with `bind_employee_user`. Dedups by email (per-org unique).
+- **The approver comes from the claim profile, not the employee.** An employee's approver
+  is `claimProfile.approverUserResourceId` (set on the Claim Profile) — the employee record
+  has no own approver field. To change who approves, edit the profile or move the employee
+  to another profile. `claimProfileResourceId` is locked while the employee has unsettled claims.
 - **`update_employee`** — partial (omit = no change; email `""` clears). **Archive with
   `active: false`** (reversible — prefer over `delete_employee`). `userResourceId` is NOT
-  editable here; use **`bind_employee_user`** (one-way, permanent). `clearEmploymentType`
-  unsets the classification.
+  editable here; for an **offline employee** (no user bound yet), use **`bind_employee_user`**
+  (one-way, permanent — only while unbound). `clearEmploymentType` unsets the classification.
 - **`delete_employee`** — server validates the employee is settled (else error). Prefer archive.
 - **`search_employees`** / **`search_employee_balances`** — the second is the balance
   directory (per-currency reimbursement owed). `search_employee_payouts` lives in `claim_processing`.
+  `get_employee` is visible to **INDIVIDUAL+** access; a **manager sees the whole org**. Both
+  return the `manager`, `userBinding`, and `claimProfile` (carrying `approverUserResourceId`)
+  companions; `originalUserResourceId` records the prior bound user if a User hard-delete
+  later nulled `userResourceId`.
 - **EmploymentType**: `FULL_TIME` `PART_TIME` `CONTRACTOR` `INTERN` `TEMPORARY` `CONSULTANT`.
 - **Import**: `preprocess_employees_file` (sync — pass a sheet `fileUrl`, returns a row
   preview) → `import_employees` (`create`/`update`/`delete` arrays, **max 100 each**;
