@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.20.45] - 2026-07-09
+
+- Internal release automation update. Hardens the post-deploy fire smoke suite (crash-proofs a `set -e` footgun that could abort a whole run, and stops counting async-extraction slowness / GitHub rate limits as test failures). No user-facing changes since 5.20.43.
+
 ## [5.20.43] - 2026-06-30
 
 - When setting up claims, the assistant now points straight to the fix instead of a raw error: a claim type needs an expense account, an employee must bind to the right team-member account, and on a tax-inclusive policy every claim line needs a tax category — each now comes with a one-step suggestion to resolve it.

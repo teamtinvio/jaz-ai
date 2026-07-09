@@ -1,4 +1,4 @@
-Auto-generated from [help.jaz.ai](https://help.jaz.ai) — 2026-06-29 — 189 articles
+Auto-generated from [help.jaz.ai](https://help.jaz.ai) — 2026-07-06 — 189 articles
 
 | Section | Articles | File |
 |---|---|---|
