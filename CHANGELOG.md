@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.21.0] - 2026-07-10
+
+- The agent now runs on OpenAI's GPT-5.6 Terra model (chat, email, and Telegram surfaces). Stronger reasoning and a much larger working context, at roughly half the input cost of the previous model.
+
 ## [5.20.45] - 2026-07-09
 
 - Internal release automation update. Hardens the post-deploy fire smoke suite (crash-proofs a `set -e` footgun that could abort a whole run, and stops counting async-extraction slowness / GitHub rate limits as test failures). No user-facing changes since 5.20.43.
