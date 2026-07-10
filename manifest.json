@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.21.0",
+  "version": "5.22.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1483,12 +1483,8 @@
       "description": "Present the user with a bounded multiple-choice question (or a short sequence of them) as an interactive pick-list, instead of asking in prose. Use as your FINAL action when the user must choose among a KNOWN, finite set of options you ALREADY have from context (a prior search/list result, org defaults, or your own knowledge) to continue (e.g. \"which bank account?\", \"which of these duplicate bills?\"). Give 2-4 options per question — curate to the most likely, never dump a long list — and at most 4 questions; set multiSelect per question when more than one may apply. List the options and stop — the user's pick arrives as their next message and starts a new turn. Ask several questions at once when more than one thing is unspecified. Prose-ask only when there's no bounded set to offer (a free-text name or amount), to confirm destructive actions, or instead of fetching data just to populate options. Terminal: do not call further tools or re-list the options in text afterward."
     },
     {
-      "name": "find_dashboard_destinations",
-      "description": "Discover valid destinations for get_dashboard_url. Returns dashboard screens and record/modal types as { key, label, kind }. Filter with `query` (substring over key + label, e.g. \"invoice\", \"report\", \"settings\"), `resource` (e.g. \"sales\", \"purchases\"), or `kind` (\"screen\" | \"modal\"). Results are capped; narrow the filter if `truncated` is true. Call this first when you are unsure of the exact destination key."
-    },
-    {
-      "name": "get_dashboard_url",
-      "description": "Build a deep link to a dashboard screen or record so you can hand the user a URL (\"here is the page: <url>\"). `destination` is a key from find_dashboard_destinations — a screen (e.g. \"sales.transactions.active-sales\", \"reports.profit-and-loss\") or a record modal (e.g. \"sales.modal.view-sale\", \"sales.modal.new-sale\", \"settings.modal.user_management\"). For a record-specific modal (view/edit/duplicate a particular record) pass `resourceId` (the Jaz resourceId of that record); omit it for screens and for create/\"new\" modals. The link opens in the user's current org. Returns { url, kind, label }. Never write dashboard URLs or destination keys from memory — always resolve them through these tools."
+      "name": "navigate",
+      "description": "Dashboard navigation: discover destinations, then build deep links. Without `destination`: lists valid destinations as { key, label, kind } — filter with `query` (substring over key + label), `resource` (e.g. \"sales\"), or `kind` (\"screen\" | \"modal\"); results are capped, narrow if `truncated`. With `destination`: builds the URL to hand the user — a screen (e.g. \"reports.profit-and-loss\") or a record modal (e.g. \"sales.modal.view-sale\"); pass `resourceId` only for a record-specific modal (view/edit one record), never for screens or create/\"new\" modals. Returns { url, kind, label }; the link opens in the user's current org. Never write dashboard URLs or destination keys from memory — call with no destination to discover keys first."
     }
   ]
 }
