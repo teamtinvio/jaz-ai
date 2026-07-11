@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.0] - 2026-07-11
+
+- Judgment notes now ride the action itself: every create, update, delete, and other write operation on the hosted connector surface accepts an optional `jot` field. Record the judgment behind an action in one line on the call you are already making (for example "MATCH: treated as distinct from the earlier bill because the references differ") and it lands in the organization's judgment journal, linked to the records the action touched. A jot never blocks or slows the action it rides on, and `recall` finds it later.
+
 ## [5.23.0] - 2026-07-11
 
 - New judgment journal: record the judgment calls behind your books with the `jot` tool, capturing the decision, the basis, the alternatives ruled out, and the records it touched. Look up prior judgments and precedents with `recall` (filter by record, kind, severity, review status, time range, or freetext). Also from the command line: `clio jots create`, `clio jots recall`, and `clio jots dispose` for review verdicts (flag / reject / endorse).
