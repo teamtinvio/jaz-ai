@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.4] - 2026-07-12
+
+- Internal efficiency update: recalling judgment entries with `--all --stats` now requests the full-result disposition aggregate once per run instead of recomputing it on every paginated page. Results are identical. No user-facing changes since 5.24.3.
+
 ## [5.24.3] - 2026-07-11
 
 - Internal quality-harness update: adds evaluation rubrics and a measurement report for the judgment journal. No user-facing changes since 5.24.2.
