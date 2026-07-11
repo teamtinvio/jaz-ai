@@ -209,7 +209,7 @@ Save both. Assert: BS Total Assets == Total Liabilities + Total Equity. P&L net 
 
 ### Step 17 — Prior-month variance + draft gate
 
-Compare against the prior period's close trial balance. Surface to the user the top 3 deltas where `|delta| > materiality threshold`, descending magnitude, with a 1-line possible-explanation.
+Compare against the prior period's close trial balance. Surface to the user the top 3 deltas where `|delta| > materiality threshold`, descending magnitude, with a 1-line possible-explanation. When the practitioner accepts a variance as explained, record the judgment: `jot(kind: RISK)` naming the account, the delta, and the accepted explanation.
 
 ```
 search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-01-31']}})
@@ -217,7 +217,7 @@ search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-0
 search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-01-31']}})
 ```
 
-All three must return zero. If any rows: classify per practitioner judgment, then `bulk_finalize_drafts` for the keep-set OR delete via `delete_journal` / `delete_invoice` / `delete_bill`.
+All three must return zero. If any rows: classify per practitioner judgment, then `bulk_finalize_drafts` for the keep-set OR delete via `delete_journal` / `delete_invoice` / `delete_bill`. Record the judgment: `jot(kind: SCOPE)` naming which drafts were finalized, which were deleted, and the rule applied.
 
 ## Phase 5 — Lock
 
@@ -228,6 +228,8 @@ update_account(resourceId: <CoA root>, lockDate: '2025-01-31')
 ```
 
 Locks the period — prevents accidental backdated entries. Move forward only. Reverse only if posting corrections (and re-lock immediately after).
+
+If residuals were documented at steps 3 or 17, record the judgment after the lock lands: `jot(kind: RISK)` naming the residuals carried into the locked period.
 
 ---
 

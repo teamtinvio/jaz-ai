@@ -84,6 +84,8 @@ For each `bankAccountResourceId` you'll pay from: confirm `availableBalance >= s
 
 Apply the org's cash-buffer policy (default: 14 days operating expenses) — never drain to zero. Compute buffer-required from last 30 days' opex via `generate_profit_and_loss(period_start: <-30d>, period_end: <today>)`.
 
+Record the judgment: `jot(kind: SCOPE)` naming the deferred bills and the cash-buffer rule applied.
+
 ## Step 6 — Record payments
 
 For each approved bill (one POST per bill — no batch endpoint):
@@ -140,7 +142,7 @@ Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)
 | `create_bill_payment` | 422 `currency_mismatch` | `paymentAmount` currency ≠ bank account currency. Either pay from the matching-currency bank account, or model as FX (different `paymentAmount` and `transactionAmount`). |
 | `create_bill_payment` | 422 `bill_already_paid` | Bill went `PAID` since step 2. Re-run `search_bills` for fresh state; remove from batch. |
 | `create_bill_payment` | 422 `lock_date_violated` | `valueDate` is in a locked period. Either lift the lock via `update_account` lock_date OR adjust `valueDate` to the next open period. |
-| `create_bill_payment` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent — re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. |
+| `create_bill_payment` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent — re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. Record the judgment: `jot(kind: RECOVERY)` naming the resume point and the bills already paid. |
 | `generate_aged_ap` | Total mismatch with `search_bills` | Likely `PARTIALLY_PAID` bills excluded from `search_bills` filter. Add `status: {in: ['UNPAID', 'PARTIALLY_PAID']}` and retry. |
 
 ---

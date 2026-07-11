@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.24.1
+version: 5.24.2
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -62,6 +62,8 @@ Jaz schedulers generate **fixed-amount** recurring entries. This determines whic
 - **Fixed amounts each period** → Use a scheduler inside a capsule (automated)
 - **Variable amounts each period** → Use manual journals inside a capsule (calculated per period)
 - **One-off or two-entry events** → Use manual journals (e.g., dividend declaration + payment)
+
+If a scenario genuinely fits either pattern, record the pick once the entries post: `jot(kind: METHOD)` naming the pattern chosen and the deciding fact.
 
 | Recipe | Pattern | Why |
 |---|---|---|
@@ -132,7 +134,7 @@ Each recipe includes: scenario description, accounts involved, journal entries, 
 1. **Read the recipe** for your scenario — understand the accounts, journal entries, and capsule structure.
 2. **Create the accounts** listed in the "Accounts Involved" table (if they don't already exist in the CoA).
 3. **Create the capsule** with an appropriate capsule type.
-4. **Run the calculator** (if available) to generate exact amounts: `clio calc <command> --json` gives you a complete blueprint.
+4. **Run the calculator** (if available) to generate exact amounts: `clio calc <command> --json` gives you a complete blueprint. Where you picked the method yourself (e.g. `--method ddb` over `sl`), record the judgment after the entries post: `jot(kind: METHOD)` naming the method and why.
 5. **Record the initial transaction** (bill, invoice, or journal) — assign it to the capsule.
 6. **For scheduler recipes**: Create the scheduler with the same capsule — it generates all subsequent entries automatically.
 7. **For manual journal recipes**: Record each period's journal using the calculator output or worked example, always assigning to the same capsule.
@@ -143,6 +145,8 @@ Each recipe includes: scenario description, accounts involved, journal entries, 
 The `jaz-clio` CLI includes 13 IFRS-compliant financial calculators. Each produces a formatted schedule + per-period journal entries + human-readable workings. Use `--json` for structured output with a complete **blueprint** — capsule type/name, tags, custom fields, workings (capsuleDescription), and every step with action type, date, accounts, and amounts.
 
 All calculators support `--currency <code>` and `--json`.
+
+Inputs the data does not hand you (loss rates, discount rate, salvage value, useful life) are assumptions: once the entries post, lock each with `jot(kind: ASSUMPTION)` naming the value and its source.
 
 Each calculator has a typical context — see the line after each command for the operational workflow that typically invokes it.
 
@@ -317,7 +321,7 @@ See `jaz-api` Rule 143 (silent-null failure mode + diagnosis sequence), Rule 144
 
 1. **Re-run `preview_capsule_recipe`** with the same `recipeName` + `inputs`. The 422 you get back is the exact reason the trigger mutation silently nulled. Fix the input and retry.
 2. **Poll `search_background_jobs --filter '{"baseTransactionResourceId":{"eq":"<id>"}}'`** — if a `FAILED` job exists, `errorDetails` has the publish failure. If no job exists, the publish never queued (validation rejected pre-queue).
-3. **Job status `FAILED`** → `resume_capsule_recipe` (≤3 attempts) OR `rollback_capsule_recipe(dryRun=true)` first, then `rollback_capsule_recipe(dryRun=false)`.
+3. **Job status `FAILED`** → `resume_capsule_recipe` (≤3 attempts) OR `rollback_capsule_recipe(dryRun=true)` first, then `rollback_capsule_recipe(dryRun=false)`. Record the judgment: `jot(kind: RECOVERY)` naming resume or rollback and the basis.
 4. **Capsule wasn't created via the recipe engine** → rollback returns 422 `RECIPE_ROLLBACK_JOB_NOT_FOUND`; use `delete_capsule` for legacy capsules.
 
 **DO NOT** use server-side execution for `fx-reval` — Jaz auto-handles ALL period-end IAS 21.23 FX translation; double-posting risk identical to the offline `execute_recipe(recipe: 'fx-reval')` warning.

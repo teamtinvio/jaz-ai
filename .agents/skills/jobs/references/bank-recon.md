@@ -84,6 +84,8 @@ search_bank_records(accountResourceId: B.resourceId, status: 'POSSIBLE_DUPLICATE
 
 Two bank-feed entries with same `valueDate + netAmount + description` = system-flagged duplicate. Review each pair: archive the duplicate via `archive_bank_record(resourceId: <id>)` BEFORE running step 4. If you reconcile a duplicated row, you'll create double cashflow entries.
 
+Record the judgment per archived pair: `jot(kind: MATCH)` naming the kept entry, the archived entry, and the tie-breaker used.
+
 ## Step 4 — Auto-match cascade
 
 For accounts with > ~10 unreconciled rows, use the cascade matcher first:
@@ -145,7 +147,7 @@ search_cashflow_transactions(
 )
 ```
 
-Widen `valueDate` ±7 days for bank processing delays. Match candidate found → invoke matching `reconcile_*` tool.
+Widen `valueDate` ±7 days for bank processing delays. Match candidate found → invoke matching `reconcile_*` tool. Record the judgment: `jot(kind: MATCH)` naming the bank entry, the matched transaction, and the basis (amount, date window, contact).
 
 ## Step 6 — Create missing transactions
 
@@ -204,7 +206,7 @@ Next month's same charge auto-reconciles via `apply_bank_rule`.
 search_bank_records(accountResourceId: B.resourceId, status: 'UNRECONCILED', limit: 1)
 ```
 
-Target: zero rows OR all remaining are documented timing differences (outstanding cheques, deposits in transit clearing next period — practitioner annotates).
+Target: zero rows OR all remaining are documented timing differences (outstanding cheques, deposits in transit clearing next period — practitioner annotates). Record the judgment: `jot(kind: SCOPE)` naming each residual accepted as a timing difference and why it clears next period.
 
 ```
 generate_bank_recon_summary(period_end: '2025-01-31', accountResourceId: B.resourceId)

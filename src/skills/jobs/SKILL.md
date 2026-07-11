@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 5.24.1
+version: 5.24.2
 description: >-
   Use this skill for recurring accounting workflows — month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -74,6 +74,8 @@ Each per-job reference is a **phased checklist** of steps. Each step names:
 - **Calculator command** — `clio calc` command for independent financial cross-checks
 - **Verification check** — how to confirm the step was completed correctly
 - **Conditional flag** — steps that only apply in certain situations (e.g., "only if multi-currency org")
+
+Steps that carry real judgment (hold, defer, accept a variance, resume after a failure) also name the jot to record at that moment via the `jot` tool. Mechanical steps never do: a jot marks a choice among real alternatives, not activity.
 
 **For AI agents (hosted or CLI):** walk the phases in the per-job reference and call the named platform tools directly. Use the jaz-api skill for payload shapes.
 **For developers / scripts:** `clio jobs <type> --json` prints the phased checklist as JSON to drive automation pipelines.

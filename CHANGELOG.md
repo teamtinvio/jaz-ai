@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.2] - 2026-07-11
+
+- The accounting playbooks now mark their judgment moments. The month-end close, bank reconciliation, and payment run playbooks (and the transaction recipes) note exactly where to record a judgment entry (deferring bills at a cash gate, archiving a suspected duplicate, accepting a close variance, resuming after a failed run), so the call and its basis land in the organization's judgment journal at the moment the decision is made.
+
 ## [5.24.1] - 2026-07-11
 
 - The judgment journal now introduces itself where it matters: the first write action of a session notes that the organization keeps a judgment journal, a failed write suggests recording a deliberate non-retry decision, and every write operation carries a one-line reminder to record judgment calls (jot field or jot tool). Set `JAZ_JOTS_NUDGES=0` to turn these reminders off.
