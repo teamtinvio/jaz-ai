@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.7] - 2026-07-12
+
+- Internal test-harness update: the integration smoke suite now treats the judgment-journal section as a strict gate now that its routes are live. No user-facing changes since 5.24.6.
+
 ## [5.24.6] - 2026-07-12
 
 - Agents now learn the judgment journal earlier. The operating rules that set up a personal agent (Claude Code, Codex, Cursor, and similar) now explain what a jot is, the one rule for when to record a judgment call, and how to recall a prior judgment before repeating it. The same short guidance is given to Jaz's own dashboard-chat and email agents, so they record a judgment call and its basis at the moment it is made. Recording a judgment stays optional and never delays a reply.

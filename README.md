@@ -57,7 +57,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 6 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.24.6", "mcp"],
+      "args": ["-y", "jaz-clio@5.24.7", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -71,14 +71,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 6 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.24.6", "mcp"],
+      "args": ["-y", "jaz-clio@5.24.7", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.24.6` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.24.7` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -361,7 +361,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.24.6", "mcp"],
+  "args": ["-y", "jaz-clio@5.24.7", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
