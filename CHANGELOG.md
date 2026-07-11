@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.3] - 2026-07-11
+
+- Internal quality-harness update: adds evaluation rubrics and a measurement report for the judgment journal. No user-facing changes since 5.24.2.
+
 ## [5.24.2] - 2026-07-11
 
 - The accounting playbooks now mark their judgment moments. The month-end close, bank reconciliation, and payment run playbooks (and the transaction recipes) note exactly where to record a judgment entry (deferring bills at a cash gate, archiving a suspected duplicate, accepting a close variance, resuming after a failed run), so the call and its basis land in the organization's judgment journal at the moment the decision is made.
