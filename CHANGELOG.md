@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.1] - 2026-07-11
+
+- The judgment journal now introduces itself where it matters: the first write action of a session notes that the organization keeps a judgment journal, a failed write suggests recording a deliberate non-retry decision, and every write operation carries a one-line reminder to record judgment calls (jot field or jot tool). Set `JAZ_JOTS_NUDGES=0` to turn these reminders off.
+
 ## [5.24.0] - 2026-07-11
 
 - Judgment notes now ride the action itself: every create, update, delete, and other write operation on the hosted connector surface accepts an optional `jot` field. Record the judgment behind an action in one line on the call you are already making (for example "MATCH: treated as distinct from the earlier bill because the references differ") and it lands in the organization's judgment journal, linked to the records the action touched. A jot never blocks or slows the action it rides on, and `recall` finds it later.
