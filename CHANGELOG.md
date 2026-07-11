@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.6] - 2026-07-12
+
+- Agents now learn the judgment journal earlier. The operating rules that set up a personal agent (Claude Code, Codex, Cursor, and similar) now explain what a jot is, the one rule for when to record a judgment call, and how to recall a prior judgment before repeating it. The same short guidance is given to Jaz's own dashboard-chat and email agents, so they record a judgment call and its basis at the moment it is made. Recording a judgment stays optional and never delays a reply.
+
 ## [5.24.5] - 2026-07-12
 
 - Judgment journal polish: the optional judgment note that rides a write action now asks for a line only when the action involved a real judgment call (which account, which match, an assumption, a risk accepted, a deviation), and says to skip it for mechanical actions. A write that times out now also suggests recording a deliberate non-retry, matching what a failed write already does. Set `JAZ_JOTS_NUDGES=0` to turn these reminders off.

@@ -43,3 +43,14 @@ Exception: `fx-reval` is verification-only — Jaz auto-handles period-end IAS 2
 - Never echo `JAZ_API_KEY` or `jk-*` strings to the user or into generated code.
 - Never invent enum values (UPPER_SNAKE_CASE only — match exactly).
 - Errors come back structured (`code`, `message`, `failedRows[]`, `errorDetails[]`). Read them — don't guess at what went wrong.
+
+## Jaz Jots: record the judgment behind a write
+
+A jot is a one-line record of a judgment call: the decision and why. The org's judgment journal lets the next agent or human read the basis instead of re-deriving it.
+
+**The one rule:** record a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write. Skip mechanical actions and calls where the platform, the data, or the user left no choice.
+
+- **Two ways to write one.** The `jot` field on the mutation you are already making (`"MATCH: distinct from BILL bil_x, references differ"`), or the `jot` tool alone. Jot AFTER the write succeeds, never before, and carry the record's resourceId.
+- **Recall before repeating.** Call `recall` before repeating a judgment on the same record, kind, or workflow: a prior call with its basis beats re-deriving; a flag on it is a warning.
+- **8 kinds:** CLASSIFICATION · MATCH · SCOPE · ASSUMPTION · RISK · METHOD · RECOVERY · DEVIATION.
+- Optional and non-blocking: a jot never delays or fails the action it rides on.

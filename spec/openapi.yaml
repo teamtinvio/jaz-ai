@@ -7085,7 +7085,7 @@
           "type": "string"
         },
         "kind": {
-          "description": "Judgement kind.",
+          "description": "Judgment kind.",
           "enum": [
             "CLASSIFICATION",
             "MATCH",
@@ -11201,7 +11201,7 @@
     "JotRefRequest": {
       "properties": {
         "field": {
-          "description": "Object form: optional field path for field-level judgements.",
+          "description": "Object form: optional field path for field-level judgments.",
           "example": "currencyCode",
           "type": "string"
         },
@@ -11265,7 +11265,7 @@
           "type": "string"
         },
         "kind": {
-          "description": "Judgement kind.",
+          "description": "Judgment kind.",
           "enum": [
             "CLASSIFICATION",
             "MATCH",
@@ -41924,7 +41924,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Write a batch of agent judgement records (jots). Entries are per-entry independent: the response carries one ack record per entry in input order, and a bad entry (invalid kind/tier, blank call) NEVER fails the batch — it comes back with error + errorCode while the rest persist. An entry's idempotencyKey makes retries safe: a replay returns the existing row's resourceId with replayed=true. duplicateCount is a dedupe hint (prior jots in the org sharing the content fingerprint). Rate valve: 600 writes per organization per minute — beyond that the whole request is rejected with 429.",
+        "description": "Write a batch of agent judgment records (jots). Entries are per-entry independent: the response carries one ack record per entry in input order, and a bad entry (invalid kind/tier, blank call) NEVER fails the batch, it comes back with error + errorCode while the rest persist. An entry's idempotencyKey makes retries safe: a replay returns the existing row's resourceId with replayed=true. duplicateCount is a dedupe hint (prior jots in the org sharing the content fingerprint). Rate valve: 600 writes per organization per minute, beyond that the whole request is rejected with 429.",
         "operationId": "create-jot",
         "parameters": [
           {
@@ -41988,7 +41988,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Search agent judgement records (jots) in the caller's organization — the recall query. Filters: entity ref (TYPE:resourceId containment), kind, tier, dispositionVerb, freetext (case-insensitive substring over call and why), and createdFrom/createdTo (epoch ms, inclusive). Sort is pinned server-side (tierNorm=CRITICAL OR withheldWrite first, then createdAt DESC) — no client sort. Set includeStats=true for per-credential disposition counts alongside the page. Organization scope is stamped from the API key.",
+        "description": "Search agent judgment records (jots) in the caller's organization, the recall query. Filters: entity ref (TYPE:resourceId containment), kind, tier, dispositionVerb, freetext (case-insensitive substring over call and why), and createdFrom/createdTo (epoch ms, inclusive). Sort is pinned server-side (tierNorm=CRITICAL OR withheldWrite first, then createdAt DESC), no client sort. Set includeStats=true for per-credential disposition counts alongside the page. Organization scope is stamped from the API key.",
         "operationId": "search-jot",
         "parameters": [
           {
@@ -42046,7 +42046,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Append a review disposition (FLAG / REJECT / ENDORSE) to a jot. Dispositions are append-only — they annotate, never mutate the jot. A REJECT response includes the rollback-handoff pointer {jotResourceId, refs, verb} for the rollback module; execution lives entirely in the rollback module, this endpoint only records the verdict.",
+        "description": "Append a review disposition (FLAG / REJECT / ENDORSE) to a jot. Dispositions are append-only, they annotate, never mutate the jot. A REJECT response includes the rollback-handoff pointer {jotResourceId, refs, verb} for the rollback module; execution lives entirely in the rollback module, this endpoint only records the verdict.",
         "operationId": "create-jot-disposition",
         "parameters": [
           {
@@ -43852,7 +43852,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies",
+        "operationId": "list-organization-currencies-2",
         "parameters": [
           {
             "default": 100,
@@ -43913,7 +43913,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency",
+        "operationId": "create-organization-currency-2",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -43972,7 +43972,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency-2",
+        "operationId": "get-organization-currency",
         "parameters": [
           {
             "description": "Currency Code",
@@ -44029,7 +44029,7 @@
         ],
         "deprecated": true,
         "description": "Resolve the organization's effective functional-to-source FX rate for a currency at a date: the org's custom rate when one is configured, otherwise the platform daily rate (the same rate the platform applies for revaluation). Returns rateFunctionalToSource (1 base currency = X source currency).",
-        "operationId": "list-organization-currency-effective-rate",
+        "operationId": "list-organization-currency-effective-rate-2",
         "parameters": [
           {
             "description": "Source currency code (ISO 4217)",
@@ -44092,7 +44092,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates-2",
+        "operationId": "list-organization-currency-rates",
         "parameters": [
           {
             "description": "Currency Code",
@@ -44160,7 +44160,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate-2",
+        "operationId": "create-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -45226,7 +45226,7 @@
           "application/json"
         ],
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies-2",
+        "operationId": "list-organization-currencies",
         "parameters": [
           {
             "default": 100,
@@ -45286,7 +45286,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency-2",
+        "operationId": "create-organization-currency",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -45402,7 +45402,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency",
+        "operationId": "get-organization-currency-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -45458,7 +45458,7 @@
           "application/json"
         ],
         "description": "Resolve the organization's effective functional-to-source FX rate for a currency at a date: the org's custom rate when one is configured, otherwise the platform daily rate (the same rate the platform applies for revaluation). Returns rateFunctionalToSource (1 base currency = X source currency).",
-        "operationId": "list-organization-currency-effective-rate-2",
+        "operationId": "list-organization-currency-effective-rate",
         "parameters": [
           {
             "description": "Source currency code (ISO 4217)",
@@ -45520,7 +45520,7 @@
           "application/json"
         ],
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates",
+        "operationId": "list-organization-currency-rates-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -45587,7 +45587,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate",
+        "operationId": "create-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -50757,7 +50757,7 @@
     "/api/v1/rollback/journals/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a journal. Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-journal-version-2",
+        "operationId": "get-rollback-journal-version",
         "parameters": [
           {
             "description": "Journal Resource ID",
@@ -50831,7 +50831,7 @@
     "/api/v1/rollback/journals/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a journal at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-journal-version",
+        "operationId": "get-rollback-journal-version-2",
         "parameters": [
           {
             "description": "Journal Resource ID",
@@ -51693,7 +51693,7 @@
     "/api/v1/rollback/sales/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a sale (invoice). Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-sale-version-2",
+        "operationId": "get-rollback-sale-version",
         "parameters": [
           {
             "description": "Sale Resource ID",
@@ -51767,7 +51767,7 @@
     "/api/v1/rollback/sales/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a sale (invoice) at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-sale-version",
+        "operationId": "get-rollback-sale-version-2",
         "parameters": [
           {
             "description": "Sale Resource ID",
@@ -57990,7 +57990,7 @@
       "name": "Rollback"
     },
     {
-      "description": "Agent judgement records (jots). Write batches of decisions with per-entry acks, recall them with the pinned-sort search, and append review dispositions (flag / reject / endorse).",
+      "description": "Agent judgment records (jots). Write batches of decisions with per-entry acks, recall them with the pinned-sort search, and append review dispositions (flag / reject / endorse).",
       "name": "Jots"
     }
   ]
