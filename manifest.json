@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.22.0",
+  "version": "5.23.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1477,6 +1477,14 @@
     {
       "name": "search_help_center",
       "description": "Search the Jaz help center for how-to articles, feature guides, and accounting concepts. Use this for \"how do I...\" or \"what is...\" questions about Jaz: bank reconciliation, GST/VAT filing, multi-currency, fixed assets, custom fields, integrations, and so on. Returns top matching articles with title, section, content, and source URL."
+    },
+    {
+      "name": "jot",
+      "description": "Record judgment entries in the org's judgment journal. THE RULE: log a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write; skip mechanical actions and calls where the platform, the data, or the user left you no choice. Jot AFTER the write succeeds, never before, and carry the written record's resourceId in refs. Kinds: CLASSIFICATION account/tax/category choice · MATCH decided which records correspond · SCOPE chose what is in or out of a set · ASSUMPTION filled a gap the data left open · RISK proceeded despite a known concern · METHOD picked a calculation or approach · RECOVERY decided how to proceed after a failure (incl. holding a write) · DEVIATION knowingly departed from a stated rule. Always give why: a call without a basis is half a record. Batch related entries in one call; each entry is acked independently."
+    },
+    {
+      "name": "recall",
+      "description": "Search the org's judgment journal (jots) for precedents, prior judgment calls with their basis. Check BEFORE repeating a judgment on the same entity, kind of decision, or workflow: a prior call with its why beats re-deriving from scratch; a FLAG or REJECT disposition on it is a warning, ENDORSE a strong precedent. Sort is pinned server-side (CRITICAL and withheld-write RECOVERY entries first, then newest). An empty page means no prior judgments match this filter, or none are recorded for this org yet."
     },
     {
       "name": "present_questions",

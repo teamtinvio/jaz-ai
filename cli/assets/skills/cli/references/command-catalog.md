@@ -512,6 +512,19 @@ Blueprints are offline (no auth). Tools require auth.
 
 ---
 
+## Judgment Journal
+
+### `clio jots` · Judgment journal
+| Subcommand | Key flags |
+|------------|-----------|
+| `create` | `--kind` (CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION), `--tier` (LOW, MEDIUM, HIGH, CRITICAL), `--call`, `--why`, `--ruled-out`, `--ref` (repeatable, grammar `TYPE:resourceId[#field][:RELATION]`), `--frame`, `--confidence`, `--cited-rule`, `--workflow-label`, `--agent-label`, `--idempotency-key`, `--input` (batch JSON), `--json` |
+| `recall` | `--ref`, `--kind`, `--tier`, `--disposition-verb` (FLAG, REJECT, ENDORSE), `--freetext`, `--created-from`, `--created-to`, `--stats`, `--limit`, `--offset`, `--all`, `--max-rows`, `--format`, `--json` |
+| `dispose <resourceId>` | `--verb` (FLAG, REJECT, ENDORSE), `--note`, `--json` |
+
+Batch create via `--input` file or stdin (`{ "entries": [...] }`, 1-100 per call, per-entry acks). `recall` sort is pinned server-side: critical and withheld-write entries first, then newest. `--stats` adds per-credential disposition counts (in the JSON/YAML envelope for machine formats). An all-error batch exits 1.
+
+---
+
 ## Organization
 
 ### `clio org` — Organization info

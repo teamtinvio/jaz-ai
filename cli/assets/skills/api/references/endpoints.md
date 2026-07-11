@@ -2355,4 +2355,53 @@ Note: `previewRows` keys are column **headers** (not paths). `filter` and `query
 
 ---
 
-*Last updated: 2026-04-09 — Added: Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). Previous: 2026-03-13 — Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*
+## 25. Jots (Judgment Journal)
+
+### POST /api/v1/jots
+
+Batch-record judgment entries (1-100 per call). Per-entry independent: acks come back in input order, and a bad entry never fails the batch, it acks with `error` + `errorCode` while siblings persist. Rate valve: 600 writes per organization per minute.
+
+```json
+// Request
+{
+  "entries": [
+    {
+      "kind": "CLASSIFICATION",
+      "tier": "MEDIUM",
+      "call": "Posted to 6420 Travel: recurring vendor pattern",
+      "why": "Same vendor posted to 6420 in 11 prior bills",
+      "refs": [{ "raw": "BILL:41f626a3-...:CREATE" }],
+      "idempotencyKey": "close-2026-06-bill-41f626a3"
+    }
+  ]
+}
+
+// Response
+{ "data": { "records": [{ "resourceId": "...", "replayed": false, "duplicateCount": 0 }] } }
+```
+
+`kind`: CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION. `tier`: LOW, MEDIUM, HIGH, CRITICAL. `refs` entries are OBJECTS: the string grammar `TYPE:resourceId[#field][:RELATION]` travels in `raw` (an unparseable ref is stored with `parsed: false`, never bounced). Optional fields: `ruledOut`, `frame`, `confidence`, `citedRule`, `workflowLabel`, `agentLabel`. `idempotencyKey` makes retries safe: a replay returns the existing entry with `replayed: true`.
+
+### POST /api/v1/jots/search
+
+Plain-value filter (no expression envelopes): `ref` (TYPE:resourceId containment), `kind`, `tier`, `dispositionVerb`, `freetext` (case-insensitive substring over call and why), `createdFrom` / `createdTo` (epoch ms, inclusive). Sort is pinned server-side (CRITICAL and withheld-write entries first, then newest); no client sort. `includeStats: true` adds per-credential disposition counts alongside the page.
+
+```json
+// Request
+{ "limit": 100, "offset": 0, "filter": { "kind": "CLASSIFICATION" }, "includeStats": true }
+```
+
+### POST /api/v1/jots/:resourceId/disposition
+
+Append one review verb to a jot (append-only: annotates, never mutates).
+
+```json
+// Request
+{ "verb": "FLAG", "note": "Re-check the account mapping next close" }
+```
+
+`verb`: FLAG, REJECT, ENDORSE. The response may carry a `rollbackHandoff` pointer; execution lives in the rollback module.
+
+---
+
+*Last updated: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09 — Added: Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13 — Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*

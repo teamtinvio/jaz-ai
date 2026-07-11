@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.23.0] - 2026-07-11
+
+- New judgment journal: record the judgment calls behind your books with the `jot` tool, capturing the decision, the basis, the alternatives ruled out, and the records it touched. Look up prior judgments and precedents with `recall` (filter by record, kind, severity, review status, time range, or freetext). Also from the command line: `clio jots create`, `clio jots recall`, and `clio jots dispose` for review verdicts (flag / reject / endorse).
+
 ## [5.22.0] - 2026-07-10
 
 - Dashboard navigation is now one `navigate` tool: call it with no destination to discover where you can go (screens and record views, filterable by keyword), then pass the destination key to get the deep link — one tool instead of two, with a leaner agent context. The previous tool names (`find_dashboard_destinations`, `get_dashboard_url`) keep working as aliases, so existing integrations are unaffected.

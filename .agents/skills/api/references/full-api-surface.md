@@ -754,6 +754,16 @@ Universal async tracking layer. Any operation returning a `jobId` can be polled 
 
 `outputFormat: "XLSX"` is required. Pass `query` OR `filter`, never both (server enforces). Entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, SALE_PAYMENT, PURCHASE_PAYMENT, BATCH_PAYMENT, CONTACT, ITEM, CAPSULE, SCHEDULED_TRANSACTION, JOURNAL, BANK_RECORD, CASHFLOW_TRANSACTION, FIXED_ASSET, CHART_OF_ACCOUNT, TAX_PROFILE.
 
+### Jots (Judgment Journal)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/jots` | Batch-record judgment entries (1-100, per-entry acks; a bad entry never fails the batch) |
+| POST | `/jots/search` | Search judgment entries. Server-pinned sort: critical and withheld-write first, then newest. `includeStats` adds per-credential disposition counts |
+| POST | `/jots/:resourceId/disposition` | Append a review disposition (FLAG / REJECT / ENDORSE), append-only |
+
+See endpoints.md section 25 for request/response shapes and the `refs` grammar (`TYPE:resourceId[#field][:RELATION]` in `raw`).
+
 ---
 
-*Last updated: 2026-04-29 — Added 3 drafts lifecycle endpoints (validate, convert-to-active, submit-for-approval) — bulk-friendly, mixed-type batches up to 500. Previous same day: 8 reconciliation action endpoints; 8 bulk-upsert endpoints. 2026-04-09 — Background Jobs, Export Records, contacts bulk-upsert.*
+*Last updated: 2026-07-11 (added Jots judgment journal: 3 endpoints). Previous: 2026-04-29 — Added 3 drafts lifecycle endpoints (validate, convert-to-active, submit-for-approval) — bulk-friendly, mixed-type batches up to 500. Same day: 8 reconciliation action endpoints; 8 bulk-upsert endpoints. 2026-04-09 — Background Jobs, Export Records, contacts bulk-upsert.*
