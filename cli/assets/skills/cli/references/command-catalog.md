@@ -517,7 +517,7 @@ Blueprints are offline (no auth). Tools require auth.
 ### `clio jots` · Judgment journal
 | Subcommand | Key flags |
 |------------|-----------|
-| `create` | `--kind` (CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION), `--tier` (LOW, MEDIUM, HIGH, CRITICAL), `--call`, `--why`, `--ruled-out`, `--ref` (repeatable, grammar `TYPE:resourceId[#field][:RELATION]`), `--frame`, `--confidence`, `--cited-rule`, `--workflow-label`, `--agent-label`, `--idempotency-key`, `--input` (batch JSON), `--json` |
+| `create` | `--kind` (CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION, NOTE), `--tier` (LOW, MEDIUM, HIGH, CRITICAL), `--call`, `--why`, `--ruled-out`, `--ref` (repeatable, grammar `TYPE:resourceId[#field][:RELATION]`), `--frame`, `--confidence`, `--cited-rule`, `--workflow-label`, `--agent-label`, `--idempotency-key`, `--input` (batch JSON), `--json` |
 | `recall` | `--ref`, `--kind`, `--tier`, `--disposition-verb` (FLAG, REJECT, ENDORSE), `--freetext`, `--created-from`, `--created-to`, `--stats`, `--limit`, `--offset`, `--all`, `--max-rows`, `--format`, `--json` |
 | `dispose <resourceId>` | `--verb` (FLAG, REJECT, ENDORSE), `--note`, `--json` |
 

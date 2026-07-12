@@ -52,5 +52,5 @@ A jot is a one-line record of a judgment call: the decision and why. The org's j
 
 - **Two ways to write one.** The `jot` field on the mutation you are already making (`"MATCH: distinct from BILL bil_x, references differ"`), or the `jot` tool alone. Jot AFTER the write succeeds, never before, and carry the record's resourceId.
 - **Recall before repeating.** Call `recall` before repeating a judgment on the same record, kind, or workflow: a prior call with its basis beats re-deriving; a flag on it is a warning.
-- **8 kinds:** CLASSIFICATION · MATCH · SCOPE · ASSUMPTION · RISK · METHOD · RECOVERY · DEVIATION.
+- **9 kinds:** CLASSIFICATION · MATCH · SCOPE · ASSUMPTION · RISK · METHOD · RECOVERY · DEVIATION · NOTE.
 - Optional and non-blocking: a jot never delays or fails the action it rides on.

@@ -2380,7 +2380,7 @@ Batch-record judgment entries (1-100 per call). Per-entry independent: acks come
 { "data": { "records": [{ "resourceId": "...", "replayed": false, "duplicateCount": 0 }] } }
 ```
 
-`kind`: CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION. `tier`: LOW, MEDIUM, HIGH, CRITICAL. `refs` entries are OBJECTS: the string grammar `TYPE:resourceId[#field][:RELATION]` travels in `raw` (an unparseable ref is stored with `parsed: false`, never bounced). Optional fields: `ruledOut`, `frame`, `confidence`, `citedRule`, `workflowLabel`, `agentLabel`. `idempotencyKey` makes retries safe: a replay returns the existing entry with `replayed: true`.
+`kind`: CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION, NOTE (the neutral fallback for a judgment logged without a declared type; a missing or blank `kind` defaults to NOTE and is flagged, not rejected). `tier`: LOW, MEDIUM, HIGH, CRITICAL. `refs` entries are OBJECTS: the string grammar `TYPE:resourceId[#field][:RELATION]` travels in `raw` (an unparseable ref is stored with `parsed: false`, never bounced). Optional fields: `ruledOut`, `frame`, `confidence`, `citedRule`, `workflowLabel`, `agentLabel`. `idempotencyKey` makes retries safe: a replay returns the existing entry with `replayed: true`.
 
 ### POST /api/v1/jots/search
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.9] - 2026-07-12
+
+- Judgment journal reliability: a judgment recorded without a stated type is now kept under a neutral type instead of being dropped, so no judgment call is lost. Two more high-stakes bulk actions now correctly mark their judgment as critical: promoting a batch of drafts to active, and rolling back a recipe's scheduled entries. Those calls surface at the top of `recall` where they belong.
+
 ## [5.24.8] - 2026-07-12
 
 - Judgment journal fidelity: a judgment recorded alongside a payment, deletion, or finalize action now correctly marks that action's role, so those high-stakes calls are treated as critical and surface at the top of `recall` where they belong. The guidance also spells out two cases: accepting or rejecting an inbound external document (an e-invoice a counterparty sent) is a finalize decision, and a deliberate decision not to post something is a recovery, not a deviation.
