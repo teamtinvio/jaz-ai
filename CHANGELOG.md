@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.10] - 2026-07-12
+
+- From the command line you can now record the judgment behind a write inline: add `--jot "<one line>"` to any write command (create, update, delete, pay, finalize, apply-credits, refund, discard, sell, and more) and the reason rides along with that action into the judgment journal — no extra command. Prefix a type for precision, e.g. `--jot "MATCH: same supplier, different reference"`. When you run a write without `--jot`, Clio prints a one-line reminder to record the judgment behind it; silence the reminders with `JAZ_JOTS_NUDGES=0`.
+
 ## [5.24.9] - 2026-07-12
 
 - Judgment journal reliability: a judgment recorded without a stated type is now kept under a neutral type instead of being dropped, so no judgment call is lost. Two more high-stakes bulk actions now correctly mark their judgment as critical: promoting a batch of drafts to active, and rolling back a recipe's scheduled entries. Those calls surface at the top of `recall` where they belong.

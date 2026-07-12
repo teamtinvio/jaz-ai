@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.24.9
+version: 5.24.10
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -158,6 +158,7 @@ Rules:
 | `--all` | List/search commands | Auto-paginate all pages |
 | `--max-rows <n>` | With `--all` | Cap total rows (default 10,000) |
 | `--finalize` | Create commands | Approve immediately (skip draft) |
+| `--jot <text>` | Write commands (create/update/delete/pay/finalize/…) | Log the judgment behind this write in one line, inline (piggybacks a judgment-journal entry after the write succeeds; optional leading kind, e.g. `"MATCH: …"`). Without it, a successful write prints a one-line reminder to stderr — silence with `JAZ_JOTS_NUDGES=0`. |
 | `--date <YYYY-MM-DD>` | Create/update commands | Transaction date |
 | `--due <YYYY-MM-DD>` | Create/update commands | Due date |
 | `--query <expression>` | Search commands (14 entities) | Jaz search expression (see below) |
@@ -268,7 +269,7 @@ Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $
 
 **AI & Automation**: `magic` (create, status, search, split), `quick-fix`, `capsules`, `capsule-transaction` (alias: `ct`, 13 recipe types)
 
-**Judgment journal**: `jots` (create, recall, dispose)
+**Judgment journal**: `jots` (create, recall, dispose). Every write command also takes `--jot "<one line>"` to log the judgment behind that specific write inline, no extra call (see `--jot` in Common Flags).
 
 **Calculators**: `calc` (loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend)
 
