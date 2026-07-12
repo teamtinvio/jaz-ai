@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.24.7",
+  "version": "5.24.8",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1480,7 +1480,7 @@
     },
     {
       "name": "jot",
-      "description": "Record judgment entries in the org's judgment journal. THE RULE: log a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write; skip mechanical actions and calls where the platform, the data, or the user left you no choice. Jot AFTER the write succeeds, never before, and carry the written record's resourceId in refs. Kinds: CLASSIFICATION account/tax/category choice · MATCH decided which records correspond · SCOPE chose what is in or out of a set · ASSUMPTION filled a gap the data left open · RISK proceeded despite a known concern · METHOD picked a calculation or approach · RECOVERY decided how to proceed after a failure (incl. holding a write) · DEVIATION knowingly departed from a stated rule. Always give why: a call without a basis is half a record. Batch related entries in one call; each entry is acked independently."
+      "description": "Record judgment entries in the org's judgment journal. THE RULE: log a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write; skip mechanical actions and calls where the platform, the data, or the user left you no choice. Jot AFTER the write succeeds, never before, and carry the written record's resourceId in refs. Kinds: CLASSIFICATION account/tax/category choice · MATCH decided which records correspond · SCOPE chose what is in or out of a set · ASSUMPTION filled a gap the data left open · RISK proceeded despite a known concern · METHOD picked a calculation or approach · RECOVERY decided how to proceed after a failure (incl. holding a write) · DEVIATION knowingly departed from a stated rule. Accepting or rejecting an inbound external document (an e-invoice a counterparty sent) is a FINALIZE act, so pin it. A decided omission (you deliberately did not post something) is RECOVERY, which pins via withheld-write, not DEVIATION. Always give why: a call without a basis is half a record. Batch related entries in one call; each entry is acked independently."
     },
     {
       "name": "recall",

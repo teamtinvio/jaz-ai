@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.24.8] - 2026-07-12
+
+- Judgment journal fidelity: a judgment recorded alongside a payment, deletion, or finalize action now correctly marks that action's role, so those high-stakes calls are treated as critical and surface at the top of `recall` where they belong. The guidance also spells out two cases: accepting or rejecting an inbound external document (an e-invoice a counterparty sent) is a finalize decision, and a deliberate decision not to post something is a recovery, not a deviation.
+- Fixed a crash when listing an empty result set with `--all` (for example `clio jots recall --all` on an organization with no entries yet). Empty results now return cleanly.
+
 ## [5.24.7] - 2026-07-12
 
 - Internal test-harness update: the integration smoke suite now treats the judgment-journal section as a strict gate now that its routes are live. No user-facing changes since 5.24.6.
