@@ -43852,7 +43852,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies-2",
+        "operationId": "list-organization-currencies",
         "parameters": [
           {
             "default": 100,
@@ -43913,7 +43913,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency-2",
+        "operationId": "create-organization-currency",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -45226,7 +45226,7 @@
           "application/json"
         ],
         "description": "List Organization Currencies",
-        "operationId": "list-organization-currencies",
+        "operationId": "list-organization-currencies-2",
         "parameters": [
           {
             "default": 100,
@@ -45286,7 +45286,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currencies",
-        "operationId": "create-organization-currency",
+        "operationId": "create-organization-currency-2",
         "parameters": [
           {
             "description": "Add organization currencies payload",
@@ -50757,7 +50757,7 @@
     "/api/v1/rollback/journals/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a journal. Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-journal-version",
+        "operationId": "get-rollback-journal-version-2",
         "parameters": [
           {
             "description": "Journal Resource ID",
@@ -50831,7 +50831,7 @@
     "/api/v1/rollback/journals/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a journal at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-journal-version-2",
+        "operationId": "get-rollback-journal-version",
         "parameters": [
           {
             "description": "Journal Resource ID",
@@ -50991,7 +50991,7 @@
     "/api/v1/rollback/purchase-credit-notes/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a purchase credit note. Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-purchase-credit-note-version",
+        "operationId": "get-rollback-purchase-credit-note-version-2",
         "parameters": [
           {
             "description": "Purchase Credit Note Resource ID",
@@ -51065,7 +51065,7 @@
     "/api/v1/rollback/purchase-credit-notes/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a purchase credit note at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-purchase-credit-note-version-2",
+        "operationId": "get-rollback-purchase-credit-note-version",
         "parameters": [
           {
             "description": "Purchase Credit Note Resource ID",
@@ -51459,7 +51459,7 @@
     "/api/v1/rollback/sale-credit-notes/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a sale credit note. Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-sale-credit-note-version-2",
+        "operationId": "get-rollback-sale-credit-note-version",
         "parameters": [
           {
             "description": "Sale Credit Note Resource ID",
@@ -51533,7 +51533,7 @@
     "/api/v1/rollback/sale-credit-notes/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a sale credit note at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-sale-credit-note-version",
+        "operationId": "get-rollback-sale-credit-note-version-2",
         "parameters": [
           {
             "description": "Sale Credit Note Resource ID",

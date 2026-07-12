@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.11] - 2026-07-12
+
+- Recalling judgment entries now shows when the server tidied an entry as it was recorded. A judgment logged without a type is kept under a neutral type (NOTE), and `recall` now notes that adjustment, so a tidied entry is distinguishable from one recorded that way on purpose. Entries recorded cleanly carry no such note.
+
 ## [5.24.10] - 2026-07-12
 
 - From the command line you can now record the judgment behind a write inline: add `--jot "<one line>"` to any write command (create, update, delete, pay, finalize, apply-credits, refund, discard, sell, and more) and the reason rides along with that action into the judgment journal — no extra command. Prefix a type for precision, e.g. `--jot "MATCH: same supplier, different reference"`. When you run a write without `--jot`, Clio prints a one-line reminder to record the judgment behind it; silence the reminders with `JAZ_JOTS_NUDGES=0`.
