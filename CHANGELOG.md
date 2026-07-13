@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.13] - 2026-07-13
+
+- Judgment journal recall gains two facets. `clio jots recall --first-party` keeps only entries written by Jaz-operated agents (the origin is stamped by the server, never self-reported), and `--pinned` keeps only the entries the journal pins to the top: critical calls and deliberately withheld writes. The `recall` tool accepts the same `firstParty` and `pinned` filters, each also accepting false to show only the other side. Entries recorded before origin stamping began count as not first-party; none are hidden.
+
 ## [5.24.12] - 2026-07-13
 
 - Help center search now works the same as always with no Jaz account needed. Behind the scenes it is served live rather than shipped inside the extension, so answers stay current and the download is smaller. No change to how you use it.
