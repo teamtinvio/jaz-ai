@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.24.14] - 2026-07-13
+
+- Rejecting a judgment entry now shows what happened to the work behind it. When a rejected entry's linked writes were rolled back (done from the review surface in the dashboard, where restores run immediately), `clio jots dispose` displays the recorded per-record outcome: restored (and to which version), changed since the agent worked on it and left untouched, created by the agent with nothing earlier to restore, or outside the rollback rails. `recall` carries the same outcome on each disposition in `--json` output. Partial results are shown honestly - each record restores independently.
+- Repeating a REJECT on an already-rejected entry now replays the original decision instead of stacking a duplicate, and brings its recorded rollback outcome along.
+- Clearer guidance when an agent credential tries to ENDORSE or REJECT: those decisions need a signed-in person, and the command now says so and points to `--verb FLAG` instead of showing a generic permission error.
+
 ## [5.24.13] - 2026-07-13
 
 - Judgment journal recall gains two facets. `clio jots recall --first-party` keeps only entries written by Jaz-operated agents (the origin is stamped by the server, never self-reported), and `--pinned` keeps only the entries the journal pins to the top: critical calls and deliberately withheld writes. The `recall` tool accepts the same `firstParty` and `pinned` filters, each also accepting false to show only the other side. Entries recorded before origin stamping began count as not first-party; none are hidden.
