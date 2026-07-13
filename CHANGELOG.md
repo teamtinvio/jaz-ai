@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.12] - 2026-07-13
+
+- Help center search now works the same as always with no Jaz account needed. Behind the scenes it is served live rather than shipped inside the extension, so answers stay current and the download is smaller. No change to how you use it.
+
 ## [5.24.11] - 2026-07-12
 
 - Recalling judgment entries now shows when the server tidied an entry as it was recorded. A judgment logged without a type is kept under a neutral type (NOTE), and `recall` now notes that adjustment, so a tidied entry is distinguishable from one recorded that way on purpose. Entries recorded cleanly carry no such note.

@@ -34131,6 +34131,64 @@
         ]
       }
     },
+    "/api/v1/data-exports/analysis-reconciliation-checks": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Generate and export Analysis Reconciliation Checks report",
+        "operationId": "data-exports-analysis-reconciliation-checks",
+        "parameters": [
+          {
+            "description": "Analysis Reconciliation Checks export payload",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GenericStandardReport"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Analysis Reconciliation Checks",
+        "tags": [
+          "Data Exports"
+        ]
+      }
+    },
     "/api/v1/data-exports/analysis-report": {
       "post": {
         "consumes": [
@@ -43972,7 +44030,7 @@
         ],
         "deprecated": true,
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency",
+        "operationId": "get-organization-currency-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -44029,7 +44087,7 @@
         ],
         "deprecated": true,
         "description": "Resolve the organization's effective functional-to-source FX rate for a currency at a date: the org's custom rate when one is configured, otherwise the platform daily rate (the same rate the platform applies for revaluation). Returns rateFunctionalToSource (1 base currency = X source currency).",
-        "operationId": "list-organization-currency-effective-rate-2",
+        "operationId": "list-organization-currency-effective-rate",
         "parameters": [
           {
             "description": "Source currency code (ISO 4217)",
@@ -44092,7 +44150,7 @@
         ],
         "deprecated": true,
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates",
+        "operationId": "list-organization-currency-rates-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -44160,7 +44218,7 @@
         ],
         "deprecated": true,
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate",
+        "operationId": "create-organization-currency-rate-2",
         "parameters": [
           {
             "description": "Currency Code",
@@ -45402,7 +45460,7 @@
           "application/json"
         ],
         "description": "Get Organization Currency",
-        "operationId": "get-organization-currency-2",
+        "operationId": "get-organization-currency",
         "parameters": [
           {
             "description": "Currency Code",
@@ -45458,7 +45516,7 @@
           "application/json"
         ],
         "description": "Resolve the organization's effective functional-to-source FX rate for a currency at a date: the org's custom rate when one is configured, otherwise the platform daily rate (the same rate the platform applies for revaluation). Returns rateFunctionalToSource (1 base currency = X source currency).",
-        "operationId": "list-organization-currency-effective-rate",
+        "operationId": "list-organization-currency-effective-rate-2",
         "parameters": [
           {
             "description": "Source currency code (ISO 4217)",
@@ -45520,7 +45578,7 @@
           "application/json"
         ],
         "description": "List Organization Currency Custom Rate",
-        "operationId": "list-organization-currency-rates-2",
+        "operationId": "list-organization-currency-rates",
         "parameters": [
           {
             "description": "Currency Code",
@@ -45587,7 +45645,7 @@
           "application/json"
         ],
         "description": "Add a Organization Currency Custom Rate",
-        "operationId": "create-organization-currency-rate-2",
+        "operationId": "create-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency Code",
@@ -51225,7 +51283,7 @@
     "/api/v1/rollback/purchases/versions/{resourceId}": {
       "get": {
         "description": "List the version/audit history of a purchase (bill). Each row is an opaque cursor; pass its `version` to the get-snapshot or restore endpoints.",
-        "operationId": "get-rollback-purchase-version-2",
+        "operationId": "get-rollback-purchase-version",
         "parameters": [
           {
             "description": "Purchase Resource ID",
@@ -51299,7 +51357,7 @@
     "/api/v1/rollback/purchases/versions/{resourceId}/{version}": {
       "get": {
         "description": "Get the full materialized state of a purchase (bill) at one version — the aggregate root plus its per-table child rows, all as raw JSON. Unknown (resourceId, version) pairs return a 422 not-found error.",
-        "operationId": "get-rollback-purchase-version",
+        "operationId": "get-rollback-purchase-version-2",
         "parameters": [
           {
             "description": "Purchase Resource ID",
