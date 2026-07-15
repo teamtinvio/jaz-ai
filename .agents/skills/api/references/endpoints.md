@@ -2400,7 +2400,7 @@ Append one review verb to a jot (append-only: annotates, never mutates).
 { "verb": "FLAG", "note": "Re-check the account mapping next close" }
 ```
 
-`verb`: FLAG, REJECT, ENDORSE. The response may carry a `rollbackHandoff` pointer; execution lives in the rollback module.
+`verb`: FLAG, REJECT, ENDORSE. REJECT with `rollback:true` queues an async rollback in the platform; the per-ref outcomes land on the disposition's `rollbackOutcome` and are readable via jot search (recall).
 
 ---
 

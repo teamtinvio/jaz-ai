@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.24.15] - 2026-07-16
+
+- Rejecting a judgment entry with a rollback now describes the outcome as landing asynchronously. `clio jots dispose` and the skill docs no longer say restores run immediately; a REJECT records right away and, if a rollback was requested, the per-record outcomes land on the entry as each write is restored, readable through `recall`. A partial outcome shown on `dispose` means the rollback is still in progress.
+
 ## [5.24.14] - 2026-07-13
 
 - Rejecting a judgment entry now shows what happened to the work behind it. When a rejected entry's linked writes were rolled back (done from the review surface in the dashboard, where restores run immediately), `clio jots dispose` displays the recorded per-record outcome: restored (and to which version), changed since the agent worked on it and left untouched, created by the agent with nothing earlier to restore, or outside the rollback rails. `recall` carries the same outcome on each disposition in `--json` output. Partial results are shown honestly - each record restores independently.

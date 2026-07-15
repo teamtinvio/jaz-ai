@@ -343,6 +343,11 @@
           "description": "Jot resource ID (UUIDv4).",
           "type": "string"
         },
+        "rollback": {
+          "default": false,
+          "description": "When true (REJECT only), asynchronously roll back the jot's mutation-relation refs to their pre-agent versions; the per-ref outcomes land on the jot and are readable via recall (jot search). rollback:true with FLAG or ENDORSE is rejected with 422 before any work. Repeating a REJECT with rollback:true is safe: a completed outcome replays as-is while an incomplete one (still in flight, or an exhausted-retry ref) re-drives only the missing refs idempotently.",
+          "type": "boolean"
+        },
         "verb": {
           "description": "Review verb.",
           "enum": [
@@ -9585,8 +9590,7 @@
           "type": "string"
         },
         "cause": {
-          "description": "Human-readable reason / operation that caused this revision (e.g. UPDATE, VOID, RESTORE).",
-          "example": "UPDATE",
+          "description": "Why this row exists: null on ordinary edits; restore-created rows carry a structured JSON marker with the restore's target (rootTargetVersion).",
           "type": "string"
         },
         "channel": {
@@ -9600,8 +9604,8 @@
           "type": "string"
         },
         "versionAt": {
-          "description": " timestamp when this revision was committed. Null on the genesis row.",
-          "example": "2026-06-20T08:15:30Z",
+          "description": "Timestamp of the write that created this row, as an epoch-milliseconds string.",
+          "example": "1783986492413",
           "type": "string"
         }
       },
@@ -9626,8 +9630,8 @@
           "type": "string"
         },
         "versionAt": {
-          "description": " timestamp when this revision was committed.",
-          "example": "2026-06-20T08:15:30Z",
+          "description": "Timestamp of the write that created this row, as an epoch-milliseconds string.",
+          "example": "1783986492413",
           "type": "string"
         }
       },
@@ -11260,6 +11264,10 @@
           ],
           "type": "string"
         },
+        "firstParty": {
+          "description": "True keeps only first-party entries (written by Jaz-operated agent surfaces, server-stamped origin); false keeps only the rest. Omit for all entries.",
+          "type": "boolean"
+        },
         "freetext": {
           "description": "Case-insensitive substring over call and why.",
           "type": "string"
@@ -11277,6 +11285,10 @@
             "DEVIATION"
           ],
           "type": "string"
+        },
+        "pinned": {
+          "description": "True keeps only pinned entries (declared or derived CRITICAL severity, or a withheld write — the same predicate the pinned sort uses); false keeps only unpinned. Omit for all entries.",
+          "type": "boolean"
         },
         "ref": {
           "description": "Entity ref as TYPE:resourceId (matched by containment over refs).",
@@ -42046,7 +42058,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Search agent judgment records (jots) in the caller's organization, the recall query. Filters: entity ref (TYPE:resourceId containment), kind, tier, dispositionVerb, freetext (case-insensitive substring over call and why), and createdFrom/createdTo (epoch ms, inclusive). Sort is pinned server-side (tierNorm=CRITICAL OR withheldWrite first, then createdAt DESC), no client sort. Set includeStats=true for per-credential disposition counts alongside the page. Organization scope is stamped from the API key.",
+        "description": "Search agent judgment records (jots) in the caller's organization, the recall query. Filters: entity ref (TYPE:resourceId containment), kind, tier, dispositionVerb, freetext (case-insensitive substring over call and why), createdFrom/createdTo (epoch ms, inclusive), firstParty (true = only entries from Jaz-operated agent surfaces, server-stamped origin; false = only the rest), and pinned (true = only pinned entries — the same predicate the pinned sort uses; false = only unpinned). Sort is pinned server-side (tierNorm=CRITICAL OR withheldWrite first, then createdAt DESC), no client sort. Set includeStats=true for per-credential disposition counts alongside the page. Organization scope is stamped from the API key.",
         "operationId": "search-jot",
         "parameters": [
           {
@@ -42104,7 +42116,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Append a review disposition (FLAG / REJECT / ENDORSE) to a jot. Dispositions are append-only, they annotate, never mutate the jot. A REJECT response includes the rollback-handoff pointer {jotResourceId, refs, verb} for the rollback module; execution lives entirely in the rollback module, this endpoint only records the verdict.",
+        "description": "Append a review disposition (FLAG / REJECT / ENDORSE) to a jot. Dispositions are append-only, they annotate, never mutate the jot. With verb=REJECT and rollback=true the rollback is coordinated asynchronously by the platform: this request returns the disposition immediately (a null or partial rollbackOutcome means the rollback is still in flight, or an exhausted-retry ref is awaiting a repeat REJECT to re-drive it), and the per-ref outcomes (RESTORED / UNSUPPORTED_TYPE / NO_PRIOR_VERSION / EDITED_SINCE / SKIPPED_RELATION / SKIPPED_CAP / FAILED) land on the jot as each ref completes, readable via jot search (recall). Partial results are permanent: refs restore independently and are never auto-reverted, so a partial outcome can leave coupled records (an invoice and its sibling journal) on different versions - when that happens: Some linked records were not restored. Review the affected books. A repeat REJECT replays the existing disposition; with rollback=true a completed outcome returns as-is (zero new restores) while an incomplete one re-drives only the missing refs idempotently. rollback=true with FLAG or ENDORSE is rejected with 422 before any work. Deciding verbs (ENDORSE / REJECT) require a human principal - agent credentials may only FLAG (403 otherwise).",
         "operationId": "create-jot-disposition",
         "parameters": [
           {
@@ -42128,6 +42140,12 @@
           "application/json"
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
           "201": {
             "description": "Created",
             "schema": {
@@ -42136,6 +42154,12 @@
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse_2"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
             "schema": {
               "$ref": "#/definitions/ErrorResponse_2"
             }
