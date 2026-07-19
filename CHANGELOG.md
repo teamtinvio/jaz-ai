@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.25.0] - 2026-07-20
+
+- Internal groundwork for the email agent's progressive memory (feature-flagged off). No user-facing changes since 5.24.16.
+
 ## [5.24.15] - 2026-07-16
 
 - Rejecting a judgment entry with a rollback now describes the outcome as landing asynchronously. `clio jots dispose` and the skill docs no longer say restores run immediately; a REJECT records right away and, if a rollback was requested, the per-record outcomes land on the entry as each write is restored, readable through `recall`. A partial outcome shown on `dispose` means the rollback is still in progress.

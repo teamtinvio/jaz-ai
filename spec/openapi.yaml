@@ -10352,6 +10352,34 @@
       ],
       "type": "object"
     },
+    "ForgetAgentMemoryRequest": {
+      "properties": {
+        "category": {
+          "description": "Slot category (required unless forgetAll).",
+          "example": "vendor-handling",
+          "type": "string"
+        },
+        "forgetAll": {
+          "default": false,
+          "description": "Evict every live row the caller can see in this org.",
+          "type": "boolean"
+        },
+        "key": {
+          "description": "Slot key (required unless forgetAll).",
+          "example": "grab-receipts-account",
+          "type": "string"
+        },
+        "scope": {
+          "description": "Target scope; omit to forget BOTH the caller-org ORG_USER slot and the USER slot.",
+          "enum": [
+            "USER",
+            "ORG_USER"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "GeneralLedgerSortFilter": {
       "properties": {
         "order": {
@@ -24979,6 +25007,94 @@
         "name",
         "taxType",
         "vatValue"
+      ],
+      "type": "object"
+    },
+    "UpsertAgentMemoryRequest": {
+      "properties": {
+        "category": {
+          "description": "Kebab-case category; shape-validated only (membership governed at the edges).",
+          "example": "vendor-handling",
+          "type": "string"
+        },
+        "confirmsKey": {
+          "description": "Promote the CANDIDATE at this key instead of writing a new row (keeps its stored directive).",
+          "type": "string"
+        },
+        "directive": {
+          "description": "The remembered instruction (max 300 chars after trim).",
+          "example": "Post Grab receipts to 6420 Travel",
+          "type": "string"
+        },
+        "idempotencyKey": {
+          "description": "Client-suppliable replay key: retries return the existing row's resourceId.",
+          "type": "string"
+        },
+        "key": {
+          "description": "The slot key (kebab-case, max 120 chars).",
+          "example": "grab-receipts-account",
+          "type": "string"
+        },
+        "keyType": {
+          "description": "Tier-2 matcher type.",
+          "enum": [
+            "SENDER_ADDRESS",
+            "SENDER_DOMAIN",
+            "VENDOR_NAME",
+            "SUBJECT_TOKEN"
+          ],
+          "type": "string"
+        },
+        "matchValue": {
+          "description": "Tier-2 matcher value (raw address / domain / vendor / token; max 255 chars).",
+          "example": "grab.com",
+          "type": "string"
+        },
+        "pending": {
+          "default": false,
+          "description": "TOOL writes land as CANDIDATE when true (defaults to false; autonomy-grant is ALWAYS CANDIDATE).",
+          "type": "boolean"
+        },
+        "provenance": {
+          "description": "Free-form origin metadata, stored as jsonb; forwarded verbatim.",
+          "type": "object"
+        },
+        "replacesKey": {
+          "description": "Also supersede the live row at this key in the same slot family.",
+          "type": "string"
+        },
+        "scope": {
+          "description": "Memory scope: USER (follows the person everywhere) or ORG_USER (this org only).",
+          "enum": [
+            "USER",
+            "ORG_USER"
+          ],
+          "example": "ORG_USER",
+          "type": "string"
+        },
+        "source": {
+          "description": "Where the write came from.",
+          "enum": [
+            "TOOL",
+            "LOGGER",
+            "DASHBOARD"
+          ],
+          "example": "TOOL",
+          "type": "string"
+        },
+        "tier": {
+          "description": "Directive tier: 1 = general directive; 2 = matcher-backed directive (requires keyType + matchValue). Tier semantics are enforced by the module.",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "category",
+        "directive",
+        "key",
+        "scope",
+        "source",
+        "tier"
       ],
       "type": "object"
     },
