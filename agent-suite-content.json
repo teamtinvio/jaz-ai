@@ -1,0 +1,2810 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "5.24.16+9c13fe66",
+  "counts": {
+    "tools": 357,
+    "namespaces": 42,
+    "calculators": 13,
+    "recipes": 13,
+    "jobs": 12,
+    "skills": 6,
+    "commands": 66,
+    "apiRules": 158
+  },
+  "namespaces": [
+    {
+      "name": "invoices",
+      "description": "Sales invoices (INV/SI). Create, search, get, update, delete, pay, finalize, apply credits, download PDF. Also: receivables, AR, AR aging, billing, overdue invoices, dunning, recurring invoices. To create from an uploaded invoice file/PDF/image, use the document_ai namespace (AI extraction), not manual entry."
+    },
+    {
+      "name": "customer_credit_notes",
+      "description": "Customer credit notes (CN). Create, search, update, delete, finalize, refund, download PDF. Also: sales returns, customer CN."
+    },
+    {
+      "name": "bills",
+      "description": "Purchase bills (PO/PI). Create, search, get, update, delete, pay, finalize, apply credits. Also: payables, AP, vendor invoices, supplier bills. To create from an uploaded bill/invoice file/PDF/image, use the document_ai namespace (AI extraction), not manual entry."
+    },
+    {
+      "name": "supplier_credit_notes",
+      "description": "Supplier credit notes. Create, search, update, delete, finalize, refund. Also: purchase returns, debit notes, supplier CN."
+    },
+    {
+      "name": "sale_orders",
+      "description": "Sales order documents: Sale Quotes (estimates/quotations) and Sale Orders. Create, get, search, update, and transition (accept a quote, confirm an order, void, delete). A Sale Order links to its quote via saleQuoteResourceId; the quote must be accepted first. Tracks fulfillment via orderState. Pipeline: quote → order → invoice (raise the invoice separately)."
+    },
+    {
+      "name": "purchase_orders",
+      "description": "Purchase order documents: Purchase Requests (requisitions) and Purchase Orders (POs). Create, get, search, update, and transition (accept a request, confirm an order, void, delete). A Purchase Order links to its request via purchaseRequestResourceId; the request must be accepted first. Tracks fulfillment via orderState. Pipeline: request → order → bill (raise the bill separately)."
+    },
+    {
+      "name": "journals",
+      "description": "Journal entries (JE). Create, search, update, delete manual journals. Also: adjusting entries, accruals, reclassifications, corrections."
+    },
+    {
+      "name": "cash_entries",
+      "description": "Cash-in receipts and cash-out disbursements for external cash movements. WHEN TO USE: money received from customers/external → cash-in. Money paid to suppliers/external → cash-out. For internal account-to-account transfers, use cash_transfers namespace."
+    },
+    {
+      "name": "cash_transfers",
+      "description": "Cash transfers between your own bank/cash accounts and cashflow transaction search. WHEN TO USE: moving funds between own accounts (main bank → petty cash, USD → SGD). For external receipts/payments, use cash_entries namespace."
+    },
+    {
+      "name": "bank_accounts",
+      "description": "Bank accounts, bank statement imports (CSV/OFX), bank records search, auto-reconciliation. For unreconciled queries: ALWAYS search bank records with status UNRECONCILED after listing accounts. Also: bank feeds, bank balance."
+    },
+    {
+      "name": "bank_rules",
+      "description": "Bank reconciliation rules (action shortcuts). Create, search, update, delete bank rules. Configure auto-matching rules for bank records."
+    },
+    {
+      "name": "reconciliations",
+      "description": "Apply a reconciliation decision to a bank statement entry — write side. Match bank records to EXISTING open bills/invoices/payments (reconcile_with_payments — the primary path, creates the payment for you), or to journals, cash entries, or transfers, or CREATE new bills/invoices (invoice_receipt/bill_receipt). Distinct from bank_accounts/bank_rules (which configure auto-reconciliation) and view_auto_reconciliation (which queries suggestions). Eleven endpoints: quick_reconcile + apply_bank_rule + magic_match (bulk), and direct_cash_entry / cash_journal / manual_journal / cash_transfer / invoice_receipt / bill_receipt / with_payments / learned_prediction (per-entry). Match-to-existing is preferred over create-new to avoid duplicates. Most fields prefill from the bank entry when omitted; FX is resolved server-side."
+    },
+    {
+      "name": "financial_reports",
+      "description": "Core financial statements: trial balance (TB), balance sheet (BS/B/S), profit & loss (PnL/P&L/income statement), cash flow, general ledger (GL), cash balance/position, equity movement, VAT/GST ledger. Also: how profitable, what is the balance. XLSX/PDF file exports of any of these statements are produced via download_export (lives in operational_reports namespace — switch there or call by name)."
+    },
+    {
+      "name": "operational_reports",
+      "description": "Aging and operational reports: aged receivables (AR aging), aged payables (AP aging), AR report, bank balance summary, bank reconciliation reports, fixed asset (FA) summary, FA reconciliation. Data exports (CSV/Excel/XLSX). Anomaly detection and audit analysis: anomalous invoices, anomalous bills, cashflow anomalies, GL journal audit, exchange rate audit, receivables customer risk, cash expense health. Also: overdue analysis, how much owed, suspicious transactions, audit trail."
+    },
+    {
+      "name": "pseudo_sql",
+      "description": "Pseudo-SQL ad-hoc read-only queries against the curated reporting schema (custom select, custom report, query data, run sql). Includes live schema introspection (get_pseudo_sql_schema) + sync preview (≤100 rows) + async CSV export. Use when search_* / download_export canonical reports don't cover the question."
+    },
+    {
+      "name": "contacts",
+      "description": "Contacts (customers/suppliers/vendors), contact groups, customer segmentation. Create, search, get, update, delete contacts. Bulk upsert contacts from CSV / spreadsheet imports — async, returns jobId, poll background_jobs. List/create contact groups."
+    },
+    {
+      "name": "items_and_inventory",
+      "description": "Products, services, inventory items. Create, search, get, update, delete items. Check inventory balance. List/search purchase-side catalog items. Also: SKU, catalog, stock."
+    },
+    {
+      "name": "catalogs",
+      "description": "Catalogs — named groupings of products/services, optionally scoped to contact groups. Create, search, get, update, delete catalogs."
+    },
+    {
+      "name": "tags_and_custom_fields",
+      "description": "Tags for categorizing transactions. Custom fields for adding metadata (text, date, dropdown). Create, search, delete tags and custom fields."
+    },
+    {
+      "name": "nano_classifiers",
+      "description": "Nano classifiers (tracking categories/dimensions). List, search, create, update, delete classifiers and their classes. Used for line-item tagging and dimensional reporting. Also: tracking categories, cost centers, departments, projects."
+    },
+    {
+      "name": "chart_of_accounts",
+      "description": "Chart of accounts (COA/GL accounts). Create, search, update accounts — including setting or removing an account's period lock date (lock / unlock a period, lock date: block recording or editing transactions on the account dated on or before a date). Bookmarks (favorites/shortcuts). Also: ledger codes, account types."
+    },
+    {
+      "name": "currencies",
+      "description": "Currencies, exchange rates (FX/forex). List/add org currencies. Set, update, import currency rates. Also: multi-currency, FX rates."
+    },
+    {
+      "name": "tax_profiles",
+      "description": "Tax profiles (GST/VAT/sales tax), withholding tax codes (WHT/ATC). Search, create, update tax profiles. List WHT codes."
+    },
+    {
+      "name": "claim_settings",
+      "description": "Employee-expense claim configuration (Settings -> Claim Settings): claim types (expense categories) and claim profiles (per-employee policy: approver, limits, visible types, balance account). Full CRUD + search on each."
+    },
+    {
+      "name": "posting_rules",
+      "description": "Claim posting rules — how approved employee-expense claims group into journals at conversion (outer/inner grouping axes, line templates, default reimbursement bank). Full CRUD + search."
+    },
+    {
+      "name": "claims",
+      "description": "Employee-expense claims (the Claims area / Employees). Search, get, update DRAFT claims (line items, employee, vendor), and drive the lifecycle: submit, approve, reject, cancel, unpost (reverse conversion), delete. Status flow DRAFT → SUBMITTED → APPROVED → CONVERTED (\"Processed\"), or REJECTED / CANCELLED. Claims are born via document attachment / conversion (no bare create); the server enforces legal transitions."
+    },
+    {
+      "name": "claim_processing",
+      "description": "Process employee-expense claims: convert APPROVED claims into journal entries (preview + commit, books-only — no real-money disburse), record books-only employee payouts (reimbursements / advances) and search them, run bulk claim actions (submit / approve / reject / cancel / delete many at once — asynchronous, returns a background-job handle to poll), plus the claim tracking-tag and custom-field-value pickers."
+    },
+    {
+      "name": "employees",
+      "description": "Employees (expense-claim members): create, update, get, delete, and search employees; search the employee-balance directory (reimbursement balances owed); bind a login user to an employee (permanent); and bulk-import employees from a sheet (preprocess preview → async import). Archive an employee with update active=false rather than deleting."
+    },
+    {
+      "name": "capsules_and_recipes",
+      "description": "Capsules (transaction groupings/capsule types). Financial recipes: amortization, depreciation, deferred revenue, IFRS 16 leases, hire purchase, fixed deposits, FX revaluation, loan schedules, ECL/expected credit loss, IAS 37 provisions, asset disposal. Two recipe execution paths: offline (plan_recipe + execute_recipe — client-side calculators, no API key) and server-side (list/get/preview/resume/rollback_capsule_recipe — produce real capsule entities via Jaz API). Plus capsuleRecipe payload on trigger mutations (create_bill, create_journal, create_cash_in, etc.) to create and trigger a recipe in one shot, with optional templateOverrides to customize the generated text (Customize Recipe). Keywords: calculate, provision, schedule, expected credit loss, revaluation, amortize, rollback recipe, customize template overrides slots."
+    },
+    {
+      "name": "scheduled_transactions",
+      "description": "Scheduled/recurring invoices, bills, journals. Create scheduled invoices/bills/journals, search scheduled transactions. Also: recurring, auto-generate."
+    },
+    {
+      "name": "subscriptions",
+      "description": "Subscriptions (recurring billing/payment plans). Create, update, cancel, search subscriptions. Also: recurring charges, subscription schedules."
+    },
+    {
+      "name": "organization",
+      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). List/search saved report templates."
+    },
+    {
+      "name": "document_ai",
+      "description": "File attachments, spreadsheets, and document AI. Read and parse rows from attached spreadsheets — CSV, Excel, XLSX. Scan a single invoice / bill / receipt PDF or image to create a draft bill or invoice via AI extraction (create_bt_from_attachment, with the file or a sourceUrl). Auto-sort a whole FOLDER, a .zip, or a Dropbox / Google Drive / OneDrive folder share link of mixed paperwork — \"create docs from this Dropbox folder link\", a pile/batch of invoices and bills — into invoices, bills, credit notes, and bank statements with classify_documents, then create the drafts with extract_documents. Upload and list attachments; track extraction workflows."
+    },
+    {
+      "name": "fixed_assets",
+      "description": "Fixed assets (PP&E/property, plant, equipment). Search, create, update, discard, sell, transfer, undo disposal. Also: depreciation, asset register."
+    },
+    {
+      "name": "payments_and_search",
+      "description": "Payment records: get, update, delete individual payments. List payments/credits on invoices and bills. Reverse credit applications. Cashflow transaction search. Universal cross-entity search. Also: payment run, batch payment, payment matching, void payment, payment history, credit note applications."
+    },
+    {
+      "name": "quick_fix",
+      "description": "Quick Fix: bulk-update multiple transactions or line items in one call. Change dates, contacts, tags, accounts, tax profiles, custom fields across many invoices/bills/journals/credit-notes/cash-entries/schedulers at once. Also: batch update, mass edit."
+    },
+    {
+      "name": "export_records",
+      "description": "Export records to XLSX. List available columns, preview export scope (row count + sample), generate export file with pre-signed download URL. Supports any entity type: invoices, bills, contacts, items, journals, bank records, cashflow, fixed assets, etc. Pass query (structured search syntax) or filter (JSON), never both."
+    },
+    {
+      "name": "background_jobs",
+      "description": "Background job tracking. Poll any async operation by jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic file processing, etc.). Filter by resourceId field to look up a specific job. Poll until status is SUCCESS, FAILED, or PARTIAL_SUCCESS."
+    },
+    {
+      "name": "drafts",
+      "description": "Draft business transactions — both local payload validation (invoices, bills, journals, credit notes) AND BULK-FRIENDLY server-side lifecycle: validate_drafts (sync eligibility check), convert_drafts_to_active (async promote to ACTIVE), submit_drafts_for_approval (async route to approval). The lifecycle tools are GENERIC and BULK — one call accepts up to 500 items mixing any combination of {btResourceId, btType: SALE|PURCHASE|SALE_CREDIT_NOTE|PURCHASE_CREDIT_NOTE}. No need for per-entity tools when promoting/submitting drafts at scale. NOT idempotent on already-promoted drafts."
+    },
+    {
+      "name": "help_center",
+      "description": "Search the Jaz help center for how-to articles, feature guides, accounting concepts, and troubleshooting. Returns top matches with title, section, snippet, and source URL. Works without an API key."
+    },
+    {
+      "name": "jots",
+      "description": "The judgment journal. jot records a judgment call (chose among real alternatives and wrote, or deliberately held a write); recall looks up prior judgments and precedents by entity, kind, or freetext. Also: decision log, rationale, why."
+    },
+    {
+      "name": "navigation",
+      "description": "Dashboard navigation deep links. Build a URL to any dashboard screen or record for the user — including the view link for a record just created or updated (a reply reporting on a record carries its link, and dashboard URLs always come from this tool, never written from memory). Also: open, go to, take me to, link, deep link, share a link, url, navigate, show me the page/screen, where can I see — for invoices, bills, reports, settings, or a specific transaction."
+    }
+  ],
+  "tools": [
+    {
+      "name": "get_organization",
+      "namespace": "organization",
+      "description": "Get organization details: name, base currency, country, and financial year end.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_my_context",
+      "namespace": "organization",
+      "description": "Resolve the CALLER's own context — identity, the employee bound to their login (if any), and per-module access (moduleRoles). Use to route a receipt (bill if PURCHASES access, expense claim if EMPLOYEE_CLAIMS access). A service api-key usually has no bound employee. Magic claim drafts auto-bind the uploader server-side — no need to read employee.resourceId to bind one.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_accounts",
+      "namespace": "chart_of_accounts",
+      "description": "List chart of accounts. Returns account name, code, type, class, status. Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_accounts",
+      "namespace": "chart_of_accounts",
+      "description": "Search chart of accounts. For OR (name or code), use filter: {\"or\":{\"name\":{\"contains\":\"X\"},\"code\":{\"contains\":\"X\"}}}.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_account",
+      "namespace": "chart_of_accounts",
+      "description": "Create a new chart of accounts entry. Auto-checks for duplicates by name — returns existing account if found. Code must be unique. Account class is inferred from accountType. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_account",
+      "namespace": "chart_of_accounts",
+      "description": "Update a chart of accounts entry — rename, re-code, set its period lock date, or remove an existing lock date. Setting lockDate (YYYY-MM-DD) is how an individual ledger account is locked for a period: it blocks recording or editing any transaction on that account dated on or before the lock date. Pass clearLockDate to remove (unlock) an existing lock. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_chart_of_accounts",
+      "namespace": "chart_of_accounts",
+      "description": "Bulk create/update CoA entries (max 500). SYNC: returns { resourceIds, failedRows: [{rowIndex, columnName, columnValue, errorCode, errorMessage}], failedCount } — no jobId polling. PARTIAL_SUCCESS: failed rows surface in failedRows[]; others still succeed.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_contacts",
+      "namespace": "contacts",
+      "description": "List contacts (customers/suppliers). Returns billingName, name, emails, status. Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_contacts",
+      "namespace": "contacts",
+      "description": "Search contacts.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_contact",
+      "namespace": "contacts",
+      "description": "Fetch a contact by internal resourceId. To search by other fields, use `search_contacts`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_contact_signals",
+      "namespace": "contacts",
+      "description": "Read-only contact pattern intelligence (cadence, outliers, divergences, severity). USE THIS for stand-alone history lookup before drafting (e.g. \"what does this supplier normally look like?\"). Use validate_drafts instead when you have a specific draft to score.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_contact",
+      "namespace": "contacts",
+      "description": "Create a new contact. Auto-checks for duplicates by name — returns existing contact if found instead of creating a duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_contact",
+      "namespace": "contacts",
+      "description": "Update an existing contact. Fetches current data first so you only need to send changed fields. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_invoices",
+      "namespace": "invoices",
+      "description": "List invoices. Returns reference, date, status, contact, totalAmount. Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_invoices",
+      "namespace": "invoices",
+      "description": "Search invoices. Supports comma-separated status (e.g., \"UNPAID,PARTIALLY_PAID\"). Use filter param for advanced queries (nested paths, OR groups).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_invoice",
+      "namespace": "invoices",
+      "description": "Fetch an invoice by internal resourceId. To search by other fields, use `search_invoices`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_invoice",
+      "namespace": "invoices",
+      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_invoice",
+      "namespace": "invoices",
+      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_invoice",
+      "namespace": "invoices",
+      "description": "Delete a draft invoice. Cannot delete finalized invoices. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "pay_invoice",
+      "namespace": "invoices",
+      "description": "Record a payment against an invoice. Invoice must be APPROVED/UNPAID before payment — draft or voided invoices cannot be paid. If the invoice is still a DRAFT, call finalize_invoice first. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "finalize_invoice",
+      "namespace": "invoices",
+      "description": "Finalize a draft invoice (set saveAsDraft=false). Can optionally update fields in the same call. IMPORTANT: Every lineItem MUST have accountResourceId. If the draft was created without it, pass lineItems with accountResourceId added (search accounts first, e.g. Operating Revenue for sales). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "apply_credits_to_invoice",
+      "namespace": "invoices",
+      "description": "Apply customer credit note(s) to an invoice. You MUST call this tool to actually apply credits — do not just describe the steps.",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "download_invoice_pdf",
+      "namespace": "invoices",
+      "description": "Download an invoice as PDF. Returns { fileUrl }.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_bills",
+      "namespace": "bills",
+      "description": "List bills (purchase invoices). Returns reference, date, status, contact, amounts. Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_bills",
+      "namespace": "bills",
+      "description": "Search bills. Supports comma-separated status (e.g., \"UNPAID,PARTIALLY_PAID\"). Use filter param for advanced queries.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_bill",
+      "namespace": "bills",
+      "description": "Fetch a bill by internal resourceId. To search by other fields, use `search_bills`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_bill",
+      "namespace": "bills",
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — generate one with a timestamp if user doesn't specify. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_bill",
+      "namespace": "bills",
+      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_bill",
+      "namespace": "bills",
+      "description": "Delete a draft bill. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "download_bill_pdf",
+      "namespace": "bills",
+      "description": "Download a bill as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "pay_bill",
+      "namespace": "bills",
+      "description": "Record a payment against a bill. Bill must be APPROVED before payment — draft or voided bills cannot be paid. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "finalize_bill",
+      "namespace": "bills",
+      "description": "Finalize a draft bill (set saveAsDraft=false). Can optionally update fields in the same call. IMPORTANT: Every lineItem MUST have accountResourceId. If the draft was created without it, pass lineItems with accountResourceId added (search accounts first, e.g. Operating Expense for purchases). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "apply_credits_to_bill",
+      "namespace": "bills",
+      "description": "Apply supplier credit note(s) to a bill. IMPORTANT: The credit note must be FINALIZED first (status UNAPPLIED, not DRAFT). If it is still a draft, call finalize_supplier_credit_note first. Then search_supplier_credit_notes with status UNAPPLIED to find available credits for the contact, and pass creditNoteResourceId and amountApplied for each. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "create_sale_order",
+      "namespace": "sale_orders",
+      "description": "Create a Sale Quote or Sale Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` auto-generates (timestamped) if omitted — must be unique per org.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "get_sale_order",
+      "namespace": "sale_orders",
+      "description": "Fetch a Sale Quote or Sale Order by internal resourceId. To search by other fields, use `search_sale_orders`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_sale_orders",
+      "namespace": "sale_orders",
+      "description": "Search Sale Quotes or Sale Orders (by documentType). Filter by status, contact, date, amount, currency, tag. Use the filter param for advanced/nested queries.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_sale_order",
+      "namespace": "sale_orders",
+      "description": "Update an editable Sale Quote or Sale Order (reference, dates, line items, notes, custom fields). Line items are fully replaced — pass the complete array. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "transition_sale_order",
+      "namespace": "sale_orders",
+      "description": "Advance or cancel a Sale Quote / Sale Order lifecycle. action:",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "create_purchase_order",
+      "namespace": "purchase_orders",
+      "description": "Create a Purchase Request or Purchase Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` auto-generates (timestamped) if omitted — must be unique per org.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "get_purchase_order",
+      "namespace": "purchase_orders",
+      "description": "Fetch a Purchase Request or Purchase Order by internal resourceId. To search by other fields, use `search_purchase_orders`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_purchase_orders",
+      "namespace": "purchase_orders",
+      "description": "Search Purchase Requests or Purchase Orders (by documentType). Filter by status, contact, date, amount, currency, tag. Use the filter param for advanced/nested queries.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_purchase_order",
+      "namespace": "purchase_orders",
+      "description": "Update an editable Purchase Request or Purchase Order (reference, dates, line items, notes, custom fields). Line items are fully replaced — pass the complete array. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "transition_purchase_order",
+      "namespace": "purchase_orders",
+      "description": "Advance or cancel a Purchase Request / Purchase Order lifecycle. action:",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "convert_sale_order_to_invoice",
+      "namespace": "sale_orders",
+      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults false (the new invoice is ACTIVE). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "convert_purchase_order_to_bill",
+      "namespace": "purchase_orders",
+      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults false (the new bill is ACTIVE). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "search_sale_order_line_items",
+      "namespace": "sale_orders",
+      "description": "Search the LINE ITEMS across Sale Quotes or Sale Orders (line-item level, not document level). Filter by line text, parent order, contact, account, amount, open state, date. Use the filter param for advanced/nested queries.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_purchase_order_line_items",
+      "namespace": "purchase_orders",
+      "description": "Search the LINE ITEMS across Purchase Requests or Purchase Orders (line-item level, not document level). Filter by line text, parent order, contact, account, amount, open state, date. Use the filter param for advanced/nested queries.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_journals",
+      "namespace": "journals",
+      "description": "List journal entries. Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_journal",
+      "namespace": "journals",
+      "description": "Get full journal entry details by resourceId. Returns journal lines, amounts, status, and metadata.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_journals",
+      "namespace": "journals",
+      "description": "Search journals. Status uses ACTIVE (not FINALIZED). Supports comma-separated status/type.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_journal",
+      "namespace": "journals",
+      "description": "Create a journal entry. IMPORTANT:",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "create_transfer_trial_balance",
+      "namespace": "journals",
+      "description": "Create opening balance entries (Transfer Trial Balance). Used to set up initial account balances when migrating to a new accounting system.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_journal",
+      "namespace": "journals",
+      "description": "Delete a draft journal entry. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "generate_trial_balance",
+      "namespace": "financial_reports",
+      "description": "Generate a trial balance report.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_balance_sheet",
+      "namespace": "financial_reports",
+      "description": "Generate a balance sheet report.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_profit_and_loss",
+      "namespace": "financial_reports",
+      "description": "Generate a profit & loss (income statement) report.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_cashflow",
+      "namespace": "financial_reports",
+      "description": "Generate a cashflow report.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_aged_ar",
+      "namespace": "operational_reports",
+      "description": "Generate aged accounts receivable summary.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_aged_ap",
+      "namespace": "operational_reports",
+      "description": "Generate aged accounts payable summary.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_cash_balance",
+      "namespace": "financial_reports",
+      "description": "Generate a cash balance report showing cash position at a specific date. PREFERRED for cash position questions — use this (NOT balance sheet) when asked about total cash, cash on hand, available cash, or cash position across all bank accounts.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_general_ledger",
+      "namespace": "financial_reports",
+      "description": "Generate a general ledger report.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_bank_accounts",
+      "namespace": "bank_accounts",
+      "description": "List bank accounts connected to the organization.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_items",
+      "namespace": "items_and_inventory",
+      "description": "List items (products & services). Returns internalName, itemCode, appliesToSale/Purchase. Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_items",
+      "namespace": "items_and_inventory",
+      "description": "Search items. Use list_items to search by name (internalName is not a filter field).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_item",
+      "namespace": "items_and_inventory",
+      "description": "Fetch an item by internal resourceId. To search by other fields, use `search_items`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_item",
+      "namespace": "items_and_inventory",
+      "description": "Create a new item. Auto-checks for duplicates by itemCode — returns existing item if found.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_item",
+      "namespace": "items_and_inventory",
+      "description": "Update an existing item. Only send fields you want to change — required fields are auto-merged from current state. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_item",
+      "namespace": "items_and_inventory",
+      "description": "Delete an item. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_upsert_items",
+      "namespace": "items_and_inventory",
+      "description": "Max 500 items per call. Provide resourceId per item to update (partial — only changed fields needed, server preserves existing values). Omit resourceId to create (defaults: status=ACTIVE, itemCategory=NON_INVENTORY). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_tags",
+      "namespace": "tags_and_custom_fields",
+      "description": "List tags used for transaction categorization. Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_tags",
+      "namespace": "tags_and_custom_fields",
+      "description": "Search tags.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_tag",
+      "namespace": "tags_and_custom_fields",
+      "description": "Create a new tag. Automatically reuses existing tag if one with the same name exists. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "get_tag",
+      "namespace": "tags_and_custom_fields",
+      "description": "Get a tag by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_tag",
+      "namespace": "tags_and_custom_fields",
+      "description": "Rename a tag. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_tag",
+      "namespace": "tags_and_custom_fields",
+      "description": "Delete a tag. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_capsule_types",
+      "namespace": "capsules_and_recipes",
+      "description": "List capsule types (e.g., PREPAID_EXPENSE, DEFERRED_REVENUE). Use to get capsuleTypeResourceId before creating capsules via create_capsule. NOT the same as list_capsule_recipes (which lists IFRS recipe descriptors with JSON Schema input contracts).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_capsules",
+      "namespace": "capsules_and_recipes",
+      "description": "List capsules (transaction groupings for amortization, deferred revenue, etc.). Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_capsules",
+      "namespace": "capsules_and_recipes",
+      "description": "Search capsules.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_capsule",
+      "namespace": "capsules_and_recipes",
+      "description": "Fetch a capsule by internal resourceId. To search by other fields, use `search_capsules`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_capsule",
+      "namespace": "capsules_and_recipes",
+      "description": "Create a new (legacy) capsule. List capsule types first to get the capsuleTypeResourceId. `title` is required and must be non-empty (blank/empty rejected with 422). For IFRS recipe-driven capsules (PREPAID_AMORTIZATION, LOAN_AMORTIZATION, etc.), use `preview_capsule_recipe` + `capsuleRecipe` payload on a trigger mutation instead — those create the capsule + scheduler atoms in one shot. This tool is for manually-grouped legacy capsules. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_capsule",
+      "namespace": "capsules_and_recipes",
+      "description": "Update a capsule title or description. Required fields are auto-merged from current state. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_capsule",
+      "namespace": "capsules_and_recipes",
+      "description": "Delete a capsule. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_customer_credit_notes",
+      "namespace": "customer_credit_notes",
+      "description": "List customer credit notes (AR adjustments/refunds). Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_customer_credit_notes",
+      "namespace": "customer_credit_notes",
+      "description": "Search customer credit notes. Status: DRAFT, UNAPPLIED, PARTIALLY_APPLIED, APPLIED, VOID.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_customer_credit_note",
+      "namespace": "customer_credit_notes",
+      "description": "Fetch a customer credit note by internal resourceId. To search by other fields, use `search_customer_credit_notes`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_customer_credit_note",
+      "namespace": "customer_credit_notes",
+      "description": "Create a customer credit note. Saves as draft by default.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_customer_credit_note",
+      "namespace": "customer_credit_notes",
+      "description": "Delete a draft customer credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "update_customer_credit_note",
+      "namespace": "customer_credit_notes",
+      "description": "Update a draft customer credit note (change amount, line items, contact, date, notes). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "finalize_customer_credit_note",
+      "namespace": "customer_credit_notes",
+      "description": "Finalize a draft customer credit note (set saveAsDraft=false). Status becomes UNAPPLIED. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "create_customer_credit_note_refund",
+      "namespace": "customer_credit_notes",
+      "description": "Record a refund payment against a customer credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_customer_credit_note_refunds",
+      "namespace": "customer_credit_notes",
+      "description": "List refund payments for a customer credit note.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_supplier_credit_notes",
+      "namespace": "supplier_credit_notes",
+      "description": "List supplier credit notes (AP adjustments/refunds). Paginated — response includes totalElements. Use limit/offset to page.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_supplier_credit_notes",
+      "namespace": "supplier_credit_notes",
+      "description": "Search supplier credit notes. Status: DRAFT, UNAPPLIED, PARTIALLY_APPLIED, APPLIED, VOID.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_supplier_credit_note",
+      "namespace": "supplier_credit_notes",
+      "description": "Fetch a supplier credit note by internal resourceId. To search by other fields, use `search_supplier_credit_notes`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_supplier_credit_note",
+      "namespace": "supplier_credit_notes",
+      "description": "Create a supplier credit note. Saves as draft by default.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_supplier_credit_note",
+      "namespace": "supplier_credit_notes",
+      "description": "Delete a draft supplier credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "download_supplier_credit_note_pdf",
+      "namespace": "supplier_credit_notes",
+      "description": "Download a supplier credit note as PDF. Returns { fileUrl } (may be pending/empty if not yet rendered).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_supplier_credit_note",
+      "namespace": "supplier_credit_notes",
+      "description": "Update a draft supplier credit note (change amount, line items, contact, date, notes). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "finalize_supplier_credit_note",
+      "namespace": "supplier_credit_notes",
+      "description": "Finalize a draft supplier credit note (set saveAsDraft=false). Status becomes UNAPPLIED. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "create_supplier_credit_note_refund",
+      "namespace": "supplier_credit_notes",
+      "description": "Record a refund payment against a supplier credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_supplier_credit_note_refunds",
+      "namespace": "supplier_credit_notes",
+      "description": "List refund payments for a supplier credit note.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_currencies",
+      "namespace": "currencies",
+      "description": "List currencies enabled for the organization. Returns code, name, symbol, isBaseCurrency.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "add_currency",
+      "namespace": "currencies",
+      "description": "Enable one or more currencies for the organization. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_currency_rates",
+      "namespace": "currencies",
+      "description": "List exchange rates for a specific currency. IMPORTANT: You MUST call list_currencies first to discover which currencies the org has enabled — never guess or assume currency codes.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "add_currency_rate",
+      "namespace": "currencies",
+      "description": "Add or set an exchange rate for a currency. ALWAYS use this tool even when the user says \"update rate\" — it handles both new and existing rates. Rate is relative to the base currency. Call list_currencies first to get valid currency codes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_currency_rate",
+      "namespace": "currencies",
+      "description": "Update an EXISTING exchange rate record by its resourceId. Requires the rate resourceId from list_currency_rates. WARNING: If the user says \"update the rate\" or \"set the rate\", they almost always mean add_currency_rate (which creates/overwrites for a date). Only use this tool when explicitly modifying an existing rate record by ID. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_currency_rates",
+      "namespace": "currencies",
+      "description": "Max 500 exchange rates per call. Auto-enables currencies not yet enabled in the org — no need to call add_currency first. Requires rateDirection per rate. Response surfaces per-row failures: `failedRows[]` (each with rowIndex, columnName, columnValue, errorCode, errorMessage) + `failedCount` alongside `resourceIds[]` for successful inserts. Omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (no temporal gap). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_tax_profiles",
+      "namespace": "tax_profiles",
+      "description": "List tax profiles (GST, VAT, etc.). Returns name, rate, tax type.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_tax_types",
+      "namespace": "tax_profiles",
+      "description": "List available tax types. Use the tax type code when creating tax profiles.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_modules",
+      "namespace": "organization",
+      "description": "List the modules (features/capabilities) enabled for the organization.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_module",
+      "namespace": "organization",
+      "description": "Get details for a single org module by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_account_classifications",
+      "namespace": "chart_of_accounts",
+      "description": "List account classifications (reference list for categorising chart-of-accounts entries).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_purchase_items",
+      "namespace": "items_and_inventory",
+      "description": "List purchase-side catalog items.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_purchase_item",
+      "namespace": "items_and_inventory",
+      "description": "Get a single purchase item by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_purchase_items",
+      "namespace": "items_and_inventory",
+      "description": "Search purchase items by name, reference, or currency.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_catalogs",
+      "namespace": "catalogs",
+      "description": "List catalogs (product/service groupings).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_catalog",
+      "namespace": "catalogs",
+      "description": "Get a catalog by resourceId (includes its items).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_catalogs",
+      "namespace": "catalogs",
+      "description": "Search catalogs by name, description, status, or contact group.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_catalog",
+      "namespace": "catalogs",
+      "description": "Create a catalog. status defaults to INACTIVE. items[] are catalog-item rows; contactGroupResourceIds[] scopes it to contact groups. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_catalog",
+      "namespace": "catalogs",
+      "description": "Update a catalog. FULL REPLACEMENT — GET first, merge, then send the complete body; omitting items or contactGroupResourceIds DROPS them. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_catalog",
+      "namespace": "catalogs",
+      "description": "Delete a catalog. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_organization_report_templates",
+      "namespace": "organization",
+      "description": "List saved organization report templates.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_organization_report_template",
+      "namespace": "organization",
+      "description": "Get a saved report template by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_organization_report_templates",
+      "namespace": "organization",
+      "description": "Search report templates by type, category, or default flag.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "move_transaction_capsules",
+      "namespace": "capsules_and_recipes",
+      "description": "Move business transactions from one capsule to another. Pass the transaction resourceIds, the source capsule (oldCapsuleResourceId), and the destination (newCapsuleResourceId). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "create_tax_profile",
+      "namespace": "tax_profiles",
+      "description": "Create a new tax profile. List tax types first to get the taxTypeCode. Automatically checks for duplicates by name — returns existing profile if found. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_cash_in",
+      "namespace": "cash_entries",
+      "description": "List cash-in entries (direct cash receipts). Paginated.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_cash_in",
+      "namespace": "cash_entries",
+      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_cash_out",
+      "namespace": "cash_entries",
+      "description": "List cash-out entries (direct cash disbursements). Paginated.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_cash_out",
+      "namespace": "cash_entries",
+      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "get_cash_in",
+      "namespace": "cash_entries",
+      "description": "Fetch a cash-in entry by internal resourceId. To search by other fields, use `search_cashflow_transactions`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_cash_in",
+      "namespace": "cash_entries",
+      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "get_cash_out",
+      "namespace": "cash_entries",
+      "description": "Fetch a cash-out entry by internal resourceId. To search by other fields, use `search_cashflow_transactions`.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_cash_out",
+      "namespace": "cash_entries",
+      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_cash_transfers",
+      "namespace": "cash_transfers",
+      "description": "List cash transfer entries. Paginated.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_cash_transfer",
+      "namespace": "cash_transfers",
+      "description": "Move money between TWO OF YOUR OWN bank/cash accounts (petty-cash top-up, inter-account, FX between own accounts).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_cash_in",
+      "namespace": "cash_entries",
+      "description": "Delete (void) a cash-in entry. Uses parentEntityResourceId from create response. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_cash_out",
+      "namespace": "cash_entries",
+      "description": "Delete (void) a cash-out entry. Uses parentEntityResourceId from create response. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_cash_transfer",
+      "namespace": "cash_transfers",
+      "description": "Delete (void) a cash transfer. Uses parentEntityResourceId from create response. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_scheduled_invoices",
+      "namespace": "scheduled_transactions",
+      "description": "List scheduled (recurring) invoices. Paginated.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_scheduled_bills",
+      "namespace": "scheduled_transactions",
+      "description": "List scheduled (recurring) bills. Paginated.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_scheduled_journals",
+      "namespace": "scheduled_transactions",
+      "description": "List scheduled (recurring) journals. Paginated.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_bank_account",
+      "namespace": "bank_accounts",
+      "description": "Get full bank account details by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_bank_records",
+      "namespace": "bank_accounts",
+      "description": "Search bank records for a specific account. Call list_bank_accounts first to get accountResourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_cashflow_transactions",
+      "namespace": "payments_and_search",
+      "description": "Search cashflow transactions (unified ledger across cash entries / payments / journals). direction enum: PAYIN | PAYOUT.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_bookmarks",
+      "namespace": "chart_of_accounts",
+      "description": "List organization bookmarks (saved values/settings).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_bookmark",
+      "namespace": "chart_of_accounts",
+      "description": "Get a bookmark by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_bookmarks",
+      "namespace": "chart_of_accounts",
+      "description": "Create one or more bookmarks. categoryCode must be one of: AUDIT_AND_ASSURANCE, BANKING_AND_FINANCE, BUDGETS_AND_CONTROLS, EMPLOYEES_AND_PAYROLL, EXTERNAL_DOCUMENTS, GENERAL_INFORMATION, OWNERS_AND_DIRECTORS, TAXATION_AND_COMPLIANCE, WORKFLOWS_AND_PROCESSES. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_bookmark",
+      "namespace": "chart_of_accounts",
+      "description": "Update an existing bookmark (name, value, or category). Use when modifying a previously created bookmark. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_org_users",
+      "namespace": "organization",
+      "description": "List organization users (team members). Returns name, email, roles.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_org_users",
+      "namespace": "organization",
+      "description": "Search organization users. For OR (name or email), use filter param.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "invite_org_user",
+      "namespace": "organization",
+      "description": "Invite a new user to the organization.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_org_user",
+      "namespace": "organization",
+      "description": "Update an organization user's access. Provide userType to change their access tier, moduleRoles to change per-module access, or both.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "remove_org_user",
+      "namespace": "organization",
+      "description": "Remove a user from the organization. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_payments",
+      "namespace": "payments_and_search",
+      "description": "List recent payments across all transaction types. Paginated.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_payments",
+      "namespace": "payments_and_search",
+      "description": "Search payments. direction enum: PAYIN | PAYOUT.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "download_export",
+      "namespace": "operational_reports",
+      "description": "Analytical / financial / audit report file (XLSX or PDF). Returns { fileName, fileUrl } (pre-signed, ~5 min). Use this tool, not export_records, for anomaly / audit / risk analyses, statements, aging, summaries, ledgers, statement-of-account.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "preview_pseudo_sql",
+      "namespace": "pseudo_sql",
+      "description": "Run a read-only pseudo-SQL SELECT against the curated reporting schema. SYNC — returns up to 100 rows + typed columns. For canonical reports (anomaly/audit/aging/P&L/BS/GL/statement-of-account) use download_export instead. DELETE/UPDATE/INSERT and multi-statement input are rejected (PSEUDOSQL_PARSE_ERROR). Query max 16384 chars (over → 422 validation_error). `truncated:true` means \"more rows matched than were returned\" — NOT \"you hit the cap\"; inspect rowCount vs preview cap or your LIMIT. Curated tables include invoices, bills, journals, payments, contacts, accounts and more — see jaz-pseudo-sql skill for full inventory + query patterns.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "export_pseudo_sql",
+      "namespace": "pseudo_sql",
+      "description": "Kick off an async CSV export of a pseudo-SQL SELECT against the curated reporting schema. Returns { jobId, status }. Same DSL constraints as preview_pseudo_sql (SELECT-only, ≤16384 chars, single statement). Poll status via get_pseudo_sql_export — terminal states are COMPLETED (downloadUrl present, ~15min S3 expiry), FAILED, or EXPIRED. For one-shot \"give me the CSV\" use run_pseudo_sql_and_download instead. Supply idempotencyKey to dedupe across retries; same key + DIFFERENT query returns the prior job's result (server-side primary).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_pseudo_sql_export",
+      "namespace": "pseudo_sql",
+      "description": "Poll a pseudo-SQL export job. Returns { jobId, status, rowCount?, truncated?, downloadUrl?, error? }. Terminal states: COMPLETED, FAILED, EXPIRED. `downloadUrl` is S3 pre-signed with ~15min expiry — fetch immediately. If a fetch returns 403 (expired), call this tool again for a fresh URL.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "run_pseudo_sql_and_download",
+      "namespace": "pseudo_sql",
+      "description": "One-shot composite: kickoff async export → poll every 2s → return { jobId, status, downloadUrl, buffer? | localPath? }. Default 25s timeout (safe under typical 30s MCP provider timeout, configurable up to 90s). Idempotency-Key auto-set to sha256(query).slice(0,16) so same-query repeats dedupe. Default returns CSV buffer; pass downloadToFile=true to write to ~/Downloads/pseudo-sql-<jobId>.csv. On TIMED_OUT returns { status:'TIMED_OUT', jobId } — caller can retry via get_pseudo_sql_export. Use for \"run this query and give me the CSV\" flows; use export_pseudo_sql + get_pseudo_sql_export for fine-grained control.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_pseudo_sql_schema",
+      "namespace": "pseudo_sql",
+      "description": "Live pseudo-SQL catalog (tables/columns/joins/functions) + agentSkillsDoc.content = canonical jaz-pseudo-sql.md (~30KB syntax guide). Call before any query. `version` is a stable cache key.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "plan_recipe",
+      "namespace": "capsules_and_recipes",
+      "description": "Offline. Plan an IFRS transaction (schedule + journals) WITHOUT posting. Returns RecipePlan: capsuleType, capsuleName, requiredAccounts, needsContact, steps (journal|bill|invoice|cash-in|cash-out), calculator output.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "execute_recipe",
+      "namespace": "capsules_and_recipes",
+      "description": "Execute a recipe end-to-end — calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_capsule_recipes",
+      "namespace": "capsules_and_recipes",
+      "description": "Server-side recipe lifecycle (NOT the offline calculator — for offline planning use plan_recipe + execute_recipe). List all registered IFRS capsule recipes with per-version JSON Schemas. Source of truth for recipeName values used in capsuleRecipe payloads on trigger mutations (create_bill, create_journal, create_cash_in, etc.) — DON'T hard-code the 5 enum values. Each descriptor carries displayName, capsuleType, requiresBaseTransaction, allowedBaseTransactionTypes[], expectedAtomTypes[], and versions[] with inputSchema (JSON Schema Draft 7) per version.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_capsule_recipe",
+      "namespace": "capsules_and_recipes",
+      "description": "Get one capsule recipe descriptor by enum name. inputSchema at `data.versions[0].inputSchema` (NOT top-level). Carries `allowedBaseTransactionTypes`, `x-accountClass` per *AccountResourceId slot, `x-baseTrxBinding` for auto-fills, and `versions[].templateSlots[]` — the slotKeys + supportedVariables you can pass to capsuleRecipe.templateOverrides (Customize Recipe). Use list_capsule_recipes for available names.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "preview_capsule_recipe",
+      "namespace": "capsules_and_recipes",
+      "description": "Compute the blueprint a recipe would build, WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. **Pre-flight gate** before sending capsuleRecipe payloads — trigger mutations silently null on publish failure but preview surfaces every problem as a clean 422 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH, RECIPE_INVALID_BASE_TRANSACTION_TYPE, ERR_RECIPE_OVERRIDE_* — Rule 143). Also the gate for templateOverrides: invalid slotKeys/variables come back as ERR_RECIPE_OVERRIDE_* here. The base-trx triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing — supply all three to auto-fill totalAmount/currency/anchor dates, OR omit all three for a pure compute preview.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "resume_capsule_recipe",
+      "namespace": "capsules_and_recipes",
+      "description": "Server-side recipe lifecycle. Resume a FAILED recipe job from the leg that failed. NOT idempotent — each call counts toward the 3-attempt limit. After 3 same-leg failures the job is terminally BLOCKED_AFTER_3_RESUME_ATTEMPTS and only rollback_capsule_recipe remains. Returns the updated CapsuleRecipeJob handle with status, resumeAttempts, terminalReason. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "rollback_capsule_recipe",
+      "namespace": "capsules_and_recipes",
+      "description": "Server-side recipe lifecycle. Delete every scheduler atom posted by this capsule's recipe. dryRun=true returns the would-delete list without deleting (idempotent, safe to call repeatedly). dryRun=false performs the delete. Status enum: SUCCESS | BLOCKED | PARTIAL_ROLLBACK | DRY_RUN. PARTIAL_ROLLBACK with blockedAtomResourceIds[] means some atoms are referenced downstream — retry idempotent; escalate if persistent. Capsules NOT created via the recipe engine return 422 RECIPE_ROLLBACK_JOB_NOT_FOUND (\"nothing to roll back\"). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "create_scheduled_journal",
+      "namespace": "scheduled_transactions",
+      "description": "Recurring journal. Use `schedulerEntries` (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT|CREDIT), name. Use `repeat` (NOT frequency/interval): ONE_TIME|DAILY|WEEKLY|MONTHLY|YEARLY. Debits must equal credits. Flat structure — reference, valueDate, saveAsDraft at top level.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "create_scheduled_invoice",
+      "namespace": "scheduled_transactions",
+      "description": "Recurring invoice. Use for fixed-amount recurrence where you want per-period control over currency / tax / line items. DIFFERENT from subscriptions: no proration, but currency/tax/items can differ per occurrence.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "create_scheduled_bill",
+      "namespace": "scheduled_transactions",
+      "description": "Create a scheduled (recurring) bill. CRITICAL:",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_journal",
+      "namespace": "journals",
+      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_update_journals",
+      "namespace": "journals",
+      "description": "Bulk-update journals — most common use is bulk-finalize (saveAsDraft: false on each row). Sync; per-row sequential execution; max 500 per call (~1-2 min wall-clock for a full 500).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "import_bank_statement",
+      "namespace": "bank_accounts",
+      "description": "Import a bank statement from URL or attachment ID. Processing is async — check magic workflows for status. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "add_bank_records",
+      "namespace": "bank_accounts",
+      "description": "Create bank statement entries via JSON POST (1-100 records per call). For CSV/OFX file imports, use import_bank_statement instead.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "create_bt_from_attachment",
+      "namespace": "document_ai",
+      "description": "Create a business transaction (invoice/bill/credit note) from a SINGLE file, a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. When the host conversation provides a file with the call, omit all source arguments — the file is used automatically. For a FOLDER, a .zip, a Dropbox/Drive/OneDrive folder share link, or several/mixed documents at once, use classify_documents (then extract_documents) instead — do not call this per-file. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "get_magic_workflow_status",
+      "namespace": "document_ai",
+      "description": "Get the current status of specific magic workflow(s) by resourceId(s). Returns workflow details including status, document type, and results.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "wait_for_magic_workflows",
+      "namespace": "document_ai",
+      "description": "Poll magic extraction workflow(s) until each reaches a terminal state — transaction created (a draft is ready), OCR succeeded/failed, or errored — or until the wait budget elapses. Use after create_bt_from_attachment / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_claim_from_attachment",
+      "namespace": "document_ai",
+      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction — from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments — the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. The draft is born BOUND to the uploader's own employee automatically; to file for someone else pass employeeResourceId (server requires a claims Manager/Admin). Optional contact, claim profile, currency, value date. Returns a workflow handle; the claim appears in Drafts asynchronously (no manual bind step). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "classify_documents",
+      "namespace": "document_ai",
+      "description": "Use this when the user points at a FOLDER, a .zip, a Dropbox / Google Drive / OneDrive folder share link, or a pile/batch of mixed documents (\"create docs from this Dropbox folder link\", \"here is a folder of invoices and bills\"). Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Files in unrecognized folders come back as needs-review. Returns a manifest (per-file type + confidence + counts) plus a collectionId; review it, then call extract_documents with that collectionId to create the drafts. Source must be an https URL: a direct .zip/file link (e.g. an uploaded attachment) or a Dropbox / Google Drive / OneDrive share link. (Local folder paths are CLI-only.) If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "extract_documents",
+      "namespace": "document_ai",
+      "description": "Create draft transactions from a classified document collection (see classify_documents). Uploads each file to the right AI-extraction endpoint — invoices/bills/credit notes via business-transaction extraction, bank statements via statement import — de-duplicates identical files, and returns the workflow ids to poll with wait_for_magic_workflows. Processing is async; drafts appear once the workflows reach a terminal state. Pass the collectionId from classify_documents. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "get_attachments",
+      "namespace": "document_ai",
+      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note, or order document).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "add_attachment",
+      "namespace": "document_ai",
+      "description": "Add an attachment to a business transaction. Provide sourceUrl (downloads and uploads as file) or attachmentId (links existing); a file provided by the host conversation is used when neither is given. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_attachment",
+      "namespace": "document_ai",
+      "description": "Delete an attachment from a business transaction (invoice, bill, journal, credit note, or order document). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "read_spreadsheet_rows",
+      "namespace": "document_ai",
+      "description": "Parse rows from a CSV/Excel URL. Returns rows as JSON objects keyed by header (max 500/call, paginatable via offset/limit). Excel response includes availableSheets[] — re-call with sheetIndex if the first sheet is Instructions. Use BEFORE bulk_upsert_* when the user attaches a tabular file.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "validate_invoice_draft",
+      "namespace": "drafts",
+      "description": "Check if an invoice draft is ready to finalize. Returns missing fields, structured validation report, and ready status. Use before finalize_invoice to prevent errors.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "validate_bill_draft",
+      "namespace": "drafts",
+      "description": "Check if a bill draft is ready to finalize. Returns missing fields, structured validation report, and ready status. Use before finalize_bill to prevent errors.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "validate_journal_draft",
+      "namespace": "drafts",
+      "description": "Check if a journal draft is ready to finalize. Returns missing fields (accounts, amounts, date), structured validation, and ready status.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "validate_credit_note_draft",
+      "namespace": "drafts",
+      "description": "Check if a credit note draft (customer or supplier) is ready to finalize. Returns missing fields, structured validation, and ready status.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_bank_rules",
+      "namespace": "bank_rules",
+      "description": "List bank reconciliation rules (action shortcuts). Shows rule name, action type, and target bank account.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_bank_rule",
+      "namespace": "bank_rules",
+      "description": "Get full bank rule details including configuration (allocation percentages, accounts, tax settings).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_bank_rules",
+      "namespace": "bank_rules",
+      "description": "Search bank rules.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_bank_rule",
+      "namespace": "bank_rules",
+      "description": "Bank reconciliation rule — auto-matches bank records. Use directly on request; don't just list existing.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_bank_rule",
+      "namespace": "bank_rules",
+      "description": "Update an existing bank reconciliation rule. FULL REPLACEMENT — the API replaces the entire rule on update. You MUST provide the complete configuration, appliesToReconciliationAccount, and name every time. Use get_bank_rule first to read the current state, merge your changes, then call this tool with the full payload. Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_bank_rule",
+      "namespace": "bank_rules",
+      "description": "Delete a bank reconciliation rule. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "view_auto_reconciliation",
+      "namespace": "bank_accounts",
+      "description": "Generate auto-reconciliation suggestions for a bank account. READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation — pass `includeReviewDetails:true` to also get `review[]` (the not-auto lines enriched with the bank line + the matched bill/invoice) for a side-by-side \"does this match?\" card. Pass `includeRaw:true` to also get the unmapped payload. On high-volume accounts the engine can 500 (OOM) → the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_fixed_assets",
+      "namespace": "fixed_assets",
+      "description": "List fixed assets. Returns name, reference, type, category, status, purchase amount, net book value.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_fixed_asset",
+      "namespace": "fixed_assets",
+      "description": "Get full fixed asset details including depreciation schedule, accounts, disposal info.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_fixed_assets",
+      "namespace": "fixed_assets",
+      "description": "Search fixed assets.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_fixed_asset",
+      "namespace": "fixed_assets",
+      "description": "Register a fixed asset linked to an existing purchase transaction (bill or journal).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_fixed_asset",
+      "namespace": "fixed_assets",
+      "description": "Update an existing fixed asset (draft or active). Can update name, depreciation settings, notes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_fixed_asset",
+      "namespace": "fixed_assets",
+      "description": "Delete a draft fixed asset. Cannot delete active/disposed assets. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "discard_fixed_asset",
+      "namespace": "fixed_assets",
+      "description": "Discard (write off) a fixed asset. Records the disposal and final depreciation. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "mark_fixed_asset_sold",
+      "namespace": "fixed_assets",
+      "description": "Mark a fixed asset as sold. Links to the sale transaction and records gain/loss. When the user asks to sell an asset, use this tool directly — retrieve the asset first with list_fixed_assets or search_fixed_assets to get the resourceId. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "transfer_fixed_asset",
+      "namespace": "fixed_assets",
+      "description": "Register a previously purchased fixed asset with accumulated depreciation.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "undo_fixed_asset_disposal",
+      "namespace": "fixed_assets",
+      "description": "Undo a fixed asset disposal (discard or sale). Restores the asset to active status. When the user asks to reverse or undo a disposal, use this tool directly. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_subscriptions",
+      "namespace": "subscriptions",
+      "description": "List recurring subscriptions. Returns status, interval, next schedule date, amount, transaction type.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_subscription",
+      "namespace": "subscriptions",
+      "description": "Get full subscription details including line items, schedule, and payment history.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_subscription",
+      "namespace": "subscriptions",
+      "description": "Subscription — auto-generates invoices on schedule WITH proration. DIFFERENT from scheduled_invoice: subscriptions prorate partial periods (credit notes for mid-period changes), but currency/tax/account are immutable after creation. Use for software licenses, retainers, recurring SaaS. Invoices only (no bills).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_subscription",
+      "namespace": "subscriptions",
+      "description": "Update an existing subscription (interval, end date, transaction template, or proratedConfig). When the user asks to update a subscription, use this tool directly. NOTE: accountResourceId and taxProfileResourceId on line items are immutable after creation — to change them, cancel and recreate. proratedConfig fields can be amended on update (proratedStartDate, proratedAdjustmentLineText, itemResourceId, includeNextPeriod). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_subscription",
+      "namespace": "subscriptions",
+      "description": "Delete a subscription. Removes the recurring schedule. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "cancel_subscription",
+      "namespace": "subscriptions",
+      "description": "Cancel an active subscription. Prorates remaining period and stops future billing. Safe to call — subscriptions can be reactivated after cancellation. Always use this tool when the user asks to cancel a subscription. Must cancel before delete. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "search_scheduled_transactions",
+      "namespace": "subscriptions",
+      "description": "Search scheduled transactions (subscriptions / recurring invoices / journals / cash entries).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_vat_ledger",
+      "namespace": "financial_reports",
+      "description": "Generate VAT/GST ledger report showing all tax transactions for the period.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_equity_movement",
+      "namespace": "financial_reports",
+      "description": "Generate equity movement report (statement of changes in equity).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_bank_balance_summary",
+      "namespace": "operational_reports",
+      "description": "Generate bank balance summary report — snapshot of all bank account balances at a point in time.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_bank_recon_summary",
+      "namespace": "operational_reports",
+      "description": "Generate bank reconciliation summary for a specific bank account. Essential for month-end close — call this for each in-scope bank account for the current entity and reporting period. Use for bank recon status, unreconciled items count, or reconciliation summaries.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_bank_recon_details",
+      "namespace": "operational_reports",
+      "description": "Generate detailed bank reconciliation report showing matched/unmatched items.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_fa_summary",
+      "namespace": "operational_reports",
+      "description": "Generate fixed assets summary report grouped by account, type, category, or status.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_fa_recon_summary",
+      "namespace": "operational_reports",
+      "description": "Generate fixed assets reconciliation summary — reconciles asset register with general ledger.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_ar_report",
+      "namespace": "operational_reports",
+      "description": "Generate accounts receivable aging report. Shows outstanding invoices grouped by aging buckets. Use this when discussing customer payment allocation, credit control, or AR status — generate the report to show the full picture.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_ledger_highlights",
+      "namespace": "operational_reports",
+      "description": "Get ledger highlights — summary metadata about the org general ledger: transaction counts by type, date range, active accounts, active currencies, and cross-currency detection. No parameters needed.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_contact_groups",
+      "namespace": "contacts",
+      "description": "List contact groups with their associated contacts. Used to segment customers/suppliers.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_contact_group",
+      "namespace": "contacts",
+      "description": "Get contact group details including all associated contacts.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_contact_groups",
+      "namespace": "contacts",
+      "description": "Search contact groups.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_contact_group",
+      "namespace": "contacts",
+      "description": "Create a new contact group for segmenting contacts (e.g., \"VIP Customers\", \"Government\", \"Overdue > 90 Days\"). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_contact_group",
+      "namespace": "contacts",
+      "description": "Update a contact group name or members. NOTE: Update endpoint has a known 500 bug on some orgs — retry or recreate if it fails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_contact_group",
+      "namespace": "contacts",
+      "description": "Delete a contact group. Does not delete the contacts themselves. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_custom_fields",
+      "namespace": "tags_and_custom_fields",
+      "description": "List custom fields defined for the organization. Custom fields add extra data to invoices, bills, credit notes, and payments.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_custom_field",
+      "namespace": "tags_and_custom_fields",
+      "description": "Get a custom field by resourceId. Returns full definition including appliesTo flags and list options.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_custom_fields",
+      "namespace": "tags_and_custom_fields",
+      "description": "Search custom fields.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_custom_field",
+      "namespace": "tags_and_custom_fields",
+      "description": "Create a new custom field. Custom fields appear on transactions (invoices, bills, credit notes, payments).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_custom_field",
+      "namespace": "tags_and_custom_fields",
+      "description": "Update a custom field definition. Can change name, description, printOnDocuments, and appliesTo flags. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_custom_field",
+      "namespace": "tags_and_custom_fields",
+      "description": "Delete a custom field. Removes it from all future transactions. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_withholding_tax_codes",
+      "namespace": "tax_profiles",
+      "description": "List withholding tax codes (industry classification codes for PH/SG compliance). Returns full list (no pagination).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_tax_profiles",
+      "namespace": "tax_profiles",
+      "description": "Search tax profiles. Use appliesToSale / appliesToPurchase filters to scope by transaction type.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_tax_profile",
+      "namespace": "tax_profiles",
+      "description": "Get full tax profile details including tax rate, type code, and status.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_tax_profile",
+      "namespace": "tax_profiles",
+      "description": "Update an existing tax profile (name, rate, or status). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "create_claim_type",
+      "namespace": "claim_settings",
+      "description": "Create a claim type (expense category for employee claims). Dedups by name. expenseAccountResourceId is server-required. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_claim_type",
+      "namespace": "claim_settings",
+      "description": "Update a claim type. Omitted fields unchanged; clearFields NULLs optional fields. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "search_claim_types",
+      "namespace": "claim_settings",
+      "description": "Search claim types.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_claim_types",
+      "namespace": "claim_settings",
+      "description": "List claim types (alphabetical).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_claim_type",
+      "namespace": "claim_settings",
+      "description": "Get a claim type incl. nested expense account + tax profile.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "delete_claim_type",
+      "namespace": "claim_settings",
+      "description": "Soft-delete a claim type (name becomes reusable). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "create_claim_profile",
+      "namespace": "claim_settings",
+      "description": "Create a claim profile (per-employee policy bundle: approver, limits, visible types, balance account). Dedups by name. taxMode EXCLUSIVE is rejected. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_claim_profile",
+      "namespace": "claim_settings",
+      "description": "Update a claim profile. Omitted fields unchanged; clearFields NULLs optional fields. Balance account cannot change while an employee has a non-zero balance. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "search_claim_profiles",
+      "namespace": "claim_settings",
+      "description": "Search claim profiles.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_claim_profiles",
+      "namespace": "claim_settings",
+      "description": "List claim profiles (alphabetical).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_claim_profile",
+      "namespace": "claim_settings",
+      "description": "Get a claim profile incl. nested balance account.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "delete_claim_profile",
+      "namespace": "claim_settings",
+      "description": "Soft-delete a claim profile. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "create_posting_rule",
+      "namespace": "posting_rules",
+      "description": "Create a posting rule (how approved claims group into journals at conversion). outerAxis + innerAxis + lineDescriptionTemplate required. Dedups by name. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_posting_rule",
+      "namespace": "posting_rules",
+      "description": "Update a posting rule. Omitted fields unchanged. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "search_posting_rules",
+      "namespace": "posting_rules",
+      "description": "Search posting rules.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_posting_rules",
+      "namespace": "posting_rules",
+      "description": "List posting rules (alphabetical).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_posting_rule",
+      "namespace": "posting_rules",
+      "description": "Get a posting rule.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "delete_posting_rule",
+      "namespace": "posting_rules",
+      "description": "Delete a posting rule. The org default cannot be deleted while default (set another default first). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "search_claims",
+      "namespace": "claims",
+      "description": "Search/list employee-expense claims. Status: DRAFT|SUBMITTED|APPROVED|CONVERTED|REJECTED|CANCELLED (CONVERTED = \"Processed\"). Claims are born via create_claim, attachment, or conversion (no bare list — use search).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_claim",
+      "namespace": "claims",
+      "description": "Get a claim incl. line items, employee, amounts, status.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_claim",
+      "namespace": "claims",
+      "description": "Create an employee-expense claim directly (bare create, no attachment). Vendor is EITHER contactResourceId OR vendorName, never both. saveAsDraft defaults to true (lands DRAFT with relaxed line validation); set false to validate + submit in one call (lands SUBMITTED). reference is REQUIRED when submitting (saveAsDraft=false) — omitting it returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT; a DRAFT saves without one. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_claim",
+      "namespace": "claims",
+      "description": "Update a DRAFT claim (partial — omitted fields unchanged). claimItems non-empty REPLACES all lines, [] clears. Set saveAsDraft=false to validate + submit in one call — reference is REQUIRED at submit (else 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT); a DRAFT save needs none. Only DRAFT claims are editable. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_claim",
+      "namespace": "claims",
+      "description": "Delete a claim. Only DRAFT / REJECTED / CANCELLED claims are deletable (else 422). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_claim_attachment",
+      "namespace": "claims",
+      "description": "Remove one attachment (receipt) from a claim. Returns the updated claim. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "submit_claim",
+      "namespace": "claims",
+      "description": "Submit a DRAFT claim for approval (DRAFT → SUBMITTED). Server enforces the transition. The claim must carry a reference — a referenceless DRAFT returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (set it via update_claim first). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "approve_claim",
+      "namespace": "claims",
+      "description": "Approve a SUBMITTED claim (SUBMITTED → APPROVED). Approved claims become convertible to journals. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reject_claim",
+      "namespace": "claims",
+      "description": "Reject a SUBMITTED/APPROVED claim with a reason (→ REJECTED). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "cancel_claim",
+      "namespace": "claims",
+      "description": "Cancel a DRAFT/SUBMITTED claim with a reason (→ CANCELLED). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "unpost_claim",
+      "namespace": "claims",
+      "description": "Unpost a CONVERTED claim — reverses the journal conversion back to APPROVED. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_submit_claims",
+      "namespace": "claim_processing",
+      "description": "Bulk-submit DRAFT claims (ASYNC). Returns a job handle {jobId,...}; poll search_background_jobs by jobId for per-item results. Max 500 ids. Each claim must have a reference — referenceless claims fail per-item with CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (check the job result). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_approve_claims",
+      "namespace": "claim_processing",
+      "description": "Bulk-approve SUBMITTED claims (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_reject_claims",
+      "namespace": "claim_processing",
+      "description": "Bulk-reject claims with one shared reason (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_cancel_claims",
+      "namespace": "claim_processing",
+      "description": "Bulk-cancel claims with one shared reason (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_delete_claims",
+      "namespace": "claim_processing",
+      "description": "Bulk-delete claims (ASYNC; only DRAFT/REJECTED/CANCELLED are deletable). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_claim_tracking_tags",
+      "namespace": "claim_processing",
+      "description": "List the tracking-tag values available across claims (picker; returns a bare array).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_claim_custom_field_values",
+      "namespace": "claim_processing",
+      "description": "List the custom-field values available across claims (picker; returns a bare array).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "preview_claims_conversion",
+      "namespace": "claim_processing",
+      "description": "Preview the journals an APPROVED claim batch would produce at conversion — no write. Returns expenseSubTotal, previewJournals, and reimbursement DCE counts; non-APPROVED claims come back under erroredClaims (check it is empty before converting). Needs a default posting rule or an explicit postingRuleResourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "convert_claims_to_journal",
+      "namespace": "claim_processing",
+      "description": "Convert an APPROVED claim batch into journals (atomic write). valueDate (YYYY-MM-DD) required. Preview first and confirm erroredClaims is empty. idempotencyKey is auto-generated for safe retries (pass your own to dedup across calls). includeReimbursementPayout adds a books-only reimbursement DCE — real-money disburse is intentionally not exposed. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "record_employee_payout",
+      "namespace": "claim_processing",
+      "description": "Record a books-only employee payout (reimbursement or advance) — a DCE, no real-money transfer. amount, paymentAccountResourceId and valueDate are required; reference auto-generated if omitted. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "search_employee_payouts",
+      "namespace": "claim_processing",
+      "description": "Search recorded employee payouts (reimbursements + advances).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "add_employee",
+      "namespace": "employees",
+      "description": "Create an employee (expense-claim member). The server requires userResourceId (a login user to bind — binding is PERMANENT) and claimProfileResourceId (REQUIRED — carries the employee balance account; the org default is NOT auto-applied). Dedups by email. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_employee",
+      "namespace": "employees",
+      "description": "Update an employee (partial; omit = no change). To ARCHIVE, set active=false (reversible — prefer over delete_employee). userResourceId is NOT editable here — use bind_employee_user. Set clearEmploymentType to unset the classification. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "search_employees",
+      "namespace": "employees",
+      "description": "Search employees by name, email, phone, manager, claim profile, active, currency.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_employee_balances",
+      "namespace": "employees",
+      "description": "Search the employee-balance directory (per-currency reimbursement balances owed).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_employee",
+      "namespace": "employees",
+      "description": "Get an employee incl. claim profile + user binding.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "delete_employee",
+      "namespace": "employees",
+      "description": "Delete an employee (server validates they are settled). Prefer update_employee active=false to archive reversibly. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bind_employee_user",
+      "namespace": "employees",
+      "description": "Bind a login user to an OFFLINE employee (one with no user bound yet — e.g. created via import without a binding email). ONE-WAY and PERMANENT: allowed only while unbound; rebind is blocked once set. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "preprocess_employees_file",
+      "namespace": "employees",
+      "description": "Preprocess an uploaded employee import sheet (CSV/XLSX) — returns a parsed row preview to review before import_employees. Provide the sheet fileUrl.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "import_employees",
+      "namespace": "employees",
+      "description": "Bulk create/update/delete employees from resolved rows (max 100 per array). Server validates rows synchronously (422 with row errors) then queues an async job — poll search_background_jobs by jobId. Create rows need a bound user + claim profile. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_inventory_items",
+      "namespace": "items_and_inventory",
+      "description": "List inventory-tracked items with stock details, COGS accounts, and purchase/sale accounts.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_inventory_balance",
+      "namespace": "items_and_inventory",
+      "description": "Get current inventory balance for a specific item — quantity on hand, average cost, base unit.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_inventory_item",
+      "namespace": "items_and_inventory",
+      "description": "Create a new inventory-tracked item. Requires itemCode, name, costingMethod (FIXED or WAC), cogsResourceId, and account links. Use --input for full JSON body. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_contact",
+      "namespace": "contacts",
+      "description": "Delete a contact. Cannot delete contacts with existing transactions. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_account",
+      "namespace": "chart_of_accounts",
+      "description": "Delete a chart of accounts entry. Cannot delete accounts with existing transactions. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_cash_transfer",
+      "namespace": "cash_transfers",
+      "description": "Get full cash transfer details by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "download_credit_note_pdf",
+      "namespace": "customer_credit_notes",
+      "description": "Download a customer credit note as PDF. Returns a file URL.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_transaction_summary",
+      "namespace": "payments_and_search",
+      "description": "Get a complete summary of any transaction — fetches the transaction, its attachments, and payment history in one call.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "bulk_finalize_drafts",
+      "namespace": "drafts",
+      "description": "Finalize multiple draft transactions in one call. Attempts finalization for each item and returns per-item pass/fail results. Supports invoices, bills, and credit notes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_invite_org_users",
+      "namespace": "organization",
+      "description": "Invite multiple users to the organization in one call. Accepts an array of user objects. Each user follows the same contract as invite_org_user. Returns per-user pass/fail results. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_create_contacts",
+      "namespace": "contacts",
+      "description": "Create multiple contacts in one call. Deduplicates against existing contacts (exact name match).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "quick_fix_transactions",
+      "namespace": "quick_fix",
+      "description": "Bulk-update transactions of the same type. Only included fields change; omitted fields preserved.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "quick_fix_line_items",
+      "namespace": "quick_fix",
+      "description": "Bulk-update line items across transactions. Only included fields change.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "list_nano_classifiers",
+      "namespace": "nano_classifiers",
+      "description": "List nano classifiers (tracking categories). Paginated. Nano classifiers tag line items with structured categories.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_nano_classifier",
+      "namespace": "nano_classifiers",
+      "description": "Get a nano classifier by resourceId. Returns type and all classes.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_nano_classifiers",
+      "namespace": "nano_classifiers",
+      "description": "Search nano classifiers (tracking categories).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_nano_classifier",
+      "namespace": "nano_classifiers",
+      "description": "Create a nano classifier (tracking category). Provide a type name and list of class names. printable defaults to true. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_nano_classifier",
+      "namespace": "nano_classifiers",
+      "description": "Update a nano classifier — change type name, modify classes, or toggle printable. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_nano_classifier",
+      "namespace": "nano_classifiers",
+      "description": "Delete a nano classifier. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_invoice_payments",
+      "namespace": "payments_and_search",
+      "description": "List all payments recorded against an invoice. Returns payment records with amounts, dates, and methods.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_invoice_credits",
+      "namespace": "payments_and_search",
+      "description": "List all credit notes applied to an invoice.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "reverse_invoice_credit",
+      "namespace": "payments_and_search",
+      "description": "Reverse (unapply) a credit note from an invoice. The credit note becomes UNAPPLIED again. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_bill_payments",
+      "namespace": "payments_and_search",
+      "description": "List all payments recorded against a bill. Returns payment records with amounts, dates, and methods.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_bill_credits",
+      "namespace": "payments_and_search",
+      "description": "List all credit notes applied to a bill.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "reverse_bill_credit",
+      "namespace": "payments_and_search",
+      "description": "Reverse (unapply) a supplier credit note from a bill. The credit note becomes UNAPPLIED again. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_scheduled_invoice",
+      "namespace": "scheduled_transactions",
+      "description": "Get a scheduled (recurring) invoice by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_scheduled_invoice",
+      "namespace": "scheduled_transactions",
+      "description": "Update a scheduled invoice — change schedule settings and/or the invoice template. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_scheduled_invoice",
+      "namespace": "scheduled_transactions",
+      "description": "Delete a scheduled (recurring) invoice. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_scheduled_bill",
+      "namespace": "scheduled_transactions",
+      "description": "Get a scheduled (recurring) bill by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_scheduled_bill",
+      "namespace": "scheduled_transactions",
+      "description": "Update a scheduled bill — change schedule settings and/or the bill template. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_scheduled_bill",
+      "namespace": "scheduled_transactions",
+      "description": "Delete a scheduled (recurring) bill. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_scheduled_journal",
+      "namespace": "scheduled_transactions",
+      "description": "Get a scheduled (recurring) journal by resourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_scheduled_journal",
+      "namespace": "scheduled_transactions",
+      "description": "Update a scheduled journal — change schedule settings and/or the journal template. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_scheduled_journal",
+      "namespace": "scheduled_transactions",
+      "description": "Delete a scheduled (recurring) journal. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_payment",
+      "namespace": "payments_and_search",
+      "description": "Get a specific payment record by resourceId. Returns payment amount, method, date, and reference.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_payment",
+      "namespace": "payments_and_search",
+      "description": "Update a payment record — correct amount, reference, date, method, or account. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_payment",
+      "namespace": "payments_and_search",
+      "description": "Delete (void) a payment record. The associated invoice/bill balance is restored. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_export_columns",
+      "namespace": "export_records",
+      "description": "List all exportable columns for an entity type, including their paths and data types. Use paths from this response to build custom column sets for export_records or preview_export_records.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "preview_export_records",
+      "namespace": "export_records",
+      "description": "Preview an export before generating the file. Returns totalRecords, up to 10 sample rows, resolved column definitions, and a human-readable filterDescription. Use this to confirm scope before calling export_records. Pass either query OR filter, never both.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "export_records",
+      "namespace": "export_records",
+      "description": "Raw entity-row XLSX export for one entity type (invoices/bills/contacts/items/journals/bank records/cashflow/fixed assets — one row per record, with column selection). Returns pre-signed download URL (~5 min), fileName, totalCount. Pass query OR filter, never both. Use preview_export_records first to confirm scope.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_background_jobs",
+      "namespace": "background_jobs",
+      "description": "Search and poll background jobs. ANY operation that returns a jobId (bulk_upsert_contacts, bulk_upsert_items, bank statement import, magic file processing, etc.) can be tracked here. Filter by resourceId (the jobId value) to poll a specific job. Poll until status is SUCCESS, FAILED, or PARTIAL_SUCCESS. Use processedCount/failedCount/totalRecords for progress. IMPORTANT: filter by resourceId field, NOT jobId — they differ.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_contacts",
+      "namespace": "contacts",
+      "description": "Bulk create/update contacts (max 500). resourceId per row → update (partial; omitted fields preserve existing). Omit resourceId → create. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Per-row failures in errorDetails (NOT failedRows — that's the sync pattern). On PARTIAL_SUCCESS: succeeded rows are committed; re-submit only failed rowIndex entries.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_invoices",
+      "namespace": "invoices",
+      "description": "Max 500 invoices per call. FLAT shape — ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_invoice_line_items",
+      "namespace": "invoices",
+      "description": "Nested line items per invoice (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_bills",
+      "namespace": "bills",
+      "description": "Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead — that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED — last wins). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only — dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_bill_line_items",
+      "namespace": "bills",
+      "description": "Nested line items per bill (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_customer_credit_notes",
+      "namespace": "customer_credit_notes",
+      "description": "Max 500 customer credit notes per call. Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_supplier_credit_notes",
+      "namespace": "supplier_credit_notes",
+      "description": "Max 500 supplier credit notes per call. Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_journals",
+      "namespace": "journals",
+      "description": "Max 500 manual journals per call. NATURAL KEY: `journalReference` (NOT `reference` — every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]` — different from `clio journals create` which uses entries). Each leg has `accountResourceId` + `debitAmount` + `creditAmount` (debit + credit must balance per row). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only — dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_fixed_assets",
+      "namespace": "fixed_assets",
+      "description": "Bulk create/update fixed assets (max 500). Natural key: reference.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "quick_reconcile",
+      "namespace": "reconciliations",
+      "description": "Bulk-reconcile bank statement entries against a list of journals (max 500). Reconciliation mode is hardcoded to QUICK_RECON. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Caller provides bankAccountResourceId + journalsForReconciliation[] (each row: bankStatementEntryResourceId, journalReference, journalAccountResourceId). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "apply_bank_rule",
+      "namespace": "reconciliations",
+      "description": "Apply a pre-configured bank rule (action shortcut) to a batch of bank statement entries (max 500). Async — returns a jobId. Poll search_background_jobs filtered by resourceId. The rule executes its configured action (e.g. RECONCILE_WITH_DIRECT_CASH_ENTRY) on each entry. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_direct_cash_entry",
+      "namespace": "reconciliations",
+      "description": "Reconcile a bank statement entry with a single cash-in / cash-out line. Direction (cash-in vs cash-out) is INFERRED from the bank entry sign. Sync — returns the reconciled entry status. NOT idempotent: calling twice on the same bankStatementEntryResourceId creates duplicate journals. Confirm reconciled-state via view_auto_reconciliation before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_cash_journal",
+      "namespace": "reconciliations",
+      "description": "Reconcile a bank statement entry with a multi-line cashflow journal (multiple cash splits, max 200 lines). Sync — returns the reconciled entry status. NOT idempotent — confirm reconciled-state before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_manual_journal",
+      "namespace": "reconciliations",
+      "description": "⚠️ CALLER PROVIDES ONLY THE OFFSET LEG(S) — backend AUTO-ADDS the bank-side leg from the statement entry. Sending both debit AND credit legs → 422 \"sum of debit and credit amounts are not equal\" (your sides duplicate after the auto-add). Reconcile a bank statement entry with a double-entry manual journal. Sync — returns the reconciled entry status. valueDate prefills from bank entry if omitted. NOT idempotent. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_cash_transfer",
+      "namespace": "reconciliations",
+      "description": "Reconcile a bank statement entry with an inter-account transfer. Sync — returns the reconciled entry status. amount is required only when the counterparty account is in a non-functional currency. NOT idempotent. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_invoice_receipt",
+      "namespace": "reconciliations",
+      "description": "CREATES A NEW invoice and auto-reconciles it to a bank statement entry (AR). To match an EXISTING open invoice instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYIN` (money in — AR). Produce via `bank add-records` with a POSITIVE amount (creates `credit_amount > 0` → PAYIN). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. NOT idempotent. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_bill_receipt",
+      "namespace": "reconciliations",
+      "description": "CREATES A NEW bill and auto-reconciles it to a bank statement entry (AP). To match an EXISTING open bill instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYOUT` (money out — AP). Produce via `bank add-records` with a NEGATIVE amount (creates `debit_amount > 0` → PAYOUT). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. NOT idempotent. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_with_payments",
+      "namespace": "reconciliations",
+      "description": "USE THIS to match a bank statement entry to an EXISTING open bill / invoice / payment (NOT reconcile_bill_receipt or reconcile_invoice_receipt, which CREATE a new bill/invoice). Pass the open transaction's cashflowTransactionResourceId (from search_cashflow_transactions or a view_auto_reconciliation suggestion) in businessTransactionPayments[] — this CREATES the payment AND reconciles in one call; no pay_bill / pay_invoice first. FX is resolved server-side — pass NO rate for the common case (only supply paymentAmount + currencySettings for the rare bill-currency ≠ bank-currency case). Sync — returns the reconciled entry status. NOT idempotent: a blind retry double-creates a payment; confirm reconciled-state via search_bank_records(status: RECONCILED) before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_magic_match",
+      "namespace": "reconciliations",
+      "description": "Bulk-accept MAGIC_MATCH suggestions: reconcile many bank entries against EXISTING open business transactions and/or payments in one call (max 500 entries). Feed entries from view_auto_reconciliation suggestions. Returns a per-entry split { reconciled[], failed[] } — a 200 with a non-empty failed[] is a PARTIAL success; surface failed entries (with their errorCode) and loop. Entry-level idempotency-keyed server-side. Use reconcile_with_payments for a single precise match; use this to accept a batch of suggestions at once. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "reconcile_learned_prediction",
+      "namespace": "reconciliations",
+      "description": "Accept an ML learned-prediction suggestion to reconcile a bank entry. predictedPayload + predictedPayloadSchemaVersion are passed through VERBATIM from a view_auto_reconciliation suggestion (recommendationType MAGIC_RECONCILE_WITH_CASH_IN_OUT) — do not construct them by hand. Pass retryToken to force a fresh journal on an edit-then-retry; omit it for an idempotent replay. Sync — returns the reconciled entry status. On failure (stale/invalid payload), fall back to reconcile_with_payments — do NOT retry the same opaque payload. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "validate_drafts",
+      "namespace": "drafts",
+      "description": "BULK validate up to 500 draft business transactions in ONE call, mixing any btType. SYNC — returns per-item errors + display data; no state change. Run before convert_drafts_to_active.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "convert_drafts_to_active",
+      "namespace": "drafts",
+      "description": "BULK promote — finalize up to 500 draft business transactions to ACTIVE in ONE call, mixing any combination of invoices, bills, and credit notes (no per-type tools needed). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent: a second call on already-promoted drafts returns 422. Filter the draft list by status: DRAFT before submitting. Pair with validate_drafts for a pre-flight check on large batches. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "submit_drafts_for_approval",
+      "namespace": "drafts",
+      "description": "BULK submit — route up to 500 draft business transactions into the approval workflow in ONE call, mixing any combination of invoices, bills, and credit notes. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent on drafts that already have an in-flight approval request. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "search_help_center",
+      "namespace": "help_center",
+      "description": "Search the Jaz help center for how-to articles, feature guides, and accounting concepts. Use this for \"how do I...\" or \"what is...\" questions about Jaz: bank reconciliation, GST/VAT filing, multi-currency, fixed assets, custom fields, integrations, and so on. Returns top matching articles with title, section, content, and source URL.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "jot",
+      "namespace": "jots",
+      "description": "Record judgment entries in the org's judgment journal. THE RULE: log a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write; skip mechanical actions and calls where the platform, the data, or the user left you no choice. Jot AFTER the write succeeds, never before, and carry the written record's resourceId in refs. Kinds: CLASSIFICATION account/tax/category choice · MATCH decided which records correspond · SCOPE chose what is in or out of a set · ASSUMPTION filled a gap the data left open · RISK proceeded despite a known concern · METHOD picked a calculation or approach · RECOVERY decided how to proceed after a failure (incl. holding a write) · DEVIATION knowingly departed from a stated rule. Accepting or rejecting an inbound external document (an e-invoice a counterparty sent) is a FINALIZE act, so pin it. A decided omission (you deliberately did not post something) is RECOVERY, which pins via withheld-write, not DEVIATION. Always give why: a call without a basis is half a record. Batch related entries in one call; each entry is acked independently.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "recall",
+      "namespace": "jots",
+      "description": "Search the org's judgment journal (jots) for precedents, prior judgment calls with their basis. Check BEFORE repeating a judgment on the same entity, kind of decision, or workflow: a prior call with its why beats re-deriving from scratch; a FLAG or REJECT disposition on it is a warning, ENDORSE a strong precedent. Sort is pinned server-side (CRITICAL and withheld-write RECOVERY entries first, then newest). An empty page means no prior judgments match this filter, or none are recorded for this org yet.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "present_questions",
+      "namespace": null,
+      "description": "Present the user with a bounded multiple-choice question (or a short sequence of them) as an interactive pick-list, instead of asking in prose. Use as your FINAL action when the user must choose among a KNOWN, finite set of options you ALREADY have from context (a prior search/list result, org defaults, or your own knowledge) to continue (e.g. \"which bank account?\", \"which of these duplicate bills?\"). Give 2-4 options per question — curate to the most likely, never dump a long list — and at most 4 questions; set multiSelect per question when more than one may apply. List the options and stop — the user's pick arrives as their next message and starts a new turn. Ask several questions at once when more than one thing is unspecified. Prose-ask only when there's no bounded set to offer (a free-text name or amount), to confirm destructive actions, or instead of fetching data just to populate options. Terminal: do not call further tools or re-list the options in text afterward.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "navigate",
+      "namespace": "navigation",
+      "description": "Dashboard navigation: discover destinations, then build deep links. Without `destination`: lists valid destinations as { key, label, kind } — filter with `query` (substring over key + label), `resource` (e.g. \"sales\"), or `kind` (\"screen\" | \"modal\"); results are capped, narrow if `truncated`. With `destination`: builds the URL to hand the user — a screen (e.g. \"reports.profit-and-loss\") or a record modal (e.g. \"sales.modal.view-sale\"); pass `resourceId` only for a record-specific modal (view/edit one record), never for screens or create/\"new\" modals. Returns { url, kind, label }; the link opens in the user's current org. Never write dashboard URLs or destination keys from memory — call with no destination to discover keys first.",
+      "readOnly": true,
+      "destructive": false
+    }
+  ],
+  "commands": [
+    "accounts",
+    "attachments",
+    "auth",
+    "background-jobs",
+    "bank",
+    "bank-rules",
+    "bills",
+    "bookmarks",
+    "calc",
+    "capsule-recipes",
+    "capsule-transaction",
+    "capsules",
+    "cash-in",
+    "cash-out",
+    "cash-transfer",
+    "cashflow",
+    "catalogs",
+    "claim-profiles",
+    "claim-types",
+    "claims",
+    "completion",
+    "contact-groups",
+    "contacts",
+    "context",
+    "currencies",
+    "currency-rates",
+    "custom-fields",
+    "customer-credit-notes",
+    "drafts",
+    "employees",
+    "export-records",
+    "exports",
+    "fixed-assets",
+    "health",
+    "help-center",
+    "init",
+    "inventory",
+    "invoices",
+    "items",
+    "jobs",
+    "jots",
+    "journals",
+    "magic",
+    "mcp",
+    "mcp-call",
+    "nano-classifiers",
+    "org",
+    "org-users",
+    "payments",
+    "posting-rules",
+    "purchase-orders",
+    "quick-fix",
+    "reconciliations",
+    "reports",
+    "resolve",
+    "sale-orders",
+    "schedulers",
+    "schema",
+    "serve",
+    "subscriptions",
+    "supplier-credit-notes",
+    "tags",
+    "tax-profiles",
+    "update",
+    "version",
+    "versions"
+  ],
+  "skills": [
+    "jaz-api",
+    "jaz-cli",
+    "jaz-conversion",
+    "jaz-recipes",
+    "jaz-jobs",
+    "jaz-pseudo-sql"
+  ],
+  "calculators": [
+    "loan",
+    "lease",
+    "depreciation",
+    "prepaid-expense",
+    "deferred-revenue",
+    "fx-reval",
+    "ecl",
+    "provision",
+    "fixed-deposit",
+    "asset-disposal",
+    "accrued-expense",
+    "leave-accrual",
+    "dividend"
+  ],
+  "recipes": [
+    "loan",
+    "lease",
+    "depreciation",
+    "prepaid-expense",
+    "deferred-revenue",
+    "fx-reval",
+    "ecl",
+    "provision",
+    "fixed-deposit",
+    "asset-disposal",
+    "accrued-expense",
+    "leave-accrual",
+    "dividend"
+  ],
+  "jobs": [
+    "month-end-close",
+    "quarter-end-close",
+    "year-end-close",
+    "bank-recon",
+    "gst-vat-filing",
+    "payment-run",
+    "credit-control",
+    "supplier-recon",
+    "audit-prep",
+    "fa-review",
+    "document-collection",
+    "statutory-filing"
+  ],
+  "urls": {
+    "github": "https://github.com/teamtinvio/jaz-ai",
+    "npm": "https://www.npmjs.com/package/jaz-clio",
+    "help": "https://help.jaz.ai"
+  }
+}

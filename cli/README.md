@@ -7,7 +7,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
-357 tools. 66 command groups. 13 calculators. 12 job playbooks. 158 API rules. 16 IFRS recipes.
+357 tools. 66 command groups. 13 calculators. 12 job playbooks. 158 API rules. 13 IFRS recipes.
 
 ```bash
 npm install -g jaz-clio

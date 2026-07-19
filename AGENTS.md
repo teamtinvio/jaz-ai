@@ -12,7 +12,7 @@ Agent skills for the [Jaz](https://jaz.ai) accounting platform. Works with [Clau
 | **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
 | **jaz-conversion** | Xero, QuickBooks, Sage, MYOB, Excel migration: CoA mapping, FX, clearing accounts, trial balance verification |
 | **jaz-jobs** | 12 close playbooks (month / quarter / year-end, bank-recon, GST/VAT, payment-run, credit-control, supplier-recon, audit-prep, FA-review, statutory-filing) + Singapore Form C-S |
-| **jaz-recipes** | 16 IFRS recipes (loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal) + 13 calculators |
+| **jaz-recipes** | 13 IFRS recipes (loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal) + 13 calculators |
 | **jaz-practice** | Multi-client practitioner workspace, engagement scaffolding, per-client config |
 
 ## Install
