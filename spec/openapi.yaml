@@ -7071,12 +7071,7 @@
           "type": "string"
         },
         "confidence": {
-          "description": "Routing hint for review attention.",
-          "enum": [
-            "LOW",
-            "MEDIUM",
-            "HIGH"
-          ],
+          "description": "Routing hint for review attention (additive; not bounced at the relay).",
           "example": "HIGH",
           "type": "string"
         },
@@ -7090,17 +7085,7 @@
           "type": "string"
         },
         "kind": {
-          "description": "Judgment kind.",
-          "enum": [
-            "CLASSIFICATION",
-            "MATCH",
-            "SCOPE",
-            "ASSUMPTION",
-            "RISK",
-            "METHOD",
-            "RECOVERY",
-            "DEVIATION"
-          ],
+          "description": "Judgment kind. Additive: the relay stores unrecognized values rather than rejecting them, so no fixed list is enforced here.",
           "example": "CLASSIFICATION",
           "type": "string"
         },
@@ -7116,13 +7101,7 @@
           "type": "string"
         },
         "tier": {
-          "description": "Agent-declared severity tier (the server also computes tierNorm).",
-          "enum": [
-            "LOW",
-            "MEDIUM",
-            "HIGH",
-            "CRITICAL"
-          ],
+          "description": "Agent-declared severity tier (the server also computes tierNorm; additive, not bounced at the relay).",
           "example": "MEDIUM",
           "type": "string"
         },
@@ -7136,13 +7115,7 @@
           "type": "string"
         },
         "writePath": {
-          "description": "How the jot arrived (defaults to TOOL server-side). Invalid values are repaired server-side, never bounced.",
-          "enum": [
-            "TOOL",
-            "PIGGYBACK",
-            "REST",
-            "CLI"
-          ],
+          "description": "How the jot arrived (defaults to TOOL server-side). Additive: invalid values are repaired server-side, never bounced, so no fixed list is enforced here.",
           "example": "REST",
           "type": "string"
         }
@@ -11248,20 +11221,7 @@
           "type": "string"
         },
         "relation": {
-          "description": "Object form: relation role (default SUBJECT). Invalid values are repaired server-side, never bounced.",
-          "enum": [
-            "CREATE",
-            "UPDATE",
-            "DELETE",
-            "FINALIZE",
-            "PAY",
-            "RECONCILE",
-            "TRIGGER",
-            "SUBJECT",
-            "INPUT",
-            "REJECTED",
-            "SUPERSEDES"
-          ],
+          "description": "Object form: relation role (default SUBJECT). Additive: invalid values are repaired server-side, never bounced, so no fixed list is enforced here.",
           "example": "CREATE",
           "type": "string"
         },
@@ -11301,17 +11261,7 @@
           "type": "string"
         },
         "kind": {
-          "description": "Judgment kind.",
-          "enum": [
-            "CLASSIFICATION",
-            "MATCH",
-            "SCOPE",
-            "ASSUMPTION",
-            "RISK",
-            "METHOD",
-            "RECOVERY",
-            "DEVIATION"
-          ],
+          "description": "Filter by judgment kind (exact match).",
           "type": "string"
         },
         "pinned": {
@@ -11324,13 +11274,7 @@
           "type": "string"
         },
         "tier": {
-          "description": "Agent-declared severity tier.",
-          "enum": [
-            "LOW",
-            "MEDIUM",
-            "HIGH",
-            "CRITICAL"
-          ],
+          "description": "Filter by agent-declared severity tier (exact match).",
           "type": "string"
         }
       },
