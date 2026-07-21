@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.25.10] - 2026-07-21
+
+- Internal groundwork for the chat agent's progressive memory (feature-flagged off). No user-facing changes since 5.25.0.
+
 ## [5.25.0] - 2026-07-20
 
 - Internal groundwork for the email agent's progressive memory (feature-flagged off). No user-facing changes since 5.24.16.

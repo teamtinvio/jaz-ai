@@ -1,6 +1,6 @@
 {
   "name": "jaz-clio",
-  "version": "5.25.8",
+  "version": "5.25.10",
   "description": "Clio: Command Line Interface Operator for Jaz AI.",
   "type": "module",
   "bin": {
