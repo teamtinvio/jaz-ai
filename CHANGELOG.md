@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.28.0] - 2026-07-22
+
+Focused the slash commands on the jobs that have real steps to follow. Seven commands are retired — four were thin wrappers you never needed (just ask for what you want, and the agent uses the same tools), and three period-close commands are being replaced by a single close command that remembers where you left off.
+
+| Retired | Use instead |
+|---------|-------------|
+| `/jaz-api` | Ask directly — "create a bill for Acme, $1,200, due 30 June" |
+| `/jaz-report` | Ask directly — "trial balance as at 30 June" |
+| `/jaz-calc` | Ask directly — "depreciate a $50k asset over 5 years" (or `clio calc <name>`) |
+| `/jaz-recipe` | Ask directly — "set up the prepaid insurance" (or `clio ct <recipe>`) |
+| `/jaz-month-end` | `/clio-close 2026-06` (next release) |
+| `/jaz-quarter-end` | `/clio-close 2026-Q2` (next release) |
+| `/jaz-year-end` | `/clio-close FY2026` (next release) |
+
+The ten remaining commands are unchanged: audit-prep, credit-control, doc-collect, fa-review, gst, migrate, payment-run, recon, supplier-recon, tax-sg. Every close playbook, calculator, and recipe is still available in full through the skills and the `clio` CLI — only the command shortcuts changed.
 ## [5.25.11] - 2026-07-21
 
 - More internal groundwork for progressive memory (feature-flagged off): a saved preference can now carry how strongly it should steer the agent, and a background pass can fold near-duplicate saved preferences into a single instruction. No user-facing changes since 5.25.0.
