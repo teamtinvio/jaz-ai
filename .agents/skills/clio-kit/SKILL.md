@@ -1,6 +1,6 @@
 ---
 name: clio-kit
-version: 5.29.0
+version: 5.29.1
 description: >-
   Use this skill when an accountant, bookkeeper, or owner is running real books
   in Jaz across one or more organizations from the terminal — setting up a
@@ -46,7 +46,7 @@ Every flow is specified in `references/flows.md` — that file is the procedure,
 
 | Intent | Flow | Command |
 |---|---|---|
-| Set up the kit · add an organization | `init` | `/clio-init` |
+| Set up the kit · add a company | `setup` | `/clio-setup` |
 | Start work on one organization | `open` | `/clio-open <org>` |
 | Run a period close | `close` | `/clio-close <period>` |
 | Clear the draft review queue | `review` | `/clio-review` |

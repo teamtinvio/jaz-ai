@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.29.1] - 2026-07-22
+
+Renamed `/clio-init` to `/clio-setup`. "Init" is programmer shorthand; nobody setting up their books thinks of it that way. Same command, same behaviour — run it once to set up, run it again to add another company.
+
 ## [5.29.0] - 2026-07-22
 
 **Clio Kit — run your practice from the terminal.**

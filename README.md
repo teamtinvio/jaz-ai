@@ -58,7 +58,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 7 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.29.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.29.1", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -72,14 +72,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 7 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.29.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.29.1", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.29.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.29.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -256,7 +256,7 @@ Every one of them also works by just asking — the commands are a shortcut, not
 A close is not one conversation. Month-end runs eighteen steps over one to three days, and an accountant serving eight clients runs it eight times with eight different sets of bank accounts, materiality thresholds, and recurring accruals. Clio Kit gives each organization a folder that remembers all of it.
 
 ```
-/clio-init                  set up the kit, connect an organization
+/clio-setup                  set up the kit, connect an organization
 /clio-open acme             load its context, verify the connection
 /clio-close 2026-06         run the close — resumable across sessions
 /clio-review                approve the drafts waiting on you
@@ -284,7 +284,7 @@ Keys never touch the workspace. They live in the CLI's credential store; the fol
 
 Multi-organization work needs the CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Windows is supported by design but not yet verified — [tell us](https://github.com/teamtinvio/jaz-ai/issues) if you hit something.
 
-Start with `/clio-init`, or just say "set up Clio Kit for my company" — the skill triggers the same flows in Codex CLI, Cursor, and Copilot, which have no slash commands.
+Start with `/clio-setup`, or just say "set up Clio Kit for my company" — the skill triggers the same flows in Codex CLI, Cursor, and Copilot, which have no slash commands.
 
 > Slash commands share one global namespace across installed plugins, so `/clio-*` and `/jaz-*` could collide with another plugin using the same names. If that happens, ask for the flow in words instead ("open acme", "close the books for June") — it triggers on intent, not on the command name.
 
@@ -417,7 +417,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.29.0", "mcp"],
+  "args": ["-y", "jaz-clio@5.29.1", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

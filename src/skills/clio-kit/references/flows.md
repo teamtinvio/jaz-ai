@@ -14,11 +14,11 @@ Schemas live in `workspace.md` (KIT.md, ORG.md, `.env`) and `close-state.md` (CL
 
 ---
 
-## init — set up the kit, onboard an organization
+## setup — set up the kit, onboard an organization
 
 Triggers: "set up Clio Kit", "add my company", "onboard a new client", "connect another org".
 
-Idempotent. No kit → create it. Kit exists → this is the add-an-organization flow.
+Idempotent. No kit → create it. Kit exists → this is the add-a-company flow.
 
 **1. Locate the root.** `JAZ_KIT_HOME` if set, else `~/Documents/Clio Kit`. If it exists, skip to step 4.
 
@@ -71,7 +71,7 @@ Present the filled ORG.md and ask the user to confirm or correct. Never present 
 
 Triggers: "open <org>", "switch to <org>", "work on <client>", "let's do <org>'s books".
 
-**1. Resolve the slug.** Fuzzy-match against `orgs/*/`. No match → offer the init flow. Ambiguous → list candidates and ask.
+**1. Resolve the slug.** Fuzzy-match against `orgs/*/`. No match → offer the setup flow. Ambiguous → list candidates and ask.
 
 **2. Guard against sync conflicts.** Glob the org directory for `*conflicted copy*` (iCloud writes these when two machines edit the same file). Any hit → stop, list them, and ask the user to resolve before continuing. Proceeding would read stale state.
 
