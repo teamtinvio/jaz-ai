@@ -4,7 +4,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
   <img src="https://img.shields.io/badge/tools-357-blue?style=for-the-badge" alt="357 tools">
   <img src="https://img.shields.io/badge/API_rules-158-green?style=for-the-badge" alt="158 API rules">
-  <img src="https://img.shields.io/badge/skills-6-purple?style=for-the-badge" alt="6 skills">
+  <img src="https://img.shields.io/badge/skills-7-purple?style=for-the-badge" alt="7 skills">
   <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
   <img src="https://img.shields.io/badge/jobs-12-teal?style=for-the-badge" alt="12 Jobs">
@@ -17,7 +17,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/stargazers"><img src="https://img.shields.io/github/stars/teamtinvio/jaz-ai?style=flat-square&logo=github" alt="GitHub stars"></a>
 </p>
 
-The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 6 skills, 13 IFRS recipes, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, first-try tool selection, structured errors an agent can recover from.
+The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 7 skills, 13 IFRS recipes, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, first-try tool selection, structured errors an agent can recover from.
 
 > Also fully compatible with [Juan Accounting](https://juan.ac) (same API surface).
 
@@ -30,6 +30,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 6 sk
 - [Token economics + speed](#token-economics--speed)
 - [For AI agents](#for-ai-agents)
 - [For accountants](#for-accountants)
+- [Clio Kit · run your practice](#clio-kit--run-your-practice)
 - [Reference](#reference)
 - [Troubleshooting](#troubleshooting)
 - [Privacy & security](#privacy--security)
@@ -57,7 +58,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 6 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.28.1", "mcp"],
+      "args": ["-y", "jaz-clio@5.29.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -71,14 +72,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 6 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.28.1", "mcp"],
+      "args": ["-y", "jaz-clio@5.29.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.28.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.29.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -147,7 +148,7 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 ## What you get
 
 - **357 tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and notes which operations are safe to retry. The model picks the right tool on the first call.
-- **6 skills** with the production-grade rules and playbooks any agent needs:
+- **7 skills** with the production-grade rules and playbooks any agent needs:
 
 | Skill | What it teaches an agent |
 |-------|--------------------------|
@@ -157,6 +158,7 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 | **jaz-jobs** | 12 close playbooks (month-end / quarter-end / year-end / bank-recon / GST-VAT / payment-run / credit-control / supplier-recon / audit-prep / FA-review / statutory-filing) + Singapore Form C-S |
 | **jaz-recipes** | 13 IFRS recipes (loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal, etc.) + 13 calculators |
 | **jaz-pseudo-sql** | Read-only SQL over the curated reporting schema: ad-hoc questions, joins and aggregates, sync preview or async CSV export |
+| **clio-kit** | Multi-organization operator workspace: per-org context, resumable period closes, draft review queue, policies and rules |
 
 - **3 meta-tools** (`search_tools`, `describe_tools`, `execute_tool`) for deferred discovery so the full catalog never has to load into context.
 - **Help center mirror** at `help-center-mirror/` synced weekly from Intercom.
@@ -232,11 +234,65 @@ Run period work conversationally. Describe it to any agent:
 
 13 calculators (`clio calc loan / depreciation / lease / ecl / fx-reval / provision / fixed-deposit / asset-disposal / prepaid-expense / deferred-revenue / accrued-expense / leave-accrual / dividend`), 12 job blueprints (`clio jobs month-end / quarter-end / year-end / bank-recon / document-collection / gst-vat / payment-run / credit-control / supplier-recon / audit-prep / fa-review / statutory-filing`), all with `--json` for structured blueprint output.
 
+In Claude Code, ten commands walk the jobs that have real steps to follow:
+
+| Command | What it runs |
+|---------|--------------|
+| `/jaz-recon` | Bank reconciliation — match, categorise, resolve |
+| `/jaz-gst` | GST/VAT return prep — tax ledger review, discrepancies, filing summary |
+| `/jaz-payment-run` | Batch bill payments by due date |
+| `/jaz-credit-control` | Aged receivables, chase list, bad-debt assessment |
+| `/jaz-supplier-recon` | Supplier statement vs AP ledger |
+| `/jaz-audit-prep` | Reports, schedules and reconciliations for the auditor |
+| `/jaz-fa-review` | Fixed asset register — depreciation, disposals, write-offs |
+| `/jaz-doc-collect` | Scan and classify client documents for upload |
+| `/jaz-migrate` | Migration from Xero, QuickBooks, Sage, MYOB or Excel |
+| `/jaz-tax-sg` | Singapore Form C-S / C-S Lite computation |
+
+Every one of them also works by just asking — the commands are a shortcut, not a requirement.
+
+## Clio Kit · run your practice
+
+A close is not one conversation. Month-end runs eighteen steps over one to three days, and an accountant serving eight clients runs it eight times with eight different sets of bank accounts, materiality thresholds, and recurring accruals. Clio Kit gives each organization a folder that remembers all of it.
+
+```
+/clio-init                  set up the kit, connect an organization
+/clio-open acme             load its context, verify the connection
+/clio-close 2026-06         run the close — resumable across sessions
+/clio-review                approve the drafts waiting on you
+/clio-status                every organization, what's due, what's pending
+/clio-exit                  journal the session, sweep scratch
+```
+
+**`/jaz-*` runs a workflow. `/clio-*` runs your practice.** Also `/clio-keys`, `/clio-policy`, `/clio-teach`, `/clio-save`, `/clio-help`.
+
+```
+~/Documents/Clio Kit/
+  orgs/<slug>/
+    ORG.md                  bank accounts, materiality, recurring accruals, FY end
+    policies/ rules/        how this organization works
+    closes/2026-06/
+      CLOSE.md              exactly where the close stopped
+      workpapers/           the permanent audit file
+```
+
+Work is created as drafts and every record carries a link into Jaz, so you review in the UI and finalize when you're ready — the agent never posts live behind you. Interrupted closes resume where they stopped, and reconciliation steps verify against the ledger before retrying, so a crash never doubles a journal.
+
+Keys never touch the workspace. They live in the CLI's credential store; the folder holds only a label pointing at one. That's what makes the kit safe to keep in Documents, back up, or share with colleagues through a private git repository.
+
+**One organization per session, enforced.** Every call names its organization explicitly rather than relying on whichever one happens to be active. If something in your shell would silently override that choice — an exported `JAZ_API_KEY`, or several comma-separated keys — the command stops instead of posting to the wrong company's books.
+
+Multi-organization work needs the CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Windows is supported by design but not yet verified — [tell us](https://github.com/teamtinvio/jaz-ai/issues) if you hit something.
+
+Start with `/clio-init`, or just say "set up Clio Kit for my company" — the skill triggers the same flows in Codex CLI, Cursor, and Copilot, which have no slash commands.
+
+> Slash commands share one global namespace across installed plugins, so `/clio-*` and `/jaz-*` could collide with another plugin using the same names. If that happens, ask for the flow in words instead ("open acme", "close the books for June") — it triggers on intent, not on the command name.
+
 ## Reference
 
 - **[CONTEXT.md](CONTEXT.md)** · runtime rules-of-engagement for agents using the stack
 - **[CHANGELOG.md](CHANGELOG.md)** · release notes
-- **[Skills source](src/skills/)** · all 6 skills (jaz-api / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-pseudo-sql)
+- **[Skills source](src/skills/)** · all 7 skills (jaz-api / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-pseudo-sql / clio-kit)
 - **[OpenAPI spec](spec/openapi.yaml)** · full HTTP surface, synced weekly
 - **[README-cli.md](README-cli.md)** · npm-package README, full CLI command catalog
 - **[help.jaz.ai](https://help.jaz.ai)** · Jaz product help center
@@ -361,7 +417,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.28.1", "mcp"],
+  "args": ["-y", "jaz-clio@5.29.0", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

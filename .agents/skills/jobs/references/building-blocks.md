@@ -140,7 +140,7 @@ Every leg carries its own explicit `org_id` — a wrong "active" org silently po
 | 500 | Retry once with 5s backoff; on second 500 surface "escalate to support with `requestId`" |
 | 404 (resource gone) | Stale resource id (e.g., a cached `bank_account` resourceId). Re-resolve via search; surface |
 | Async PARTIAL_SUCCESS | Read `data[0].errorDetails[]`; loop back to re-execute failed rows only |
-| NOT idempotent on retry | Per `jaz-api/SKILL.md` rule 124 — confirm state via search before retrying |
+| NOT idempotent on retry | Per `jaz-api/SKILL.md` rule 125 — confirm state via search before retrying |
 
 ---
 

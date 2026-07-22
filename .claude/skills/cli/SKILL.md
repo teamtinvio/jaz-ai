@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.28.1
+version: 5.29.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -230,7 +230,7 @@ clio invoices search --query "status:unpaid sort:amount:desc" --limit 10
 - Unsupported entities have no `--query` flag (background-jobs, tags, contact-groups, etc.).
 - Never use `-` for negation — it means negative amount (e.g. `$-500` = amount is -500). Use `!` or `NOT`.
 
-See [references/search-reference.md](./references/search-reference.md) for the full syntax spec.
+See `references/search-reference.md` in the `jaz-api` skill for the full syntax spec.
 
 ## Body Input
 

@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.28.1+c411e889",
+  "contentVersion": "5.29.0+3b029424",
   "counts": {
     "tools": 357,
     "namespaces": 42,
     "calculators": 13,
     "recipes": 13,
     "jobs": 12,
-    "skills": 6,
+    "skills": 7,
     "commands": 66,
     "apiRules": 158
   },
@@ -2756,7 +2756,8 @@
     "jaz-conversion",
     "jaz-recipes",
     "jaz-jobs",
-    "jaz-pseudo-sql"
+    "jaz-pseudo-sql",
+    "clio-kit"
   ],
   "calculators": [
     "loan",

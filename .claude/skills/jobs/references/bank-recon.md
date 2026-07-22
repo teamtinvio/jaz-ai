@@ -44,7 +44,7 @@
 ### Cross-references
 - Invoked by `month-end-close.md` step 3 (mandatory pre-close gate) — loop over each of the org's bank accounts.
 - Sibling job: `bank-match.md` (the cascade matcher algorithm + scoring weights). Always run the cascade matcher for any account with > ~10 unreconciled items.
-- API rules: `jaz-api/SKILL.md` rules 18 (bank-accounts envelope), 26 (cash entries `accountResourceId` shape), 50a (search query DSL), 124 (recon NOT idempotent).
+- API rules: `jaz-api/SKILL.md` rules 18 (bank-accounts envelope), 26 (cash entries `accountResourceId` shape), 50a (search query DSL), 125 (recon NOT idempotent).
 
 ---
 
@@ -232,7 +232,7 @@ Per account: `bookBalance == bankStatementBalance ± documentedTimingDifference`
 | `view_auto_reconciliation` | 500 on high-volume account → returns `{degraded:true}` | Documented OOM quirk on accounts with thousands of unreconciled rows. The tool degrades (doesn't throw): scope per-period (`valueDateRange`) OR fall back to `clio jobs bank-recon match` cascade. |
 | `view_auto_reconciliation` | 404 → returns `{notSupported:true}` | Endpoint not enabled for the org's plan tier. Use cascade matcher only. |
 | `quick_reconcile` | PARTIAL_SUCCESS jobId | Async result. Poll `search_background_jobs(filter: {resourceId: {eq: <jobId>}})` until terminal. Read `data[0].errorDetails[]` for per-row failures; loop back to step 4 for the failed rows. |
-| `quick_reconcile` / `reconcile_*` | (any) — NOT idempotent (rule 124) | On 500 / network error, do NOT retry. Confirm reconciled state via `view_auto_reconciliation` OR `search_bank_records(status: 'RECONCILED')` first. |
+| `quick_reconcile` / `reconcile_*` | (any) — NOT idempotent (rule 125) | On 500 / network error, do NOT retry. Confirm reconciled state via `view_auto_reconciliation` OR `search_bank_records(status: 'RECONCILED')` first. |
 | `reconcile_with_payments` | (any 5xx/network) — NOT idempotent, **no client key** | A blind retry **double-creates a payment**. ALWAYS re-check `search_bank_records(status:'RECONCILED')` for the entry before retrying. (magic_match is entry-level idempotency-keyed; learned_prediction takes a `retryToken`.) |
 | `reconcile_magic_match` | 200 with non-empty `failed[]` | PARTIAL success — `reconciled[]` succeeded, `failed[]` carries per-entry `errorCode`. Surface failures + loop only on the failed entries. **All-fail** (empty `reconciled[]`) = hard stop, surface. A re-submit returns already-done entries in `reconciled[]` (not `failed[]`) — don't treat them as new failures. |
 | `reconcile_learned_prediction` | error (stale/invalid `predictedPayload`) | Do NOT retry the same opaque payload. Fall back to `reconcile_with_payments` or manual match. `retryToken` forces a fresh journal on an intentional edit-retry; omit for idempotent replay. |

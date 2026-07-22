@@ -43,7 +43,7 @@
 - Org inputs this job needs (confirm with the user when not already on file): the list of recurring accruals, the bank accounts, the materiality threshold, the CoA mapping, the base currency, and whether the org is multi-currency.
 - Sibling jobs: `bank-recon.md` (step 3 detail), `payment-run.md` (typically run separately mid-month), `quarter-end-close.md` / `year-end-close.md` (additive on top of this base).
 - Recipes invoked: `accrued-expense`, `prepaid-expense`, `deferred-revenue`, `depreciation`, `leave-accrual` + `accrued-expense` (employee accruals / bonus), `loan` (verification only — engine emits interest), `fx-reval`, `ecl`. See the transaction-recipes skill for engine entry points.
-- API rules: `jaz-api/SKILL.md` rules 2 (valueDate not issueDate), 14 (saveAsDraft default), 18 (bank-accounts envelope), 31 (currency object shape), 36 (endDate for AR/AP point-in-time), 124 (recon NOT idempotent).
+- API rules: `jaz-api/SKILL.md` rules 2 (valueDate not issueDate), 14 (saveAsDraft default), 18 (bank-accounts envelope), 31 (currency object shape), 36 (endDate for AR/AP point-in-time), 125 (recon NOT idempotent).
 
 ---
 
@@ -240,7 +240,7 @@ If residuals were documented at steps 3 or 17, record the judgment after the loc
 | `search_bank_records` | 404 | Account doesn't exist or the bank account resourceId is stale. Re-run `list_bank_accounts`. |
 | `quick_reconcile` | 422 `amount_mismatch` | Cascade tolerance too loose. Surface to the user; accept manually OR reject. |
 | `reconcile_invoice_receipt` | 422 `invoice_status_invalid` | Matched invoice still DRAFT. `finalize_invoice(resourceId: <id>)` first. |
-| `reconcile_*` | (any) — NOT idempotent | Per `jaz-api/SKILL.md` rule 124. On 500 / network error, do NOT retry. Confirm reconciled state via `view_auto_reconciliation` or `search_bank_records(status: 'RECONCILED')` first. |
+| `reconcile_*` | (any) — NOT idempotent | Per `jaz-api/SKILL.md` rule 125. On 500 / network error, do NOT retry. Confirm reconciled state via `view_auto_reconciliation` or `search_bank_records(status: 'RECONCILED')` first. |
 | `plan_recipe` | 422 `account_not_found` / `contact_not_found` | Step resolution incomplete. `search_accounts` / `search_contacts`; create if missing. Halt and surface to the user. |
 | `bulk_finalize_drafts` | 422 `journal_unbalanced` | Recipe regression. Halt; do not retry without manual review. |
 | `update_account` lockDate | 422 `lock_date_violated` | Open drafts in the period. Re-run step 17 gates. |

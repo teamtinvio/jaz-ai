@@ -7,14 +7,14 @@
   },
   "metadata": {
     "description": "Jaz accounting platform skills for AI agents and humans",
-    "version": "5.28.1"
+    "version": "5.29.0"
   },
   "plugins": [
     {
       "name": "jaz-ai",
       "source": "./",
-      "description": "Every endpoint, field name, error code, and production gotcha for Jaz — directly inside your AI agent. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any Agent Skills-compatible tool. API reference + data conversion playbook + 13 transaction recipes + 12 accounting jobs (month/quarter/year-end close + 9 ad-hoc operational workflows) + Singapore Form C-S corporate income tax computation (wizard workflow + CLI engine) + 13 CLI financial calculators with journal entries, workings, and execution blueprints. 10 slash commands for guided workflows.",
-      "version": "5.28.1",
+      "description": "Every endpoint, field name, error code, and production gotcha for Jaz — directly inside your AI agent. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any Agent Skills-compatible tool. API reference + data conversion playbook + 13 transaction recipes + 12 accounting jobs (month/quarter/year-end close + 9 ad-hoc operational workflows) + Singapore Form C-S corporate income tax computation (wizard workflow + CLI engine) + 13 CLI financial calculators with journal entries, workings, and execution blueprints. Clio Kit adds a multi-organization operator workspace — per-client context, resumable period closes, and a draft review queue. 21 slash commands for guided workflows.",
+      "version": "5.29.0",
       "author": {
         "name": "Jaz"
       },

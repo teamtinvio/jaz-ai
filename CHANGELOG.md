@@ -1,5 +1,32 @@
 # Changelog
 
+## [5.29.0] - 2026-07-22
+
+**Clio Kit — run your practice from the terminal.**
+
+A close is not one conversation. Month-end runs eighteen steps over one to three days, and if you serve eight clients you run it eight times with eight different sets of bank accounts, materiality thresholds, and recurring accruals. Clio Kit gives each organization a folder that remembers all of it.
+
+```
+/clio-init                  set up the kit, connect an organization
+/clio-open acme             load its context, verify the connection
+/clio-close 2026-06         run the close — resumable across sessions
+/clio-review                approve the drafts waiting on you
+/clio-status                every organization, what's due, what's pending
+/clio-exit                  journal the session, sweep scratch
+```
+
+Plus `/clio-keys`, `/clio-policy`, `/clio-teach`, `/clio-save`, and `/clio-help`. `/jaz-*` runs a workflow; `/clio-*` runs your practice.
+
+**What it remembers.** Each organization gets an `ORG.md` holding the things a close otherwise stops to ask for every time — bank accounts, materiality threshold, recurring accruals and how each is estimated, fiscal year end, filing frequency. Onboarding reads most of it from your ledger and asks you to confirm, rather than interviewing you about facts Jaz already knows.
+
+**What it protects.** Everything is created as a draft, and every record carries a link into Jaz, so you review in the interface and finalize when you're ready — nothing posts live behind you. Interrupted closes resume exactly where they stopped, and any step that was mid-write when a session ended is verified against the ledger before it is retried, so a crash never doubles a journal. The period lock only moves after the review queue is empty and you explicitly confirm.
+
+**Where keys live.** Not in the workspace. They stay in the CLI's credential store, and the folder holds only a label pointing at one. That is what makes the kit safe to keep in Documents, back up, or share with colleagues through a private git repository.
+
+Multi-organization work needs the CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. In Codex CLI, Cursor, and Copilot — which have no slash commands — the same flows trigger from plain requests like "open acme" or "close the books for June". Windows is supported by design but not yet verified.
+
+Start with `/clio-init`.
+
 ## [5.28.1] - 2026-07-22
 
 Slash commands now ship with the plugin. If you installed Jaz through the Claude Code marketplace, `/jaz-recon`, `/jaz-gst`, `/jaz-payment-run` and the other seven are available immediately — previously they reached only people who installed the `clio` CLI from npm. Nothing to do: update the plugin and type `/` to see them.
@@ -14,9 +41,9 @@ Focused the slash commands on the jobs that have real steps to follow. Seven com
 | `/jaz-report` | Ask directly — "trial balance as at 30 June" |
 | `/jaz-calc` | Ask directly — "depreciate a $50k asset over 5 years" (or `clio calc <name>`) |
 | `/jaz-recipe` | Ask directly — "set up the prepaid insurance" (or `clio ct <recipe>`) |
-| `/jaz-month-end` | `/clio-close 2026-06` (next release) |
-| `/jaz-quarter-end` | `/clio-close 2026-Q2` (next release) |
-| `/jaz-year-end` | `/clio-close FY2026` (next release) |
+| `/jaz-month-end` | `/clio-close 2026-06` |
+| `/jaz-quarter-end` | `/clio-close 2026-Q2` |
+| `/jaz-year-end` | `/clio-close FY2026` |
 
 The ten remaining commands are unchanged: audit-prep, credit-control, doc-collect, fa-review, gst, migrate, payment-run, recon, supplier-recon, tax-sg. Every close playbook, calculator, and recipe is still available in full through the skills and the `clio` CLI — only the command shortcuts changed.
 

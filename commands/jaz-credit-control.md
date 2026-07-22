@@ -59,7 +59,7 @@ Review the plan output, then re-run without `--plan` to post. Entries are create
 
 ## Key Rules
 
-- `--overdue-days` sets the threshold for the chase list (default: 0 = all overdue)
+- `--overdue-days` sets the threshold for the chase list (default: 30)
 - AR aging report uses `aged-ar` report type
 - ECL provisioning uses IFRS 9 simplified approach (5-bucket matrix)
 - No `amountDue` field on invoices — check `paymentRecords` to determine remaining balance
