@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.28.1] - 2026-07-22
+
+Slash commands now ship with the plugin. If you installed Jaz through the Claude Code marketplace, `/jaz-recon`, `/jaz-gst`, `/jaz-payment-run` and the other seven are available immediately — previously they reached only people who installed the `clio` CLI from npm. Nothing to do: update the plugin and type `/` to see them.
+
 ## [5.28.0] - 2026-07-22
 
 Focused the slash commands on the jobs that have real steps to follow. Seven commands are retired — four were thin wrappers you never needed (just ask for what you want, and the agent uses the same tools), and three period-close commands are being replaced by a single close command that remembers where you left off.
@@ -15,6 +19,7 @@ Focused the slash commands on the jobs that have real steps to follow. Seven com
 | `/jaz-year-end` | `/clio-close FY2026` (next release) |
 
 The ten remaining commands are unchanged: audit-prep, credit-control, doc-collect, fa-review, gst, migrate, payment-run, recon, supplier-recon, tax-sg. Every close playbook, calculator, and recipe is still available in full through the skills and the `clio` CLI — only the command shortcuts changed.
+
 ## [5.25.11] - 2026-07-21
 
 - More internal groundwork for progressive memory (feature-flagged off): a saved preference can now carry how strongly it should steer the agent, and a background pass can fold near-duplicate saved preferences into a single instruction. No user-facing changes since 5.25.0.
