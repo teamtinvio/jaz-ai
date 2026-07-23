@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.30.1] - 2026-07-24
+
+Internal release automation update. No user-facing changes since v5.30.0.
+
 ## [5.30.0] - 2026-07-24
 
 **Clio Kit is now Jaz Kit, and its commands are `/jk-*`.** "Clio" is the CLI's name, not something an accountant recognises; Jaz is the product they use. The command that sets up a company is `/jk-setup`, running a close is `/jk-close`, and so on — eleven `/jk-*` commands, with `/jaz-*` still running the individual workflows.
