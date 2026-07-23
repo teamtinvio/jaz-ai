@@ -1,7 +1,7 @@
 {
   "name": "jaz-ai",
-  "version": "5.29.2",
-  "description": "Complete AI agent stack for Jaz Accounting. 357 tools, 158 API rules, 13 IFRS recipes, 13 calculators, 12 job playbooks. Clio Kit multi-organization workspaces with resumable closes. Data migration (Xero/QB/Sage/MYOB). Singapore Form C-S tax. For Claude Code, Copilot, Cursor, Codex, and any MCP-compatible agent.",
+  "version": "5.30.0",
+  "description": "Complete AI agent stack for Jaz Accounting. 357 tools, 158 API rules, 13 IFRS recipes, 13 calculators, 12 job playbooks. Jaz Kit multi-organization workspaces with resumable closes. Data migration (Xero/QB/Sage/MYOB). Singapore Form C-S tax. For Claude Code, Copilot, Cursor, Codex, and any MCP-compatible agent.",
   "author": {
     "name": "Jaz",
     "url": "https://github.com/teamtinvio/jaz-ai"
@@ -9,8 +9,8 @@
   "homepage": "https://help.jaz.ai",
   "license": "MIT",
   "keywords": ["jaz", "juan", "accounting", "api", "invoicing", "conversion", "migration", "xero", "quickbooks"],
-  "skills": ["./.claude/skills/api", "./.claude/skills/cli", "./.claude/skills/conversion", "./.claude/skills/transaction-recipes", "./.claude/skills/jobs", "./.claude/skills/jaz-pseudo-sql", "./.claude/skills/clio-kit"],
-  "agentSkills": ["./.agents/skills/api", "./.agents/skills/cli", "./.agents/skills/conversion", "./.agents/skills/transaction-recipes", "./.agents/skills/jobs", "./.agents/skills/jaz-pseudo-sql", "./.agents/skills/clio-kit"],
+  "skills": ["./.claude/skills/api", "./.claude/skills/cli", "./.claude/skills/conversion", "./.claude/skills/transaction-recipes", "./.claude/skills/jobs", "./.claude/skills/jaz-pseudo-sql", "./.claude/skills/jaz-kit"],
+  "agentSkills": ["./.agents/skills/api", "./.agents/skills/cli", "./.agents/skills/conversion", "./.agents/skills/transaction-recipes", "./.agents/skills/jobs", "./.agents/skills/jaz-pseudo-sql", "./.agents/skills/jaz-kit"],
   "mcpServers": {
     "clio": {
       "command": "npx",

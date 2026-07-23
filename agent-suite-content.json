@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.29.2+92778f84",
+  "contentVersion": "5.30.0+baec5eb1",
   "counts": {
     "tools": 357,
     "namespaces": 42,
@@ -2757,7 +2757,7 @@
     "jaz-recipes",
     "jaz-jobs",
     "jaz-pseudo-sql",
-    "clio-kit"
+    "jaz-kit"
   ],
   "calculators": [
     "loan",

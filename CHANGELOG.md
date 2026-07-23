@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.30.0] - 2026-07-24
+
+**Clio Kit is now Jaz Kit, and its commands are `/jk-*`.** "Clio" is the CLI's name, not something an accountant recognises; Jaz is the product they use. The command that sets up a company is `/jk-setup`, running a close is `/jk-close`, and so on — eleven `/jk-*` commands, with `/jaz-*` still running the individual workflows.
+
+**Keys now live with the company.** Each company's folder holds its own key in a gitignored `.env`. A Jaz API key is scoped to one company, so the folder you open is the company you work on — no profiles, no labels, nothing to switch, no way to write to the wrong books once a folder's own key checks out. Setup guides you to paste the key straight into the file (never through chat); everything else reads it from there. On a Mac that syncs Documents to iCloud the key syncs too — setup says so once, and you can keep keys off the cloud by pointing `JAZ_KIT_HOME` elsewhere.
+
 ## [5.29.2] - 2026-07-22
 
 Fiscal year end is now recorded in full ("31 December") rather than the `31-12` form the API returns. Year-end and quarter closes resolve their date range from that field, and the short form is ambiguous — `01-12` could be read two ways.

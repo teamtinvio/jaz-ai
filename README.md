@@ -30,7 +30,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 7 sk
 - [Token economics + speed](#token-economics--speed)
 - [For AI agents](#for-ai-agents)
 - [For accountants](#for-accountants)
-- [Clio Kit · run your practice](#clio-kit--run-your-practice)
+- [Jaz Kit · run your practice](#jaz-kit--run-your-practice)
 - [Reference](#reference)
 - [Troubleshooting](#troubleshooting)
 - [Privacy & security](#privacy--security)
@@ -58,7 +58,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 7 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.29.2", "mcp"],
+      "args": ["-y", "jaz-clio@5.30.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -72,14 +72,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 357 tools, 7 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.29.2", "mcp"],
+      "args": ["-y", "jaz-clio@5.30.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.29.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.30.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -158,7 +158,7 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 | **jaz-jobs** | 12 close playbooks (month-end / quarter-end / year-end / bank-recon / GST-VAT / payment-run / credit-control / supplier-recon / audit-prep / FA-review / statutory-filing) + Singapore Form C-S |
 | **jaz-recipes** | 13 IFRS recipes (loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal, etc.) + 13 calculators |
 | **jaz-pseudo-sql** | Read-only SQL over the curated reporting schema: ad-hoc questions, joins and aggregates, sync preview or async CSV export |
-| **clio-kit** | Multi-organization operator workspace: per-org context, resumable period closes, draft review queue, policies and rules |
+| **jaz-kit** | Multi-organization operator workspace: per-org context, resumable period closes, draft review queue, policies and rules |
 
 - **3 meta-tools** (`search_tools`, `describe_tools`, `execute_tool`) for deferred discovery so the full catalog never has to load into context.
 - **Help center mirror** at `help-center-mirror/` synced weekly from Intercom.
@@ -251,23 +251,23 @@ In Claude Code, ten commands walk the jobs that have real steps to follow:
 
 Every one of them also works by just asking — the commands are a shortcut, not a requirement.
 
-## Clio Kit · run your practice
+## Jaz Kit · run your practice
 
-A close is not one conversation. Month-end runs eighteen steps over one to three days, and an accountant serving eight clients runs it eight times with eight different sets of bank accounts, materiality thresholds, and recurring accruals. Clio Kit gives each organization a folder that remembers all of it.
-
-```
-/clio-setup                  set up the kit, connect an organization
-/clio-open acme             load its context, verify the connection
-/clio-close 2026-06         run the close — resumable across sessions
-/clio-review                approve the drafts waiting on you
-/clio-status                every organization, what's due, what's pending
-/clio-exit                  journal the session, sweep scratch
-```
-
-**`/jaz-*` runs a workflow. `/clio-*` runs your practice.** Also `/clio-keys`, `/clio-policy`, `/clio-teach`, `/clio-save`, `/clio-help`.
+A close is not one conversation. Month-end runs eighteen steps over one to three days, and an accountant serving eight clients runs it eight times with eight different sets of bank accounts, materiality thresholds, and recurring accruals. Jaz Kit gives each organization a folder that remembers all of it.
 
 ```
-~/Documents/Clio Kit/
+/jk-setup                  set up the kit, connect an organization
+/jk-open acme             load its context, verify the connection
+/jk-close 2026-06         run the close — resumable across sessions
+/jk-review                approve the drafts waiting on you
+/jk-status                every organization, what's due, what's pending
+/jk-exit                  journal the session, sweep scratch
+```
+
+**`/jaz-*` runs a workflow. `/jk-*` runs your practice.** Also `/jk-keys`, `/jk-policy`, `/jk-teach`, `/jk-save`, `/jk-help`.
+
+```
+~/Documents/Jaz Kit/
   orgs/<slug>/
     ORG.md                  bank accounts, materiality, recurring accruals, FY end
     policies/ rules/        how this organization works
@@ -278,21 +278,21 @@ A close is not one conversation. Month-end runs eighteen steps over one to three
 
 Work is created as drafts and every record carries a link into Jaz, so you review in the UI and finalize when you're ready — the agent never posts live behind you. Interrupted closes resume where they stopped, and reconciliation steps verify against the ledger before retrying, so a crash never doubles a journal.
 
-Keys never touch the workspace. They live in the CLI's credential store; the folder holds only a label pointing at one. That's what makes the kit safe to keep in Documents, back up, or share with colleagues through a private git repository.
+Each company's key lives in its own folder's `.env`. A `jk-` key is scoped to one company, so the folder you open decides which books you touch — no profiles, no labels, nothing to switch. Keys are gitignored, so a kit shared through a private git repo carries the context and policies but never the keys; each machine pastes its own. (On a default Mac `~/Documents` syncs to iCloud, so keys sync too — bounded and revocable; set `JAZ_KIT_HOME` elsewhere to keep them off the cloud.)
 
 **One organization per session, enforced.** Every call names its organization explicitly rather than relying on whichever one happens to be active. If something in your shell would silently override that choice — an exported `JAZ_API_KEY`, or several comma-separated keys — the command stops instead of posting to the wrong company's books.
 
 Multi-organization work needs the CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Windows is supported by design but not yet verified — [tell us](https://github.com/teamtinvio/jaz-ai/issues) if you hit something.
 
-Start with `/clio-setup`, or just say "set up Clio Kit for my company" — the skill triggers the same flows in Codex CLI, Cursor, and Copilot, which have no slash commands.
+Start with `/jk-setup`, or just say "set up Jaz Kit for my company" — the skill triggers the same flows in Codex CLI, Cursor, and Copilot, which have no slash commands.
 
-> Slash commands share one global namespace across installed plugins, so `/clio-*` and `/jaz-*` could collide with another plugin using the same names. If that happens, ask for the flow in words instead ("open acme", "close the books for June") — it triggers on intent, not on the command name.
+> Slash commands share one global namespace across installed plugins, so `/jk-*` and `/jaz-*` could collide with another plugin using the same names. If that happens, ask for the flow in words instead ("open acme", "close the books for June") — it triggers on intent, not on the command name.
 
 ## Reference
 
 - **[CONTEXT.md](CONTEXT.md)** · runtime rules-of-engagement for agents using the stack
 - **[CHANGELOG.md](CHANGELOG.md)** · release notes
-- **[Skills source](src/skills/)** · all 7 skills (jaz-api / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-pseudo-sql / clio-kit)
+- **[Skills source](src/skills/)** · all 7 skills (jaz-api / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-pseudo-sql / jaz-kit)
 - **[OpenAPI spec](spec/openapi.yaml)** · full HTTP surface, synced weekly
 - **[README-cli.md](README-cli.md)** · npm-package README, full CLI command catalog
 - **[help.jaz.ai](https://help.jaz.ai)** · Jaz product help center
@@ -417,7 +417,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.29.2", "mcp"],
+  "args": ["-y", "jaz-clio@5.30.0", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
