@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.30.2] - 2026-07-24
+
+The npm package page now covers Jaz Kit. The CLI README was rewritten cleaner and better structured, with a dedicated Jaz Kit section, so anyone who installs `jaz-clio` finds the workspace layer where they look for it.
+
 ## [5.30.1] - 2026-07-24
 
 Internal release automation update. No user-facing changes since v5.30.0.
