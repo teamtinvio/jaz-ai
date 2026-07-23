@@ -6,7 +6,7 @@ Fill ORG.md from the platform first, then ask only what the platform cannot know
 
 | Call | Fills |
 |---|---|
-| `clio org info --org <label> --json` | `name`, `organization_id`, `base_currency`, `country`, `fy_end` |
+| `clio org info --org <label> --json` | `name`, `organization_id`, `base_currency`, `country`, `fy_end` (returned as `financialYearEnd` in `DD-MM` — write it out in full) |
 | `clio reports generate ledger-highlights --org <label> --json` | `multi_currency`, which modules are live, active accounts, period range |
 | `search_journals` over the last three months | Candidate `recurring_accruals` |
 | `clio context --org <label> -w <workflow> --json` | Reference detail, only if needed — **always pass `-w`** |

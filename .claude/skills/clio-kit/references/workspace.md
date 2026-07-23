@@ -55,7 +55,7 @@ The close configuration. Everything the jobs skill's playbooks otherwise stop to
 | `country` | Recorded for the user's own reference and for report labelling |
 | `base_currency` | Reporting currency |
 | `multi_currency` | Whether foreign-currency balances exist — gates the FX verification step |
-| `fy_end` | Fiscal year end (e.g. `31 December`, `30 June`) — resolves `FY<year>` |
+| `fy_end` | Fiscal year end, written in full: `31 December`, `30 June`. `clio org info` returns it as `financialYearEnd` in `DD-MM` form (`31-12`) — **spell it out before storing it**, because `FY<year>` and fiscal-quarter resolution both read this field and `01-12` is ambiguous |
 
 **Filing** — every value here comes from the user. The kit tracks their calendar; it does not own one.
 

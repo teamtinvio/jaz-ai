@@ -1,6 +1,6 @@
 ---
 name: clio-kit
-version: 5.29.1
+version: 5.29.2
 description: >-
   Use this skill when an accountant, bookkeeper, or owner is running real books
   in Jaz across one or more organizations from the terminal — setting up a

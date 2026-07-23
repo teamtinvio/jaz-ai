@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.29.2] - 2026-07-22
+
+Fiscal year end is now recorded in full ("31 December") rather than the `31-12` form the API returns. Year-end and quarter closes resolve their date range from that field, and the short form is ambiguous — `01-12` could be read two ways.
+
 ## [5.29.1] - 2026-07-22
 
 Renamed `/clio-init` to `/clio-setup`. "Init" is programmer shorthand; nobody setting up their books thinks of it that way. Same command, same behaviour — run it once to set up, run it again to add another company.
