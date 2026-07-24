@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.30.3] - 2026-07-24
+
+Agents now record judgment-journal entries (jots) more consistently. Every surface — chat, email, the connectors, and the CLI — teaches the same rules for how serious a call is (the same severity anchors the platform itself scores with), which kind of judgment it is, and how tightly to write it, so the journal reads the same no matter which agent wrote the entry.
+
 ## [5.30.2] - 2026-07-24
 
 The npm package page now covers Jaz Kit. The CLI README was rewritten cleaner and better structured, with a dedicated Jaz Kit section, so anyone who installs `jaz-clio` finds the workspace layer where they look for it.

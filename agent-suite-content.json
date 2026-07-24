@@ -174,7 +174,7 @@
     },
     {
       "name": "jots",
-      "description": "The judgment journal. jot records a judgment call (chose among real alternatives and wrote, or deliberately held a write); recall looks up prior judgments and precedents by entity, kind, or freetext. Also: decision log, rationale, why."
+      "description": "The judgment journal. jot records a judgment call (chose among real alternatives and wrote, or deliberately held a write); recall looks up prior judgments and precedents by entity, kind, or freetext. Tier: CRITICAL only for money-out, delete, finalize, or a recovery that re-drove a write; a withheld write is HIGH. Also: decision log, rationale, why."
     },
     {
       "name": "navigation",
@@ -2656,7 +2656,7 @@
     {
       "name": "jot",
       "namespace": "jots",
-      "description": "Record judgment entries in the org's judgment journal. THE RULE: log a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write; skip mechanical actions and calls where the platform, the data, or the user left you no choice. Jot AFTER the write succeeds, never before, and carry the written record's resourceId in refs. Kinds: CLASSIFICATION account/tax/category choice · MATCH decided which records correspond · SCOPE chose what is in or out of a set · ASSUMPTION filled a gap the data left open · RISK proceeded despite a known concern · METHOD picked a calculation or approach · RECOVERY decided how to proceed after a failure (incl. holding a write) · DEVIATION knowingly departed from a stated rule. Accepting or rejecting an inbound external document (an e-invoice a counterparty sent) is a FINALIZE act, so pin it. A decided omission (you deliberately did not post something) is RECOVERY, which pins via withheld-write, not DEVIATION. Always give why: a call without a basis is half a record. Batch related entries in one call; each entry is acked independently.",
+      "description": "Record judgment entries in the org's judgment journal. THE RULE: log a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write; skip mechanical actions and calls where the platform, the data, or the user left you no choice. Jot AFTER the write succeeds, never before, and carry the written record's resourceId in refs. Kinds: CLASSIFICATION account/tax/category choice · MATCH decided which records correspond · SCOPE chose what is in or out of a set · ASSUMPTION filled a gap the data left open · RISK proceeded despite a known concern · METHOD picked a calculation or approach · RECOVERY decided how to proceed after a failure (incl. holding a write) · DEVIATION knowingly departed from a stated rule. Accepting or rejecting an inbound external document (an e-invoice a counterparty sent) is a FINALIZE act, so pin it. A decided omission (you deliberately did not post something) is RECOVERY, which pins via withheld-write, not DEVIATION. Always give why: a call without a basis is half a record. Batch related entries in one call; each entry is acked independently. An ack with duplicateCount > 0 means this judgment is already recorded: do not re-jot identical calls; recall first on repeated workflows. Style: tight, factual, plain punctuation; never repeat content across fields (refs carry the record, why carries the basis); detail belongs only in why/ruledOut/frame where it earns its place.",
       "readOnly": false,
       "destructive": false
     },

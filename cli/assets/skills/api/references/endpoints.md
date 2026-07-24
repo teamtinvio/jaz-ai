@@ -2380,7 +2380,17 @@ Batch-record judgment entries (1-100 per call). Per-entry independent: acks come
 { "data": { "records": [{ "resourceId": "...", "replayed": false, "duplicateCount": 0 }] } }
 ```
 
-`kind`: CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION, NOTE (the neutral fallback for a judgment logged without a declared type; a missing or blank `kind` defaults to NOTE and is flagged, not rejected). `tier`: LOW, MEDIUM, HIGH, CRITICAL. `refs` entries are OBJECTS: the string grammar `TYPE:resourceId[#field][:RELATION]` travels in `raw` (an unparseable ref is stored with `parsed: false`, never bounced). Optional fields: `ruledOut`, `frame`, `confidence`, `citedRule`, `workflowLabel`, `agentLabel`. `idempotencyKey` makes retries safe: a replay returns the existing entry with `replayed: true`.
+`kind`: CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION, NOTE (the neutral fallback for a judgment logged without a declared type; a missing or blank `kind` defaults to NOTE and is flagged, not rejected — never declare NOTE deliberately). `tier`: LOW, MEDIUM, HIGH, CRITICAL. `refs` entries are OBJECTS: the string grammar `TYPE:resourceId[#field][:RELATION]` travels in `raw` (an unparseable ref is stored with `parsed: false`, never bounced). Optional fields: `ruledOut`, `frame`, `confidence`, `citedRule`, `workflowLabel`, `agentLabel`. `idempotencyKey` makes retries safe: a replay returns the existing entry with `replayed: true`.
+
+**Jot doctrine (fill fields consistently — the server re-scores tier from kind + refs, and declared-vs-computed agreement is a review signal):**
+
+- **When**: log a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write. Skip mechanical actions. Jot AFTER the write succeeds; carry the written record's resourceId in `refs`.
+- **Tier anchors** (mirror the server's rules): CRITICAL = money leaves (`PAY` ref), data destroyed (`DELETE` ref), external send or period lock (`FINALIZE` ref), or a RECOVERY that still drove a write. HIGH = the withheld write (RECOVERY with no mutation ref — it pins via withheld-write, not tier), or RISK/MATCH backed by a write. LOW = a DEVIATION detached from any write. MEDIUM = everything else.
+- **Kind boundaries**: where a value LANDS (account, tax code) = CLASSIFICATION; how it is COMPUTED = METHOD. Filling one missing fact = ASSUMPTION; drawing a set boundary = SCOPE (carry `frame`). A decided omission after failure = RECOVERY, never DEVIATION.
+- **Refs relation** is load-bearing: state what the write did (CREATE/UPDATE/DELETE/FINALIZE/PAY/RECONCILE/TRIGGER); SUBJECT only for no-write entries. PAY/DELETE/FINALIZE pin the jot regardless of declared tier.
+- **confidence**: HIGH = clear rule or precedent; MEDIUM = pattern inference; LOW = a guess a reviewer should check.
+- **workflowLabel**: use a canonical job name when one fits (`month-end-close`, `quarter-end-close`, `year-end-close`, `bank-recon`, `gst-vat-filing`, `payment-run`, `credit-control`, `supplier-recon`, `audit-prep`, `fa-review`, `document-collection`, `statutory-filing`), else short kebab-case.
+- **Style**: tight, factual, plain punctuation; one line per field; never repeat content across fields; a call without a `why` is half a record. `duplicateCount > 0` on the ack = already recorded — do not re-jot; search first on repeated workflows.
 
 ### POST /api/v1/jots/search
 

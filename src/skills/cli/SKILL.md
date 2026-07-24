@@ -158,7 +158,7 @@ Rules:
 | `--all` | List/search commands | Auto-paginate all pages |
 | `--max-rows <n>` | With `--all` | Cap total rows (default 10,000) |
 | `--finalize` | Create commands | Approve immediately (skip draft) |
-| `--jot <text>` | Write commands (create/update/delete/pay/finalize/…) | Log the judgment behind this write in one line, inline (piggybacks a judgment-journal entry after the write succeeds; optional leading kind, e.g. `"MATCH: …"`). Without it, a successful write prints a one-line reminder to stderr — silence with `JAZ_JOTS_NUDGES=0`. |
+| `--jot <text>` | Write commands (create/update/delete/pay/finalize/…) | Log the judgment behind this write in one line, inline (piggybacks a judgment-journal entry after the write succeeds; optional leading kind, e.g. `"MATCH: …"`). Quick LOW/MEDIUM one-liners only — for HIGH or CRITICAL calls, or when the why matters, use `clio jots create` (doctrine in its `--help`: tier anchors, kind boundaries, style). Without it, a successful write prints a one-line reminder to stderr — silence with `JAZ_JOTS_NUDGES=0`. |
 | `--date <YYYY-MM-DD>` | Create/update commands | Transaction date |
 | `--due <YYYY-MM-DD>` | Create/update commands | Due date |
 | `--query <expression>` | Search commands (14 entities) | Jaz search expression (see below) |
