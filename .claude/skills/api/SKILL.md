@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.30.3
+version: 5.31.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 158 production gotchas, error
@@ -399,14 +399,14 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 
 ### Reconciliation actions (write-side)
 
-123. **11 reconciliation action endpoints under `/api/v1/reconciliations/*`** — these *commit* a reconciliation decision against a bank statement entry, distinct from `view_auto_reconciliation` (which queries `/search-magic-reconciliation` for *suggestions*):
+123. **12 reconciliation action endpoints under `/api/v1/reconciliations/*`** — these *commit* a reconciliation decision against a bank statement entry, distinct from `view_auto_reconciliation` (which queries `/search-magic-reconciliation` for *suggestions*):
     - **Async (jobId):** `quick_reconcile` (bulk match entries to journals, max 500), `apply_bank_rule` (bulk apply a rule to entries, max 500). Poll `search_background_jobs` filtered by `resourceId`; on `PARTIAL_SUCCESS` read `data[0].errorDetails` for per-row failures.
     - **Sync (single bank entry):** `reconcile_direct_cash_entry`, `reconcile_cash_journal`, `reconcile_manual_journal`, `reconcile_cash_transfer`, `reconcile_invoice_receipt`, `reconcile_bill_receipt`, `reconcile_with_payments` (match EXISTING — see Rule 158), `reconcile_learned_prediction`. Each returns `{bankStatementEntryResourceId, status, reference, valueDate}`.
-    - **Sync bulk:** `reconcile_magic_match` (bulk-accept MAGIC_MATCH suggestions, max 500) returns `{reconciled[], failed[]}`.
+    - **Sync bulk:** `reconcile_magic_match` (bulk-accept MAGIC_MATCH suggestions, max 500) returns `{reconciled[], failed[]}`; `undo_reconciliations` (unlink, 1-500) returns `{resetReconciliationResponse[], linkedRecords[]}` — see Rule 125.
 
 124. **Recon prefill from the bank statement entry** — when caller omits `valueDate`, `dueDate`, payment `amount`, or direction (cash-in vs cash-out), the API fills these from the bank entry. Best-effort: a missing entry lookup logs a warning and forwards the payload as-is. Caller can always override by passing the field explicitly.
 
-125. **The 6 sync recon endpoints are NOT idempotent** — calling twice on the same `bankStatementEntryResourceId` creates duplicate journals. Before retrying, confirm the entry's reconciled state via `view_auto_reconciliation` or `search_bank_records` filtered by `status`. Concurrent calls on the same entry race — last-write-wins.
+125. **The 6 sync recon endpoints are NOT idempotent** — calling twice on the same `bankStatementEntryResourceId` creates duplicate journals. Before retrying, confirm the entry's reconciled state via `view_auto_reconciliation` or `search_bank_records` filtered by `status`. Concurrent calls on the same entry race — last-write-wins. **`undo_reconciliations` is the reverse and behaves differently**: it UNLINKS but does NOT delete the record that was matched, so undoing any of the 6 CREATE endpoints (`direct_cash_entry`, `cash_journal`, `manual_journal`, `cash_transfer`, `invoice_receipt`, `bill_receipt`) leaves that record on the books against an unmatched bank line — a discrepancy the undo introduced. Delete it via `linkedRecords[]` (captured BEFORE the unlink, since the unlink is what makes it unfindable by bank entry): cash in/out/transfer by `parentEntityResourceId`, everything else by `businessTransactionResourceId`. Never just re-reconcile after undoing — that creates a SECOND record. Undo never double-applies (a repeat returns per-entry `FAILED`/`INVALID_BANK_STATEMENT_ENTRY_STATUS`), and unresolved ids are OMITTED from the response, so compare returned ids against what you sent.
 
 126. **Sync recon → AR/AP via `invoice_receipt` / `bill_receipt`** — these endpoints CREATE a transaction (invoice for AR, bill for AP) and immediately reconcile it to the bank entry. The two endpoints stay separate (not unified) because the invoice side carries `billTo` / `billFrom` that bills don't have. Cash-in vs cash-out, by contrast, IS unified into `reconcile_direct_cash_entry` — direction is encoded in the bank entry sign.
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.30.3+5ac15729",
+  "contentVersion": "5.31.0+b29e51ed",
   "counts": {
-    "tools": 357,
+    "tools": 358,
     "namespaces": 42,
     "calculators": 13,
     "recipes": 13,
@@ -58,7 +58,7 @@
     },
     {
       "name": "reconciliations",
-      "description": "Apply a reconciliation decision to a bank statement entry — write side. Match bank records to EXISTING open bills/invoices/payments (reconcile_with_payments — the primary path, creates the payment for you), or to journals, cash entries, or transfers, or CREATE new bills/invoices (invoice_receipt/bill_receipt). Distinct from bank_accounts/bank_rules (which configure auto-reconciliation) and view_auto_reconciliation (which queries suggestions). Eleven endpoints: quick_reconcile + apply_bank_rule + magic_match (bulk), and direct_cash_entry / cash_journal / manual_journal / cash_transfer / invoice_receipt / bill_receipt / with_payments / learned_prediction (per-entry). Match-to-existing is preferred over create-new to avoid duplicates. Most fields prefill from the bank entry when omitted; FX is resolved server-side."
+      "description": "Apply a reconciliation decision to a bank statement entry — write side. Match bank records to EXISTING open bills/invoices/payments (reconcile_with_payments — the primary path, creates the payment for you), or to journals, cash entries, or transfers, or CREATE new bills/invoices (invoice_receipt/bill_receipt). Distinct from bank_accounts/bank_rules (which configure auto-reconciliation) and view_auto_reconciliation (which queries suggestions). Twelve endpoints: quick_reconcile + apply_bank_rule + magic_match (bulk), undo_reconciliations (bulk reverse), and direct_cash_entry / cash_journal / manual_journal / cash_transfer / invoice_receipt / bill_receipt / with_payments / learned_prediction (per-entry). Match-to-existing is preferred over create-new to avoid duplicates. Most fields prefill from the bank entry when omitted; FX is resolved server-side. To reverse a reconciliation use undo_reconciliations, which unlinks the entry but does NOT delete a record a reconcile call created — it returns linkedRecords so you can delete that record too."
     },
     {
       "name": "financial_reports",
@@ -2624,6 +2624,13 @@
       "description": "Accept an ML learned-prediction suggestion to reconcile a bank entry. predictedPayload + predictedPayloadSchemaVersion are passed through VERBATIM from a view_auto_reconciliation suggestion (recommendationType MAGIC_RECONCILE_WITH_CASH_IN_OUT) — do not construct them by hand. Pass retryToken to force a fresh journal on an edit-then-retry; omit it for an idempotent replay. Sync — returns the reconciled entry status. On failure (stale/invalid payload), fall back to reconcile_with_payments — do NOT retry the same opaque payload. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
+    },
+    {
+      "name": "undo_reconciliations",
+      "namespace": "reconciliations",
+      "description": "Unlink bank entries from what they were reconciled against, returning each to UNRECONCILED. Re-running reports already-unreconciled/archived entries as per-entry FAILED (INVALID_BANK_STATEMENT_ENTRY_STATUS); it never double-applies. On a non-200 nothing was applied, the batch rolls back. Ids that do not resolve are OMITTED from resetReconciliationResponse, so compare returned ids against what you sent. Does NOT delete the record it was matched to; reconcile_* tools that CREATE one leave it on the books as a bank-rec discrepancy, and re-reconciling without deleting it duplicates the record. Delete via linkedRecords by businessTransactionType: SALE=delete_invoice, PURCHASE=delete_bill, SALE_CREDIT_NOTE=delete_customer_credit_note, PURCHASE_CREDIT_NOTE=delete_supplier_credit_note, PAYMENT_*=delete_payment, JOURNAL_MANUAL=delete_journal (drafts only) — all using businessTransactionResourceId. JOURNAL_DIRECT_CASH_IN/OUT and JOURNAL_CASH_TRANSFER use delete_cash_in/out/transfer with parentEntityResourceId instead. Any other type has no delete tool: locate it with search_cashflow_transactions first. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
     },
     {
       "name": "validate_drafts",

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.30.3",
+  "version": "5.31.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default.",
   "author": {
@@ -1461,6 +1461,10 @@
     {
       "name": "reconcile_learned_prediction",
       "description": "Accept an ML learned-prediction suggestion to reconcile a bank entry. predictedPayload + predictedPayloadSchemaVersion are passed through VERBATIM from a view_auto_reconciliation suggestion (recommendationType MAGIC_RECONCILE_WITH_CASH_IN_OUT) — do not construct them by hand. Pass retryToken to force a fresh journal on an edit-then-retry; omit it for an idempotent replay. Sync — returns the reconciled entry status. On failure (stale/invalid payload), fall back to reconcile_with_payments — do NOT retry the same opaque payload. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "undo_reconciliations",
+      "description": "Unlink bank entries from what they were reconciled against, returning each to UNRECONCILED. Re-running reports already-unreconciled/archived entries as per-entry FAILED (INVALID_BANK_STATEMENT_ENTRY_STATUS); it never double-applies. On a non-200 nothing was applied, the batch rolls back. Ids that do not resolve are OMITTED from resetReconciliationResponse, so compare returned ids against what you sent. Does NOT delete the record it was matched to; reconcile_* tools that CREATE one leave it on the books as a bank-rec discrepancy, and re-reconciling without deleting it duplicates the record. Delete via linkedRecords by businessTransactionType: SALE=delete_invoice, PURCHASE=delete_bill, SALE_CREDIT_NOTE=delete_customer_credit_note, PURCHASE_CREDIT_NOTE=delete_supplier_credit_note, PAYMENT_*=delete_payment, JOURNAL_MANUAL=delete_journal (drafts only) — all using businessTransactionResourceId. JOURNAL_DIRECT_CASH_IN/OUT and JOURNAL_CASH_TRANSFER use delete_cash_in/out/transfer with parentEntityResourceId instead. Any other type has no delete tool: locate it with search_cashflow_transactions first. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "validate_drafts",
