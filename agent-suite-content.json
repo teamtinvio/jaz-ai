@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.31.0+b29e51ed",
+  "contentVersion": "5.31.0+ae92f574",
   "counts": {
     "tools": 358,
     "namespaces": 42,
@@ -1557,7 +1557,7 @@
     {
       "name": "view_auto_reconciliation",
       "namespace": "bank_accounts",
-      "description": "Generate auto-reconciliation suggestions for a bank account. READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation — pass `includeReviewDetails:true` to also get `review[]` (the not-auto lines enriched with the bank line + the matched bill/invoice) for a side-by-side \"does this match?\" card. Pass `includeRaw:true` to also get the unmapped payload. On high-volume accounts the engine can 500 (OOM) → the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher.",
+      "description": "Generate auto-reconciliation suggestions for specific bank statement entries (no account-wide mode). READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation — pass `includeReviewDetails:true` to also get `review[]` (the not-auto lines enriched with the bank line + the matched bill/invoice) for a side-by-side \"does this match?\" card. Pass `includeRaw:true` to also get the unmapped payload. Cost tracks entries passed — batch large backlogs. On a 500 the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher.",
       "readOnly": true,
       "destructive": false
     },
