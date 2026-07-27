@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.32.0] - 2026-07-28
+
+**Ask Jaz what it can do, and it will tell you.** A new capability map answers "what can you do" with the real catalogue — every area, how many operations each holds, and what they cover. It works before you sign in, so you can see what you are getting before you commit.
+
+If you have ever wondered why the extension advertises hundreds of tools while your assistant shows 3 or 43, that gap is now explained everywhere it appears. It is packaging, not capability: every install reaches the same operations, and only the shape of the menu changes. Assistants are told this up front, so they stop concluding that something is missing.
+
+Your tool list also reads better. Each entry now carries a plain-English name and the number of operations behind it — "Bank Reconciliation · 12 operations" instead of a bare label — so you can see the depth without opening anything.
+
 ## [5.30.3] - 2026-07-24
 
 Agents now record judgment-journal entries (jots) more consistently. Every surface — chat, email, the connectors, and the CLI — teaches the same rules for how serious a call is (the same severity anchors the platform itself scores with), which kind of judgment it is, and how tightly to write it, so the journal reads the same no matter which agent wrote the entry.

@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 65 command groups. Organized by domain.
+Complete reference for all 66 command groups. Organized by domain.
 
 ---
 
@@ -587,7 +587,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker — any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp` — MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 247 tools.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 358 operations.
 
 ### `clio serve` — HTTP daemon
 Starts the HTTP daemon for ChatKit and email channel integrations.

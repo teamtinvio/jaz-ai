@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/tools-358-blue?style=for-the-badge" alt="358 tools">
   <img src="https://img.shields.io/badge/API_rules-158-green?style=for-the-badge" alt="158 API rules">
   <img src="https://img.shields.io/badge/skills-7-purple?style=for-the-badge" alt="7 skills">
-  <img src="https://img.shields.io/badge/recipes-16-orange?style=for-the-badge" alt="16 Recipes">
+  <img src="https://img.shields.io/badge/recipe_playbooks-16-orange?style=for-the-badge" alt="16 Recipe Playbooks">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
   <img src="https://img.shields.io/badge/jobs-12-teal?style=for-the-badge" alt="12 Jobs">
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
@@ -58,7 +58,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 358 tools, 7 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.31.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.32.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -72,14 +72,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 358 tools, 7 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.31.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.32.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.31.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.32.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -89,7 +89,7 @@ Bring Jaz into **Claude** (claude.ai, Desktop, mobile, Cowork) and **ChatGPT** w
 2. Enter the URL `https://mcp.jaz.ai/mcp`.
 3. Sign in with your Jaz account (email one-time code or passkey) and **Allow**.
 
-It uses OAuth 2.1 + PKCE: the agent receives a scoped, time-limited token tied to your account, never your password. One sign-in reaches **every organization you belong to**; name the org in your request (e.g. *"in Acme Pte Ltd, list unpaid invoices"*), and access to each is checked on every call. Same tool surface as the local server, with honest read-only / write / destructive hints. Bookkeeping only: it records entries and reads data. It moves no money.
+It uses OAuth 2.1 + PKCE: the agent receives a scoped, time-limited token tied to your account, never your password. One sign-in reaches **every organization you belong to**; name the org in your request (e.g. *"in Acme Pte Ltd, list unpaid invoices"*), and access to each is checked on every call. The same operations as the local server, packaged as namespace tools — one `tools/list` entry per accounting area, each routing to the operations inside it — with honest read-only / write / destructive hints. Ask *"what can you do?"* and the connector answers from its own live capability map. Bookkeeping only: it records entries and reads data. It moves no money.
 
 ### Microsoft 365 Copilot · Copilot Studio
 
@@ -145,6 +145,20 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 | Windsurf | `.windsurf/rules/jaz.md` |
 | Gemini CLI | `GEMINI.md` |
 
+## How many tools is it?
+
+One catalog, three packagings. Every install reaches the **same 358 operations** — they are presented differently because hosts have different context budgets.
+
+| Install | `tools/list` shows | Operations reachable | Why |
+|---|---|---|---|
+| Claude Code plugin, `.mcpb`, Gemini, Cursor / VS Code / Windsurf / Codex | **3** meta-tools | 358 | Lazy: `search_tools` → `describe_tools` → `execute_tool`. ~600 tokens of context instead of ~78KB. |
+| Remote connector (`mcp.jaz.ai`), M365 Copilot, OpenAI Responses | **43** namespace tools | 358 | One tool per accounting area; each routes to its operations, documented in its description. |
+| `JAZ_MCP_FLAT=1` (either transport) | **358** tools | 358 | Every operation listed directly. Heaviest payload; enables per-tool read-only parallelism. |
+
+A directory listing that says "358 tools" and a client that shows 3 or 43 are describing the same server. Nothing is missing.
+
+Ask the agent **"what can you do?"** on any of them — it answers from the connector's own live capability map (`describe_capabilities`), never from the length of its tool list.
+
 ## What you get
 
 - **358 tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and notes which operations are safe to retry. The model picks the right tool on the first call.
@@ -174,7 +188,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 | **CLI** (`jaz-clio`) | A `clio` binary: 66 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
 | **MCP server** (`clio mcp`) | The same binary in MCP mode: 358 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
-Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install). Same tools either way.
+Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install). **The same operations either way — packaged differently.** See [How many tools is it?](#how-many-tools-is-it).
 
 ## Quick start
 
@@ -208,7 +222,8 @@ Built so any model sees the right tool fast and calls it once.
 
 | What | How |
 |------|-----|
-| **MCP delivery** | 3 meta-tools (~600 tokens) instead of all 358 tools (~78KB). The agent searches into the catalog only when needed. |
+| **MCP delivery — local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of 358 operation schemas (~78KB). The agent searches into the catalog only when needed. |
+| **MCP delivery — hosted connector** | 43 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
 | **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
 | **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
 | **Discovery ranker** | In-memory, no network round-trip. Scans tool name + description + searchHint + namespace. |
@@ -417,7 +432,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.31.0", "mcp"],
+  "args": ["-y", "jaz-clio@5.32.0", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

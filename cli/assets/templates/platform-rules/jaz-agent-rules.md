@@ -6,13 +6,15 @@ Source of truth lives in the installed skills (`.claude/skills/jaz-*/SKILL.md` o
 
 ## Discovery
 
-The Jaz MCP server exposes 358 tools across 42 namespaces via 3 meta-tools. **Use the meta-tool flow — never enumerate tools blindly.**
+Jaz exposes **358 tools across 43 namespaces**. Your tool list shows **3, 43, or 358** entries depending on packaging — **never infer capability from its length.**
 
-1. `search_tools(query)` → top-N tool names + namespaces.
-2. `describe_tools(names)` → full parameter schemas.
-3. `execute_tool(name, args)` → run.
+- **3** — `search_tools(query)` → `describe_tools(names)` → `execute_tool(name, args)`. Empty query returns the namespace map.
+- **43** — namespace routers; call one with `{ operation, arguments }`. Its description lists its operations.
+- **358** — call operations directly by name.
 
-Offline tools (no API key needed): `plan_recipe`, `search_help_center`. The MCP server says `Offline.` at the start of those tools' descriptions.
+`describe_capabilities` returns the capability map on all three. **Call it before telling the user Jaz cannot do something.**
+
+No API key needed: `describe_capabilities`, `plan_recipe`, `search_help_center` (marked `Offline.`).
 
 ## API contract — the 6 rules that prevent 90% of 422s
 

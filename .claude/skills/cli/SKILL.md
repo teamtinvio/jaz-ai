@@ -1,14 +1,14 @@
 ---
 name: jaz-cli
-version: 5.31.0
+version: 5.32.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
-  or chaining multi-step accounting workflows from the terminal. Covers all 65
-  command groups, auth precedence, output formats, entity resolution, and common
-  workflow patterns. Also use when the user asks how to use clio, what commands
-  are available, or how to automate accounting tasks from the command line.
-  Covers all 66 command groups and 358 tools, including employee-expense claims.
+  or chaining multi-step accounting workflows from the terminal. Covers auth
+  precedence, output formats, entity resolution, and common workflow patterns.
+  Also use when the user asks how to use clio, what commands are available, or
+  how to automate accounting tasks from the command line. Covers all
+  66 command groups and 358 tools, including employee-expense claims.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 ---
@@ -34,7 +34,7 @@ You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting pl
 | Need | Skill |
 |------|-------|
 | CLI command syntax, flags, output | **jaz-cli** (this skill) |
-| API field names, error codes, 141 gotchas | **jaz-api** |
+| API field names, error codes, 158 API rules | **jaz-api** |
 | IFRS transaction recipes (depreciation, leases, loans) | **jaz-recipes** |
 | Month-end close, bank recon, GST filing workflows | **jaz-jobs** |
 | Migration from Xero/QuickBooks/Sage | **jaz-conversion** |
@@ -377,7 +377,7 @@ See `references/common-workflows.md` for end-to-end multi-command patterns.
 4. **--offset is page number (0-indexed), not row count.**
 5. **JAZ_API_KEY env overrides --org.** Unset to use profiles.
 
-See [references/agent-gotchas.md](./references/agent-gotchas.md) for the full list of 15 gotchas. See [references/output-shapes.md](./references/output-shapes.md) for `--json` output structures. See [references/error-recovery.md](./references/error-recovery.md) for 30+ error patterns with fixes.
+See [references/agent-gotchas.md](./references/agent-gotchas.md) for the full list of 19 critical gotchas. See [references/output-shapes.md](./references/output-shapes.md) for `--json` output structures. See [references/error-recovery.md](./references/error-recovery.md) for 30+ error patterns with fixes.
 
 ## See Also
 

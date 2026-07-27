@@ -11604,6 +11604,17 @@
           "description": "Resource ID of the bank account.",
           "type": "string"
         },
+        "bankStatementEntryResourceIds": {
+          "description": "Required. The bank statement entries to generate recommendations for.\n\nThis endpoint is deliberately per-entry. There is no account-wide mode.\nMatching cost scales with the entries you request rather than with the\nsize of the account, which is what keeps a call inside the request\ntimeout on accounts with a large unreconciled backlog. Combined with the\nrequired recommendationType above, a call evaluates exactly one\nrecommendation type over exactly the entries named.\n\nRequest entries in batches rather than passing very large lists at once.",
+          "example": [
+            "bse-1"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        },
         "recommendationType": {
           "description": "Magic recommendation type to compute. Required; pick exactly one. The endpoint scopes a full-account scan to one match type at a time, so callers must commit to which type they want rather than survey all.",
           "enum": [
@@ -11618,6 +11629,7 @@
         }
       },
       "required": [
+        "bankStatementEntryResourceIds",
         "recommendationType"
       ],
       "type": "object"
