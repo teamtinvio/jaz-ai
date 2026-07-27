@@ -50,8 +50,9 @@ BANK_ID="<bank-account-resourceId>"
 # Import statement file (CSV, OFX, XLS, or XLSX)
 clio bank import "$BANK_ID" ./march-2026-statement.csv
 
-# Trigger auto-reconciliation
-clio bank auto-recon "$BANK_ID"
+# Reconciliation suggestions (READ-ONLY, per-entry — --type and --entries are required)
+ENTRY_IDS=$(clio bank records "$BANK_ID" --status UNRECONCILED --limit 20 --json | jq -r '[.data[].resourceId] | join(",")')
+clio bank auto-recon --account "$BANK_ID" --type MAGIC_MATCH --entries "$ENTRY_IDS"
 
 # Review unreconciled records
 clio bank records "$BANK_ID" --status UNRECONCILED --from 2026-03-01 --to 2026-03-31 --json

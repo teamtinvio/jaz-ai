@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.32.1] - 2026-07-28
+
+Corrects the built-in guidance for bank reconciliation. The reference material still described the older account-wide form of the auto-reconciliation call, which no longer works, so an assistant following it would hit an error rather than return suggestions. It now documents the per-entry form the platform actually uses.
+
 ## [5.32.0] - 2026-07-28
 
 **Ask Jaz what it can do, and it will tell you.** A new capability map answers "what can you do" with the real catalogue — every area, how many operations each holds, and what they cover. It works before you sign in, so you can see what you are getting before you commit.

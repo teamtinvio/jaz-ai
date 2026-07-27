@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 5.32.0
+version: 5.32.1
 description: >-
   Use this skill for recurring accounting workflows — month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -55,7 +55,7 @@ Period-close jobs build on each other. Quarter = month + extras. Year = quarter 
 
 | Job | CLI (local convenience) | Description |
 |-----|-------------------------|-------------|
-| **Bank Recon** | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path — create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate (auto-commit high-confidence, checkpoint the rest — see `references/bank-recon.md` Step 4a). Cascade matcher: `clio jobs bank-recon match`. |
+| **Bank Recon** | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path — create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate — per-entry, so fetch ids with `search_bank_records` first (auto-commit high-confidence, checkpoint the rest — see `references/bank-recon.md` Step 4a). Cascade matcher: `clio jobs bank-recon match`. |
 | **Document Collection** | `clio jobs document-collection` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for upload via Jaz Magic. Ingest helper: `clio jobs document-collection ingest`. |
 | **GST/VAT Filing** | `clio jobs gst-vat --period YYYY-QN` | Tax ledger review, discrepancy check, filing summary. |
 | **Payment Run** | `clio jobs payment-run` | Select outstanding bills by due date, process payments. |

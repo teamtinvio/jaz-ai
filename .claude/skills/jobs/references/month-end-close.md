@@ -20,7 +20,7 @@
 - **`plan_recipe(recipe: 'ecl', ...)`** — step 13: top-up bad-debt provision based on `generate_aged_ar` buckets.
 
 ### Platform tools — reconciliation execution
-- **`view_auto_reconciliation(bankAccountResourceId: <id>)`** — step 3: READ-ONLY suggestions (does NOT write).
+- **`view_auto_reconciliation(bankStatementEntryResourceIds: [<id>, ...])`** — step 3: READ-ONLY suggestions (does NOT write). Per-entry only; source ids from `search_bank_records` (status `UNRECONCILED`).
 - **`apply_bank_rule(...)`** — step 3: rule-driven recon.
 - **`quick_reconcile(...)` / `reconcile_direct_cash_entry(...)` / `reconcile_cash_journal(...)` / `reconcile_manual_journal(...)` / `reconcile_cash_transfer(...)` / `reconcile_invoice_receipt(...)` / `reconcile_bill_receipt(...)`** — step 3: per matched pair from the cascade.
 
@@ -76,7 +76,7 @@ For each bank account:
 1. If you don't already have the account's resourceId: `list_bank_accounts()`, match by `name + currency`, confirm with the user.
 2. `search_bank_records(accountResourceId: <bank account resourceId>, status: 'UNRECONCILED', valueDateRange: {from: '2025-01-01', to: '2025-01-31'}, limit: 200, sort: 'valueDate:asc')`.
 3. If results: drive the 5-phase cascade matcher (Step 4 in `bank-recon.md`; local CLI: `clio jobs bank-recon match --input <records> --tolerance 0.01 --date-window 14 --json`). For each match, invoke the matching `reconcile_*` tool.
-4. `view_auto_reconciliation(bankAccountResourceId: <id>, recommendationType: 'MAGIC_MATCH')` — READ-ONLY suggestions for residuals; commit via `quick_reconcile` / `apply_bank_rule` / per-entry `reconcile_*`.
+4. `view_auto_reconciliation(bankStatementEntryResourceIds: [<id>, ...], recommendationType: 'MAGIC_MATCH')` — READ-ONLY suggestions for residuals (per-entry; get ids from `search_bank_records`, status `UNRECONCILED`); commit via `quick_reconcile` / `apply_bank_rule` / per-entry `reconcile_*`.
 5. `generate_bank_recon_summary(period_end: '2025-01-31', accountResourceId: <id>)`. Confirm `unreconciledCount == 0` OR document the residuals for the period and surface to the user.
 
 Full detail in `bank-recon.md`. NOT idempotent — see error table.

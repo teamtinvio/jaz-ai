@@ -300,7 +300,7 @@ EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPO
 | `records <accountId>` | `--from`, `--to`, `--status`, `--description`, `--limit`, `--offset`, `--all` |
 | `add-records <accountId>` | `--input` (JSON array of bank records) |
 | `import <accountId> <file>` | Supports CSV, OFX, XLS, XLSX |
-| `auto-recon <accountId>` | Trigger auto-reconciliation |
+| `auto-recon` | READ-ONLY reconciliation suggestions. `--type <workflow>` and `--entries <id,...>` are both REQUIRED (per-entry; no account-wide mode). `--account` optional. |
 
 ### `clio bank-rules` — Bank reconciliation rules
 | Subcommand | Key flags |
