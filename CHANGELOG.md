@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.34.0] - 2026-07-28
+
+Clearer errors when a lookup is missing a detail. Asking for something like reconciliation suggestions without saying which entries to look at used to return a bare rejection from the platform, with nothing to act on. Now the assistant is told exactly which detail is missing and where to get it, so it can fetch it and carry on instead of stalling or guessing.
+
+This check already applied when creating or changing records. It now covers lookups too, which is where most of these dead ends happened.
+
 ## [5.32.1] - 2026-07-28
 
 Corrects the built-in guidance for bank reconciliation. The reference material still described the older account-wide form of the auto-reconciliation call, which no longer works, so an assistant following it would hit an error rather than return suggestions. It now documents the per-entry form the platform actually uses.
