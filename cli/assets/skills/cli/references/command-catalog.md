@@ -79,7 +79,7 @@ Complete reference for all 66 command groups. Organized by domain.
 | `delete <id>` | |
 | `transfer-trial-balance` (alias: `ttb`) | `--from-date`, `--to-date`, `--target-date` |
 | `draft list` | `--max-rows N`, `--ids`, `--json` |
-| `bulk-upsert` | `--input <file>`, `--json` — ⚠️ Natural key is `journalReference` (NOT `reference`); legs use `journalEntries[]` (NOT `entries[]`); each leg has `debitAmount`+`creditAmount` (NOT `amount`+`type`). `currencyCode` REQUIRED. Async → jobId |
+| `bulk-upsert` | `--input <file>`, `--json` — ⚠️ Natural key is `journalReference` (NOT `reference`); legs use `journalEntries[]` (NOT `entries[]`); each leg is `organizationAccountResourceId` (NOT `accountResourceId`) + exactly one of `debitAmount`/`creditAmount` (NOT `amount`+`type`), omitting the unused side. No `currencyCode` on journal rows. Async → jobId |
 
 ### `clio cash-in` — Direct cash-in entries
 | Subcommand | Key flags |

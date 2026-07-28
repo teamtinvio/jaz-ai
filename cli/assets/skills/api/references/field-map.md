@@ -223,8 +223,10 @@ DIFFERENT shape from single create — easier to confuse.
 |------------------|-------------------|-------|
 | `reference` | `journalReference` | Natural key — bulk uses `journalReference` (asymmetric vs other entities which use `<entity>Reference`) |
 | `entries` | `journalEntries` | Array of legs — same name as single create |
-| `amount` + `type: "DEBIT"` | `debitAmount` / `creditAmount` (separate fields per leg) | Bulk uses split numeric fields, NOT amount+type. Set unused side to 0. |
-| `currency: { ... }` (object) | `currencyCode: "SGD"` (flat string) | Bulk requires the flat `currencyCode` string per row — REQUIRED. Missing → `IMPORT_CURRENCY_REQUIRED` errorCode. |
+| `accountResourceId` (leg) | `organizationAccountResourceId` | **The leg account field is NOT `accountResourceId`.** Single create uses `accountResourceId`; bulk uses `organizationAccountResourceId`. Sending the single-create name is silently dropped and the row fails `INVALID_ACCOUNT_TO_IMPORT_JOURNAL` with `columnValue: null`. |
+| `amount` + `type: "DEBIT"` | `debitAmount` / `creditAmount` (separate fields per leg) | Split numeric fields, NOT amount+type. **Send exactly one side and OMIT the other** — do not set the unused side to 0. Both present → `BOTH_CREDIT_AND_DEBIT_ON_A_JOURNAL_ENTRY_LINE_IS_NOT_ALLOWED`; both zero or `<= 0` → rejected too. Neither present → `INVALID_CREDIT_AND_DEBIT_AMOUNT`. |
+| `rowIndex` on the row | `rowIndex` on the **leg** | 1-based, caller-supplied, echoed back in per-row `errorDetails`. It is a leg field for journals, not a row field. |
+| `currency: { ... }` (object) | *(no currency field)* | **Journals are the exception to the `currencyCode` rule** — the bulk journal row has no currency field at all and any `currencyCode` sent is discarded. Per-leg `transactionCurrency` carries multi-currency instead. |
 
 ---
 

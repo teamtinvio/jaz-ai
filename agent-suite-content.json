@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.35.0+f10d1da3",
+  "contentVersion": "5.35.1+127d7816",
   "counts": {
     "tools": 358,
     "namespaces": 43,
@@ -2541,7 +2541,7 @@
     {
       "name": "bulk_upsert_journals",
       "namespace": "journals",
-      "description": "Max 500 manual journals per call. NATURAL KEY: `journalReference` (NOT `reference` — every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]` — different from `clio journals create` which uses entries). Each leg has `accountResourceId` + `debitAmount` + `creditAmount` (debit + credit must balance per row). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only — dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Max 500 manual journals per call. NATURAL KEY: `journalReference` (NOT `reference` — every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]` — different from `clio journals create` which uses entries). A leg is `organizationAccountResourceId` + EXACTLY ONE of `debitAmount` / `creditAmount` — omit the unused side, do not send 0, and do NOT use the `accountResourceId`+`amount`+`type` shape `create_journal` takes. Debits must equal credits per journal. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only — dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
