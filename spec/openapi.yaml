@@ -20495,6 +20495,14 @@
           "minimum": 1,
           "type": "integer"
         },
+        "magicSort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionsMagicSort"
+            }
+          ],
+          "description": "Rank results by how well each record matches a bank statement entry."
+        },
         "offset": {
           "default": 0,
           "description": "Zero-indexed page number. Sort is required when offset is set.",
@@ -20514,6 +20522,16 @@
             }
           ],
           "description": "Sort order. Required when offset is set."
+        },
+        "transactionType": {
+          "default": "ALL_CASHFLOWS",
+          "description": "Which cash records to search. Defaults to all cash records.",
+          "enum": [
+            "ALL_CASHFLOWS",
+            "CASH_ENTRIES"
+          ],
+          "example": "ALL_CASHFLOWS",
+          "type": "string"
         }
       },
       "type": "object"
@@ -23803,6 +23821,13 @@
           "description": "Combine with another filter using AND.",
           "type": "object"
         },
+        "andGroup": {
+          "description": "Combine filter groups using AND.",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
         "balanceAmount": {
           "allOf": [
             {
@@ -23871,6 +23896,13 @@
           "description": "Combine with another filter using OR.",
           "type": "object"
         },
+        "orGroup": {
+          "description": "Combine filter groups using OR.",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
         "organizationAccountResourceId": {
           "allOf": [
             {
@@ -23902,6 +23934,32 @@
             }
           ],
           "description": "Value date, in YYYY-MM-DD format (organization timezone)."
+        }
+      },
+      "type": "object"
+    },
+    "TransactionsFilterGroup": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "TransactionsMagicSort": {
+      "properties": {
+        "bankStatementEntryResourceId": {
+          "description": "Resource ID of the bank statement entry to rank results against.",
+          "type": "string"
+        },
+        "magicSort": {
+          "description": "Set to true to rank results by match quality against that entry.",
+          "type": "boolean"
         }
       },
       "type": "object"

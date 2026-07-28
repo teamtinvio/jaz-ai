@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.34.1] - 2026-07-28
+
+Cashflow search can now be pointed at a specific bank line. Give it a bank statement entry and it returns the cash records ranked by how well each one matches, so the likely match sits at the top instead of being buried under whatever the date sort produced. You can also narrow a search to direct cash entries only, rather than the whole ledger of payments and journals.
+
+Searches can also express grouped either/or conditions, the same way invoices, bills and journals already could.
+
 ## [5.34.0] - 2026-07-28
 
 Clearer errors when a lookup is missing a detail. Asking for something like reconciliation suggestions without saying which entries to look at used to return a bare rejection from the platform, with nothing to act on. Now the assistant is told exactly which detail is missing and where to get it, so it can fetch it and carry on instead of stalling or guessing.
