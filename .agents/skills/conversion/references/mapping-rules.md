@@ -222,16 +222,16 @@ POST /api/v1/organization/currencies
 For Quick Conversion, all conversion transactions use the FYE closing rate. Rates MUST be set AFTER currencies are enabled:
 
 ```
-POST /api/v1/organization-currencies/<code>/rates
+POST /api/v1/organization/currencies/<code>/rates
 {
-  "rate": 1.35,
+  "rate": 0.74,
   "rateApplicableFrom": "2023-12-31"
 }
 ```
 
-**Rate direction:** `functionalToSource` — how many units of functional (base) currency = 1 unit of source (foreign) currency. Example: If base is SGD and rate is 1 SGD = 0.74 USD, then rate = 0.74.
+**Rate direction:** `functionalToSource` — how many units of SOURCE (foreign) currency = 1 unit of FUNCTIONAL (base) currency. Example: base SGD, 1 SGD = 0.74 USD → rate = 0.74. A quote written foreign-first ("1 USD = 1.35 SGD") is the inverse — send 1/1.35 = 0.74, or send 1.35 with `rateDirection: "SOURCE_TO_FUNCTIONAL"` and let the client invert.
 
-**Note:** Rate endpoints use `/organization-currencies` (hyphenated). Enable/disable uses `/organization/currencies` (nested path). These are DIFFERENT endpoints.
+**Note:** Rate endpoints and enable/disable both live under the nested `/organization/currencies` family. The older hyphenated `/organization-currencies/...` rate paths are **deprecated** in the OpenAPI spec.
 
 **CRITICAL:** The field is `rateApplicableFrom` (NOT `effectiveDate`). Using the wrong field name will silently fail.
 

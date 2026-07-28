@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.35.0] - 2026-07-28
+
+Exchange rates stop being a trap. Jaz stores every rate as "1 unit of your base currency = N units of the foreign one". When your base currency is the weaker of the pair, that is the opposite of how the rate is written on a bank statement, so the number people naturally reach for is upside down — and it was accepted without complaint, booking an amount wrong by the square of the rate. One organisation entered a USD 10,000 opening balance and got ₱170.94 instead of ₱585,000.
+
+You no longer have to work out which way round it goes. Give the rate exactly as you have it and say how it reads: `SOURCE_TO_FUNCTIONAL` for "1 USD = 1.35 SGD", `FUNCTIONAL_TO_SOURCE` for a figure taken from your own rate list. Whichever you pick, the assistant now tells you what it understood before anything is saved — "1 base unit = 0.769231 USD (from 1 USD = 1.3 base, inverted for you)" — so a rate entered the wrong way round is visible while the document is still a draft.
+
+Foreign-currency journals work properly. Previously a journal in a currency other than your base could only be created by hand-editing a JSON file; it is now a normal option wherever journals are created.
+
+Listing exchange rates shows the rates. `clio currency-rates list` had been printing a dash in place of every value. It now shows the stored rate and its inverse side by side, each labelled, so there is no ambiguity about which direction you are looking at.
+
+FX revaluation understands payables. The calculator treated every balance as something owed *to* you, so a foreign-currency payable or provision came out with the sign inverted — a strengthening currency was reported as a gain when it means you owe more — and the journal reduced the liability instead of increasing it. Its own documentation had listed intercompany payables and FX-denominated provisions as intended uses the whole time. Add `--position LIABILITY` for those; receivables and deposits need no change.
+
+**Breaking:** the FX revaluation calculator now requires you to state the rate direction. It has always read rates in the opposite direction to the rest of the platform, which meant a rate copied from your rate list produced a valuation that was wrong but looked plausible. Rather than quietly change everyone's answers, `clio calc fx-reval` and the FX revaluation recipe now ask which convention you mean and accept either. Existing commands need `--rate-direction` added; the number itself does not change if you keep the convention you were already using.
+
 ## [5.34.1] - 2026-07-28
 
 Cashflow search can now be pointed at a specific bank line. Give it a bank statement entry and it returns the cash records ranked by how well each one matches, so the likely match sits at the top instead of being buried under whatever the date sort produced. You can also narrow a search to direct cash entries only, rather than the whole ledger of payments and journals.

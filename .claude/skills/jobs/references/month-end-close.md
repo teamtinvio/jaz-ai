@@ -164,7 +164,9 @@ generate_general_ledger(period_end: '2025-01-31', accountResourceIds: [<FX accou
 
 2. For each foreign-currency monetary balance at period end (from a separate `generate_general_ledger` filtered to non-base-currency accounts), independently compute:
 ```
-clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <list_currency_rates valueDate: '2025-01-31'> --currency <code> --base-currency <base currency> --json
+# --rate-direction is REQUIRED. A list_currency_rates value is FUNCTIONAL_TO_SOURCE
+# and can be passed as-is; an everyday "1 USD = 1.35 SGD" quote is SOURCE_TO_FUNCTIONAL.
+clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <rateFunctionalToSource at 2025-01-31> --rate-direction FUNCTIONAL_TO_SOURCE --currency <code> --base-currency <base currency> --json
 ```
 
 3. Sum your independent gain/loss across all foreign balances. Compare against Jaz's auto-posted FX totals from step 1. Variance > materiality threshold → investigate (see the `fx-reval` recipe for likely causes — settlement-realized FX shifts, explicit `currency.exchangeRate` overrides, multi-leg FX through bank-side spreads).

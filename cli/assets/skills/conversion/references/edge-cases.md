@@ -9,11 +9,11 @@ Enable currencies and set FYE closing rates before creating any FX transactions:
 POST /api/v1/organization/currencies          // Enable currency
 { "currencies": ["USD"] }
 
-POST /api/v1/organization-currencies/USD/rates  // Set FYE rate
-{ "rate": 1.35, "rateApplicableFrom": "2024-12-31" }
+POST /api/v1/organization/currencies/USD/rates  // Set FYE rate
+{ "rate": 0.74, "rateApplicableFrom": "2024-12-31" }
 ```
 
-**Rate direction:** Jaz uses `functionalToSource` — how many functional currency units per 1 source currency unit. If base = SGD and "1 USD = 1.35 SGD", then `rate = 1.35`.
+**Rate direction:** Jaz uses `functionalToSource` — how many SOURCE (foreign) units per 1 FUNCTIONAL (base) unit. If base = SGD and the quote is "1 USD = 1.35 SGD", that quote is the inverse: `rate = 1 / 1.35 = 0.74`. Invert only when the quote is written foreign-first; a USD-base org quoting "1 USD = 56.5 PHP" already has the right direction and sends `56.5`. Rather than deciding, set `rateDirection` and pass the figure verbatim (SKILL.md Rule 49).
 
 **CRITICAL:** `currencyCode: "USD"` (string) is **silently ignored** by the API — it creates the transaction in base currency. You MUST use the `currency` object form.
 
@@ -27,7 +27,7 @@ FX conversion transactions use **original dates** (for aging) but an **explicit 
   "dueDate": "2024-07-15",
   "currency": {
     "sourceCurrency": "USD",
-    "exchangeRate": 1.35
+    "exchangeRate": 0.74
   }
 }
 ```

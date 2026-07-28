@@ -93,7 +93,7 @@ POST /api/v1/invoices
 
 **Dates:** Use original dates from the aging report (preserves aging schedules). Fall back to FYE date if not available.
 
-**FX invoices:** Use `currency: { sourceCurrency: "USD", exchangeRate: 1.35 }` (object form with explicit FYE rate). The `exchangeRate` field overrides Jaz's auto-fetch, ensuring zero UGL on day 1. See "FX Invoices/Bills — Dates vs. Rates" in Edge Cases below.
+**FX invoices:** Use `currency: { sourceCurrency: "USD", exchangeRate: 0.74 }` (object form with explicit FYE rate). The `exchangeRate` field overrides Jaz's auto-fetch, ensuring zero UGL on day 1. See "FX Invoices/Bills — Dates vs. Rates" in Edge Cases below.
 
 #### 2.2 Conversion Bills (AP)
 For each line in the AP Aging report:
@@ -193,7 +193,7 @@ POST /api/v1/invoices
   "dueDate": "<original due date>",           // preserves aging buckets
   "currency": {
     "sourceCurrency": "USD",
-    "exchangeRate": 1.35                      // explicit FYE rate — overrides auto-fetch
+    "exchangeRate": 0.74                      // explicit FYE rate — overrides auto-fetch
   },
   ...
 }
@@ -207,7 +207,7 @@ POST /api/v1/invoices
 
 **When dates aren't available:** Some aging reports only show contact name + amount (no individual dates). In this case, fall back to FYE date for both valueDate and dueDate. Aging schedules will be flat ("current") but FX handling remains correct.
 
-**Rate source:** FYE rates come from the exchange rates file (e.g., MAS closing rates). They're set on the org in Phase 1 via `POST /organization-currencies/:code/rates` and also passed explicitly on each FX transaction to guarantee the rate is used regardless of valueDate.
+**Rate source:** FYE rates come from the exchange rates file (e.g., MAS closing rates). They're set on the org in Phase 1 via `POST /organization/currencies/:code/rates` and also passed explicitly on each FX transaction to guarantee the rate is used regardless of valueDate.
 
 ### Partially Paid Invoices in AR Aging
 The AR Aging shows only the **outstanding** balance. Create the conversion invoice for the outstanding amount only — the historical payments are not relevant for Quick Conversion.

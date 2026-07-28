@@ -175,21 +175,23 @@ Valid `type` values: `"TEXT"`, `"DATE"`, `"DROPDOWN"` (UPPERCASE).
 
 ## Currency Errors
 
-### 404 on rate endpoints — WRONG PATH (common mistake)
-**Cause**: Using `/organization/currencies` (nested) instead of `/organization-currencies` (hyphenated) for rate endpoints.
+### 404 on rate endpoints — MALFORMED PATH (common mistake)
+**Cause**: Omitting the currency code, or using singular `rate` instead of `rates`.
 **Endpoints that 404 (wrong paths)**:
-- `/api/v1/organization/currencies/rates` → 404
-- `/api/v1/organization/currencies/USD/rate` → 404
-- `/api/v1/organization/currencies/{id}/rate` → 404
-**Fix**: Rate endpoints use the **hyphenated** path `/organization-currencies` (NOT `/organization/currencies`):
+- `/api/v1/organization/currencies/rates` → 404 (no currency code)
+- `/api/v1/organization/currencies/USD/rate` → 404 (singular)
+- `/api/v1/organization/currencies/{id}/rate` → 404 (singular)
+**Fix**: Rate endpoints live under the nested `/organization/currencies` family. The older
+hyphenated `/organization-currencies/...` rate paths still resolve but are marked
+**deprecated** in the OpenAPI spec — prefer the nested form:
 ```
-POST   /api/v1/organization-currencies/:currencyCode/rates          Set rate
-GET    /api/v1/organization-currencies/:currencyCode/rates          List rates
-GET    /api/v1/organization-currencies/:currencyCode/rates/:id      Get rate
-PUT    /api/v1/organization-currencies/:currencyCode/rates/:id      Update rate
-DELETE /api/v1/organization-currencies/:currencyCode/rates/:id      Delete rate
+POST   /api/v1/organization/currencies/:currencyCode/rates          Set rate
+GET    /api/v1/organization/currencies/:currencyCode/rates          List rates
+GET    /api/v1/organization/currencies/:currencyCode/rates/:id      Get rate
+PUT    /api/v1/organization/currencies/:currencyCode/rates/:id      Update rate
+DELETE /api/v1/organization/currencies/:currencyCode/rates/:id      Delete rate
 ```
-Enable currencies first via `POST /organization/currencies`, then set rates via `/organization-currencies/:code/rates`.
+Enable currencies first via `POST /organization/currencies`, then set rates via `/organization/currencies/:code/rates`.
 
 ### "Cannot set rate for organization base currency" (400)
 **Cause**: Trying to POST/PUT a rate for the org's base currency (e.g., SGD for a Singapore org).
@@ -208,7 +210,7 @@ Enable currencies first via `POST /organization/currencies`, then set rates via 
 **Fix**: Ensure `rateApplicableTo` is after `rateApplicableFrom`, or omit `rateApplicableTo` entirely.
 
 ### Rates appear inverted (wrong direction)
-**Cause**: POSTing a sourceToFunctional rate (1 foreign = X base) as the `rate` field, which expects functionalToSource (1 base = X foreign).
+**Cause**: POSTing a sourceToFunctional rate (1 foreign = X base) as the `rate` field, which expects functionalToSource (1 base = X foreign). You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`) and the client inverts and strips it. See SKILL.md Rule 49.
 **Symptom**: UI shows "1 SGD = 0.0088 JPY" instead of "1 SGD ≈ 111 JPY" — the reciprocal of what you intended.
 **Fix**: Invert before POSTing: `rate = 1 / yourRate`. If your data says "1 JPY = 0.009 SGD", POST `rate: 111.11`.
 
@@ -241,11 +243,11 @@ Enable currencies first via `POST /organization/currencies`, then set rates via 
 **Rate sources in response** (inspect `currencyExchange.rateSource`):
 - `rateSource: "EXTERNAL"`, `providerName: "FRANKFURTER"` — auto-fetched from ECB
 - `rateSource: "INTERNAL_TRANSACTION"`, `providerName: "CUSTOM"` — user-specified `exchangeRate`
-- `rateSource: "INTERNAL_ORG"` — org-level rate (set via `/organization-currencies/:code/rates`)
+- `rateSource: "INTERNAL_ORG"` — org-level rate (set via `/organization/currencies/:code/rates`)
 
 ### "Invalid request body" (400) — `currency` as string
 **Cause**: Using `currency: "USD"` (string) instead of object form.
-**Fix**: Use object form `currency: { sourceCurrency: "USD" }` or `currency: { sourceCurrency: "USD", exchangeRate: 1.35 }`.
+**Fix**: Use object form `currency: { sourceCurrency: "USD" }` or `currency: { sourceCurrency: "USD", exchangeRate: 0.74 }`.
 
 ---
 
@@ -617,7 +619,7 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 ## Journal Errors
 
 ### Multi-currency journals — `currency` object
-Journals support a top-level `currency` object to create entries in a foreign currency — **same format as invoices/bills**: `{ "sourceCurrency": "USD" }` (auto-fetch platform rate) or `{ "sourceCurrency": "USD", "exchangeRate": 1.35 }` (custom rate). The currency must be enabled for the org. Omit the field for base currency journals.
+Journals support a top-level `currency` object to create entries in a foreign currency — **same format as invoices/bills**: `{ "sourceCurrency": "USD" }` (auto-fetch platform rate) or `{ "sourceCurrency": "USD", "exchangeRate": 0.74 }` (custom rate). The currency must be enabled for the org. Omit the field for base currency journals.
 
 ```json
 // Base currency journal (omit currency):
@@ -627,7 +629,7 @@ Journals support a top-level `currency` object to create entries in a foreign cu
 { "saveAsDraft": false, "reference": "JV-001", "valueDate": "2026-02-08", "currency": { "sourceCurrency": "USD" }, "journalEntries": [...] }
 
 // Foreign currency journal (custom rate):
-{ "saveAsDraft": false, "reference": "JV-001", "valueDate": "2026-02-08", "currency": { "sourceCurrency": "USD", "exchangeRate": 1.35 }, "journalEntries": [...] }
+{ "saveAsDraft": false, "reference": "JV-001", "valueDate": "2026-02-08", "currency": { "sourceCurrency": "USD", "exchangeRate": 0.74 }, "journalEntries": [...] }
 ```
 
 **Three restrictions apply to foreign currency journals:**

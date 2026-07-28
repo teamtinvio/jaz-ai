@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.34.0+ed6ed794",
+  "contentVersion": "5.35.0+f10d1da3",
   "counts": {
     "tools": 358,
     "namespaces": 43,
@@ -917,7 +917,7 @@
     {
       "name": "add_currency_rate",
       "namespace": "currencies",
-      "description": "Add or set an exchange rate for a currency. ALWAYS use this tool even when the user says \"update rate\" — it handles both new and existing rates. Rate is relative to the base currency. Call list_currencies first to get valid currency codes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Add or set an exchange rate for a currency. ALWAYS use this tool even when the user says \"update rate\" — it handles both new and existing rates. Rate direction is base→source (1 org-base unit = N of this currency); see the rate param before sending. Call list_currencies first to get valid currency codes. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },

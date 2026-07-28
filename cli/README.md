@@ -52,6 +52,29 @@ clio invoices search --query 'status:unpaid AND $500+' # structured per-entity s
 
 66 command groups, 16 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
 
+### Foreign currency
+
+Rates read **base→source**: `1` unit of your organization's base currency `= N` units of the
+foreign one. Whether that matches how the rate was quoted to you depends on which side your base
+currency is on — an SGD-base org quoting "1 USD = 1.35 SGD" has it backwards and needs `0.74`, while
+a USD-base org quoting "1 USD = 56.5 PHP" already has it right and sends `56.5` unchanged.
+
+You do not have to flip it. Pass the number as you have it and say which way it reads:
+
+```bash
+# "1 USD = 1.35 SGD", from a bank statement, on an SGD-base org
+clio invoices create --currency USD --exchange-rate 1.35 \
+  --rate-direction SOURCE_TO_FUNCTIONAL ...
+
+# 0.74, straight out of clio currency-rates list
+clio invoices create --currency USD --exchange-rate 0.74 ...
+```
+
+Omit `--exchange-rate` entirely to use the organization's stored rate, or the platform daily rate
+when none is set. `clio calc fx-reval` requires `--rate-direction` explicitly — that calculator
+takes rates in the opposite direction to the API, and guessing would silently change a number
+that ends up in a journal.
+
 ## MCP server
 
 358 tools for any AI agent that speaks MCP. Runs locally: no cloud, no ports.

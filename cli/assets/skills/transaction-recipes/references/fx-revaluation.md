@@ -20,12 +20,12 @@
 ## Tools, recipes, calculators this recipe uses
 
 ### Calculator (cross-check, no API key needed)
-- **`clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <period-end> --currency <code> --base-currency <base currency> --json`** — independent gain/loss computation. Returns `{ gainLoss, baseCurrencyValueAtClose, classification: 'gain' | 'loss' }`. Use this to verify what Jaz auto-posted, not to feed `execute_recipe`.
+- **`clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <period-end> --rate-direction <FUNCTIONAL_TO_SOURCE|SOURCE_TO_FUNCTIONAL> --currency <code> --base-currency <base currency> --json`** — independent gain/loss computation. `--rate-direction` is REQUIRED. `--position` defaults to `ASSET`; pass `LIABILITY` for a payable or provision, where a rising base value is a **loss** rather than a gain. Returns `{ bookValue, closingValue, gainOrLoss, isGain }`. Use this to verify what Jaz auto-posted, not to feed `execute_recipe`.
 
 ### Tools (jaz-api / direct) — verification only
 - **`generate_general_ledger(period_end: <date>, accountResourceId: <FX Unrealized Gain | Loss>)`** — pull what Jaz auto-posted to the FX accounts during the period.
 - **`generate_general_ledger(period_end: <date>)`** — discover all foreign-currency monetary balances at period end.
-- **`list_currency_rates(currencyCode: 'USD', valueDate: <period-end>)`** — confirm the closing rate Jaz used. Per `jaz-api/SKILL.md` rule 39, rates are direction-aware (`SOURCE_TO_FUNCTIONAL`).
+- **`list_currency_rates(currencyCode: 'USD', valueDate: <period-end>)`** — confirm the closing rate Jaz used. Per `jaz-api/SKILL.md` rule 49, the API stores rates `functionalToSource` (1 base unit = N foreign). `calc fx-reval` now **requires** `--rate-direction`, so there is no implicit convention to get wrong: pass a `list_currency_rates` value with `--rate-direction FUNCTIONAL_TO_SOURCE`, or an everyday "1 USD = 1.35 SGD" quote with `SOURCE_TO_FUNCTIONAL`. Both describe the same position and produce the same valuation.
 - **`generate_trial_balance(period_end: <date>)`** — confirm foreign-currency monetary balances translated correctly at the closing rate.
 - **`generate_balance_sheet(period_end: <date>)`** — IAS 21.23 verification (all monetary items at closing rate).
 
@@ -81,7 +81,8 @@ Then run the calculator:
 clio calc fx-reval \
   --amount 50000 \
   --book-rate <pull from earliest unposted-against rate>  \
-  --closing-rate <list_currency_rates result> \
+  --closing-rate <rateFunctionalToSource from list_currency_rates, as-is> \
+  --rate-direction FUNCTIONAL_TO_SOURCE \
   --currency USD \
   --base-currency SGD \
   --json

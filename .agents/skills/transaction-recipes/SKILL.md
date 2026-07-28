@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.34.1
+version: 5.35.0
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -189,7 +189,9 @@ clio calc asset-disposal --cost 50000 --salvage 5000 --life 5 --acquired 2022-01
 
 # FX revaluation — unrealized gain/loss on non-AR/AP items (IAS 21)
 # Typical context: month-end close (period-end FX reval) + year-end (revaluation)
-clio calc fx-reval --amount 50000 --book-rate 1.35 --closing-rate 1.38 [--currency USD] [--base-currency SGD] [--json]
+# --rate-direction is REQUIRED — these rates read foreign-first (1 USD = 1.35 SGD).
+# A list_currency_rates value would be FUNCTIONAL_TO_SOURCE instead.
+clio calc fx-reval --amount 50000 --book-rate 1.35 --closing-rate 1.38 --rate-direction SOURCE_TO_FUNCTIONAL [--position ASSET|LIABILITY] [--currency USD] [--base-currency SGD] [--json]
 
 # Expected credit loss provision matrix (IFRS 9)
 # Typical context: GST/VAT filing cycle (ECL reviewed alongside the return prep) + year-end (ECL true-up)

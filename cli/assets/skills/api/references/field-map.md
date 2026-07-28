@@ -213,7 +213,7 @@ When POSTing, `classificationType` must be one of these exact strings (same as `
 | `lines` | `journalEntries` | Same |
 | `entries` | `journalEntries` | Same |
 | `debit` / `credit` (entry) | `amount` + `type` | `amount`: number, `type`: `"DEBIT"` or `"CREDIT"` (UPPERCASE) |
-| `currency: "USD"` (string) | `currency: { sourceCurrency: "USD" }` | **Object form** — same as invoices/bills. Auto-fetches platform rate. Add `exchangeRate: 1.35` for custom rate. Omit for base currency. |
+| `currency: "USD"` (string) | `currency: { sourceCurrency: "USD" }` | **Object form** — same as invoices/bills. Auto-fetches platform rate. Add `exchangeRate: 0.74` for custom rate. Omit for base currency. |
 
 ### Bulk upsert (`POST /journals/bulk-upsert`)
 
@@ -460,7 +460,7 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `/organization/currencies/:code/rates` | `/organization-currencies/:code/rates` | **Hyphenated** path for rates (NOT nested) |
+| `/organization-currencies/:code/rates` (older docs) | `/organization/currencies/:code/rates` | Nested path is current; hyphenated form is **deprecated** in the spec |
 | `exchangeRate` (rate POST body) | `rate` | Just `rate`, not `exchangeRate` |
 | `effectiveDate` / `valueDate` / `date` | `rateApplicableFrom` | Rate start date, `YYYY-MM-DD` only |
 | `expiryDate` | `rateApplicableTo` | Optional rate end date |
@@ -470,9 +470,9 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `baseCurrency` (GET response) | `functionalCurrencyCode` | The org's base currency code in rate response |
 | `notes` (GET response) | `notes: { date, name }` | Metadata object — `date` is the creation date, `name` is the creator |
 
-> **Rate direction cheat-sheet**: POST `rate` = GET `rateFunctionalToSource` = "1 base → X foreign". If your data is "1 foreign → X base", **invert before POSTing**.
+> **Rate direction cheat-sheet**: POST `rate` = GET `rateFunctionalToSource` = "1 base → X foreign". If your data is "1 foreign → X base", **invert before POSTing** — or set `rateDirection: "SOURCE_TO_FUNCTIONAL"` and let the client do it (Rule 49).
 
-**Rate POST response gotcha**: `POST /organization-currencies/:code/rates` returns `{ "data": "Rate added successfully" }` — a **plain string**, NOT a CurrencyRate object. No `resourceId` is returned. To get the rate's `resourceId` for later PUT/DELETE, follow up with GET and match by `rateApplicableFrom`.
+**Rate POST response gotcha**: `POST /organization/currencies/:code/rates` returns `{ "data": "Rate added successfully" }` — a **plain string**, NOT a CurrencyRate object. No `resourceId` is returned. To get the rate's `resourceId` for later PUT/DELETE, follow up with GET and match by `rateApplicableFrom`.
 
 ---
 
@@ -582,8 +582,8 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `GET /organization/currencies` | `{ data: { data: [...] } }` | `{ data: [...] }` |
 | `POST /chart-of-accounts/bulk-upsert` | `{ data: { resourceIds: [...] } }` | Individual results |
 | `POST /organization/currencies` | `{ data: { resourceIds: [...] } }` | Confirmation object |
-| `POST /organization-currencies/:code/rates` | `{ data: "Rate added successfully" }` (string!) | `{ data: { resourceId } }` (object) |
-| `PUT /organization-currencies/:code/rates/:id` | `{ data: "Rate updated successfully" }` (string!) | `{ data: { resourceId } }` (object) |
+| `POST /organization/currencies/:code/rates` | `{ data: "Rate added successfully" }` (string!) | `{ data: { resourceId } }` (object) |
+| `PUT /organization/currencies/:code/rates/:id` | `{ data: "Rate updated successfully" }` (string!) | `{ data: { resourceId } }` (object) |
 | `GET /invoices/{id}` line items | `organizationAccountResourceId` | `accountResourceId` (POST uses `accountResourceId`) |
 | `POST /invoices` (create) | `{ resourceId }` only | Full entity (minimal response!) |
 | `POST /bills` (create) | `{ resourceId }` only | Full entity (minimal response!) |
@@ -606,7 +606,7 @@ Battle-tested patterns from production Jaz API clients:
 | Bill payments | Always embedded in bill creation body, never standalone |
 | Bank records | JSON POST `/bank-records/:id` or multipart `/magic/importBankStatementFromAttachment`. Search via `/bank-records/:id/search`. |
 | Scheduled bills | Wrapped as `{ repeat, startDate, endDate, bill: {...} }`. Field is `repeat` (NOT `frequency`/`interval`) |
-| FX currency | MUST use `currency` OBJECT on ALL transaction types (invoices, bills, credit notes, journals): `{ sourceCurrency: "USD" }` (auto platform rate) or `{ sourceCurrency: "USD", exchangeRate: 1.35 }` (custom). String `currencyCode` silently ignored. |
+| FX currency | MUST use `currency` OBJECT on ALL transaction types (invoices, bills, credit notes, journals): `{ sourceCurrency: "USD" }` (auto platform rate) or `{ sourceCurrency: "USD", exchangeRate: 0.74 }` (custom). String `currencyCode` silently ignored. `exchangeRate` = functionalToSource; invert an everyday "1 USD = 1.35 SGD" quote (Rule 49). |
 
 ---
 

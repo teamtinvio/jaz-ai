@@ -98,8 +98,10 @@ Handle a foreign currency invoice from start to finish.
 # Add USD currency to the org (idempotent — safe to re-run)
 clio currencies add USD
 
-# Set the exchange rate for the period
-clio currency-rates add USD --rate 1.3450 --from 2026-03-01 --to 2026-03-31
+# Set the exchange rate for the period.
+# --rate is functionalToSource: 1 SGD = 0.7435 USD. Invert an everyday
+# "1 USD = 1.3450 SGD" quote before sending (1 / 1.3450 = 0.7435).
+clio currency-rates add USD --rate 0.7435 --from 2026-03-01 --to 2026-03-31
 
 # For bulk updates, prepare a JSON file and use bulk-upsert (max 500 rates/call)
 clio currency-rates bulk-upsert --input rates.json
@@ -111,7 +113,7 @@ clio invoices create \
   --due 2026-04-15 \
   --ref "INV-USD-001" \
   --currency USD \
-  --rate 1.3450 \
+  --exchange-rate 0.7435 \
   --lines '[{"name":"Software License","quantity":1,"unitPrice":2000,"accountResourceId":"Revenue"}]' \
   --finalize
 

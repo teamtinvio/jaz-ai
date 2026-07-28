@@ -183,9 +183,8 @@ Same subcommands and flags as `cash-in`.
 |------------|-----------|
 | `list <code>` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `add <code>` | `--rate`, `--from`, `--to` |
-| `update <rateId>` | `--rate`, `--from`, `--to` |
-| `import <code>` | `--from`, `--to` (auto-fetch from ECB/MAS) |
-| `import-status <jobId>` | Check import job status |
+| `update <code> <rateId>` | `--rate`, `--from`, `--to` |
+| `bulk-upsert` | `--input <file>` (max 500 rates; requires `rateDirection` per rate) |
 
 ### `clio tax-profiles` — Tax profiles and tax types
 | Subcommand | Key flags |
@@ -472,7 +471,7 @@ All calculators work offline (no auth). Use `--json` for structured output.
 | `depreciation` | `--cost`, `--salvage`, `--life`, `--method` |
 | `prepaid-expense` | `--amount`, `--start-date`, `--months` |
 | `deferred-revenue` | `--amount`, `--start-date`, `--months` |
-| `fx-reval` | `--amount`, `--original-rate`, `--new-rate`, `--currency` |
+| `fx-reval` | `--amount`, `--book-rate`, `--closing-rate`, `--rate-direction`, `--currency` |
 | `ecl` | `--receivables`, `--aging-buckets` (via `--input`) |
 | `provision` | `--amount`, `--rate`, `--periods` |
 | `fixed-deposit` | `--principal`, `--rate`, `--term` |

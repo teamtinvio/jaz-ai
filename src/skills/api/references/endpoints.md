@@ -289,11 +289,11 @@ Enable currencies first, then set rates via the **separate** rate endpoints belo
 - To check before enabling: `GET /organization/currencies` and check if the code is already in the list.
 - Sending an empty array `{ "currencies": [] }` returns 400.
 
-### Currency Rates — `/organization-currencies` (hyphenated path)
+### Currency Rates — `/organization/currencies/:code/rates`
 
-**CRITICAL path difference**: Enable uses `/organization/currencies` (nested). Rates use `/organization-currencies` (hyphenated). Using the wrong path returns 404.
+**Path note**: both enable and rates live under the nested `/organization/currencies` family. The older hyphenated `/organization-currencies/...` rate paths still resolve but are marked **deprecated** in the OpenAPI spec — use the nested form.
 
-#### POST /api/v1/organization-currencies/:currencyCode/rates
+#### POST /api/v1/organization/currencies/:currencyCode/rates
 
 ```json
 // Request:
@@ -304,16 +304,16 @@ Enable currencies first, then set rates via the **separate** rate endpoints belo
 // HTTP 201
 ```
 
-**CRITICAL**: Response `data` is a **plain string** `"Rate added successfully"` — NOT a CurrencyRate object. You do NOT get back a `resourceId`. If you need the rate's `resourceId` (e.g., for later PUT/DELETE), you must follow up with `GET /organization-currencies/:code/rates` and match by `rateApplicableFrom` date.
+**CRITICAL**: Response `data` is a **plain string** `"Rate added successfully"` — NOT a CurrencyRate object. You do NOT get back a `resourceId`. If you need the rate's `resourceId` (e.g., for later PUT/DELETE), you must follow up with `GET /organization/currencies/:code/rates` and match by `rateApplicableFrom` date.
 
 **Required fields**:
-- `rate` — positive number (must be > 0). Direction is **functionalToSource** (1 base = X foreign). Example for SGD org setting USD rate: `rate: 0.74` means 1 SGD = 0.74 USD. **If your data is sourceToFunctional (1 USD = 1.35 SGD), invert: `rate = 1 / yourRate`.**
+- `rate` — positive number (must be > 0). Direction is **functionalToSource** (1 base = X foreign). Example for SGD org setting USD rate: `rate: 0.74` means 1 SGD = 0.74 USD. **If your data is sourceToFunctional (1 USD = 1.35 SGD), invert: `rate = 1 / yourRate`.** You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`) and the client inverts and strips it. See SKILL.md Rule 49.
 - `rateApplicableFrom` — `YYYY-MM-DD` string (NOT ISO datetime — `"2026-02-10T00:00:00Z"` is rejected with "does not match 2006-01-02 format")
 
 **Optional fields**:
 - `rateApplicableTo` — `YYYY-MM-DD` string. Must be after `rateApplicableFrom` (422 `INVALID_DATE_RANGE` otherwise).
 
-#### GET /api/v1/organization-currencies/:currencyCode/rates
+#### GET /api/v1/organization/currencies/:currencyCode/rates
 
 ```json
 // Response:
@@ -335,7 +335,7 @@ Enable currencies first, then set rates via the **separate** rate endpoints belo
 }
 ```
 
-#### PUT /api/v1/organization-currencies/:currencyCode/rates/:resourceId
+#### PUT /api/v1/organization/currencies/:currencyCode/rates/:resourceId
 
 ```json
 // Request:
@@ -346,7 +346,7 @@ Enable currencies first, then set rates via the **separate** rate endpoints belo
 // HTTP 200
 ```
 
-#### DELETE /api/v1/organization-currencies/:currencyCode/rates/:resourceId
+#### DELETE /api/v1/organization/currencies/:currencyCode/rates/:resourceId
 
 ```json
 // Response:
@@ -371,12 +371,12 @@ Create exchange rates in bulk (max 500). **Auto-enables currencies not yet enabl
     {
       "sourceCurrencyCode": "USD",
       "rate": 1.35,
-      "rateDirection": "FUNCTIONAL_TO_SOURCE",
+      "rateDirection": "SOURCE_TO_FUNCTIONAL",
       "rateApplicableFrom": "2026-03-29"
     },
     {
       "sourceCurrencyCode": "EUR",
-      "rate": 1.48,
+      "rate": 0.68,
       "rateDirection": "FUNCTIONAL_TO_SOURCE",
       "rateApplicableFrom": "2026-03-29",
       "rateApplicableTo": "2026-04-30"
@@ -388,7 +388,7 @@ Create exchange rates in bulk (max 500). **Auto-enables currencies not yet enabl
 { "data": { "resourceId": null, "resourceIds": ["uuid1", "uuid2"] } }
 ```
 
-`rateDirection`: `FUNCTIONAL_TO_SOURCE` (e.g., 1 SGD = 1.35 USD) or `SOURCE_TO_FUNCTIONAL` (e.g., 1 USD = 0.74 SGD). Unlike the single-rate POST endpoint, this returns `resourceIds` directly.
+`rateDirection` (SGD-base org, USD source): `FUNCTIONAL_TO_SOURCE` means the value is source-per-base — 1 SGD = 0.74 USD → send `0.74`. `SOURCE_TO_FUNCTIONAL` means base-per-source — 1 USD = 1.35 SGD → send `1.35` as-is, no inversion. This is the ONLY rate endpoint that accepts the everyday quote directly; the single-rate POST always wants `FUNCTIONAL_TO_SOURCE`. Unlike the single-rate POST endpoint, this returns `resourceIds` directly.
 
 ---
 
@@ -547,7 +547,7 @@ Create defaults: `status=ACTIVE`, `itemCategory=NON_INVENTORY`. Update: only sen
 - **`currency: "USD"` (string)** causes "Invalid request body" error (400).
 
 **Rate hierarchy** (when using `currency: { sourceCurrency }` without `exchangeRate`):
-1. Org-level rate (set via `/organization-currencies/:code/rates`) — auto-filled if exists
+1. Org-level rate (set via `/organization/currencies/:code/rates`) — auto-filled if exists
 2. Platform rate (ECB via FRANKFURTER) — auto-fetched if no org rate
 3. Transaction-level rate (via `exchangeRate` in the `currency` object) — overrides all
 
@@ -2078,7 +2078,7 @@ Update an existing payment record. All fields optional — only included fields 
   "valueDate": "2026-03-02",
   "paymentMethod": "BANK_TRANSFER",
   "accountResourceId": "uuid-bank",
-  "currency": { "sourceCurrency": "USD", "exchangeRate": 1.35 },
+  "currency": { "sourceCurrency": "USD", "exchangeRate": 0.74 },
   "transactionFee": 5.00,
   "transactionFeeCollected": true
 }

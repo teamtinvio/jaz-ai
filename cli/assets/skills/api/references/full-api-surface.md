@@ -307,17 +307,17 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | GET | `/organization/currencies/:currencyCode` | Get by code |
 | DELETE | `/organization/currencies/:currencyCode` | Disable currency |
 
-### Currency Rates (via /organization-currencies)
+### Currency Rates (via /organization/currencies)
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/organization-currencies/:currencyCode/rates` | Set custom rate |
-| GET | `/organization-currencies/:currencyCode/rates` | List rates |
-| GET | `/organization-currencies/:currencyCode/rates/:resourceId` | Get rate |
-| PUT | `/organization-currencies/:currencyCode/rates/:resourceId` | Update rate |
-| DELETE | `/organization-currencies/:currencyCode/rates/:resourceId` | Delete rate |
+| POST | `/organization/currencies/:currencyCode/rates` | Set custom rate |
+| GET | `/organization/currencies/:currencyCode/rates` | List rates |
+| GET | `/organization/currencies/:currencyCode/rates/:resourceId` | Get rate |
+| PUT | `/organization/currencies/:currencyCode/rates/:resourceId` | Update rate |
+| DELETE | `/organization/currencies/:currencyCode/rates/:resourceId` | Delete rate |
 | POST | `/organization/currencies/rates/bulk-upsert` | Bulk create exchange rates (max 500, auto-enables currencies) |
 
-**CRITICAL path difference**: Currency rate management uses `/organization-currencies` (hyphenated), while basic enable/disable uses `/organization/currencies` (nested). The bulk-upsert endpoint uses the nested path (`/organization/currencies/rates/bulk-upsert`). Using the wrong path returns 404. POST body: `{ "rate": 0.74, "rateApplicableFrom": "YYYY-MM-DD" }` (rate = 1 base → X foreign; see endpoints.md for direction details). Base currency rates return 400. See endpoints.md for full examples.
+**Path note**: rate management, enable/disable and bulk-upsert all live under the nested `/organization/currencies` family. The older hyphenated `/organization-currencies/...` rate paths still resolve but are marked **deprecated** in the OpenAPI spec — prefer the nested form. POST body: `{ "rate": 0.74, "rateApplicableFrom": "YYYY-MM-DD" }` (rate = 1 base → X foreign; see endpoints.md for direction details). Base currency rates return 400. See endpoints.md for full examples.
 
 ---
 

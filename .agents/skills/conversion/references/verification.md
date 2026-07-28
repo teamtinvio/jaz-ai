@@ -108,11 +108,11 @@ Conversion Bills (AP)       XX
 TTB Journal                 1
 Lock Date Set               <FYE date>
 
-FX RATES APPLIED
+FX RATES APPLIED (functionalToSource — 1 base unit = N foreign)
 --------------------------------------------
-USD                         1.3500
-EUR                         1.4500
-JPY                         0.0092
+USD                         0.7407
+EUR                         0.6897
+JPY                       108.6957
 
 ERRORS (if any)
 --------------------------------------------
