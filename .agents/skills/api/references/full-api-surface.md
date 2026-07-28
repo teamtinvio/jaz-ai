@@ -131,7 +131,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | GET | `/journals/:resourceId/attachments` | List attachments |
 | POST | `/journals/:resourceId/attachments` | Upload attachment |
 | DELETE | `/journals/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| POST | `/journals/bulk-upsert` | Bulk create/update manual journals (max 500) — **async**, returns `{ jobId }`. Natural key: `reference`. Multi-leg `entries[]` per row. ISO 8601 dates only. |
+| POST | `/journals/bulk-upsert` | Bulk create/update manual journals (max 500) — **async**, returns `{ jobId }`. Natural key: `journalReference` (NOT `reference`). Legs are `journalEntries[]`, each `organizationAccountResourceId` + exactly one of `debitAmount`/`creditAmount`. ISO 8601 dates only. |
 
 ### Cash Entries
 | Method | Path | Description |
