@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.35.1+127d7816",
+  "contentVersion": "5.35.2+64924bf2",
   "counts": {
     "tools": 358,
     "namespaces": 43,
@@ -553,7 +553,7 @@
     {
       "name": "delete_journal",
       "namespace": "journals",
-      "description": "Delete a draft journal entry. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Deletes a DRAFT journal permanently; VOIDs an ACTIVE one and keeps it. `status`: SUCCEEDED = deleted, VOID = voided. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2632,7 +2632,7 @@
     {
       "name": "undo_reconciliations",
       "namespace": "reconciliations",
-      "description": "Unlink bank entries from what they were reconciled against, returning each to UNRECONCILED. Re-running reports already-unreconciled/archived entries as per-entry FAILED (INVALID_BANK_STATEMENT_ENTRY_STATUS); it never double-applies. On a non-200 nothing was applied, the batch rolls back. Ids that do not resolve are OMITTED from resetReconciliationResponse, so compare returned ids against what you sent. Does NOT delete the record it was matched to; reconcile_* tools that CREATE one leave it on the books as a bank-rec discrepancy, and re-reconciling without deleting it duplicates the record. Delete via linkedRecords by businessTransactionType: SALE=delete_invoice, PURCHASE=delete_bill, SALE_CREDIT_NOTE=delete_customer_credit_note, PURCHASE_CREDIT_NOTE=delete_supplier_credit_note, PAYMENT_*=delete_payment, JOURNAL_MANUAL=delete_journal (drafts only) — all using businessTransactionResourceId. JOURNAL_DIRECT_CASH_IN/OUT and JOURNAL_CASH_TRANSFER use delete_cash_in/out/transfer with parentEntityResourceId instead. Any other type has no delete tool: locate it with search_cashflow_transactions first. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Unlink bank entries from what they were reconciled against, returning each to UNRECONCILED. Re-running reports already-unreconciled/archived entries as per-entry FAILED (INVALID_BANK_STATEMENT_ENTRY_STATUS); it never double-applies. On a non-200 nothing was applied, the batch rolls back. Ids that do not resolve are OMITTED from resetReconciliationResponse, so compare returned ids against what you sent. Does NOT delete the record it was matched to; reconcile_* tools that CREATE one leave it on the books as a bank-rec discrepancy, and re-reconciling without deleting it duplicates the record. Delete via linkedRecords by businessTransactionType: SALE=delete_invoice, PURCHASE=delete_bill, SALE_CREDIT_NOTE=delete_customer_credit_note, PURCHASE_CREDIT_NOTE=delete_supplier_credit_note, PAYMENT_*=delete_payment, JOURNAL_MANUAL=delete_journal (voids an ACTIVE) — all using businessTransactionResourceId. JOURNAL_DIRECT_CASH_IN/OUT and JOURNAL_CASH_TRANSFER use delete_cash_in/out/transfer with parentEntityResourceId instead. Any other type has no delete tool: locate it with search_cashflow_transactions first. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
