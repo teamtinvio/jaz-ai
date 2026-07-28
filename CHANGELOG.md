@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.35.2] - 2026-07-29
+
+Internal reliability and observability work. No user-facing changes since v5.35.1.
+
 ## [5.35.0] - 2026-07-28
 
 Exchange rates stop being a trap. Jaz stores every rate as "1 unit of your base currency = N units of the foreign one". When your base currency is the weaker of the pair, that is the opposite of how the rate is written on a bank statement, so the number people naturally reach for is upside down — and it was accepted without complaint, booking an amount wrong by the square of the rate. One organisation entered a USD 10,000 opening balance and got ₱170.94 instead of ₱585,000.
