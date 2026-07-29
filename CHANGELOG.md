@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.4] - 2026-07-30
+
+Internal deployment wiring for the hosted email assistant. No user-facing changes since v5.36.3.
+
 ## [5.36.3] - 2026-07-30
 
 Internal test-suite fix. No user-facing changes since v5.36.2.
