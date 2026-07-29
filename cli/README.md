@@ -159,7 +159,7 @@ Runs on your machine. Calls go to the Jaz API over HTTPS. No telemetry, no data 
 
 ## Support
 
-[help.jaz.ai](https://help.jaz.ai) · [GitHub Issues](https://github.com/teamtinvio/jaz-ai/issues) · api-support@jaz.ai
+[help.jaz.ai](https://help.jaz.ai) · [GitHub Issues](https://github.com/teamtinvio/jaz-ai/issues) · build.with@jaz.ai
 
 ## License
 

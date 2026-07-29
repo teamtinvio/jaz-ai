@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.2] - 2026-07-30
+
+The contact address for API and developer questions is now build.with@jaz.ai, replacing api-support@jaz.ai across the README, the npm package, the plugin listing and the help centre.
+
 ## [5.36.1] - 2026-07-30
 
 Draft journals. Asking the drafts tools to convert a journal used to fail with a bare list of the four types it does accept, which read as "journals cannot be promoted". They can. A draft journal becomes active through `bulk_update_journals` with `saveAsDraft: false`, and the error now says so. Journals have no approval step to route through, and the API reference no longer claims otherwise.

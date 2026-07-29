@@ -19,6 +19,6 @@ jobs:
             --repo "${{ github.repository }}" \
             --body "Thanks for your interest! This repository is a **read-only mirror** — all development happens internally. Pull requests are not accepted here and will be automatically closed.
 
-          If you've found a bug or have a suggestion, please email api-support@jaz.ai."
+          If you've found a bug or have a suggestion, please email build.with@jaz.ai."
 
           gh pr close "$PR_NUMBER" --repo "${{ github.repository }}"
