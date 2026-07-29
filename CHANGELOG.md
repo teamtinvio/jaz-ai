@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.36.0] - 2026-07-29
+
+The same supplier invoice can no longer be recorded twice without anyone noticing. Forward an invoice to Jaz, forward it again a week later, and you used to get two bills — two entries in payables, two amounts owed, and nothing to tell you they were the same document. There was no check of any kind, and the reference number could not provide one because the assistant was told to invent a fresh timestamped reference whenever the document did not obviously carry one. Every copy therefore arrived looking new.
+
+Before a bill is created, Jaz now looks for one that is already there: same supplier, same date on the document, same currency, same sort of amount. If it finds one, nothing is written. You are shown the bill it found — its reference, date, amount and status — and asked whether the one in front of you is the same document.
+
+It asks rather than refuses, because a second bill from the same supplier on the same day is often entirely real: a split shipment, a second delivery, two identical retainers. Say it is a separate bill and it is recorded normally. Drafts count as matches too, so a document you forwarded an hour ago and have not looked at yet still protects you.
+
+Reference numbers now come from the document. The assistant is asked to read the supplier's own invoice number off the invoice, and to ask you if the document genuinely does not have one, rather than generating something that only looks unique.
+
+**One thing this does not cover.** Sending a document as an *attachment* — a PDF or photo of an invoice, forwarded by email or uploaded — still goes through a separate extraction path where the supplier, amount and date are not yet known at the moment the request is made, so there is nothing to compare. Identical files attached to the *same* email are already collapsed; the same invoice arriving in two different emails is not yet detected. Recording a bill from typed or extracted details is protected; the attachment route is not.
+
 ## [5.35.5] - 2026-07-29
 
 Internal reliability work in the hosted email assistant. No user-facing changes since v5.35.4.

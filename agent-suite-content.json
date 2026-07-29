@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.35.5+70769f62",
+  "contentVersion": "5.36.0+422f7b1b",
   "counts": {
     "tools": 358,
     "namespaces": 43,
@@ -371,7 +371,7 @@
     {
       "name": "create_bill",
       "namespace": "bills",
-      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — generate one with a timestamp if user doesn't specify. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — use the SUPPLIER'S OWN invoice number; if the document has none, ask. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating — show it, retry with allowDuplicate only once the user confirms it is separate. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
