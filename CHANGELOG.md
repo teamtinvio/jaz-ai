@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.35.5] - 2026-07-29
+
+Internal reliability work in the hosted email assistant. No user-facing changes since v5.35.4.
+
 ## [5.35.4] - 2026-07-29
 
 Bulk journal import documentation now names the right fields. The command help and the API reference still described the natural key as `reference` and the legs array as `entries[]`; both are `journalReference` and `journalEntries[]`. A leg is an account id plus exactly one of a debit or a credit amount, with the unused side omitted.
