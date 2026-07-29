@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.3] - 2026-07-30
+
+Internal test-suite fix. No user-facing changes since v5.36.2.
+
 ## [5.36.2] - 2026-07-30
 
 The contact address for API and developer questions is now build.with@jaz.ai, replacing api-support@jaz.ai across the README, the npm package, the plugin listing and the help centre.
