@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.36.0
+version: 5.36.1
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 158 production gotchas, error
@@ -419,7 +419,7 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
     - `POST /api/v1/drafts/convert-to-active` (async, jobId) → `convert_drafts_to_active`. Promotes drafts to ACTIVE. Poll `search_background_jobs` filtered by `resourceId`; on PARTIAL_SUCCESS read `data[0].errorDetails`.
     - `POST /api/v1/drafts/submit-for-approval` (async, jobId) → `submit_drafts_for_approval`. Routes drafts into the approval workflow.
 
-129. **Drafts lifecycle request shape (mix-friendly)** — all 3 endpoints accept the same body: `{ items: [{btResourceId, btType}] }` with `btType ∈ {SALE | PURCHASE | SALE_CREDIT_NOTE | PURCHASE_CREDIT_NOTE}`. **Max 500 items per call. ONE batch can mix any combination of types** — no need to group by btType client-side, no need to make multiple calls per entity type. **Mapping**: `SALE` → invoice, `PURCHASE` → bill, `SALE_CREDIT_NOTE` → customer credit note, `PURCHASE_CREDIT_NOTE` → supplier credit note. Journals are NOT in the enum (they have their own approval flow).
+129. **Drafts lifecycle request shape (mix-friendly)** — all 3 endpoints accept the same body: `{ items: [{btResourceId, btType}] }` with `btType ∈ {SALE | PURCHASE | SALE_CREDIT_NOTE | PURCHASE_CREDIT_NOTE}`. **Max 500 items per call. ONE batch can mix any combination of types** — no need to group by btType client-side, no need to make multiple calls per entity type. **Mapping**: `SALE` → invoice, `PURCHASE` → bill, `SALE_CREDIT_NOTE` → customer credit note, `PURCHASE_CREDIT_NOTE` → supplier credit note. Journals are NOT in the enum: they have no approval state (ACTIVE | VOID | DRAFT), so they never entered this lifecycle. Promote a DRAFT journal with `bulk_update_journals` (`saveAsDraft: false`) or `update_journal` — that IS the supported path, not a workaround.
 
 130. **Drafts lifecycle is NOT idempotent** — a second `convert_drafts_to_active` on already-ACTIVE drafts returns 422; a second `submit_drafts_for_approval` on drafts with an in-flight approval returns 422. Filter the draft list by `status: DRAFT` before submitting (the entity-specific search tools — `search_invoices`, `search_bills`, etc. — accept `status` filters). `validate_drafts` IS safe to call repeatedly (read-only, no state change).
 

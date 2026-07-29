@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.1] - 2026-07-30
+
+Draft journals. Asking the drafts tools to convert a journal used to fail with a bare list of the four types it does accept, which read as "journals cannot be promoted". They can. A draft journal becomes active through `bulk_update_journals` with `saveAsDraft: false`, and the error now says so. Journals have no approval step to route through, and the API reference no longer claims otherwise.
+
 ## [5.36.0] - 2026-07-29
 
 The same supplier invoice can no longer be recorded twice without anyone noticing. Forward an invoice to Jaz, forward it again a week later, and you used to get two bills — two entries in payables, two amounts owed, and nothing to tell you they were the same document. There was no check of any kind, and the reference number could not provide one because the assistant was told to invent a fresh timestamped reference whenever the document did not obviously carry one. Every copy therefore arrived looking new.
