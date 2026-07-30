@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.5] - 2026-07-30
+
+Internal deployment and credential-routing fix for the hosted email assistant. No user-facing changes since v5.36.4.
+
 ## [5.36.4] - 2026-07-30
 
 Internal deployment wiring for the hosted email assistant. No user-facing changes since v5.36.3.
