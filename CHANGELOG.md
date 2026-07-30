@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.8] - 2026-07-30
+
+Internal test hardening for currency-rate direction handling. No user-facing changes since v5.36.7.
+
 ## [5.36.7] - 2026-07-30
 
 Internal correctness fix for the hosted email assistant's currency-rate handling. No user-facing changes since v5.36.6.
