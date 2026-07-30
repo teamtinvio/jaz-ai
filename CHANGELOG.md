@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.11] - 2026-07-30
+
+When you set or update an exchange rate from an everyday quote ("1 USD = 1.35 SGD") and declare `SOURCE_TO_FUNCTIONAL`, that figure is now sent to the platform exactly as you typed it and recorded in the direction you declared, instead of being converted to its reciprocal first. Your figure is the one stored without rounding, and the opposite direction is derived from it. Listing your rates still shows both. Omitting the direction is unchanged and still means "1 unit of your base currency = N of this currency".
+
 ## [5.36.10] - 2026-07-30
 
 Internal cleanup: removed an unused help-center prompt path from the hosted assistant. No user-facing changes since v5.36.9.

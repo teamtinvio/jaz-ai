@@ -210,9 +210,9 @@ Enable currencies first via `POST /organization/currencies`, then set rates via 
 **Fix**: Ensure `rateApplicableTo` is after `rateApplicableFrom`, or omit `rateApplicableTo` entirely.
 
 ### Rates appear inverted (wrong direction)
-**Cause**: POSTing a sourceToFunctional rate (1 foreign = X base) as the `rate` field, which expects functionalToSource (1 base = X foreign). You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`) and the client inverts and strips it. See SKILL.md Rule 49.
+**Cause**: POSTing a sourceToFunctional rate (1 foreign = X base) as the `rate` field, which expects functionalToSource (1 base = X foreign). You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`), which the rate-table endpoints accept natively. Omitting it means `FUNCTIONAL_TO_SOURCE`. See SKILL.md Rule 49.
 **Symptom**: UI shows "1 SGD = 0.0088 JPY" instead of "1 SGD ≈ 111 JPY" — the reciprocal of what you intended.
-**Fix**: Invert before POSTing: `rate = 1 / yourRate`. If your data says "1 JPY = 0.009 SGD", POST `rate: 111.11`.
+**Fix**: Either declare the direction and send your figure as-is (`rate: 0.009, rateDirection: "SOURCE_TO_FUNCTIONAL"`), or invert before POSTing: if your data says "1 JPY = 0.009 SGD", POST `rate: 111.11` bare. Declaring is preferred — a wrong inversion is silent and wrong by rate².
 
 ### Wrong body format for enabling
 **Cause**: Using `{ currencyCode: "USD" }` instead of array format.

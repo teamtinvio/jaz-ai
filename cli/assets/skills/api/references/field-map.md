@@ -472,7 +472,7 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `baseCurrency` (GET response) | `functionalCurrencyCode` | The org's base currency code in rate response |
 | `notes` (GET response) | `notes: { date, name }` | Metadata object — `date` is the creation date, `name` is the creator |
 
-> **Rate direction cheat-sheet**: POST `rate` = GET `rateFunctionalToSource` = "1 base → X foreign". If your data is "1 foreign → X base", **invert before POSTing** — or set `rateDirection: "SOURCE_TO_FUNCTIONAL"` and let the client do it (Rule 49).
+> **Rate direction cheat-sheet**: POST `rate` = GET `rateFunctionalToSource` = "1 base → X foreign". If your data is "1 foreign → X base", **invert before POSTing** — or set `rateDirection: "SOURCE_TO_FUNCTIONAL"` and send your figure as-is, which the endpoint applies server-side (Rule 49).
 
 **Rate POST response gotcha**: `POST /organization/currencies/:code/rates` returns `{ "data": "Rate added successfully" }` — a **plain string**, NOT a CurrencyRate object. No `resourceId` is returned. To get the rate's `resourceId` for later PUT/DELETE, follow up with GET and match by `rateApplicableFrom`.
 

@@ -481,6 +481,15 @@
         "rateApplicableTo": {
           "description": "End date for the rate, in YYYY-MM-DD format (UTC). When omitted, defaults to the same date as rateApplicableFrom (rate valid for that single day).",
           "type": "string"
+        },
+        "rateDirection": {
+          "default": "FUNCTIONAL_TO_SOURCE",
+          "description": "Direction the rate is quoted in. FUNCTIONAL_TO_SOURCE means 1 unit of the organization's base currency equals this many units of the currency. SOURCE_TO_FUNCTIONAL means the reverse. Defaults to FUNCTIONAL_TO_SOURCE when omitted.",
+          "enum": [
+            "FUNCTIONAL_TO_SOURCE",
+            "SOURCE_TO_FUNCTIONAL"
+          ],
+          "type": "string"
         }
       },
       "required": [
@@ -2192,7 +2201,7 @@
           "type": "string"
         },
         "rateDirection": {
-          "description": "Direction of the rate: base-to-source or source-to-base.",
+          "description": "Direction the rate is quoted in. FUNCTIONAL_TO_SOURCE means 1 unit of the organization's base currency equals this many units of the currency. SOURCE_TO_FUNCTIONAL means the reverse.",
           "enum": [
             "FUNCTIONAL_TO_SOURCE",
             "SOURCE_TO_FUNCTIONAL"
@@ -9863,6 +9872,15 @@
         },
         "rateApplicableTo": {
           "description": "End date for the rate, in YYYY-MM-DD format (organization timezone).",
+          "type": "string"
+        },
+        "rateDirection": {
+          "default": "FUNCTIONAL_TO_SOURCE",
+          "description": "Direction the rate is quoted in. FUNCTIONAL_TO_SOURCE means 1 unit of the organization's base currency equals this many units of the currency. SOURCE_TO_FUNCTIONAL means the reverse. It is not carried over from the existing rate, so omitting it reads the value as FUNCTIONAL_TO_SOURCE.",
+          "enum": [
+            "FUNCTIONAL_TO_SOURCE",
+            "SOURCE_TO_FUNCTIONAL"
+          ],
           "type": "string"
         },
         "resourceId": {
@@ -46331,6 +46349,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "schema": {
@@ -46524,6 +46548,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -47758,6 +47788,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "schema": {
@@ -47948,6 +47984,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }

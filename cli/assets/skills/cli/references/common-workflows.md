@@ -99,9 +99,13 @@ Handle a foreign currency invoice from start to finish.
 clio currencies add USD
 
 # Set the exchange rate for the period.
-# --rate is functionalToSource: 1 SGD = 0.7435 USD. Invert an everyday
-# "1 USD = 1.3450 SGD" quote before sending (1 / 1.3450 = 0.7435).
+# --rate defaults to functionalToSource: 1 SGD = 0.7435 USD.
 clio currency-rates add USD --rate 0.7435 --from 2026-03-01 --to 2026-03-31
+
+# Holding an everyday "1 USD = 1.3450 SGD" quote instead? Declare the
+# direction and send it as-is rather than inverting by hand.
+clio currency-rates add USD --rate 1.3450 --rate-direction SOURCE_TO_FUNCTIONAL \
+  --from 2026-03-01 --to 2026-03-31
 
 # For bulk updates, prepare a JSON file and use bulk-upsert (max 500 rates/call)
 clio currency-rates bulk-upsert --input rates.json

@@ -229,7 +229,7 @@ POST /api/v1/organization/currencies/<code>/rates
 }
 ```
 
-**Rate direction:** `functionalToSource` — how many units of SOURCE (foreign) currency = 1 unit of FUNCTIONAL (base) currency. Example: base SGD, 1 SGD = 0.74 USD → rate = 0.74. A quote written foreign-first ("1 USD = 1.35 SGD") is the inverse — send 1/1.35 = 0.74, or send 1.35 with `rateDirection: "SOURCE_TO_FUNCTIONAL"` and let the client invert.
+**Rate direction:** `functionalToSource` — how many units of SOURCE (foreign) currency = 1 unit of FUNCTIONAL (base) currency. Example: base SGD, 1 SGD = 0.74 USD → rate = 0.74. A quote written foreign-first ("1 USD = 1.35 SGD") is the inverse — send 1/1.35 = 0.74, or send 1.35 with `rateDirection: "SOURCE_TO_FUNCTIONAL"` and let the endpoint apply it. Omitting `rateDirection` means `FUNCTIONAL_TO_SOURCE`.
 
 **Note:** Rate endpoints and enable/disable both live under the nested `/organization/currencies` family. The older hyphenated `/organization-currencies/...` rate paths are **deprecated** in the OpenAPI spec.
 

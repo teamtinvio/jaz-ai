@@ -182,8 +182,8 @@ Same subcommands and flags as `cash-in`.
 | Subcommand | Key flags |
 |------------|-----------|
 | `list <code>` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
-| `add <code>` | `--rate`, `--from`, `--to` |
-| `update <code> <rateId>` | `--rate`, `--from`, `--to` |
+| `add <code>` | `--rate`, `--rate-direction`, `--from`, `--to` |
+| `update <code> <rateId>` | `--rate`, `--rate-direction`, `--from`, `--to` |
 | `bulk-upsert` | `--input <file>` (max 500 rates; requires `rateDirection` per rate) |
 
 ### `clio tax-profiles` — Tax profiles and tax types

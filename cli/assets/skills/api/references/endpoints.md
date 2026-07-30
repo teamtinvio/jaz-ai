@@ -307,7 +307,7 @@ Enable currencies first, then set rates via the **separate** rate endpoints belo
 **CRITICAL**: Response `data` is a **plain string** `"Rate added successfully"` — NOT a CurrencyRate object. You do NOT get back a `resourceId`. If you need the rate's `resourceId` (e.g., for later PUT/DELETE), you must follow up with `GET /organization/currencies/:code/rates` and match by `rateApplicableFrom` date.
 
 **Required fields**:
-- `rate` — positive number (must be > 0). Direction is **functionalToSource** (1 base = X foreign). Example for SGD org setting USD rate: `rate: 0.74` means 1 SGD = 0.74 USD. **If your data is sourceToFunctional (1 USD = 1.35 SGD), invert: `rate = 1 / yourRate`.** You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`) and the client inverts and strips it. See SKILL.md Rule 49.
+- `rate` — positive number (must be > 0). Direction is **functionalToSource** (1 base = X foreign). Example for SGD org setting USD rate: `rate: 0.74` means 1 SGD = 0.74 USD. **If your data is sourceToFunctional (1 USD = 1.35 SGD), invert: `rate = 1 / yourRate`.** You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`), which this endpoint accepts natively and applies server-side. Omitting it means `FUNCTIONAL_TO_SOURCE`. See SKILL.md Rule 49.
 - `rateApplicableFrom` — `YYYY-MM-DD` string (NOT ISO datetime — `"2026-02-10T00:00:00Z"` is rejected with "does not match 2006-01-02 format")
 
 **Optional fields**:
@@ -336,6 +336,8 @@ Enable currencies first, then set rates via the **separate** rate endpoints belo
 ```
 
 #### PUT /api/v1/organization/currencies/:currencyCode/rates/:resourceId
+
+Takes the same optional `rateDirection` as the POST above, with the same `FUNCTIONAL_TO_SOURCE` default. Edit and add read a bare `rate` identically; supply the label to send an everyday quote verbatim.
 
 ```json
 // Request:
@@ -388,7 +390,7 @@ Create exchange rates in bulk (max 500). **Auto-enables currencies not yet enabl
 { "data": { "resourceId": null, "resourceIds": ["uuid1", "uuid2"] } }
 ```
 
-`rateDirection` (SGD-base org, USD source): `FUNCTIONAL_TO_SOURCE` means the value is source-per-base — 1 SGD = 0.74 USD → send `0.74`. `SOURCE_TO_FUNCTIONAL` means base-per-source — 1 USD = 1.35 SGD → send `1.35` as-is, no inversion. This is the ONLY rate endpoint that accepts the everyday quote directly; the single-rate POST always wants `FUNCTIONAL_TO_SOURCE`. Unlike the single-rate POST endpoint, this returns `resourceIds` directly.
+`rateDirection` (SGD-base org, USD source): `FUNCTIONAL_TO_SOURCE` means the value is source-per-base — 1 SGD = 0.74 USD → send `0.74`. `SOURCE_TO_FUNCTIONAL` means base-per-source — 1 USD = 1.35 SGD → send `1.35` as-is, no inversion. All three rate endpoints (single add, single edit, bulk-upsert) accept the everyday quote this way; the difference here is that `rateDirection` is **required** on bulk-upsert and optional on the single-rate pair, where omitting it means `FUNCTIONAL_TO_SOURCE`. Unlike the single-rate POST endpoint, this returns `resourceIds` directly.
 
 ---
 
