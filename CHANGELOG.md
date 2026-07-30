@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.6] - 2026-07-30
+
+Fixed: when the assistant spots that a bill you forwarded is one it has already recorded, it holds the write and tells you. Previously, if that same request then ran long, you could be told documents "may already have been created in your books" and be left to go looking — even though nothing was written. The summary of actions attached to that reply could also list the bill as created. Both now correctly report that nothing was created, and the request is retried normally.
+
 ## [5.36.5] - 2026-07-30
 
 Internal deployment and credential-routing fix for the hosted email assistant. No user-facing changes since v5.36.4.
