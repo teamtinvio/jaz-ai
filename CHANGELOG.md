@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.10] - 2026-07-30
+
+Internal cleanup: removed an unused help-center prompt path from the hosted assistant. No user-facing changes since v5.36.9.
+
 ## [5.36.9] - 2026-07-30
 
 Internal correctness fixes for the hosted email assistant: it no longer tells you your plan blocks active transactions (it saves drafts for review by design), and two inaccurate developer comments were corrected. No user-facing changes to the extension since v5.36.8.
