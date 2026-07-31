@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.12] - 2026-07-31
+
+When you create an invoice, bill or credit note in a foreign currency, the reply now tells you the exchange rate it was actually created with, for example "FX: 1 SGD = 0.74 USD (applied rate for 2026-04-03)". This matters most when you do not supply a rate yourself: your organization's rate for that date is applied automatically, and previously nothing told you which number was used. A rate saved the wrong way round now reads as an obviously wrong figure you can catch before finalizing. Documents in your own base currency are unchanged, and so is everything the command line already told you before a document is sent.
+
 ## [5.36.11] - 2026-07-30
 
 When you set or update an exchange rate from an everyday quote ("1 USD = 1.35 SGD") and declare `SOURCE_TO_FUNCTIONAL`, that figure is now sent to the platform exactly as you typed it and recorded in the direction you declared, instead of being converted to its reciprocal first. Your figure is the one stored without rounding, and the opposite direction is derived from it. Listing your rates still shows both. Omitting the direction is unchanged and still means "1 unit of your base currency = N of this currency".

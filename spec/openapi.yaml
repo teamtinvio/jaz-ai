@@ -576,6 +576,31 @@
       },
       "type": "object"
     },
+    "AppliedRate": {
+      "properties": {
+        "baseCurrency": {
+          "description": "Organization base currency code (ISO 4217).",
+          "example": "SGD",
+          "type": "string"
+        },
+        "date": {
+          "description": "Date the rate was resolved for, in YYYY-MM-DD format.",
+          "example": "2026-04-03",
+          "type": "string"
+        },
+        "exchangeRate": {
+          "description": "Exchange rate from the organization's base currency to the transaction currency.",
+          "example": 0.74,
+          "type": "number"
+        },
+        "sourceCurrency": {
+          "description": "Transaction currency code (ISO 4217).",
+          "example": "USD",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "ApplyBankRuleClientRequest": {
       "properties": {
         "actionShortcutResourceId": {
@@ -12242,7 +12267,7 @@
           "type": "string"
         },
         "exchangeRate": {
-          "description": "Exchange rate applied to the line.",
+          "description": "Exchange rate applied to the line, from the line's account currency to the organization's base currency. This is the opposite direction to the exchange rate on the journal itself.",
           "minimum": 0,
           "type": "number"
         },
@@ -23660,6 +23685,22 @@
       ],
       "type": "object"
     },
+    "TransactionCreateResponse": {
+      "properties": {
+        "appliedRate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/AppliedRate"
+            }
+          ],
+          "description": "Exchange rate the record was created with. Present only when the transaction currency differs from the organization base currency."
+        },
+        "data": {
+          "description": "The response object."
+        }
+      },
+      "type": "object"
+    },
     "TransactionScheduleFilter": {
       "properties": {
         "and": {
@@ -28360,7 +28401,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/TransactionCreateResponse"
             }
           },
           "400": {
@@ -35114,7 +35155,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/TransactionCreateResponse"
             }
           },
           "400": {
@@ -42701,7 +42742,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/TransactionCreateResponse"
             }
           },
           "400": {
@@ -58298,7 +58339,7 @@
           "201": {
             "description": "Created",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/TransactionCreateResponse"
             }
           },
           "400": {
