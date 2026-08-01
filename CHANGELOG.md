@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.15] - 2026-08-02
+
+The hosted email assistant now writes its replies like a person, in the tone configured for your agent, instead of a fixed label:value summary with a "Status" line and a checklist of actions. It still states exactly what it did — every record it says it created or changed really was — just in natural language. No user-facing changes to the extension since v5.36.14.
+
 ## [5.36.14] - 2026-08-02
 
 The hosted email assistant now ends each reply that changed your books with a short receipt of exactly what it recorded — one line per document, taken from what actually landed rather than from the wording of the reply. Read-only answers are unchanged. No user-facing changes to the extension since v5.36.13.
