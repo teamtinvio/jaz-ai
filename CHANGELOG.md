@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.16] - 2026-08-02
+
+The in-app Clio chat assistant now replies in a natural, first-person voice ("I've created the invoice") instead of the old impersonal, command-line phrasing, and it states exactly what it did. Memory capture on chat is also more reliable: preferences are matched by vendor or subject rather than by sender (which a chat has none of). No user-facing changes to the extension since v5.36.15.
+
 ## [5.36.15] - 2026-08-02
 
 The hosted email assistant now writes its replies like a person, in the tone configured for your agent, instead of a fixed label:value summary with a "Status" line and a checklist of actions. It still states exactly what it did — every record it says it created or changed really was — just in natural language. No user-facing changes to the extension since v5.36.14.
