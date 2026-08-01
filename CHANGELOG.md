@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.13] - 2026-08-02
+
+Internal infrastructure fix: the hosted email assistant's readiness check no longer depends on a live upstream fetch, so a brief upstream blip can't take the service offline. No user-facing changes to the extension since v5.36.12.
+
 ## [5.36.12] - 2026-07-31
 
 When you create an invoice, bill or credit note in a foreign currency, the reply now tells you the exchange rate it was actually created with, for example "FX: 1 SGD = 0.74 USD (applied rate for 2026-04-03)". This matters most when you do not supply a rate yourself: your organization's rate for that date is applied automatically, and previously nothing told you which number was used. A rate saved the wrong way round now reads as an obviously wrong figure you can catch before finalizing. Documents in your own base currency are unchanged, and so is everything the command line already told you before a document is sent.
