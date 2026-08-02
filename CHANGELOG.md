@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.36.17] - 2026-08-02
+
+Internal test-suite reliability fix (flaky timeouts). No user-facing changes since v5.36.16.
+
 ## [5.36.16] - 2026-08-02
 
 The in-app Clio chat assistant now replies in a natural, first-person voice ("I've created the invoice") instead of the old impersonal, command-line phrasing, and it states exactly what it did. Memory capture on chat is also more reliable: preferences are matched by vendor or subject rather than by sender (which a chat has none of). No user-facing changes to the extension since v5.36.15.

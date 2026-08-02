@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.36.16
+version: 5.36.17
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
