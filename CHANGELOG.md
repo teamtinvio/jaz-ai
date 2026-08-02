@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.39.0] - 2026-08-03
+
+Converting a sale order or purchase order into an invoice or bill now saves the new document as a draft for review by default; pass saveAsDraft false (CLI: --finalize) to post it immediately. Status guidance across the docs was corrected to match the platform: a finalized journal reads ACTIVE, and the void status is VOID. Creating a bill with both a recipe and an existing capsule now returns the validation error directly instead of a duplicate warning.
+
 ## [5.38.1] - 2026-08-03
 
 The exchange-rate confirmation on foreign-currency documents now names which currency is your organization's base, for example "FX: 1 SGD (your base) = 0.74 USD (applied rate for 2026-04-03)" — so you can tell at a glance which way round the rate was applied without knowing your base currency by heart.
