@@ -11691,9 +11691,10 @@
           "type": "array"
         },
         "recommendationType": {
-          "description": "Magic recommendation type to compute. Required; pick exactly one. The endpoint scopes a full-account scan to one match type at a time, so callers must commit to which type they want rather than survey all.",
+          "description": "What to compute. Required; pick exactly one.\n\nRECOMMENDATIONS returns every type except MAGIC_MATCH in a single call, ranked together, and is the cheaper option. MAGIC_MATCH is the costly one because it scans open transactions across the account, so it is kept separate and requested on its own. The four specific values narrow to one type when you already know which you want.\n\nThere is deliberately no value that returns everything at once.",
           "enum": [
             "MAGIC_MATCH",
+            "RECOMMENDATIONS",
             "MAGIC_RECONCILE_WITH_CASH_TRANSFER",
             "MAGIC_RECONCILE_WITH_BANK_RULE",
             "MAGIC_QUICK_RECONCILE",
