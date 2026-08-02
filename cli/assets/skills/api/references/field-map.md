@@ -592,7 +592,8 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `POST /journals` (create) | `{ resourceId }` only | Full entity (minimal response!) |
 | `POST /:type/:id/payments` | `{ resourceId }` only | Full entity (minimal response!) |
 | Invoice/bill `amountDue` | Does NOT exist | Use `paymentRecords` array |
-| Invoice/bill/journal status | `"APPROVED"` | `"FINALIZED"` (wrong!) |
+| Invoice/bill status | `"UNPAID"` (→ `"PAID"`) | `"APPROVED"` / `"FINALIZED"` (wrong!) |
+| Journal status | `"ACTIVE"` | `"APPROVED"` / `"FINALIZED"` (wrong!) |
 
 ---
 

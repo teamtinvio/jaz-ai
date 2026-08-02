@@ -144,7 +144,7 @@
     },
     {
       "name": "pay_invoice",
-      "description": "Record a payment against an invoice. Invoice must be APPROVED/UNPAID before payment — draft or voided invoices cannot be paid. If the invoice is still a DRAFT, call finalize_invoice first. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record a payment against an invoice. Invoice must be UNPAID/PARTIALLY_PAID before payment — draft or voided invoices cannot be paid. If the invoice is still a DRAFT, call finalize_invoice first. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "finalize_invoice",
@@ -188,7 +188,7 @@
     },
     {
       "name": "pay_bill",
-      "description": "Record a payment against a bill. Bill must be APPROVED before payment — draft or voided bills cannot be paid. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record a payment against a bill. Bill must be UNPAID/PARTIALLY_PAID before payment — draft or voided bills cannot be paid. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "finalize_bill",
@@ -240,11 +240,11 @@
     },
     {
       "name": "convert_sale_order_to_invoice",
-      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults false (the new invoice is ACTIVE). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "convert_purchase_order_to_bill",
-      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults false (the new bill is ACTIVE). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_sale_order_line_items",

@@ -208,7 +208,7 @@ To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `Y
 |-------|------|-------|
 | `resourceId` | StringExpression | |
 | `contactResourceId` | StringExpression | |
-| `status` | StringExpression | POSTED, DRAFT, VOIDED, etc. |
+| `status` | StringExpression | DRAFT, UNPAID, PAID, ACTIVE, VOID, etc. (per type — Rule 67) |
 | `reference` | StringExpression | Invoice number |
 | `terms` | IntExpression | Payment terms (days) |
 | `contact` | ContactNestedFilter | Nested: name, resourceId, status, taxId |

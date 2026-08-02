@@ -46,7 +46,7 @@
 | `At least one line item is required` | Empty --lines array | Provide at least one line item object |
 | `Invalid date format` | Date not in YYYY-MM-DD | Use ISO format: `--date 2026-03-15` |
 | `unitPrice must be a number` | String passed for numeric field | Remove quotes from numeric values in JSON |
-| `Invalid status filter` | Wrong status value for entity type | Check valid statuses: DRAFT, APPROVED, PAID, VOIDED, DELETED |
+| `Invalid status filter` | Wrong status value for entity type | Check valid statuses per type (Rule 67): invoices/bills DRAFT, UNPAID, PARTIALLY_PAID, PAID, OVERDUE, VOID; journals DRAFT, ACTIVE, VOID |
 
 ---
 

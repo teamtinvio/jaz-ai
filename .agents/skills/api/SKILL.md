@@ -70,8 +70,8 @@ The rest of this skill — field names, gotchas, error catalog, dependency order
 13. **Invoice/bill number is `reference`** — not `referenceNumber`.
 
 ### Transaction Creation
-14. **`saveAsDraft`** defaults to `false` — omitting it creates a finalized transaction. Explicitly sending `saveAsDraft: true` creates a draft.
-15. **If `saveAsDraft: false`** (or omitted), every lineItem MUST have `accountResourceId`.
+14. **`saveAsDraft` has OPPOSITE defaults on the two surfaces.** Raw REST: omitting it creates a FINALIZED transaction (`false`). MCP/CLI tools: creates for invoices, bills, both credit notes, journals, sale quotes, purchase requests/orders, and the order-conversions inject `true` — omitting it creates a DRAFT; pass `saveAsDraft: false` to post immediately. When the landing state matters, pass the field explicitly and read `status` off the create response rather than assuming either default. (Cash entries and cash transfers are currently unreliable around this flag — pass it explicitly and verify `status`.)
+15. **If `saveAsDraft: false`** (or omitted on the raw REST surface — see Rule 14), every lineItem MUST have `accountResourceId`.
 16. **Phones MUST be E.164** — `+65XXXXXXXX` (SG), `+63XXXXXXXXXX` (PH). No spaces.
 
 ### Chart of Accounts
@@ -204,7 +204,7 @@ The rest of this skill — field names, gotchas, error catalog, dependency order
 
 ### Response Shape Gotchas
 66. **Contact boolean fields are `customer`/`supplier`** — NOT `isCustomer`/`isSupplier`. These are plain booleans on the contact object: `{ "customer": true, "supplier": false }`. Using `isCustomer` or `isSupplier` in code will be `undefined`.
-67. **Finalized statuses differ by resource type** — NOT `"FINALIZED"`, `"FINAL"`, or `"POSTED"`. Journals → `"APPROVED"`. Invoices/Bills → `"UNPAID"` (progresses to `"PAID"`, `"OVERDUE"`). Customer/Supplier Credit Notes → `"UNAPPLIED"` (progresses to `"APPLIED"`). All types support `"DRAFT"` and `"VOIDED"`. When creating without `saveAsDraft: true`, the response status matches the type's finalized status.
+67. **Finalized statuses differ by resource type** — NOT `"FINALIZED"`, `"FINAL"`, or `"POSTED"`. Journals → `"ACTIVE"` (journals have no approval state — their lifecycle is `ACTIVE | VOID | DRAFT`; live-verified 2026-08-03). Invoices/Bills → `"UNPAID"` (progresses to `"PAID"`, `"OVERDUE"`). Customer/Supplier Credit Notes → `"UNAPPLIED"` (progresses to `"APPLIED"`). All types support `"DRAFT"` and `"VOID"` (not `"VOIDED"`). When creating with `saveAsDraft: false`, the response status matches the type's finalized status.
 68. **Create/pay responses are minimal by default** — POST create endpoints (invoices, bills, journals, contacts, payments) return only `{ resourceId: "..." }` (plus a few metadata fields). They do NOT return the full entity. To verify field values after creation, do a subsequent `GET /:type/:resourceId`. **MCP tool shortcut:** `create_invoice` / `create_bill` / `create_journal` / `create_contact` / `create_item` accept `returnFullEntity: true` — the executor performs the GET server-side and returns the full entity inline, saving a turn. The raw REST `POST` is still minimal-only; only the MCP tools collapse the round trip. **If the post-create GET fails** (transient 5xx, network blip), the tool returns the minimal create envelope augmented with `_hydration: { status: 'failed', resourceId, message }` — the write committed; the agent should retry only the `get_*` call, NEVER the create (would duplicate the document). **`_fx` on transaction creates:** invoice/bill/credit-note create results may carry a sibling `_fx` field, e.g. `FX: 1 SGD (your base) = 0.74 USD (applied rate for 2026-04-03)` — the exchange rate the record was ACTUALLY created with. Relay that line to the user verbatim; it matters most when the caller supplied no rate (the organization rate was applied silently, and a rate stored the wrong way round reads as an obviously absurd number the user can catch on sight).
 69. **No `amountDue` field** — Invoices and bills do NOT have an `amountDue` field. To check if a transaction is fully paid, inspect the `paymentRecords` array: if `paymentRecords.length > 0`, payments exist. Compare `totalAmount` with the sum of `paymentRecords[].transactionAmount` to determine remaining balance.
 70. **Response dates include time component** — Even though request dates are `YYYY-MM-DD`, response dates are epoch milliseconds (see Rule 52). When comparing dates from responses, always convert with `new Date(epochMs).toISOString().slice(0, 10)` — never string-match against the raw epoch value. Remember: business dates are org-timezone (see Rule 52).
@@ -261,7 +261,7 @@ Step 2:  For each draft where ready = false:
             → Download fileUrl, read PDF/image, extract or verify values
          c) Resolve values (ask user, or infer from attachment + context)
          d) clio bills draft finalize <id> --contact "Acme" --date 2025-01-15 ... --json
-            → Updates + converts to UNPAID in one PUT (Rule 67: bills/invoices → UNPAID, journals → APPROVED)
+            → Updates + converts to UNPAID in one PUT (Rule 67: bills/invoices → UNPAID, journals → ACTIVE)
 
 Step 3:  For each draft where ready = true:
          clio bills draft finalize <id> --json

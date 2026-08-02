@@ -41,7 +41,7 @@ Both directions are now first-class endpoints:
 - **`convert_sale_order_to_invoice`** (documentType `SALE_QUOTE` | `SALE_ORDER`) → creates a new Invoice from the source.
 - **`convert_purchase_order_to_bill`** (documentType `PURCHASE_REQUEST` | `PURCHASE_ORDER`) → creates a new Bill from the source.
 
-Body: `valueDate` + `dueDate` + `reference` required; if `reference` is omitted the tool sends a unique placeholder — pass your own to follow your org's numbering sequence. Optional `terms`, `notes` (sales → `invoiceNotes`), `internalNotes`, `tag`, `saveAsDraft` (defaults false → the new document is ACTIVE).
+Body: `valueDate` + `dueDate` + `reference` required; if `reference` is omitted the tool sends a unique placeholder — pass your own to follow your org's numbering sequence. Optional `terms`, `notes` (sales → `invoiceNotes`), `internalNotes`, `tag`, `saveAsDraft` (defaults true → the new document lands as a DRAFT; pass false to post immediately).
 
 - **NON-IDEMPOTENT.** Each call creates ANOTHER invoice/bill. On a timeout or uncertain result, do NOT blind-retry — search for one already linked to this order (via the linkage fields below) first.
 - **Source must not be VOID.** The convert tools pre-flight this and return a `repair` hint instead of a bare 422.

@@ -612,7 +612,7 @@ All 28 `POST /*/search` endpoints accept this filter structure in the POST body:
 ```json
 { "filter": { "and": { "status": { "eq": "ACTIVE" }, "totalAmount": { "gt": 0 } } } }
 { "filter": { "or": { "status": { "eq": "ACTIVE" }, "status": { "eq": "DRAFT" } } } }
-{ "filter": { "not": { "status": { "eq": "VOIDED" } } } }
+{ "filter": { "not": { "status": { "eq": "VOID" } } } }
 ```
 
 ### andGroup / orGroup (invoices, bills, journals, credit notes)
