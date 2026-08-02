@@ -13244,8 +13244,12 @@
     },
     "MyOrganizationsResponse": {
       "properties": {
+        "boundOrganizationResourceId": {
+          "description": "Organization this token is restricted to, when the token was authorized\nfor a single organization. Empty when the authorization did not pin the\ntoken to a single organization. Always present, so clients can rely on\nthe field to learn the token's grant shape without probing an\norganization-scoped endpoint.",
+          "type": "string"
+        },
         "data": {
-          "description": "The organizations the authenticated user is allowed to access.",
+          "description": "The organizations the authenticated user is allowed to access. Restricted\nto the bound organization when the token was authorized for one.",
           "items": {
             "$ref": "#/definitions/MyOrganization"
           },
@@ -49286,7 +49290,7 @@
     },
     "/api/v1/me/organizations": {
       "get": {
-        "description": "Returns every organization the authenticated user is allowed to access. User-scoped: no organization header is required, so a connector token can enumerate its organizations and target one per request.",
+        "description": "Returns every organization the authenticated user is allowed to access. User-scoped: no organization header is required, so a connector token can enumerate its organizations and target one per request. When the token was authorized for a single organization, boundOrganizationResourceId names it and the list is restricted to that organization; the field is empty when the authorization did not pin the token to a single organization.",
         "operationId": "list-me-organizations",
         "produces": [
           "application/json"
