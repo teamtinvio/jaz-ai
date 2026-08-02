@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.38.1] - 2026-08-03
+
+The exchange-rate confirmation on foreign-currency documents now names which currency is your organization's base, for example "FX: 1 SGD (your base) = 0.74 USD (applied rate for 2026-04-03)" — so you can tell at a glance which way round the rate was applied without knowing your base currency by heart.
+
+## [5.38.0] - 2026-08-03
+
+Personal access tokens now work fully with the local MCP server: `clio mcp` with a `pat-` token discovers all your organizations at startup (previously the organization list stayed empty and organization-scoped tools refused to run), and can recover on demand if the first lookup hits a brief outage. Connecting also got faster and quieter behind the scenes: the hosted connector confirms your token's access in a single check instead of two.
+
 ## [5.36.17] - 2026-08-02
 
 Internal test-suite reliability fix (flaky timeouts). No user-facing changes since v5.36.16.
