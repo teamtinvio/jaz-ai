@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.39.1] - 2026-08-04
+
+Email and chat replies no longer show internal shorthand. A confirmation that read "Created bt from attachment" now names the document you actually get, "Submitted bill for processing", and says submitted rather than created, because extraction runs in the background and the draft appears in your Drafts tab a moment later. The activity record behind those replies also covers far more of what the agent does: paying an invoice or a bill, bulk imports, reconciliations, claim approvals and 67 other actions were previously missing from it entirely. Applying a credit note now reads "Applied", inviting a colleague reads "Invited", and updating an exchange rate reads "Updated currency rate" instead of "Updated currency".
+
 ## [5.39.0] - 2026-08-03
 
 Converting a sale order or purchase order into an invoice or bill now saves the new document as a draft for review by default; pass saveAsDraft false (CLI: --finalize) to post it immediately. Status guidance across the docs was corrected to match the platform: a finalized journal reads ACTIVE, and the void status is VOID. Creating a bill with both a recipe and an existing capsule now returns the validation error directly instead of a duplicate warning.
