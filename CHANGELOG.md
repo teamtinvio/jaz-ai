@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.39.2] - 2026-08-04
+
+Progress messages in chat now read as actions in progress rather than command names: "Bulk saving invoices" instead of "Bulk upsert invoices", "Inviting user" instead of "Invite org user", "Paying invoice" instead of "Pay invoice". Work that runs in the background now says so instead of reporting itself as finished: importing a bank statement, bulk-saving invoices, or scanning a document reads "Submitted for processing" until the job completes. Recovery notices name the action ("Recovering via searching accounts") rather than an internal command name. Applies to Jaz chat and Telegram.
+
 ## [5.39.1] - 2026-08-04
 
 Email and chat replies no longer show internal shorthand. A confirmation that read "Created bt from attachment" now names the document you actually get, "Submitted bill for processing", and says submitted rather than created, because extraction runs in the background and the draft appears in your Drafts tab a moment later. The activity record behind those replies also covers far more of what the agent does: paying an invoice or a bill, bulk imports, reconciliations, claim approvals and 67 other actions were previously missing from it entirely. Applying a credit note now reads "Applied", inviting a colleague reads "Invited", and updating an exchange rate reads "Updated currency rate" instead of "Updated currency".
