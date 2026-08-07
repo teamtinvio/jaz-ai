@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.39.3] - 2026-08-07
+
+Internal release: changes to how the email agent stores and recalls a saved preference. No user-facing changes since v5.39.2.
+
 ## [5.39.2] - 2026-08-04
 
 Progress messages in chat now read as actions in progress rather than command names: "Bulk saving invoices" instead of "Bulk upsert invoices", "Inviting user" instead of "Invite org user", "Paying invoice" instead of "Pay invoice". Work that runs in the background now says so instead of reporting itself as finished: importing a bank statement, bulk-saving invoices, or scanning a document reads "Submitted for processing" until the job completes. Recovery notices name the action ("Recovering via searching accounts") rather than an internal command name. Applies to Jaz chat and Telegram.

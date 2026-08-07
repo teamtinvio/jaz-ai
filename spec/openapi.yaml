@@ -1658,6 +1658,33 @@
       ],
       "type": "object"
     },
+    "BulkRequestChangesRequest": {
+      "properties": {
+        "message": {
+          "description": "What needs changing. Required, and applied to every record in the batch. This is posted as\nthe first comment on a new collaboration thread on each record and is the only place the\nreason is recorded, so a blank value is rejected.",
+          "example": "Please attach the signed delivery note before resubmitting.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "resourceIds": {
+          "description": "Resource IDs of the records to send back for changes. Between 1 and 500 per call.",
+          "example": [
+            "b7a2c3d4-e5f6-7890-abcd-ef1234567890"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "message",
+        "resourceIds"
+      ],
+      "type": "object"
+    },
     "BulkUpsertBill": {
       "properties": {
         "amountWithholding": {
@@ -17611,6 +17638,127 @@
       ],
       "type": "object"
     },
+    "RequestChangesClaimRecord": {
+      "properties": {
+        "collaborationThreadPath": {
+          "description": "Path of the collaboration thread opened by this call, carrying the message. Returned as\nsoon as the identifier is reserved, so the thread document itself may appear a moment later.",
+          "type": "string"
+        },
+        "errorCode": {
+          "description": "Machine readable code for the reason the claim was skipped. Null on success.",
+          "type": "string"
+        },
+        "errorMessage": {
+          "description": "Human readable reason the claim was skipped. Null on success.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the claim this outcome belongs to.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Outcome for this claim, either SUCCESS or FAILED.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "RequestChangesClaimResponse": {
+      "properties": {
+        "claims": {
+          "description": "Outcome per claim.",
+          "items": {
+            "$ref": "#/definitions/RequestChangesClaimRecord"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "RequestChangesJobResponse": {
+      "properties": {
+        "jobId": {
+          "description": "Identifier of the background job. Poll it through the background jobs search endpoint.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the job at the moment it was accepted.",
+          "type": "string"
+        },
+        "subscriptionFBPath": {
+          "description": "Realtime database path to subscribe to for live progress on the job.",
+          "type": "string"
+        },
+        "totalChunks": {
+          "description": "Number of chunks the job was split into.",
+          "type": "integer"
+        },
+        "totalRecords": {
+          "description": "Number of records the job will process.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "RequestChangesRecord": {
+      "properties": {
+        "approvalStatus": {
+          "description": "Approval status after the call.",
+          "type": "string"
+        },
+        "collaborationThreadPath": {
+          "description": "Path of the collaboration thread opened by this call, carrying the message. Returned as\nsoon as the identifier is reserved, so the thread document itself may appear a moment later.",
+          "type": "string"
+        },
+        "errorCode": {
+          "description": "Machine readable code for the reason the record was skipped. Null on success.",
+          "type": "string"
+        },
+        "failureReason": {
+          "description": "Human readable reason the record was skipped. Null on success.",
+          "type": "string"
+        },
+        "isSuccess": {
+          "description": "True when the record was sent back for changes, false when it was skipped.",
+          "type": "boolean"
+        },
+        "resourceId": {
+          "description": "Resource ID of the record this outcome belongs to.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Record status after the call.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "RequestChangesRequest": {
+      "properties": {
+        "message": {
+          "description": "What needs changing. Required. This is posted as the first comment on a new collaboration\nthread on the record and is the only place the reason is recorded, so a blank value is\nrejected.",
+          "example": "Please attach the signed delivery note before resubmitting.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "message"
+      ],
+      "type": "object"
+    },
+    "RequestChangesResponse": {
+      "properties": {
+        "records": {
+          "description": "Outcome per record.",
+          "items": {
+            "$ref": "#/definitions/RequestChangesRecord"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "ResetReconciliationsClientRequest": {
       "properties": {
         "bankStatementEntryResourceIds": {
@@ -21992,7 +22140,8 @@
           "default": "XLSX",
           "description": "Export file format.",
           "enum": [
-            "XLSX"
+            "XLSX",
+            "PDF"
           ],
           "type": "string"
         },
@@ -22356,7 +22505,8 @@
           "default": "XLSX",
           "description": "Export file format.",
           "enum": [
-            "XLSX"
+            "XLSX",
+            "PDF"
           ],
           "type": "string"
         },
@@ -28886,6 +29036,88 @@
         ]
       }
     },
+    "/api/v1/bills/bulk-request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many submitted bills back to their creators with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Bills in any other state are skipped and reported on the job tasks.",
+        "operationId": "create-bill-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Bill resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Bills",
+        "tags": [
+          "Bills"
+        ]
+      }
+    },
     "/api/v1/bills/bulk-upsert": {
       "post": {
         "consumes": [
@@ -29954,6 +30186,95 @@
           }
         ],
         "summary": "Record Bill Payments",
+        "tags": [
+          "Bills"
+        ]
+      }
+    },
+    "/api/v1/bills/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send a submitted bill back to its creator for edits. The bill returns to draft, its approval markers are cleared, and the message is posted as the first comment on a new collaboration thread. Bills in any other state are skipped and reported in the response.",
+        "operationId": "create-bill-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the bill.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on a Bill",
         "tags": [
           "Bills"
         ]
@@ -34470,6 +34791,88 @@
         ]
       }
     },
+    "/api/v1/claims/bulk/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many submitted claims back to their employees with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Claims in any other state are skipped and reported on the job tasks.",
+        "operationId": "create-claim-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Claim resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Claims",
+        "tags": [
+          "Claims"
+        ]
+      }
+    },
     "/api/v1/claims/bulk/submit": {
       "post": {
         "consumes": [
@@ -35343,6 +35746,95 @@
           }
         ],
         "summary": "Reject Claim",
+        "tags": [
+          "Claims"
+        ]
+      }
+    },
+    "/api/v1/claims/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send a submitted claim back to the employee for edits. The claim returns to draft, the approver task is cleared, and the message is posted as the first comment on a new collaboration thread. Claims in any other state are skipped and reported in the response. Use reject or cancel for the final outcomes.",
+        "operationId": "create-claim-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the claim.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesClaimResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on a Claim",
         "tags": [
           "Claims"
         ]
@@ -37056,6 +37548,88 @@
         ]
       }
     },
+    "/api/v1/customer-credit-notes/bulk-request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many submitted customer credit notes back to their creators with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Credit notes in any other state are skipped and reported on the job tasks.",
+        "operationId": "create-customer-credit-note-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Customer credit note resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Customer Credit Notes",
+        "tags": [
+          "Customer Credit"
+        ]
+      }
+    },
     "/api/v1/customer-credit-notes/bulk-upsert": {
       "post": {
         "consumes": [
@@ -37839,6 +38413,95 @@
           }
         ],
         "summary": "Add Customer Credit Refunds",
+        "tags": [
+          "Customer Credit"
+        ]
+      }
+    },
+    "/api/v1/customer-credit-notes/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send a submitted customer credit note back to its creator for edits. The credit note returns to draft, its approval markers are cleared, and the message is posted as the first comment on a new collaboration thread. Credit notes in any other state are skipped and reported in the response.",
+        "operationId": "create-customer-credit-note-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the customer credit note.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on a Customer Credit Note",
         "tags": [
           "Customer Credit"
         ]
@@ -46155,6 +46818,88 @@
         ]
       }
     },
+    "/api/v1/invoices/bulk-request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many submitted invoices back to their creators with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Invoices in any other state are skipped and reported on the job tasks.",
+        "operationId": "create-invoice-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Invoice resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Invoices",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
     "/api/v1/invoices/bulk-upsert": {
       "post": {
         "consumes": [
@@ -47232,6 +47977,95 @@
           }
         ],
         "summary": "Record Invoice Payments",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/v1/invoices/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send a submitted invoice back to its creator for edits. The invoice returns to draft, its approval markers are cleared, and the message is posted as the first comment on a new collaboration thread. Invoices in any other state are skipped and reported in the response.",
+        "operationId": "create-invoice-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the invoice.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on an Invoice",
         "tags": [
           "Invoices"
         ]
@@ -53566,6 +54400,88 @@
         ]
       }
     },
+    "/api/v1/purchase-orders/bulk-request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many confirmed purchase orders back for edits with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Orders with a live bill raised against them, and orders in any other state, are skipped and reported on the job tasks.",
+        "operationId": "create-purchase-order-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Purchase order resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Purchase Orders",
+        "tags": [
+          "Purchase Orders"
+        ]
+      }
+    },
     "/api/v1/purchase-orders/bulk-void": {
       "post": {
         "consumes": [
@@ -54454,6 +55370,95 @@
         ]
       }
     },
+    "/api/v1/purchase-orders/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send a confirmed purchase order back for edits. The order returns to created state and the message is posted as the first comment on a new collaboration thread. An order that already has a live bill raised against it is skipped, as are orders in any other state, and both are reported in the response.",
+        "operationId": "create-purchase-order-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the purchase order.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on a Purchase Order",
+        "tags": [
+          "Purchase Orders"
+        ]
+      }
+    },
     "/api/v1/purchase-orders/{resourceId}/void": {
       "post": {
         "consumes": [
@@ -54786,6 +55791,88 @@
           }
         ],
         "summary": "Bulk Delete Purchase Requests",
+        "tags": [
+          "Purchase Requests"
+        ]
+      }
+    },
+    "/api/v1/purchase-requests/bulk-request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many accepted purchase requests back for edits with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Requests with a live order raised against them, requests out for signature, and requests in any other state are skipped and reported on the job tasks.",
+        "operationId": "create-purchase-request-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Purchase request resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Purchase Requests",
         "tags": [
           "Purchase Requests"
         ]
@@ -55604,6 +56691,95 @@
           }
         ],
         "summary": "Fast Fix Purchase Request Details",
+        "tags": [
+          "Purchase Requests"
+        ]
+      }
+    },
+    "/api/v1/purchase-requests/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send an accepted purchase request back for edits. The request returns to created state and the message is posted as the first comment on a new collaboration thread. A request that already has a live order raised against it, or that is out for signature, is skipped, as are requests in any other state, and all are reported in the response.",
+        "operationId": "create-purchase-request-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the purchase request.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on a Purchase Request",
         "tags": [
           "Purchase Requests"
         ]
@@ -60051,6 +61227,88 @@
         ]
       }
     },
+    "/api/v1/sale-orders/bulk-request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many confirmed sale orders back for edits with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Orders with a live invoice raised against them, and orders in any other state, are skipped and reported on the job tasks.",
+        "operationId": "create-sale-order-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Sale order resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Sale Orders",
+        "tags": [
+          "Sale Orders"
+        ]
+      }
+    },
     "/api/v1/sale-orders/bulk-void": {
       "post": {
         "consumes": [
@@ -60939,6 +62197,95 @@
         ]
       }
     },
+    "/api/v1/sale-orders/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send a confirmed sale order back for edits. The order returns to created state and the message is posted as the first comment on a new collaboration thread. An order that already has a live invoice raised against it is skipped, as are orders in any other state, and both are reported in the response.",
+        "operationId": "create-sale-order-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the sale order.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on a Sale Order",
+        "tags": [
+          "Sale Orders"
+        ]
+      }
+    },
     "/api/v1/sale-orders/{resourceId}/void": {
       "post": {
         "consumes": [
@@ -61271,6 +62618,88 @@
           }
         ],
         "summary": "Bulk Delete Sale Quotes",
+        "tags": [
+          "Sale Quotes"
+        ]
+      }
+    },
+    "/api/v1/sale-quotes/bulk-request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many accepted sale quotes back for edits with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Quotes with a live order raised against them, quotes out for signature, and quotes in any other state are skipped and reported on the job tasks.",
+        "operationId": "create-sale-quote-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Sale quote resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Sale Quotes",
         "tags": [
           "Sale Quotes"
         ]
@@ -62089,6 +63518,95 @@
           }
         ],
         "summary": "Fast Fix Sale Quote Details",
+        "tags": [
+          "Sale Quotes"
+        ]
+      }
+    },
+    "/api/v1/sale-quotes/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send an accepted sale quote back for edits. The quote returns to created state and the message is posted as the first comment on a new collaboration thread. A quote that already has a live order raised against it, or that is out for signature, is skipped, as are quotes in any other state, and all are reported in the response.",
+        "operationId": "create-sale-quote-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the sale quote.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on a Sale Quote",
         "tags": [
           "Sale Quotes"
         ]
@@ -64894,6 +66412,88 @@
         ]
       }
     },
+    "/api/v1/supplier-credit-notes/bulk-request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that sends many submitted supplier credit notes back to their creators with one shared message. Returns a job handle carrying the job ID and a subscription path for live progress. Credit notes in any other state are skipped and reported on the job tasks.",
+        "operationId": "create-supplier-credit-note-bulk-request-change",
+        "parameters": [
+          {
+            "description": "Supplier credit note resource IDs and the shared message.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkRequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Request Changes on Supplier Credit Notes",
+        "tags": [
+          "Supplier Credit"
+        ]
+      }
+    },
     "/api/v1/supplier-credit-notes/bulk-upsert": {
       "post": {
         "consumes": [
@@ -65674,6 +67274,95 @@
           }
         ],
         "summary": "Add Supplier Credit Refunds",
+        "tags": [
+          "Supplier Credit"
+        ]
+      }
+    },
+    "/api/v1/supplier-credit-notes/{resourceId}/request-changes": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Send a submitted supplier credit note back to its creator for edits. The credit note returns to draft, its approval markers are cleared, and the message is posted as the first comment on a new collaboration thread. Credit notes in any other state are skipped and reported in the response.",
+        "operationId": "create-supplier-credit-note-request-change",
+        "parameters": [
+          {
+            "description": "Resource ID of the supplier credit note.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Message explaining what needs changing.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RequestChangesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/RequestChangesResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Request Changes on a Supplier Credit Note",
         "tags": [
           "Supplier Credit"
         ]
