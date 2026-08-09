@@ -2081,8 +2081,26 @@ Update an existing payment record. All fields optional — only included fields 
   "paymentMethod": "BANK_TRANSFER",
   "accountResourceId": "uuid-bank",
   "currency": { "sourceCurrency": "USD", "exchangeRate": 0.74 },
-  "transactionFee": 5.00,
-  "transactionFeeCollected": true
+  // Both fees are OBJECTS, not a number and not a boolean. A bare value is rejected.
+  "transactionFee": {
+    "feeAccountResourceId": "uuid-fee-expense",
+    "feeType": "FLAT",
+    "feeValue": 5.00,
+    "feeTaxVatApplicable": false
+  },
+  "transactionFeeCollected": {
+    "feeAccountResourceId": "uuid-fee-income",
+    "feeType": "FLAT",
+    "feeValue": 2.00,
+    "feeTaxVatApplicable": false
+  },
+  // Cash-leg adjustment: overpayment or rounding. Bank leg only, never AR/AP.
+  // Omitting this on an update CLEARS an existing adjustment.
+  "adjustment": {
+    "adjustmentValue": -0.03,
+    "adjustmentAccountResourceId": "uuid-rounding-account",
+    "adjustmentDescription": "rounding difference"
+  }
 }
 
 // Response: same shape as GET

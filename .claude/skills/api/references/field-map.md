@@ -636,6 +636,7 @@ Battle-tested patterns from production Jaz API clients:
 | `cashflowId` | ≠ `resourceId` | Cashflow transaction IDs are NOT payment IDs — different entities |
 | `bankAccountId` | `accountResourceId` | Bank account for the payment |
 | `fee` | `feeAmount` (response) / `transactionFee` (update) | Response field is `feeAmount`, update field is `transactionFee` |
+| `adjustment` (cash-leg over/underpayment) | `adjustment: { adjustmentValue, adjustmentAccountResourceId, adjustmentDescription }` | Write nested; READ back flat as `adjustmentAmount` + `adjustmentOrganizationAccountResourceId`. Bank leg only |
 | `isCrossCurrency` | `crossCurrency` | Boolean, no `is` prefix |
 | `currency` (string) | `currencyCode` (response) / `currency` (update: `{ sourceCurrency, exchangeRate }`) | Response is flat string, update is object |
 

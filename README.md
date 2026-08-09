@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
   <img src="https://img.shields.io/badge/tools-358-blue?style=for-the-badge" alt="358 tools">
-  <img src="https://img.shields.io/badge/API_rules-158-green?style=for-the-badge" alt="158 API rules">
+  <img src="https://img.shields.io/badge/API_rules-159-green?style=for-the-badge" alt="159 API rules">
   <img src="https://img.shields.io/badge/skills-7-purple?style=for-the-badge" alt="7 skills">
   <img src="https://img.shields.io/badge/recipe_playbooks-16-orange?style=for-the-badge" alt="16 Recipe Playbooks">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
@@ -58,7 +58,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 358 tools, 7 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.39.3", "mcp"],
+      "args": ["-y", "jaz-clio@5.40.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -72,14 +72,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 358 tools, 7 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.39.3", "mcp"],
+      "args": ["-y", "jaz-clio@5.40.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.39.3` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.40.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -166,7 +166,7 @@ Ask the agent **"what can you do?"** on any of them — it answers from the conn
 
 | Skill | What it teaches an agent |
 |-------|--------------------------|
-| **jaz-api** | 158 API rules, every endpoint, error catalog, field aliases, response shapes |
+| **jaz-api** | 159 API rules, every endpoint, error catalog, field aliases, response shapes |
 | **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
 | **jaz-conversion** | Xero / QuickBooks / Sage / MYOB / Excel migration, CoA mapping, FX, clearing accounts, TB verification |
 | **jaz-jobs** | 12 close playbooks (month-end / quarter-end / year-end / bank-recon / GST-VAT / payment-run / credit-control / supplier-recon / audit-prep / FA-review / statutory-filing) + Singapore Form C-S |
@@ -184,7 +184,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 
 | Layer | What it is | Use it alone when |
 |-------|------------|-------------------|
-| **Skills** | Domain knowledge as markdown (158 API rules, 13 recipes, 12 jobs, conversion playbooks). The agent reads these at session start. | Your agent reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
+| **Skills** | Domain knowledge as markdown (159 API rules, 13 recipes, 12 jobs, conversion playbooks). The agent reads these at session start. | Your agent reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
 | **CLI** (`jaz-clio`) | A `clio` binary: 66 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
 | **MCP server** (`clio mcp`) | The same binary in MCP mode: 358 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
@@ -320,7 +320,7 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company" — the skil
 
 | Reference | Content |
 |-----------|---------|
-| `SKILL.md` | 158 API rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `SKILL.md` | 159 API rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
 | `endpoints.md` | Request/response examples for every core endpoint |
 | `errors.md` | Error catalog with root causes and fixes |
 | `field-map.md` | Intuitive name → actual field name mapping |
@@ -432,7 +432,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.39.3", "mcp"],
+  "args": ["-y", "jaz-clio@5.40.0", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

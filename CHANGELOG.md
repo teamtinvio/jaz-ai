@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.40.0] - 2026-08-09
+
+Record a cash adjustment on a payment or refund. Use it for an overpayment or a
+rounding difference: the adjustment applies to the bank or cash side only, so the
+invoice or bill balance and status still follow the payment amount. An overpaid
+invoice stays paid with the excess sitting on the account you choose, and no
+credit note is created.
+
+Available when paying an invoice or bill, refunding a credit note, updating a
+payment record, and on both bank-statement receipt reconciliations. Not available
+on batch payments, and not for settlement-style payment methods that record no
+bank movement.
+
+`clio payments update` now accepts `--input`, so a payment update can carry the
+nested fee and adjustment objects the flags cannot express.
+
+Corrected the payment update example in the API skill: transaction fees are
+objects, not a bare number or a boolean. A bare value is rejected.
+
 ## [5.39.3] - 2026-08-07
 
 Internal release: changes to how the email agent stores and recalls a saved preference. No user-facing changes since v5.39.2.

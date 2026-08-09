@@ -1,9 +1,9 @@
 ---
 name: jaz-api
-version: 5.39.3
+version: 5.40.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
-  REST API. Covers field names, response shapes, 158 production gotchas, error
+  REST API. Covers field names, response shapes, 159 production gotchas, error
   recovery (422/400/404/500), search filters, pagination, and edge cases for
   every endpoint — invoices, bills, credit notes, journals, cash entries,
   payments, contacts, CoA, items, tax profiles, bank records, fixed assets,
@@ -547,3 +547,5 @@ When the user wants to OPEN, SEE, or SHARE something in the Jaz dashboard ("open
 - **jaz-jobs** — 12 accounting job playbooks (month-end close, bank recon, GST/VAT filing, etc.)
 - **jaz-conversion** — Data migration workflows from Xero, QuickBooks, Sage, MYOB, and Excel
 - **jaz-cli** — CLI command reference, auth, output formats, pagination, and workflow patterns
+
+160. **Payment `adjustment` is a CASH-LEG-only correction — it never moves the document balance.** Records an overpayment or a rounding difference on the bank side of a payment: `netCash = paymentAmount -/+ fees +/- adjustmentValue` (fees are deducted from cash received on an invoice and added to cash spent on a bill). AR/AP is untouched, so an overpaid invoice stays PAID with the excess sitting on the account you chose and NO credit note is created. Shape: `adjustment: { adjustmentValue, adjustmentAccountResourceId, adjustmentDescription? }` — signed, non-zero, max 2dp, always FLAT (never a percentage), never taxed. Accepted on `pay_invoice` / `pay_bill` / both credit-note refunds / `update_payment` / both receipt reconciliations. **NOT** on batch payments, and not for `DEBT_WRITE_OFF` / `CLEARING_SETTLEMENT` / `INTER_COMPANY` / `WITHHOLDING_TAX_CERTIFICATE` (those record a settlement, so there is no cash leg). The account must be non-controlled: not AR/AP, not the VAT or FX accounts, not bank/cash, not deposit-linked. **Write/read asymmetry:** you WRITE the nested `adjustment.adjustmentValue` but READ a flat `adjustmentAmount` on the payment record, alongside `adjustmentOrganizationAccountResourceId`. Don't confuse either with `lineItems[].taxVatAdjustment.adjustmentAmount`, which is line-item tax and unrelated. **On `update_payment`, omitting `adjustment` CLEARS it** — same as `transactionFee`, but NOT the same as `transactionFeeCollected`, which is preserved when omitted. On a reconciled payment that carries one, any update omitting it returns `PAYMENT_ADJUSTMENT_CANNOT_CHANGE_WHEN_RECONCILED` even if you only touched the reference.

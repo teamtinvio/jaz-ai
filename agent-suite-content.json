@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.39.3+76322686",
+  "contentVersion": "5.40.0+071c53a9",
   "counts": {
     "tools": 358,
     "namespaces": 43,
@@ -9,7 +9,7 @@
     "jobs": 12,
     "skills": 7,
     "commands": 66,
-    "apiRules": 158
+    "apiRules": 159
   },
   "namespaces": [
     {

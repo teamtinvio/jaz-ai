@@ -851,6 +851,22 @@ Journals support a top-level `currency` object to create entries in a foreign cu
 
 **Cashflow transaction ID ≠ payment ID** — These are different entities. Cashflow transactions are a ledger view; payment records are the actual payment objects attached to invoices/bills.
 
+#### Payment adjustment errors (422)
+
+The `adjustment` object on a payment is validated server-side. The API returns the code as `error_type` with a human message. Do NOT pre-validate any of these — surface the 422.
+
+Two of the seven never reach you through this path: a zero `adjustmentValue` and a missing `adjustmentAccountResourceId` are caught by the API layer's own field validation first and come back as a `validation_error`, not as the code below. `INVALID_PAYMENT_ADJUSTMENT_AMOUNT` still reaches you via the decimal-scale rule.
+
+| `error_type` | Cause | Fix |
+|---|---|---|
+| `INVALID_PAYMENT_ADJUSTMENT_AMOUNT` | `adjustmentValue` is zero, or has more than 2 decimal places | Send a non-zero value rounded to 2dp. Zero is the absence of an adjustment, not an adjustment of nothing — omit the object instead |
+| `PAYMENT_ADJUSTMENT_ACCOUNT_REQUIRED` | No `adjustmentAccountResourceId` | Supply one |
+| `INVALID_PAYMENT_ADJUSTMENT_ACCOUNT` | Account is a control account (AR, AP, the VAT pair, the FX accounts, Retained Earnings, withholding tax), a bank or cash account, deposit-linked, missing, or deleted | Pick an ordinary postable account. Most seeded accounts qualify — Rounding, Other Income, Bank Charges |
+| `PAYMENT_ADJUSTMENT_MAKES_NET_CASH_INVALID` | Net cash would not remain above zero | Reduce the magnitude of a negative adjustment |
+| `PAYMENT_ADJUSTMENT_NOT_APPLICABLE_FOR_PAYMENT_METHOD` | Method is `DEBT_WRITE_OFF`, `CLEARING_SETTLEMENT`, `INTER_COMPANY` or `WITHHOLDING_TAX_CERTIFICATE` | Those record a settlement, not a bank movement, so there is no cash leg to adjust. Drop the adjustment |
+| `PAYMENT_ADJUSTMENT_CANNOT_CHANGE_WHEN_RECONCILED` | The payment is matched to a bank statement entry and the request would change its adjustment | Un-reconcile first, or resend the existing adjustment unchanged. **This fires even when you are only editing `reference`**, because omitting `adjustment` reads as clearing it |
+| `PAYMENT_ADJUSTMENT_NOT_APPLICABLE_FOR_BATCH_PAYMENT` | Batch payments do not support adjustments | Record the adjustment on an individual payment |
+
 ---
 
 ### Sub-Resource Response Errors

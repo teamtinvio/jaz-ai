@@ -9,7 +9,7 @@
 
 <p align="center"><b>Jaz accounting on the command line, and inside any AI agent.</b></p>
 
-358 tools · 66 command groups · 7 skills · 13 calculators · 12 close playbooks · 158 field-tested API rules.
+358 tools · 66 command groups · 7 skills · 13 calculators · 12 close playbooks · 159 field-tested API rules.
 
 ```bash
 npm install -g jaz-clio
@@ -109,7 +109,7 @@ Several companies at once: comma-separate the keys, or use a personal access tok
 
 ## Skills
 
-158 API rules from production testing: field-name maps, error-recovery patterns, response-shape quirks, plus 12 job playbooks. Installable into any agent project, no server involved.
+159 API rules from production testing: field-name maps, error-recovery patterns, response-shape quirks, plus 12 job playbooks. Installable into any agent project, no server involved.
 
 ```bash
 clio init                     # auto-detect the agent, install skills + agent-rules

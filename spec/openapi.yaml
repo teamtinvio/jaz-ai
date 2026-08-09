@@ -21789,10 +21789,10 @@
         },
         "outputFormat": {
           "default": "XLSX",
-          "description": "Export file format.",
+          "description": "Export file format. A PDF fits at most 12 columns on a page: pass\nselectedColumns with 12 or fewer, or the request is rejected with\nTOO_MANY_COLUMNS_FOR_PDF. XLSX has no such limit.",
           "enum": [
-            "PDF",
-            "XLSX"
+            "XLSX",
+            "PDF"
           ],
           "type": "string"
         },
@@ -21831,8 +21831,8 @@
           "default": "XLSX",
           "description": "Export file format.",
           "enum": [
-            "PDF",
-            "XLSX"
+            "XLSX",
+            "PDF"
           ],
           "type": "string"
         },
@@ -21880,10 +21880,10 @@
         },
         "outputFormat": {
           "default": "XLSX",
-          "description": "Export file format.",
+          "description": "Export file format. A PDF fits at most 12 columns on a page: pass\nselectedColumns with 12 or fewer, or the request is rejected with\nTOO_MANY_COLUMNS_FOR_PDF. XLSX has no such limit.",
           "enum": [
-            "PDF",
-            "XLSX"
+            "XLSX",
+            "PDF"
           ],
           "type": "string"
         },
@@ -21922,8 +21922,8 @@
           "default": "XLSX",
           "description": "Export file format.",
           "enum": [
-            "PDF",
-            "XLSX"
+            "XLSX",
+            "PDF"
           ],
           "type": "string"
         },
@@ -22650,9 +22650,10 @@
         },
         "outputFormat": {
           "default": "XLSX",
-          "description": "Export file format.",
+          "description": "Export file format. A PDF fits at most 12 columns on a page: pass\nselectedColumns with 12 or fewer, or the request is rejected with\nTOO_MANY_COLUMNS_FOR_PDF. XLSX has no such limit.",
           "enum": [
-            "XLSX"
+            "XLSX",
+            "PDF"
           ],
           "type": "string"
         },
@@ -22694,9 +22695,10 @@
         },
         "outputFormat": {
           "default": "XLSX",
-          "description": "Export file format.",
+          "description": "Export file format. The PDF renders the columns the report template\ndefines for its group-by; selectedColumns applies to the XLSX.",
           "enum": [
-            "XLSX"
+            "XLSX",
+            "PDF"
           ],
           "type": "string"
         },
