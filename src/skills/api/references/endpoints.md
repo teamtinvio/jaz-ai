@@ -54,6 +54,23 @@ All GET list endpoints and POST `/search` endpoints use **`limit`/`offset` pagin
 
 ---
 
+## Success Status Codes (All Endpoints)
+
+**Never branch on the exact 2xx — check `response.ok` (or `status < 300`) and read the body.** Every success carries the same `{ data: ... }` envelope regardless of code.
+
+| Shape | Code |
+|---|---|
+| `POST` that creates a NEW record — `/invoices`, `/bills`, `/journals`, `/contacts`, `/items`, `/chart-of-accounts`, `/tags`, `/tax-profiles`, `/capsules`, `/bookmarks`, `/bank-records/:acct`, `/:type/:id/payments`, `/:type/:id/refunds`, `/organization[-]currencies/:code/rates`, `/scheduled/*`, `/magic/*`, `/sale-orders/:id/convert-to-invoice` (and the other `convert-to-*`), the fixed-asset disposal actions (`/discard-fixed-assets/:id`, `/mark-as-sold/fixed-assets`, `/transfer-fixed-assets`) | **201** |
+| `PUT` (update) — all 40 of them, no exceptions | **200** |
+| `GET` (all), `DELETE` (all) | **200** |
+| `POST /search`, `POST /bulk-upsert`, and action POSTs that mutate an EXISTING record (`/:id/request-changes`, `/:id/credits`, `/:id/attachments`) | **200** |
+| Async batch kickoff (`/bulk-request-changes`, claims `bulk/*`) | **202** |
+| Quick Fix / bulk partial failure | **207** (body shape identical to 200 — check `failed[]`) |
+
+**Changed 2026-08-10**: seven `PUT` endpoints moved 201 → 200 — `/bills/{id}`, `/contacts/{id}`, `/nano-classifiers/{id}`, `/items/{id}`, `/journals/{id}`, `/scheduled/journals/{id}`, `/organization-currencies/{code}/rates/{id}`. Request shapes and response bodies are byte-identical; only the status changed. The same release corrected 114 published success codes that disagreed with what the endpoints actually returned, so the API reference now matches runtime everywhere. A client that asserted `status === 201` on an update breaks; one that checks `response.ok` does not.
+
+---
+
 ## 1. Organization
 
 ### GET /api/v1/organization
@@ -2095,7 +2112,8 @@ Update an existing payment record. All fields optional — only included fields 
     "feeTaxVatApplicable": false
   },
   // Cash-leg adjustment: overpayment or rounding. Bank leg only, never AR/AP.
-  // Omitting this on an update CLEARS an existing adjustment.
+  // Only applies when RECORDING a payment. On update it is inert: add, change
+  // and remove all return 200 and do nothing. See rule 160.
   "adjustment": {
     "adjustmentValue": -0.03,
     "adjustmentAccountResourceId": "uuid-rounding-account",

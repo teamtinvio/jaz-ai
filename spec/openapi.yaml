@@ -4265,11 +4265,15 @@
             "HEIC",
             "JPEG",
             "JPG",
+            "MSG",
             "PDF",
             "PNG",
-            "TEXT",
+            "RAR",
+            "TIFF",
+            "TXT",
             "XLS",
-            "XLSX"
+            "XLSX",
+            "ZIP"
           ],
           "type": "string"
         },
@@ -5755,6 +5759,14 @@
           "description": "Resource ID of the account the payment is made from.",
           "type": "string"
         },
+        "adjustment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentAdjustment"
+            }
+          ],
+          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record."
+        },
         "currency": {
           "allOf": [
             {
@@ -5796,14 +5808,6 @@
         "sendEmail": {
           "description": "When true, email a receipt for this payment.",
           "type": "boolean"
-        },
-        "taxCurrency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTExchangeRate"
-            }
-          ],
-          "description": "Tax currency and exchange rate details."
         },
         "transactionAmount": {
           "description": "Amount applied to the bill, in the bill currency.",
@@ -6872,6 +6876,14 @@
           "description": "Resource ID of the account the refund is paid from.",
           "type": "string"
         },
+        "adjustment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentAdjustment"
+            }
+          ],
+          "description": "Cash-leg adjustment applied to the bank or cash side of this refund record."
+        },
         "currency": {
           "allOf": [
             {
@@ -6913,14 +6925,6 @@
         "sendEmail": {
           "description": "When true, email a receipt for this refund.",
           "type": "boolean"
-        },
-        "taxCurrency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTExchangeRate"
-            }
-          ],
-          "description": "Tax currency and exchange rate details."
         },
         "transactionAmount": {
           "description": "Amount applied to the customer credit note, in the customer credit note currency.",
@@ -7431,6 +7435,14 @@
           "description": "Resource ID of the account the payment is deposited to.",
           "type": "string"
         },
+        "adjustment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentAdjustment"
+            }
+          ],
+          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record."
+        },
         "currency": {
           "allOf": [
             {
@@ -7472,14 +7484,6 @@
         "sendEmail": {
           "description": "When true, email a receipt for this payment.",
           "type": "boolean"
-        },
-        "taxCurrency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTExchangeRate"
-            }
-          ],
-          "description": "Tax currency and exchange rate details."
         },
         "transactionAmount": {
           "description": "Amount applied to the invoice, in the invoice currency.",
@@ -8829,6 +8833,14 @@
           "description": "Resource ID of the account the refund is received into.",
           "type": "string"
         },
+        "adjustment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentAdjustment"
+            }
+          ],
+          "description": "Cash-leg adjustment applied to the bank or cash side of this refund record."
+        },
         "currency": {
           "allOf": [
             {
@@ -8870,14 +8882,6 @@
         "sendEmail": {
           "description": "When true, email a receipt for this refund.",
           "type": "boolean"
-        },
-        "taxCurrency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTExchangeRate"
-            }
-          ],
-          "description": "Tax currency and exchange rate details."
         },
         "transactionAmount": {
           "description": "Amount applied to the supplier credit note, in the supplier credit note currency.",
@@ -10443,11 +10447,15 @@
             "HEIC",
             "JPEG",
             "JPG",
+            "MSG",
             "PDF",
             "PNG",
-            "TEXT",
+            "RAR",
+            "TIFF",
+            "TXT",
             "XLS",
-            "XLSX"
+            "XLSX",
+            "ZIP"
           ],
           "type": "string"
         },
@@ -13879,6 +13887,27 @@
           "type": "string"
         }
       },
+      "type": "object"
+    },
+    "PaymentAdjustment": {
+      "properties": {
+        "adjustmentAccountResourceId": {
+          "description": "Resource ID of the account the adjustment posts to. Must not be a control account, a bank or cash account, or an account linked to a deposit.",
+          "type": "string"
+        },
+        "adjustmentDescription": {
+          "description": "Description of the adjustment.",
+          "type": "string"
+        },
+        "adjustmentValue": {
+          "description": "Signed adjustment in the payment account's currency, to at most 2 decimal places. Must not be zero. A positive value increases the recorded bank or cash amount in the direction the payment already goes, and a negative value decreases it.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "adjustmentAccountResourceId",
+        "adjustmentValue"
+      ],
       "type": "object"
     },
     "PaymentTransactionFee": {
@@ -17318,6 +17347,14 @@
     },
     "ReconcileRecordedPayment": {
       "properties": {
+        "adjustment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentAdjustment"
+            }
+          ],
+          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record."
+        },
         "organizationAccountResourceId": {
           "description": "Resource ID of the bank account the payment is recorded against.",
           "type": "string"
@@ -17328,7 +17365,19 @@
         },
         "paymentMethod": {
           "description": "Payment method (defaults to BANK_TRANSFER).",
-          "maxLength": 64,
+          "enum": [
+            "CASH",
+            "CREDIT_CARD",
+            "BANK_TRANSFER",
+            "E_WALLET",
+            "CHEQUE",
+            "WITHHOLDING_TAX_CERTIFICATE",
+            "CLEARING_SETTLEMENT",
+            "DEBT_WRITE_OFF",
+            "INTER_COMPANY",
+            "OTHER",
+            "PAYMENT_GATEWAY"
+          ],
           "type": "string"
         },
         "reference": {
@@ -26741,6 +26790,14 @@
           "description": "Resource ID of the bank or cash account for the payment.",
           "type": "string"
         },
+        "adjustment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentAdjustment"
+            }
+          ],
+          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record. Omit to remove an existing adjustment. A payment already matched to a bank statement entry rejects any change to its adjustment."
+        },
         "currency": {
           "allOf": [
             {
@@ -26793,14 +26850,6 @@
         "sendEmail": {
           "description": "When true, email a receipt for this payment.",
           "type": "boolean"
-        },
-        "taxCurrency": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BTExchangeRate"
-            }
-          ],
-          "description": "Tax currency exchange rate."
         },
         "transactionAmount": {
           "description": "Amount applied to the invoice or bill, in the document currency.",
@@ -28344,8 +28393,8 @@
           "application/json"
         ],
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -29362,8 +29411,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -29644,8 +29693,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -29719,8 +29768,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -29787,8 +29836,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -29862,8 +29911,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -29937,8 +29986,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -30070,8 +30119,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -30378,8 +30427,8 @@
           "application/json"
         ],
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -31249,8 +31298,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -31458,8 +31507,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -31670,8 +31719,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -31879,8 +31928,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -31947,8 +31996,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -32232,8 +32281,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -32517,8 +32566,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -32871,8 +32920,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -33009,8 +33058,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -33077,8 +33126,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -33143,8 +33192,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -33218,8 +33267,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -33430,8 +33479,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -33709,8 +33758,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -36124,8 +36173,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -36626,8 +36675,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -37002,8 +37051,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -37140,8 +37189,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -37208,8 +37257,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -37274,8 +37323,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -37349,8 +37398,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -37945,8 +37994,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -38013,8 +38062,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -38086,8 +38135,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -38161,8 +38210,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -38297,8 +38346,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -38372,8 +38421,8 @@
           "application/json"
         ],
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -43510,8 +43559,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -43718,8 +43767,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -43786,8 +43835,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -46407,8 +46456,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -46475,8 +46524,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -46550,8 +46599,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47144,8 +47193,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47285,8 +47334,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47353,8 +47402,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47426,8 +47475,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47501,8 +47550,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47569,8 +47618,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47644,8 +47693,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47719,8 +47768,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -47861,8 +47910,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -48111,8 +48160,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -48387,8 +48436,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -48453,8 +48502,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -48528,8 +48577,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -48843,8 +48892,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -49131,8 +49180,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -49197,8 +49246,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -49272,8 +49321,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -49413,8 +49462,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -49488,8 +49537,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -50195,8 +50244,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -50263,8 +50312,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -50558,8 +50607,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -50901,8 +50950,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51039,8 +51088,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51196,8 +51245,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51354,8 +51403,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51428,8 +51477,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51511,8 +51560,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51576,8 +51625,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51646,8 +51695,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51714,8 +51763,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51789,8 +51838,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51929,8 +51978,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -51997,8 +52046,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -52063,8 +52112,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -52138,8 +52187,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -52280,8 +52329,8 @@
           "application/json"
         ],
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -52563,8 +52612,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -52769,8 +52818,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -52924,8 +52973,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -53080,8 +53129,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -53153,8 +53202,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -53235,8 +53284,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -53367,8 +53416,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -53433,8 +53482,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -53508,8 +53557,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -54008,8 +54057,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -55033,8 +55082,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -56424,8 +56473,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -61860,8 +61909,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -63251,8 +63300,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -63765,8 +63814,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -63901,8 +63950,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -63967,8 +64016,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -64042,8 +64091,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -64353,8 +64402,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -64412,8 +64461,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -64548,8 +64597,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -64614,8 +64663,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -64689,8 +64738,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -64997,8 +65046,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65133,8 +65182,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65199,8 +65248,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65274,8 +65323,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65428,8 +65477,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65503,8 +65552,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65562,8 +65611,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65698,8 +65747,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65764,8 +65813,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -65839,8 +65888,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -66877,8 +66926,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -66950,8 +66999,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -67025,8 +67074,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -67158,8 +67207,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -67464,8 +67513,8 @@
           "application/json"
         ],
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -67534,8 +67583,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -67885,8 +67934,8 @@
           "application/json"
         ],
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -67955,8 +68004,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }
@@ -68446,8 +68495,8 @@
           "application/json"
         ],
         "responses": {
-          "201": {
-            "description": "Created",
+          "200": {
+            "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
             }

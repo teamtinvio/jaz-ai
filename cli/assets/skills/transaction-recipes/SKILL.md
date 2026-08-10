@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.40.0
+version: 5.40.1
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -307,7 +307,7 @@ A second path: 5 IFRS recipes (Loan Amortization, Accrual Reversal, Prepaid Amor
 
 ### Three pre-flight gates BEFORE sending `capsuleRecipe` (else the response silently nulls)
 
-The trigger mutation is **best-effort post-commit**: if the recipe publish fails inside customer-service, the base-trx still commits, the response still returns 201, but `capsuleRecipeJob` is null and **no error reason is surfaced on the response body**. Three causes of silent null — gate every one of them before sending:
+The trigger mutation is **best-effort post-commit**: if the recipe publish fails inside customer-service, the base-trx still commits, the response still returns its normal success status (201 on create, 200 on update), but `capsuleRecipeJob` is null and **no error reason is surfaced on the response body**. Three causes of silent null — gate every one of them before sending:
 
 | Gate | Constraint | Pre-flight check |
 |---|---|---|
@@ -315,7 +315,7 @@ The trigger mutation is **best-effort post-commit**: if the recipe publish fails
 | **Currency** | Recipe `currency`, every `*AccountResourceId` account's `currencyCode`, and base trx `currencyCode` ALL must match (v1 recipes are single-currency) | `get_account(<id>).currencyCode` for every input account |
 | **Account class** | Each `*AccountResourceId` slot has an `x-accountClass` constraint in the recipe inputSchema (Asset/Liability/Expense/Revenue) | `get_capsule_recipe(name).versions[0].inputSchema.properties.<field>['x-accountClass']` vs `get_account(<id>).accountClass` |
 
-**The canonical pre-flight is one call**: `preview_capsule_recipe(recipeName, inputs)`. Pure-compute (no side effects). Surfaces every input/class/currency violation as a clean 422 with a concrete `error_type`. The trigger mutation does NOT surface these — it just returns 201 with no `capsuleRecipeJob`. Always preview first if you can't trust the inputs.
+**The canonical pre-flight is one call**: `preview_capsule_recipe(recipeName, inputs)`. Pure-compute (no side effects). Surfaces every input/class/currency violation as a clean 422 with a concrete `error_type`. The trigger mutation does NOT surface these — it just returns its normal success status with no `capsuleRecipeJob`. Always preview first if you can't trust the inputs.
 
 See `jaz-api` Rule 143 (silent-null failure mode + diagnosis sequence), Rule 144 (closed enum on `recipeName`), Rule 150 (RECIPE_INVALID_BASE_TRANSACTION_TYPE — preview-only, NOT trigger), Rule 156 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH), Rule 157 (x-accountClass slot constraint).
 
