@@ -26796,7 +26796,7 @@
               "$ref": "#/definitions/PaymentAdjustment"
             }
           ],
-          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record. Omit to remove an existing adjustment. A payment already matched to a bank statement entry rejects any change to its adjustment."
+          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record. This field currently has no effect on an update: adding, changing and removing an adjustment all return a success response and leave the stored value unchanged. Set the adjustment when recording the payment instead. Do not treat a success response here as confirmation that an adjustment changed."
         },
         "currency": {
           "allOf": [
