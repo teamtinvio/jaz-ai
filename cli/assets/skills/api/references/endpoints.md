@@ -2112,8 +2112,9 @@ Update an existing payment record. All fields optional — only included fields 
     "feeTaxVatApplicable": false
   },
   // Cash-leg adjustment: overpayment or rounding. Bank leg only, never AR/AP.
-  // Only applies when RECORDING a payment. On update it is inert: add, change
-  // and remove all return 200 and do nothing. See rule 160.
+  // On update, add and change APPLY; remove does not (0 rejected, null reads as
+  // omitted). Rejected if the payment is reconciled or an account on its ledger
+  // rows is lock-dated. See rule 160.
   "adjustment": {
     "adjustmentValue": -0.03,
     "adjustmentAccountResourceId": "uuid-rounding-account",
