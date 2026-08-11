@@ -182,16 +182,8 @@ Valid `type` values: `"TEXT"`, `"DATE"`, `"DROPDOWN"` (UPPERCASE).
 - `/api/v1/organization/currencies/USD/rate` → 404 (singular)
 - `/api/v1/organization/currencies/{id}/rate` → 404 (singular)
 **Fix**: Rate endpoints live under the nested `/organization/currencies` family. The older
-hyphenated `/organization-currencies/...` rate paths still resolve but are marked
-**deprecated** in the OpenAPI spec — prefer the nested form:
-```
-POST   /api/v1/organization/currencies/:currencyCode/rates          Set rate
-GET    /api/v1/organization/currencies/:currencyCode/rates          List rates
-GET    /api/v1/organization/currencies/:currencyCode/rates/:id      Get rate
-PUT    /api/v1/organization/currencies/:currencyCode/rates/:id      Update rate
-DELETE /api/v1/organization/currencies/:currencyCode/rates/:id      Delete rate
-```
-Enable currencies first via `POST /organization/currencies`, then set rates via `/organization/currencies/:code/rates`.
+hyphenated `/organization-currencies/...` rate paths still resolve but are
+**superseded** — use the nested form.
 
 ### "Cannot set rate for organization base currency" (400)
 **Cause**: Trying to POST/PUT a rate for the org's base currency (e.g., SGD for a Singapore org).

@@ -462,7 +462,7 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `/organization-currencies/:code/rates` (older docs) | `/organization/currencies/:code/rates` | Nested path is current; hyphenated form is **deprecated** in the spec |
+| `/organization-currencies/:code/rates` (older docs) | `/organization/currencies/:code/rates` | Nested path is the supported one; the hyphenated form still resolves but is **superseded** |
 | `exchangeRate` (rate POST body) | `rate` | Just `rate`, not `exchangeRate` |
 | `effectiveDate` / `valueDate` / `date` | `rateApplicableFrom` | Rate start date, `YYYY-MM-DD` only |
 | `expiryDate` | `rateApplicableTo` | Optional rate end date |

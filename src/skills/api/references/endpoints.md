@@ -67,7 +67,7 @@ All GET list endpoints and POST `/search` endpoints use **`limit`/`offset` pagin
 | Async batch kickoff (`/bulk-request-changes`, claims `bulk/*`) | **202** |
 | Quick Fix / bulk partial failure | **207** (body shape identical to 200 — check `failed[]`) |
 
-**Changed 2026-08-10**: seven `PUT` endpoints moved 201 → 200 — `/bills/{id}`, `/contacts/{id}`, `/nano-classifiers/{id}`, `/items/{id}`, `/journals/{id}`, `/scheduled/journals/{id}`, `/organization-currencies/{code}/rates/{id}`. Request shapes and response bodies are byte-identical; only the status changed. The same release corrected 114 published success codes that disagreed with what the endpoints actually returned, so the API reference now matches runtime everywhere. A client that asserted `status === 201` on an update breaks; one that checks `response.ok` does not.
+**Changed 2026-08-10**: seven `PUT` endpoints moved 201 → 200 — `/bills/{id}`, `/contacts/{id}`, `/nano-classifiers/{id}`, `/items/{id}`, `/journals/{id}`, `/scheduled/journals/{id}`, `/organization/currencies/{code}/rates/{id}`. Request shapes and response bodies are byte-identical; only the status changed. The same release corrected 114 published success codes that disagreed with what the endpoints actually returned, so the API reference now matches runtime everywhere. A client that asserted `status === 201` on an update breaks; one that checks `response.ok` does not.
 
 ---
 
@@ -308,7 +308,7 @@ Enable currencies first, then set rates via the **separate** rate endpoints belo
 
 ### Currency Rates — `/organization/currencies/:code/rates`
 
-**Path note**: both enable and rates live under the nested `/organization/currencies` family. The older hyphenated `/organization-currencies/...` rate paths still resolve but are marked **deprecated** in the OpenAPI spec — use the nested form.
+**Path note**: both enable and rates live under the nested `/organization/currencies` family. The older hyphenated `/organization-currencies/...` rate paths still resolve but are **superseded**. Use the nested form; do not rely on the hyphenated one being documented.
 
 #### POST /api/v1/organization/currencies/:currencyCode/rates
 

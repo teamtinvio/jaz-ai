@@ -26796,7 +26796,7 @@
               "$ref": "#/definitions/PaymentAdjustment"
             }
           ],
-          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record. This field currently has no effect on an update: adding, changing and removing an adjustment all return a success response and leave the stored value unchanged. Set the adjustment when recording the payment instead. Do not treat a success response here as confirmation that an adjustment changed."
+          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record. On an update, adding an adjustment and changing an existing one both take effect. Removing one does not: a zero value is rejected, and sending null is treated the same as omitting the field, which leaves the stored adjustment unchanged. To remove an adjustment, delete the payment record and record it again without one."
         },
         "currency": {
           "allOf": [
@@ -28128,6 +28128,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -28272,6 +28278,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -28336,6 +28348,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -28417,6 +28435,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -28494,6 +28518,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -28559,6 +28589,12 @@
           },
           "402": {
             "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -28769,6 +28805,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -28831,6 +28873,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -28995,6 +29043,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -29059,6 +29113,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -29355,6 +29415,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -29435,6 +29501,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -29497,6 +29569,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -29576,6 +29654,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -29640,6 +29724,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -29713,6 +29803,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -29792,6 +29888,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -29856,6 +29958,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -29935,6 +30043,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -30010,6 +30124,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -30071,6 +30191,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -30139,6 +30265,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -30214,6 +30346,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -30382,6 +30520,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -30447,6 +30591,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -30520,6 +30670,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -30583,6 +30739,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -30659,6 +30821,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -30881,6 +31049,12 @@
               ]
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "401": {
             "description": "Unauthorized",
             "schema": {
@@ -31086,6 +31260,12 @@
               ]
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "401": {
             "description": "Unauthorized",
             "schema": {
@@ -31184,6 +31364,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -31248,6 +31434,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -31322,6 +31514,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -31390,6 +31588,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -31452,6 +31656,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -31531,6 +31741,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -31605,6 +31821,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -31669,6 +31891,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -31743,6 +31971,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -31811,6 +32045,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -31873,6 +32113,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -31952,6 +32198,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32016,6 +32268,18 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -32094,6 +32358,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32162,6 +32432,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32226,6 +32502,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -32305,6 +32587,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32379,6 +32667,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32447,6 +32741,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32511,6 +32811,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -32590,6 +32896,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32664,6 +32976,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32728,6 +33046,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -32800,6 +33124,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -32866,6 +33196,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -32944,6 +33280,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -33008,6 +33350,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -33078,6 +33426,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -33216,6 +33570,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -33287,6 +33647,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -33365,6 +33731,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -33429,6 +33801,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -33503,6 +33881,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -33569,6 +33953,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -33641,6 +34031,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -33703,6 +34099,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -33778,6 +34180,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -33876,6 +34284,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -33938,6 +34352,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -34068,6 +34488,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -34123,6 +34549,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -34231,6 +34663,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -34293,6 +34731,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -34423,6 +34867,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -34478,6 +34928,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -34614,6 +35070,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -34676,6 +35138,12 @@
             "description": "Accepted",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -34742,6 +35210,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -34804,6 +35278,12 @@
             "description": "Accepted",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -34952,6 +35432,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -35016,6 +35502,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -35078,6 +35570,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -35186,6 +35684,12 @@
             "description": "Created",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -35426,6 +35930,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -35695,6 +36205,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -35764,6 +36280,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -36059,6 +36581,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -36123,6 +36651,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -36197,6 +36731,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -36265,6 +36805,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -36327,6 +36873,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -36402,6 +36954,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -36491,6 +37049,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -36555,6 +37119,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -36699,6 +37269,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -36767,6 +37343,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -36829,6 +37411,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -36904,6 +37492,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -37075,6 +37669,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -37139,6 +37739,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -37213,6 +37819,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -37281,6 +37893,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -37343,6 +37961,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -37418,6 +38042,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -37507,6 +38137,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -37571,6 +38207,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -37797,6 +38439,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -37877,6 +38525,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -37939,6 +38593,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -38018,6 +38678,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -38082,6 +38748,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -38155,6 +38827,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -38234,6 +38912,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -38302,6 +38986,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -38366,6 +39056,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -38441,6 +39137,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -42185,6 +42887,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -42483,6 +43191,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -42545,6 +43259,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -42611,6 +43331,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -42673,6 +43399,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -42739,6 +43471,12 @@
               "$ref": "#/definitions/PageableResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -42801,6 +43539,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -42931,6 +43675,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -42986,6 +43736,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -43057,6 +43813,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -43370,6 +44132,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -43513,6 +44281,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -43583,6 +44357,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -43647,6 +44427,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -43791,6 +44577,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -43859,6 +44651,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -43921,6 +44719,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -46480,6 +47284,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -46544,6 +47354,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -46623,6 +47439,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -46687,6 +47509,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -46777,6 +47605,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -46841,6 +47675,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -47137,6 +47977,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -47217,6 +48063,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -47279,6 +48131,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -47358,6 +48216,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -47422,6 +48286,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -47495,6 +48365,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -47574,6 +48450,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -47638,6 +48520,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -47717,6 +48605,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -47788,6 +48682,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -47934,6 +48834,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -48005,6 +48911,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -48184,6 +49096,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -48248,6 +49166,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -48392,6 +49316,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -48460,6 +49390,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -48522,6 +49458,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -48597,6 +49539,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -48916,6 +49864,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -48980,6 +49934,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -49124,6 +50084,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -49204,6 +50170,18 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -49266,6 +50244,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -49345,6 +50329,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -49409,6 +50399,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -49486,6 +50482,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -49557,6 +50559,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -49725,6 +50733,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -49733,6 +50747,18 @@
           },
           "500": {
             "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -49956,6 +50982,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -50092,6 +51124,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -50268,6 +51306,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -50332,6 +51376,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -50402,6 +51452,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -50493,6 +51549,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -50557,6 +51619,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -50631,6 +51699,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -50699,6 +51773,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -50761,6 +51841,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -50840,6 +51926,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -50895,6 +51987,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -50974,6 +52072,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -51043,6 +52147,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -51108,6 +52218,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -51265,6 +52381,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -51427,6 +52549,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -51497,6 +52625,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -51649,6 +52783,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -51719,6 +52859,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -51783,6 +52929,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -51862,6 +53014,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -51928,6 +53086,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -52002,6 +53166,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -52070,6 +53240,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -52132,6 +53308,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -52211,6 +53393,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -52285,6 +53473,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -52349,6 +53543,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -52421,6 +53621,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -52483,6 +53689,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -52562,6 +53774,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -52636,6 +53854,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -52700,6 +53924,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -52838,6 +54068,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -52993,6 +54229,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -53153,6 +54395,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -53222,6 +54470,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -53378,6 +54632,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "500": {
             "description": "Internal Server Error",
             "schema": {
@@ -53440,6 +54700,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -53448,6 +54714,12 @@
           },
           "500": {
             "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -53502,6 +54774,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -53581,6 +54859,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -53589,6 +54873,12 @@
           },
           "500": {
             "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "501": {
+            "description": "Not Implemented",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -53675,6 +54965,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -53737,6 +55033,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -53867,6 +55169,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -53922,6 +55230,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -54011,6 +55325,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -54081,6 +55401,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -54145,6 +55471,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -54225,8 +55557,20 @@
               "$ref": "#/definitions/PageableResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -54351,6 +55695,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -54413,6 +55763,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -54559,6 +55915,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -54830,6 +56192,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -54838,6 +56206,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -54885,6 +56259,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -55021,6 +56401,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -55029,6 +56415,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -55106,6 +56498,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -55160,6 +56558,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -55168,6 +56572,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -55217,6 +56627,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -55377,6 +56793,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -55544,6 +56966,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -55552,6 +56980,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -55621,8 +57055,20 @@
               "$ref": "#/definitions/PageableResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -55747,6 +57193,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -55809,6 +57261,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -55955,6 +57413,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -56156,6 +57620,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -56164,6 +57634,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -56211,6 +57687,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -56294,6 +57776,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "422": {
             "description": "Unprocessable Entity",
             "schema": {
@@ -56345,6 +57833,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -56412,6 +57906,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -56420,6 +57920,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -56497,6 +58003,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -56551,6 +58063,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -56559,6 +58077,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -56703,6 +58227,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -56870,6 +58400,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -56878,6 +58414,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -61052,8 +62594,20 @@
               "$ref": "#/definitions/PageableResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -61178,6 +62732,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -61240,6 +62800,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -61386,6 +62952,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -61657,6 +63229,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -61665,6 +63243,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -61712,6 +63296,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -61848,6 +63438,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -61856,6 +63452,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -61933,6 +63535,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -61987,6 +63595,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -61995,6 +63609,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -62044,6 +63664,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -62204,6 +63830,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -62371,6 +64003,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -62379,6 +64017,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -62448,8 +64092,20 @@
               "$ref": "#/definitions/PageableResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -62574,6 +64230,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -62636,6 +64298,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -62782,6 +64450,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -62983,6 +64657,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -62991,6 +64671,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -63038,6 +64724,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -63121,6 +64813,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "422": {
             "description": "Unprocessable Entity",
             "schema": {
@@ -63172,6 +64870,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -63239,6 +64943,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -63247,6 +64957,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -63324,6 +65040,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -63378,6 +65100,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -63386,6 +65114,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -63530,6 +65264,12 @@
             "description": "OK",
             "schema": {
               "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
             }
           },
           "402": {
@@ -63697,6 +65437,12 @@
               "$ref": "#/definitions/BaseResponse"
             }
           },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "402": {
             "description": "Payment Required",
             "schema": {
@@ -63705,6 +65451,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -63779,6 +65531,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -63834,6 +65592,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -63906,6 +65670,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -63974,6 +65744,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -64036,6 +65812,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -64111,6 +65893,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -64191,6 +65979,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -64426,6 +66220,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -64481,6 +66281,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -64553,6 +66359,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -64621,6 +66433,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -64683,6 +66501,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -64758,6 +66582,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -64838,6 +66668,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -65070,6 +66906,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -65134,6 +66976,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -65206,6 +67054,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -65268,6 +67122,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -65343,6 +67203,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -65428,6 +67294,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -65497,6 +67369,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -65576,6 +67454,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -65631,6 +67515,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -65703,6 +67593,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -65771,6 +67667,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -65833,6 +67735,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -65908,6 +67816,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -65988,6 +67902,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -66216,6 +68136,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -66282,6 +68208,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -66371,6 +68303,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -66435,6 +68373,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -66661,6 +68605,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -66741,6 +68691,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -66803,6 +68759,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -66882,6 +68844,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -66946,6 +68914,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -67019,6 +68993,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -67098,6 +69078,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -67159,6 +69145,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -67227,6 +69219,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -67302,6 +69300,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -67469,6 +69473,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -67533,6 +69543,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -67607,6 +69623,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -67675,6 +69697,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -67737,6 +69765,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -67816,6 +69850,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -67890,6 +69930,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -67954,6 +70000,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -68028,6 +70080,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -68096,6 +70154,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -68158,6 +70222,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -68237,6 +70307,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -68311,6 +70387,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -68377,6 +70459,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -68519,6 +70607,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -68595,6 +70689,12 @@
           },
           "404": {
             "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
