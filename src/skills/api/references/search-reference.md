@@ -87,9 +87,13 @@ When both are present, merged at filter level. Explicit `filter` keys win on con
 | `neq` | string | `{ "status": { "neq": "DRAFT" } }` | Not equal |
 | `contains` | string | `{ "reference": { "contains": "INV" } }` | Substring match |
 | `in` | string[] | `{ "status": { "in": ["ACTIVE", "DRAFT"] } }` | Max 100 values |
-| `reg` | string[] | `{ "name": { "reg": ["^Acme.*"] } }` | Regex patterns, max 100 |
-| `likeIn` | string[] | `{ "name": { "likeIn": ["Acme%"] } }` | SQL LIKE patterns, max 100 |
-| `isNull` | string | `{ "reference": { "isNull": "true" } }` | Null check |
+| `reg` | string[] | `{ "name": { "reg": ["Acme"] } }` | Substring match despite the name, max 100 |
+| `likeIn` | string[] | `{ "name": { "likeIn": ["Acme"] } }` | Substring match, max 100 |
+| `isNull` | string | `{ "reference": { "isNull": "true" } }` | Null check, takes "true"/"false" |
+| `notContains` | string | `{ "reference": { "notContains": "DRAFT" } }` | Substring exclusion |
+| `startWith` / `notStartWith` | string | `{ "reference": { "startWith": "INV-" } }` | Prefix match, case sensitive |
+| `endWith` / `notEndWith` | string | `{ "reference": { "endWith": "-01" } }` | Suffix match, case sensitive |
+| `isBlank` / `isNotBlank` | string | `{ "terms": { "isBlank": "true" } }` | Null-or-empty check, takes "true"/"false" |
 
 ### Numeric Operators (`BigDecimalExpression`)
 
@@ -101,10 +105,13 @@ When both are present, merged at filter level. Explicit `filter` keys win on con
 | `lt` | number | `{ "totalAmount": { "lt": 10000 } }` |
 | `lte` | number | `{ "totalAmount": { "lte": 10000 } }` |
 | `in` | number[] | `{ "totalAmount": { "in": [100, 200, 300] } }` |
+| `neq` | number | `{ "totalAmount": { "neq": 1000 } }` |
+| `inRange` | number[2] | `{ "totalAmount": { "inRange": [100, 1000] } }` |
+| `notInRange` | number[2] | `{ "totalAmount": { "notInRange": [100, 1000] } }` |
 
 ### Integer Operators (`IntExpression`)
 
-Same as numeric: `eq`, `gt`, `gte`, `lt`, `lte`, `in` (used by `terms` field on invoices/bills).
+Same as numeric minus `neq`: `eq`, `gt`, `gte`, `lt`, `lte`, `in`, `inRange`, `notInRange` (used by `terms` field on invoices/bills).
 
 ### Date Operators (`DateExpression`) — format: `YYYY-MM-DD`
 
@@ -116,8 +123,10 @@ Same as numeric: `eq`, `gt`, `gte`, `lt`, `lte`, `in` (used by `terms` field on 
 | `lt` | string | `{ "valueDate": { "lt": "2026-12-31" } }` |
 | `lte` | string | `{ "valueDate": { "lte": "2026-12-31" } }` |
 | `between` | string[2] | `{ "valueDate": { "between": ["2026-01-01", "2026-03-31"] } }` |
+| `notBetween` | string[2] | `{ "valueDate": { "notBetween": ["2026-01-01", "2026-03-31"] } }` |
+| `isNull` / `isNotNull` | string | `{ "dueDate": { "isNull": "0001-01-01" } }` | takes the placeholder DATE, not "true" |
 
-**CRITICAL**: `between` requires EXACTLY 2 values. All date strings must be `YYYY-MM-DD`.
+**CRITICAL**: `between`, `notBetween`, `inRange` and `notInRange` require EXACTLY 2 values, low then high. Date `isNull`/`isNotNull` take the placeholder date `"0001-01-01"` — unlike the string ones, which take `"true"`/`"false"`. All date strings must be `YYYY-MM-DD`.
 
 ### DateTime Operators (`DateTimeExpression`) — format: RFC3339
 

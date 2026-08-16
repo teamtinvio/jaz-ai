@@ -623,6 +623,34 @@
       ],
       "type": "object"
     },
+    "ArchiveBankStatementEntriesRequest": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the bank account, from the URL path.",
+          "type": "string"
+        },
+        "archiveNotes": {
+          "description": "Note stored against each archived record.",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "resourceIds": {
+          "description": "Bank records to archive. Maximum 500 per request.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "accountResourceId",
+        "resourceIds"
+      ],
+      "type": "object"
+    },
     "AttachmentNestedFilter": {
       "properties": {
         "fileName": {
@@ -1017,6 +1045,172 @@
       },
       "type": "object"
     },
+    "BatchPaymentFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "andGroup": {
+          "description": "Combine filter groups using AND.",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        "bankStatementEntryResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the resource ID of the bank record the batch is reconciled to."
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "currencyCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by currency code (ISO 4217)."
+        },
+        "customFields": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/JsonExpression"
+            }
+          ],
+          "description": "Filter by custom field values."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "orGroup": {
+          "description": "Combine filter groups using OR.",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        "organizationAccountResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the resource ID of the bank or cash account the batch posts to."
+        },
+        "paymentMethod": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by how the payment was made."
+        },
+        "reference": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by batch reference."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payment batch resource ID."
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by batch status."
+        },
+        "totalAmount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BigDecimalExpression"
+            }
+          ],
+          "description": "Filter by the sum of the batch's payment records."
+        },
+        "type": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by batch side: AR for sale batches, AP for purchase batches."
+        },
+        "valueDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by payment date, in YYYY-MM-DD format."
+        }
+      },
+      "type": "object"
+    },
+    "BatchPaymentFilterGroup": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "BatchPaymentSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "asc",
+            "DESC",
+            "desc"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
     "BigDecimalExpression": {
       "properties": {
         "eq": {
@@ -1039,6 +1233,13 @@
           "maxItems": 100,
           "type": "array"
         },
+        "inRange": {
+          "description": "Match values within this inclusive range (exactly two, low then high).",
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
+        },
         "lt": {
           "description": "Match values less than this.",
           "type": "number"
@@ -1046,6 +1247,17 @@
         "lte": {
           "description": "Match values less than or equal to this.",
           "type": "number"
+        },
+        "neq": {
+          "description": "Match values not equal to this.",
+          "type": "number"
+        },
+        "notInRange": {
+          "description": "Match values outside this inclusive range (exactly two, low then high).",
+          "items": {
+            "type": "number"
+          },
+          "type": "array"
         }
       },
       "type": "object"
@@ -1287,6 +1499,54 @@
       "properties": {
         "resourceIds": {
           "description": "List of sale order resource IDs to confirm (max 200). Processed asynchronously. Returns a job ID.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200,
+          "type": "array"
+        }
+      },
+      "required": [
+        "resourceIds"
+      ],
+      "type": "object"
+    },
+    "BulkDeleteBatchPaymentsClientRequest": {
+      "properties": {
+        "resourceIds": {
+          "description": "List of batch payment resource IDs to delete (max 200). Processed asynchronously. Returns a job ID.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200,
+          "type": "array"
+        }
+      },
+      "required": [
+        "resourceIds"
+      ],
+      "type": "object"
+    },
+    "BulkDeleteCashEntriesClientRequest": {
+      "properties": {
+        "resourceIds": {
+          "description": "List of cash entry resource IDs to delete (max 200). Processed asynchronously. Returns a job ID.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 200,
+          "type": "array"
+        }
+      },
+      "required": [
+        "resourceIds"
+      ],
+      "type": "object"
+    },
+    "BulkDeletePaymentsClientRequest": {
+      "properties": {
+        "resourceIds": {
+          "description": "List of payment record resource IDs to delete (max 200). Processed asynchronously. Returns a job ID.",
           "items": {
             "type": "string"
           },
@@ -1634,6 +1894,135 @@
       },
       "type": "object"
     },
+    "BulkPaymentTransaction": {
+      "properties": {
+        "businessTransactionResourceId": {
+          "description": "Resource ID of the invoice, bill, or credit note the payment is recorded against.",
+          "type": "string"
+        },
+        "businessTransactionType": {
+          "description": "Type of the transaction the payment is recorded against. Defaults to the type implied by the endpoint when omitted.",
+          "enum": [
+            "SALE",
+            "PURCHASE",
+            "SALE_CREDIT_NOTE",
+            "PURCHASE_CREDIT_NOTE"
+          ],
+          "type": "string"
+        },
+        "currency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BTExchangeRate"
+            }
+          ],
+          "description": "Payment currency and exchange rate details for this record. Omit when the transaction is in the payment account's currency."
+        },
+        "paymentAmount": {
+          "description": "Amount recorded against the bank or cash account, in that account's currency.",
+          "type": "number"
+        },
+        "transactionAmount": {
+          "description": "Amount applied to the transaction, in the transaction currency.",
+          "type": "number"
+        },
+        "transactionFee": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentTransactionFee"
+            }
+          ],
+          "description": "Transaction fee charged on this record."
+        },
+        "transactionFeeCollected": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentTransactionFee"
+            }
+          ],
+          "description": "Transaction fee collected from the customer on this record. Meaningful on the sale side; the purchase endpoints accept it but a bill has no collected fee."
+        }
+      },
+      "required": [
+        "businessTransactionResourceId",
+        "paymentAmount",
+        "transactionAmount"
+      ],
+      "type": "object"
+    },
+    "BulkPaymentsClientRequest": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the bank or cash account the payment records post to.",
+          "type": "string"
+        },
+        "attachments": {
+          "description": "Attachments applied to the payment.",
+          "items": {
+            "$ref": "#/definitions/ClaimAttachmentRequest"
+          },
+          "type": "array"
+        },
+        "customFields": {
+          "description": "Custom field values applied to the payment.",
+          "items": {
+            "$ref": "#/definitions/CustomField"
+          },
+          "type": "array"
+        },
+        "paymentMethod": {
+          "description": "How the payment was made.",
+          "enum": [
+            "CASH",
+            "CREDIT_CARD",
+            "BANK_TRANSFER",
+            "E_WALLET",
+            "CHEQUE",
+            "WITHHOLDING_TAX_CERTIFICATE",
+            "CLEARING_SETTLEMENT",
+            "DEBT_WRITE_OFF",
+            "INTER_COMPANY",
+            "OTHER",
+            "PAYMENT_GATEWAY"
+          ],
+          "type": "string"
+        },
+        "ph2307Details": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Ph2307DetailsInput"
+            }
+          ],
+          "description": "Certificate 2307 details. Send only when paymentMethod is WITHHOLDING_TAX_CERTIFICATE (Philippines). Its contactResourceId is required here, because the transactions in one call can belong to different contacts."
+        },
+        "reference": {
+          "description": "Reference recorded on every payment record the job creates.",
+          "type": "string"
+        },
+        "transactions": {
+          "description": "Transactions settled by this payment (min 1, max 500 per call).",
+          "items": {
+            "$ref": "#/definitions/BulkPaymentTransaction"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array"
+        },
+        "valueDate": {
+          "description": "Payment date, in YYYY-MM-DD format (organization timezone).",
+          "example": "2026-01-15",
+          "type": "string"
+        }
+      },
+      "required": [
+        "accountResourceId",
+        "paymentMethod",
+        "reference",
+        "transactions",
+        "valueDate"
+      ],
+      "type": "object"
+    },
     "BulkRejectClaimsRequest": {
       "properties": {
         "rejectionReason": {
@@ -1781,6 +2170,177 @@
       },
       "required": [
         "bills"
+      ],
+      "type": "object"
+    },
+    "BulkUpsertCashEntriesRequest": {
+      "properties": {
+        "cashEntries": {
+          "description": "List of cash entries to create (min 1, max 500 per call).",
+          "items": {
+            "$ref": "#/definitions/BulkUpsertCashEntry"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "cashEntries"
+      ],
+      "type": "object"
+    },
+    "BulkUpsertCashEntry": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the bank or cash account the entry moves money through.",
+          "type": "string"
+        },
+        "contactResourceId": {
+          "description": "Resource ID of the contact.",
+          "type": "string"
+        },
+        "exchangeRate": {
+          "description": "Exchange rate from the organization's base currency to the cash account's currency. Required when the cash account is in another currency.",
+          "type": "number"
+        },
+        "internalNotes": {
+          "description": "Internal notes, visible only inside the organization.",
+          "type": "string"
+        },
+        "lines": {
+          "description": "Posting lines on this cash entry.",
+          "items": {
+            "$ref": "#/definitions/BulkUpsertCashEntryLine"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "reference": {
+          "description": "Unique cash entry reference. The entry is identified by this field.",
+          "example": "-0001",
+          "type": "string"
+        },
+        "taxInclusion": {
+          "description": "When true, the line amounts include tax. Defaults to true when any line sets taxInclusive, matching the spreadsheet import.",
+          "example": false,
+          "type": "boolean"
+        },
+        "type": {
+          "description": "Direction of the entry: CASH_IN receives money, CASH_OUT pays it out.",
+          "enum": [
+            "CASH_IN",
+            "CASH_OUT"
+          ],
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Cash entry date, in YYYY-MM-DD format (organization timezone).",
+          "example": "2026-04-20",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lines",
+        "reference",
+        "type",
+        "valueDate"
+      ],
+      "type": "object"
+    },
+    "BulkUpsertCashEntryLine": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the account the line posts to.",
+          "type": "string"
+        },
+        "amount": {
+          "description": "Line amount, in the cash account's currency.",
+          "type": "number"
+        },
+        "description": {
+          "description": "Description of the line.",
+          "type": "string"
+        },
+        "rowIndex": {
+          "description": "Row index (1-based) for error tracking.",
+          "example": "1",
+          "type": "string"
+        },
+        "taxInclusive": {
+          "description": "When true, the line amount includes tax.",
+          "type": "boolean"
+        },
+        "taxProfileResourceId": {
+          "description": "Resource ID of the line's tax profile.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "BulkUpsertCashTransfer": {
+      "properties": {
+        "cashInAmount": {
+          "description": "Amount arriving in the to account, in that account's currency. When both accounts are in the same currency this value is ignored and cashOutAmount is used for both legs, with no error reported.",
+          "type": "number"
+        },
+        "cashOutAmount": {
+          "description": "Amount leaving the from account, in that account's currency.",
+          "type": "number"
+        },
+        "contactResourceId": {
+          "description": "Resource ID of the contact.",
+          "type": "string"
+        },
+        "fromAccountResourceId": {
+          "description": "Resource ID of the account the money leaves.",
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Internal notes, visible only inside the organization.",
+          "type": "string"
+        },
+        "reference": {
+          "description": "Unique cash transfer reference. The transfer is identified by this field.",
+          "example": "-0001",
+          "type": "string"
+        },
+        "rowIndex": {
+          "description": "Row index (1-based) for error tracking.",
+          "example": "1",
+          "type": "string"
+        },
+        "toAccountResourceId": {
+          "description": "Resource ID of the account the money arrives in.",
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Transfer date, in YYYY-MM-DD format (organization timezone).",
+          "example": "2026-04-20",
+          "type": "string"
+        }
+      },
+      "required": [
+        "reference",
+        "valueDate"
+      ],
+      "type": "object"
+    },
+    "BulkUpsertCashTransfersRequest": {
+      "properties": {
+        "cashTransfers": {
+          "description": "List of cash transfers to create (min 1, max 500 per call).",
+          "items": {
+            "$ref": "#/definitions/BulkUpsertCashTransfer"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "cashTransfers"
       ],
       "type": "object"
     },
@@ -6672,16 +7232,40 @@
           "description": "Applicability for bills: NULL, SHOW, or PRINT.",
           "type": "boolean"
         },
+        "contacts": {
+          "description": "Applicability for contacts.",
+          "type": "boolean"
+        },
         "customerCredits": {
           "description": "Applicability for customer credit notes: NULL, SHOW, or PRINT.",
+          "type": "boolean"
+        },
+        "employeeClaims": {
+          "description": "Applicability for employee claims.",
+          "type": "boolean"
+        },
+        "fixedAssets": {
+          "description": "Applicability for fixed assets.",
           "type": "boolean"
         },
         "invoices": {
           "description": "Applicability for invoices: NULL, SHOW, or PRINT.",
           "type": "boolean"
         },
+        "items": {
+          "description": "Applicability for items.",
+          "type": "boolean"
+        },
         "payments": {
           "description": "Payments to record against the custom field at creation.",
+          "type": "boolean"
+        },
+        "purchaseOrders": {
+          "description": "Applicability for purchase orders.",
+          "type": "boolean"
+        },
+        "saleOrders": {
+          "description": "Applicability for sale orders.",
           "type": "boolean"
         },
         "supplierCredits": {
@@ -6703,6 +7287,19 @@
         },
         "description": {
           "description": "Custom field description.",
+          "type": "string"
+        },
+        "format": {
+          "default": "CUSTOM",
+          "description": "Where the field's options come from. CUSTOM means the options are typed by hand. Any other\nvalue draws them from that record list and makes the field a pick from that list.\nDefaults to CUSTOM.",
+          "enum": [
+            "CUSTOM",
+            "ALL_CUSTOMERS",
+            "ALL_SUPPLIERS",
+            "ALL_CONTACTS",
+            "ALL_EMPLOYEES",
+            "ALL_USERS"
+          ],
           "type": "string"
         },
         "name": {
@@ -7861,11 +8458,24 @@
     "CreateNanoClassifierClientRequest": {
       "properties": {
         "classes": {
-          "description": "Classes available within the classifier.",
+          "description": "Classes available within the classifier. Required unless format draws them from a record list.",
           "items": {
             "type": "string"
           },
           "type": "array"
+        },
+        "format": {
+          "default": "CUSTOM",
+          "description": "Where the classes come from. CUSTOM means the classes are typed by hand. Any other value\ndraws them from that record list and ignores classes. Defaults to CUSTOM.",
+          "enum": [
+            "CUSTOM",
+            "ALL_CUSTOMERS",
+            "ALL_SUPPLIERS",
+            "ALL_CONTACTS",
+            "ALL_EMPLOYEES",
+            "ALL_USERS"
+          ],
+          "type": "string"
         },
         "printable": {
           "description": "When true, the classifier appears on printed and PDF documents.",
@@ -9130,8 +9740,24 @@
           "description": "Description of the custom field.",
           "type": "string"
         },
+        "entityResourceId": {
+          "description": "Resource ID of the record chosen, when the options come from a record list.\nactualValue then holds the name as of the time the record was saved.",
+          "type": "string"
+        },
+        "format": {
+          "description": "Where the options come from. CUSTOM means the options are typed by hand. Any other value\ndraws them from that record list, and entityResourceId identifies the record chosen.",
+          "enum": [
+            "CUSTOM",
+            "ALL_CUSTOMERS",
+            "ALL_SUPPLIERS",
+            "ALL_CONTACTS",
+            "ALL_EMPLOYEES",
+            "ALL_USERS"
+          ],
+          "type": "string"
+        },
         "listOptions": {
-          "description": "Available options for LIST type fields.",
+          "description": "Available options for LIST type fields. Empty when the options come from a record list.",
           "items": {
             "type": "string"
           },
@@ -9604,6 +10230,16 @@
           "description": "Match dates on or after this, in YYYY-MM-DD format.",
           "type": "string"
         },
+        "isNotNull": {
+          "description": "Match records where the date is set. Pass the placeholder date \"0001-01-01\".",
+          "example": "0001-01-01",
+          "type": "string"
+        },
+        "isNull": {
+          "description": "Match records where the date is not set. Pass the placeholder date \"0001-01-01\".",
+          "example": "0001-01-01",
+          "type": "string"
+        },
         "lt": {
           "description": "Match dates before this, in YYYY-MM-DD format.",
           "type": "string"
@@ -9611,6 +10247,13 @@
         "lte": {
           "description": "Match dates on or before this, in YYYY-MM-DD format.",
           "type": "string"
+        },
+        "notBetween": {
+          "description": "Match dates outside these two dates (exactly two, in YYYY-MM-DD format).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         }
       },
       "required": [
@@ -11987,6 +12630,13 @@
           "maxItems": 100,
           "type": "array"
         },
+        "inRange": {
+          "description": "Match values within this inclusive range (exactly two, low then high).",
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
+        },
         "lt": {
           "description": "Match values less than this.",
           "type": "integer"
@@ -11994,6 +12644,13 @@
         "lte": {
           "description": "Match values less than or equal to this.",
           "type": "integer"
+        },
+        "notInRange": {
+          "description": "Match values outside this inclusive range (exactly two, low then high).",
+          "items": {
+            "type": "integer"
+          },
+          "type": "array"
         }
       },
       "required": [
@@ -12318,7 +12975,7 @@
           "type": "string"
         },
         "amount": {
-          "description": "Line amount, in the journal currency.",
+          "description": "Line amount, in the journal currency. Omit it to leave a draft line without an amount. Active journals reject lines with no amount.",
           "minimum": 0,
           "type": "number"
         },
@@ -13907,6 +14564,196 @@
       "required": [
         "adjustmentAccountResourceId",
         "adjustmentValue"
+      ],
+      "type": "object"
+    },
+    "PaymentFilter": {
+      "properties": {
+        "amount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BigDecimalExpression"
+            }
+          ],
+          "description": "Filter by amount applied to the transaction."
+        },
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "andGroup": {
+          "description": "Combine filter groups using AND.",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        "businessTransactionResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the resource ID of the transaction the payment is recorded against."
+        },
+        "businessTransactionType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the type of the transaction the payment is recorded against."
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "createdAtDateTime": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateTimeExpression"
+            }
+          ],
+          "description": "Filter by creation timestamp."
+        },
+        "currencyCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by transaction currency code (ISO 4217)."
+        },
+        "customFields": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/JsonExpression"
+            }
+          ],
+          "description": "Filter by custom field values."
+        },
+        "hasAttachment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Filter by whether the payment has at least one attachment."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "orGroup": {
+          "description": "Combine filter groups using OR.",
+          "items": {
+            "type": "object"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        "paymentCurrencyCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payment account currency code (ISO 4217)."
+        },
+        "paymentMethod": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by how the payment was made."
+        },
+        "reference": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payment reference."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payment resource ID."
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by record status (DRAFT, ACTIVE, VOID)."
+        },
+        "type": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payment type (SALE_PAYMENT, PURCHASE_PAYMENT, SALE_CREDIT_NOTE_PAYMENT, PURCHASE_CREDIT_NOTE_PAYMENT)."
+        },
+        "valueDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by payment date, in YYYY-MM-DD format."
+        }
+      },
+      "type": "object"
+    },
+    "PaymentFilterGroup": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "PaymentSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "asc",
+            "DESC",
+            "desc"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
       ],
       "type": "object"
     },
@@ -17841,6 +18688,36 @@
       },
       "type": "object"
     },
+    "ResolveRecordListEntitiesRequest": {
+      "properties": {
+        "entityResourceIds": {
+          "description": "Resource IDs to resolve, batched. Resolve every row of a transaction in one call.\nA resource ID that no longer exists is absent from the result rather than an error.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "format": {
+          "description": "Record list the resource IDs belong to, from the URL path.",
+          "enum": [
+            "ALL_CUSTOMERS",
+            "ALL_SUPPLIERS",
+            "ALL_CONTACTS",
+            "ALL_EMPLOYEES",
+            "ALL_USERS"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "entityResourceIds",
+        "format"
+      ],
+      "type": "object"
+    },
     "RestoreEntityResponse": {
       "properties": {
         "capsuleRecipe": {
@@ -18929,6 +19806,50 @@
       "required": [
         "accountResourceId"
       ],
+      "type": "object"
+    },
+    "SearchBatchPaymentRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BatchPaymentFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (default 100, max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "multiContactOnly": {
+          "description": "When true, return only batches whose payment records span more than one contact.",
+          "type": "boolean"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BatchPaymentSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
       "type": "object"
     },
     "SearchBillRequest": {
@@ -20360,6 +21281,46 @@
       },
       "type": "object"
     },
+    "SearchPaymentRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (default 100, max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
     "SearchPostingRulesRequest": {
       "properties": {
         "filter": {
@@ -21169,14 +22130,17 @@
           "description": "Name of the selected class.",
           "type": "string"
         },
+        "entityResourceId": {
+          "description": "Resource ID of the selected record, when the classifier draws its options from\ncustomers, suppliers, contacts, employees, or users. Send this instead of resourceId.",
+          "type": "string"
+        },
         "resourceId": {
-          "description": "Resource ID of the selected class.",
+          "description": "Resource ID of the selected class. Required when the classifier lists its own classes.",
           "type": "string"
         }
       },
       "required": [
-        "className",
-        "resourceId"
+        "className"
       ],
       "type": "object"
     },
@@ -21283,6 +22247,10 @@
           "description": "Match values containing this substring.",
           "type": "string"
         },
+        "endWith": {
+          "description": "Match values ending with this term (case sensitive).",
+          "type": "string"
+        },
         "eq": {
           "description": "Match values equal to this.",
           "type": "string"
@@ -21294,6 +22262,14 @@
           },
           "maxItems": 100,
           "type": "array"
+        },
+        "isBlank": {
+          "description": "Match records where the field is null or empty (\"true\") or neither (\"false\").",
+          "type": "string"
+        },
+        "isNotBlank": {
+          "description": "Match records where the field is neither null nor empty (\"true\").",
+          "type": "string"
         },
         "isNull": {
           "description": "Match records where the field is null (\"true\") or not null (\"false\").",
@@ -21311,13 +22287,29 @@
           "description": "Match values not equal to this.",
           "type": "string"
         },
+        "notContains": {
+          "description": "Match values not containing this substring.",
+          "type": "string"
+        },
+        "notEndWith": {
+          "description": "Match values not ending with this term (case sensitive).",
+          "type": "string"
+        },
+        "notStartWith": {
+          "description": "Match values not starting with this term (case sensitive).",
+          "type": "string"
+        },
         "reg": {
-          "description": "Match values against these regular expressions.",
+          "description": "Match values containing any of these terms. This is a substring match, not a regular expression, despite the name.",
           "items": {
             "type": "string"
           },
           "maxItems": 100,
           "type": "array"
+        },
+        "startWith": {
+          "description": "Match values starting with this term (case sensitive).",
+          "type": "string"
         }
       },
       "required": [
@@ -24691,6 +25683,29 @@
       },
       "type": "object"
     },
+    "UnarchiveBankStatementEntriesRequest": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the bank account, from the URL path.",
+          "type": "string"
+        },
+        "resourceIds": {
+          "description": "Bank records to restore. Maximum 500 per request.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "accountResourceId",
+        "resourceIds"
+      ],
+      "type": "object"
+    },
     "UpdateActionShortcutClientRequest": {
       "properties": {
         "appliesToReconciliationAccount": {
@@ -25634,16 +26649,40 @@
           "description": "Applicability for bills: NULL, SHOW, or PRINT.",
           "type": "boolean"
         },
+        "contacts": {
+          "description": "Applicability for contacts. Omit to leave unchanged.",
+          "type": "boolean"
+        },
         "customerCredits": {
           "description": "Applicability for customer credit notes: NULL, SHOW, or PRINT.",
+          "type": "boolean"
+        },
+        "employeeClaims": {
+          "description": "Applicability for employee claims. Omit to leave unchanged.",
+          "type": "boolean"
+        },
+        "fixedAssets": {
+          "description": "Applicability for fixed assets. Omit to leave unchanged.",
           "type": "boolean"
         },
         "invoices": {
           "description": "Applicability for invoices: NULL, SHOW, or PRINT.",
           "type": "boolean"
         },
+        "items": {
+          "description": "Applicability for items. Omit to leave unchanged.",
+          "type": "boolean"
+        },
         "payments": {
           "description": "Payments to record against the custom field at creation.",
+          "type": "boolean"
+        },
+        "purchaseOrders": {
+          "description": "Applicability for purchase orders. Omit to leave unchanged.",
+          "type": "boolean"
+        },
+        "saleOrders": {
+          "description": "Applicability for sale orders. Omit to leave unchanged.",
           "type": "boolean"
         },
         "supplierCredits": {
@@ -25672,6 +26711,18 @@
         },
         "description": {
           "description": "Custom field description.",
+          "type": "string"
+        },
+        "format": {
+          "description": "Where the field's options come from. CUSTOM means the options are typed by hand. Any other\nvalue draws them from that record list and makes the field a pick from that list.",
+          "enum": [
+            "CUSTOM",
+            "ALL_CUSTOMERS",
+            "ALL_SUPPLIERS",
+            "ALL_CONTACTS",
+            "ALL_EMPLOYEES",
+            "ALL_USERS"
+          ],
           "type": "string"
         },
         "name": {
@@ -26369,11 +27420,23 @@
     "UpdateNanoClassifierClientRequest": {
       "properties": {
         "classes": {
-          "description": "Classes available within the classifier.",
+          "description": "Classes available within the classifier. Required unless format draws them from a record list.",
           "items": {
             "$ref": "#/definitions/ClassesRequest"
           },
           "type": "array"
+        },
+        "format": {
+          "description": "Where the classes come from. CUSTOM means the classes are typed by hand. Switching to any\nother value retires the existing classes and draws the options from that record list.",
+          "enum": [
+            "CUSTOM",
+            "ALL_CUSTOMERS",
+            "ALL_SUPPLIERS",
+            "ALL_CONTACTS",
+            "ALL_EMPLOYEES",
+            "ALL_USERS"
+          ],
+          "type": "string"
         },
         "printable": {
           "description": "When true, the classifier appears on printed and PDF documents.",
@@ -26796,7 +27859,7 @@
               "$ref": "#/definitions/PaymentAdjustment"
             }
           ],
-          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record. On an update, adding an adjustment and changing an existing one both take effect. Removing one does not: a zero value is rejected, and sending null is treated the same as omitting the field, which leaves the stored adjustment unchanged. To remove an adjustment, delete the payment record and record it again without one."
+          "description": "Cash-leg adjustment applied to the bank or cash side of this payment record. On an update, adding an adjustment and changing an existing one both take effect. Removing one does not: a zero value is rejected, and sending null is treated the same as omitting the field, which leaves the stored adjustment unchanged. To remove an adjustment, delete the payment record and record it again without one. On an update, a change is also rejected when the payment is reconciled to a bank statement entry, or when any account on its ledger rows has a lock date later than the payment value date. Amount, account and description are all compared: moving the adjustment to another account is a change, and so is resending it without the description it already carries. Resending all three values unchanged, or omitting the field, is not. Other edits are validated on their own, so changing the reference or the value date can still be rejected."
         },
         "currency": {
           "allOf": [
@@ -27715,6 +28778,14 @@
     },
     "UserNestedFilter": {
       "properties": {
+        "deleted": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Filter by whether the user record is deleted."
+        },
         "email": {
           "allOf": [
             {
@@ -28465,6 +29536,89 @@
         ]
       }
     },
+    "/api/v1/bank-records/{accountResourceId}/archive": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Archive bank records on the bank account. Archiving takes a record out of the account's working set: it leaves the reconciliation list and stops being offered as a match suggestion. A reconciled record is unlinked first and then archived, and the invoice, bill, payment, or journal it was matched against is left in place. Records that are already archived, or that belong to a different bank account, are reported as skipped rather than rejected, so the same request can be retried safely. Use Unarchive Bank Records to reverse this.",
+        "operationId": "create-bank-record-archive",
+        "parameters": [
+          {
+            "description": "Resource ID of the bank account.",
+            "in": "path",
+            "name": "accountResourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Bank records to archive.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ArchiveBankStatementEntriesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Archive Bank Records",
+        "tags": [
+          "Bank Records"
+        ]
+      }
+    },
     "/api/v1/bank-records/{accountResourceId}/search": {
       "post": {
         "consumes": [
@@ -28543,6 +29697,89 @@
           }
         ],
         "summary": "Search Bank Records",
+        "tags": [
+          "Bank Records"
+        ]
+      }
+    },
+    "/api/v1/bank-records/{accountResourceId}/unarchive": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Return archived bank records to the bank account's working set, so they appear in the reconciliation list again. Records that are not archived, or that belong to a different bank account, are reported as skipped rather than rejected, so the same request can be retried safely.",
+        "operationId": "create-bank-record-unarchive",
+        "parameters": [
+          {
+            "description": "Resource ID of the bank account.",
+            "in": "path",
+            "name": "accountResourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Bank records to restore.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnarchiveBankStatementEntriesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Unarchive Bank Records",
         "tags": [
           "Bank Records"
         ]
@@ -28979,6 +30216,146 @@
         "summary": "Update Bank Rule",
         "tags": [
           "Bank Rules"
+        ]
+      }
+    },
+    "/api/v1/batch-payments/bulk-delete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Delete multiple batch payments asynchronously. A batch that fails is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-batch-payment-bulk-delete",
+        "parameters": [
+          {
+            "description": "The bulk delete request.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkDeleteBatchPaymentsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Delete Batch Payments",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/v1/batch-payments/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search payment batches, with filters, sort, and pagination. Each result carries the payment records grouped under it. Filter on type for one side only: AR for the batches created against invoices and customer credit notes, AP for those against bills and supplier credit notes.",
+        "operationId": "search-batch-payment",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchBatchPaymentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Batch Payments",
+        "tags": [
+          "Payments"
         ]
       }
     },
@@ -30469,392 +31846,6 @@
         ]
       }
     },
-    "/api/v1/bookmarks": {
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "List the organization's bookmarks, paginated.",
-        "operationId": "list-bookmarks",
-        "parameters": [
-          {
-            "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
-            "in": "query",
-            "name": "limit",
-            "type": "integer"
-          },
-          {
-            "description": "Zero-indexed page number.",
-            "in": "query",
-            "name": "offset",
-            "type": "integer"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "List Bookmarks",
-        "tags": [
-          "Bookmarks"
-        ]
-      },
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Create a bookmark.",
-        "operationId": "create-bookmark",
-        "parameters": [
-          {
-            "description": "The bookmark to create.",
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/CreateBookmarkClientRequest"
-            }
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Create Bookmark",
-        "tags": [
-          "Bookmarks"
-        ]
-      }
-    },
-    "/api/v1/bookmarks/{resourceId}": {
-      "delete": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Delete the bookmark.",
-        "operationId": "delete-bookmark",
-        "parameters": [
-          {
-            "description": "Resource ID of the bookmark.",
-            "in": "path",
-            "name": "resourceId",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Delete Bookmark",
-        "tags": [
-          "Bookmarks"
-        ]
-      },
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Get a single bookmark by its resource ID.",
-        "operationId": "get-bookmark",
-        "parameters": [
-          {
-            "description": "Resource ID of the bookmark.",
-            "in": "path",
-            "name": "resourceId",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Get Bookmark",
-        "tags": [
-          "Bookmarks"
-        ]
-      },
-      "put": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Update an existing bookmark.",
-        "operationId": "update-bookmark",
-        "parameters": [
-          {
-            "description": "Resource ID of the bookmark.",
-            "in": "path",
-            "name": "resourceId",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "The bookmark fields to update.",
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/UpdateBookmarkClientRequest"
-            }
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Update Bookmark",
-        "tags": [
-          "Bookmarks"
-        ]
-      }
-    },
     "/api/v1/capsule-recipes": {
       "get": {
         "consumes": [
@@ -32228,6 +33219,146 @@
         ]
       }
     },
+    "/api/v1/cash-entries/bulk-delete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Void and delete multiple cash entries (cash-in, cash-out, or cash transfer) asynchronously. An entry that fails is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-cash-entry-bulk-delete",
+        "parameters": [
+          {
+            "description": "The bulk delete request.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkDeleteCashEntriesClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Delete Cash Entries",
+        "tags": [
+          "Direct Cash Entries"
+        ]
+      }
+    },
+    "/api/v1/cash-entries/bulk-upsert": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create cash entries in bulk, asynchronously (one entry per element, cash-in or cash-out). Entries are created active; this endpoint cannot create drafts or update an existing entry. An entry that fails is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-cash-entry-bulk-upsert",
+        "parameters": [
+          {
+            "description": "The cash entries to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkUpsertCashEntriesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Create Cash Entries",
+        "tags": [
+          "Direct Cash Entries"
+        ]
+      }
+    },
     "/api/v1/cash-entries/{resourceId}": {
       "delete": {
         "consumes": [
@@ -33075,6 +34206,76 @@
           }
         ],
         "summary": "Create Cash Transfer",
+        "tags": [
+          "Direct Cash Entries"
+        ]
+      }
+    },
+    "/api/v1/cash-transfers/bulk-upsert": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create cash transfers in bulk, asynchronously (one transfer per element). Transfers are created active; this endpoint cannot create drafts or update an existing transfer. A transfer that fails is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-cash-transfer-bulk-upsert",
+        "parameters": [
+          {
+            "description": "The cash transfers to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkUpsertCashTransfersRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Create Cash Transfers",
         "tags": [
           "Direct Cash Entries"
         ]
@@ -38071,6 +39272,100 @@
           }
         ],
         "summary": "Update Custom Field",
+        "tags": [
+          "Custom Fields"
+        ]
+      }
+    },
+    "/api/v1/custom-fields/{resourceId}/options": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List the options a custom field offers, paginated. Serves both kinds of field:\none with typed list options returns them as names with no resource ID, and one\ndrawing on a record list returns records as entityResourceId, which is the value\nto store on the transaction.",
+        "operationId": "list-custom-field-options",
+        "parameters": [
+          {
+            "description": "Resource ID of the custom field.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Filter options by name. Matches anywhere in the name and ignores case.",
+            "in": "query",
+            "name": "search",
+            "type": "string"
+          },
+          {
+            "default": 100,
+            "description": "Maximum number of results per page (default 100, max 1000).",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "description": "Number of results to skip. This is a row offset, not a page number.",
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Custom Field Options",
         "tags": [
           "Custom Fields"
         ]
@@ -51163,7 +52458,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Resolve the authenticated caller's own context: identity (user and organization user), the employee bound to their login (if any), and whether they can create bills (Purchases module access). Server-resolved from the caller's token; returns only the caller's own data. Used by agents to route a receipt to a bill vs an expense claim and to file a self-claim. Mirrors the self-scoped `/api/v1/me/organizations`.",
+        "description": "Resolve the authenticated caller's own context: identity (user and organization user), the employee bound to their login (if any), and whether they can create bills (Purchases module access). Server-resolved from the caller's token; returns only the caller's own data. Used by agents to route a receipt to a bill vs an expense claim and to file a self-claim. Mirrors the self-scoped `/api/v1/me/organizations`. Requires a user credential: an organization API key authenticates the organization rather than a user, so it receives a 401.",
         "operationId": "get-me",
         "produces": [
           "application/json"
@@ -51956,6 +53251,100 @@
         ]
       }
     },
+    "/api/v1/nano-classifiers/{resourceId}/options": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List the options a nano classifier offers, paginated. Serves both kinds of\nclassifier: one with its own classes returns those classes as classResourceId,\nand one drawing on a record list returns records as entityResourceId. Exactly one\nof the two is set on each option, and it is the value to store on the transaction.",
+        "operationId": "list-nano-classifier-options",
+        "parameters": [
+          {
+            "description": "Resource ID of the nano classifier.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Filter options by name. Matches anywhere in the name and ignores case.",
+            "in": "query",
+            "name": "search",
+            "type": "string"
+          },
+          {
+            "default": 100,
+            "description": "Maximum number of results per page (default 100, max 1000).",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "description": "Number of results to skip. This is a row offset, not a page number.",
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Nano Classifier Options",
+        "tags": [
+          "Nano Classifiers"
+        ]
+      }
+    },
     "/api/v1/organization": {
       "get": {
         "consumes": [
@@ -52018,733 +53407,6 @@
         "summary": "Get Organization Details",
         "tags": [
           "Organization"
-        ]
-      }
-    },
-    "/api/v1/organization-currencies": {
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "List the organization's currencies, paginated.",
-        "operationId": "list-organization-currencies",
-        "parameters": [
-          {
-            "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
-            "in": "query",
-            "name": "limit",
-            "type": "integer"
-          },
-          {
-            "description": "Zero-indexed page number.",
-            "in": "query",
-            "name": "offset",
-            "type": "integer"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "List Currencies",
-        "tags": [
-          "Organization Currencies"
-        ]
-      },
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Add currencies to the organization.",
-        "operationId": "create-organization-currency",
-        "parameters": [
-          {
-            "description": "The add organization currencies request.",
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AddOrganizationCurrenciesRequest"
-            }
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Add Currency",
-        "tags": [
-          "Organization Currencies"
-        ]
-      }
-    },
-    "/api/v1/organization-currencies/{currencyCode}": {
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Get a single organization currency by its code.",
-        "operationId": "get-organization-currency",
-        "parameters": [
-          {
-            "description": "Currency code (ISO 4217).",
-            "in": "path",
-            "name": "currencyCode",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Get Currency",
-        "tags": [
-          "Organization Currencies"
-        ]
-      }
-    },
-    "/api/v1/organization-currencies/{currencyCode}/effective-rate": {
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Resolve the organization's effective functional-to-source FX rate for a currency at a date: the organization's custom rate when one is configured, otherwise the platform daily rate (the same rate the platform applies for revaluation). Returns rateFunctionalToSource (1 base currency = X source currency).",
-        "operationId": "list-organization-currency-effective-rate",
-        "parameters": [
-          {
-            "description": "Source currency code (ISO 4217).",
-            "in": "path",
-            "name": "currencyCode",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Rate date, in YYYY-MM-DD format. Defaults to today (UTC).",
-            "in": "query",
-            "name": "date",
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Get Effective Currency Rate",
-        "tags": [
-          "Organization Currencies"
-        ]
-      }
-    },
-    "/api/v1/organization-currencies/{currencyCode}/rates": {
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "List the currency's custom exchange rates.",
-        "operationId": "list-organization-currency-rates",
-        "parameters": [
-          {
-            "description": "Currency code (ISO 4217).",
-            "in": "path",
-            "name": "currencyCode",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
-            "in": "query",
-            "name": "limit",
-            "type": "integer"
-          },
-          {
-            "description": "Zero-indexed page number.",
-            "in": "query",
-            "name": "offset",
-            "type": "integer"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "List Currency Rates",
-        "tags": [
-          "Organization Currencies"
-        ]
-      },
-      "post": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Add a custom exchange rate for the currency.",
-        "operationId": "create-organization-currency-rate",
-        "parameters": [
-          {
-            "description": "Currency code (ISO 4217).",
-            "in": "path",
-            "name": "currencyCode",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "The add custom rate request.",
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/AddOrganizationCurrencyCustomRateClientRequest"
-            }
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "201": {
-            "description": "Created",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Add Currency Rate",
-        "tags": [
-          "Organization Currencies"
-        ]
-      }
-    },
-    "/api/v1/organization-currencies/{currencyCode}/rates/{resourceId}": {
-      "delete": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Delete the custom exchange rate.",
-        "operationId": "delete-organization-currency-rate",
-        "parameters": [
-          {
-            "description": "Currency code (ISO 4217).",
-            "in": "path",
-            "name": "currencyCode",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Resource ID of the custom rate.",
-            "in": "path",
-            "name": "resourceId",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Delete Currency Rate",
-        "tags": [
-          "Organization Currencies"
-        ]
-      },
-      "get": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Get a single custom exchange rate by its resource ID.",
-        "operationId": "get-organization-currency-rate",
-        "parameters": [
-          {
-            "description": "Currency code (ISO 4217).",
-            "in": "path",
-            "name": "currencyCode",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Resource ID of the custom rate.",
-            "in": "path",
-            "name": "resourceId",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Get Currency Rate",
-        "tags": [
-          "Organization Currencies"
-        ]
-      },
-      "put": {
-        "consumes": [
-          "application/json"
-        ],
-        "deprecated": true,
-        "description": "Update an existing custom exchange rate.",
-        "operationId": "update-organization-currency-rate",
-        "parameters": [
-          {
-            "description": "Currency code (ISO 4217).",
-            "in": "path",
-            "name": "currencyCode",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Resource ID of the custom rate.",
-            "in": "path",
-            "name": "resourceId",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "The edit custom rate request.",
-            "in": "body",
-            "name": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/EditOrganizationCurrencyCustomRateClientRequest"
-            }
-          }
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/BaseResponse"
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "402": {
-            "description": "Payment Required",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "404": {
-            "description": "Not Found",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "422": {
-            "description": "Unprocessable Entity",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ],
-        "summary": "Update Currency Rate",
-        "tags": [
-          "Organization Currencies"
         ]
       }
     },
@@ -53810,7 +54472,7 @@
           "application/json"
         ],
         "description": "List the organization's currencies, paginated.",
-        "operationId": "list-organization-currencies-2",
+        "operationId": "list-organization-currencies",
         "parameters": [
           {
             "default": 100,
@@ -53888,7 +54550,7 @@
           "application/json"
         ],
         "description": "Add currencies to the organization.",
-        "operationId": "create-organization-currency-2",
+        "operationId": "create-organization-currency",
         "parameters": [
           {
             "description": "The add organization currencies request.",
@@ -54034,7 +54696,7 @@
           "application/json"
         ],
         "description": "Get a single organization currency by its code.",
-        "operationId": "get-organization-currency-2",
+        "operationId": "get-organization-currency",
         "parameters": [
           {
             "description": "Currency code (ISO 4217).",
@@ -54108,7 +54770,7 @@
           "application/json"
         ],
         "description": "Resolve the organization's effective functional-to-source FX rate for a currency at a date: the organization's custom rate when one is configured, otherwise the platform daily rate (the same rate the platform applies for revaluation). Returns rateFunctionalToSource (1 base currency = X source currency).",
-        "operationId": "list-organization-currency-effective-rate-2",
+        "operationId": "list-organization-currency-effective-rate",
         "parameters": [
           {
             "description": "Source currency code (ISO 4217).",
@@ -54182,7 +54844,7 @@
           "application/json"
         ],
         "description": "List the currency's custom exchange rates.",
-        "operationId": "list-organization-currency-rates-2",
+        "operationId": "list-organization-currency-rates",
         "parameters": [
           {
             "description": "Currency code (ISO 4217).",
@@ -54267,7 +54929,7 @@
           "application/json"
         ],
         "description": "Add a custom exchange rate for the currency.",
-        "operationId": "create-organization-currency-rate-2",
+        "operationId": "create-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency code (ISO 4217).",
@@ -54350,7 +55012,7 @@
           "application/json"
         ],
         "description": "Delete the custom exchange rate.",
-        "operationId": "delete-organization-currency-rate-2",
+        "operationId": "delete-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency code (ISO 4217).",
@@ -54429,7 +55091,7 @@
           "application/json"
         ],
         "description": "Get a single custom exchange rate by its resource ID.",
-        "operationId": "get-organization-currency-rate-2",
+        "operationId": "get-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency code (ISO 4217).",
@@ -54508,7 +55170,7 @@
           "application/json"
         ],
         "description": "Update an existing custom exchange rate.",
-        "operationId": "update-organization-currency-rate-2",
+        "operationId": "update-organization-currency-rate",
         "parameters": [
           {
             "description": "Currency code (ISO 4217).",
@@ -54589,6 +55251,76 @@
         "summary": "Update Currency Rate",
         "tags": [
           "Organization Currencies"
+        ]
+      }
+    },
+    "/api/v1/payments/bulk-delete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Delete multiple payment records asynchronously. Each record is deleted with the same validation as Delete Payment, so a record that fails, for example one whose transaction is locked, is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-payment-bulk-delete",
+        "parameters": [
+          {
+            "description": "The bulk delete request.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkDeletePaymentsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Delete Payment Records",
+        "tags": [
+          "Payments"
         ]
       }
     },
@@ -58448,6 +59180,216 @@
         ]
       }
     },
+    "/api/v1/purchases/batch-payments": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Record one payment against many bills and supplier credit notes asynchronously, grouping the resulting payment records under a single payment batch. Use Bulk Record Purchase Payments instead when the records should stay independent. A transaction that fails is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-purchase-batch-payment",
+        "parameters": [
+          {
+            "description": "The payment and the transactions it settles.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkPaymentsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Batch Record Purchase Payments",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/v1/purchases/bulk-payments": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Record one payment against many bills and supplier credit notes asynchronously. Every transaction gets its own independent payment record, all sharing the account, method, reference, and date on the request. A transaction that fails is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-purchase-bulk-payment",
+        "parameters": [
+          {
+            "description": "The payment and the transactions it settles.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkPaymentsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Record Purchase Payments",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/v1/purchases/payments/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search payment records on bills and supplier credit notes, with filters, sort, and pagination. Use Search Sale Payments for the records on invoices and customer credit notes.",
+        "operationId": "search-purchase-payment",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchPaymentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Purchase Payments",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
     "/api/v1/quick-fix/bills": {
       "post": {
         "consumes": [
@@ -60817,6 +61759,197 @@
         "summary": "Reconcile Bank Statement with Existing Payments",
         "tags": [
           "Reconciliation"
+        ]
+      }
+    },
+    "/api/v1/record-lists/{format}/options": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List the options a record list offers, paginated. Use this to populate a picker\nfor a classifier or custom field whose format draws its options from a record list.\nDeleted and inactive records are never offered, because they must not be selectable.",
+        "operationId": "list-record-list-options",
+        "parameters": [
+          {
+            "description": "Record list to read options from.",
+            "enum": [
+              "ALL_CUSTOMERS",
+              "ALL_SUPPLIERS",
+              "ALL_CONTACTS",
+              "ALL_EMPLOYEES",
+              "ALL_USERS"
+            ],
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Filter options by name. Matches anywhere in the name and ignores case.",
+            "in": "query",
+            "name": "search",
+            "type": "string"
+          },
+          {
+            "default": 100,
+            "description": "Maximum number of results per page (default 100, max 1000).",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "description": "Number of results to skip. This is a row offset, not a page number.",
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Record List Options",
+        "tags": [
+          "Record Lists"
+        ]
+      }
+    },
+    "/api/v1/record-lists/{format}/resolve": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Look up the current names for record resource IDs already stored on transactions.\nRecords that have since been deactivated or deleted are still returned, carrying\ntheir latest name and a deleted flag, so a saved transaction keeps reading correctly.\nA resource ID that no longer exists at all is absent from the result: fall back to\nthe name stored on the transaction. Send every resource ID for a transaction at once.",
+        "operationId": "create-record-list-resolve",
+        "parameters": [
+          {
+            "description": "Record list the resource IDs belong to.",
+            "enum": [
+              "ALL_CUSTOMERS",
+              "ALL_SUPPLIERS",
+              "ALL_CONTACTS",
+              "ALL_EMPLOYEES",
+              "ALL_USERS"
+            ],
+            "in": "path",
+            "name": "format",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource IDs to resolve.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ResolveRecordListEntitiesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Resolve Record List Entities",
+        "tags": [
+          "Record Lists"
         ]
       }
     },
@@ -65482,6 +66615,216 @@
         "summary": "Void a Sale Quote",
         "tags": [
           "Sale Quotes"
+        ]
+      }
+    },
+    "/api/v1/sales/batch-payments": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Record one payment against many invoices and customer credit notes asynchronously, grouping the resulting payment records under a single payment batch. Use Bulk Record Sale Payments instead when the records should stay independent. A transaction that fails is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-sale-batch-payment",
+        "parameters": [
+          {
+            "description": "The payment and the transactions it settles.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkPaymentsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Batch Record Sale Payments",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/v1/sales/bulk-payments": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Record one payment against many invoices and customer credit notes asynchronously. Every transaction gets its own independent payment record, all sharing the account, method, reference, and date on the request. A transaction that fails is reported on its own in the job's error details and does not stop the rest of the job. Returns a job ID. Poll it with Search Background Jobs.",
+        "operationId": "create-sale-bulk-payment",
+        "parameters": [
+          {
+            "description": "The payment and the transactions it settles.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkPaymentsClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Record Sale Payments",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
+    "/api/v1/sales/payments/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search payment records on invoices and customer credit notes, with filters, sort, and pagination. Use Search Purchase Payments for the records on bills and supplier credit notes.",
+        "operationId": "search-sale-payment",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchPaymentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Sale Payments",
+        "tags": [
+          "Payments"
         ]
       }
     },
@@ -70900,6 +72243,10 @@
     {
       "description": "Create and manage nano classifiers for line item classification.",
       "name": "Nano Classifiers"
+    },
+    {
+      "description": "Read the options behind a classifier or custom field that draws them from a record list of customers, suppliers, contacts, employees, or users, and resolve stored resource IDs to their current names.",
+      "name": "Record Lists"
     },
     {
       "description": "View organization details.",

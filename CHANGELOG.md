@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.41.0] - 2026-08-16
+
+Tag search now works. Filtering by tag on invoices, bills, journals, credit notes,
+fixed assets and orders was sending a shape the API does not accept, so the tag was
+ignored and the search returned every record instead of the tagged ones.
+
+Filter operator guidance is now correct per field type. The reference previously
+listed one combined set, which suggested combinations the API rejects, such as a
+range on an amount field or a not-equal on a date.
+
 ## [5.40.0] - 2026-08-09
 
 Record a cash adjustment on a payment or refund. Use it for an overpayment or a
