@@ -1,8 +1,15 @@
-# Jaz API — Complete Endpoint Catalog
+# Jaz API — Endpoint Catalog
 
-> Every endpoint in the Jaz REST API, organized by resource. Includes undocumented
-> endpoints, magic AI features, admin APIs, and advanced search/filter syntax.
-> For request/response examples of core endpoints, see endpoints.md.
+> **The endpoints clio wraps — the REST surface is larger.** This file catalogues roughly 200
+> paths, organized by resource, including undocumented endpoints, magic AI features, admin
+> APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
+> carries 440 paths / 358 operations and is the authoritative list; check it before concluding
+> an endpoint does not exist. For request/response examples of core endpoints, see
+> endpoints.md.
+>
+> **Paths below are written without the `/api/v1` prefix.** Every one of them is really
+> `/api/v1/<path>`. Recent additions not yet folded into the tables are listed at the end
+> under "2026-08 additions".
 
 ---
 
@@ -766,4 +773,73 @@ See endpoints.md section 25 for request/response shapes and the `refs` grammar (
 
 ---
 
-*Last updated: 2026-07-11 (added Jots judgment journal: 3 endpoints). Previous: 2026-04-29 — Added 3 drafts lifecycle endpoints (validate, convert-to-active, submit-for-approval) — bulk-friendly, mixed-type batches up to 500. Same day: 8 reconciliation action endpoints; 8 bulk-upsert endpoints. 2026-04-09 — Background Jobs, Export Records, contacts bulk-upsert.*
+## Additions since 2026-07-11
+
+Live routes added after the tables above were last regenerated. None has a `clio` subcommand
+or an MCP tool — call them with a raw request.
+
+### Request changes (18) — 2026-08-06
+
+`POST /{entity}/:resourceId/request-changes` and `POST /{entity}/bulk-request-changes` for
+`invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `purchase-orders`,
+`purchase-requests`, `sale-orders`, `sale-quotes`. Claims uses a different bulk shape:
+`POST /claims/:resourceId/request-changes` + `POST /claims/bulk/request-changes`.
+Bodies and per-record outcome semantics: endpoints.md section 19c.
+
+### Payments, bulk and batch (9) — 2026-08-13
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/sales/payments/search` | Search sale payments (see SKILL.md Rule 64) |
+| POST | `/purchases/payments/search` | Search purchase payments |
+| POST | `/sales/bulk-payments` | Record many sale payments |
+| POST | `/sales/batch-payments` | Record a sale payment batch |
+| POST | `/purchases/bulk-payments` | Record many purchase payments |
+| POST | `/purchases/batch-payments` | Record a purchase payment batch |
+| POST | `/payments/bulk-delete` | Delete many payments |
+| POST | `/batch-payments/search` | Search payment batches |
+| POST | `/batch-payments/bulk-delete` | Delete many payment batches |
+
+### Cash entries and transfers, bulk (3) — 2026-08-13
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/cash-entries/bulk-upsert` | Bulk create/update cash entries |
+| POST | `/cash-entries/bulk-delete` | Bulk delete cash entries |
+| POST | `/cash-transfers/bulk-upsert` | Bulk create/update cash transfers |
+
+Neither bulk cash route applies the `issueDate`/`date` → `valueDate` aliases their
+single-create siblings do — the alias middleware rewrites the top-level body only, and on
+these routes the aliased keys sit inside the `cashEntries[]` / `cashTransfers[]` rows. Send
+`valueDate` on bulk rows.
+
+### Record-list option pickers (4) — 2026-08-12
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/record-lists/:format/options` | Options for a record-list format |
+| POST | `/record-lists/:format/resolve` | Resolve a record list |
+| GET | `/custom-fields/:resourceId/options` | Options for a custom field |
+| GET | `/nano-classifiers/:resourceId/options` | Options for a nano-classifier |
+
+### Bank-record archive (2) — 2026-08-15
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/bank-records/:accountResourceId/archive` | Archive bank records |
+| POST | `/bank-records/:accountResourceId/unarchive` | Unarchive bank records |
+
+### Withholding (1) — 2026-07-31
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/payments/withholding` | Record withholding on a sale / sale credit note payment (see SKILL.md Rule 45) |
+
+---
+
+*Last updated: 2026-08-16 (added the "Additions since 2026-07-11" section: request-changes ×18, payments bulk/batch ×9, cash bulk ×3, record-list option pickers ×4, bank-record archive ×2, withholding ×1; dropped the "every endpoint" claim — the tables above cover the endpoints clio wraps, not the whole surface). Previous: 2026-07-11 (added Jots judgment journal: 3 endpoints). 2026-04-29 — Added 3 drafts lifecycle endpoints (validate, convert-to-active, submit-for-approval) — bulk-friendly, mixed-type batches up to 500. Same day: 8 reconciliation action endpoints; 8 bulk-upsert endpoints. 2026-04-09 — Background Jobs, Export Records, contacts bulk-upsert.*
+
+**Regeneration note**: this file is hand-maintained and NOT covered by the drift gate (whose
+`docsPaths` lists `endpoints.md` alone, and which only reads `### METHOD /api/v1/...` headers).
+Nothing catches it going stale. Re-derive it from `spec/openapi.yaml` whenever the spec
+refresh lands, and treat the spec as authoritative on any disagreement.

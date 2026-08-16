@@ -839,4 +839,4 @@ POST /api/v1/cashflow-transactions/search
 
 ---
 
-*Source of truth: Go structs in the API backend (`models/*.go`). All filter/sort fields extracted from Go struct validation tags and verified against live production API. Last updated: 2026-02-14 — All search/list responses standardized to flat shape. Capsules/capsuleTypes sort now array. Purchase-items sort fields corrected. Tax-profiles max fixed. Catalogs search returns paginated response.*
+*Derived from Go structs in the API backend (`models/*.go`) — filter/sort fields extracted from struct validation tags and verified against the live production API. **Hand-maintained and not regenerated; nothing detects it going stale** — provenance and precedence rules: `search-enums.md` → Provenance and staleness. Last re-derived: 2026-02-14 — All search/list responses standardized to flat shape. Capsules/capsuleTypes sort now array. Purchase-items sort fields corrected. Tax-profiles max fixed. Catalogs search returns paginated response.*

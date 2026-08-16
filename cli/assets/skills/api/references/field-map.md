@@ -681,4 +681,4 @@ Battle-tested patterns from production Jaz API clients:
 
 ---
 
-*Last updated: 2026-04-09 — Added: Background Jobs (resourceId vs jobId critical trap, startedAt broken), Export Records (fileUrl, filterDescription, previewRows keying). Previous: 2026-03-13 — Payment record fields, scheduler field asymmetry, nano-classifier fields.*
+*Hand-maintained and not regenerated; nothing detects it going stale — provenance and precedence rules: `search-enums.md` → Provenance and staleness. Last updated: 2026-04-09 — Added: Background Jobs (resourceId vs jobId critical trap, startedAt broken), Export Records (fileUrl, filterDescription, previewRows keying). Previous: 2026-03-13 — Payment record fields, scheduler field asymmetry, nano-classifier fields.*

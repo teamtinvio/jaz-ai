@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.41.1",
+  "version": "5.42.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 358 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -576,7 +576,7 @@
     },
     {
       "name": "create_cash_in",
-      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts) — any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, type (DEBIT/CREDIT), amount }. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability) — NOT bank/cash and NOT controlled accounts (AR/AP).\n\nOptional capsuleRecipe (JOURNAL_DIRECT_CASH_IN base — LOAN_AMORTIZATION: cash-in = loan disbursement, recipe builds repayment schedule). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts) — any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, amount }. NO 'type' field — cash-in credits every offset line, decided by the endpoint. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability) — NOT bank/cash and NOT controlled accounts (AR/AP).\n\nOptional capsuleRecipe (JOURNAL_DIRECT_CASH_IN base — LOAN_AMORTIZATION: cash-in = loan disbursement, recipe builds repayment schedule). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_cash_out",
@@ -584,7 +584,7 @@
     },
     {
       "name": "create_cash_out",
-      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, type: 'DEBIT' (typical for the expense leg), amount > 0 }. Offset accounts must be regular P&L or balance-sheet accounts — NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", type: \"DEBIT\", amount: 100 }.\n\nOptional capsuleRecipe — no v1 recipe lists JOURNAL_DIRECT_CASH_OUT; passing capsuleRecipe here silently nulls. Use create_cash_in or create_journal for LOAN_AMORTIZATION. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, amount > 0 }. NO 'type' field — cash-out debits every offset line, decided by the endpoint. Offset accounts must be regular P&L or balance-sheet accounts — NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", amount: 100 }.\n\nOptional capsuleRecipe — no v1 recipe lists JOURNAL_DIRECT_CASH_OUT; passing capsuleRecipe here silently nulls. Use create_cash_in or create_journal for LOAN_AMORTIZATION. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_cash_in",
@@ -868,7 +868,7 @@
     },
     {
       "name": "create_fixed_asset",
-      "description": "Register a fixed asset linked to an existing purchase transaction (bill or journal).\n- saveAsDraft defaults to true. Set to false to activate — requires ALL fields below.\n- ACTIVE assets require: purchaseBusinessTransactionType + purchaseBusinessTransactionResourceId\n  (links to the bill/journal that recorded the purchase).\n- For standalone asset entry (no linked transaction), use transfer_fixed_asset instead. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Register a fixed asset linked to an existing purchase transaction (bill or journal).\n- saveAsDraft defaults to true. Set to false to activate — requires ALL fields below.\n- ACTIVE assets require: purchaseBusinessTransactionType + purchaseBusinessTransactionResourceId\n  (the purchase LINE ITEM on that bill/journal, NOT the document resourceId — see the param).\n- For standalone asset entry (no linked transaction), use transfer_fixed_asset instead. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_fixed_asset",

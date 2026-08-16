@@ -1740,31 +1740,42 @@ POST /api/v1/catalogs
 
 ---
 
-## Deposits (Experimental)
+## Deposits (no endpoint — by design)
 
-> Endpoint availability varies by organization. Use try/catch.
+> **There is no deposits entity.** No `/deposits` route exists at any spelling and none is
+> planned. A deposit is a *flag on a Chart of Accounts account*, not a document. See
+> `feature-glossary.md` → Deposits for the business model, `errors.md` → Deposits Errors for
+> the 404.
 
-### Create Deposit
-POST /api/v1/deposits
-```json
-{
-  "contactResourceId": "contact-uuid",
-  "depositDate": "2026-02-01",
-  "amount": 5000.00,
-  "type": "AR",
-  "bankAccountResourceId": "bank-account-uuid",
-  "currencyCode": "SGD"
-}
-```
+**The flag**: a CoA account carries `depositContactType` — `CUSTOMER` (customer deposit /
+advance received, a liability), `SUPPLIER` (supplier deposit / advance paid, an asset), or
+`NULL` (an ordinary account).
 
-- `type`: `"AR"` (accounts receivable / customer deposit) or `"AP"` (accounts payable / supplier deposit)
-- `depositDate`: YYYY-MM-DD format
-- `bankAccountResourceId`: Must be a CoA entry with accountType "Bank Accounts"
+**The movement**: once an account is flagged, a deposit is an *ordinary transaction posted
+against that account*. Nothing about the call is deposit-specific. The transaction types that
+land on a deposit account are the normal ones — `SALE`, `PURCHASE`, `PAYMENT_SALE`,
+`PAYMENT_PURCHASE`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT`, `JOURNAL_MANUAL`.
 
-### Response
-```json
-{ "data": { "resourceId": "deposit-uuid" } }
-```
+| Movement | Call |
+|----------|------|
+| Top up (advance received or paid) | `POST /api/v1/journals`, or `POST /api/v1/cash-in-entries` / `POST /api/v1/cash-out-entries` — one leg on the flagged account |
+| Draw down against an invoice | `POST /api/v1/invoices/:resourceId/payments` with `accountResourceId` = the flagged account **and `paymentMethod: "OTHER"`** |
+| Draw down against a bill | `POST /api/v1/bills/:resourceId/payments` with `accountResourceId` = the flagged account **and `paymentMethod: "OTHER"`** |
+| Read deposit movements | `POST /api/v1/cashflow-transactions/search` filtered on the flagged account's `organizationAccountResourceId` |
+
+> **The payment method is load-bearing on a drawdown.** The platform gates the payment
+> account's TYPE on the method: `BANK_TRANSFER`, `CASH` and `CHEQUE` require a Bank
+> Accounts or Cash account and reject anything else with
+> `INVALID_ACCOUNT_FOR_BUSINESS_TRANSACTION_FOUND`. A deposit account is a Liability or
+> Asset by construction, so it is only reachable under another method — `OTHER` is the
+> plain choice. The tools default `paymentMethod` to `BANK_TRANSFER`, so a drawdown that
+> does not set it explicitly will 422. See SKILL.md Rule 80.
+
+**What the API cannot do**: `depositContactType` is not on any chart-of-accounts request or
+response model in this API, and the platform-backend mutation that sets it
+(`configureDepositAccounts`) is not proxied. **Flagging an account as a deposit account is a
+web-app action.** `POST /chart-of-accounts` cannot create one. Over the API you can only read
+and post against an account someone already flagged.
 
 ---
 
@@ -1835,30 +1846,24 @@ Register an asset purchased before using Jaz, with accumulated depreciation.
 
 ---
 
-## Inventory Adjustments (Experimental)
+## Inventory (read-only balances — no adjustment write path)
 
-> Endpoint availability varies by organization. Use try/catch.
+> **There is no stock-adjustment endpoint at any spelling.** `POST /inventory/adjustments`,
+> `/inventory-adjustments`, `/inventory-items/:id/adjustments` and
+> `/items/:id/inventory-adjustments` all 404 — none is registered. See `errors.md` →
+> Inventory Adjustments Errors.
 
-### Create Adjustment
-POST /api/v1/inventory/adjustments
-```json
-{
-  "itemResourceId": "inventory-item-uuid",
-  "quantity": 50,
-  "adjustmentDate": "2026-02-01",
-  "reason": "Initial stock count",
-  "accountResourceId": "inventory-coa-uuid"
-}
-```
+The complete inventory surface is three routes plus the item create/list pair:
 
-- `quantity`: Positive integer (adjustment amount)
-- `adjustmentDate`: YYYY-MM-DD format
-- `itemResourceId`: Must reference an inventory-type item (not service)
+| Method | Path | Notes |
+|--------|------|-------|
+| POST | `/api/v1/inventory-items` | Create an inventory-tracked item |
+| GET | `/api/v1/inventory-items` | List inventory-tracked items |
+| GET | `/api/v1/inventory-item-balance/:resourceId` | Balance for one item |
+| GET | `/api/v1/inventory-balances/:balanceStatus` | Balances by status — **returns 500**, see SKILL.md Rule 46 |
 
-### Response
-```json
-{ "data": { "resourceId": "adjustment-uuid" } }
-```
+Stock moves only as a side effect of a transaction that carries the item (invoice, bill,
+credit note). There is no direct quantity write.
 
 ---
 
@@ -2151,6 +2156,79 @@ Update an existing payment record. All fields optional — only included fields 
 Same for `GET /bills/{resourceId}/payments`, `GET /invoices/{resourceId}/credits`, `GET /bills/{resourceId}/credits`.
 
 **CRITICAL**: These sub-resource endpoints return raw arrays, NOT `{data: [...]}`. The CLI wraps them into `{data: [...]}` for consistency.
+
+---
+
+## 19c. Request Changes (REST only — no CLI or MCP wrapper)
+
+Sends a **submitted** record back to its creator for edits: the record returns to draft, its
+approval markers are cleared, and `message` is posted as the first comment on a new
+collaboration thread. Records in any other state are skipped and reported in the response.
+
+> **No wrapper exists.** These 18 routes have no `clio` subcommand, no MCP tool, and no
+> `src/core/api/` client function. Call them with a raw HTTP request — do not go looking for a
+> tool that does not exist.
+
+Nine entities, each with a single-record and a bulk form:
+
+| Entity | Single | Bulk |
+|--------|--------|------|
+| Invoices | `POST /api/v1/invoices/:resourceId/request-changes` | `POST /api/v1/invoices/bulk-request-changes` |
+| Bills | `POST /api/v1/bills/:resourceId/request-changes` | `POST /api/v1/bills/bulk-request-changes` |
+| Customer credit notes | `POST /api/v1/customer-credit-notes/:resourceId/request-changes` | `POST /api/v1/customer-credit-notes/bulk-request-changes` |
+| Supplier credit notes | `POST /api/v1/supplier-credit-notes/:resourceId/request-changes` | `POST /api/v1/supplier-credit-notes/bulk-request-changes` |
+| Purchase orders | `POST /api/v1/purchase-orders/:resourceId/request-changes` | `POST /api/v1/purchase-orders/bulk-request-changes` |
+| Purchase requests | `POST /api/v1/purchase-requests/:resourceId/request-changes` | `POST /api/v1/purchase-requests/bulk-request-changes` |
+| Sale orders | `POST /api/v1/sale-orders/:resourceId/request-changes` | `POST /api/v1/sale-orders/bulk-request-changes` |
+| Sale quotes | `POST /api/v1/sale-quotes/:resourceId/request-changes` | `POST /api/v1/sale-quotes/bulk-request-changes` |
+| Claims | `POST /api/v1/claims/:resourceId/request-changes` | `POST /api/v1/claims/bulk/request-changes` |
+
+**Claims breaks the bulk path pattern** — `/claims/bulk/request-changes`, not
+`/claims/bulk-request-changes`. The other eight are all `bulk-request-changes`.
+
+### Single — request body (200)
+```json
+{ "message": "Please attach the signed delivery note before resubmitting." }
+```
+`message` is required and `minLength: 1` — a blank value is rejected. It is the only place the
+reason is recorded.
+
+```json
+// Response — 200 (per-record outcome; a skipped record does NOT fail the call)
+{
+  "data": {
+    "records": [
+      {
+        "resourceId": "...",
+        "isSuccess": true,
+        "status": "DRAFT",
+        "approvalStatus": "...",
+        "collaborationThreadPath": "...",
+        "errorCode": null,
+        "failureReason": null
+      }
+    ]
+  }
+}
+```
+**Check `isSuccess` per record** — a record in the wrong state comes back with
+`isSuccess: false` + `errorCode`/`failureReason`, inside a 200.
+
+### Bulk — request body (202)
+```json
+{
+  "message": "Please attach the signed delivery note before resubmitting.",
+  "resourceIds": ["b7a2c3d4-e5f6-7890-abcd-ef1234567890"]
+}
+```
+`resourceIds`: 1–500 per call. `message` applies to every record in the batch.
+
+```json
+// Response — 202 (async job handle, NOT the outcome)
+{ "data": { "jobId": "...", "status": "...", "totalRecords": 12, "totalChunks": 1, "subscriptionFBPath": "..." } }
+```
+Poll the result with `POST /api/v1/background-jobs/search` (section 23) — the 202 only means
+the job was accepted.
 
 ---
 

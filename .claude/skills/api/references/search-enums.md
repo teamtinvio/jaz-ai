@@ -247,11 +247,13 @@ Used by: invoices, bills, credit notes, journals, items, scheduled transactions,
 
 | Field | Valid Values |
 |-------|-------------|
-| `status` | `ACTIVE`, `DRAFT`, `DISPOSED`, `SOLD`, `DISCARDED`, `COMPLETED`, `ONGOING` |
+| `status` | `ACTIVE`, `ONGOING`, `COMPLETED`, `DRAFT`, `DISPOSED`, `SOLD`, `DISCARDED`, `CLOSED_OUT` |
 | `category` | `TANGIBLE`, `INTANGIBLE` |
 | `depreciationMethod` | `NO_DEPRECIATION`, `STRAIGHT_LINE` |
 | `disposalType` | `SOLD`, `DISCARDED` |
 | `registrationType` | `NEW`, `TRANSFER` |
+
+**Two status enums**: the 8 values above are the VIEW status, which is what the search filter resolves against. A fixed asset RECORD's own `status` field only ever holds `DRAFT`, `ACTIVE`, `DISPOSED`, or `CLOSED_OUT` — so `ONGOING`, `COMPLETED`, `SOLD`, and `DISCARDED` narrow the search but never come back in a record's `status`.
 
 **Amount fields**: `purchaseAmount`, `bookValueAmount`, `netBookAtDisposalAmount`, `assetDisposalGainLossAmount`
 **Date fields**: `purchaseDate`, `disposalValueDate`, `depreciationStartDate`, `depreciationEndDate`
@@ -523,4 +525,31 @@ All search endpoints return:
 
 ---
 
-*Source of truth: Jaz API backend Go structs + OpenAPI specification. Last updated: 2026-03-31.*
+## Provenance and staleness (applies to the search reference files)
+
+**This file is derived, not authoritative.** The enum values live in exactly one place in
+code — `src/core/search/enums.ts` — which is what the entity configs, the MCP tool schemas
+and the CLI flag choices all import. Upstream of that sits the committed `spec/openapi.yaml`.
+Precedence on any disagreement:
+
+```
+spec/openapi.yaml  →  src/core/search/enums.ts  →  this file (and search-reference.md,
+                                                   field-map.md, full-api-surface.md)
+```
+
+If a value here disagrees with `enums.ts`, **this file is wrong** — fix it here and do not
+"fix" the code to match. If `enums.ts` disagrees with the spec, the spec wins and both need
+updating.
+
+**These four reference files are hand-maintained and nothing regenerates them.** The drift
+gate reads `endpoints.md` alone, and only its `### METHOD /api/v1/...` headers, so a stale
+enum table here fails silently and forever. Re-derive them on the same cadence as the spec
+refresh. When adding a NEW enum, add it to `enums.ts` first and reference it here rather than
+restating the values — the same enum is currently written out in up to five places, and every
+one of them has to be touched for a single upstream change.
+
+---
+
+*Derived from `src/core/search/enums.ts` + the committed OpenAPI specification. Enum tables
+above last re-derived: 2026-03-31 — treat any value not confirmed against `enums.ts` as
+unverified.*

@@ -586,17 +586,34 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 
 ## Deposits Errors
 
-### 404 — Endpoint does not exist
-**Cause**: `POST /deposits` returns 404. Also tested: `/customer-deposits`, `/supplier-deposits`, `/cash-entries`, `/cash-in`, `/cash-out` — all 404.
-**Note**: This endpoint is not implemented in the API. No workaround.
+### 404 on `POST /deposits` — CORRECT and expected
+**Cause**: There is no deposits entity, by design. `POST /deposits` 404s, and so do
+`/customer-deposits`, `/supplier-deposits`, `/cash-in` and `/cash-out`. Nothing is broken and
+nothing is missing — a deposit is not a document.
+**Fix**: Post against a **deposit-flagged Chart of Accounts account** instead. The account
+carries `depositContactType` = `CUSTOMER` or `SUPPLIER`; a deposit is then an ordinary
+transaction on it.
+- Top up: `POST /journals`, `POST /cash-in-entries`, `POST /cash-out-entries` — one leg on the flagged account.
+- Draw down against an invoice or bill: `POST /invoices/:resourceId/payments` or `POST /bills/:resourceId/payments` with `accountResourceId` = the flagged account.
+- Read movements: `POST /cashflow-transactions/search` on that account.
+
+**Setting the flag is a web-app action** — `depositContactType` is not on any
+chart-of-accounts model in this API, so `POST /chart-of-accounts` cannot create a deposit
+account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-glossary.md` → Deposits.
+
+**`/cash-entries` is NOT a 404 path** — an earlier version of this note listed it. A bare
+`POST /cash-entries` has no handler, but the prefix is live:
+`DELETE /cash-entries/:resourceId`, `POST /cash-entries/bulk-upsert` and
+`POST /cash-entries/bulk-delete` all exist. Single cash entries are created at
+`POST /cash-in-entries` / `POST /cash-out-entries`.
 
 ---
 
 ## Inventory Adjustments Errors
 
 ### 404 — Endpoint does not exist
-**Cause**: `POST /inventory/adjustments` returns 404. Also tested: `/inventory-adjustments`, `/inventory-items/:id/adjustments`, `/items/:id/inventory-adjustments` — all 404.
-**Note**: This endpoint is not implemented in the API. Inventory items can be created via `POST /inventory-items` but stock adjustments cannot be made via API.
+**Cause**: `POST /inventory/adjustments` returns 404. Also tested: `/inventory-adjustments`, `/inventory-items/:id/adjustments`, `/items/:id/inventory-adjustments` — all 404. None of the four is registered; there is no stock-adjustment write path at any spelling.
+**Note**: The whole inventory surface is `POST|GET /inventory-items`, `GET /inventory-item-balance/:resourceId` and `GET /inventory-balances/:balanceStatus` (that last one 500s — Rule 46). Inventory items can be created, and stock moves as a side effect of a transaction carrying the item, but quantity cannot be written directly. See `endpoints.md` → Inventory.
 
 ---
 
@@ -865,10 +882,6 @@ Two of the seven never reach you through this path: a zero `adjustmentValue` and
 ### Sub-Resource Response Errors
 
 **`Cannot read property 'data'` / TypeError** — Invoice/bill sub-resource endpoints (`GET /invoices/:id/payments`, `GET /invoices/:id/credits`, etc.) return raw arrays `[{...}]`, NOT `{data: [...]}`. Trying to access `.data` on the response fails. Wrap the raw array yourself.
-
----
-
-*Last updated: 2026-03-13 — Added: Nano-classifier errors (classes field, double-wrapped GET), payment record errors (cashflow vs payment IDs), sub-resource raw array errors. Previous: Cash entry path migration, Quick Fix errors.*
 
 ---
 

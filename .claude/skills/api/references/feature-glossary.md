@@ -80,9 +80,11 @@ Track advance payments and prepaid balances. Customer deposits are liabilities (
 
 Can block payments if deposit balance is insufficient. View all contacts with deposits and filter by balance status. Managed via dedicated deposit accounts in the Chart of Accounts.
 
-There is no dedicated `/deposits` endpoint (returns 404). Deposits are managed through deposit-designated CoA accounts, with transactions recorded as journal entries and payments on invoices/bills drawing from those deposit accounts.
+**The mechanism**: an account is marked as a deposit account by `depositContactType` on the chart-of-accounts record — `CUSTOMER` (advance received, a liability), `SUPPLIER` (advance paid, an asset), or `NULL` (an ordinary account). The flag is set by the platform-backend mutation `configureDepositAccounts`. **Neither is exposed on this API**, so flagging an account is a web-app action; over the API you can only read and post against an account someone already flagged. `POST /chart-of-accounts` cannot create one.
 
-**API**: `POST /journals` (record deposit top-ups/drawdowns via deposit CoA accounts), `POST /chart-of-accounts` (create deposit accounts), `POST /invoices/:id/payments` / `POST /bills/:id/payments` (draw from deposit account via `accountResourceId`)
+There is no dedicated `/deposits` endpoint (returns 404) and none is planned — a deposit is not a document. Once an account is flagged, a deposit movement is an ordinary transaction against it, carrying the ordinary `businessTransactionType` values (`SALE`, `PURCHASE`, `PAYMENT_SALE`, `PAYMENT_PURCHASE`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT`, `JOURNAL_MANUAL`).
+
+**API**: `POST /journals` / `POST /cash-in-entries` / `POST /cash-out-entries` (top up or draw down — one leg on the flagged account), `POST /invoices/:id/payments` / `POST /bills/:id/payments` (draw the deposit down against a document via `accountResourceId`, with `paymentMethod: OTHER` — BANK_TRANSFER/CASH/CHEQUE force a bank account and 422), `POST /cashflow-transactions/search` (read movements). Authoritative version: SKILL.md Rule 47a.
 
 ---
 
