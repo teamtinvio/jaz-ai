@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.41.1] - 2026-08-17
+
+Cashflow search by reconciliation status works again. Searching `status:unreconciled`
+or `status:reconciled` on cashflow records was sending a field the endpoint does not
+have, so the filter was ignored and every record came back.
+
 ## [5.41.0] - 2026-08-16
 
 Tag search now works. Filtering by tag on invoices, bills, journals, credit notes,
