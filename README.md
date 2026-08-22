@@ -58,7 +58,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 358 tools, 7 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.42.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.43.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -72,14 +72,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 358 tools, 7 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.42.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.43.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.42.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.43.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -102,6 +102,8 @@ Bring Jaz into Microsoft 365 Copilot through a Copilot Studio agent. Cloud to cl
 5. Select **Add to agent**, then publish the agent to Microsoft 365 Copilot or Teams as usual.
 
 Same tool surface and per-call organization checks as the [remote connector](#remote-connector--no-install); the sign-in here uses OAuth 2.0 dynamic client registration. If your tenant restricts custom connectors, a Power Platform admin needs to allow this one.
+
+**If sign-in fails with "Could not discover authorization server metadata":** choose **Dynamic** instead of **Dynamic discovery** in step 3, then enter `https://api.getjaz.com/oauth/authorize` as the Authorization URL and `https://api.getjaz.com/oauth/token` as the Token URL. Copilot Studio still registers itself, so you need no client ID or secret. Everything else is unchanged.
 
 **Prefer a local install on the Microsoft stack?** Copilot Studio is cloud-only and cannot run local MCP servers. Use VS Code with GitHub Copilot Chat instead: the [VS Code MCP config](#install--30-seconds) runs Jaz locally with an API key, and `npx jaz-clio init --platform copilot` installs the skills to `.github/copilot-instructions.md`.
 
@@ -432,7 +434,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.42.0", "mcp"],
+  "args": ["-y", "jaz-clio@5.43.0", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

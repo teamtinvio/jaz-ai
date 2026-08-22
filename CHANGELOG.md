@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.43.0] - 2026-08-22
+
+Groundwork for Microsoft Copilot Studio. Adding the hosted connector with
+**OAuth 2.0 - Dynamic discovery** fails with "Could not discover authorization
+server metadata", because Copilot Studio looks for the sign-in details on the
+connector's own address rather than where they are published today. Until that
+is switched on, the README now documents the one-step workaround: choose
+**Dynamic** instead of **Dynamic discovery** and enter the two sign-in URLs.
+No change for existing connections.
+
 ## [5.41.1] - 2026-08-17
 
 Cashflow search by reconciliation status works again. Searching `status:unreconciled`

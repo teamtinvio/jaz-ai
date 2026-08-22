@@ -51888,6 +51888,80 @@
         ]
       }
     },
+    "/api/v1/journals/{resourceId}/download": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Download the journal as a PDF. Covers both manual journals and cash journals. Returns the file name and a link to fetch it, not the file itself.",
+        "operationId": "download-journal",
+        "parameters": [
+          {
+            "description": "Resource ID of the journal.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download Journal PDF",
+        "tags": [
+          "Journals"
+        ]
+      }
+    },
     "/api/v1/ledger/highlights": {
       "get": {
         "consumes": [
