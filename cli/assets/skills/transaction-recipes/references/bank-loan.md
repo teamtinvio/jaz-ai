@@ -68,7 +68,7 @@ Returns: `RecipePlan` with `requiredAccounts`, `needsContact: true`, `steps[0]` 
 ### Step 3 — Resolve dependencies
 
 For every account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty, halt: "Loan recipe references GL account `<accountName>` not in CoA. Create via `create_account` (suggested classifications: `Loan Payable` → `Non-Current Liability`; `Interest Expense` → `Operating Expense`) or remap the account before retry."
+- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty, halt: "Loan recipe references GL account `<accountName>` not in CoA. Create via `create_account` (suggested classifications: `Loan Payable` → `Non-current Liability`; `Interest Expense` → `Operating Expense`) or remap the account before retry."
 
 If `bankAccountResourceId` resolution failed:
 - `list_bank_accounts()`, match by `name + currency`. If still no match: halt and surface it.
@@ -143,7 +143,7 @@ After the FINAL period (60th repayment) is finalized:
 - **Interest-only period:** Not supported by the loan calculator. Workaround: post N manual interest-only journals via `create_journal` (Dr Interest Expense / Cr Cash) for the interest-only window, then run `plan_recipe(recipe: 'loan', ...)` from the start of the amortizing window with the full outstanding principal.
 - **Multi-currency loan (USD loan with SGD base):** Pass `currency: 'USD'`. Disbursement records via `currency: { sourceCurrency: 'USD' }` per `jaz-api/SKILL.md` rule 25. Monthly repayments stay in USD. Period-end FX revaluation against base currency is auto-handled by Jaz (Loan Payable is a monetary item per IAS 21.23 — Jaz auto-translates at closing rate). Verify via the month-end close FX verification flow; do NOT invoke `execute_recipe(recipe: 'fx-reval', ...)`.
 - **Loan origination fees:** Out of scope for this recipe (the engine's IFRS 9 effective-interest treatment doesn't currently amortize fees into the EIR). Post fees as a separate manual journal: Dr `Operating Expense > Loan Origination Fee` / Cr Cash. For IFRS 9 EIR-amortized fees, model the fee as `prepaid-expense` over the loan term.
-- **Year-end current/non-current reclassification:** Out of scope for the engine — manual annual journal: Dr Loan Payable Non-Current / Cr Loan Payable Current for the next 12 months' principal portion. Job blueprint `jobs/references/year-end-close.md` Y6 covers this.
+- **Year-end current/non-current reclassification:** Out of scope for the engine — manual annual journal: Dr Loan Payable Non-current / Cr Loan Payable Current for the next 12 months' principal portion. Job blueprint `jobs/references/year-end-close.md` Y6 covers this.
 
 ---
 

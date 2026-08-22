@@ -94,7 +94,7 @@ For gain (proceeds > NBV): engine debits Cash, debits Accum Dep, credits Vehicle
 ### Step 3 — Resolve dependencies
 
 For each account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: asset → `Non-Current Asset`; accum dep → `Non-Current Asset` contra; **`Gain on Disposal` → `Other Revenue`** (NOT Operating Revenue per IAS 16.71); `Loss on Disposal` → `Other Expense` (or `Operating Expense`, jurisdiction-specific).
+- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: asset → `Non-current Asset`; accum dep → `Non-current Asset` contra; **`Gain on Disposal` → `Other Revenue`** (NOT Operating Revenue per IAS 16.71); `Loss on Disposal` → `Other Expense` (or `Operating Expense`, jurisdiction-specific).
 
 Bank account: resolve via `list_bank_accounts()` if the bank account resourceId isn't already known. For scrap (no proceeds): `bankAccountResourceId` is required only if there's a disposal-cost cash-out (e.g., scrap fee paid to disposal vendor) — pass it for safety even if proceeds are zero.
 

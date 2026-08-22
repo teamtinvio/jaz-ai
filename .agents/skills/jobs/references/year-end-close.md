@@ -21,7 +21,7 @@
 ### Platform tools — current/non-current reclassification (manual annual journals)
 - **`search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}})`** + per-capsule `clio calc loan` to compute next-12-months principal portion.
 - **`search_capsules(filter: {capsuleType: {eq: 'Lease'}})`** + per-capsule `clio calc lease` for IFRS 16 reclassification.
-- **`create_journal(...)`** for the reclassification entries (Dr Loan Payable Non-Current / Cr Loan Payable Current; Dr Lease Liability Non-Current / Cr Lease Liability Current).
+- **`create_journal(...)`** for the reclassification entries (Dr Loan Payable Non-current / Cr Loan Payable Current; Dr Lease Liability Non-current / Cr Lease Liability Current).
 
 ### Handoff to audit-prep
 - See `audit-prep.md` — year-end-close hands off to the audit-prep job, which produces the report pack + supporting schedules + audit analyses.
@@ -166,14 +166,14 @@ create_journal({
   valueDate: '2025-12-31',
   reference: 'YE-RECLASS-LOAN-<facility>',
   journalEntries: [
-    { accountResourceId: <Loan Payable Non-Current>, amount: <next-12mo-principal>, type: 'DEBIT' },
+    { accountResourceId: <Loan Payable Non-current>, amount: <next-12mo-principal>, type: 'DEBIT' },
     { accountResourceId: <Loan Payable Current>, amount: <next-12mo-principal>, type: 'CREDIT' }
   ],
   saveAsDraft: false
 })
 ```
 
-Mirror for IFRS 16 lease liability (`Lease Liability Non-Current` → `Lease Liability Current`).
+Mirror for IFRS 16 lease liability (`Lease Liability Non-current` → `Lease Liability Current`).
 
 ### Y7 — Final TB + draft gate + report pack handoff
 

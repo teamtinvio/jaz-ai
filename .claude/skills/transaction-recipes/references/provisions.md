@@ -73,7 +73,7 @@ Returns `RecipePlan` with `requiredAccounts: ['Provision for Warranties', 'Warra
 ### Step 3 — Resolve dependencies
 
 For each account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Provision for Warranties` → `Non-Current Liability` (or `Current Liability` if settlement < 12 months); `Warranty Expense` → `Operating Expense` (P&L, period of recognition); `Finance Cost` → `Operating Expense` or `Other Expense` (jurisdiction-specific; SG often `Other Expense`).
+- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Provision for Warranties` → `Non-current Liability` (or `Current Liability` if settlement < 12 months); `Warranty Expense` → `Operating Expense` (P&L, period of recognition); `Finance Cost` → `Operating Expense` or `Other Expense` (jurisdiction-specific; SG often `Other Expense`).
 
 Bank account: only needed for the settlement cash-out at the end of the term.
 
@@ -135,7 +135,7 @@ If actual settlement amount differs from estimated $500,000 (highly likely for w
 | `plan_recipe` | 422 `unsupported_recipe` | Use canonical engine name `provision` (not `provisions`). |
 | `plan_recipe` | 422 `term_too_short` | Provision must span ≥ 2 periods (otherwise PV unwinding is immaterial). For short-term provisions (settlement < 6 months): post directly via `create_journal` at face value, no PV needed. |
 | `plan_recipe` | 422 `rate_invalid` | Discount rate must be > 0. Per IAS 37.47, use a pre-tax rate reflecting current market + obligation-specific risks. SG: typically gov't bond rate + risk premium. |
-| `execute_recipe` | 422 `account_not_found` for `Finance Cost` | Step 3 incomplete. Create via `create_account(accountType: 'Operating Expense' or 'Other Expense', name: 'Finance Cost')`. |
+| `execute_recipe` | 422 `account_not_found` for `Finance Cost` | Step 3 incomplete. Create via `create_account(accountType: 'Finance Cost', name: 'Finance Cost')`. Note `Finance Cost` is both a valid account TYPE and the account NAME here — the error refers to the missing account, not a bad type. |
 | Step 6 remeasurement | Recipe doesn't natively support mid-life remeasurement | Manual journal + delete remaining DRAFT unwinding journals + re-execute recipe for remaining term. |
 | Step 7 actual settlement ≠ estimated | (always, for real-world provisions) | Edit settlement cash-out via `update_cash_out_entry` before finalizing, post true-up journal for the delta. |
 | Provision presented as Operating Expense vs Finance Cost confusion | (presentation) | Per IAS 37.84, the unwinding charge is presented in P&L as a Finance Cost (separate from the recognition expense which is Operating Expense). Practitioner judgment if jurisdiction disagrees. |

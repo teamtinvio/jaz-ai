@@ -1,6 +1,6 @@
 # Recipe: Capital Work-in-Progress (CWIP) → Fixed Asset (manual — no engine)
 
-> Multi-month asset construction pattern: accumulate construction costs in `Capital Work-in-Progress` (Non-Current Asset) via bills coded to CWIP, then transfer the accumulated cost to a Jaz native FA on completion. No recipe engine — built from primitive `create_bill` + `create_journal` + `create_fixed_asset`. The CWIP-to-FA transfer triggers Jaz's auto-depreciation (SL).
+> Multi-month asset construction pattern: accumulate construction costs in `Capital Work-in-Progress` (Non-current Asset) via bills coded to CWIP, then transfer the accumulated cost to a Jaz native FA on completion. No recipe engine — built from primitive `create_bill` + `create_journal` + `create_fixed_asset`. The CWIP-to-FA transfer triggers Jaz's auto-depreciation (SL).
 
 ## Why no engine
 
@@ -38,7 +38,7 @@ search_accounts(filter: {name: {in: ['Capital Work-in-Progress', 'Office Improve
 
 `Capital Work-in-Progress` is the holding account. The eventual FA destination (`Office Improvements`, `Buildings`, `Plant & Equipment`, etc.) and its corresponding accumulated depreciation account both need to exist before completion-time transfer.
 
-If `Capital Work-in-Progress` doesn't exist: `create_account(name: 'Capital Work-in-Progress', accountType: 'Non-Current Asset')` first. CRITICAL: classify as Non-Current Asset (not Operating Expense) — the whole point of CWIP is to defer expense recognition.
+If `Capital Work-in-Progress` doesn't exist: `create_account(name: 'Capital Work-in-Progress', accountType: 'Non-current Asset')` first. CRITICAL: classify as Non-current Asset (not Operating Expense) — the whole point of CWIP is to defer expense recognition.
 
 ### Step 1 — Create the project capsule
 
@@ -188,7 +188,7 @@ Close the project capsule (or keep ACTIVE for traceability — the FA still refe
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| Step 0 | `Capital Work-in-Progress` doesn't exist as Non-Current Asset | `create_account(accountType: 'Non-Current Asset')`. Common gap in CoAs that haven't done capital projects. |
+| Step 0 | `Capital Work-in-Progress` doesn't exist as Non-current Asset | `create_account(accountType: 'Non-current Asset')`. Common gap in CoAs that haven't done capital projects. |
 | Step 2 | Bill posted to Operating Expense instead of CWIP | Reverse via `delete_bill` (if DRAFT) OR `create_supplier_credit_note` + `apply_credit_to_bill` (if ACTIVE). Re-post correctly. AVOID year-end audit headache — auditor will challenge any P&L expense for capital project items. |
 | Step 4b | Transfer journal unbalanced | Verify the `amount` on both lines exactly matches the closing CWIP balance from step 4a. Per `jaz-api/SKILL.md` rule 23 — total debits = total credits. |
 | Step 4c | `create_fixed_asset` 422 `cost_mismatch` | Cost passed differs from the transfer journal amount. Both must equal CWIP closing balance. Re-pull `generate_general_ledger` and re-confirm. |

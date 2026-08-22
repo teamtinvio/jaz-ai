@@ -55,20 +55,44 @@ Used by: invoices, bills, credit notes, journals, items, scheduled transactions,
 
 ### accountType (Chart of Accounts)
 
-| Value |
-|-------|
-| `Bank Accounts` |
-| `Cash and Cash Equivalents` |
-| `Current Assets` |
-| `Non-Current Assets` |
-| `Current Liabilities` |
-| `Non-Current Liabilities` |
-| `Equity` |
-| `Revenue` |
-| `Cost of Goods Sold` |
-| `Operating Expenses` |
-| `Other Income` |
-| `Other Expenses` |
+23 values. Source: `GET /api/v1/account-classifications` (`list_account_classifications`),
+which is authoritative. The set is GLOBAL — the same 23 for every organisation
+(the classifications table has no org column) — so this is a stable list, not a
+per-tenant one. This table mirrors the CLI's canonical
+account-type list and is kept in step with it by an automated drift check.
+
+**Singular, and not the account's name.** An earlier version of this table listed
+pluralized inventions (`Current Assets`, `Operating Expenses`, `Other Expenses`)
+plus `Cost of Goods Sold`, which is an account NAME whose type is `Direct Costs`.
+A wrong value returns **zero rows with no error**, which reads exactly like "the
+org has no such account". `search_accounts` does not normalise — only
+`create_account` does.
+
+| Value | accountClass |
+|-------|--------------|
+| `Bank Accounts` | Asset |
+| `Cash` | Asset |
+| `Current Asset` | Asset |
+| `Non-current Asset` | Asset |
+| `Fixed Asset` | Asset |
+| `Inventory` | Asset |
+| `Investment` | Asset |
+| `Goodwill` | Asset |
+| `Current Liability` | Liability |
+| `Non-current Liability` | Liability |
+| `Shareholders Equity` | Equity |
+| `Operating Revenue` | Revenue |
+| `Other Revenue` | Revenue |
+| `Discontinued Income` | Revenue |
+| `Financing Income` | Revenue |
+| `Investing Income` | Revenue |
+| `Direct Costs` | Expense |
+| `Operating Expense` | Expense |
+| `Other Expense` | Expense |
+| `Finance Cost` | Expense |
+| `Investing Expense` | Expense |
+| `Income Tax Expense` | Expense |
+| `Discontinued Expense` | Expense |
 
 ---
 
@@ -185,7 +209,7 @@ Used by: invoices, bills, credit notes, journals, items, scheduled transactions,
 |-------|-------------|
 | `status` | `ACTIVE`, `INACTIVE` |
 | `accountClass` | `Asset`, `Liability`, `Equity`, `Revenue`, `Expense` |
-| `accountType` | See 12 values in Universal Enums above |
+| `accountType` | See the 23 values in Universal Enums above |
 | `appliesTo` | `Sales & Sale Credits`, `Purchases & Purchase Credits`, `Payments` |
 | `controlFlag` | `true`, `false` (BooleanExpression) |
 

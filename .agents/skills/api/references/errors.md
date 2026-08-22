@@ -33,14 +33,18 @@ Common `error_type` values:
 ## Chart of Accounts Errors
 
 ### "Account Classification Type not found" (400)
-**Cause**: `classificationType` value doesn't match one of the 12 valid values.
-**Wrong values we tried**: `"Revenue"`, `"REVENUE"`, `"revenue"`, `"INCOME"`, `"OPERATING_REVENUE"`, `"Sales"`, `"Asset"`, `"ASSET"`
+**Cause**: `classificationType` value doesn't match one of the 23 valid values.
+**Wrong values we tried**: `"Revenue"`, `"REVENUE"`, `"revenue"`, `"INCOME"`, `"OPERATING_REVENUE"`, `"Sales"`, `"Asset"`, `"ASSET"`, `"Operating Expenses"` (plural), `"Cost of Goods Sold"` (an account NAME — the type is `"Direct Costs"`)
 **Fix**: Use the exact `accountType` values from GET response:
 ```
-"Bank Accounts", "Cash", "Current Asset", "Current Liability", "Direct Costs",
-"Fixed Asset", "Inventory", "Non-current Liability", "Operating Expense",
-"Operating Revenue", "Other Revenue", "Shareholders Equity"
+"Bank Accounts", "Cash", "Current Asset", "Non-current Asset", "Fixed Asset",
+"Inventory", "Investment", "Goodwill", "Current Liability",
+"Non-current Liability", "Shareholders Equity", "Operating Revenue",
+"Other Revenue", "Discontinued Income", "Financing Income", "Investing Income",
+"Direct Costs", "Operating Expense", "Other Expense", "Finance Cost",
+"Investing Expense", "Income Tax Expense", "Discontinued Expense"
 ```
+Or call `list_account_classifications` — authoritative for that organisation.
 **Key insight**: `classificationType` in POST uses the same values as `accountType` from GET. NOT `accountClass` values (which are broader: Asset, Liability, Equity, Revenue, Expense).
 
 ### "ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED" (400)

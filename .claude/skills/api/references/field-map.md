@@ -109,13 +109,26 @@ When POSTing, `classificationType` must be one of these exact strings (same as `
 | `"Current Asset"` | Asset |
 | `"Fixed Asset"` | Asset |
 | `"Inventory"` | Asset |
+| `"Non-current Asset"` | Asset |
+| `"Investment"` | Asset |
+| `"Goodwill"` | Asset |
 | `"Current Liability"` | Liability |
 | `"Non-current Liability"` | Liability |
 | `"Shareholders Equity"` | Equity |
 | `"Operating Revenue"` | Revenue |
 | `"Other Revenue"` | Revenue |
+| `"Discontinued Income"` | Revenue |
+| `"Financing Income"` | Revenue |
+| `"Investing Income"` | Revenue |
 | `"Operating Expense"` | Expense |
+| `"Other Expense"` | Expense |
 | `"Direct Costs"` | Expense |
+| `"Finance Cost"` | Expense |
+| `"Investing Expense"` | Expense |
+| `"Income Tax Expense"` | Expense |
+| `"Discontinued Expense"` | Expense |
+
+COGS maps to `"Direct Costs"` — "Cost of Goods Sold" is the default account name shipped in the CoA template, not a type.
 
 ### Account Create (POST /chart-of-accounts) Fields
 

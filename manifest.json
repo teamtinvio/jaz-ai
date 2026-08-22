@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.43.0",
+  "version": "5.44.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 358 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -92,7 +92,7 @@
     },
     {
       "name": "bulk_upsert_chart_of_accounts",
-      "description": "Bulk create/update CoA entries (max 500). SYNC: returns { resourceIds, failedRows: [{rowIndex, columnName, columnValue, errorCode, errorMessage}], failedCount } — no jobId polling. PARTIAL_SUCCESS: failed rows surface in failedRows[]; others still succeed.\n\nresourceId per row → update; omit → create. Note: dedup is by NAME (not code) — duplicate name surfaces ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED per row. Accepts classic 12 + 9 IFRS 18 accountType values; common variants normalized via normalizeAccountType.\n\nUse for CoA imports / IFRS 18 migration / template seeding. For one-off creates with dedup, use create_account. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk create/update CoA entries (max 500). SYNC: returns { resourceIds, failedRows: [{rowIndex, columnName, columnValue, errorCode, errorMessage}], failedCount } — no jobId polling. PARTIAL_SUCCESS: failed rows surface in failedRows[]; others still succeed.\n\nresourceId per row → update; omit → create. Note: dedup is by NAME (not code) — duplicate name surfaces ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED per row. Accepts all 23 accountType values (see create_account); common variants normalized via normalizeAccountType.\n\nUse for CoA imports / IFRS 18 migration / template seeding. For one-off creates with dedup, use create_account. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_contacts",

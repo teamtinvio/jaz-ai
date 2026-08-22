@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.44.0] - 2026-08-22
+
+Searching the chart of accounts by account type works again. The list of valid
+account types was wrong in 11 of its 12 entries, using plurals like "Operating
+Expenses" and listing "Cost of Goods Sold", which is the name of an account and
+not a type at all. Any search that used one came back empty with no error, which
+looked exactly like the organisation having no such account. The list now carries
+all 23 real types, including "Non-current Asset" and "Other Expense", which were
+missing everywhere.
+
+Asking what account type Cost of Goods Sold belongs to now gets the right answer.
+In Jaz that is Direct Costs, a type of its own, not Operating Expense.
+
 ## [5.43.0] - 2026-08-22
 
 Groundwork for Microsoft Copilot Studio. Adding the hosted connector with

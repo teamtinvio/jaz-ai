@@ -72,7 +72,7 @@ Returns `RecipePlan` with `requiredAccounts: ['Vehicles', 'Accumulated Depreciat
 ### Step 3 — Resolve dependencies
 
 For each account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty: halt. Suggested classifications: asset GL → `Non-Current Asset`; accumulated depreciation → `Non-Current Asset` (contra); expense → `Operating Expense`.
+- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty: halt. Suggested classifications: asset GL → `Non-current Asset`; accumulated depreciation → `Non-current Asset` (contra); expense → `Operating Expense`.
 
 NO contact resolution (depreciation has no counterparty). NO bank account resolution.
 

@@ -76,7 +76,7 @@ Returns `RecipePlan` with:
 ### Step 3 — Resolve dependencies
 
 For each account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Right-of-Use Asset` → `Non-Current Asset`; `Lease Liability` → `Non-Current Liability`; `Interest Expense — Leases` → `Operating Expense`. The Depreciation Expense + Accumulated Depreciation accounts are FA-register defaults — Jaz uses standard ones unless overridden.
+- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Right-of-Use Asset` → `Non-current Asset`; `Lease Liability` → `Non-current Liability`; `Interest Expense — Leases` → `Operating Expense`. The Depreciation Expense + Accumulated Depreciation accounts are FA-register defaults — Jaz uses standard ones unless overridden.
 
 Lessor:
 - `search_contacts(filter: {supplier: true, name: {eq: 'Marina One Holdings'}})`. If empty: `create_contact(supplier: true, ...)`.
@@ -164,7 +164,7 @@ After the FINAL period (month 36):
 - **Variable rent** (CPI-linked, turnover-linked): NOT supported by initial recipe. Recompute PV at each reset event and re-measure manually.
 - **Multi-currency lease** (USD payments from SGD bank): pass `currency: 'USD'`. ROU + Lease Liability denominate in USD; Jaz auto-translates BS balances at closing rate per IAS 21.23 (do NOT invoke `fx-reval` recipe).
 - **Lease with prepayments** (initial payment at signing): post the prepayment as `create_cash_out_entry` against ROU Asset BEFORE invoking the recipe. The recipe's PV calculation should exclude the upfront payment portion.
-- **Year-end current/non-current reclassification**: Out of scope for the engine. Manual annual journal: Dr Lease Liability (Non-Current) / Cr Lease Liability (Current) for the next 12 months' principal portion. Job blueprint `jobs/references/year-end-close.md` Y6 covers this.
+- **Year-end current/non-current reclassification**: Out of scope for the engine. Manual annual journal: Dr Lease Liability (Non-current) / Cr Lease Liability (Current) for the next 12 months' principal portion. Job blueprint `jobs/references/year-end-close.md` Y6 covers this.
 
 ---
 

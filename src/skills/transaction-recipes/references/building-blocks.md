@@ -254,15 +254,15 @@ Each recipe lists the specific CoA accounts needed. Common patterns:
 | Prepaid Expenses | Asset | Current Asset | Prepaid amortization |
 | Deferred Revenue | Liability | Current Liability | Deferred revenue |
 | Accrued Expenses | Liability | Current Liability | Accrued expenses |
-| Loan Payable | Liability | Non-Current Liability | Bank loan |
+| Loan Payable | Liability | Non-current Liability | Bank loan |
 | Loan Payable (Current) | Liability | Current Liability | Bank loan (current portion) |
 | Interest Expense | Expense | Expense | Bank loan, IFRS 16 |
-| Right-of-Use Asset | Asset | Non-Current Asset | IFRS 16 |
-| Lease Liability | Liability | Non-Current Liability | IFRS 16 |
+| Right-of-Use Asset | Asset | Non-current Asset | IFRS 16 |
+| Lease Liability | Liability | Non-current Liability | IFRS 16 |
 | Lease Liability (Current) | Liability | Current Liability | IFRS 16 |
-| Accumulated Depreciation | Asset | Non-Current Asset | Declining balance, Capital WIP |
+| Accumulated Depreciation | Asset | Non-current Asset | Declining balance, Capital WIP |
 | Depreciation Expense | Expense | Expense | Declining balance, Capital WIP |
-| FX Unrealized Gain | Revenue | Other Income | FX revaluation |
+| FX Unrealized Gain | Revenue | Other Revenue | FX revaluation |
 | FX Unrealized Loss | Expense | Other Expense | FX revaluation |
 | Bad Debt Expense | Expense | Expense | ECL provision |
 | Allowance for Doubtful Debts | Asset | Current Asset (contra) | ECL provision |
@@ -271,12 +271,12 @@ Each recipe lists the specific CoA accounts needed. Common patterns:
 | Bonus Expense | Expense | Expense | Employee accruals |
 | Accrued Bonus Liability | Liability | Current Liability | Employee accruals |
 | Provision Expense | Expense | Expense | IAS 37 provisions |
-| Provision for Obligations | Liability | Non-Current Liability | IAS 37 provisions |
+| Provision for Obligations | Liability | Non-current Liability | IAS 37 provisions |
 | Finance Cost — Unwinding | Expense | Expense | IAS 37 provisions, Lease |
 | Retained Earnings | Equity | Retained Earnings | Dividends |
 | Dividends Payable | Liability | Current Liability | Dividends |
 | Intercompany Receivable | Asset | Current Asset | Intercompany |
 | Intercompany Payable | Liability | Current Liability | Intercompany |
-| Capital Work-in-Progress | Asset | Non-Current Asset | Capital WIP |
+| Capital Work-in-Progress | Asset | Non-current Asset | Capital WIP |
 
 **API:** `POST /chart-of-accounts` or `POST /chart-of-accounts/bulk-upsert`

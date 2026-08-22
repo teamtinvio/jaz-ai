@@ -45,7 +45,9 @@ Source systems use different classification names. Map to Jaz types:
 | Operating Expenses | Operating Expense |
 | Other Income | Other Revenue |
 
-**Valid `classificationType` values (exactly 13):** Bank Accounts, Cash, Current Asset, Fixed Asset, Non-current Asset, Inventory, Current Liability, Non-current Liability, Shareholders Equity, Operating Revenue, Other Revenue, Direct Costs, Operating Expense
+**Valid `classificationType` values (exactly 23):** Bank Accounts, Cash, Current Asset, Non-current Asset, Fixed Asset, Inventory, Investment, Goodwill, Current Liability, Non-current Liability, Shareholders Equity, Operating Revenue, Other Revenue, Discontinued Income, Financing Income, Investing Income, Direct Costs, Operating Expense, Other Expense, Finance Cost, Investing Expense, Income Tax Expense, Discontinued Expense
+
+The set is GLOBAL (identical for every org). Confirm with `list_account_classifications` using `limit: 100` — its default page size is 20 and there are 23 types.
 
 ### Clearing Account Creation
 

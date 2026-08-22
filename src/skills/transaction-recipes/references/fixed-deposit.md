@@ -73,7 +73,7 @@ Returns `RecipePlan` with `requiredAccounts: ['Fixed Deposit Receivable', 'Accru
 ### Step 3 — Resolve dependencies
 
 For each account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Fixed Deposit Receivable` → `Current Asset` (≤12-month FD) OR `Non-Current Asset` (>12-month); `Accrued Interest Receivable` → `Current Asset`; `Interest Income` → `Other Revenue`.
+- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Fixed Deposit Receivable` → `Current Asset` (≤12-month FD) OR `Non-current Asset` (>12-month); `Accrued Interest Receivable` → `Current Asset`; `Interest Income` → `Other Revenue`.
 
 Bank account: resolve `bankAccountResourceId` for the disbursement bank (where the cash leaves to placement). Should be the actual operational bank account, NOT the FD account itself — the FD becomes its own balance-sheet line, separate from cash.
 
