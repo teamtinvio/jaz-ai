@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.44.1] - 2026-08-23
+
+Internal documentation only. No user-facing changes since v5.44.0.
+
 ## [5.44.0] - 2026-08-22
 
 Searching the chart of accounts by account type works again. The list of valid
