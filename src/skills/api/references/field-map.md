@@ -83,7 +83,7 @@ These aliases are applied by middleware on POST/PUT endpoints. The alias is only
 | `apiKey` header | `x-jk-api-key` | Custom header (not Authorization: Bearer) |
 | `org.id` | `data[0].resourceId` | Org endpoint returns a LIST |
 | `org.baseCurrency` | `data[0].currency` | Not `baseCurrency` |
-| `org.country` | `data[0].countryCode` | ISO 2-letter code |
+| `org.country` | `data[0].country` | ISO 2-letter code. NOT `countryCode` — that name is a deprecated alias, is optional, and may be absent from the response |
 
 ---
 

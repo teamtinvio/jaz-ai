@@ -82,7 +82,7 @@ All GET list endpoints and POST `/search` endpoints use **`limit`/`offset` pagin
     "resourceId": "31eb050a-...",
     "name": "Jaz Global SG",
     "currency": "SGD",
-    "countryCode": "SG",
+    "country": "SG",
     "status": "ACTIVE",
     "lockDate": null
   }
