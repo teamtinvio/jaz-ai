@@ -813,7 +813,12 @@ single-create siblings do — the alias middleware rewrites the top-level body o
 these routes the aliased keys sit inside the `cashEntries[]` / `cashTransfers[]` rows. Send
 `valueDate` on bulk rows.
 
-### Record-list option pickers (4) — 2026-08-12
+### Record-list option pickers (4) — NOT WRAPPED
+
+These four exist in the REST API but this client has **no wrapper for them and no
+tool exposes them**, so they cannot be called from here. They are listed only so
+that looking for them and finding nothing is not mistaken for the catalog being
+incomplete. Reaching them needs a raw HTTP call.
 
 | Method | Path | Description |
 |--------|------|-------------|
