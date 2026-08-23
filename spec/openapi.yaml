@@ -36,6 +36,64 @@
       },
       "type": "object"
     },
+    "AccountClass": {
+      "enum": [
+        "Asset",
+        "Equity",
+        "Expense",
+        "Liability",
+        "Revenue"
+      ],
+      "type": "string",
+      "x-enum-varnames": [
+        "AccountClassAsset",
+        "AccountClassEquity",
+        "AccountClassExpense",
+        "AccountClassLiability",
+        "AccountClassRevenue"
+      ]
+    },
+    "AccountClassification": {
+      "properties": {
+        "accountClass": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/AccountClass"
+            }
+          ],
+          "description": "Broad ledger class the type belongs to."
+        },
+        "accountType": {
+          "description": "Exact display label used by `accountType` on chart-of-accounts entries and\nby `classificationType` when creating one. Case- and number-sensitive: a\nnear miss such as a pluralized \"Current Assets\" is not rejected, it simply\nmatches nothing.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the classification. Stable and shared across organizations.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "AccountClassificationPageableResponse": {
+      "properties": {
+        "data": {
+          "description": "Result rows for the requested page. Note the default page size is smaller\nthan the number of classifications, so a caller enumerating the full set\nmust pass an explicit limit rather than read the first page.",
+          "items": {
+            "$ref": "#/definitions/AccountClassification"
+          },
+          "type": "array"
+        },
+        "totalElements": {
+          "description": "Total number of records matching the query.",
+          "type": "integer"
+        },
+        "totalPages": {
+          "description": "Total number of pages.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
     "AccountFilter": {
       "properties": {
         "accountClass": {
@@ -29178,7 +29236,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "$ref": "#/definitions/AccountClassificationPageableResponse"
             }
           },
           "400": {
