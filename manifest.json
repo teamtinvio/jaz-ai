@@ -1000,7 +1000,7 @@
     },
     {
       "name": "update_custom_field",
-      "description": "Update a custom field definition. Can change name, description, printOnDocuments, and appliesTo flags. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a custom field definition. Omitted fields keep their current values. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_custom_field",
@@ -1020,7 +1020,7 @@
     },
     {
       "name": "update_tax_profile",
-      "description": "Update an existing tax profile (name, rate, or status). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing tax profile. Omitted fields keep their current values; status is not updatable. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "create_claim_type",
