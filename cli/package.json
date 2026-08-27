@@ -12,7 +12,8 @@
   "files": [
     "cli.mjs",
     "postinstall.mjs",
-    "assets"
+    "assets",
+    "dashboard-routes-manifest.json"
   ],
   "keywords": [
     "jaz",

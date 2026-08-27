@@ -17232,6 +17232,56 @@
       },
       "type": "object"
     },
+    "QuickFixPurchaseOrderLineItemsRequest": {
+      "properties": {
+        "attributes": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/QuickFixPurchaseLineItemAttributes"
+            }
+          ],
+          "description": "Fields to update on each line item."
+        },
+        "lineItemResourceIds": {
+          "description": "UUIDs of line items to update.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "attributes",
+        "lineItemResourceIds"
+      ],
+      "type": "object"
+    },
+    "QuickFixPurchaseRequestLineItemsRequest": {
+      "properties": {
+        "attributes": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/QuickFixPurchaseLineItemAttributes"
+            }
+          ],
+          "description": "Fields to update on each line item."
+        },
+        "lineItemResourceIds": {
+          "description": "UUIDs of line items to update.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "attributes",
+        "lineItemResourceIds"
+      ],
+      "type": "object"
+    },
     "QuickFixPurchaseScheduleAttributes": {
       "properties": {
         "capsuleResourceId": {
@@ -17381,6 +17431,56 @@
           "type": "number"
         }
       },
+      "type": "object"
+    },
+    "QuickFixSaleOrderLineItemsRequest": {
+      "properties": {
+        "attributes": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/QuickFixSaleLineItemAttributes"
+            }
+          ],
+          "description": "Fields to update on each line item."
+        },
+        "lineItemResourceIds": {
+          "description": "UUIDs of line items to update.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "attributes",
+        "lineItemResourceIds"
+      ],
+      "type": "object"
+    },
+    "QuickFixSaleQuoteLineItemsRequest": {
+      "properties": {
+        "attributes": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/QuickFixSaleLineItemAttributes"
+            }
+          ],
+          "description": "Fields to update on each line item."
+        },
+        "lineItemResourceIds": {
+          "description": "UUIDs of line items to update.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "attributes",
+        "lineItemResourceIds"
+      ],
       "type": "object"
     },
     "QuickFixSaleScheduleAttributes": {
@@ -60434,6 +60534,158 @@
         ]
       }
     },
+    "/api/v1/quick-fix/purchase-orders/line-items": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Bulk-update fields across multiple purchase order line items. Only provided fields are updated.",
+        "operationId": "create-quick-fix-purchase-order-line-item",
+        "parameters": [
+          {
+            "description": "The purchase order line item updates to apply.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QuickFixPurchaseOrderLineItemsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/QuickFixResponse"
+            }
+          },
+          "207": {
+            "description": "Multi-Status",
+            "schema": {
+              "$ref": "#/definitions/QuickFixResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Quick Fix Purchase Order Line Items",
+        "tags": [
+          "Purchase Orders"
+        ]
+      }
+    },
+    "/api/v1/quick-fix/purchase-requests/line-items": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Bulk-update fields across multiple purchase request line items. Only provided fields are updated.",
+        "operationId": "create-quick-fix-purchase-request-line-item",
+        "parameters": [
+          {
+            "description": "The purchase request line item updates to apply.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QuickFixPurchaseRequestLineItemsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/QuickFixResponse"
+            }
+          },
+          "207": {
+            "description": "Multi-Status",
+            "schema": {
+              "$ref": "#/definitions/QuickFixResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Quick Fix Purchase Request Line Items",
+        "tags": [
+          "Purchase Requests"
+        ]
+      }
+    },
     "/api/v1/quick-fix/purchase-schedules": {
       "post": {
         "consumes": [
@@ -60583,6 +60835,158 @@
         "summary": "Quick Fix Purchase Schedule Line Items",
         "tags": [
           "Scheduled Bills"
+        ]
+      }
+    },
+    "/api/v1/quick-fix/sale-orders/line-items": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Bulk-update fields across multiple sale order line items. Only provided fields are updated.",
+        "operationId": "create-quick-fix-sale-order-line-item",
+        "parameters": [
+          {
+            "description": "The sale order line item updates to apply.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QuickFixSaleOrderLineItemsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/QuickFixResponse"
+            }
+          },
+          "207": {
+            "description": "Multi-Status",
+            "schema": {
+              "$ref": "#/definitions/QuickFixResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Quick Fix Sale Order Line Items",
+        "tags": [
+          "Sale Orders"
+        ]
+      }
+    },
+    "/api/v1/quick-fix/sale-quotes/line-items": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Bulk-update fields across multiple sale quote line items. Only provided fields are updated.",
+        "operationId": "create-quick-fix-sale-quote-line-item",
+        "parameters": [
+          {
+            "description": "The sale quote line item updates to apply.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/QuickFixSaleQuoteLineItemsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/QuickFixResponse"
+            }
+          },
+          "207": {
+            "description": "Multi-Status",
+            "schema": {
+              "$ref": "#/definitions/QuickFixResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Quick Fix Sale Quote Line Items",
+        "tags": [
+          "Sale Quotes"
         ]
       }
     },

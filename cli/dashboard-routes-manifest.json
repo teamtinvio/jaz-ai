@@ -1,0 +1,4658 @@
+{
+  "version": "1",
+  "screens": [
+    {
+      "key": "accounts",
+      "path": "/accounts",
+      "label": "Accounts"
+    },
+    {
+      "key": "bank-reconciliation.bank-accounts",
+      "path": "/bank-reconciliation/bank-accounts",
+      "label": "Bank Accounts"
+    },
+    {
+      "key": "cashflow.all-cashflow.all",
+      "path": "/cashflow/all-cashflow/all",
+      "label": "All"
+    },
+    {
+      "key": "cashflow.all-cashflow.reconciled",
+      "path": "/cashflow/all-cashflow/reconciled",
+      "label": "Reconciled"
+    },
+    {
+      "key": "cashflow.all-cashflow.unreconciled",
+      "path": "/cashflow/all-cashflow/unreconciled",
+      "label": "Unreconciled"
+    },
+    {
+      "key": "cashflow.cash-entries.Cash-ins",
+      "path": "/cashflow/cash-entries/Cash-ins",
+      "label": "Cash Ins"
+    },
+    {
+      "key": "cashflow.cash-entries.Cash-outs",
+      "path": "/cashflow/cash-entries/Cash-outs",
+      "label": "Cash Outs"
+    },
+    {
+      "key": "cashflow.cash-entries.Cash-Transfers",
+      "path": "/cashflow/cash-entries/Cash-Transfers",
+      "label": "Cash Transfers"
+    },
+    {
+      "key": "cashflow.cash-entry-lines.cash-ins",
+      "path": "/cashflow/cash-entry-lines/cash-ins",
+      "label": "Cash Ins"
+    },
+    {
+      "key": "cashflow.cash-entry-lines.cash-outs",
+      "path": "/cashflow/cash-entry-lines/cash-outs",
+      "label": "Cash Outs"
+    },
+    {
+      "key": "cashflow.collection-requests.action-needed",
+      "path": "/cashflow/collection-requests/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "cashflow.collection-requests.cancelled",
+      "path": "/cashflow/collection-requests/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "cashflow.collection-requests.completed",
+      "path": "/cashflow/collection-requests/completed",
+      "label": "Completed"
+    },
+    {
+      "key": "cashflow.collection-requests.in-progress",
+      "path": "/cashflow/collection-requests/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "cashflow.direct-disbursements.action-needed",
+      "path": "/cashflow/direct-disbursements/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "cashflow.direct-disbursements.cancelled",
+      "path": "/cashflow/direct-disbursements/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "cashflow.direct-disbursements.completed",
+      "path": "/cashflow/direct-disbursements/completed",
+      "label": "Completed"
+    },
+    {
+      "key": "cashflow.direct-disbursements.in-progress",
+      "path": "/cashflow/direct-disbursements/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "catalogs",
+      "path": "/catalogs",
+      "label": "Catalogs"
+    },
+    {
+      "key": "contacts",
+      "path": "/contacts",
+      "label": "Contacts"
+    },
+    {
+      "key": "contacts.all-contacts",
+      "path": "/contacts/all-contacts",
+      "label": "All Contacts"
+    },
+    {
+      "key": "contacts.beneficiaries",
+      "path": "/contacts/beneficiaries",
+      "label": "Beneficiaries"
+    },
+    {
+      "key": "employees",
+      "path": "/employees",
+      "label": "Employees"
+    },
+    {
+      "key": "employees.claims",
+      "path": "/employees/claims",
+      "label": "Claims"
+    },
+    {
+      "key": "employees.directory",
+      "path": "/employees/directory",
+      "label": "Directory"
+    },
+    {
+      "key": "employees.payouts",
+      "path": "/employees/payouts",
+      "label": "Payouts"
+    },
+    {
+      "key": "fixed-assets.disposals.all",
+      "path": "/fixed-assets/disposals/all",
+      "label": "All"
+    },
+    {
+      "key": "fixed-assets.disposals.discarded",
+      "path": "/fixed-assets/disposals/discarded",
+      "label": "Discarded"
+    },
+    {
+      "key": "fixed-assets.disposals.sold",
+      "path": "/fixed-assets/disposals/sold",
+      "label": "Sold"
+    },
+    {
+      "key": "fixed-assets.register.active",
+      "path": "/fixed-assets/register/active",
+      "label": "Active"
+    },
+    {
+      "key": "fixed-assets.register.close-out",
+      "path": "/fixed-assets/register/close-out",
+      "label": "Close Out"
+    },
+    {
+      "key": "fixed-assets.register.draft",
+      "path": "/fixed-assets/register/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "home",
+      "path": "/home",
+      "label": "Home"
+    },
+    {
+      "key": "inventory.balances.all-items",
+      "path": "/inventory/balances/all-items",
+      "label": "All Items"
+    },
+    {
+      "key": "inventory.balances.balance-available",
+      "path": "/inventory/balances/balance-available",
+      "label": "Balance Available"
+    },
+    {
+      "key": "inventory.balances.fully-drawn",
+      "path": "/inventory/balances/fully-drawn",
+      "label": "Fully Drawn"
+    },
+    {
+      "key": "inventory.cost-movement.above-average",
+      "path": "/inventory/cost-movement/above-average",
+      "label": "Above Average"
+    },
+    {
+      "key": "inventory.cost-movement.all-additions",
+      "path": "/inventory/cost-movement/all-additions",
+      "label": "All Additions"
+    },
+    {
+      "key": "inventory.cost-movement.below-average",
+      "path": "/inventory/cost-movement/below-average",
+      "label": "Below Average"
+    },
+    {
+      "key": "inventory.transactions.additions",
+      "path": "/inventory/transactions/additions",
+      "label": "Additions"
+    },
+    {
+      "key": "inventory.transactions.all",
+      "path": "/inventory/transactions/all",
+      "label": "All"
+    },
+    {
+      "key": "inventory.transactions.deductions",
+      "path": "/inventory/transactions/deductions",
+      "label": "Deductions"
+    },
+    {
+      "key": "items.all-items",
+      "path": "/items/all-items",
+      "label": "All Items"
+    },
+    {
+      "key": "items.inventory-items",
+      "path": "/items/inventory-items",
+      "label": "Inventory Items"
+    },
+    {
+      "key": "items.purchase-items",
+      "path": "/items/purchase-items",
+      "label": "Purchase Items"
+    },
+    {
+      "key": "items.sale-items",
+      "path": "/items/sale-items",
+      "label": "Sale Items"
+    },
+    {
+      "key": "journal-entries.all-journals.active-journal-entries",
+      "path": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Active Journal Entries"
+    },
+    {
+      "key": "journal-entries.all-journals.draft",
+      "path": "/journal-entries/all-journals/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "journal-entries.all-journals.voided",
+      "path": "/journal-entries/all-journals/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "journal-entries.cash-journals.active-journal-entries",
+      "path": "/journal-entries/cash-journals/active-journal-entries",
+      "label": "Active Journal Entries"
+    },
+    {
+      "key": "journal-entries.cash-journals.draft",
+      "path": "/journal-entries/cash-journals/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "journal-entries.cash-journals.voided",
+      "path": "/journal-entries/cash-journals/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "journal-entries.journal-entry-lines.active-journal-entry-lines",
+      "path": "/journal-entries/journal-entry-lines/active-journal-entry-lines",
+      "label": "Active Journal Entry Lines"
+    },
+    {
+      "key": "journal-entries.journal-entry-lines.draft-journal-entry-lines",
+      "path": "/journal-entries/journal-entry-lines/draft-journal-entry-lines",
+      "label": "Draft Journal Entry Lines"
+    },
+    {
+      "key": "journal-entries.journal-entry-lines.voided-journal-entry-lines",
+      "path": "/journal-entries/journal-entry-lines/voided-journal-entry-lines",
+      "label": "Voided Journal Entry Lines"
+    },
+    {
+      "key": "journal-entries.manual-journals.active-journal-entries",
+      "path": "/journal-entries/manual-journals/active-journal-entries",
+      "label": "Active Journal Entries"
+    },
+    {
+      "key": "journal-entries.manual-journals.draft",
+      "path": "/journal-entries/manual-journals/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "journal-entries.manual-journals.voided",
+      "path": "/journal-entries/manual-journals/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "mailbox.annual.action-needed",
+      "path": "/mailbox/annual/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.annual.cancelled",
+      "path": "/mailbox/annual/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "mailbox.annual.filed",
+      "path": "/mailbox/annual/filed",
+      "label": "Filed"
+    },
+    {
+      "key": "mailbox.annual.for-approval",
+      "path": "/mailbox/annual/for-approval",
+      "label": "For Approval"
+    },
+    {
+      "key": "mailbox.annual.in-progress",
+      "path": "/mailbox/annual/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "mailbox.annual.resubmission",
+      "path": "/mailbox/annual/resubmission",
+      "label": "Resubmission"
+    },
+    {
+      "key": "mailbox.bir-einvoicing.eligible",
+      "path": "/mailbox/bir-einvoicing/eligible",
+      "label": "Eligible"
+    },
+    {
+      "key": "mailbox.bir-einvoicing.eligible.all",
+      "path": "/mailbox/bir-einvoicing/eligible/all",
+      "label": "All"
+    },
+    {
+      "key": "mailbox.bir-einvoicing.eligible.other",
+      "path": "/mailbox/bir-einvoicing/eligible/other",
+      "label": "Other"
+    },
+    {
+      "key": "mailbox.bir-einvoicing.eligible.sales",
+      "path": "/mailbox/bir-einvoicing/eligible/sales",
+      "label": "Sales"
+    },
+    {
+      "key": "mailbox.bir-einvoicing.sent",
+      "path": "/mailbox/bir-einvoicing/sent",
+      "label": "Sent"
+    },
+    {
+      "key": "mailbox.bir-einvoicing.sent.action-needed",
+      "path": "/mailbox/bir-einvoicing/sent/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.bir-einvoicing.sent.to-file",
+      "path": "/mailbox/bir-einvoicing/sent/to-file",
+      "label": "To File"
+    },
+    {
+      "key": "mailbox.gst-returns.action-needed",
+      "path": "/mailbox/gst-returns/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.gst-returns.cancelled",
+      "path": "/mailbox/gst-returns/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "mailbox.gst-returns.filed",
+      "path": "/mailbox/gst-returns/filed",
+      "label": "Filed"
+    },
+    {
+      "key": "mailbox.gst-returns.in-progress",
+      "path": "/mailbox/gst-returns/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "mailbox.invoicenow.received",
+      "path": "/mailbox/invoicenow/received",
+      "label": "Received"
+    },
+    {
+      "key": "mailbox.invoicenow.received.accepted",
+      "path": "/mailbox/invoicenow/received/accepted",
+      "label": "Accepted"
+    },
+    {
+      "key": "mailbox.invoicenow.received.not-accepted",
+      "path": "/mailbox/invoicenow/received/not-accepted",
+      "label": "Not Accepted"
+    },
+    {
+      "key": "mailbox.invoicenow.received.to-accept",
+      "path": "/mailbox/invoicenow/received/to-accept",
+      "label": "To Accept"
+    },
+    {
+      "key": "mailbox.invoicenow.sent",
+      "path": "/mailbox/invoicenow/sent",
+      "label": "Sent"
+    },
+    {
+      "key": "mailbox.invoicenow.sent.action-needed",
+      "path": "/mailbox/invoicenow/sent/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.invoicenow.sent.inactive",
+      "path": "/mailbox/invoicenow/sent/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "mailbox.invoicenow.sent.sent",
+      "path": "/mailbox/invoicenow/sent/sent",
+      "label": "Sent"
+    },
+    {
+      "key": "mailbox.invoicenow.to-send",
+      "path": "/mailbox/invoicenow/to-send",
+      "label": "To Send"
+    },
+    {
+      "key": "mailbox.invoicenow.to-send.all",
+      "path": "/mailbox/invoicenow/to-send/all",
+      "label": "All"
+    },
+    {
+      "key": "mailbox.invoicenow.to-send.credit-notes",
+      "path": "/mailbox/invoicenow/to-send/credit-notes",
+      "label": "Credit Notes"
+    },
+    {
+      "key": "mailbox.invoicenow.to-send.invoices",
+      "path": "/mailbox/invoicenow/to-send/invoices",
+      "label": "Invoices"
+    },
+    {
+      "key": "mailbox.invoicenow.to-send.other",
+      "path": "/mailbox/invoicenow/to-send/other",
+      "label": "Other"
+    },
+    {
+      "key": "mailbox.monthly.action-needed",
+      "path": "/mailbox/monthly/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.monthly.cancelled",
+      "path": "/mailbox/monthly/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "mailbox.monthly.filed",
+      "path": "/mailbox/monthly/filed",
+      "label": "Filed"
+    },
+    {
+      "key": "mailbox.monthly.for-approval",
+      "path": "/mailbox/monthly/for-approval",
+      "label": "For Approval"
+    },
+    {
+      "key": "mailbox.monthly.in-progress",
+      "path": "/mailbox/monthly/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "mailbox.monthly.resubmission",
+      "path": "/mailbox/monthly/resubmission",
+      "label": "Resubmission"
+    },
+    {
+      "key": "mailbox.my-invoicenow.received",
+      "path": "/mailbox/my-invoicenow/received",
+      "label": "Received"
+    },
+    {
+      "key": "mailbox.my-invoicenow.received.accepted",
+      "path": "/mailbox/my-invoicenow/received/accepted",
+      "label": "Accepted"
+    },
+    {
+      "key": "mailbox.my-invoicenow.received.not-accepted",
+      "path": "/mailbox/my-invoicenow/received/not-accepted",
+      "label": "Not Accepted"
+    },
+    {
+      "key": "mailbox.my-invoicenow.received.to-accept",
+      "path": "/mailbox/my-invoicenow/received/to-accept",
+      "label": "To Accept"
+    },
+    {
+      "key": "mailbox.my-invoicenow.sent",
+      "path": "/mailbox/my-invoicenow/sent",
+      "label": "Sent"
+    },
+    {
+      "key": "mailbox.my-invoicenow.sent.action-needed",
+      "path": "/mailbox/my-invoicenow/sent/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.my-invoicenow.sent.inactive",
+      "path": "/mailbox/my-invoicenow/sent/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "mailbox.my-invoicenow.sent.sent",
+      "path": "/mailbox/my-invoicenow/sent/sent",
+      "label": "Sent"
+    },
+    {
+      "key": "mailbox.my-invoicenow.to-send",
+      "path": "/mailbox/my-invoicenow/to-send",
+      "label": "To Send"
+    },
+    {
+      "key": "mailbox.my-invoicenow.to-send.all",
+      "path": "/mailbox/my-invoicenow/to-send/all",
+      "label": "All"
+    },
+    {
+      "key": "mailbox.my-invoicenow.to-send.credit-notes",
+      "path": "/mailbox/my-invoicenow/to-send/credit-notes",
+      "label": "Credit Notes"
+    },
+    {
+      "key": "mailbox.my-invoicenow.to-send.invoices",
+      "path": "/mailbox/my-invoicenow/to-send/invoices",
+      "label": "Invoices"
+    },
+    {
+      "key": "mailbox.my-invoicenow.to-send.other",
+      "path": "/mailbox/my-invoicenow/to-send/other",
+      "label": "Other"
+    },
+    {
+      "key": "mailbox.other.action-needed",
+      "path": "/mailbox/other/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.other.cancelled",
+      "path": "/mailbox/other/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "mailbox.other.filed",
+      "path": "/mailbox/other/filed",
+      "label": "Filed"
+    },
+    {
+      "key": "mailbox.other.for-approval",
+      "path": "/mailbox/other/for-approval",
+      "label": "For Approval"
+    },
+    {
+      "key": "mailbox.other.in-progress",
+      "path": "/mailbox/other/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "mailbox.other.resubmission",
+      "path": "/mailbox/other/resubmission",
+      "label": "Resubmission"
+    },
+    {
+      "key": "mailbox.quarterly.action-needed",
+      "path": "/mailbox/quarterly/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.quarterly.cancelled",
+      "path": "/mailbox/quarterly/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "mailbox.quarterly.filed",
+      "path": "/mailbox/quarterly/filed",
+      "label": "Filed"
+    },
+    {
+      "key": "mailbox.quarterly.for-approval",
+      "path": "/mailbox/quarterly/for-approval",
+      "label": "For Approval"
+    },
+    {
+      "key": "mailbox.quarterly.in-progress",
+      "path": "/mailbox/quarterly/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "mailbox.quarterly.resubmission",
+      "path": "/mailbox/quarterly/resubmission",
+      "label": "Resubmission"
+    },
+    {
+      "key": "mailbox.sst-returns.action-needed",
+      "path": "/mailbox/sst-returns/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "mailbox.sst-returns.cancelled",
+      "path": "/mailbox/sst-returns/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "mailbox.sst-returns.filed",
+      "path": "/mailbox/sst-returns/filed",
+      "label": "Filed"
+    },
+    {
+      "key": "mailbox.sst-returns.in-progress",
+      "path": "/mailbox/sst-returns/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "purchase-credits.line-items.active",
+      "path": "/purchase-credits/line-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "purchase-credits.line-items.draft",
+      "path": "/purchase-credits/line-items/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "purchase-credits.line-items.voided",
+      "path": "/purchase-credits/line-items/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "purchase-credits.transactions.active-purchase-credits",
+      "path": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "Active Purchase Credits"
+    },
+    {
+      "key": "purchase-credits.transactions.approvals",
+      "path": "/purchase-credits/transactions/approvals",
+      "label": "Approvals"
+    },
+    {
+      "key": "purchase-credits.transactions.draft",
+      "path": "/purchase-credits/transactions/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "purchase-credits.transactions.received",
+      "path": "/purchase-credits/transactions/received",
+      "label": "Received"
+    },
+    {
+      "key": "purchase-credits.transactions.resubmit",
+      "path": "/purchase-credits/transactions/resubmit",
+      "label": "Resubmit"
+    },
+    {
+      "key": "purchase-credits.transactions.voided",
+      "path": "/purchase-credits/transactions/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "purchase-deposits.balances.all",
+      "path": "/purchase-deposits/balances/all",
+      "label": "All"
+    },
+    {
+      "key": "purchase-deposits.balances.balance-available",
+      "path": "/purchase-deposits/balances/balance-available",
+      "label": "Balance Available"
+    },
+    {
+      "key": "purchase-deposits.balances.fully-drawn",
+      "path": "/purchase-deposits/balances/fully-drawn",
+      "label": "Fully Drawn"
+    },
+    {
+      "key": "purchase-deposits.transactions.all",
+      "path": "/purchase-deposits/transactions/all",
+      "label": "All"
+    },
+    {
+      "key": "purchase-deposits.transactions.deposits",
+      "path": "/purchase-deposits/transactions/deposits",
+      "label": "Deposits"
+    },
+    {
+      "key": "purchase-deposits.transactions.drawdowns",
+      "path": "/purchase-deposits/transactions/drawdowns",
+      "label": "Drawdowns"
+    },
+    {
+      "key": "purchase-orders.order-items.active",
+      "path": "/purchase-orders/order-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "purchase-orders.order-items.bill-due",
+      "path": "/purchase-orders/order-items/bill-due",
+      "label": "Bill Due"
+    },
+    {
+      "key": "purchase-orders.order-items.open",
+      "path": "/purchase-orders/order-items/open",
+      "label": "Open"
+    },
+    {
+      "key": "purchase-orders.order-items.voided",
+      "path": "/purchase-orders/order-items/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "purchase-orders.orders.active",
+      "path": "/purchase-orders/orders/active",
+      "label": "Active"
+    },
+    {
+      "key": "purchase-orders.orders.bill-due",
+      "path": "/purchase-orders/orders/bill-due",
+      "label": "Bill Due"
+    },
+    {
+      "key": "purchase-orders.orders.open",
+      "path": "/purchase-orders/orders/open",
+      "label": "Open"
+    },
+    {
+      "key": "purchase-orders.orders.voided",
+      "path": "/purchase-orders/orders/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "purchase-orders.request-items.active",
+      "path": "/purchase-orders/request-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "purchase-orders.request-items.draft",
+      "path": "/purchase-orders/request-items/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "purchase-orders.request-items.open",
+      "path": "/purchase-orders/request-items/open",
+      "label": "Open"
+    },
+    {
+      "key": "purchase-orders.request-items.order-due",
+      "path": "/purchase-orders/request-items/order-due",
+      "label": "Order Due"
+    },
+    {
+      "key": "purchase-orders.request-items.voided",
+      "path": "/purchase-orders/request-items/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "purchase-orders.requests.active",
+      "path": "/purchase-orders/requests/active",
+      "label": "Active"
+    },
+    {
+      "key": "purchase-orders.requests.draft",
+      "path": "/purchase-orders/requests/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "purchase-orders.requests.open",
+      "path": "/purchase-orders/requests/open",
+      "label": "Open"
+    },
+    {
+      "key": "purchase-orders.requests.order-due",
+      "path": "/purchase-orders/requests/order-due",
+      "label": "Order Due"
+    },
+    {
+      "key": "purchase-orders.requests.resubmit",
+      "path": "/purchase-orders/requests/resubmit",
+      "label": "Resubmit"
+    },
+    {
+      "key": "purchase-orders.requests.voided",
+      "path": "/purchase-orders/requests/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "purchase-payments.all-payments.active-purchase-payments",
+      "path": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Active Purchase Payments"
+    },
+    {
+      "key": "purchase-payments.all-payments.batch-purchase-payments",
+      "path": "/purchase-payments/all-payments/batch-purchase-payments",
+      "label": "Batch Purchase Payments"
+    },
+    {
+      "key": "purchase-payments.all-payments.draft",
+      "path": "/purchase-payments/all-payments/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "purchase-payments.all-payments.draft-batch-purchase-payments",
+      "path": "/purchase-payments/all-payments/draft-batch-purchase-payments",
+      "label": "Draft Batch Purchase Payments"
+    },
+    {
+      "key": "purchase-payments.all-payments.due-purchase-payments",
+      "path": "/purchase-payments/all-payments/due-purchase-payments",
+      "label": "Due Purchase Payments"
+    },
+    {
+      "key": "purchase-payments.disbursements.cancelled",
+      "path": "/purchase-payments/disbursements/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "purchase-payments.disbursements.completed",
+      "path": "/purchase-payments/disbursements/completed",
+      "label": "Completed"
+    },
+    {
+      "key": "purchase-payments.disbursements.in-progress",
+      "path": "/purchase-payments/disbursements/in-progress",
+      "label": "In Progress"
+    },
+    {
+      "key": "purchase-payments.disbursements.pending-user-action",
+      "path": "/purchase-payments/disbursements/pending-user-action",
+      "label": "Pending User Action"
+    },
+    {
+      "key": "purchase-payments.due-payments.due-bill-payments",
+      "path": "/purchase-payments/due-payments/due-bill-payments",
+      "label": "Due Bill Payments"
+    },
+    {
+      "key": "purchase-payments.due-payments.due-vendor-credit-refunds",
+      "path": "/purchase-payments/due-payments/due-vendor-credit-refunds",
+      "label": "Due Vendor Credit Refunds"
+    },
+    {
+      "key": "purchases.billable-items.billed",
+      "path": "/purchases/billable-items/billed",
+      "label": "Billed"
+    },
+    {
+      "key": "purchases.billable-items.pending",
+      "path": "/purchases/billable-items/pending",
+      "label": "Pending"
+    },
+    {
+      "key": "purchases.line-items.active",
+      "path": "/purchases/line-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "purchases.line-items.draft",
+      "path": "/purchases/line-items/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "purchases.line-items.voided",
+      "path": "/purchases/line-items/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "purchases.transactions.active-purchases",
+      "path": "/purchases/transactions/active-purchases",
+      "label": "Active Purchases"
+    },
+    {
+      "key": "purchases.transactions.approvals",
+      "path": "/purchases/transactions/approvals",
+      "label": "Approvals"
+    },
+    {
+      "key": "purchases.transactions.balance-due",
+      "path": "/purchases/transactions/balance-due",
+      "label": "Balance Due"
+    },
+    {
+      "key": "purchases.transactions.draft",
+      "path": "/purchases/transactions/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "purchases.transactions.received",
+      "path": "/purchases/transactions/received",
+      "label": "Received"
+    },
+    {
+      "key": "purchases.transactions.resubmit",
+      "path": "/purchases/transactions/resubmit",
+      "label": "Resubmit"
+    },
+    {
+      "key": "purchases.transactions.scheduled",
+      "path": "/purchases/transactions/scheduled",
+      "label": "Scheduled"
+    },
+    {
+      "key": "purchases.transactions.voided",
+      "path": "/purchases/transactions/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "reports.aged-payables.details",
+      "path": "/reports/aged-payables/details",
+      "label": "Details"
+    },
+    {
+      "key": "reports.aged-payables.summary",
+      "path": "/reports/aged-payables/summary",
+      "label": "Summary"
+    },
+    {
+      "key": "reports.aged-receivables.details",
+      "path": "/reports/aged-receivables/details",
+      "label": "Details"
+    },
+    {
+      "key": "reports.aged-receivables.summary",
+      "path": "/reports/aged-receivables/summary",
+      "label": "Summary"
+    },
+    {
+      "key": "reports.anomalies.bills",
+      "path": "/reports/anomalies/bills",
+      "label": "Bills"
+    },
+    {
+      "key": "reports.anomalies.cashflows",
+      "path": "/reports/anomalies/cashflows",
+      "label": "Cashflows"
+    },
+    {
+      "key": "reports.anomalies.invoices",
+      "path": "/reports/anomalies/invoices",
+      "label": "Invoices"
+    },
+    {
+      "key": "reports.anomalies.journals",
+      "path": "/reports/anomalies/journals",
+      "label": "Journals"
+    },
+    {
+      "key": "reports.balance-sheet",
+      "path": "/reports/balance-sheet",
+      "label": "Balance Sheet"
+    },
+    {
+      "key": "reports.banks.closing-balance",
+      "path": "/reports/banks/closing-balance",
+      "label": "Closing Balance"
+    },
+    {
+      "key": "reports.banks.reconciliation-details.reconciled",
+      "path": "/reports/banks/reconciliation-details/reconciled",
+      "label": "Reconciled"
+    },
+    {
+      "key": "reports.banks.reconciliation-details.unreconciled",
+      "path": "/reports/banks/reconciliation-details/unreconciled",
+      "label": "Unreconciled"
+    },
+    {
+      "key": "reports.banks.reconciliation-summary",
+      "path": "/reports/banks/reconciliation-summary",
+      "label": "Reconciliation Summary"
+    },
+    {
+      "key": "reports.capsules",
+      "path": "/reports/capsules",
+      "label": "Capsules"
+    },
+    {
+      "key": "reports.capsules.active",
+      "path": "/reports/capsules/active",
+      "label": "Active"
+    },
+    {
+      "key": "reports.capsules.empty",
+      "path": "/reports/capsules/empty",
+      "label": "Empty"
+    },
+    {
+      "key": "reports.cash-balance",
+      "path": "/reports/cash-balance",
+      "label": "Cash Balance"
+    },
+    {
+      "key": "reports.cashflow",
+      "path": "/reports/cashflow",
+      "label": "Cashflow"
+    },
+    {
+      "key": "reports.data-exports",
+      "path": "/reports/data-exports",
+      "label": "Data Exports"
+    },
+    {
+      "key": "reports.diagnostics.expense-health",
+      "path": "/reports/diagnostics/expense-health",
+      "label": "Expense Health"
+    },
+    {
+      "key": "reports.diagnostics.receivable-risk",
+      "path": "/reports/diagnostics/receivable-risk",
+      "label": "Receivable Risk"
+    },
+    {
+      "key": "reports.diagnostics.reconciliation-checks",
+      "path": "/reports/diagnostics/reconciliation-checks",
+      "label": "Reconciliation Checks"
+    },
+    {
+      "key": "reports.equity",
+      "path": "/reports/equity",
+      "label": "Equity"
+    },
+    {
+      "key": "reports.fixed-assets.reconciliation-summary",
+      "path": "/reports/fixed-assets/reconciliation-summary",
+      "label": "Reconciliation Summary"
+    },
+    {
+      "key": "reports.fixed-assets.register",
+      "path": "/reports/fixed-assets/register",
+      "label": "Register"
+    },
+    {
+      "key": "reports.general-ledger",
+      "path": "/reports/general-ledger",
+      "label": "General Ledger"
+    },
+    {
+      "key": "reports.gst-report",
+      "path": "/reports/gst-report",
+      "label": "Gst Report"
+    },
+    {
+      "key": "reports.profit-and-loss",
+      "path": "/reports/profit-and-loss",
+      "label": "Profit And Loss"
+    },
+    {
+      "key": "reports.reports-packages",
+      "path": "/reports/reports-packages",
+      "label": "Reports Packages"
+    },
+    {
+      "key": "reports.trial-balance",
+      "path": "/reports/trial-balance",
+      "label": "Trial Balance"
+    },
+    {
+      "key": "sale-credits.line-items.active",
+      "path": "/sale-credits/line-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "sale-credits.line-items.draft",
+      "path": "/sale-credits/line-items/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "sale-credits.line-items.voided",
+      "path": "/sale-credits/line-items/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "sale-credits.transactions.active-sale-credits",
+      "path": "/sale-credits/transactions/active-sale-credits",
+      "label": "Active Sale Credits"
+    },
+    {
+      "key": "sale-credits.transactions.approvals",
+      "path": "/sale-credits/transactions/approvals",
+      "label": "Approvals"
+    },
+    {
+      "key": "sale-credits.transactions.draft",
+      "path": "/sale-credits/transactions/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "sale-credits.transactions.resubmit",
+      "path": "/sale-credits/transactions/resubmit",
+      "label": "Resubmit"
+    },
+    {
+      "key": "sale-credits.transactions.voided",
+      "path": "/sale-credits/transactions/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "sale-payments.all-payments.active-sale-payments",
+      "path": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Active Sale Payments"
+    },
+    {
+      "key": "sale-payments.all-payments.batch-sale-payments",
+      "path": "/sale-payments/all-payments/batch-sale-payments",
+      "label": "Batch Sale Payments"
+    },
+    {
+      "key": "sale-payments.all-payments.draft",
+      "path": "/sale-payments/all-payments/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "sale-payments.all-payments.due-sale-payments",
+      "path": "/sale-payments/all-payments/due-sale-payments",
+      "label": "Due Sale Payments"
+    },
+    {
+      "key": "sale-payments.due-payments.due-customer-credit-refunds",
+      "path": "/sale-payments/due-payments/due-customer-credit-refunds",
+      "label": "Due Customer Credit Refunds"
+    },
+    {
+      "key": "sale-payments.due-payments.due-invoice-payments",
+      "path": "/sale-payments/due-payments/due-invoice-payments",
+      "label": "Due Invoice Payments"
+    },
+    {
+      "key": "sales-deposits.balances.all",
+      "path": "/sales-deposits/balances/all",
+      "label": "All"
+    },
+    {
+      "key": "sales-deposits.balances.balance-available",
+      "path": "/sales-deposits/balances/balance-available",
+      "label": "Balance Available"
+    },
+    {
+      "key": "sales-deposits.balances.fully-drawn",
+      "path": "/sales-deposits/balances/fully-drawn",
+      "label": "Fully Drawn"
+    },
+    {
+      "key": "sales-deposits.transactions.all",
+      "path": "/sales-deposits/transactions/all",
+      "label": "All"
+    },
+    {
+      "key": "sales-deposits.transactions.deposits",
+      "path": "/sales-deposits/transactions/deposits",
+      "label": "Deposits"
+    },
+    {
+      "key": "sales-deposits.transactions.drawdowns",
+      "path": "/sales-deposits/transactions/drawdowns",
+      "label": "Drawdowns"
+    },
+    {
+      "key": "sales-orders.order-items.active",
+      "path": "/sales-orders/order-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "sales-orders.order-items.invoice-due",
+      "path": "/sales-orders/order-items/invoice-due",
+      "label": "Invoice Due"
+    },
+    {
+      "key": "sales-orders.order-items.open",
+      "path": "/sales-orders/order-items/open",
+      "label": "Open"
+    },
+    {
+      "key": "sales-orders.order-items.voided",
+      "path": "/sales-orders/order-items/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "sales-orders.orders.active",
+      "path": "/sales-orders/orders/active",
+      "label": "Active"
+    },
+    {
+      "key": "sales-orders.orders.invoice-due",
+      "path": "/sales-orders/orders/invoice-due",
+      "label": "Invoice Due"
+    },
+    {
+      "key": "sales-orders.orders.open",
+      "path": "/sales-orders/orders/open",
+      "label": "Open"
+    },
+    {
+      "key": "sales-orders.orders.voided",
+      "path": "/sales-orders/orders/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "sales-orders.quote-items.active",
+      "path": "/sales-orders/quote-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "sales-orders.quote-items.draft",
+      "path": "/sales-orders/quote-items/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "sales-orders.quote-items.open",
+      "path": "/sales-orders/quote-items/open",
+      "label": "Open"
+    },
+    {
+      "key": "sales-orders.quote-items.order-due",
+      "path": "/sales-orders/quote-items/order-due",
+      "label": "Order Due"
+    },
+    {
+      "key": "sales-orders.quote-items.voided",
+      "path": "/sales-orders/quote-items/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "sales-orders.quotes.active",
+      "path": "/sales-orders/quotes/active",
+      "label": "Active"
+    },
+    {
+      "key": "sales-orders.quotes.draft",
+      "path": "/sales-orders/quotes/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "sales-orders.quotes.open",
+      "path": "/sales-orders/quotes/open",
+      "label": "Open"
+    },
+    {
+      "key": "sales-orders.quotes.order-due",
+      "path": "/sales-orders/quotes/order-due",
+      "label": "Order Due"
+    },
+    {
+      "key": "sales-orders.quotes.resubmit",
+      "path": "/sales-orders/quotes/resubmit",
+      "label": "Resubmit"
+    },
+    {
+      "key": "sales-orders.quotes.voided",
+      "path": "/sales-orders/quotes/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "sales.line-items.active",
+      "path": "/sales/line-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "sales.line-items.draft",
+      "path": "/sales/line-items/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "sales.line-items.voided",
+      "path": "/sales/line-items/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "sales.transactions.active-sales",
+      "path": "/sales/transactions/active-sales",
+      "label": "Active Sales"
+    },
+    {
+      "key": "sales.transactions.approvals",
+      "path": "/sales/transactions/approvals",
+      "label": "Approvals"
+    },
+    {
+      "key": "sales.transactions.balance-due",
+      "path": "/sales/transactions/balance-due",
+      "label": "Balance Due"
+    },
+    {
+      "key": "sales.transactions.draft",
+      "path": "/sales/transactions/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "sales.transactions.resubmit",
+      "path": "/sales/transactions/resubmit",
+      "label": "Resubmit"
+    },
+    {
+      "key": "sales.transactions.scheduled",
+      "path": "/sales/transactions/scheduled",
+      "label": "Scheduled"
+    },
+    {
+      "key": "sales.transactions.voided",
+      "path": "/sales/transactions/voided",
+      "label": "Voided"
+    },
+    {
+      "key": "scheduled.bills.line-items.active",
+      "path": "/scheduled/bills/line-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "scheduled.bills.line-items.inactive",
+      "path": "/scheduled/bills/line-items/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "scheduled.bills.line-items.set-to-end",
+      "path": "/scheduled/bills/line-items/set-to-end",
+      "label": "Set To End"
+    },
+    {
+      "key": "scheduled.bills.transactions.active",
+      "path": "/scheduled/bills/transactions/active",
+      "label": "Active"
+    },
+    {
+      "key": "scheduled.bills.transactions.inactive",
+      "path": "/scheduled/bills/transactions/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "scheduled.bills.transactions.set-to-end",
+      "path": "/scheduled/bills/transactions/set-to-end",
+      "label": "Set To End"
+    },
+    {
+      "key": "scheduled.invoices.line-items.active",
+      "path": "/scheduled/invoices/line-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "scheduled.invoices.line-items.inactive",
+      "path": "/scheduled/invoices/line-items/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "scheduled.invoices.line-items.set-to-end",
+      "path": "/scheduled/invoices/line-items/set-to-end",
+      "label": "Set To End"
+    },
+    {
+      "key": "scheduled.invoices.transactions.active",
+      "path": "/scheduled/invoices/transactions/active",
+      "label": "Active"
+    },
+    {
+      "key": "scheduled.invoices.transactions.inactive",
+      "path": "/scheduled/invoices/transactions/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "scheduled.invoices.transactions.set-to-end",
+      "path": "/scheduled/invoices/transactions/set-to-end",
+      "label": "Set To End"
+    },
+    {
+      "key": "scheduled.journals.line-items.active",
+      "path": "/scheduled/journals/line-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "scheduled.journals.line-items.inactive",
+      "path": "/scheduled/journals/line-items/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "scheduled.journals.line-items.set-to-end",
+      "path": "/scheduled/journals/line-items/set-to-end",
+      "label": "Set To End"
+    },
+    {
+      "key": "scheduled.journals.transactions.active",
+      "path": "/scheduled/journals/transactions/active",
+      "label": "Active"
+    },
+    {
+      "key": "scheduled.journals.transactions.inactive",
+      "path": "/scheduled/journals/transactions/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "scheduled.journals.transactions.set-to-end",
+      "path": "/scheduled/journals/transactions/set-to-end",
+      "label": "Set To End"
+    },
+    {
+      "key": "scheduled.subscriptions.line-items.active",
+      "path": "/scheduled/subscriptions/line-items/active",
+      "label": "Active"
+    },
+    {
+      "key": "scheduled.subscriptions.line-items.inactive",
+      "path": "/scheduled/subscriptions/line-items/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "scheduled.subscriptions.line-items.set-to-cancel",
+      "path": "/scheduled/subscriptions/line-items/set-to-cancel",
+      "label": "Set To Cancel"
+    },
+    {
+      "key": "scheduled.subscriptions.transactions.active",
+      "path": "/scheduled/subscriptions/transactions/active",
+      "label": "Active"
+    },
+    {
+      "key": "scheduled.subscriptions.transactions.inactive",
+      "path": "/scheduled/subscriptions/transactions/inactive",
+      "label": "Inactive"
+    },
+    {
+      "key": "scheduled.subscriptions.transactions.set-to-cancel",
+      "path": "/scheduled/subscriptions/transactions/set-to-cancel",
+      "label": "Set To Cancel"
+    }
+  ],
+  "modals": [
+    {
+      "key": "agent-suite.modal.agent_suite_actions",
+      "resource": "agent-suite",
+      "modalType": "agent_suite_actions",
+      "urlTemplate": "?modal=agent_suite_actions",
+      "mountPath": "/home",
+      "label": "Agent Suite Actions",
+      "requiresId": false
+    },
+    {
+      "key": "agent-suite.modal.agent_suite_clio",
+      "resource": "agent-suite",
+      "modalType": "agent_suite_clio",
+      "urlTemplate": "?modal=agent_suite_clio",
+      "mountPath": "/home",
+      "label": "Agent Suite Clio",
+      "requiresId": false
+    },
+    {
+      "key": "agent-suite.modal.agent_suite_controls",
+      "resource": "agent-suite",
+      "modalType": "agent_suite_controls",
+      "urlTemplate": "?modal=agent_suite_controls",
+      "mountPath": "/home",
+      "label": "Agent Suite Controls",
+      "requiresId": false
+    },
+    {
+      "key": "agent-suite.modal.agent_suite_email",
+      "resource": "agent-suite",
+      "modalType": "agent_suite_email",
+      "urlTemplate": "?modal=agent_suite_email",
+      "mountPath": "/home",
+      "label": "Agent Suite Email",
+      "requiresId": false
+    },
+    {
+      "key": "agent-suite.modal.agent_suite_jots",
+      "resource": "agent-suite",
+      "modalType": "agent_suite_jots",
+      "urlTemplate": "?modal=agent_suite_jots",
+      "mountPath": "/home",
+      "label": "Agent Suite Jots",
+      "requiresId": false
+    },
+    {
+      "key": "agent-suite.modal.agent_suite_memories",
+      "resource": "agent-suite",
+      "modalType": "agent_suite_memories",
+      "urlTemplate": "?modal=agent_suite_memories",
+      "mountPath": "/home",
+      "label": "Agent Suite Memories",
+      "requiresId": false
+    },
+    {
+      "key": "agent-suite.modal.agent_suite_overview",
+      "resource": "agent-suite",
+      "modalType": "agent_suite_overview",
+      "urlTemplate": "?modal=agent_suite_overview",
+      "mountPath": "/home",
+      "label": "Agent Suite Overview",
+      "requiresId": false
+    },
+    {
+      "key": "agent-suite.modal.agent_suite_stack",
+      "resource": "agent-suite",
+      "modalType": "agent_suite_stack",
+      "urlTemplate": "?modal=agent_suite_stack",
+      "mountPath": "/home",
+      "label": "Agent Suite Stack",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.activity-log",
+      "resource": "bank-reconciliation",
+      "modalType": "activity-log",
+      "urlTemplate": "?modal=activity-log",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Activity Log",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.add-adjustments",
+      "resource": "bank-reconciliation",
+      "modalType": "add-adjustments",
+      "urlTemplate": "?modal=add-adjustments",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Add Adjustments",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.auto-reconcile-settings",
+      "resource": "bank-reconciliation",
+      "modalType": "auto-reconcile-settings",
+      "urlTemplate": "?modal=auto-reconcile-settings",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Auto Reconcile Settings",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.br-download-recon-report",
+      "resource": "bank-reconciliation",
+      "modalType": "br-download-recon-report",
+      "urlTemplate": "?modal=br-download-recon-report",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Br Download Recon Report",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.br-view-cash-transfer",
+      "resource": "bank-reconciliation",
+      "modalType": "br-view-cash-transfer",
+      "urlTemplate": "?modal=br-view-cash-transfer&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Br View Cash Transfer",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.br-view-direct-cash-entry",
+      "resource": "bank-reconciliation",
+      "modalType": "br-view-direct-cash-entry",
+      "urlTemplate": "?modal=br-view-direct-cash-entry&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Br View Direct Cash Entry",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.br-view-journal",
+      "resource": "bank-reconciliation",
+      "modalType": "br-view-journal",
+      "urlTemplate": "?modal=br-view-journal&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Br View Journal",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.br-view-reconciled-journal",
+      "resource": "bank-reconciliation",
+      "modalType": "br-view-reconciled-journal",
+      "urlTemplate": "?modal=br-view-reconciled-journal&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Br View Reconciled Journal",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.br-view-sale-credit",
+      "resource": "bank-reconciliation",
+      "modalType": "br-view-sale-credit",
+      "urlTemplate": "?modal=br-view-sale-credit&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Br View Sale Credit",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.cerate-bank-rule",
+      "resource": "bank-reconciliation",
+      "modalType": "cerate-bank-rule",
+      "urlTemplate": "?modal=cerate-bank-rule",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Cerate Bank Rule",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.cerate-match-rule",
+      "resource": "bank-reconciliation",
+      "modalType": "cerate-match-rule",
+      "urlTemplate": "?modal=cerate-match-rule",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Cerate Match Rule",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.create-recon",
+      "resource": "bank-reconciliation",
+      "modalType": "create-recon",
+      "urlTemplate": "?modal=create-recon",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Create Recon",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.delete-bank-statement",
+      "resource": "bank-reconciliation",
+      "modalType": "delete-bank-statement",
+      "urlTemplate": "?modal=delete-bank-statement&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Delete Bank Statement",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.delete-statement-line",
+      "resource": "bank-reconciliation",
+      "modalType": "delete-statement-line",
+      "urlTemplate": "?modal=delete-statement-line&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Delete Statement Line",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.deleted-import-statement",
+      "resource": "bank-reconciliation",
+      "modalType": "deleted-import-statement",
+      "urlTemplate": "?modal=deleted-import-statement",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Deleted Import Statement",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.download-bank-summary-report",
+      "resource": "bank-reconciliation",
+      "modalType": "download-bank-summary-report",
+      "urlTemplate": "?modal=download-bank-summary-report",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Download Bank Summary Report",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.edit-bank-account",
+      "resource": "bank-reconciliation",
+      "modalType": "edit-bank-account",
+      "urlTemplate": "?modal=edit-bank-account&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Edit Bank Account",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.edit-journal",
+      "resource": "bank-reconciliation",
+      "modalType": "edit-journal",
+      "urlTemplate": "?modal=edit-journal&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Edit Journal",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.edit-purchase-credit-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "edit-purchase-credit-payment",
+      "urlTemplate": "?modal=edit-purchase-credit-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Edit Purchase Credit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.edit-purchase-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "edit-purchase-payment",
+      "urlTemplate": "?modal=edit-purchase-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Edit Purchase Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.edit-sale-credit-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "edit-sale-credit-payment",
+      "urlTemplate": "?modal=edit-sale-credit-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Edit Sale Credit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.edit-sale-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "edit-sale-payment",
+      "urlTemplate": "?modal=edit-sale-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Edit Sale Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.filter-jaz-payments",
+      "resource": "bank-reconciliation",
+      "modalType": "filter-jaz-payments",
+      "urlTemplate": "?modal=filter-jaz-payments",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Filter Jaz Payments",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.import-bank-feed",
+      "resource": "bank-reconciliation",
+      "modalType": "import-bank-feed",
+      "urlTemplate": "?modal=import-bank-feed",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Import Bank Feed",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.import-reconciliations",
+      "resource": "bank-reconciliation",
+      "modalType": "import-reconciliations",
+      "urlTemplate": "?modal=import-reconciliations",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Import Reconciliations",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.imported-import-statement",
+      "resource": "bank-reconciliation",
+      "modalType": "imported-import-statement",
+      "urlTemplate": "?modal=imported-import-statement",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Imported Import Statement",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.magic-match",
+      "resource": "bank-reconciliation",
+      "modalType": "magic-match",
+      "urlTemplate": "?modal=magic-match",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Magic Match",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.magic-reconcile",
+      "resource": "bank-reconciliation",
+      "modalType": "magic-reconcile",
+      "urlTemplate": "?modal=magic-reconcile",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Magic Reconcile",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.manage-bank-fields",
+      "resource": "bank-reconciliation",
+      "modalType": "manage-bank-fields",
+      "urlTemplate": "?modal=manage-bank-fields",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Manage Bank Fields",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.manage-bank-rules",
+      "resource": "bank-reconciliation",
+      "modalType": "manage-bank-rules",
+      "urlTemplate": "?modal=manage-bank-rules",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Manage Bank Rules",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.new-bank-account",
+      "resource": "bank-reconciliation",
+      "modalType": "new-bank-account",
+      "urlTemplate": "?modal=new-bank-account",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "New Bank Account",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.pending-import-statement",
+      "resource": "bank-reconciliation",
+      "modalType": "pending-import-statement",
+      "urlTemplate": "?modal=pending-import-statement",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Pending Import Statement",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.quick-reconcile",
+      "resource": "bank-reconciliation",
+      "modalType": "quick-reconcile",
+      "urlTemplate": "?modal=quick-reconcile",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Quick Reconcile",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.reconciled-statement",
+      "resource": "bank-reconciliation",
+      "modalType": "reconciled-statement",
+      "urlTemplate": "?modal=reconciled-statement&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Reconciled Statement",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.reconciled-statement-line",
+      "resource": "bank-reconciliation",
+      "modalType": "reconciled-statement-line",
+      "urlTemplate": "?modal=reconciled-statement-line&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Reconciled Statement Line",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.reset-reconciliation",
+      "resource": "bank-reconciliation",
+      "modalType": "reset-reconciliation",
+      "urlTemplate": "?modal=reset-reconciliation",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Reset Reconciliation",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.shortcut-reconcile-br",
+      "resource": "bank-reconciliation",
+      "modalType": "shortcut-reconcile-br",
+      "urlTemplate": "?modal=shortcut-reconcile-br",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Shortcut Reconcile Br",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.types-rank",
+      "resource": "bank-reconciliation",
+      "modalType": "types-rank",
+      "urlTemplate": "?modal=types-rank",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Types Rank",
+      "requiresId": false
+    },
+    {
+      "key": "bank-reconciliation.modal.view-bank-recon-purchase-batch-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "view-bank-recon-purchase-batch-payment",
+      "urlTemplate": "?modal=view-bank-recon-purchase-batch-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Bank Recon Purchase Batch Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-bank-recon-sale-batch-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "view-bank-recon-sale-batch-payment",
+      "urlTemplate": "?modal=view-bank-recon-sale-batch-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Bank Recon Sale Batch Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-cash-transfer-br",
+      "resource": "bank-reconciliation",
+      "modalType": "view-cash-transfer-br",
+      "urlTemplate": "?modal=view-cash-transfer-br&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Cash Transfer Br",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-connected-bank",
+      "resource": "bank-reconciliation",
+      "modalType": "view-connected-bank",
+      "urlTemplate": "?modal=view-connected-bank&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Connected Bank",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-direct-cash-entry-br",
+      "resource": "bank-reconciliation",
+      "modalType": "view-direct-cash-entry-br",
+      "urlTemplate": "?modal=view-direct-cash-entry-br&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Direct Cash Entry Br",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-journal-br",
+      "resource": "bank-reconciliation",
+      "modalType": "view-journal-br",
+      "urlTemplate": "?modal=view-journal-br&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Journal Br",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-purchase",
+      "resource": "bank-reconciliation",
+      "modalType": "view-purchase",
+      "urlTemplate": "?modal=view-purchase&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Purchase",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-purchase-credit",
+      "resource": "bank-reconciliation",
+      "modalType": "view-purchase-credit",
+      "urlTemplate": "?modal=view-purchase-credit&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Purchase Credit",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-purchase-credit-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "view-purchase-credit-payment",
+      "urlTemplate": "?modal=view-purchase-credit-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Purchase Credit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-purchase-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "view-purchase-payment",
+      "urlTemplate": "?modal=view-purchase-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Purchase Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-reconciled-journal-br",
+      "resource": "bank-reconciliation",
+      "modalType": "view-reconciled-journal-br",
+      "urlTemplate": "?modal=view-reconciled-journal-br&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Reconciled Journal Br",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-reconciliations",
+      "resource": "bank-reconciliation",
+      "modalType": "view-reconciliations",
+      "urlTemplate": "?modal=view-reconciliations&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Reconciliations",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-sale",
+      "resource": "bank-reconciliation",
+      "modalType": "view-sale",
+      "urlTemplate": "?modal=view-sale&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Sale",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-sale-credit-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "view-sale-credit-payment",
+      "urlTemplate": "?modal=view-sale-credit-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Sale Credit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "bank-reconciliation.modal.view-sale-payment",
+      "resource": "bank-reconciliation",
+      "modalType": "view-sale-payment",
+      "urlTemplate": "?modal=view-sale-payment&id={id}",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "View Sale Payment",
+      "requiresId": true
+    },
+    {
+      "key": "capsules.modal.manages-types",
+      "resource": "capsules",
+      "modalType": "manages-types",
+      "urlTemplate": "?modal=manages-types",
+      "mountPath": "/home",
+      "label": "Manages Types",
+      "requiresId": false
+    },
+    {
+      "key": "capsules.modal.new-capsule",
+      "resource": "capsules",
+      "modalType": "new-capsule",
+      "urlTemplate": "?modal=new-capsule",
+      "mountPath": "/home",
+      "label": "New Capsule",
+      "requiresId": false
+    },
+    {
+      "key": "capsules.modal.view-capsule",
+      "resource": "capsules",
+      "modalType": "view-capsule",
+      "urlTemplate": "?modal=view-capsule&id={id}",
+      "mountPath": "/home",
+      "label": "View Capsule",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-edit-journal-entry",
+      "resource": "cashflow",
+      "modalType": "cashflow-edit-journal-entry",
+      "urlTemplate": "?modal=cashflow-edit-journal-entry&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow Edit Journal Entry",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-fast-fix",
+      "resource": "cashflow",
+      "modalType": "cashflow-fast-fix",
+      "urlTemplate": "?modal=cashflow-fast-fix",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow Fast Fix",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-fast-fix-cash-entry-lines",
+      "resource": "cashflow",
+      "modalType": "cashflow-fast-fix-cash-entry-lines",
+      "urlTemplate": "?modal=cashflow-fast-fix-cash-entry-lines",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow Fast Fix Cash Entry Lines",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-import-cash-transfer-journal",
+      "resource": "cashflow",
+      "modalType": "cashflow-import-cash-transfer-journal",
+      "urlTemplate": "?modal=cashflow-import-cash-transfer-journal",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow Import Cash Transfer Journal",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-import-direct-cash-journal",
+      "resource": "cashflow",
+      "modalType": "cashflow-import-direct-cash-journal",
+      "urlTemplate": "?modal=cashflow-import-direct-cash-journal",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow Import Direct Cash Journal",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-new-cash-in",
+      "resource": "cashflow",
+      "modalType": "cashflow-new-cash-in",
+      "urlTemplate": "?modal=cashflow-new-cash-in",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow New Cash In",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-new-cash-out",
+      "resource": "cashflow",
+      "modalType": "cashflow-new-cash-out",
+      "urlTemplate": "?modal=cashflow-new-cash-out",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow New Cash Out",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-new-cash-transfer",
+      "resource": "cashflow",
+      "modalType": "cashflow-new-cash-transfer",
+      "urlTemplate": "?modal=cashflow-new-cash-transfer",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow New Cash Transfer",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-new-collection-request",
+      "resource": "cashflow",
+      "modalType": "cashflow-new-collection-request",
+      "urlTemplate": "?modal=cashflow-new-collection-request",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow New Collection Request",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-new-direct-disbursement",
+      "resource": "cashflow",
+      "modalType": "cashflow-new-direct-disbursement",
+      "urlTemplate": "?modal=cashflow-new-direct-disbursement",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow New Direct Disbursement",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-new-journal-entry",
+      "resource": "cashflow",
+      "modalType": "cashflow-new-journal-entry",
+      "urlTemplate": "?modal=cashflow-new-journal-entry",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow New Journal Entry",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-reconciled-statement-line",
+      "resource": "cashflow",
+      "modalType": "cashflow-reconciled-statement-line",
+      "urlTemplate": "?modal=cashflow-reconciled-statement-line&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow Reconciled Statement Line",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-view-cash-transfer",
+      "resource": "cashflow",
+      "modalType": "cashflow-view-cash-transfer",
+      "urlTemplate": "?modal=cashflow-view-cash-transfer&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow View Cash Transfer",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-view-collection-request",
+      "resource": "cashflow",
+      "modalType": "cashflow-view-collection-request",
+      "urlTemplate": "?modal=cashflow-view-collection-request&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow View Collection Request",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-view-direct-cash-entry",
+      "resource": "cashflow",
+      "modalType": "cashflow-view-direct-cash-entry",
+      "urlTemplate": "?modal=cashflow-view-direct-cash-entry&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow View Direct Cash Entry",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-view-direct-disbursement",
+      "resource": "cashflow",
+      "modalType": "cashflow-view-direct-disbursement",
+      "urlTemplate": "?modal=cashflow-view-direct-disbursement&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow View Direct Disbursement",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-view-journal-entry",
+      "resource": "cashflow",
+      "modalType": "cashflow-view-journal-entry",
+      "urlTemplate": "?modal=cashflow-view-journal-entry&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow View Journal Entry",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-view-reconciled-journal-entry",
+      "resource": "cashflow",
+      "modalType": "cashflow-view-reconciled-journal-entry",
+      "urlTemplate": "?modal=cashflow-view-reconciled-journal-entry&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow View Reconciled Journal Entry",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.cashflow-view-sale-credit",
+      "resource": "cashflow",
+      "modalType": "cashflow-view-sale-credit",
+      "urlTemplate": "?modal=cashflow-view-sale-credit&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow View Sale Credit",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.edit-purchase-credit-payment",
+      "resource": "cashflow",
+      "modalType": "edit-purchase-credit-payment",
+      "urlTemplate": "?modal=edit-purchase-credit-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Edit Purchase Credit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.edit-purchase-payment",
+      "resource": "cashflow",
+      "modalType": "edit-purchase-payment",
+      "urlTemplate": "?modal=edit-purchase-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Edit Purchase Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.edit-sale-credit-payment",
+      "resource": "cashflow",
+      "modalType": "edit-sale-credit-payment",
+      "urlTemplate": "?modal=edit-sale-credit-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Edit Sale Credit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.edit-sale-payment",
+      "resource": "cashflow",
+      "modalType": "edit-sale-payment",
+      "urlTemplate": "?modal=edit-sale-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Edit Sale Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.new-bill-receipt",
+      "resource": "cashflow",
+      "modalType": "new-bill-receipt",
+      "urlTemplate": "?modal=new-bill-receipt",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "New Bill Receipt",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.new-invoice-receipt",
+      "resource": "cashflow",
+      "modalType": "new-invoice-receipt",
+      "urlTemplate": "?modal=new-invoice-receipt",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "New Invoice Receipt",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.view-purchase-batch-payment",
+      "resource": "cashflow",
+      "modalType": "view-purchase-batch-payment",
+      "urlTemplate": "?modal=view-purchase-batch-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "View Purchase Batch Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.view-purchase-credit-payment",
+      "resource": "cashflow",
+      "modalType": "view-purchase-credit-payment",
+      "urlTemplate": "?modal=view-purchase-credit-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "View Purchase Credit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.view-purchase-payment",
+      "resource": "cashflow",
+      "modalType": "view-purchase-payment",
+      "urlTemplate": "?modal=view-purchase-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "View Purchase Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.view-sale-batch-payment",
+      "resource": "cashflow",
+      "modalType": "view-sale-batch-payment",
+      "urlTemplate": "?modal=view-sale-batch-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "View Sale Batch Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.view-sale-credit-payment",
+      "resource": "cashflow",
+      "modalType": "view-sale-credit-payment",
+      "urlTemplate": "?modal=view-sale-credit-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "View Sale Credit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "cashflow.modal.view-sale-payment",
+      "resource": "cashflow",
+      "modalType": "view-sale-payment",
+      "urlTemplate": "?modal=view-sale-payment&id={id}",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "View Sale Payment",
+      "requiresId": true
+    },
+    {
+      "key": "catalogs.modal.add-items",
+      "resource": "catalogs",
+      "modalType": "add-items",
+      "urlTemplate": "?modal=add-items",
+      "mountPath": "/catalogs",
+      "label": "Add Items",
+      "requiresId": false
+    },
+    {
+      "key": "catalogs.modal.duplicate-catalog",
+      "resource": "catalogs",
+      "modalType": "duplicate-catalog",
+      "urlTemplate": "?modal=duplicate-catalog&id={id}",
+      "mountPath": "/catalogs",
+      "label": "Duplicate Catalog",
+      "requiresId": true
+    },
+    {
+      "key": "catalogs.modal.edit-catalog",
+      "resource": "catalogs",
+      "modalType": "edit-catalog",
+      "urlTemplate": "?modal=edit-catalog&id={id}",
+      "mountPath": "/catalogs",
+      "label": "Edit Catalog",
+      "requiresId": true
+    },
+    {
+      "key": "catalogs.modal.new-catalog",
+      "resource": "catalogs",
+      "modalType": "new-catalog",
+      "urlTemplate": "?modal=new-catalog",
+      "mountPath": "/catalogs",
+      "label": "New Catalog",
+      "requiresId": false
+    },
+    {
+      "key": "catalogs.modal.view-catalog",
+      "resource": "catalogs",
+      "modalType": "view-catalog",
+      "urlTemplate": "?modal=view-catalog&id={id}",
+      "mountPath": "/catalogs",
+      "label": "View Catalog",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.amend-gst-return",
+      "resource": "compliance",
+      "modalType": "amend-gst-return",
+      "urlTemplate": "?modal=amend-gst-return&id={id}",
+      "mountPath": "/home",
+      "label": "Amend Gst Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.amend-return",
+      "resource": "compliance",
+      "modalType": "amend-return",
+      "urlTemplate": "?modal=amend-return&id={id}",
+      "mountPath": "/home",
+      "label": "Amend Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.amend-sst-return",
+      "resource": "compliance",
+      "modalType": "amend-sst-return",
+      "urlTemplate": "?modal=amend-sst-return&id={id}",
+      "mountPath": "/home",
+      "label": "Amend Sst Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.approve-return",
+      "resource": "compliance",
+      "modalType": "approve-return",
+      "urlTemplate": "?modal=approve-return&id={id}",
+      "mountPath": "/home",
+      "label": "Approve Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.create-gst-return",
+      "resource": "compliance",
+      "modalType": "create-gst-return",
+      "urlTemplate": "?modal=create-gst-return",
+      "mountPath": "/home",
+      "label": "Create Gst Return",
+      "requiresId": false
+    },
+    {
+      "key": "compliance.modal.create-sst-return",
+      "resource": "compliance",
+      "modalType": "create-sst-return",
+      "urlTemplate": "?modal=create-sst-return",
+      "mountPath": "/home",
+      "label": "Create Sst Return",
+      "requiresId": false
+    },
+    {
+      "key": "compliance.modal.create-tax-return",
+      "resource": "compliance",
+      "modalType": "create-tax-return",
+      "urlTemplate": "?modal=create-tax-return",
+      "mountPath": "/home",
+      "label": "Create Tax Return",
+      "requiresId": false
+    },
+    {
+      "key": "compliance.modal.duplicate-gst-return",
+      "resource": "compliance",
+      "modalType": "duplicate-gst-return",
+      "urlTemplate": "?modal=duplicate-gst-return&id={id}",
+      "mountPath": "/home",
+      "label": "Duplicate Gst Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.duplicate-return",
+      "resource": "compliance",
+      "modalType": "duplicate-return",
+      "urlTemplate": "?modal=duplicate-return&id={id}",
+      "mountPath": "/home",
+      "label": "Duplicate Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.duplicate-sst-return",
+      "resource": "compliance",
+      "modalType": "duplicate-sst-return",
+      "urlTemplate": "?modal=duplicate-sst-return&id={id}",
+      "mountPath": "/home",
+      "label": "Duplicate Sst Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.edit-gst-return",
+      "resource": "compliance",
+      "modalType": "edit-gst-return",
+      "urlTemplate": "?modal=edit-gst-return&id={id}",
+      "mountPath": "/home",
+      "label": "Edit Gst Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.edit-sst-return",
+      "resource": "compliance",
+      "modalType": "edit-sst-return",
+      "urlTemplate": "?modal=edit-sst-return&id={id}",
+      "mountPath": "/home",
+      "label": "Edit Sst Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.edit-submission",
+      "resource": "compliance",
+      "modalType": "edit-submission",
+      "urlTemplate": "?modal=edit-submission&id={id}",
+      "mountPath": "/home",
+      "label": "Edit Submission",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.edit-tax-return",
+      "resource": "compliance",
+      "modalType": "edit-tax-return",
+      "urlTemplate": "?modal=edit-tax-return&id={id}",
+      "mountPath": "/home",
+      "label": "Edit Tax Return",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.file-gst-return",
+      "resource": "compliance",
+      "modalType": "file-gst-return",
+      "urlTemplate": "?modal=file-gst-return",
+      "mountPath": "/home",
+      "label": "File Gst Return",
+      "requiresId": false
+    },
+    {
+      "key": "compliance.modal.file-return",
+      "resource": "compliance",
+      "modalType": "file-return",
+      "urlTemplate": "?modal=file-return",
+      "mountPath": "/home",
+      "label": "File Return",
+      "requiresId": false
+    },
+    {
+      "key": "compliance.modal.file-sst-return",
+      "resource": "compliance",
+      "modalType": "file-sst-return",
+      "urlTemplate": "?modal=file-sst-return",
+      "mountPath": "/home",
+      "label": "File Sst Return",
+      "requiresId": false
+    },
+    {
+      "key": "compliance.modal.new-submission",
+      "resource": "compliance",
+      "modalType": "new-submission",
+      "urlTemplate": "?modal=new-submission",
+      "mountPath": "/home",
+      "label": "New Submission",
+      "requiresId": false
+    },
+    {
+      "key": "compliance.modal.resubmission-needed",
+      "resource": "compliance",
+      "modalType": "resubmission-needed",
+      "urlTemplate": "?modal=resubmission-needed",
+      "mountPath": "/home",
+      "label": "Resubmission Needed",
+      "requiresId": false
+    },
+    {
+      "key": "compliance.modal.view-batch",
+      "resource": "compliance",
+      "modalType": "view-batch",
+      "urlTemplate": "?modal=view-batch&id={id}",
+      "mountPath": "/home",
+      "label": "View Batch",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-cancelled",
+      "resource": "compliance",
+      "modalType": "view-cancelled",
+      "urlTemplate": "?modal=view-cancelled&id={id}",
+      "mountPath": "/home",
+      "label": "View Cancelled",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-confirmations",
+      "resource": "compliance",
+      "modalType": "view-confirmations",
+      "urlTemplate": "?modal=view-confirmations&id={id}",
+      "mountPath": "/home",
+      "label": "View Confirmations",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-filed-and-paid",
+      "resource": "compliance",
+      "modalType": "view-filed-and-paid",
+      "urlTemplate": "?modal=view-filed-and-paid&id={id}",
+      "mountPath": "/home",
+      "label": "View Filed And Paid",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-gst-cancelled",
+      "resource": "compliance",
+      "modalType": "view-gst-cancelled",
+      "urlTemplate": "?modal=view-gst-cancelled&id={id}",
+      "mountPath": "/home",
+      "label": "View Gst Cancelled",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-gst-filed",
+      "resource": "compliance",
+      "modalType": "view-gst-filed",
+      "urlTemplate": "?modal=view-gst-filed&id={id}",
+      "mountPath": "/home",
+      "label": "View Gst Filed",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-gst-in-progress",
+      "resource": "compliance",
+      "modalType": "view-gst-in-progress",
+      "urlTemplate": "?modal=view-gst-in-progress&id={id}",
+      "mountPath": "/home",
+      "label": "View Gst In Progress",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-in-progress",
+      "resource": "compliance",
+      "modalType": "view-in-progress",
+      "urlTemplate": "?modal=view-in-progress&id={id}",
+      "mountPath": "/home",
+      "label": "View In Progress",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-resubmission",
+      "resource": "compliance",
+      "modalType": "view-resubmission",
+      "urlTemplate": "?modal=view-resubmission&id={id}",
+      "mountPath": "/home",
+      "label": "View Resubmission",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-sst-cancelled",
+      "resource": "compliance",
+      "modalType": "view-sst-cancelled",
+      "urlTemplate": "?modal=view-sst-cancelled&id={id}",
+      "mountPath": "/home",
+      "label": "View Sst Cancelled",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-sst-filed",
+      "resource": "compliance",
+      "modalType": "view-sst-filed",
+      "urlTemplate": "?modal=view-sst-filed&id={id}",
+      "mountPath": "/home",
+      "label": "View Sst Filed",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-sst-in-progress",
+      "resource": "compliance",
+      "modalType": "view-sst-in-progress",
+      "urlTemplate": "?modal=view-sst-in-progress&id={id}",
+      "mountPath": "/home",
+      "label": "View Sst In Progress",
+      "requiresId": true
+    },
+    {
+      "key": "compliance.modal.view-tax-return",
+      "resource": "compliance",
+      "modalType": "view-tax-return",
+      "urlTemplate": "?modal=view-tax-return&id={id}",
+      "mountPath": "/home",
+      "label": "View Tax Return",
+      "requiresId": true
+    },
+    {
+      "key": "data-exports.modal.download-balance-sheet-report",
+      "resource": "data-exports",
+      "modalType": "download-balance-sheet-report",
+      "urlTemplate": "?modal=download-balance-sheet-report",
+      "mountPath": "/home",
+      "label": "Download Balance Sheet Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-cashflow-report",
+      "resource": "data-exports",
+      "modalType": "download-cashflow-report",
+      "urlTemplate": "?modal=download-cashflow-report",
+      "mountPath": "/home",
+      "label": "Download Cashflow Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-equity-movement-report",
+      "resource": "data-exports",
+      "modalType": "download-equity-movement-report",
+      "urlTemplate": "?modal=download-equity-movement-report",
+      "mountPath": "/home",
+      "label": "Download Equity Movement Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-journal-summary-report",
+      "resource": "data-exports",
+      "modalType": "download-journal-summary-report",
+      "urlTemplate": "?modal=download-journal-summary-report",
+      "mountPath": "/home",
+      "label": "Download Journal Summary Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-merged-pdf",
+      "resource": "data-exports",
+      "modalType": "download-merged-pdf",
+      "urlTemplate": "?modal=download-merged-pdf",
+      "mountPath": "/home",
+      "label": "Download Merged Pdf",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-profit-and-loss-by-month-report",
+      "resource": "data-exports",
+      "modalType": "download-profit-and-loss-by-month-report",
+      "urlTemplate": "?modal=download-profit-and-loss-by-month-report",
+      "mountPath": "/home",
+      "label": "Download Profit And Loss By Month Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-profit-and-loss-report",
+      "resource": "data-exports",
+      "modalType": "download-profit-and-loss-report",
+      "urlTemplate": "?modal=download-profit-and-loss-report",
+      "mountPath": "/home",
+      "label": "Download Profit And Loss Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-purchases-cashflow-summary-report",
+      "resource": "data-exports",
+      "modalType": "download-purchases-cashflow-summary-report",
+      "urlTemplate": "?modal=download-purchases-cashflow-summary-report",
+      "mountPath": "/home",
+      "label": "Download Purchases Cashflow Summary Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-purchases-summary-report",
+      "resource": "data-exports",
+      "modalType": "download-purchases-summary-report",
+      "urlTemplate": "?modal=download-purchases-summary-report",
+      "mountPath": "/home",
+      "label": "Download Purchases Summary Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-report",
+      "resource": "data-exports",
+      "modalType": "download-report",
+      "urlTemplate": "?modal=download-report",
+      "mountPath": "/home",
+      "label": "Download Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-sales-cashflow-summary-report",
+      "resource": "data-exports",
+      "modalType": "download-sales-cashflow-summary-report",
+      "urlTemplate": "?modal=download-sales-cashflow-summary-report",
+      "mountPath": "/home",
+      "label": "Download Sales Cashflow Summary Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-sales-summary-report",
+      "resource": "data-exports",
+      "modalType": "download-sales-summary-report",
+      "urlTemplate": "?modal=download-sales-summary-report",
+      "mountPath": "/home",
+      "label": "Download Sales Summary Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-soa-sale-transactions-report",
+      "resource": "data-exports",
+      "modalType": "download-soa-sale-transactions-report",
+      "urlTemplate": "?modal=download-soa-sale-transactions-report",
+      "mountPath": "/home",
+      "label": "Download Soa Sale Transactions Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-trial-balance-report",
+      "resource": "data-exports",
+      "modalType": "download-trial-balance-report",
+      "urlTemplate": "?modal=download-trial-balance-report",
+      "mountPath": "/home",
+      "label": "Download Trial Balance Report",
+      "requiresId": false
+    },
+    {
+      "key": "data-exports.modal.download-vat-ledger-report",
+      "resource": "data-exports",
+      "modalType": "download-vat-ledger-report",
+      "urlTemplate": "?modal=download-vat-ledger-report",
+      "mountPath": "/home",
+      "label": "Download Vat Ledger Report",
+      "requiresId": false
+    },
+    {
+      "key": "employees.modal.disburse-payout",
+      "resource": "employees",
+      "modalType": "disburse-payout",
+      "urlTemplate": "?modal=disburse-payout",
+      "mountPath": "/home",
+      "label": "Disburse Payout",
+      "requiresId": false
+    },
+    {
+      "key": "employees.modal.duplicate-claim",
+      "resource": "employees",
+      "modalType": "duplicate-claim",
+      "urlTemplate": "?modal=duplicate-claim&id={id}",
+      "mountPath": "/home",
+      "label": "Duplicate Claim",
+      "requiresId": true
+    },
+    {
+      "key": "employees.modal.edit-claim",
+      "resource": "employees",
+      "modalType": "edit-claim",
+      "urlTemplate": "?modal=edit-claim&id={id}",
+      "mountPath": "/home",
+      "label": "Edit Claim",
+      "requiresId": true
+    },
+    {
+      "key": "employees.modal.edit-employee",
+      "resource": "employees",
+      "modalType": "edit-employee",
+      "urlTemplate": "?modal=edit-employee&id={id}",
+      "mountPath": "/home",
+      "label": "Edit Employee",
+      "requiresId": true
+    },
+    {
+      "key": "employees.modal.import-claims",
+      "resource": "employees",
+      "modalType": "import-claims",
+      "urlTemplate": "?modal=import-claims",
+      "mountPath": "/home",
+      "label": "Import Claims",
+      "requiresId": false
+    },
+    {
+      "key": "employees.modal.import-employees",
+      "resource": "employees",
+      "modalType": "import-employees",
+      "urlTemplate": "?modal=import-employees",
+      "mountPath": "/home",
+      "label": "Import Employees",
+      "requiresId": false
+    },
+    {
+      "key": "employees.modal.new-claim",
+      "resource": "employees",
+      "modalType": "new-claim",
+      "urlTemplate": "?modal=new-claim",
+      "mountPath": "/home",
+      "label": "New Claim",
+      "requiresId": false
+    },
+    {
+      "key": "employees.modal.new-employee",
+      "resource": "employees",
+      "modalType": "new-employee",
+      "urlTemplate": "?modal=new-employee",
+      "mountPath": "/home",
+      "label": "New Employee",
+      "requiresId": false
+    },
+    {
+      "key": "employees.modal.record-payout",
+      "resource": "employees",
+      "modalType": "record-payout",
+      "urlTemplate": "?modal=record-payout",
+      "mountPath": "/home",
+      "label": "Record Payout",
+      "requiresId": false
+    },
+    {
+      "key": "employees.modal.view-claim",
+      "resource": "employees",
+      "modalType": "view-claim",
+      "urlTemplate": "?modal=view-claim&id={id}",
+      "mountPath": "/home",
+      "label": "View Claim",
+      "requiresId": true
+    },
+    {
+      "key": "employees.modal.view-employee",
+      "resource": "employees",
+      "modalType": "view-employee",
+      "urlTemplate": "?modal=view-employee&id={id}",
+      "mountPath": "/home",
+      "label": "View Employee",
+      "requiresId": true
+    },
+    {
+      "key": "fastfile.modal.create-tax-return",
+      "resource": "fastfile",
+      "modalType": "create-tax-return",
+      "urlTemplate": "?modal=create-tax-return",
+      "mountPath": "/home",
+      "label": "Create Tax Return",
+      "requiresId": false
+    },
+    {
+      "key": "fastfile.modal.edit-tax-return",
+      "resource": "fastfile",
+      "modalType": "edit-tax-return",
+      "urlTemplate": "?modal=edit-tax-return&id={id}",
+      "mountPath": "/home",
+      "label": "Edit Tax Return",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.close-out-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "close-out-fixed-asset",
+      "urlTemplate": "?modal=close-out-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Close Out Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.discard-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "discard-fixed-asset",
+      "urlTemplate": "?modal=discard-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Discard Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.duplicate-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "duplicate-fixed-asset",
+      "urlTemplate": "?modal=duplicate-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Duplicate Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.duplicate-transfer-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "duplicate-transfer-fixed-asset",
+      "urlTemplate": "?modal=duplicate-transfer-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Duplicate Transfer Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.edit-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "edit-fixed-asset",
+      "urlTemplate": "?modal=edit-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Edit Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.edit-transfered-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "edit-transfered-fixed-asset",
+      "urlTemplate": "?modal=edit-transfered-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Edit Transfered Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.import-register-fixed-assets",
+      "resource": "fixed-assets",
+      "modalType": "import-register-fixed-assets",
+      "urlTemplate": "?modal=import-register-fixed-assets",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Import Register Fixed Assets",
+      "requiresId": false
+    },
+    {
+      "key": "fixed-assets.modal.import-transfer-fixed-assets",
+      "resource": "fixed-assets",
+      "modalType": "import-transfer-fixed-assets",
+      "urlTemplate": "?modal=import-transfer-fixed-assets",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Import Transfer Fixed Assets",
+      "requiresId": false
+    },
+    {
+      "key": "fixed-assets.modal.new-register-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "new-register-fixed-asset",
+      "urlTemplate": "?modal=new-register-fixed-asset",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "New Register Fixed Asset",
+      "requiresId": false
+    },
+    {
+      "key": "fixed-assets.modal.sell-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "sell-fixed-asset",
+      "urlTemplate": "?modal=sell-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Sell Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.transfer-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "transfer-fixed-asset",
+      "urlTemplate": "?modal=transfer-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "Transfer Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "fixed-assets.modal.view-fixed-asset",
+      "resource": "fixed-assets",
+      "modalType": "view-fixed-asset",
+      "urlTemplate": "?modal=view-fixed-asset&id={id}",
+      "mountPath": "/fixed-assets/register/active",
+      "label": "View Fixed Asset",
+      "requiresId": true
+    },
+    {
+      "key": "inventory.modal.view-inventory",
+      "resource": "inventory",
+      "modalType": "view-inventory",
+      "urlTemplate": "?modal=view-inventory&id={id}",
+      "mountPath": "/inventory/balances/all-items",
+      "label": "View Inventory",
+      "requiresId": true
+    },
+    {
+      "key": "items.modal.add-items",
+      "resource": "items",
+      "modalType": "add-items",
+      "urlTemplate": "?modal=add-items",
+      "mountPath": "/items/all-items",
+      "label": "Add Items",
+      "requiresId": false
+    },
+    {
+      "key": "items.modal.duplicate-item",
+      "resource": "items",
+      "modalType": "duplicate-item",
+      "urlTemplate": "?modal=duplicate-item&id={id}",
+      "mountPath": "/items/all-items",
+      "label": "Duplicate Item",
+      "requiresId": true
+    },
+    {
+      "key": "items.modal.edit-item",
+      "resource": "items",
+      "modalType": "edit-item",
+      "urlTemplate": "?modal=edit-item&id={id}",
+      "mountPath": "/items/all-items",
+      "label": "Edit Item",
+      "requiresId": true
+    },
+    {
+      "key": "items.modal.import-inventory-items",
+      "resource": "items",
+      "modalType": "import-inventory-items",
+      "urlTemplate": "?modal=import-inventory-items",
+      "mountPath": "/items/all-items",
+      "label": "Import Inventory Items",
+      "requiresId": false
+    },
+    {
+      "key": "items.modal.import-items",
+      "resource": "items",
+      "modalType": "import-items",
+      "urlTemplate": "?modal=import-items",
+      "mountPath": "/items/all-items",
+      "label": "Import Items",
+      "requiresId": false
+    },
+    {
+      "key": "items.modal.new-item",
+      "resource": "items",
+      "modalType": "new-item",
+      "urlTemplate": "?modal=new-item",
+      "mountPath": "/items/all-items",
+      "label": "New Item",
+      "requiresId": false
+    },
+    {
+      "key": "items.modal.view-item",
+      "resource": "items",
+      "modalType": "view-item",
+      "urlTemplate": "?modal=view-item&id={id}",
+      "mountPath": "/items/all-items",
+      "label": "View Item",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.duplicate-cash-in-journal",
+      "resource": "journal-entries",
+      "modalType": "duplicate-cash-in-journal",
+      "urlTemplate": "?modal=duplicate-cash-in-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Duplicate Cash In Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.duplicate-cash-out-journal",
+      "resource": "journal-entries",
+      "modalType": "duplicate-cash-out-journal",
+      "urlTemplate": "?modal=duplicate-cash-out-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Duplicate Cash Out Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.duplicate-cash-transfer-journal",
+      "resource": "journal-entries",
+      "modalType": "duplicate-cash-transfer-journal",
+      "urlTemplate": "?modal=duplicate-cash-transfer-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Duplicate Cash Transfer Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.duplicate-journal",
+      "resource": "journal-entries",
+      "modalType": "duplicate-journal",
+      "urlTemplate": "?modal=duplicate-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Duplicate Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.duplicate-opening-balance",
+      "resource": "journal-entries",
+      "modalType": "duplicate-opening-balance",
+      "urlTemplate": "?modal=duplicate-opening-balance&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Duplicate Opening Balance",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.duplicate-schedule-journal",
+      "resource": "journal-entries",
+      "modalType": "duplicate-schedule-journal",
+      "urlTemplate": "?modal=duplicate-schedule-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Duplicate Schedule Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.edit-cash-in-journal",
+      "resource": "journal-entries",
+      "modalType": "edit-cash-in-journal",
+      "urlTemplate": "?modal=edit-cash-in-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Edit Cash In Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.edit-cash-out-journal",
+      "resource": "journal-entries",
+      "modalType": "edit-cash-out-journal",
+      "urlTemplate": "?modal=edit-cash-out-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Edit Cash Out Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.edit-cash-transfer-journal",
+      "resource": "journal-entries",
+      "modalType": "edit-cash-transfer-journal",
+      "urlTemplate": "?modal=edit-cash-transfer-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Edit Cash Transfer Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.edit-journal",
+      "resource": "journal-entries",
+      "modalType": "edit-journal",
+      "urlTemplate": "?modal=edit-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Edit Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.edit-schedule-journal",
+      "resource": "journal-entries",
+      "modalType": "edit-schedule-journal",
+      "urlTemplate": "?modal=edit-schedule-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Edit Schedule Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.import-entries",
+      "resource": "journal-entries",
+      "modalType": "import-entries",
+      "urlTemplate": "?modal=import-entries",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Import Entries",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.journal-fast-fix",
+      "resource": "journal-entries",
+      "modalType": "journal-fast-fix",
+      "urlTemplate": "?modal=journal-fast-fix",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Journal Fast Fix",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.journal-fast-fix-journal-lines",
+      "resource": "journal-entries",
+      "modalType": "journal-fast-fix-journal-lines",
+      "urlTemplate": "?modal=journal-fast-fix-journal-lines",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Journal Fast Fix Journal Lines",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.journal-reconciled-statement-line",
+      "resource": "journal-entries",
+      "modalType": "journal-reconciled-statement-line",
+      "urlTemplate": "?modal=journal-reconciled-statement-line&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Journal Reconciled Statement Line",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.new-cash-in-journal",
+      "resource": "journal-entries",
+      "modalType": "new-cash-in-journal",
+      "urlTemplate": "?modal=new-cash-in-journal",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "New Cash In Journal",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.new-cash-out-journal",
+      "resource": "journal-entries",
+      "modalType": "new-cash-out-journal",
+      "urlTemplate": "?modal=new-cash-out-journal",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "New Cash Out Journal",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.new-cash-transfer-journal",
+      "resource": "journal-entries",
+      "modalType": "new-cash-transfer-journal",
+      "urlTemplate": "?modal=new-cash-transfer-journal",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "New Cash Transfer Journal",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.new-journal",
+      "resource": "journal-entries",
+      "modalType": "new-journal",
+      "urlTemplate": "?modal=new-journal",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "New Journal",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.new-opening-balance",
+      "resource": "journal-entries",
+      "modalType": "new-opening-balance",
+      "urlTemplate": "?modal=new-opening-balance",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "New Opening Balance",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.new-schedule-journal",
+      "resource": "journal-entries",
+      "modalType": "new-schedule-journal",
+      "urlTemplate": "?modal=new-schedule-journal",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "New Schedule Journal",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.new-tracking-tags",
+      "resource": "journal-entries",
+      "modalType": "new-tracking-tags",
+      "urlTemplate": "?modal=new-tracking-tags",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "New Tracking Tags",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.schedule-journal-fast-fix",
+      "resource": "journal-entries",
+      "modalType": "schedule-journal-fast-fix",
+      "urlTemplate": "?modal=schedule-journal-fast-fix",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Schedule Journal Fast Fix",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.schedule-journal-fast-fix-journal-lines",
+      "resource": "journal-entries",
+      "modalType": "schedule-journal-fast-fix-journal-lines",
+      "urlTemplate": "?modal=schedule-journal-fast-fix-journal-lines",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "Schedule Journal Fast Fix Journal Lines",
+      "requiresId": false
+    },
+    {
+      "key": "journal-entries.modal.view-capsule",
+      "resource": "journal-entries",
+      "modalType": "view-capsule",
+      "urlTemplate": "?modal=view-capsule&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "View Capsule",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.view-cash-transfer",
+      "resource": "journal-entries",
+      "modalType": "view-cash-transfer",
+      "urlTemplate": "?modal=view-cash-transfer&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "View Cash Transfer",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.view-direct-cash-entry",
+      "resource": "journal-entries",
+      "modalType": "view-direct-cash-entry",
+      "urlTemplate": "?modal=view-direct-cash-entry&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "View Direct Cash Entry",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.view-journal",
+      "resource": "journal-entries",
+      "modalType": "view-journal",
+      "urlTemplate": "?modal=view-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "View Journal",
+      "requiresId": true
+    },
+    {
+      "key": "journal-entries.modal.view-schedule-journal",
+      "resource": "journal-entries",
+      "modalType": "view-schedule-journal",
+      "urlTemplate": "?modal=view-schedule-journal&id={id}",
+      "mountPath": "/journal-entries/all-journals/active-journal-entries",
+      "label": "View Schedule Journal",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-credits.modal.duplicate-purchase-credit",
+      "resource": "purchase-credits",
+      "modalType": "duplicate-purchase-credit",
+      "urlTemplate": "?modal=duplicate-purchase-credit&id={id}",
+      "mountPath": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "Duplicate Purchase Credit",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-credits.modal.edit-purchase-credit",
+      "resource": "purchase-credits",
+      "modalType": "edit-purchase-credit",
+      "urlTemplate": "?modal=edit-purchase-credit&id={id}",
+      "mountPath": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "Edit Purchase Credit",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-credits.modal.fast-fix-purchase-credit",
+      "resource": "purchase-credits",
+      "modalType": "fast-fix-purchase-credit",
+      "urlTemplate": "?modal=fast-fix-purchase-credit",
+      "mountPath": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "Fast Fix Purchase Credit",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-credits.modal.fast-fix-purchase-credit-line-items",
+      "resource": "purchase-credits",
+      "modalType": "fast-fix-purchase-credit-line-items",
+      "urlTemplate": "?modal=fast-fix-purchase-credit-line-items",
+      "mountPath": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "Fast Fix Purchase Credit Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-credits.modal.import-purchase-credits-items",
+      "resource": "purchase-credits",
+      "modalType": "import-purchase-credits-items",
+      "urlTemplate": "?modal=import-purchase-credits-items",
+      "mountPath": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "Import Purchase Credits Items",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-credits.modal.new-purchase-credit",
+      "resource": "purchase-credits",
+      "modalType": "new-purchase-credit",
+      "urlTemplate": "?modal=new-purchase-credit",
+      "mountPath": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "New Purchase Credit",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-credits.modal.purchase-credit-reconciled-statement-line",
+      "resource": "purchase-credits",
+      "modalType": "purchase-credit-reconciled-statement-line",
+      "urlTemplate": "?modal=purchase-credit-reconciled-statement-line&id={id}",
+      "mountPath": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "Purchase Credit Reconciled Statement Line",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-credits.modal.view-purchase-credit",
+      "resource": "purchase-credits",
+      "modalType": "view-purchase-credit",
+      "urlTemplate": "?modal=view-purchase-credit&id={id}",
+      "mountPath": "/purchase-credits/transactions/active-purchase-credits",
+      "label": "View Purchase Credit",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-deposits.modal.manage-deposits-purchase",
+      "resource": "purchase-deposits",
+      "modalType": "manage-deposits-purchase",
+      "urlTemplate": "?modal=manage-deposits-purchase",
+      "mountPath": "/purchase-deposits/balances/all",
+      "label": "Manage Deposits Purchase",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-orders.modal.convert-order-to-bill",
+      "resource": "purchase-orders",
+      "modalType": "convert-order-to-bill",
+      "urlTemplate": "?modal=convert-order-to-bill&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Convert Order To Bill",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.convert-order-to-recurring-bill",
+      "resource": "purchase-orders",
+      "modalType": "convert-order-to-recurring-bill",
+      "urlTemplate": "?modal=convert-order-to-recurring-bill&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Convert Order To Recurring Bill",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.convert-request-to-bill",
+      "resource": "purchase-orders",
+      "modalType": "convert-request-to-bill",
+      "urlTemplate": "?modal=convert-request-to-bill&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Convert Request To Bill",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.convert-request-to-order",
+      "resource": "purchase-orders",
+      "modalType": "convert-request-to-order",
+      "urlTemplate": "?modal=convert-request-to-order&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Convert Request To Order",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.convert-request-to-recurring-bill",
+      "resource": "purchase-orders",
+      "modalType": "convert-request-to-recurring-bill",
+      "urlTemplate": "?modal=convert-request-to-recurring-bill&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Convert Request To Recurring Bill",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.duplicate-purchase-order",
+      "resource": "purchase-orders",
+      "modalType": "duplicate-purchase-order",
+      "urlTemplate": "?modal=duplicate-purchase-order&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Duplicate Purchase Order",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.duplicate-request",
+      "resource": "purchase-orders",
+      "modalType": "duplicate-request",
+      "urlTemplate": "?modal=duplicate-request&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Duplicate Request",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.edit-purchase-order",
+      "resource": "purchase-orders",
+      "modalType": "edit-purchase-order",
+      "urlTemplate": "?modal=edit-purchase-order&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Edit Purchase Order",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.edit-request",
+      "resource": "purchase-orders",
+      "modalType": "edit-request",
+      "urlTemplate": "?modal=edit-request&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Edit Request",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.import-purchase-orders",
+      "resource": "purchase-orders",
+      "modalType": "import-purchase-orders",
+      "urlTemplate": "?modal=import-purchase-orders",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Import Purchase Orders",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-orders.modal.new-purchase-order",
+      "resource": "purchase-orders",
+      "modalType": "new-purchase-order",
+      "urlTemplate": "?modal=new-purchase-order",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "New Purchase Order",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-orders.modal.new-request",
+      "resource": "purchase-orders",
+      "modalType": "new-request",
+      "urlTemplate": "?modal=new-request",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "New Request",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-orders.modal.send-request-for-signature",
+      "resource": "purchase-orders",
+      "modalType": "send-request-for-signature",
+      "urlTemplate": "?modal=send-request-for-signature&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Send Request For Signature",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.todo-list",
+      "resource": "purchase-orders",
+      "modalType": "todo-list",
+      "urlTemplate": "?modal=todo-list",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Todo List",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-orders.modal.view-purchase-order",
+      "resource": "purchase-orders",
+      "modalType": "view-purchase-order",
+      "urlTemplate": "?modal=view-purchase-order&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "View Purchase Order",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.view-purchase-result",
+      "resource": "purchase-orders",
+      "modalType": "view-purchase-result",
+      "urlTemplate": "?modal=view-purchase-result&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "View Purchase Result",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.view-request",
+      "resource": "purchase-orders",
+      "modalType": "view-request",
+      "urlTemplate": "?modal=view-request&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "View Request",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-orders.modal.view-scheduled-purchase-result",
+      "resource": "purchase-orders",
+      "modalType": "view-scheduled-purchase-result",
+      "urlTemplate": "?modal=view-scheduled-purchase-result&id={id}",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "View Scheduled Purchase Result",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-payments.modal.purchase-credit-note-refund",
+      "resource": "purchase-payments",
+      "modalType": "purchase-credit-note-refund",
+      "urlTemplate": "?modal=purchase-credit-note-refund",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase Credit Note Refund",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-payments.modal.purchase-delete-credit-note-refund",
+      "resource": "purchase-payments",
+      "modalType": "purchase-delete-credit-note-refund",
+      "urlTemplate": "?modal=purchase-delete-credit-note-refund&id={id}",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase Delete Credit Note Refund",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-payments.modal.purchase-delete-payment",
+      "resource": "purchase-payments",
+      "modalType": "purchase-delete-payment",
+      "urlTemplate": "?modal=purchase-delete-payment&id={id}",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase Delete Payment",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-payments.modal.purchase-edit-credit-note-refund",
+      "resource": "purchase-payments",
+      "modalType": "purchase-edit-credit-note-refund",
+      "urlTemplate": "?modal=purchase-edit-credit-note-refund&id={id}",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase Edit Credit Note Refund",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-payments.modal.purchase-edit-payment",
+      "resource": "purchase-payments",
+      "modalType": "purchase-edit-payment",
+      "urlTemplate": "?modal=purchase-edit-payment&id={id}",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase Edit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-payments.modal.purchase-view-batch-payment",
+      "resource": "purchase-payments",
+      "modalType": "purchase-view-batch-payment",
+      "urlTemplate": "?modal=purchase-view-batch-payment&id={id}",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase View Batch Payment",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-payments.modal.purchase-view-disbursement",
+      "resource": "purchase-payments",
+      "modalType": "purchase-view-disbursement",
+      "urlTemplate": "?modal=purchase-view-disbursement&id={id}",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase View Disbursement",
+      "requiresId": true
+    },
+    {
+      "key": "purchase-payments.modal.purchase-view-payment",
+      "resource": "purchase-payments",
+      "modalType": "purchase-view-payment",
+      "urlTemplate": "?modal=purchase-view-payment&id={id}",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase View Payment",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.duplicate-purchase",
+      "resource": "purchases",
+      "modalType": "duplicate-purchase",
+      "urlTemplate": "?modal=duplicate-purchase&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Duplicate Purchase",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.duplicate-scheduled-purchase",
+      "resource": "purchases",
+      "modalType": "duplicate-scheduled-purchase",
+      "urlTemplate": "?modal=duplicate-scheduled-purchase&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Duplicate Scheduled Purchase",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.edit-purchase",
+      "resource": "purchases",
+      "modalType": "edit-purchase",
+      "urlTemplate": "?modal=edit-purchase&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Edit Purchase",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.edit-scheduled-purchase",
+      "resource": "purchases",
+      "modalType": "edit-scheduled-purchase",
+      "urlTemplate": "?modal=edit-scheduled-purchase&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Edit Scheduled Purchase",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.fast-fix-purchase",
+      "resource": "purchases",
+      "modalType": "fast-fix-purchase",
+      "urlTemplate": "?modal=fast-fix-purchase",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Fast Fix Purchase",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.fast-fix-purchase-line-items",
+      "resource": "purchases",
+      "modalType": "fast-fix-purchase-line-items",
+      "urlTemplate": "?modal=fast-fix-purchase-line-items",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Fast Fix Purchase Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.fast-fix-scheduled-purchase",
+      "resource": "purchases",
+      "modalType": "fast-fix-scheduled-purchase",
+      "urlTemplate": "?modal=fast-fix-scheduled-purchase",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Fast Fix Scheduled Purchase",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.fast-fix-scheduled-purchase-line-items",
+      "resource": "purchases",
+      "modalType": "fast-fix-scheduled-purchase-line-items",
+      "urlTemplate": "?modal=fast-fix-scheduled-purchase-line-items",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Fast Fix Scheduled Purchase Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.import-bill-items",
+      "resource": "purchases",
+      "modalType": "import-bill-items",
+      "urlTemplate": "?modal=import-bill-items",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Import Bill Items",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.import-bills",
+      "resource": "purchases",
+      "modalType": "import-bills",
+      "urlTemplate": "?modal=import-bills",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Import Bills",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.make-purchase-recurring",
+      "resource": "purchases",
+      "modalType": "make-purchase-recurring",
+      "urlTemplate": "?modal=make-purchase-recurring&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Make Purchase Recurring",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.new-bill-receipt",
+      "resource": "purchases",
+      "modalType": "new-bill-receipt",
+      "urlTemplate": "?modal=new-bill-receipt",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "New Bill Receipt",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.new-contact",
+      "resource": "purchases",
+      "modalType": "new-contact",
+      "urlTemplate": "?modal=new-contact",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "New Contact",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.new-purchase",
+      "resource": "purchases",
+      "modalType": "new-purchase",
+      "urlTemplate": "?modal=new-purchase",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "New Purchase",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.new-scheduled-purchase",
+      "resource": "purchases",
+      "modalType": "new-scheduled-purchase",
+      "urlTemplate": "?modal=new-scheduled-purchase",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "New Scheduled Purchase",
+      "requiresId": false
+    },
+    {
+      "key": "purchases.modal.purchase-duplicate-order",
+      "resource": "purchases",
+      "modalType": "purchase-duplicate-order",
+      "urlTemplate": "?modal=purchase-duplicate-order&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Purchase Duplicate Order",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.purchase-edit-order",
+      "resource": "purchases",
+      "modalType": "purchase-edit-order",
+      "urlTemplate": "?modal=purchase-edit-order&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Purchase Edit Order",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.purchase-reconciled-statement-line",
+      "resource": "purchases",
+      "modalType": "purchase-reconciled-statement-line",
+      "urlTemplate": "?modal=purchase-reconciled-statement-line&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Purchase Reconciled Statement Line",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.purchase-view-order",
+      "resource": "purchases",
+      "modalType": "purchase-view-order",
+      "urlTemplate": "?modal=purchase-view-order&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Purchase View Order",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.view_purchase_credit",
+      "resource": "purchases",
+      "modalType": "view_purchase_credit",
+      "urlTemplate": "?modal=view_purchase_credit&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "View Purchase Credit",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.view-billed-billable-item",
+      "resource": "purchases",
+      "modalType": "view-billed-billable-item",
+      "urlTemplate": "?modal=view-billed-billable-item&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "View Billed Billable Item",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.view-purchase",
+      "resource": "purchases",
+      "modalType": "view-purchase",
+      "urlTemplate": "?modal=view-purchase&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "View Purchase",
+      "requiresId": true
+    },
+    {
+      "key": "purchases.modal.view-scheduled-purchase",
+      "resource": "purchases",
+      "modalType": "view-scheduled-purchase",
+      "urlTemplate": "?modal=view-scheduled-purchase&id={id}",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "View Scheduled Purchase",
+      "requiresId": true
+    },
+    {
+      "key": "sale-credits.modal.duplicate-sale-credit",
+      "resource": "sale-credits",
+      "modalType": "duplicate-sale-credit",
+      "urlTemplate": "?modal=duplicate-sale-credit&id={id}",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "Duplicate Sale Credit",
+      "requiresId": true
+    },
+    {
+      "key": "sale-credits.modal.edit-sale-credit",
+      "resource": "sale-credits",
+      "modalType": "edit-sale-credit",
+      "urlTemplate": "?modal=edit-sale-credit&id={id}",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "Edit Sale Credit",
+      "requiresId": true
+    },
+    {
+      "key": "sale-credits.modal.fast-fix-sale-credit",
+      "resource": "sale-credits",
+      "modalType": "fast-fix-sale-credit",
+      "urlTemplate": "?modal=fast-fix-sale-credit",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "Fast Fix Sale Credit",
+      "requiresId": false
+    },
+    {
+      "key": "sale-credits.modal.fast-fix-sale-credits-line-items",
+      "resource": "sale-credits",
+      "modalType": "fast-fix-sale-credits-line-items",
+      "urlTemplate": "?modal=fast-fix-sale-credits-line-items",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "Fast Fix Sale Credits Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "sale-credits.modal.import-sale-credits-items",
+      "resource": "sale-credits",
+      "modalType": "import-sale-credits-items",
+      "urlTemplate": "?modal=import-sale-credits-items",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "Import Sale Credits Items",
+      "requiresId": false
+    },
+    {
+      "key": "sale-credits.modal.new-sale-credit",
+      "resource": "sale-credits",
+      "modalType": "new-sale-credit",
+      "urlTemplate": "?modal=new-sale-credit",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "New Sale Credit",
+      "requiresId": false
+    },
+    {
+      "key": "sale-credits.modal.sale-credit-reconciled-statement-line",
+      "resource": "sale-credits",
+      "modalType": "sale-credit-reconciled-statement-line",
+      "urlTemplate": "?modal=sale-credit-reconciled-statement-line&id={id}",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "Sale Credit Reconciled Statement Line",
+      "requiresId": true
+    },
+    {
+      "key": "sale-credits.modal.send-email-sale-credit",
+      "resource": "sale-credits",
+      "modalType": "send-email-sale-credit",
+      "urlTemplate": "?modal=send-email-sale-credit&id={id}",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "Send Email Sale Credit",
+      "requiresId": true
+    },
+    {
+      "key": "sale-credits.modal.view-sale-credit",
+      "resource": "sale-credits",
+      "modalType": "view-sale-credit",
+      "urlTemplate": "?modal=view-sale-credit&id={id}",
+      "mountPath": "/sale-credits/transactions/active-sale-credits",
+      "label": "View Sale Credit",
+      "requiresId": true
+    },
+    {
+      "key": "sale-payments.modal.sale-credit-note-refund",
+      "resource": "sale-payments",
+      "modalType": "sale-credit-note-refund",
+      "urlTemplate": "?modal=sale-credit-note-refund",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale Credit Note Refund",
+      "requiresId": false
+    },
+    {
+      "key": "sale-payments.modal.sale-delete-credit-note-refund",
+      "resource": "sale-payments",
+      "modalType": "sale-delete-credit-note-refund",
+      "urlTemplate": "?modal=sale-delete-credit-note-refund&id={id}",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale Delete Credit Note Refund",
+      "requiresId": true
+    },
+    {
+      "key": "sale-payments.modal.sale-delete-payment",
+      "resource": "sale-payments",
+      "modalType": "sale-delete-payment",
+      "urlTemplate": "?modal=sale-delete-payment&id={id}",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale Delete Payment",
+      "requiresId": true
+    },
+    {
+      "key": "sale-payments.modal.sale-edit-credit-note-refund",
+      "resource": "sale-payments",
+      "modalType": "sale-edit-credit-note-refund",
+      "urlTemplate": "?modal=sale-edit-credit-note-refund&id={id}",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale Edit Credit Note Refund",
+      "requiresId": true
+    },
+    {
+      "key": "sale-payments.modal.sale-edit-payment",
+      "resource": "sale-payments",
+      "modalType": "sale-edit-payment",
+      "urlTemplate": "?modal=sale-edit-payment&id={id}",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale Edit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "sale-payments.modal.sale-payment-send-email",
+      "resource": "sale-payments",
+      "modalType": "sale-payment-send-email",
+      "urlTemplate": "?modal=sale-payment-send-email&id={id}",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale Payment Send Email",
+      "requiresId": true
+    },
+    {
+      "key": "sale-payments.modal.sale-view-batch-payment",
+      "resource": "sale-payments",
+      "modalType": "sale-view-batch-payment",
+      "urlTemplate": "?modal=sale-view-batch-payment&id={id}",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale View Batch Payment",
+      "requiresId": true
+    },
+    {
+      "key": "sale-payments.modal.sale-view-payment",
+      "resource": "sale-payments",
+      "modalType": "sale-view-payment",
+      "urlTemplate": "?modal=sale-view-payment&id={id}",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale View Payment",
+      "requiresId": true
+    },
+    {
+      "key": "sales-deposits.modal.manage-deposits-sale",
+      "resource": "sales-deposits",
+      "modalType": "manage-deposits-sale",
+      "urlTemplate": "?modal=manage-deposits-sale",
+      "mountPath": "/sales-deposits/balances/all",
+      "label": "Manage Deposits Sale",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.convert-order-to-invoice",
+      "resource": "sales-orders",
+      "modalType": "convert-order-to-invoice",
+      "urlTemplate": "?modal=convert-order-to-invoice&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Convert Order To Invoice",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.convert-order-to-recurring-invoice",
+      "resource": "sales-orders",
+      "modalType": "convert-order-to-recurring-invoice",
+      "urlTemplate": "?modal=convert-order-to-recurring-invoice&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Convert Order To Recurring Invoice",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.convert-quote-to-invoice",
+      "resource": "sales-orders",
+      "modalType": "convert-quote-to-invoice",
+      "urlTemplate": "?modal=convert-quote-to-invoice&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Convert Quote To Invoice",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.convert-quote-to-order",
+      "resource": "sales-orders",
+      "modalType": "convert-quote-to-order",
+      "urlTemplate": "?modal=convert-quote-to-order&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Convert Quote To Order",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.convert-quote-to-recurring-invoice",
+      "resource": "sales-orders",
+      "modalType": "convert-quote-to-recurring-invoice",
+      "urlTemplate": "?modal=convert-quote-to-recurring-invoice&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Convert Quote To Recurring Invoice",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.duplicate-order",
+      "resource": "sales-orders",
+      "modalType": "duplicate-order",
+      "urlTemplate": "?modal=duplicate-order&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Duplicate Order",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.duplicate-quote",
+      "resource": "sales-orders",
+      "modalType": "duplicate-quote",
+      "urlTemplate": "?modal=duplicate-quote&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Duplicate Quote",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.edit-order",
+      "resource": "sales-orders",
+      "modalType": "edit-order",
+      "urlTemplate": "?modal=edit-order&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Edit Order",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.edit-quote",
+      "resource": "sales-orders",
+      "modalType": "edit-quote",
+      "urlTemplate": "?modal=edit-quote&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Edit Quote",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.import-sales-orders",
+      "resource": "sales-orders",
+      "modalType": "import-sales-orders",
+      "urlTemplate": "?modal=import-sales-orders",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Import Sales Orders",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.internal-signer",
+      "resource": "sales-orders",
+      "modalType": "internal-signer",
+      "urlTemplate": "?modal=internal-signer",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Internal Signer",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.new-order",
+      "resource": "sales-orders",
+      "modalType": "new-order",
+      "urlTemplate": "?modal=new-order",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "New Order",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.new-quote",
+      "resource": "sales-orders",
+      "modalType": "new-quote",
+      "urlTemplate": "?modal=new-quote",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "New Quote",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.send-for-signature",
+      "resource": "sales-orders",
+      "modalType": "send-for-signature",
+      "urlTemplate": "?modal=send-for-signature&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Send For Signature",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.signature-activity",
+      "resource": "sales-orders",
+      "modalType": "signature-activity",
+      "urlTemplate": "?modal=signature-activity",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Signature Activity",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.so-view-sale",
+      "resource": "sales-orders",
+      "modalType": "so-view-sale",
+      "urlTemplate": "?modal=so-view-sale&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "So View Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.so-view-scheduled-sale",
+      "resource": "sales-orders",
+      "modalType": "so-view-scheduled-sale",
+      "urlTemplate": "?modal=so-view-scheduled-sale&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "So View Scheduled Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.todo-list",
+      "resource": "sales-orders",
+      "modalType": "todo-list",
+      "urlTemplate": "?modal=todo-list",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Todo List",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.view-order",
+      "resource": "sales-orders",
+      "modalType": "view-order",
+      "urlTemplate": "?modal=view-order&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "View Order",
+      "requiresId": true
+    },
+    {
+      "key": "sales-orders.modal.view-quote",
+      "resource": "sales-orders",
+      "modalType": "view-quote",
+      "urlTemplate": "?modal=view-quote&id={id}",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "View Quote",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.bulk-cancel-subscription-sale",
+      "resource": "sales",
+      "modalType": "bulk-cancel-subscription-sale",
+      "urlTemplate": "?modal=bulk-cancel-subscription-sale",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Bulk Cancel Subscription Sale",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.cancel-subscription-sale",
+      "resource": "sales",
+      "modalType": "cancel-subscription-sale",
+      "urlTemplate": "?modal=cancel-subscription-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Cancel Subscription Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.duplicate-sale",
+      "resource": "sales",
+      "modalType": "duplicate-sale",
+      "urlTemplate": "?modal=duplicate-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Duplicate Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.duplicate-schedule-sale",
+      "resource": "sales",
+      "modalType": "duplicate-schedule-sale",
+      "urlTemplate": "?modal=duplicate-schedule-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Duplicate Schedule Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.duplicate-subscription-sale",
+      "resource": "sales",
+      "modalType": "duplicate-subscription-sale",
+      "urlTemplate": "?modal=duplicate-subscription-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Duplicate Subscription Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.edit-sale",
+      "resource": "sales",
+      "modalType": "edit-sale",
+      "urlTemplate": "?modal=edit-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Edit Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.edit-scheduled-sale",
+      "resource": "sales",
+      "modalType": "edit-scheduled-sale",
+      "urlTemplate": "?modal=edit-scheduled-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Edit Scheduled Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.edit-subscription-sale",
+      "resource": "sales",
+      "modalType": "edit-subscription-sale",
+      "urlTemplate": "?modal=edit-subscription-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Edit Subscription Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.fast-fix",
+      "resource": "sales",
+      "modalType": "fast-fix",
+      "urlTemplate": "?modal=fast-fix",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Fast Fix",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.fast-fix-sales-line-items",
+      "resource": "sales",
+      "modalType": "fast-fix-sales-line-items",
+      "urlTemplate": "?modal=fast-fix-sales-line-items",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Fast Fix Sales Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.fast-fix-scheduled-sale-line-items",
+      "resource": "sales",
+      "modalType": "fast-fix-scheduled-sale-line-items",
+      "urlTemplate": "?modal=fast-fix-scheduled-sale-line-items",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Fast Fix Scheduled Sale Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.fast-fix-scheduled-sales",
+      "resource": "sales",
+      "modalType": "fast-fix-scheduled-sales",
+      "urlTemplate": "?modal=fast-fix-scheduled-sales",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Fast Fix Scheduled Sales",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.fast-fix-scheduled-subscription-line-items",
+      "resource": "sales",
+      "modalType": "fast-fix-scheduled-subscription-line-items",
+      "urlTemplate": "?modal=fast-fix-scheduled-subscription-line-items",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Fast Fix Scheduled Subscription Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.get-payment-link",
+      "resource": "sales",
+      "modalType": "get-payment-link",
+      "urlTemplate": "?modal=get-payment-link",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Get Payment Link",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.import-invoice-items",
+      "resource": "sales",
+      "modalType": "import-invoice-items",
+      "urlTemplate": "?modal=import-invoice-items",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Import Invoice Items",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.import-invoices",
+      "resource": "sales",
+      "modalType": "import-invoices",
+      "urlTemplate": "?modal=import-invoices",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Import Invoices",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.make-sale-recurring",
+      "resource": "sales",
+      "modalType": "make-sale-recurring",
+      "urlTemplate": "?modal=make-sale-recurring&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Make Sale Recurring",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.new-invoice-receipt",
+      "resource": "sales",
+      "modalType": "new-invoice-receipt",
+      "urlTemplate": "?modal=new-invoice-receipt",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "New Invoice Receipt",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.new-sale",
+      "resource": "sales",
+      "modalType": "new-sale",
+      "urlTemplate": "?modal=new-sale",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "New Sale",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.new-scheduled-sale",
+      "resource": "sales",
+      "modalType": "new-scheduled-sale",
+      "urlTemplate": "?modal=new-scheduled-sale",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "New Scheduled Sale",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.new-subscription-sale",
+      "resource": "sales",
+      "modalType": "new-subscription-sale",
+      "urlTemplate": "?modal=new-subscription-sale",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "New Subscription Sale",
+      "requiresId": false
+    },
+    {
+      "key": "sales.modal.sale-duplicate-order",
+      "resource": "sales",
+      "modalType": "sale-duplicate-order",
+      "urlTemplate": "?modal=sale-duplicate-order&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Sale Duplicate Order",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.sale-edit-order",
+      "resource": "sales",
+      "modalType": "sale-edit-order",
+      "urlTemplate": "?modal=sale-edit-order&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Sale Edit Order",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.sale-reconciled-statement-line",
+      "resource": "sales",
+      "modalType": "sale-reconciled-statement-line",
+      "urlTemplate": "?modal=sale-reconciled-statement-line&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Sale Reconciled Statement Line",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.sale-view-order",
+      "resource": "sales",
+      "modalType": "sale-view-order",
+      "urlTemplate": "?modal=sale-view-order&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Sale View Order",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.sale-view-sale-credit",
+      "resource": "sales",
+      "modalType": "sale-view-sale-credit",
+      "urlTemplate": "?modal=sale-view-sale-credit&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Sale View Sale Credit",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.send-email",
+      "resource": "sales",
+      "modalType": "send-email",
+      "urlTemplate": "?modal=send-email&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Send Email",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.view-sale",
+      "resource": "sales",
+      "modalType": "view-sale",
+      "urlTemplate": "?modal=view-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "View Sale",
+      "requiresId": true
+    },
+    {
+      "key": "sales.modal.view-scheduled-sale",
+      "resource": "sales",
+      "modalType": "view-scheduled-sale",
+      "urlTemplate": "?modal=view-scheduled-sale&id={id}",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "View Scheduled Sale",
+      "requiresId": true
+    },
+    {
+      "key": "settings.modal.account_details",
+      "resource": "settings",
+      "modalType": "account_details",
+      "urlTemplate": "?modal=account_details",
+      "mountPath": "/home",
+      "label": "Account Details",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.appearance",
+      "resource": "settings",
+      "modalType": "appearance",
+      "urlTemplate": "?modal=appearance",
+      "mountPath": "/home",
+      "label": "Appearance",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.billing_account",
+      "resource": "settings",
+      "modalType": "billing_account",
+      "urlTemplate": "?modal=billing_account",
+      "mountPath": "/home",
+      "label": "Billing Account",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.billing_accounts",
+      "resource": "settings",
+      "modalType": "billing_accounts",
+      "urlTemplate": "?modal=billing_accounts",
+      "mountPath": "/home",
+      "label": "Billing Accounts",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.chart_of_accounts",
+      "resource": "settings",
+      "modalType": "chart_of_accounts",
+      "urlTemplate": "?modal=chart_of_accounts",
+      "mountPath": "/home",
+      "label": "Chart Of Accounts",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.claims",
+      "resource": "settings",
+      "modalType": "claims",
+      "urlTemplate": "?modal=claims",
+      "mountPath": "/home",
+      "label": "Claims",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.classifiers",
+      "resource": "settings",
+      "modalType": "classifiers",
+      "urlTemplate": "?modal=classifiers",
+      "mountPath": "/home",
+      "label": "Classifiers",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.custom_fields",
+      "resource": "settings",
+      "modalType": "custom_fields",
+      "urlTemplate": "?modal=custom_fields",
+      "mountPath": "/home",
+      "label": "Custom Fields",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.data_transfer",
+      "resource": "settings",
+      "modalType": "data_transfer",
+      "urlTemplate": "?modal=data_transfer",
+      "mountPath": "/home",
+      "label": "Data Transfer",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.digital_payments",
+      "resource": "settings",
+      "modalType": "digital_payments",
+      "urlTemplate": "?modal=digital_payments",
+      "mountPath": "/home",
+      "label": "Digital Payments",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.e_signs",
+      "resource": "settings",
+      "modalType": "e_signs",
+      "urlTemplate": "?modal=e_signs",
+      "mountPath": "/home",
+      "label": "E Signs",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.email_templates",
+      "resource": "settings",
+      "modalType": "email_templates",
+      "urlTemplate": "?modal=email_templates",
+      "mountPath": "/home",
+      "label": "Email Templates",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.field_templates",
+      "resource": "settings",
+      "modalType": "field_templates",
+      "urlTemplate": "?modal=field_templates",
+      "mountPath": "/home",
+      "label": "Field Templates",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.juan_wallet",
+      "resource": "settings",
+      "modalType": "juan_wallet",
+      "urlTemplate": "?modal=juan_wallet",
+      "mountPath": "/home",
+      "label": "Juan Wallet",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.organization_details",
+      "resource": "settings",
+      "modalType": "organization_details",
+      "urlTemplate": "?modal=organization_details",
+      "mountPath": "/home",
+      "label": "Organization Details",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.payment-profiles",
+      "resource": "settings",
+      "modalType": "payment-profiles",
+      "urlTemplate": "?modal=payment-profiles",
+      "mountPath": "/home",
+      "label": "Payment Profiles",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.payment-services",
+      "resource": "settings",
+      "modalType": "payment-services",
+      "urlTemplate": "?modal=payment-services",
+      "mountPath": "/home",
+      "label": "Payment Services",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.pdf_templates",
+      "resource": "settings",
+      "modalType": "pdf_templates",
+      "urlTemplate": "?modal=pdf_templates",
+      "mountPath": "/home",
+      "label": "Pdf Templates",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.preferences",
+      "resource": "settings",
+      "modalType": "preferences",
+      "urlTemplate": "?modal=preferences",
+      "mountPath": "/home",
+      "label": "Preferences",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.report_templates",
+      "resource": "settings",
+      "modalType": "report_templates",
+      "urlTemplate": "?modal=report_templates",
+      "mountPath": "/home",
+      "label": "Report Templates",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.subscription",
+      "resource": "settings",
+      "modalType": "subscription",
+      "urlTemplate": "?modal=subscription",
+      "mountPath": "/home",
+      "label": "Subscription",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.switch_organization",
+      "resource": "settings",
+      "modalType": "switch_organization",
+      "urlTemplate": "?modal=switch_organization",
+      "mountPath": "/home",
+      "label": "Switch Organization",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.tags",
+      "resource": "settings",
+      "modalType": "tags",
+      "urlTemplate": "?modal=tags",
+      "mountPath": "/home",
+      "label": "Tags",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.user_management",
+      "resource": "settings",
+      "modalType": "user_management",
+      "urlTemplate": "?modal=user_management",
+      "mountPath": "/home",
+      "label": "User Management",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.vat_profiles",
+      "resource": "settings",
+      "modalType": "vat_profiles",
+      "urlTemplate": "?modal=vat_profiles",
+      "mountPath": "/home",
+      "label": "Vat Profiles",
+      "requiresId": false
+    }
+  ]
+}

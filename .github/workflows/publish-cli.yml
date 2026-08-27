@@ -66,6 +66,10 @@ jobs:
           }
           await import('./bundle.js');
           JSEOF
+          # navigate readFileSync's this next to the bundle at runtime; esbuild
+          # cannot inline it. build-mcpb.sh already does this for the local
+          # bundle, but THIS is the workflow that builds the published .mcpb.
+          cp cli/dashboard-routes-manifest.json mcpb-build/server/
           cp manifest.json icon.png README.md LICENSE CHANGELOG.md package.json mcpb-build/
           cd mcpb-build
           npx --yes @anthropic-ai/mcpb pack
