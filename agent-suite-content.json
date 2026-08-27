@@ -1596,7 +1596,7 @@
     {
       "name": "update_fixed_asset",
       "namespace": "fixed_assets",
-      "description": "Update an existing fixed asset (draft or active). Can update name, depreciation settings, notes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a fixed asset (draft or active). Send only what changes — the stored asset is merged in first, so omitted fields are preserved, not wiped. isDraftToActive: true activates a draft. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },

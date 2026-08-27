@@ -872,7 +872,7 @@
     },
     {
       "name": "update_fixed_asset",
-      "description": "Update an existing fixed asset (draft or active). Can update name, depreciation settings, notes. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a fixed asset (draft or active). Send only what changes — the stored asset is merged in first, so omitted fields are preserved, not wiped. isDraftToActive: true activates a draft. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_fixed_asset",
@@ -1416,7 +1416,7 @@
     },
     {
       "name": "bulk_upsert_fixed_assets",
-      "description": "Bulk create/update fixed assets (max 500). Natural key: reference.\n\n⚠️ DATE FIELD MISMATCH: REQUEST uses valueDate (NOT purchaseDate); GET response uses purchaseDate. Sending purchaseDate → cryptic 400 \"Invalid request body\".\n\nRequired per row: reference, registrationType (NEW | TRANSFER). Recommended: typeCode, typeName, category (TANGIBLE | INTANGIBLE), cost (synonym: purchaseAmount), valueDate, depreciationStartDate, effectiveLife (synonym: usefulLifeMonths), depreciationMethod, purchaseAssetAccountResourceId, depreciationExpenseAccountResourceId, accumulatedDepreciationAccountResourceId. Account fields = UUIDv4.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); on PARTIAL_SUCCESS read data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk create/update fixed assets (max 500). Natural key: reference.\n\n⚠️ DATES ARE EPOCH MILLISECONDS here — purchaseDate and depreciationStartDate are numbers (e.g. 1745107200000), NOT the YYYY-MM-DD every other bulk-upsert takes. A date string → cryptic 400 \"Invalid request body\".\n\nRequired per row: reference, registrationType. NEW also needs purchaseBusinessTransactionType + purchaseBusinessTransactionResourceId (the purchase LINE ITEM, not the bill/journal id); TRANSFER takes accumulatedDepreciationAtTransferDate + bookValueAtTransferDate. Recommended: typeCode, typeName, category, purchaseAmount, purchaseDate, effectiveLife, depreciationMethod + the three account UUIDv4s.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); on PARTIAL_SUCCESS read data[0].errorDetails. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "quick_reconcile",

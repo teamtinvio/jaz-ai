@@ -247,7 +247,7 @@ DIFFERENT shape from single create — easier to confuse.
 
 ### Bulk upsert (`POST /fixed-assets/bulk-upsert`) — REQUEST shape
 
-⚠️ **Date field is `valueDate`, NOT `purchaseDate`.** The GET response uses `purchaseDate`; the bulk-upsert REQUEST uses `valueDate`. Sending `purchaseDate` returns generic 400 "Invalid request body" with no detail. Most painful field-name asymmetry in the API.
+⚠️ **Both dates are EPOCH MILLISECONDS, not `YYYY-MM-DD`.** `purchaseDate` and `depreciationStartDate` are integers on this endpoint (every other bulk-upsert takes `YYYY-MM-DD`). A date string returns a generic 400 "Invalid request body" with no detail. There is no `valueDate`, `cost`, `usefulLifeMonths`, `currencyCode`, `tags` or `resourceId` field here — they are silently discarded.
 
 | Field | Required? | Notes |
 |-------|-----------|-------|
@@ -257,19 +257,22 @@ DIFFERENT shape from single create — easier to confuse.
 | `typeCode` | recommended | e.g. `FURNITURE_AND_FIXTURE`, `COMPUTER_AND_ELECTRONIC` |
 | `typeName` | recommended | Human label, e.g. `"Furniture and Fixtures"` |
 | `category` | recommended | `"TANGIBLE"` or `"INTANGIBLE"` |
-| `cost` OR `purchaseAmount` | recommended | Synonyms — both accepted |
-| `valueDate` | recommended | Acquisition date YYYY-MM-DD (NOT `purchaseDate`!) |
-| `currencyCode` | recommended | `"SGD"` flat string |
-| `depreciationStartDate` | optional | **EPOCH MILLISECONDS** (number, NOT YYYY-MM-DD — inconsistent with `valueDate` on the same endpoint). Sending YYYY-MM-DD → generic 400. Omit to default to `valueDate`. |
-| `effectiveLife` OR `usefulLifeMonths` | recommended | Months — synonyms |
+| `purchaseAmount` | recommended | Acquisition cost (there is no `cost` alias) |
+| `purchaseDate` | recommended | Acquisition date, **epoch milliseconds** |
+| `depreciationStartDate` | optional | **Epoch milliseconds.** Omit to default to `purchaseDate` |
+| `effectiveLife` | recommended | Months (there is no `usefulLifeMonths` alias) |
 | `depreciationMethod` | recommended | `"STRAIGHT_LINE"` or `"NO_DEPRECIATION"` |
 | `purchaseAssetAccountResourceId` | recommended | Asset account UUIDv4 |
 | `depreciationExpenseAccountResourceId` | recommended | Depreciation expense account UUIDv4 |
 | `accumulatedDepreciationAccountResourceId` | recommended | Accum dep account UUIDv4 |
+| `purchaseBusinessTransactionType` | required for `NEW` | `"PURCHASE"` \| `"SALE"` \| `"JOURNAL_MANUAL"` |
+| `purchaseBusinessTransactionResourceId` | required for `NEW` | Purchase LINE ITEM resourceId, must be UNLINKED |
+| `accumulatedDepreciationAtTransferDate` | `TRANSFER` only | Depreciation already booked in the source system |
+| `bookValueAtTransferDate` | `TRANSFER` only | Remaining undepreciated value |
 
 ### Single create (`POST /fixed-assets`)
 
-Uses `purchaseAmount` + `purchaseDate` + `effectiveLife` + `purchaseAssetAccountResourceId` + `depreciationExpenseAccountResourceId`. CLI command `clio fixed-assets create` mirrors this. **Different date field from bulk-upsert** — see warning above.
+Uses `purchaseAmount` + `purchaseDate` + `effectiveLife` + `purchaseAssetAccountResourceId` + `depreciationExpenseAccountResourceId`. CLI command `clio fixed-assets create` mirrors this. Same field names as bulk-upsert, but dates here are `YYYY-MM-DD` strings — see warning above.
 
 ---
 
