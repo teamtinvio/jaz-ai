@@ -1099,7 +1099,7 @@
     {
       "name": "get_cash_in",
       "namespace": "cash_entries",
-      "description": "Fetch a cash-in entry by internal resourceId. To search by other fields, use `search_cashflow_transactions`.",
+      "description": "Fetch a cash-in entry by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns.",
       "readOnly": true,
       "destructive": false
     },
@@ -1113,7 +1113,7 @@
     {
       "name": "get_cash_out",
       "namespace": "cash_entries",
-      "description": "Fetch a cash-out entry by internal resourceId. To search by other fields, use `search_cashflow_transactions`.",
+      "description": "Fetch a cash-out entry by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns.",
       "readOnly": true,
       "destructive": false
     },
@@ -2240,7 +2240,7 @@
     {
       "name": "get_cash_transfer",
       "namespace": "cash_transfers",
-      "description": "Get full cash transfer details by resourceId.",
+      "description": "Get full cash transfer details by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns.",
       "readOnly": true,
       "destructive": false
     },

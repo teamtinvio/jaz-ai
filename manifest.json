@@ -588,7 +588,7 @@
     },
     {
       "name": "get_cash_in",
-      "description": "Fetch a cash-in entry by internal resourceId. To search by other fields, use `search_cashflow_transactions`."
+      "description": "Fetch a cash-in entry by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns."
     },
     {
       "name": "update_cash_in",
@@ -596,7 +596,7 @@
     },
     {
       "name": "get_cash_out",
-      "description": "Fetch a cash-out entry by internal resourceId. To search by other fields, use `search_cashflow_transactions`."
+      "description": "Fetch a cash-out entry by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns."
     },
     {
       "name": "update_cash_out",
@@ -1240,7 +1240,7 @@
     },
     {
       "name": "get_cash_transfer",
-      "description": "Get full cash transfer details by resourceId."
+      "description": "Get full cash transfer details by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns."
     },
     {
       "name": "download_credit_note_pdf",
