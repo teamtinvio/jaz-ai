@@ -315,7 +315,7 @@
     {
       "name": "delete_invoice",
       "namespace": "invoices",
-      "description": "Delete a draft invoice. Cannot delete finalized invoices. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Deletes a DRAFT invoice; VOIDs an active one and KEEPS it. force: true hard-deletes either. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -385,7 +385,7 @@
     {
       "name": "delete_bill",
       "namespace": "bills",
-      "description": "Delete a draft bill. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Deletes a DRAFT bill; VOIDs an active one and KEEPS it. force: true hard-deletes either. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -553,7 +553,7 @@
     {
       "name": "delete_journal",
       "namespace": "journals",
-      "description": "Deletes a DRAFT journal permanently; VOIDs an ACTIVE one and keeps it. `status`: SUCCEEDED = deleted, VOID = voided. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Deletes a DRAFT journal; VOIDs an active one and KEEPS it. force: true hard-deletes either. `status`: SUCCEEDED = deleted, VOID = voided. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -791,7 +791,7 @@
     {
       "name": "delete_customer_credit_note",
       "namespace": "customer_credit_notes",
-      "description": "Delete a draft customer credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Deletes a DRAFT customer credit note; VOIDs an active one and KEEPS it. force: true hard-deletes either. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -854,7 +854,7 @@
     {
       "name": "delete_supplier_credit_note",
       "namespace": "supplier_credit_notes",
-      "description": "Delete a draft supplier credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Deletes a DRAFT supplier credit note; VOIDs an active one and KEEPS it. force: true hard-deletes either. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -1267,14 +1267,14 @@
     {
       "name": "list_payments",
       "namespace": "payments_and_search",
-      "description": "List recent payments across all transaction types. Paginated.",
+      "description": "List recent rows from the cashflow-transaction ledger, newest first. Same ledger and same id trap as search_payments. Paginated.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "search_payments",
       "namespace": "payments_and_search",
-      "description": "Search payments. direction enum: PAYIN | PAYOUT.",
+      "description": "Searches the cashflow-transaction LEDGER (every BT type), NOT payment records: its resourceId 404s on get_payment/update_payment, which want a document's paymentRecords id. direction enum: PAYIN | PAYOUT.",
       "readOnly": true,
       "destructive": false
     },
@@ -2443,7 +2443,7 @@
     {
       "name": "get_payment",
       "namespace": "payments_and_search",
-      "description": "Get a specific payment record by resourceId. Returns payment amount, method, date, and reference.",
+      "description": "Get a payment record. Takes a PAYMENT resourceId; the ledger resourceId list_payments/search_payments return is a different entity and 404s here.",
       "readOnly": true,
       "destructive": false
     },

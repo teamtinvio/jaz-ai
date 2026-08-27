@@ -140,7 +140,7 @@
     },
     {
       "name": "delete_invoice",
-      "description": "Delete a draft invoice. Cannot delete finalized invoices. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Deletes a DRAFT invoice; VOIDs an active one and KEEPS it. force: true hard-deletes either. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "pay_invoice",
@@ -180,7 +180,7 @@
     },
     {
       "name": "delete_bill",
-      "description": "Delete a draft bill. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Deletes a DRAFT bill; VOIDs an active one and KEEPS it. force: true hard-deletes either. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "download_bill_pdf",
@@ -276,7 +276,7 @@
     },
     {
       "name": "delete_journal",
-      "description": "Deletes a DRAFT journal permanently; VOIDs an ACTIVE one and keeps it. `status`: SUCCEEDED = deleted, VOID = voided. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Deletes a DRAFT journal; VOIDs an active one and KEEPS it. force: true hard-deletes either. `status`: SUCCEEDED = deleted, VOID = voided. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "generate_trial_balance",
@@ -412,7 +412,7 @@
     },
     {
       "name": "delete_customer_credit_note",
-      "description": "Delete a draft customer credit note. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Deletes a DRAFT customer credit note; VOIDs an active one and KEEPS it. force: true hard-deletes either. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_customer_credit_note",
@@ -448,7 +448,7 @@
     },
     {
       "name": "delete_supplier_credit_note",
-      "description": "Delete a draft supplier credit note. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Deletes a DRAFT supplier credit note; VOIDs an active one and KEEPS it. force: true hard-deletes either. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "download_supplier_credit_note_pdf",
@@ -684,11 +684,11 @@
     },
     {
       "name": "list_payments",
-      "description": "List recent payments across all transaction types. Paginated."
+      "description": "List recent rows from the cashflow-transaction ledger, newest first. Same ledger and same id trap as search_payments. Paginated."
     },
     {
       "name": "search_payments",
-      "description": "Search payments. direction enum: PAYIN | PAYOUT."
+      "description": "Searches the cashflow-transaction LEDGER (every BT type), NOT payment records: its resourceId 404s on get_payment/update_payment, which want a document's paymentRecords id. direction enum: PAYIN | PAYOUT."
     },
     {
       "name": "download_export",
@@ -1356,7 +1356,7 @@
     },
     {
       "name": "get_payment",
-      "description": "Get a specific payment record by resourceId. Returns payment amount, method, date, and reference."
+      "description": "Get a payment record. Takes a PAYMENT resourceId; the ledger resourceId list_payments/search_payments return is a different entity and 404s here."
     },
     {
       "name": "update_payment",
