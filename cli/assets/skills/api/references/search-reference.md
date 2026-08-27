@@ -683,9 +683,12 @@ To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `Y
 
 ### 21. POST /api/v1/organization-users/search
 
-**Filter fields** (`OrganizationUserFilter`): `name`, `email`, `role`, `status`
+**Filter fields** (`OrganizationUserFilter`): `resourceId`, `userResourceId`, `userType`, `status`, `email`, `and`, `or`
+**Nested**: `user` (`user.firstName`, `user.lastName`, `user.email`, `user.phoneRegistered`, `user.status`, `user.resourceId`, `user.deleted`)
 
-**Sort fields**: `name`, `email`, `createdAt`
+**Sort fields** (max 9): `resourceId`, `status`, `userResourceId`, `userType`, `user.FirstName`, `user.LastName`, `user.Email`, `user.PhoneRegistered`, `user.Status`
+
+There is no top-level `name` or `role` on this filter, and the nested sort keys are capitalised while the nested filter keys are not — `user.firstName` filters, `user.FirstName` sorts. Anything else in `sort.sortBy` is a 422. `query` is rejected on this endpoint; use the filter.
 
 Standard pattern with limit/offset/filter/sort. Rarely used in conversions.
 
@@ -706,6 +709,8 @@ Standard pattern with limit/offset/filter/sort. Used for managing bank reconcili
 **Filter fields** (`PurchaseItemFilter`): `currencyCode`, `name`, `purchaseResourceId`, `resourceId`, `reference` (plain strings — NOT expression objects. Operators like `contains`, `in` are not supported on this endpoint).
 
 **Sort fields** (max 13): `resourceId`, `name`, `reference`, `currencyCode`, `status`, `valueDate`, `totalItemAmount`, `description`
+
+`query` is rejected on this endpoint ("The query field is not supported for this entity") despite being declared on `SearchPurchaseItemRequest`. Use the filter.
 
 ---
 

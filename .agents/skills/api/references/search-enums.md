@@ -370,9 +370,12 @@ No enum fields on the top level. String filters: `resourceId`, `type`.
 | Field | Valid Values |
 |-------|-------------|
 | `status` | `ACTIVE`, `INACTIVE` |
-| `role` | `ADMIN`, `CUSTOM_USER` |
+| `userType` | `ADMIN`, `CUSTOM_USER` |
 
-**String fields**: `name`, `email`
+**String fields**: `email`, `resourceId`, `userResourceId`
+**Nested** (`user`): `user.firstName`, `user.lastName`, `user.email`, `user.status`, `user.phoneRegistered`
+
+There is no `name` or `role` field on this filter.
 
 ---
 

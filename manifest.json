@@ -668,7 +668,7 @@
     },
     {
       "name": "search_org_users",
-      "description": "Search organization users. For OR (name or email), use filter param."
+      "description": "Search organization users. Names are nested under user; for name-or-email OR, pass filter: {\"or\":{\"user\":{\"firstName\":{\"contains\":\"jo\"}},\"email\":{\"contains\":\"jo\"}}}."
     },
     {
       "name": "invite_org_user",
