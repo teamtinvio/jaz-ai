@@ -1,5 +1,63 @@
 # Changelog
 
+## [5.45.0] - 2026-08-28
+
+Updating a record no longer erases the fields you did not mention. Fixed assets,
+custom fields and tax profiles are saved as a whole record, so an update that
+changed one field was quietly blanking the rest: purchase cost, depreciation
+settings, account mappings, and which documents a custom field applies to.
+Updates now carry the stored values through, so only what you change is changed.
+
+Tax profile updates work. Every update was rejected, and a rate change appeared
+to succeed while doing nothing, because the update was sending its fields under
+the names the create call uses. Changing a profile's name or rate now takes
+effect. A tax profile's status is read-only and is no longer offered as
+something you can set, because no endpoint accepts it.
+
+Ending a subscription works. Setting only an end date failed with a date-format
+error about a start date you never supplied.
+
+Importing fixed assets in bulk works. Both the new-asset and transfer paths
+failed on every row: the new path needed a purchase-source field the import
+never offered, and the date field the reference told you to send does not exist
+on that endpoint. Purchase dates and amounts now use the names the import
+expects.
+
+Importing bill and invoice line items in bulk works. Every job failed with a
+missing-currency error long after it was submitted, because the currency was
+being sent under a name the import does not have. A row with no currency is now
+rejected immediately and names the row, instead of costing you a round trip to
+find out.
+
+Searching organisation users works. Every search that did not name a sort order
+was rejected outright, and filtering by name or email was silently ignored, so
+you got the whole list back rather than a match, which reads as a valid answer.
+Names and email addresses now filter properly, and searching a surname finds
+people. Free-text search on tags, contact groups, bank rules and classifiers
+works again too.
+
+Updating cash entries and editing classifier classes work; both failed on every
+call. Fetching a cash entry now tells you which of its identifiers to use, which
+is not the one the create call hands back.
+
+Deleting a finalised invoice, bill, journal or credit note now tells you what
+actually happened. These are voided rather than removed, so the audit trail
+stays intact, but the result said the record had been deleted. It now reports
+whether the record was deleted or voided, and you can ask for a permanent
+deletion where that is allowed. Deleting with an identifier that is not valid no
+longer reports success.
+
+A mistyped field name on a write is now flagged instead of being dropped in
+silence. Previously it was accepted, ignored, and surfaced much later as a
+confusing error about missing data.
+
+Dashboard navigation links work. The navigation tools failed on every call in
+the published package because a file they read at runtime was missing from it.
+
+Creating a catalog and running the bank reconciliation detail report now
+describe the fields they need, instead of leaving you to find them by trial and
+error.
+
 ## [5.44.1] - 2026-08-23
 
 Internal documentation only. No user-facing changes since v5.44.0.
