@@ -406,7 +406,7 @@ Types: `trial-balance`, `balance-sheet`, `profit-loss`, `cashflow`, `aged-ar`, `
 | `--from` | Start date (P&L, cashflow, equity, recon) |
 | `--to` | End/snapshot date |
 | `--currency` | Currency code override |
-| `--group-by` | ACCOUNT, TRANSACTION, or CAPSULE (for GL/FA) |
+| `--group-by` | GL: ACCOUNT, CONTACT, TRANSACTION, RELATIONSHIP · FA summary: ACCOUNT, TYPE, CATEGORY, STATUS |
 | `--bank-account` | Bank account ID (for bank-recon-*) |
 
 Also: `clio reports pdf` — generate PDF from a message/document.
@@ -586,7 +586,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker — any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp` — MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 358 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 367 operations.
 
 ### `clio serve` — HTTP daemon
 Starts the HTTP daemon for ChatKit and email channel integrations.

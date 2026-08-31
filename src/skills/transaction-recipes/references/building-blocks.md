@@ -63,7 +63,7 @@ The recipe engine uses capsules automatically. But capsules also enable advanced
 
 2. **Use Capsule Types as the search axis, not Capsule Name.** Capsule names are unique per instance ("FY2025 Office Insurance"); types are reusable ("Prepaid Expenses"). `search_capsules(filter: {capsuleType: {eq: 'Prepaid Expenses'}})` returns ALL prepaid capsules across history.
 
-3. **Group GL by capsule for the auditor.** Capsules are the ONLY enrichment that supports `groupBy: 'CAPSULE'` in `generate_general_ledger`. Auditor sample-test: pick 3 capsules per type, pull the full GL by capsule, tie the entries back to the source documents (bills, invoices, journals). This is the highest-leverage capsule use.
+3. **Tie capsule entries back for the auditor.** `generate_general_ledger` does NOT group by capsule -- `groupBy` is ACCOUNT, CONTACT, TRANSACTION or RELATIONSHIP, and `CAPSULE` returns 422 (verified live 2026-09-01). Auditor sample-test: pick 3 capsules per type, read each with `get_capsule` to get its transaction resource ids, then pull those documents (bills, invoices, journals) directly. Same evidence, one more hop.
 
 **MCP tool shape:**
 
@@ -91,7 +91,7 @@ search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}}, status: {eq: 'ACT
   # All open loan capsules — feed into year-end-close.md Y6 reclassification
 search_journals(filter: {capsuleResourceId: {eq: <id>}}, sort: 'valueDate:asc')
   # Full GL for one capsule — the auditor's view
-generate_general_ledger(period_start, period_end, groupBy: 'CAPSULE')
+get_capsule(resourceId)   # returns the capsule's transactions; GL cannot group by capsule
   # Period activity grouped by capsule — the practitioner's view
 ```
 
@@ -241,7 +241,7 @@ Apply enrichments to recipe transactions for richer reporting and record-keeping
    }
    ```
 4. **Supported transaction types**: invoices, bills, credit notes, journals, cash entries
-5. **Reports**: Classified transactions appear in General Ledger grouped by capsule when using `groupBy: "CAPSULE"`
+5. **Reports**: General Ledger cannot group by capsule (`groupBy` accepts ACCOUNT, CONTACT, TRANSACTION, RELATIONSHIP only). Read the capsule with `get_capsule` and pull its transactions.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.45.0
+version: 5.46.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 159 production gotchas, error
@@ -148,7 +148,7 @@ The rest of this skill — field names, gotchas, error catalog, dependency order
 | Trial balance | `startDate`, `endDate` |
 | Balance sheet | `primarySnapshotDate` |
 | P&L | `primarySnapshotDate`, `secondarySnapshotDate` |
-| General ledger | `startDate`, `endDate`, `groupBy: "ACCOUNT"` (also `TRANSACTION`, `CAPSULE`) |
+| General ledger | `startDate`, `endDate`, `groupBy: "ACCOUNT"` (also `CONTACT`, `TRANSACTION`, `RELATIONSHIP`) |
 | Cashflow | `primaryStartDate`, `primaryEndDate` |
 | Cash balance | `reportDate` |
 | AR/AP report | `endDate` |

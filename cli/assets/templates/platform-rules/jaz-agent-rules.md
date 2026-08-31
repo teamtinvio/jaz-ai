@@ -6,11 +6,11 @@ Source of truth lives in the installed skills (`.claude/skills/jaz-*/SKILL.md` o
 
 ## Discovery
 
-Jaz exposes **358 tools across 43 namespaces**. Your tool list shows **3, 43, or 358** entries depending on packaging — **never infer capability from its length.**
+Jaz exposes **367 tools across 45 namespaces**. Your tool list shows **3, 45, or 367** entries depending on packaging — **never infer capability from its length.**
 
 - **3** — `search_tools(query)` → `describe_tools(names)` → `execute_tool(name, args)`. Empty query returns the namespace map.
 - **43** — namespace routers; call one with `{ operation, arguments }`. Its description lists its operations.
-- **358** — call operations directly by name.
+- **367** — call operations directly by name.
 
 `describe_capabilities` returns the capability map on all three. **Call it before telling the user Jaz cannot do something.**
 

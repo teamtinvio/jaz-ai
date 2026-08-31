@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.45.0+63204e36",
+  "contentVersion": "5.46.0+05f9cb7b",
   "counts": {
-    "tools": 358,
-    "namespaces": 43,
+    "tools": 367,
+    "namespaces": 45,
     "calculators": 13,
     "recipes": 13,
     "jobs": 12,
@@ -155,6 +155,14 @@
     {
       "name": "payments_and_search",
       "description": "Payment records: get, update, delete individual payments. List payments/credits on invoices and bills. Reverse credit applications. Cashflow transaction search. Universal cross-entity search. Also: payment run, batch payment, payment matching, void payment, payment history, credit note applications."
+    },
+    {
+      "name": "versions",
+      "description": "Document version history and restore. List the versions held for a journal, bill, invoice or credit note, read one snapshot, or restore the document to it. Restoring replaces current state."
+    },
+    {
+      "name": "approvals",
+      "description": "Approve documents awaiting approval, or send them back for changes. Covers invoices, bills, both credit notes, sale/purchase orders, quotes, requests and claims. Approving posts the ledger and is one-shot. Find what is waiting with the approvalStatus filter on the relevant search tool."
     },
     {
       "name": "quick_fix",
@@ -343,7 +351,7 @@
     {
       "name": "download_invoice_pdf",
       "namespace": "invoices",
-      "description": "Download an invoice as PDF. Returns { fileUrl }.",
+      "description": "Download an invoice as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered).",
       "readOnly": true,
       "destructive": false
     },
@@ -861,7 +869,7 @@
     {
       "name": "download_supplier_credit_note_pdf",
       "namespace": "supplier_credit_notes",
-      "description": "Download a supplier credit note as PDF. Returns { fileUrl } (may be pending/empty if not yet rendered).",
+      "description": "Download a supplier credit note as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered).",
       "readOnly": true,
       "destructive": false
     },
@@ -2247,7 +2255,7 @@
     {
       "name": "download_credit_note_pdf",
       "namespace": "customer_credit_notes",
-      "description": "Download a customer credit note as PDF. Returns a file URL.",
+      "description": "Download a customer credit note as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered).",
       "readOnly": true,
       "destructive": false
     },
@@ -2689,6 +2697,69 @@
       "name": "navigate",
       "namespace": "navigation",
       "description": "Dashboard navigation: discover destinations, then build deep links. Without `destination`: lists valid destinations as { key, label, kind } — filter with `query` (substring over key + label), `resource` (e.g. \"sales\"), or `kind` (\"screen\" | \"modal\"); results are capped, narrow if `truncated`. With `destination`: builds the URL to hand the user — a screen (e.g. \"reports.profit-and-loss\") or a record modal (e.g. \"sales.modal.view-sale\"); pass `resourceId` only for a record-specific modal (view/edit one record), never for screens or create/\"new\" modals. Returns { url, kind, label }; the link opens in the user's current org. Never write dashboard URLs or destination keys from memory — call with no destination to discover keys first.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "approve_documents",
+      "namespace": "approvals",
+      "description": "Approve one document awaiting approval. Posts its ledger entries and makes it live. One-shot: a record not awaiting approval reports INVALID_SALE_STATUS_ERROR. Read approvalStatus off this response, not off the document. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_approve_documents",
+      "namespace": "approvals",
+      "description": "Approve up to 100 documents awaiting approval. Async — returns a jobId; poll search_background_jobs. Each approval posts a ledger. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "request_document_changes",
+      "namespace": "approvals",
+      "description": "Send one document back for changes instead of approving it. Also covers orders, quotes, requests and claims. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "bulk_request_document_changes",
+      "namespace": "approvals",
+      "description": "Send up to 500 documents back for changes with one message. Async — returns a jobId; poll search_background_jobs. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "get_document_version_history",
+      "namespace": "versions",
+      "description": "The stored versions of a document, newest first. Not paginated. Use before restoring to pick a version id.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_document_version",
+      "namespace": "versions",
+      "description": "Read one stored version of a document. An unknown resourceId/version pair returns 422.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "rollback_document_version",
+      "namespace": "versions",
+      "description": "Restore a document to a stored version. REPLACES current state — read the version first with get_document_version. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_currency_effective_rate",
+      "namespace": "currencies",
+      "description": "The organization effective rate for a currency on a date: its own custom rate when set, else the platform daily rate. Defaults to today.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "download_journal_pdf",
+      "namespace": "journals",
+      "description": "Download a journal as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered).",
       "readOnly": true,
       "destructive": false
     }

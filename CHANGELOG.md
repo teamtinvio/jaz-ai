@@ -1,5 +1,36 @@
 # Changelog
 
+## [5.46.0] - 2026-09-01
+
+Approve and send back documents awaiting approval. You could already find what was
+pending; now you can act on it. Approve an invoice, bill or credit note singly or
+up to 100 at once, or send one back for changes with a message that opens a
+collaboration thread. Sale and purchase orders, quotes, requests and claims can be
+sent back too. Approving posts the ledger and cannot be undone, so a record that is
+not awaiting approval is refused rather than approved twice.
+
+Document version history. List the versions kept for a journal, bill, invoice or
+credit note, read any one of them, and restore the document to it. Restoring
+replaces the current version.
+
+Payment runs no longer overstate what you owe. A bill with payments already
+recorded against it was being listed at its full amount rather than its remaining
+balance, so a 4,665.20 bill with 4,000 paid appeared as 4,665.20 outstanding.
+Remaining balances are now worked out from the payments and credits actually
+recorded, voided payments are excluded, and payments made from an account in a
+different currency are converted correctly instead of being subtracted as-is.
+
+`invoices get` and `bills get` now show Amount Due. The line had never appeared.
+
+General ledger grouping is honest about what it accepts. `CAPSULE` was offered and
+always rejected by the server, while `CONTACT` and `RELATIONSHIP` worked and were
+never mentioned. Grouping a general ledger by capsule is not something the report
+supports; read the capsule directly to see its transactions. Fixed-asset summaries
+now validate their own grouping options instead of passing an invalid one through.
+
+Download a journal as PDF, and look up your organization's effective exchange rate
+for a currency on a date.
+
 ## [5.45.0] - 2026-08-28
 
 Updating a record no longer erases the fields you did not mention. Fixed assets,

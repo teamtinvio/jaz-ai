@@ -53,7 +53,7 @@ search_invoices(
 get_contact(resourceId: <customer id>)
 ```
 
-For each customer build a chase record: `{customerName, totalOverdue, oldestDaysOverdue, invoices: [{reference, valueDate, dueDate, daysOverdue, balanceAmount}], primaryContact}`.
+For each customer build a chase record: `{customerName, totalOverdue, oldestDaysOverdue, invoices: [{reference, valueDate, dueDate, daysOverdue, outstanding}], primaryContact}`.
 
 ## Step 3 — Contact-signals pull (Mid-7)
 

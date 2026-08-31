@@ -87,7 +87,7 @@ Capsule types used by jobs:
 
 Group GL by capsule for the auditor:
 ```
-generate_general_ledger(period_start, period_end, groupBy: 'CAPSULE')
+get_capsule(resourceId)   # returns the capsule's transactions; GL cannot group by capsule
 ```
 
 ## Platform tools every job uses

@@ -109,7 +109,7 @@ For assets at salvage value AND no longer in use:
 
 For each FA category (e.g., Vehicles, Office Equipment, Computers, Buildings):
 ```
-generate_general_ledger(accountResourceId: <FA cost GL>, period_start: '2025-01-01', period_end: '2025-12-31', groupBy: 'CAPSULE')
+generate_general_ledger(accountResourceId: <FA cost GL>, period_start: '2025-01-01', period_end: '2025-12-31', groupBy: 'ACCOUNT')
 ```
 
 Group by capsule shows per-asset / per-disposal trail. Auditor sample-test will pick 2-3 assets per category and trace GL → original purchase bill → FA registration → depreciation history → disposal (if any).

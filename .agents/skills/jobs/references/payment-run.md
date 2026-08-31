@@ -54,7 +54,7 @@ search_bills(
 
 Paginate via `offset` if `totalElements > 200`. Add a 7-day grace window (`dueDate.lte: <cutoff + 7 days>`) — pay slightly early beats missing day-after.
 
-For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, `balanceAmount`, `dueDate`, `reference`. Per `jaz-api/SKILL.md` rule 52, `dueDate` arrives as epoch ms — convert with `new Date(ms)` before display.
+For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, `paymentRecords`, `creditsApplied`, `dueDate`, `reference`. `balanceAmount` is a FILTER key only — the API accepts it in a filter but never returns it on a bill or invoice. Reading it back yields undefined. Derive outstanding instead: `totalAmount - sum(paymentRecords[].transactionAmount) - sum(creditsApplied[].amountApplied)`, and fetch with `view: 'full'` because a lean row omits `paymentRecords` entirely. Per `jaz-api/SKILL.md` rule 52, `dueDate` arrives as epoch ms — convert with `new Date(ms)` before display.
 
 ## Step 3 — AP aging cross-check
 
@@ -62,7 +62,7 @@ For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, 
 generate_aged_ap(period_end: '2025-02-28')
 ```
 
-Verify: `sum(search_bills.balanceAmount) ≈ generate_aged_ap.totalOutstanding` (within the materiality threshold). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling — surface to the user.
+Verify: `sum(derived outstanding) ≈ generate_aged_ap.totalOutstanding` (within the materiality threshold). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling — surface to the user.
 
 Flag any bill in the 60d+ bucket — these need priority OR dispute resolution. Exclude bills the user has flagged as disputed.
 
@@ -106,7 +106,7 @@ create_bill_payment(
 
 **FX bills (e.g., USD bill paid from SGD account):** `paymentAmount` is the SGD amount that left the bank, `transactionAmount` is the USD amount applied to the bill. The platform calculates the implied rate and posts the FX gain/loss. Per `jaz-api/SKILL.md` rule 4: same-currency means both fields equal; FX means they differ.
 
-**Partial payment:** Set both fields to the partial amount; bill remains `UNPAID` with reduced `balanceAmount`.
+**Partial payment:** Set both fields to the partial amount; bill remains `UNPAID`; the payment appears in `paymentRecords[]` and outstanding is derived from it.
 
 **Reference convention:** `PAYRUN-YYYY-MM-DD-NNN` (zero-padded sequence). Bank reconciliation downstream relies on this prefix to auto-match bank statement lines.
 
@@ -123,7 +123,7 @@ search_payments(filter: {reference: {startsWith: 'PAYRUN-2025-02-28-'}, valueDat
 
 Assert:
 - AP aging total reduced by `sum(payments.transactionAmount)` (in base currency, FX-converted at value date).
-- Bills fully paid no longer appear in aging; partials show reduced `balanceAmount`.
+- Bills fully paid no longer appear in aging; partials carry the payment in `paymentRecords[]`; derive outstanding from it.
 - `search_payments` returns N rows where N = bills paid in step 6.
 
 ```
@@ -152,7 +152,7 @@ Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)
 - **Priority-based payment ordering:** `sort: 'dueDate:asc'` covers chronological. For overdue-first, sort by `daysOverdue:desc`. For supplier-strategic, ask the user which suppliers are priority and process those first.
 - **Multi-currency runs:** Split the run by currency. SGD bills → SGD bank; USD bills → USD bank or SWIFT-routed. The actual bank disbursement is handled outside Jaz (via the bank's portal); Jaz records the payment after it clears.
 - **Approval workflow (multi-signatory SMBs):** Build the batch in step 5, get out-of-band approval, then execute step 6 only after sign-off. Do NOT post payments before the actual bank transfer is initiated — Jaz payments are not "payment instructions", they record completed payments.
-- **Early-payment discounts:** If supplier offers `2% 10 Net 30`, computing the equivalent annualized return is `(2% / 98%) × (365 / 20) ≈ 37.2%`. Take it when cash allows. Apply the discount as: pay `transactionAmount = bill.balanceAmount × 0.98`, then post a separate journal Dr Bank Charges/Discount Income for the 2% saved (cleaner than partial payment of the original bill).
+- **Early-payment discounts:** If supplier offers `2% 10 Net 30`, computing the equivalent annualized return is `(2% / 98%) × (365 / 20) ≈ 37.2%`. Take it when cash allows. Apply the discount as: pay `transactionAmount = (derived outstanding) × 0.98`, then post a separate journal Dr Bank Charges/Discount Income for the 2% saved (cleaner than partial payment of the original bill).
 
 ---
 

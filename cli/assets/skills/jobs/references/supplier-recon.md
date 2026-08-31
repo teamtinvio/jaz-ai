@@ -47,7 +47,7 @@ search_bills(
 )
 ```
 
-Per bill: `{resourceId, reference, valueDate, currency, originalAmount, balanceAmount, status, dueDate}`. Keep the Jaz-side bill list for the recon pack.
+Per bill: `{resourceId, reference, valueDate, currency, originalAmount, paymentRecords, status, dueDate}`. `balanceAmount` is a FILTER key only — the API accepts it in a filter but never returns it on a bill or invoice. Reading it back yields undefined. Derive outstanding instead: `totalAmount - sum(paymentRecords[].transactionAmount) - sum(creditsApplied[].amountApplied)`, and fetch with `view: 'full'` because a lean row omits `paymentRecords` entirely. Keep the Jaz-side bill list for the recon pack.
 
 For an opening-balance recon: also pull the supplier's pre-period balance via `generate_aged_ap(period_end: <period-start - 1 day>)` and filter to this supplier.
 

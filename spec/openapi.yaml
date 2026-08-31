@@ -681,6 +681,72 @@
       ],
       "type": "object"
     },
+    "ApproveJobResponse": {
+      "properties": {
+        "jobId": {
+          "description": "Identifier of the background job. Poll it through the background jobs search endpoint.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the job at the moment it was accepted.",
+          "type": "string"
+        },
+        "subscriptionFBPath": {
+          "description": "Realtime database path to subscribe to for live progress on the job.",
+          "type": "string"
+        },
+        "totalChunks": {
+          "description": "Number of chunks the job was split into.",
+          "type": "integer"
+        },
+        "totalRecords": {
+          "description": "Number of records the job will process.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "ApproveRecord": {
+      "properties": {
+        "approvalStatus": {
+          "description": "Approval status after the call.",
+          "type": "string"
+        },
+        "errorCode": {
+          "description": "Machine readable code for the reason the record was skipped. Null on success. A record that\nwas not awaiting approval reports INVALID_SALE_STATUS_ERROR, which is also what an\nalready-approved record reports: approving is one-shot, not idempotent.",
+          "type": "string"
+        },
+        "failureReason": {
+          "description": "Human readable reason the record was skipped. Null on success.",
+          "type": "string"
+        },
+        "isSuccess": {
+          "description": "True when the record was approved, false when it was skipped.",
+          "type": "boolean"
+        },
+        "resourceId": {
+          "description": "Resource ID of the record this outcome belongs to.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Record status after the call. An approved record is live, so this is its live status\n(UNPAID, PARTIALLY_PAID, PAID) rather than DRAFT.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "ApproveResponse": {
+      "properties": {
+        "records": {
+          "description": "Outcome per record.",
+          "items": {
+            "$ref": "#/definitions/ApproveRecord"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "ArchiveBankStatementEntriesRequest": {
       "properties": {
         "accountResourceId": {
@@ -1489,6 +1555,27 @@
           },
           "maxItems": 200,
           "type": "array"
+        }
+      },
+      "required": [
+        "resourceIds"
+      ],
+      "type": "object"
+    },
+    "BulkApproveRequest": {
+      "properties": {
+        "resourceIds": {
+          "description": "Resource IDs of the records to approve. Between 1 and 100 per call, with no duplicates.\n\nThe ceiling is 100 rather than the 500 the request-changes endpoints allow, for two\nreasons. Upstream runs a batch of 100 or fewer inline instead of dispatching it, so a\nlarger batch can outrun the request deadline while records keep being approved. And\napproving is far heavier than requesting changes: every record posts ledger entries and\nqueues follow-up work, while the rate limiter charges one token per request regardless\nof batch size.",
+          "example": [
+            "b7a2c3d4-e5f6-4890-abcd-ef1234567890"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
         }
       },
       "required": [
@@ -30682,6 +30769,88 @@
         ]
       }
     },
+    "/api/v1/bills/bulk-approve": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that approves many bills awaiting approval. Returns a job handle carrying the job ID and a subscription path for live progress. Poll it by searching background jobs with a resourceId filter set to that job ID. Each approved bill becomes live, posting its ledger entries and emitting a notification, so size a batch with that in mind. Bills that are not awaiting approval are skipped and reported on the job tasks. Resource IDs that cannot be found in your organization are rejected with 422 and no job is dispatched, so fix the list and retry.",
+        "operationId": "create-bill-bulk-approve",
+        "parameters": [
+          {
+            "description": "Bill resource IDs to approve.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkApproveRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ApproveJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Approve Bills",
+        "tags": [
+          "Bills"
+        ]
+      }
+    },
     "/api/v1/bills/bulk-request-changes": {
       "post": {
         "consumes": [
@@ -31214,6 +31383,89 @@
           }
         ],
         "summary": "Update Bill",
+        "tags": [
+          "Bills"
+        ]
+      }
+    },
+    "/api/v1/bills/{resourceId}/approve": {
+      "post": {
+        "description": "Approve a bill that is awaiting approval. The bill becomes live: its ledger entries are posted, any linked purchase order is confirmed, and its document reference is consumed. Approving is one time only, so a bill that is not awaiting approval is rejected with 422 rather than approved again. On a timeout or a 500, read the bill back and check its approval status before retrying. A bill that cannot be found in your organization is rejected with 404.",
+        "operationId": "create-bill-approve",
+        "parameters": [
+          {
+            "description": "Resource ID of the bill.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ApproveResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Approve a Bill",
         "tags": [
           "Bills"
         ]
@@ -34863,6 +35115,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "429": {
             "description": "Too Many Requests",
             "schema": {
@@ -37833,7 +38091,7 @@
     },
     "/api/v1/claims/{resourceId}/unpost": {
       "post": {
-        "description": "Un-post a CONVERTED claim: voids its accrual journal and reverts the claim to APPROVED so it can be fixed and re-converted. Blocked while a live payout is linked; reverse the payout first.",
+        "description": "Un-post a CONVERTED claim: voids its accrual journal and reverts the claim to APPROVED so it can be fixed and re-converted. Other states are rejected (CLAIM_NOT_UNPOSTABLE_ERROR). The one exception is an already-un-posted claim (APPROVED with unposted true), where re-calling un-post is a deliberate no-op that returns the claim unchanged with 200. Claim and payout lifecycles are decoupled: un-posting voids only this claim's accrual and never checks for a linked payout, so a payout that already drew the employee balance down simply leaves it negative until the claim is re-converted or the payout is reversed independently. Aggregated claims un-post as a whole group, since one accrual journal can back many claims.",
         "operationId": "create-claim-unpost",
         "parameters": [
           {
@@ -39694,6 +39952,88 @@
         ]
       }
     },
+    "/api/v1/customer-credit-notes/bulk-approve": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that approves many customer credit notes awaiting approval. Returns a job handle carrying the job ID and a subscription path for live progress. Poll it by searching background jobs with a resourceId filter set to that job ID. Credit notes that are not awaiting approval are skipped and reported on the job tasks. Resource IDs that cannot be found in your organization are rejected with 422 and no job is dispatched, so fix the list and retry.",
+        "operationId": "create-customer-credit-note-bulk-approve",
+        "parameters": [
+          {
+            "description": "Customer credit note resource IDs to approve.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkApproveRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ApproveJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Approve Customer Credit Notes",
+        "tags": [
+          "Customer Credit"
+        ]
+      }
+    },
     "/api/v1/customer-credit-notes/bulk-request-changes": {
       "post": {
         "consumes": [
@@ -40156,6 +40496,89 @@
           }
         ],
         "summary": "Update Customer Credit Note",
+        "tags": [
+          "Customer Credit"
+        ]
+      }
+    },
+    "/api/v1/customer-credit-notes/{resourceId}/approve": {
+      "post": {
+        "description": "Approve a customer credit note that is awaiting approval. The credit note becomes live and its ledger entries are posted. Approving is one time only: a credit note that is not awaiting approval is returned in the response with a failure reason rather than approved again. On a timeout or a 500, read the credit note back and check its approval status before retrying. A customer credit note that cannot be found in your organization is rejected with 404.",
+        "operationId": "create-customer-credit-note-approve",
+        "parameters": [
+          {
+            "description": "Resource ID of the customer credit note.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ApproveResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Approve a Customer Credit Note",
         "tags": [
           "Customer Credit"
         ]
@@ -49162,6 +49585,88 @@
         ]
       }
     },
+    "/api/v1/invoices/bulk-approve": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that approves many invoices awaiting approval. Returns a job handle carrying the job ID and a subscription path for live progress. Poll it by searching background jobs with a resourceId filter set to that job ID. Each approved invoice becomes live, posting its ledger entries and emitting a notification, so size a batch with that in mind. Invoices that are not awaiting approval are skipped and reported on the job tasks. Resource IDs that cannot be found in your organization are rejected with 422 and no job is dispatched, so fix the list and retry.",
+        "operationId": "create-invoice-bulk-approve",
+        "parameters": [
+          {
+            "description": "Invoice resource IDs to approve.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkApproveRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ApproveJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Approve Invoices",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
     "/api/v1/invoices/bulk-request-changes": {
       "post": {
         "consumes": [
@@ -49694,6 +50199,89 @@
           }
         ],
         "summary": "Update Invoice",
+        "tags": [
+          "Invoices"
+        ]
+      }
+    },
+    "/api/v1/invoices/{resourceId}/approve": {
+      "post": {
+        "description": "Approve an invoice that is awaiting approval. The invoice becomes live: its ledger entries are posted, any linked sale order is confirmed, and its document reference is consumed. Approving is one time only, so an invoice that is not awaiting approval is rejected with 422 rather than approved again. On a timeout or a 500, read the invoice back and check its approval status before retrying. An invoice that cannot be found in your organization is rejected with 404.",
+        "operationId": "create-invoice-approve",
+        "parameters": [
+          {
+            "description": "Resource ID of the invoice.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ApproveResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Approve an Invoice",
         "tags": [
           "Invoices"
         ]
@@ -52229,6 +52817,12 @@
             "description": "Raw HTML to render to a PDF, then process (required if sourceType=HTML). Max 5 MB.",
             "in": "formData",
             "name": "html",
+            "type": "string"
+          },
+          {
+            "description": "Internal notes to set on the record this file creates. Visible only inside the organization. Max 3000 characters.",
+            "in": "formData",
+            "name": "internalNotes",
             "type": "string"
           }
         ],
@@ -70286,6 +70880,88 @@
         ]
       }
     },
+    "/api/v1/supplier-credit-notes/bulk-approve": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Dispatch a background job that approves many supplier credit notes awaiting approval. Returns a job handle carrying the job ID and a subscription path for live progress. Poll it by searching background jobs with a resourceId filter set to that job ID. Credit notes that are not awaiting approval are skipped and reported on the job tasks. Resource IDs that cannot be found in your organization are rejected with 422 and no job is dispatched, so fix the list and retry.",
+        "operationId": "create-supplier-credit-note-bulk-approve",
+        "parameters": [
+          {
+            "description": "Supplier credit note resource IDs to approve.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkApproveRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ApproveJobResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Approve Supplier Credit Notes",
+        "tags": [
+          "Supplier Credit"
+        ]
+      }
+    },
     "/api/v1/supplier-credit-notes/bulk-request-changes": {
       "post": {
         "consumes": [
@@ -70748,6 +71424,89 @@
           }
         ],
         "summary": "Update Supplier Credit Note",
+        "tags": [
+          "Supplier Credit"
+        ]
+      }
+    },
+    "/api/v1/supplier-credit-notes/{resourceId}/approve": {
+      "post": {
+        "description": "Approve a supplier credit note that is awaiting approval. The credit note becomes live and its ledger entries are posted. Approving is one time only: a credit note that is not awaiting approval is returned in the response with a failure reason rather than approved again. On a timeout or a 500, read the credit note back and check its approval status before retrying. A supplier credit note that cannot be found in your organization is rejected with 404.",
+        "operationId": "create-supplier-credit-note-approve",
+        "parameters": [
+          {
+            "description": "Resource ID of the supplier credit note.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ApproveResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Approve a Supplier Credit Note",
         "tags": [
           "Supplier Credit"
         ]
