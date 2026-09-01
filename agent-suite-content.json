@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.46.0+05f9cb7b",
+  "contentVersion": "5.46.1+036be91a",
   "counts": {
     "tools": 367,
     "namespaces": 45,
@@ -2703,7 +2703,7 @@
     {
       "name": "approve_documents",
       "namespace": "approvals",
-      "description": "Approve one document awaiting approval. Posts its ledger entries and makes it live. One-shot: a record not awaiting approval reports INVALID_SALE_STATUS_ERROR. Read approvalStatus off this response, not off the document. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Approve one document awaiting approval. Posts its ledger entries and makes it live. One-shot, and the refusal channel differs by entity: invoices/bills THROW 422; credit notes return 200 with isSuccess:false and a STALE approvalStatus of APPROVED. Check isSuccess and catch the throw — approvalStatus alone cannot tell refusal from success. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
