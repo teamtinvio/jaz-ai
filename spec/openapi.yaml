@@ -11748,22 +11748,6 @@
           },
           "type": "array"
         },
-        "birFilingDate": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/DateExpression"
-            }
-          ],
-          "description": "Filter by the date the return was filed with the tax authority, in YYYY-MM-DD format."
-        },
-        "clientApprovalEmail": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/StringExpression"
-            }
-          ],
-          "description": "Filter by the email address of the client asked to approve the return."
-        },
         "displayFilingGroupings": {
           "allOf": [
             {
@@ -11814,6 +11798,14 @@
             }
           ],
           "description": "Filter by organization resource ID."
+        },
+        "paymentStatus": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payment status."
         },
         "periodEndDate": {
           "allOf": [
@@ -11879,11 +11871,6 @@
           ],
           "description": "Filter by fields on the tax form behind the filing."
         },
-        "taxReturnStatus": {
-          "description": "Filter by tax return status. Takes a plain value rather than a set of match conditions.",
-          "maxLength": 64,
-          "type": "string"
-        },
         "taxType": {
           "allOf": [
             {
@@ -11925,7 +11912,7 @@
           "items": {
             "type": "string"
           },
-          "maxItems": 14,
+          "maxItems": 12,
           "type": "array",
           "uniqueItems": true
         }
