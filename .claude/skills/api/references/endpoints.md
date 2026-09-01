@@ -647,7 +647,7 @@ Bills and supplier credit notes support withholding tax per line item:
   "reference": "JV-001",
   "valueDate": "2026-02-08",
   "journalEntries": [
-    { "accountResourceId": "uuid", "amount": 500, "type": "DEBIT", "contactResourceId": "uuid" },
+    { "accountResourceId": "uuid", "amount": 500, "type": "DEBIT", "description": "Line note" },
     { "accountResourceId": "uuid", "amount": 500, "type": "CREDIT" }
   ]
 }
@@ -661,7 +661,10 @@ Bills and supplier credit notes support withholding tax per line item:
 - Do NOT use `debit`/`credit` as separate number fields — that is WRONG
 - Do NOT include `currency` at top level — causes "Invalid request body"
 - Total DEBIT amounts MUST equal total CREDIT amounts
-- `contactResourceId` is optional per entry
+- `contactResourceId` is a TOP-LEVEL field, NOT per entry. Probed 2026-09-02: an entry-level
+  `contactResourceId` is silently discarded (an int there is accepted like any unknown key, while an
+  int on `description` or `taxProfileResourceId` returns 400), and a real contact id on an entry does
+  not appear on the created journal. Put it at the top level, where it does land.
 
 ---
 
@@ -1356,8 +1359,8 @@ Same but with `"bill"` wrapper instead of `"invoice"`.
   "valueDate": "2026-03-01",
   "saveAsDraft": false,
   "schedulerEntries": [
-    { "accountResourceId": "uuid", "amount": 100, "type": "DEBIT", "name": "Monthly accrual" },
-    { "accountResourceId": "uuid", "amount": 100, "type": "CREDIT", "name": "Monthly accrual" }
+    { "accountResourceId": "uuid", "amount": 100, "type": "DEBIT", "description": "Monthly accrual" },
+    { "accountResourceId": "uuid", "amount": 100, "type": "CREDIT", "description": "Monthly accrual" }
   ],
   "repeat": "MONTHLY",
   "startDate": "2026-03-01",

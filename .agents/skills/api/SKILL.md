@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.46.11
+version: 5.46.12
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 159 production gotchas, error
@@ -363,7 +363,7 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 108. **Transfer Trial Balance** (`POST /api/v1/transfer-trial-balance`) creates opening balance entries. Uses `journalEntries` (NOT `lines` — this is a journal type). Always ACTIVE (no draft mode), reference auto-generated as "Transfer Trial Balance", minimum 1 entry, entries cannot have 0 amounts, skips lock date validation. **`valueDate` must be today or in the past** — future dates are rejected with "Opening data cannot be future date". Each entry: `{ accountResourceId, type: "DEBIT"|"CREDIT", amount }`.
 
 ### Scheduler Dynamic Strings
-109. **Scheduler placeholder strings** — All scheduled transactions (invoices, bills, journals, subscriptions) support dynamic strings in any free text field (`reference`, line item `name`, `notes`). Strings are replaced with values relative to the **transaction date**: `{{Day}}` → day name (Monday), `{{Date}}` → full date (09 Mar 2026), `{{Date+X}}` → date + X days, `{{DateRange:X}}` → date range spanning X days (min 1, max 999), `{{Month}}` → month name (March), `{{Month+X}}` → month + X months, `{{MonthRange:X}}` → month range spanning X months, `{{Year}}` → year (2026), `{{Year+X}}` → year + X years. Example: `reference: "INV-{{Month}}-{{Year}}"` → `"INV-March-2026"` for a March transaction.
+109. **Scheduler placeholder strings** — All scheduled transactions (invoices, bills, journals, subscriptions) support dynamic strings in any free text field (`reference`, line item `name`, `notes`). **Scheduled JOURNALS are the exception**: their line field is `description`, not `name`, and they have no notes field at all — neither `notes` nor `internalNotes` is on the create or update contract. Probed 2026-09-02: both are accepted like any unknown key and never read back, so for journals the only dynamic-string field is `reference`. Strings are replaced with values relative to the **transaction date**: `{{Day}}` → day name (Monday), `{{Date}}` → full date (09 Mar 2026), `{{Date+X}}` → date + X days, `{{DateRange:X}}` → date range spanning X days (min 1, max 999), `{{Month}}` → month name (March), `{{Month+X}}` → month + X months, `{{MonthRange:X}}` → month range spanning X months, `{{Year}}` → year (2026), `{{Year+X}}` → year + X years. Example: `reference: "INV-{{Month}}-{{Year}}"` → `"INV-March-2026"` for a March transaction.
 
 ### Bank Rule Dynamic Strings
 110. **Bank rule placeholder strings** — Bank reconciliation rules support dynamic strings in any free text field (`name`, `reference`, cash entry description). Strings are replaced with actual **bank record** values during reconciliation: `{{bankReference}}` → bank record reference (e.g., INV-03/01/2025-01), `{{bankPayee}}` → payer/payee name (e.g., Fruit Planet), `{{bankDescription}}` → transaction description (e.g., QR Payment). Example: `reference: "{{bankPayee}} - {{bankReference}}"`.

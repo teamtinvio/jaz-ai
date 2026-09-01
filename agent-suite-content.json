@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.46.11+c1f5567b",
+  "contentVersion": "5.46.12+0a4fd382",
   "counts": {
     "tools": 367,
     "namespaces": 45,
@@ -1380,7 +1380,7 @@
     {
       "name": "create_scheduled_journal",
       "namespace": "scheduled_transactions",
-      "description": "Recurring journal. Use `schedulerEntries` (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT|CREDIT), name. Use `repeat` (NOT frequency/interval): ONE_TIME|DAILY|WEEKLY|MONTHLY|YEARLY. Debits must equal credits. Flat structure — reference, valueDate, saveAsDraft at top level.",
+      "description": "Recurring journal. Use `schedulerEntries` (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT|CREDIT), description. Use `repeat` (NOT frequency/interval): ONE_TIME|DAILY|WEEKLY|MONTHLY|YEARLY. Debits must equal credits. Flat structure — reference, valueDate, saveAsDraft at top level.",
       "readOnly": false,
       "destructive": false
     },
