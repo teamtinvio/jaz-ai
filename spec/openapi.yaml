@@ -11735,6 +11735,207 @@
       ],
       "type": "object"
     },
+    "FilingSubmissionFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "andGroup": {
+          "description": "Combine filter groups using AND.",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "birFilingDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by the date the return was filed with the tax authority, in YYYY-MM-DD format."
+        },
+        "clientApprovalEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the email address of the client asked to approve the return."
+        },
+        "displayFilingGroupings": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the period grouping a filing is listed under: MONTHLY, QUARTERLY, ANNUAL, or OTHER."
+        },
+        "filingDueDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by statutory due date, in YYYY-MM-DD format."
+        },
+        "formType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by tax form code, for example 2550Q."
+        },
+        "lifecycleStatus": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by lifecycle status, for example READY_TO_FILE, SENT_TO_CLIENT, FILED_AND_PAID, or CANCELLED."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "orGroup": {
+          "description": "Combine filter groups using OR.",
+          "items": {
+            "type": "object"
+          },
+          "type": "array"
+        },
+        "organizationResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by organization resource ID."
+        },
+        "periodEndDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by the last day of the period covered, in YYYY-MM-DD format."
+        },
+        "periodStartDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by the first day of the period covered, in YYYY-MM-DD format."
+        },
+        "periodType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by period type: MONTHLY, QUARTERLY, or ANNUAL."
+        },
+        "periodValue": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IntExpression"
+            }
+          ],
+          "description": "Filter by the month (1 to 12) or quarter (1 to 4) within the period year, according to period type."
+        },
+        "periodYear": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IntExpression"
+            }
+          ],
+          "description": "Filter by the calendar year of the period covered."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by filing resource ID."
+        },
+        "taxDueAmount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BigDecimalExpression"
+            }
+          ],
+          "description": "Filter by tax payable on the return."
+        },
+        "taxForm": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TaxFormNestedFilter"
+            }
+          ],
+          "description": "Filter by fields on the tax form behind the filing."
+        },
+        "taxReturnStatus": {
+          "description": "Filter by tax return status. Takes a plain value rather than a set of match conditions.",
+          "maxLength": 64,
+          "type": "string"
+        },
+        "taxType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TaxTypeNestedFilter"
+            }
+          ],
+          "description": "Filter by fields on the tax type."
+        }
+      },
+      "type": "object"
+    },
+    "FilingSubmissionFilterGroup": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "FilingSubmissionSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "asc",
+            "DESC",
+            "desc"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 14,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
     "FixedAllocationRequest": {
       "properties": {
         "amount": {
@@ -13801,13 +14002,17 @@
           "description": "Workflow creation date, in YYYY-MM-DD format."
         },
         "documentType": {
-          "description": "Document type filter. Determines which workflow tables are queried. Allowed values: SALE, PURCHASE, SALE_CREDIT_NOTE, PURCHASE_CREDIT_NOTE, BANK_STATEMENT.",
+          "description": "Document type filter. Determines which workflow tables are queried. Allowed values: SALE, PURCHASE, SALE_CREDIT_NOTE, PURCHASE_CREDIT_NOTE, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER, BANK_STATEMENT.",
           "items": {
             "enum": [
               "SALE",
               "PURCHASE",
               "SALE_CREDIT_NOTE",
               "PURCHASE_CREDIT_NOTE",
+              "SALE_QUOTE",
+              "SALE_ORDER",
+              "PURCHASE_REQUEST",
+              "PURCHASE_ORDER",
               "BANK_STATEMENT"
             ],
             "type": "string"
@@ -15361,7 +15566,11 @@
             "SALE",
             "PURCHASE",
             "SALE_CREDIT_NOTE",
-            "PURCHASE_CREDIT_NOTE"
+            "PURCHASE_CREDIT_NOTE",
+            "SALE_QUOTE",
+            "SALE_ORDER",
+            "PURCHASE_REQUEST",
+            "PURCHASE_ORDER"
           ],
           "example": "SALE",
           "type": "string"
@@ -20752,6 +20961,46 @@
       },
       "type": "object"
     },
+    "SearchFilingSubmissionsRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/FilingSubmissionFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and, or, andGroup, and orGroup for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (default 100, max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/FilingSubmissionSortFilter"
+            }
+          ],
+          "description": "Sort order. Defaults to newest first by creation date. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
     "SearchFixedAssetsReportFilter": {
       "properties": {
         "assetAccount": {
@@ -22891,6 +23140,19 @@
       ],
       "type": "object"
     },
+    "TaxFormNestedFilter": {
+      "properties": {
+        "categoryCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the form's category code."
+        }
+      },
+      "type": "object"
+    },
     "TaxProfileFilter": {
       "properties": {
         "and": {
@@ -23054,6 +23316,19 @@
         "order",
         "sortBy"
       ],
+      "type": "object"
+    },
+    "TaxTypeNestedFilter": {
+      "properties": {
+        "categoryCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the tax type's category code."
+        }
+      },
       "type": "object"
     },
     "TemplateDataExportAPDetailsReport": {
@@ -27887,6 +28162,10 @@
           "maxLength": 1000,
           "type": "string"
         },
+        "isPendingToActivePurchaseOrder": {
+          "description": "When true, convert a PENDING purchase order to live as part of this update.\nMirrors IsDraftToActiveSaleQuote; only honoured while the order is PENDING.",
+          "type": "boolean"
+        },
         "isTaxVATApplicable": {
           "description": "When true, tax applies to the purchase order and line items carry tax profiles.",
           "type": "boolean"
@@ -28245,6 +28524,10 @@
           "description": "Invoice notes shown on document.",
           "maxLength": 1000,
           "type": "string"
+        },
+        "isPendingToActiveSaleOrder": {
+          "description": "When true, convert a PENDING sale order to live as part of this update.\nMirrors IsDraftToActiveSaleQuote; only honoured while the order is PENDING.",
+          "type": "boolean"
         },
         "isTaxVATApplicable": {
           "description": "When true, tax applies to the sale order and line items carry tax profiles.",
@@ -45957,6 +46240,76 @@
         ]
       }
     },
+    "/api/v1/filing-submissions/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search tax return filings with filters, sort, and pagination. Filter on period, form type, lifecycle status, tax payable, and due dates, and combine conditions with and, or, andGroup, and orGroup. Results are sorted newest first by creation date unless a sort is supplied, and a sort is required when offset is set.",
+        "operationId": "search-filing-submission",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchFilingSubmissionsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Filings",
+        "tags": [
+          "Filings"
+        ]
+      }
+    },
     "/api/v1/fixed-assets": {
       "get": {
         "consumes": [
@@ -52770,7 +53123,11 @@
               "INVOICE",
               "BILL",
               "CUSTOMER_CREDIT_NOTE",
-              "SUPPLIER_CREDIT_NOTE"
+              "SUPPLIER_CREDIT_NOTE",
+              "SALE_QUOTE",
+              "SALE_ORDER",
+              "PURCHASE_REQUEST",
+              "PURCHASE_ORDER"
             ],
             "in": "formData",
             "name": "businessTransactionType",
@@ -73514,6 +73871,10 @@
     {
       "description": "List the organization's withholding tax codes.",
       "name": "Withholding Tax Codes"
+    },
+    {
+      "description": "Search tax return filings by period, form type, lifecycle status, and tax payable.",
+      "name": "Filings"
     },
     {
       "description": "List the available account classifications.",
