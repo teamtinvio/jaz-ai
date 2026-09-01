@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.46.8",
+  "version": "5.46.9",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 367 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -1388,7 +1388,7 @@
     },
     {
       "name": "bulk_upsert_invoices",
-      "description": "Max 500 invoices per call. FLAT shape — ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED — last wins). resourceId per row → update by UUID; omit → upsert by invoiceReference.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); PARTIAL_SUCCESS → data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Max 500 invoices per call. FLAT shape — ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED — last wins). resourceId does NOT update by id here — it is ignored and you get a duplicate.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); PARTIAL_SUCCESS → data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_invoice_line_items",
