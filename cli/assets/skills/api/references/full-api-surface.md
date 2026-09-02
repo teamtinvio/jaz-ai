@@ -259,7 +259,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | DELETE | `/items/:resourceId` | Delete item |
 | POST | `/items/search` | Advanced search with filters |
 | POST | `/items/bulk-upsert` | Bulk create/update items (max 500) |
-| POST | `/inventory-items` | Create inventory item (needs `unit`, `costingMethod`, `cogsResourceId`, `blockInsufficientDeductions`, `inventoryAccountResourceId`) |
+| POST | `/inventory-items` | Create inventory item (needs `name`, `itemCode`, `unit`, `costingMethod`, `cogsResourceId` (Direct Costs), `purchaseAccountResourceId` (Inventory), `saleAccountResourceId`, `blockInsufficientDeductions`) |
 | GET | `/inventory-items` | List inventory items |
 | GET | `/inventory-item-balance/:resourceId` | Get inventory balance |
 | GET | `/inventory-balances/:balanceStatus` | List by status (**known 500 bug**) |

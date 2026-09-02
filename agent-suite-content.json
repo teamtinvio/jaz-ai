@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.46.14+9a193aca",
+  "contentVersion": "5.47.0+85bd1ae3",
   "counts": {
     "tools": 367,
     "namespaces": 45,
@@ -2227,7 +2227,7 @@
     {
       "name": "create_inventory_item",
       "namespace": "items_and_inventory",
-      "description": "Create a new inventory-tracked item. Requires itemCode, name, costingMethod (FIXED or WAC), cogsResourceId, and account links. Use --input for full JSON body. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create a new inventory-tracked item. Requires itemCode, name, unit, costingMethod (FIXED or WAC) and three account links. Use --input for full JSON body. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },

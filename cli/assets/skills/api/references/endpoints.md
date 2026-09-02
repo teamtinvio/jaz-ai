@@ -949,7 +949,7 @@ Returns full custom field definition including `applyToSales`, `applyToPurchase`
 ```json
 // Request:
 {
-  "internalName": "Widget A",
+  "name": "Widget A",
   "itemCode": "WDG-A",
   "unit": "pcs",
   "appliesToSale": true,
@@ -964,8 +964,7 @@ Returns full custom field definition including `applyToSales`, `applyToPurchase`
   "purchaseTaxProfileResourceId": "uuid-tax",
   "costingMethod": "WAC",
   "cogsResourceId": "uuid-direct-costs",
-  "blockInsufficientDeductions": false,
-  "inventoryAccountResourceId": "uuid-inventory-account"
+  "blockInsufficientDeductions": false
 }
 
 // Response:
@@ -973,10 +972,15 @@ Returns full custom field definition including `applyToSales`, `applyToPurchase`
 ```
 
 **CRITICAL notes from live testing**:
+- Send `name`, not `internalName`. The endpoint declares no `name` property and marks `internalName` required, but the API populates `internalName` from the `name` you send (verified by readback 2026-09-02)
 - `unit` is REQUIRED (e.g., `"pcs"`, `"box"`, `"kg"`) — omitting causes ITEM_UNIT_EMPTY_ERROR
+- `blockInsufficientDeductions` is REQUIRED and is NOT defaulted server-side — omitting it fails with "blockInsufficientDeductions is a required field"
 - `costingMethod` must be `"FIXED"` or `"WAC"` (NOT `"FIXED_COST"`)
-- `purchaseAccountResourceId` MUST point to an Inventory-type CoA account (NOT Direct Costs) — wrong type causes INVALID_ACCOUNT_TYPE_INVENTORY
-- `inventoryAccountResourceId` also must be Inventory-type
+- `cogsResourceId` is required, and MUST point to a Direct Costs account — wrong type causes INVALID_ACCOUNT_TYPE_DIRECT_COST
+- `purchaseAccountResourceId` MUST point to an Inventory-type CoA account (NOT Direct Costs) — wrong type causes INVALID_ACCOUNT_TYPE_INVENTORY. An inventory purchase debits the asset; COGS is recognised on sale
+- Because `cogsResourceId` is always required, so are `purchaseAccountResourceId`, `saleAccountResourceId`, `appliesToSale` and `appliesToPurchase` — the API reports them as "required if [cogsResourceId] is present", but that condition always holds
+- `appliesToSale` and `appliesToPurchase` must both be `true`, not merely present: `false` returns APPLIES_TO_SALE_ERROR / APPLIES_TO_PURCHASE_ERROR, "must be true when cogs selected". An inventory-tracked item with COGS is necessarily both sale- and purchase-applicable
+- There is no `inventoryAccountResourceId` — it appears in no request schema and a create succeeds without it
 - Delete inventory items via `DELETE /items/:id` (NOT `/inventory-items/:id`)
 - `GET /inventory-item-balance/:id` returns balance per item
 - `GET /inventory-balances/:status` currently returns 500 (known bug)

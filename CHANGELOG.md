@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.47.0] - 2026-09-02
+
+Create inventory-tracked items from the command line. `clio inventory create` can
+now set the COGS, purchase and sale accounts an inventory item needs, so it builds
+a fully linked item instead of an unlinked one. It also tells you up front which
+fields are missing rather than letting the server reject the request.
+
+Clearer inventory item requirements. The tool now asks for the unit of measure and
+all three account links, which the API has always required, and says which kind of
+account each one has to be: a Direct Costs account for cost of goods sold, and an
+Inventory account for purchases. Two settings that had to be on for every tracked
+item are no longer asked for at all.
+
+Read a single account by id with `clio accounts get`.
+
 ## [5.46.0] - 2026-09-01
 
 Approve and send back documents awaiting approval. You could already find what was

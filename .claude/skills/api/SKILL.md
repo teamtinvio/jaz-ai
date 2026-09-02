@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.46.14
+version: 5.47.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 159 production gotchas, error
@@ -115,7 +115,7 @@ The rest of this skill — field names, gotchas, error catalog, dependency order
 28. **CN refunds use the same Payment shape** as invoice/bill payments — `paymentAmount`, `transactionAmount`, `accountResourceId`, `paymentMethod`, `valueDate`, `reference`. The API also accepts aliases `refundAmount`/`refundMethod` (see Rule 53) but prefer canonical `paymentAmount`/`paymentMethod` for consistency.
 
 ### Inventory Items
-29. **Inventory items require**: `unit` (e.g., `"pcs"`), `costingMethod` (`"FIXED"` or `"WAC"`), `cogsResourceId`, `blockInsufficientDeductions`, `inventoryAccountResourceId`. `purchaseAccountResourceId` MUST be Inventory-type CoA.
+29. **Inventory items** (`POST /inventory-items`, verified live 2026-09-02): required are `itemCode`, `name`, `unit` (e.g. `"pcs"` — a blank unit returns `ITEM_UNIT_EMPTY_ERROR`), `costingMethod` (`"FIXED"` or `"WAC"`), `cogsResourceId` and `blockInsufficientDeductions` (send `false` explicitly — omitting it 422s, it is not defaulted server-side). Send `name`: the endpoint declares no `name` property and marks `internalName` required, but the API populates `internalName` from the `name` you send. The two account links are TYPE-constrained and the errors name the type: `cogsResourceId` must be **Direct Costs** (`INVALID_ACCOUNT_TYPE_DIRECT_COST`), `purchaseAccountResourceId` must be **Inventory** (`INVALID_ACCOUNT_TYPE_INVENTORY`) — an inventory purchase debits the asset, and COGS is recognised on sale. The API reports `purchaseAccountResourceId`, `saleAccountResourceId`, `appliesToSale` and `appliesToPurchase` as "required if [cogsResourceId] is present" — but `cogsResourceId` is itself always required, so all four are unconditional too. `appliesToSale` and `appliesToPurchase` must both be **`true`**, not merely present: `false` returns `APPLIES_TO_SALE_ERROR` / `APPLIES_TO_PURCHASE_ERROR` ("must be true when cogs selected"), so an inventory-tracked item with COGS is necessarily both sale- and purchase-applicable. There is no `inventoryAccountResourceId` — it appears in no request schema and a create succeeds without it.
 30. **Delete inventory items via `DELETE /items/:id`** — not `/inventory-items/:id`.
 
 ### Cash Transfers

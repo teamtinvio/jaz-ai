@@ -362,6 +362,9 @@ Body shape (all 3): `{ items: [{ btResourceId, btType }] }` with `btType ∈ {SA
 |------------|-----------|
 | `items` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `balance <itemId>` | `--json` |
+| `create` | `--item-code`, `--name`, `--unit`, `--costing-method`, `--cogs-account`, `--purchase-account`, `--sale-account`, `--block-insufficient`, `--input` |
+
+All seven of `--item-code`, `--name`, `--unit`, `--costing-method`, `--cogs-account`, `--purchase-account` and `--sale-account` are required. `--cogs-account` must be a Direct Costs account and `--purchase-account` an Inventory account. There are no `--sale`/`--purchase` flags: the API rejects either as false once COGS is set, so both are always sent as `true`.
 
 ---
 
