@@ -27391,7 +27391,7 @@
           "type": "string"
         },
         "clearEmploymentType": {
-          "description": "Set true to clear the classification back to unclassified.",
+          "description": "Set true to clear the classification. Sending employmentType as null does the same.",
           "type": "boolean"
         },
         "defaultApproverUserResourceId": {
@@ -27399,11 +27399,11 @@
           "type": "string"
         },
         "email": {
-          "description": "Null means no change; an empty string clears it.",
+          "description": "Work email. Send null to clear it.",
           "type": "string"
         },
         "employmentType": {
-          "description": "Employment classification.",
+          "description": "Employment classification. Send null to clear it back to unclassified.",
           "enum": [
             "FULL_TIME",
             "PART_TIME",
@@ -27415,21 +27415,25 @@
           "type": "string"
         },
         "managerEmployeeResourceId": {
-          "description": "Manager employee (UUIDv4). Server rejects self/cyclic references.",
+          "description": "Manager employee (UUIDv4). Server rejects self/cyclic references. Send null to clear it.",
           "type": "string"
         },
         "name": {
-          "description": "Employee display name. Null means no change.",
+          "description": "Employee display name. Leave the field out for no change.",
           "maxLength": 255,
           "type": "string"
         },
         "phone": {
-          "description": "Phone number. Server enforces per-organization uniqueness.",
+          "description": "Phone number. Server enforces per-organization uniqueness. Send null to clear it.",
           "maxLength": 50,
           "type": "string"
         },
         "resourceId": {
           "description": "Employee resource ID (UUIDv4).",
+          "type": "string"
+        },
+        "userResourceId": {
+          "description": "Login user linked to this employee (UUIDv4). Send a value to link or relink, and\nnull to remove the link. A user maps to at most one employee per organization.",
           "type": "string"
         }
       },
@@ -27946,7 +27950,7 @@
           "type": "string"
         },
         "printable": {
-          "description": "When true, the classifier appears on printed and PDF documents.",
+          "description": "When true, the classifier appears on printed and PDF documents. Leave it out to keep\nthe setting the classifier already has.",
           "type": "boolean"
         },
         "resourceId": {
