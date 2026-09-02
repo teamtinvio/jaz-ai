@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.47.4] - 2026-09-03
+
+`--format` is gone from the commands that never honoured it. Asking a single
+record for `--format csv` used to print the ordinary human output and report
+success; it now tells you the option does not apply. Use `--json` on those
+commands, which has always worked. Nothing changed for list, search and report
+commands, where `--format` does what it says.
+
+`clio catalogs` gained `--json` on every subcommand, so its output can be read by
+a script. `clio capsules move` did too.
+
+`clio contacts get` shows the email address again instead of a placeholder.
+
 ## [5.47.3] - 2026-09-02
 
 Custom fields now work the way the form suggests. Choosing which documents a

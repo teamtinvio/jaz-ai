@@ -203,9 +203,23 @@ Same subcommands and flags as `cash-in`.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search <query>` | `--limit`, `--offset` |
-| `create` | `--name`, `--input` |
+| `create` | `--name`, `--description`, `--print-on-documents`, `--invoices`, `--bills`, `--customer-credits`, `--supplier-credits`, `--payments`, `--field-format` |
 | `update <id>` | `--name` |
 | `delete <id>` | |
+
+`--field-format` picks the kind of field: `CUSTOM` (default) is free text; `ALL_CUSTOMERS` / `ALL_SUPPLIERS` / `ALL_CONTACTS` / `ALL_EMPLOYEES` / `ALL_USERS` make it a picklist of that population. The datatype is derived from it, not chosen — there is no NUMBER or DATE field. Send at least one applicability flag or the field appears on nothing.
+
+### `clio catalogs` — Price catalogs
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
+| `search` | `--limit`, `--offset`, `--json` |
+| `get <id>` | `--json` |
+| `create` | `--name`, `--description`, `--status`, `--input`, `--json` |
+| `update <id>` | `--name`, `--description`, `--status`, `--input`, `--json` |
+| `delete <id>` | `--json` |
+
+`update` is a FULL REPLACEMENT: pass `--input` with the complete body (get it first), because omitting `items` or `contactGroupResourceIds` drops them. `create` rejects a body with no items.
 
 ### `clio bookmarks` — Organization bookmarks
 | Subcommand | Key flags |
@@ -294,7 +308,7 @@ EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPO
 ### `clio bank` — Bank accounts and records
 | Subcommand | Key flags |
 |------------|-----------|
-| `accounts` | `--limit`, `--format`, `--json` |
+| `accounts` | `--limit`, `--json` |
 | `get <id>` | `--json` |
 | `records <accountId>` | `--from`, `--to`, `--status`, `--description`, `--limit`, `--offset`, `--all` |
 | `add-records <accountId>` | `--input` (JSON array of bank records) |
