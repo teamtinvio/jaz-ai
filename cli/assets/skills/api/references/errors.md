@@ -95,20 +95,18 @@ Or call `list_account_classifications` — authoritative for that organisation.
 **Fix**: Always include `printOnDocuments: false` (or `true`) in POST body. `create_custom_field` now sends `false` when you omit it, so this only bites a direct API caller.
 **Note**: recorded here as a 400 "Invalid request body" until 2026-09-02, when a live probe returned `422 validation_error` with the field named. Either the API tightened or the original entry generalised from a different malformed body; the 422 is what it returns today.
 ```json
-{ "name": "PO Number", "type": "TEXT", "printOnDocuments": false }
+{ "name": "PO Number", "printOnDocuments": false, "appliesTo": { "invoices": true } }
 ```
 
-### "Invalid request body" (400) — appliesTo field
-**Cause**: Sending the `appliesTo` array field in the POST body.
-**Fix**: Do NOT send `appliesTo` — it causes "Invalid request body". Only send: `name`, `type`, `printOnDocuments` (and `options` for DROPDOWN type).
+### WITHDRAWN — "do not send appliesTo" on custom fields
+This entry said `appliesTo` caused "Invalid request body" and told callers to send `type` and `options` instead. Re-probed live 2026-09-02: the opposite is true.
+- `appliesTo` as an OBJECT works — `{ "invoices": true, "bills": true }` returns 200 and sets `applyToSales`/`applyToPurchase` to `SHOW`. **Omitting it leaves every `applyTo*` at `NULL`, so the field appears on nothing.** The old entry's example sent an ARRAY (`["INVOICE"]`), which is the likely source of the original 400.
+- `type`, `fieldType`, `entityType`, `datatypeCode` and `options` are all silently dropped: sent with a value they return 200 and the field is created as plain TEXT. There is no NUMBER/DATE/DROPDOWN custom field.
+- `format` is the real control: `CUSTOM` (default) = free text, `ALL_*` = a picklist of that population.
 ```json
-// WRONG:
-{ "name": "PO Number", "type": "TEXT", "printOnDocuments": false, "appliesTo": ["INVOICE"] }
-
-// CORRECT:
-{ "name": "PO Number", "type": "TEXT", "printOnDocuments": false }
+// Correct:
+{ "name": "PO Number", "printOnDocuments": false, "appliesTo": { "invoices": true, "bills": true } }
 ```
-Valid `type` values: `"TEXT"`, `"DATE"`, `"DROPDOWN"` (UPPERCASE).
 
 ---
 

@@ -246,7 +246,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | GET | `/contact-groups/:resourceId` | Get by ID |
 | POST | `/contact-groups` | Create |
 | POST | `/contact-groups/search` | Advanced search |
-| PUT | `/contact-groups/:resourceId` | Update (**known 500 bug**) |
+| PUT | `/contact-groups/:resourceId` | Update — membership field is `associatedContactResourceIds`, not `contactResourceIds` |
 | DELETE | `/contact-groups/:resourceId` | Delete |
 
 ### Items
@@ -293,7 +293,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | GET | `/custom-fields/:resourceId` | Get by ID |
 | POST | `/custom-fields` | Create |
 | POST | `/custom-fields/search` | Advanced search |
-| PUT | `/custom-fields/:resourceId` | Update (**known 500 bug** — requires `appliesTo` but crashes) |
+| PUT | `/custom-fields/:resourceId` | Update — full replace of `appliesTo`+`printOnDocuments`; omitting either resets it |
 | DELETE | `/custom-fields/:resourceId` | Delete |
 
 ---

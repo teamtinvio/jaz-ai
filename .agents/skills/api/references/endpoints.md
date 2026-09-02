@@ -866,26 +866,23 @@ Always wrap in `{ payments: [...] }` even for single payment.
 ### POST /api/v1/custom-fields
 
 ```json
-// Request (TEXT type):
-{ "name": "PO Number", "type": "TEXT", "printOnDocuments": false }
+// Request (free-text field on invoices and bills):
+{ "name": "PO Number", "printOnDocuments": false, "appliesTo": { "invoices": true, "bills": true } }
 
-// Request (DROPDOWN type with options):
-{ "name": "Priority", "type": "DROPDOWN", "printOnDocuments": false, "options": ["Low", "Medium", "High"] }
+// Request (picklist of every customer):
+{ "name": "Account Manager", "printOnDocuments": false, "format": "ALL_CUSTOMERS", "appliesTo": { "invoices": true } }
 
-// Request (DATE type):
-{ "name": "Delivery Date", "type": "DATE", "printOnDocuments": true }
-
-// Response (includes both canonical and alias names):
+// Response:
 { "data": { "customFieldName": "PO Number", "name": "PO Number", "status": "ACTIVE", "resourceId": "uuid" } }
 ```
 
-**CRITICAL notes from live testing**:
+**CRITICAL notes — re-probed live 2026-09-02, correcting several earlier entries**:
+- **PUT works.** The 500 this file and SKILL.md rule 46 recorded is gone: a PUT returned 200 and applied the change. But it is a FULL REPLACE of `appliesTo` + `printOnDocuments`, and the GET returns `printOnDocuments` as null — the truth is in the `applyTo*` enum, where `PRINT` means it prints and `SHOW` means it does not. `updateCustomField` hydrates from that enum; a raw caller that omits `printOnDocuments` will silently turn printing off.
 - POST uses `name`, GET returns both `customFieldName` and `name`
-- Valid `type` values: `"TEXT"`, `"DATE"`, `"DROPDOWN"` (UPPERCASE)
-- `printOnDocuments` is REQUIRED and is not defaulted server-side — omitting it returns 422 `printOnDocuments is a required field` (probed 2026-09-02; recorded as a 400 before that). `create_custom_field` sends `false` when you omit it.
-- Do NOT send `appliesTo` field — causes "Invalid request body"
-- Only send: `name`, `type`, `printOnDocuments` (and `options` for DROPDOWN)
-- For DROPDOWN type, `options` array works (without `appliesTo`)
+- `printOnDocuments` is REQUIRED and is not defaulted server-side — omitting it returns 422 `printOnDocuments is a required field` (recorded as a 400 before that). `create_custom_field` sends `false` when you omit it.
+- **`appliesTo` WORKS and you should send it.** `{ invoices, bills, customerCredits, supplierCredits, payments }` sets the matching `applyTo*` response fields to `SHOW`. Omit it and every one stays `NULL`, i.e. the field appears on nothing. The previous "do NOT send appliesTo, causes Invalid request body" entry is wrong.
+- **`format` is the only control over the KIND of field**, and the datatype is derived from it, not chosen: `CUSTOM` (default) yields `datatypeCode: TEXT`; any `ALL_*` value (`ALL_CUSTOMERS`, `ALL_SUPPLIERS`, `ALL_CONTACTS`, `ALL_EMPLOYEES`, `ALL_USERS`) yields `datatypeCode: LIST`, a picklist of that population.
+- **There is no NUMBER, DATE or DROPDOWN custom field, and `type`/`fieldType`/`entityType`/`datatypeCode`/`options` are all silently dropped** — sent with a value, they return 200 and the field is created as plain TEXT. Verified by readback across five spellings; `datatypeCode: 12345` also returns 200, so the DTO does not declare it. `datatypeCode` on the response is derived and read-only; `format` is settable on POST **and** PUT (both verified 2026-09-02).
 
 ### GET /api/v1/custom-fields/:resourceId
 

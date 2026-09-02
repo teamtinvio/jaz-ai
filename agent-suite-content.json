@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.47.2+f4372018",
+  "contentVersion": "5.47.3+17749373",
   "counts": {
     "tools": 367,
     "namespaces": 45,
@@ -659,7 +659,7 @@
     {
       "name": "update_item",
       "namespace": "items_and_inventory",
-      "description": "Update an existing item. Only send fields you want to change — required fields are auto-merged from current state. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing item. Only send fields you want to change — required fields are auto-merged from current state. To change status use bulk_upsert_items, which queues a job you poll — PUT /items drops it silently. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1786,7 +1786,7 @@
     {
       "name": "update_contact_group",
       "namespace": "contacts",
-      "description": "Update a contact group name or members. NOTE: Update endpoint has a known 500 bug on some orgs — retry or recreate if it fails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a contact group name or members. Membership replaces the existing set. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },

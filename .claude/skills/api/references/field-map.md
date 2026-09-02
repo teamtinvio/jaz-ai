@@ -383,8 +383,8 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `name` (in GET response) | `customFieldName` | GET returns both `customFieldName` and `name` alias. |
 | `name` (in POST body) | `name` | POST accepts `name`. |
 | `showOnPdf` | `printOnDocuments` | Required boolean |
-| `appliesTo` | DO NOT SEND | Causes "Invalid request body" |
-| `type` values | `"TEXT"`, `"DATE"`, `"DROPDOWN"` | UPPERCASE strings |
+| `appliesTo` | `appliesTo` (OBJECT) | `{invoices,bills,customerCredits,supplierCredits,payments,contacts,employeeClaims,fixedAssets,items,purchaseOrders,saleOrders}`. SEND IT — omit it and the field appears on nothing. An ARRAY 400s, which is what the old "do not send" note measured |
+| `type` / `fieldType` / `entityType` | — (silently dropped) | Use `format`: CUSTOM = free text, ALL_* = a picklist. `datatypeCode` is derived (TEXT or LIST); there is no NUMBER/DATE/DROPDOWN field |
 
 ### Custom Field Values on Transactions
 

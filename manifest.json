@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.47.2",
+  "version": "5.47.3",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 367 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -332,7 +332,7 @@
     },
     {
       "name": "update_item",
-      "description": "Update an existing item. Only send fields you want to change — required fields are auto-merged from current state. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing item. Only send fields you want to change — required fields are auto-merged from current state. To change status use bulk_upsert_items, which queues a job you poll — PUT /items drops it silently. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_item",
@@ -976,7 +976,7 @@
     },
     {
       "name": "update_contact_group",
-      "description": "Update a contact group name or members. NOTE: Update endpoint has a known 500 bug on some orgs — retry or recreate if it fails. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a contact group name or members. Membership replaces the existing set. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_contact_group",
@@ -996,7 +996,7 @@
     },
     {
       "name": "create_custom_field",
-      "description": "Create a new custom field. Custom fields appear on transactions (invoices, bills, credit notes, payments).\n- Use appliesTo to control which transaction types show this field.\n- printOnDocuments controls whether the field appears on PDFs. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new custom field. Custom fields appear on transactions (invoices, bills, credit notes, payments).\n- appliesTo controls which transaction types show this field. Omit it and it shows on none.\n- printOnDocuments controls whether the field appears on PDFs. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_custom_field",

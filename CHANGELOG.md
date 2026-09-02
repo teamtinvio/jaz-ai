@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.47.3] - 2026-09-02
+
+Custom fields now work the way the form suggests. Choosing which documents a
+field appears on is applied instead of ignored, so a new field no longer shows up
+on nothing. You can also create a field that offers a list of your customers,
+suppliers, contacts, employees or users to pick from, which was not reachable
+before. Renaming a field no longer switches off "show on PDF documents".
+
+Adding or removing contacts from a contact group now takes effect. The change was
+previously accepted and discarded.
+
+Activating and deactivating an item is done from the bulk item update, which is
+where it has always worked. The single-item update no longer offers a switch that
+did nothing.
+
+## [5.47.2] - 2026-09-02
+
+Tax profiles with a rate of 0 can be created and updated from the command line
+again — every exempt, zero-rated and out-of-scope profile carries rate 0.
+
 ## [5.47.1] - 2026-09-02
 
 Scheduling a recurring journal no longer fails when you don't supply your own
