@@ -882,7 +882,7 @@ Always wrap in `{ payments: [...] }` even for single payment.
 **CRITICAL notes from live testing**:
 - POST uses `name`, GET returns both `customFieldName` and `name`
 - Valid `type` values: `"TEXT"`, `"DATE"`, `"DROPDOWN"` (UPPERCASE)
-- `printOnDocuments` is REQUIRED — omitting it causes 400
+- `printOnDocuments` is REQUIRED and is not defaulted server-side — omitting it returns 422 `printOnDocuments is a required field` (probed 2026-09-02; recorded as a 400 before that). `create_custom_field` sends `false` when you omit it.
 - Do NOT send `appliesTo` field — causes "Invalid request body"
 - Only send: `name`, `type`, `printOnDocuments` (and `options` for DROPDOWN)
 - For DROPDOWN type, `options` array works (without `appliesTo`)

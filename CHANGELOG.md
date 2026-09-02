@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.47.1] - 2026-09-02
+
+Scheduling a recurring journal no longer fails when you don't supply your own
+reference. One is generated for you, as it already was for invoices, bills and
+credit notes.
+
+Creating a custom field no longer fails when you leave "show on PDF documents"
+unset. It now defaults to off, which is what the field always said it did.
+
 ## [5.47.0] - 2026-09-02
 
 Create inventory-tracked items from the command line. `clio inventory create` can

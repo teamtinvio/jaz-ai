@@ -90,9 +90,10 @@ Or call `list_account_classifications` — authoritative for that organisation.
 
 ## Custom Field Errors
 
-### "Invalid request body" (400) — missing printOnDocuments
-**Cause**: Missing the required `printOnDocuments` field.
-**Fix**: Always include `printOnDocuments: false` (or `true`) in POST body.
+### "printOnDocuments is a required field" (422) — missing printOnDocuments
+**Cause**: Missing the required `printOnDocuments` field. It is not defaulted server-side.
+**Fix**: Always include `printOnDocuments: false` (or `true`) in POST body. `create_custom_field` now sends `false` when you omit it, so this only bites a direct API caller.
+**Note**: recorded here as a 400 "Invalid request body" until 2026-09-02, when a live probe returned `422 validation_error` with the field named. Either the API tightened or the original entry generalised from a different malformed body; the 422 is what it returns today.
 ```json
 { "name": "PO Number", "type": "TEXT", "printOnDocuments": false }
 ```
