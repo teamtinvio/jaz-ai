@@ -3664,7 +3664,7 @@
     "BulkUpsertPaymentTerm": {
       "properties": {
         "name": {
-          "description": "Payment term name.",
+          "description": "Payment term name. Accepted in any letter case.",
           "enum": [
             "ON_DELIVERY",
             "NET_7",
@@ -3677,7 +3677,7 @@
           "type": "string"
         },
         "value": {
-          "description": "Custom payment term value in days (only applies when name is CUSTOM).",
+          "description": "Number of days the term allows. Required when name is CUSTOM, ignored otherwise: every other name carries its own number of days.",
           "type": "string"
         }
       },
@@ -7176,7 +7176,7 @@
           "type": "string"
         },
         "customerPaymentTerms": {
-          "description": "Default payment terms for invoices to this customer.",
+          "description": "Default payment terms for invoices to this customer. Accepted in any letter case.",
           "enum": [
             "ON_DELIVERY",
             "NET_7",
@@ -7305,7 +7305,7 @@
           "type": "string"
         },
         "supplierPaymentTerms": {
-          "description": "Default payment terms for bills from this supplier.",
+          "description": "Default payment terms for bills from this supplier. Accepted in any letter case.",
           "enum": [
             "ON_DELIVERY",
             "NET_7",
@@ -13325,8 +13325,7 @@
           "type": "string"
         },
         "exchangeRate": {
-          "description": "Exchange rate applied to the line, from the line's account currency to the organization's base currency. This is the opposite direction to the exchange rate on the journal itself.",
-          "minimum": 0,
+          "description": "Exchange rate applied to the line, from the line's account currency to the organization's base currency. This is the opposite direction to the exchange rate on the journal itself. Only a line posting to an account held in another currency takes a rate: a rate on a base-currency line is rejected unless it is exactly 1. Update Journal validates this field but does not send it onward, so updating it does not change the line's rate. Reconcile Bank Statement with Manual Journal applies the rate as sent and does not run the base-currency check, because it does not read the line's account currency.",
           "type": "number"
         },
         "taxProfileResourceId": {
@@ -26956,7 +26955,7 @@
           "type": "string"
         },
         "customerPaymentTerms": {
-          "description": "Default payment terms for invoices to this customer.",
+          "description": "Default payment terms for invoices to this customer. Accepted in any letter case.",
           "enum": [
             "ON_DELIVERY",
             "NET_7",
@@ -27080,7 +27079,7 @@
           "type": "string"
         },
         "supplierPaymentTerms": {
-          "description": "Default payment terms for bills from this supplier.",
+          "description": "Default payment terms for bills from this supplier. Accepted in any letter case.",
           "enum": [
             "ON_DELIVERY",
             "NET_7",

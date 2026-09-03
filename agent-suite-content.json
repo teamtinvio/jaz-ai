@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.47.11+62055405",
+  "contentVersion": "5.47.12+d37b3601",
   "counts": {
-    "tools": 367,
+    "tools": 368,
     "namespaces": 45,
     "calculators": 13,
     "recipes": 13,
@@ -1324,7 +1324,14 @@
     {
       "name": "get_pseudo_sql_schema",
       "namespace": "pseudo_sql",
-      "description": "Live pseudo-SQL catalog (tables/columns/joins/functions) + agentSkillsDoc.content = canonical jaz-pseudo-sql.md (~30KB syntax guide). Call before any query. `version` is a stable cache key.",
+      "description": "Live pseudo-SQL catalog: tables/columns, joins, functions. Pass `table` to scope to one table and its joins. Syntax rules are a separate call — get_pseudo_sql_syntax — so a query against two tables does not pay for the whole guide. `version` is a stable cache key.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_pseudo_sql_syntax",
+      "namespace": "pseudo_sql",
+      "description": "The pseudo-SQL syntax guide (canonical jaz-pseudo-sql.md). Static — identical for every organization — so fetch it once and cache on `version`. Skip it entirely if the jaz-pseudo-sql skill is already loaded. Table and column names come from get_pseudo_sql_schema.",
       "readOnly": true,
       "destructive": false
     },
@@ -2745,7 +2752,7 @@
     {
       "name": "rollback_document_version",
       "namespace": "versions",
-      "description": "Restore a document to a stored version. REPLACES current state — read the version first with get_document_version. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Restore a document to a stored version. REPLACES current state — read the version first with get_document_version. `CREATED` is NOT a restorable version and is refused: upstream DELETES the document for it and still answers 200. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.47.11",
+  "version": "5.47.12",
   "description": "Fastest way to manage money",
-  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 367 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
+  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 368 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
     "name": "Jaz",
     "email": "build.with@jaz.ai",
@@ -712,7 +712,11 @@
     },
     {
       "name": "get_pseudo_sql_schema",
-      "description": "Live pseudo-SQL catalog (tables/columns/joins/functions) + agentSkillsDoc.content = canonical jaz-pseudo-sql.md (~30KB syntax guide). Call before any query. `version` is a stable cache key."
+      "description": "Live pseudo-SQL catalog: tables/columns, joins, functions. Pass `table` to scope to one table and its joins. Syntax rules are a separate call — get_pseudo_sql_syntax — so a query against two tables does not pay for the whole guide. `version` is a stable cache key."
+    },
+    {
+      "name": "get_pseudo_sql_syntax",
+      "description": "The pseudo-SQL syntax guide (canonical jaz-pseudo-sql.md). Static — identical for every organization — so fetch it once and cache on `version`. Skip it entirely if the jaz-pseudo-sql skill is already loaded. Table and column names come from get_pseudo_sql_schema."
     },
     {
       "name": "plan_recipe",
@@ -1524,7 +1528,7 @@
     },
     {
       "name": "rollback_document_version",
-      "description": "Restore a document to a stored version. REPLACES current state — read the version first with get_document_version. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Restore a document to a stored version. REPLACES current state — read the version first with get_document_version. `CREATED` is NOT a restorable version and is refused: upstream DELETES the document for it and still answers 200. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_currency_effective_rate",

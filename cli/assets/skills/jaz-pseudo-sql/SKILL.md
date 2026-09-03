@@ -1,13 +1,14 @@
 ---
 name: jaz-pseudo-sql
-version: 5.47.11
+version: 5.47.12
 description: >-
   Use this skill when answering ad-hoc data questions that aren't covered by
   download_export (canonical reports — anomaly, audit, aging, P&L, BS, GL,
   statement of account) or search_* tools (entity listings with structured
   filters). Pseudo-SQL is a read-only DSL against Jaz's curated reporting
   schema — single SELECT statement, ≤100 row sync preview or full async CSV
-  export. Tools: get_pseudo_sql_schema (call FIRST — returns live catalog +
+  export. Tools: get_pseudo_sql_schema (live catalog, optional `table` filter),
+  get_pseudo_sql_syntax (the static syntax guide),
   downloadable jaz-pseudo-sql.md skill body), preview_pseudo_sql,
   export_pseudo_sql, get_pseudo_sql_export, run_pseudo_sql_and_download.
 license: MIT
@@ -26,7 +27,9 @@ You are running ad-hoc data queries against the **curated reporting schema** in 
 
 ## Source of truth for the schema
 
-**Always call `get_pseudo_sql_schema` first.** The response returns the live curated catalog (~70 tables, 91 join edges, 47 functions) AND the canonical `jaz-pseudo-sql.md` skill body in `agentSkillsDoc.content`. That `.md` body is the authoritative syntax guide — drop it into your context and use it instead of any cached column list.
+**Call `get_pseudo_sql_schema` first for the live curated catalog** (~70 tables, 91 join edges, 47 functions). Pass `table` to scope it to one table and its joins — the whole catalog is ~18k tokens, one table is ~1k.
+
+The syntax guide is a SEPARATE call, `get_pseudo_sql_syntax`, returning the canonical `jaz-pseudo-sql.md` body in `agentSkillsDoc.content`. It is static — identical for every organization — so fetch it once, cache on `version`, and skip it entirely if you already have this skill loaded. The two were one response until 2026-09-03; combined they cost ~35k tokens on a call documented as "before any query", of which 42% was the unchanging guide.
 
 The `version` field is a stable 16-char hex hash; cache by it. If you've already called the tool this session and the version is unchanged on a re-call, the schema and skill body are identical to your cached copy — no need to re-read.
 
@@ -44,7 +47,8 @@ Don't write a pseudo-SQL query from memory. The catalog grows; column names chan
 
 ## Tool selection within pseudo-SQL
 
-- **`get_pseudo_sql_schema`** — call FIRST. Returns the live curated catalog (tables/columns/joins/functions) plus the canonical `jaz-pseudo-sql.md` skill body in `agentSkillsDoc.content`. Drop the `.md` body into context as the syntax guide. Use the response's `version` (16-char hex) as a session-stable cache key. Org-agnostic.
+- **`get_pseudo_sql_schema`** — call FIRST. Returns the live curated catalog (tables/columns/joins/functions). Optional `table` scopes it to one table plus the joins touching it. Use the response's `version` (16-char hex) as a session-stable cache key. Org-agnostic.
+- **`get_pseudo_sql_syntax`** — the canonical `jaz-pseudo-sql.md` body in `agentSkillsDoc.content`. Static across organizations; fetch once, cache on `version`, or skip it if this skill is already in context.
 - **`preview_pseudo_sql`** — sync, ≤100 rows. Use for any agent-loop question where you need to look at the data quickly.
 - **`export_pseudo_sql` + `get_pseudo_sql_export`** — async kickoff + polling. Use when you want explicit job control (manual retry, parallel jobs, polling at your own cadence) or when the result set is too big for preview's 100-row cap.
 - **`run_pseudo_sql_and_download`** — one-shot composite: kickoff + poll + fetch CSV. Use for "give me the file" flows. Default returns the CSV buffer; pass `downloadToFile=true` to write to `~/Downloads/`.
@@ -62,7 +66,7 @@ Don't write a pseudo-SQL query from memory. The catalog grows; column names chan
 
 ## Reference docs
 
-- **Schema inventory** — call `get_pseudo_sql_schema` (live, ~30 KB response with tables / joins / functions + the canonical `jaz-pseudo-sql.md` body for context).
+- **Schema inventory** — call `get_pseudo_sql_schema` (live; ~73 KB for the whole catalog, ~5 KB with a `table` filter). The syntax guide is `get_pseudo_sql_syntax`, separately.
 - **[Query patterns](references/query-patterns.md)** — example SELECTs by user intent (top customers, unpaid invoices, FX-exposed bills, etc.).
 - **[Error catalog](references/error-catalog.md)** — every observed error code + recovery action.
 
