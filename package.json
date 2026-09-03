@@ -1,6 +1,6 @@
 {
   "name": "jaz-clio",
-  "version": "5.47.17",
+  "version": "5.47.18",
   "description": "Clio: Command Line Interface Operator for Jaz AI.",
   "type": "module",
   "bin": {
@@ -22,6 +22,7 @@
     "token-budget:tighten": "node scripts/token-budget-tighten.mjs --apply",
     "manifest:size": "node scripts/manifest-size.mjs",
     "audit:repair-loop": "vitest run src/__tests__/eval/repair-loop-precision.test.ts",
+    "audit:rubrics": "node scripts/audit-rubrics.mjs",
     "eval:memory": "vitest run src/__tests__/eval/memory-eval.test.ts",
     "prepublishOnly": "bash scripts/sync-cli-assets.sh && npm run build",
     "typecheck:scripts": "bash scripts/typecheck-scripts.sh"

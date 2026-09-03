@@ -1,5 +1,42 @@
 # Changelog
 
+## [5.47.18] - 2026-09-03
+
+Editing a foreign-currency invoice, bill or credit note keeps it in its own
+currency. Changing something small, a line item or a date, used to rewrite the
+document into your organization's base currency at a rate of 1, so a bill for
+EUR 8.31 became USD 8.31. The amount looked right and the value was wrong, with
+no warning. Finalizing had the same fault, and a finalized document can only be
+voided, so this one was worth catching. Currency is now carried through every
+edit unless you deliberately change it.
+
+Restoring the earliest version of a document no longer deletes it. The version
+history lists a first entry called CREATED, and asking to restore that one
+removed the record and reported success. It is now refused.
+
+Updating a line on a bill keeps its account. Sending the account back the way it
+was read used to be accepted and then discarded, leaving the line unposted with
+no error to notice.
+
+Large reports come back readable. A general ledger covering a long period could
+return more than any assistant could take in, which meant a slow answer built on
+a payload that had to be skimmed. Reports are now trimmed to a workable size and
+say so, including how many rows were left out, so you can narrow the dates or
+export the full set instead of being told a partial answer is the whole one.
+
+Asking what data is available is now its own small request, so questions about
+the data model are quicker and cost far less than they did when the entire
+catalog came back with every query.
+
+`--org` works in front of the command as well as after it, so
+`clio --org acme bills search` is accepted rather than rejected as an unknown
+option. `clio auth whoami` names the organization actually in use; it could
+previously print one label while operating on another.
+
+Subscriptions offer the repeat intervals that work. Quarterly was listed and is
+rejected by the platform; daily and one time were missing and are not. Search
+filters no longer suggest a field format the platform refuses.
+
 ## [5.47.4] - 2026-09-03
 
 `--format` is gone from the commands that never honoured it. Asking a single
