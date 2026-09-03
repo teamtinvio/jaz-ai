@@ -249,7 +249,7 @@ clio magic create --html @./email-body.html --type invoice --json
 clio magic status "wf-id-1,wf-id-2,wf-id-3" --json
 
 # Search past magic workflows
-clio magic search --type bill --status COMPLETED --from 2026-03-01 --json
+clio magic status <workflowIds> --json   # comma-separated ids from `magic create`
 
 # For encrypted PDFs — embed the password in the filename via __pw__
 clio magic create --file ./encrypted-file__pw__secret123.pdf --type invoice --json

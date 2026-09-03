@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.47.4
+version: 5.47.5
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -267,7 +267,7 @@ Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $
 
 **Reports & Exports**: `reports` (16 report types), `exports`
 
-**AI & Automation**: `magic` (create, status, search, split), `quick-fix`, `capsules`, `capsule-transaction` (alias: `ct`, 13 recipe types)
+**AI & Automation**: `magic` (create, status), `quick-fix`, `capsules`, `capsule-transaction` (alias: `ct`, 13 recipe types)
 
 **Judgment journal**: `jots` (create, recall, dispose). Every write command also takes `--jot "<one line>"` to log the judgment behind that specific write inline, no extra call (see `--jot` in Common Flags).
 

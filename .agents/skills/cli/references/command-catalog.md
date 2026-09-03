@@ -11,13 +11,13 @@ Complete reference for all 66 command groups. Organized by domain.
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
-| `search` | `--ref`, `--contact`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
-| `create` | `--contact`, `--date`, `--due`, `--ref`, `--currency`, `--rate`, `--lines`, `--tax-profile`, `--finalize`, `--input` |
-| `update <id>` | `--contact`, `--date`, `--due`, `--ref`, `--lines`, `--input` |
+| `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
+| `create` | `--contact`, `--date`, `--due`, `--ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
+| `update <id>` | `--date`, `--due`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
-| `pay <id>` | `--amount`, `--tx-amount`, `--account`, `--method`, `--ref`, `--date` |
+| `pay <id>` | `--amount`, `--transaction-amount`, `--account`, `--method`, `--ref`, `--date` |
 | `apply-credits <id>` | `--credit-note`, `--amount` |
-| `download <id>` | `--output` (PDF download) |
+| `download <id>` | `--json` — returns the PDF URL; writes no file |
 | `draft list` | `--max-rows N`, `--ids`, `--json` — ⚠️ fans out 1 attachment lookup per draft (5 in flight); pass `--max-rows 10` for spot checks |
 | `draft finalize <id>` | `--account`, `--input` |
 | `bulk-upsert` | `--input <file>`, `--json` — **FLAT** shape (one line per row via `itemDescription`+`totalAmount`+`invoiceAccountResourceId`). Async → jobId. `currencyCode` REQUIRED |
@@ -28,11 +28,11 @@ Complete reference for all 66 command groups. Organized by domain.
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
-| `search` | `--ref`, `--contact`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
-| `create` | `--contact`, `--date`, `--due`, `--ref`, `--currency`, `--rate`, `--lines`, `--tax-profile`, `--finalize`, `--input` |
-| `update <id>` | `--contact`, `--date`, `--due`, `--ref`, `--lines`, `--input` |
+| `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
+| `create` | `--contact`, `--date`, `--due`, `--ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
+| `update <id>` | `--date`, `--due`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
-| `pay <id>` | `--amount`, `--tx-amount`, `--account`, `--method`, `--ref`, `--date` |
+| `pay <id>` | `--amount`, `--transaction-amount`, `--account`, `--method`, `--ref`, `--date` |
 | `apply-credits <id>` | `--credit-note`, `--amount` |
 | `draft list` | `--max-rows N`, `--ids`, `--json` — same attachment fan-out warning as invoices |
 | `draft finalize <id>` | `--account`, `--input` |
@@ -44,13 +44,13 @@ Complete reference for all 66 command groups. Organized by domain.
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
-| `search` | `--ref`, `--contact`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
-| `create` | `--contact`, `--date`, `--ref`, `--currency`, `--rate`, `--lines`, `--tax-profile`, `--finalize`, `--input` |
-| `update <id>` | `--contact`, `--date`, `--ref`, `--lines`, `--input` |
+| `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
+| `create` | `--contact`, `--date`, `--ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
+| `update <id>` | `--date`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
 | `refund <id>` | `--amount`, `--account`, `--method`, `--ref`, `--date` |
 | `refunds <id>` | List refunds for a credit note |
-| `download <id>` | `--output` (PDF download) |
+| `download <id>` | `--json` — returns the PDF URL; writes no file |
 | `draft list` | `--max-rows N`, `--ids`, `--json` |
 | `bulk-upsert` | `--input <file>`, `--json` — Nested `lineItems[]`. Async → jobId. `currencyCode` REQUIRED |
 
@@ -59,9 +59,9 @@ Complete reference for all 66 command groups. Organized by domain.
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
-| `search` | `--ref`, `--contact`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
-| `create` | `--contact`, `--date`, `--ref`, `--currency`, `--rate`, `--lines`, `--tax-profile`, `--finalize`, `--input` |
-| `update <id>` | `--contact`, `--date`, `--ref`, `--lines`, `--input` |
+| `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
+| `create` | `--contact`, `--date`, `--ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
+| `update <id>` | `--date`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
 | `refund <id>` | `--amount`, `--account`, `--method`, `--ref`, `--date` |
 | `refunds <id>` | List refunds for a credit note |
@@ -73,11 +73,11 @@ Complete reference for all 66 command groups. Organized by domain.
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
-| `search` | `--ref`, `--from`, `--to`, `--status`, `--tag`, `--type`, `--sort`, `--order` |
-| `create` | `--date`, `--ref`, `--entries`, `--currency`, `--rate`, `--finalize`, `--input` |
+| `search` | `--reference`, `--from`, `--to`, `--status`, `--tag`, `--type`, `--sort`, `--order` |
+| `create` | `--date`, `--ref`, `--entries`, `--finalize`, `--input` |
 | `update <id>` | `--date`, `--ref`, `--entries`, `--input` |
 | `delete <id>` | |
-| `transfer-trial-balance` (alias: `ttb`) | `--from-date`, `--to-date`, `--target-date` |
+| `transfer-trial-balance` (alias: `ttb`) | `--date`, `--entries`, `--input`, `--currency`, `--exchange-rate`, `--rate-direction` |
 | `draft list` | `--max-rows N`, `--ids`, `--json` |
 | `bulk-upsert` | `--input <file>`, `--json` — ⚠️ Natural key is `journalReference` (NOT `reference`); legs use `journalEntries[]` (NOT `entries[]`); each leg is `organizationAccountResourceId` (NOT `accountResourceId`) + exactly one of `debitAmount`/`creditAmount` (NOT `amount`+`type`), omitting the unused side. No `currencyCode` on journal rows. Async → jobId |
 
@@ -100,7 +100,7 @@ Same subcommands and flags as `cash-in`.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search` | `--ref`, `--from`, `--to`, `--status` |
-| `create` | `--from-account`, `--to-account`, `--amount`, `--date`, `--ref`, `--rate`, `--input` |
+| `create` | `--from-account`, `--to-account`, `--amount`, `--date`, `--ref`, `--input` |
 | `delete <id>` | |
 
 ### `clio payments` — Cashflow transactions (read-only)
@@ -109,14 +109,13 @@ Same subcommands and flags as `cash-in`.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `search` | `--from`, `--to`, `--type`, `--direction`, `--ref`, `--sort`, `--order` |
 | `get <id>` | `--json` |
-| `update <id>` | `--date`, `--ref`, `--input` |
+| `update <id>` | `--date`, `--reference`, `--input` |
 | `delete <id>` | |
 
 ### `clio cashflow` — Cashflow search
 | Subcommand | Key flags |
 |------------|-----------|
 | `search` | `--from`, `--to`, `--type`, `--direction`, `--ref`, `--sort`, `--order`, `--limit`, `--offset`, `--all` |
-| `delete <id>` | |
 
 ---
 
@@ -139,8 +138,8 @@ Same subcommands and flags as `cash-in`.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search <query>` | `--limit`, `--offset` |
-| `create` | `--name`, `--input` |
-| `update <id>` | `--name`, `--input` |
+| `create` | `--name` |
+| `update <id>` | `--name` |
 | `delete <id>` | |
 
 ### `clio accounts` — Chart of accounts
@@ -158,7 +157,7 @@ Same subcommands and flags as `cash-in`.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search <query>` | `--limit`, `--offset`, `--all` |
-| `create` | `--name`, `--sale-name`, `--purchase-name`, `--sale-price`, `--purchase-price`, `--account`, `--tax-profile`, `--input` |
+| `create` | `--sale-account`, `--purchase-account`, `--sale-tax`, `--purchase-tax`, `--name`, `--sale-name`, `--purchase-name`, `--sale-price`, `--purchase-price`, `--input` |
 | `update <id>` | Same as create flags |
 | `delete <id>` | |
 
@@ -192,7 +191,7 @@ Same subcommands and flags as `cash-in`.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search <query>` | `--limit`, `--offset` |
-| `create` | `--name`, `--rate`, `--tax-type`, `--input` |
+| `create` | `--rate`, `--name`, `--tax-type-code` |
 | `update <id>` | `--name`, `--rate` |
 | `types` | List available tax type codes |
 | `wht-codes` | List withholding tax codes |
@@ -246,7 +245,7 @@ Same subcommands and flags as `cash-in`.
 ### `clio claims` — Employee-expense claims
 | Subcommand | Key flags |
 |------------|-----------|
-| `search` (alias `list`) | `--status`, `--employee`, `--contact`, `--limit`, `--offset`, `--json` |
+| `search` | `--status`, `--employee-resource-id`, `--contact-resource-id`, `--reference`, `--from`, `--to`, `--sort`, `--order` |
 | `get <id>` | `--json` |
 | `create` | `--value-date`*, `--currency`*, `--employee`, `--contact` / `--vendor-name` (XOR), `--items <json>`, `--custom-fields <json>`, `--tags`, `--submit` |
 | `update <id>` | partial; `--items` non-empty REPLACES all lines, `--submit` |
@@ -260,13 +259,13 @@ Same subcommands and flags as `cash-in`.
 | `preview-conversion` | `--ids`, `--posting-rule`, `--payout-flow` |
 | `convert` | `--ids`, `--value-date`*, `--posting-rule`, `--include-payout`, `--idempotency-key` |
 | `record-payout` | `--employee`, `--amount`, `--payment-account`, `--payout-for` (REIMBURSEMENT / ADVANCE) |
-| `payouts` (search) | `--employee`, `--reference`, `--payout-status`, `--payout-type` (DIRECT_ENTRY / DISBURSEMENT / REIMBURSEMENT_PAYOUT / ADVANCE) — list recorded payouts |
+| `payouts` | `--employee-resource-id`, `--employee-name`, `--reference`, `--payout-status`, `--payout-type` |
 | `tracking-tags` / `custom-field-values` | picker arrays |
 
 ### `clio employees` — Claim members
 | Subcommand | Key flags |
 |------------|-----------|
-| `search` (alias `list`) | `--name`, `--status`, `--limit`, `--offset`, `--json` |
+| `search` | `--name`, `--email`, `--active`, `--claim-profile-resource-id`, `--sort`, `--order` |
 | `balances` (alias `search-balances`) | per-employee, per-currency reimbursement owed |
 | `get <id>` | `--json` |
 | `create` | `--name`, `--user`* (bind login), `--claim-profile`*, `--employment-type`, `--email`, `--manager` |
@@ -311,9 +310,9 @@ EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPO
 | `accounts` | `--limit`, `--json` |
 | `get <id>` | `--json` |
 | `records <accountId>` | `--from`, `--to`, `--status`, `--description`, `--limit`, `--offset`, `--all` |
-| `add-records <accountId>` | `--input` (JSON array of bank records) |
-| `import <accountId> <file>` | Supports CSV, OFX, XLS, XLSX |
-| `auto-recon` | READ-ONLY reconciliation suggestions. `--type <workflow>` and `--entries <id,...>` are both REQUIRED (per-entry; no account-wide mode). `--account` optional. |
+| `add-records <accountId>` | `--records`, (JSON array of bank records) |
+| `import <accountId> <file>` | `--file`, `--account`, Supports CSV, OFX, XLS, XLSX |
+| `auto-recon` | `--type`, `--entries`, READ-ONLY reconciliation suggestions. `--type <workflow>` and `--entries <id,...>` are both REQUIRED (per-entry; no account-wide mode). `--account` optional. |
 
 ### `clio bank-rules` — Bank reconciliation rules
 | Subcommand | Key flags |
@@ -337,12 +336,12 @@ Dynamic strings in rules: `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescripti
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search <query>` | `--limit`, `--offset` |
-| `create` | `--name`, `--type`, `--purchase-price`, `--purchase-date`, `--input` |
+| `create` | `--amount`, `--name`, `--type`, `--date`, `--input` |
 | `update <id>` | `--name`, `--input` |
 | `delete <id>` | |
-| `discard <id>` | `--date`, `--account` |
-| `sell <id>` | `--date`, `--amount`, `--account` |
-| `transfer <id>` | `--date`, `--to-type` |
+| `discard <id>` | `--disposal-date`, `--gain-loss-account` |
+| `sell <id>` | `--id`, `--depreciation-end-date`, `--sale-type`, `--gain-loss-account` |
+| `transfer <id>` | `--date`, `--type` |
 | `undo-disposal <id>` | Reverse a discard or sale |
 | `bulk-upsert` | `--input <file>`, `--json` — ⚠️ Date field is `valueDate` (NOT `purchaseDate` — that's the GET response field; bulk request uses `valueDate`). `cost`/`purchaseAmount` synonyms accepted. `effectiveLife`/`usefulLifeMonths` synonyms accepted. Required: `reference`, `registrationType` ("NEW" or "TRANSFER"). Async → jobId |
 
@@ -401,9 +400,9 @@ All seven of `--item-code`, `--name`, `--unit`, `--costing-method`, `--cogs-acco
 | `list-invoices` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `list-bills` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `list-journals` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
-| `create-invoice` | `--contact`, `--ref`, `--interval`, `--start-date`, `--lines`, `--input` |
-| `create-bill` | `--contact`, `--ref`, `--interval`, `--start-date`, `--lines`, `--input` |
-| `create-journal` | `--ref`, `--interval`, `--start-date`, `--entries`, `--input` |
+| `create-invoice` | `--contact`, `--reference`, `--repeat`, `--start-date`, `--line-items`, `--input` |
+| `create-bill` | `--contact`, `--reference`, `--repeat`, `--start-date`, `--line-items`, `--input` |
+| `create-journal` | `--reference`, `--repeat`, `--start-date`, `--entries`, `--input` |
 
 Dynamic strings in schedulers: `{{Day}}`, `{{Date}}`, `{{Date+X}}`, `{{DateRange:X}}`, `{{Month}}`, `{{Month+X}}`, `{{MonthRange:X}}`, `{{Year}}`, `{{Year+X}}`
 
@@ -442,7 +441,6 @@ Also: `clio reports pdf` — generate PDF from a message/document.
 |------------|-----------|
 | `create` | one of `--file <path>` / `--url <url>` / `--html <string\|@file>`; `--type` (invoice, bill, credit-note-customer, credit-note-supplier); `--merged` (split a multi-doc PDF). `--html` takes raw HTML (e.g. an email body), rendered to a PDF server-side. Encrypted PDFs: `name__pw__password.pdf`. |
 | `status <workflowIds>` | Comma-separated workflow IDs |
-| `search` | `--type`, `--status`, `--from`, `--to`, `--limit`, `--offset` |
 
 ### `clio quick-fix <entity>` — Bulk-update transactions
 Entities: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `journals`, `cash-entries`, `sale-schedules`, `purchase-schedules`, `subscription-schedules`, `journal-schedules`
@@ -486,16 +484,16 @@ All calculators work offline (no auth). Use `--json` for structured output.
 | `loan` | `--principal`, `--rate`, `--term` |
 | `lease` | `--payment`, `--term`, `--rate` (optional: `--useful-life` for hire purchase) |
 | `depreciation` | `--cost`, `--salvage`, `--life`, `--method` |
-| `prepaid-expense` | `--amount`, `--start-date`, `--months` |
-| `deferred-revenue` | `--amount`, `--start-date`, `--months` |
+| `prepaid-expense` | `--amount`, `--periods`, `--frequency`, `--start-date` |
+| `deferred-revenue` | `--amount`, `--periods`, `--frequency`, `--start-date` |
 | `fx-reval` | `--amount`, `--book-rate`, `--closing-rate`, `--rate-direction`, `--currency` |
-| `ecl` | `--receivables`, `--aging-buckets` (via `--input`) |
-| `provision` | `--amount`, `--rate`, `--periods` |
+| `ecl` | `--current`, `--30d`, `--60d`, `--90d`, `--120d`, `--rates`, `--existing-provision` |
+| `provision` | `--amount`, `--rate`, `--term`, `--start-date` |
 | `fixed-deposit` | `--principal`, `--rate`, `--term` |
-| `asset-disposal` | `--cost`, `--accumulated-dep`, `--proceeds` |
-| `accrued-expense` | `--amount`, `--start-date`, `--months` |
-| `leave-accrual` | `--daily-rate`, `--days`, `--employees` (via `--input`) |
-| `dividend` | `--total-dividend`, `--shares` (via `--input`) |
+| `asset-disposal` | `--cost`, `--salvage`, `--life`, `--acquired`, `--disposed`, `--proceeds`, `--method` |
+| `accrued-expense` | `--amount`, `--periods`, `--frequency`, `--start-date` |
+| `leave-accrual` | `--employees`, `--days`, `--daily-rate`, `--periods`, `--start-date` |
+| `dividend` | `--amount`, `--declaration-date`, `--payment-date`, `--withholding-rate` |
 
 Common optional flags: `--start-date`, `--currency`, `--json`
 
@@ -508,21 +506,21 @@ Blueprints are offline (no auth). Tools require auth.
 
 | Subcommand | Type | Key flags |
 |------------|------|-----------|
-| `month-end` | Blueprint | `--month`, `--year`, `--currency` |
-| `quarter-end` | Blueprint | `--quarter`, `--year`, `--currency` |
-| `year-end` | Blueprint | `--year`, `--currency` |
-| `bank-recon` | Blueprint | `--bank-account`, `--month` |
+| `month-end` | Blueprint | `--period`, `--currency` |
+| `quarter-end` | `--period`, Blueprint | `--currency` |
+| `year-end` | `--period`, Blueprint | `--currency` |
+| `bank-recon` | Blueprint | `--account`, `--period`, `--currency` |
 | `match` | Tool | `--input` (bank records + transactions JSON) |
-| `gst-vat` | Blueprint | `--period`, `--jurisdiction` |
-| `payment-run` | Blueprint | `--date` |
-| `outstanding` | Tool | `--contact`, `--limit` (group outstanding bills) |
-| `credit-control` | Blueprint | `--aging-days` |
-| `supplier-recon` | Blueprint | `--contact` |
-| `audit-prep` | Blueprint | `--year` |
-| `fa-review` | Blueprint | `--year` |
-| `document-collection` | Blueprint | `--month` |
-| `ingest` | Tool | `<path>` (classify + upload documents) |
-| `statutory-filing` | Blueprint | `--jurisdiction`, `--year` |
+| `gst-vat` | Blueprint | `--period` |
+| `payment-run` | Blueprint | `--due-before`, `--currency` |
+| `outstanding` | Tool | `--limit` (group outstanding bills) |
+| `credit-control` | `--overdue-days`, Blueprint | |
+| `supplier-recon` | `--supplier`, `--period`, Blueprint | |
+| `audit-prep` | `--period`, Blueprint | |
+| `fa-review` | `--currency`, Blueprint | |
+| `document-collection` | Blueprint | `--currency` |
+| `ingest` | `--source`, Tool | `<path>` (classify + upload documents) |
+| `statutory-filing` | Blueprint | `--ya`, `--jurisdiction`, `--currency` |
 | `sg-cs` | Tool | `--input` (compute Singapore Form C-S) |
 | `sg-ca` | Tool | `--input` (compute Singapore capital allowances) |
 
@@ -553,8 +551,8 @@ Batch create via `--input` file or stdin (`{ "entries": [...] }`, 1-100 per call
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `search <query>` | `--limit`, `--offset` |
-| `invite` | `--email`, `--first-name`, `--last-name`, `--roles`, `--input` |
-| `update <id>` | `--roles`, `--input` |
+| `invite` | `--email`, `--first-name`, `--last-name`, `--role`, `--input` |
+| `update <id>` | `--role`, `--input` |
 | `remove <id>` | |
 
 ### `clio auth` — Authentication
@@ -569,8 +567,9 @@ See SKILL.md Auth Precedence section for full details.
 |------------|-----------|
 | `list` | `--type` (invoices, bills, journals, etc.), `--id` |
 | `add` | `--type`, `--id`, `<file>` |
-| `delete` | `--type`, `--id`, `--attachment-id` |
-| `table` | `--type`, `--id` (tabular view) |
+| `delete <attachmentId>` | `--type`, `--id` (the transaction; the attachment id is positional) |
+
+`list` renders the tabular view — pass `--format table` (the default) or `--format csv`.
 
 ### `clio help-center` (alias: `hc`) — Help center search
 ```
