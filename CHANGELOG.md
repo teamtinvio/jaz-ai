@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.47.20] - 2026-09-04
+
+Internal release automation update. No user-facing changes since 5.47.18.
+
+Release notes are now checked before a version can ship. Fourteen releases went
+out carrying a placeholder instead of a description of what changed, which is
+what the "what's new" pane showed. That can no longer happen quietly.
+
+## [5.47.19] - 2026-09-04
+
+Internal release automation update. No user-facing changes since 5.47.18.
+
 ## [5.47.18] - 2026-09-03
 
 Editing a foreign-currency invoice, bill or credit note keeps it in its own
