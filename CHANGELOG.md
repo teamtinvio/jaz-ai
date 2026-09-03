@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.47.24] - 2026-09-04
+
+The remaining calculator and transaction-recipe options now reject values they do
+not support, instead of accepting them and computing something else.
+
+This is the same fault fixed for depreciation method in 5.47.23, found in eleven
+more places. Two of them were on transaction recipes, which post journal entries
+rather than preview them: asking for a straight-line schedule produced a capsule
+titled "STRAIGHT-LINE Depreciation" whose workings were 150% declining balance.
+
+Frequency behaved the same way and was less predictable: an unsupported value
+produced monthly figures under one method and annual under another, and neither
+matched the documented default. Compounding did stop, but reported the term as
+the problem rather than the value.
+
+Every supported value behaves exactly as before.
+
 ## [5.47.23] - 2026-09-04
 
 The depreciation calculators no longer accept a method they do not support. Any
