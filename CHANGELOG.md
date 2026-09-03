@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.47.23] - 2026-09-04
+
+The depreciation calculators no longer accept a method they do not support. Any
+value other than sl, ddb or 150db used to be taken without complaint and then
+computed as 150% declining balance, while the result reported back the method you
+asked for. Writing "straight-line" instead of "sl" therefore returned a schedule
+that was not straight-line: on an asset costing 3,600 over three years, first-year
+depreciation came back as 1,800 where straight-line is 1,200.
+
+Nothing about the three real methods has changed, and each still produces the
+same schedule it always did. An unsupported value is now refused, and the message
+lists what is accepted.
+
 ## [5.47.22] - 2026-09-04
 
 The workflow examples in the CLI guide now run. Nine of them named a command or
