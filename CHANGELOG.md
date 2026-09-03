@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.47.21] - 2026-09-04
+
+Internal release automation update. No user-facing changes since 5.47.18.
+
 ## [5.47.20] - 2026-09-04
 
 Internal release automation update. No user-facing changes since 5.47.18.
