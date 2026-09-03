@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.47.12
+version: 5.47.13
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -70,7 +70,9 @@ clio auth unpin              # Unset JAZ_ORG from current shell
 
 ## Output Formats
 
-Every command supports `--json`. Most list commands also support `--format <type>`.
+**`--json` is the contract; `--format` is an extra.** Every command that talks to the API accepts `--json` — all 398 of them — so a script never needs to special-case a command. `--format` exists only where a MULTI-ROW rendering is meaningful: 31/31 `search` and 33/39 `list` leaves have it, and `get` has it on 0 of 33, because CSV or YAML of a single record is not a table. `clio bills get --format json` is therefore an `unknown option`, by design — use `--json`.
+
+This rule is enforced by `surface-honesty.test.ts`, which also guarantees the flags are HONEST: 58 leaves once declared `--format` and never read it, so `--format csv` printed a human table and exited 0. Those declarations were deleted rather than left lying.
 
 | Flag | Format | Use case |
 |------|--------|----------|
@@ -152,7 +154,7 @@ Rules:
 | `--api-key <key>` | All online commands | Override auth for this command |
 | `--org <label>` | All online commands | Use a specific saved profile |
 | `--json` | All commands | Structured JSON output |
-| `--format <type>` | List commands | table, json, csv, yaml |
+| `--format <type>` | List/search commands ONLY — not `get` | table, json, csv, yaml |
 | `--limit <n>` | List/search commands | Max results per page |
 | `--offset <n>` | List/search commands | Page offset (0-indexed) |
 | `--all` | List/search commands | Auto-paginate all pages |
