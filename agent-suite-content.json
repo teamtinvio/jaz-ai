@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.47.9+c931a327",
+  "contentVersion": "5.47.10+78b73b35",
   "counts": {
     "tools": 367,
     "namespaces": 45,
@@ -42,7 +42,7 @@
     },
     {
       "name": "journals",
-      "description": "Journal entries (JE). Create, search, update, delete manual journals. Also: adjusting entries, accruals, reclassifications, corrections."
+      "description": "Journal entries (JE). Create, search, update, delete manual journals. Also: adjusting entries, accruals, reclassifications, corrections, transfer trial balance (TTB)."
     },
     {
       "name": "cash_entries",
@@ -70,7 +70,7 @@
     },
     {
       "name": "operational_reports",
-      "description": "Aging and operational reports: aged receivables (AR aging), aged payables (AP aging), AR report, bank balance summary, bank reconciliation reports, fixed asset (FA) summary, FA reconciliation. Data exports (CSV/Excel/XLSX). Anomaly detection and audit analysis: anomalous invoices, anomalous bills, cashflow anomalies, GL journal audit, exchange rate audit, receivables customer risk, cash expense health. Also: overdue analysis, how much owed, suspicious transactions, audit trail."
+      "description": "Aging and operational reports: aged receivables (AR aging), aged payables (AP aging), AR report, bank balance summary, bank reconciliation reports, fixed asset (FA) summary, FA reconciliation. Data exports (CSV/Excel/XLSX). Anomaly detection and audit analysis: anomalous invoices, anomalous bills, cashflow anomalies, GL journal audit, exchange rate audit, receivables customer risk, cash expense health. Also: overdue analysis, how much owed, suspicious transactions, audit trail, ledger highlights."
     },
     {
       "name": "pseudo_sql",
@@ -142,11 +142,11 @@
     },
     {
       "name": "organization",
-      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). List/search saved report templates."
+      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). List/search saved report templates. Agent context bundle."
     },
     {
       "name": "document_ai",
-      "description": "File attachments, spreadsheets, and document AI. Read and parse rows from attached spreadsheets — CSV, Excel, XLSX. Scan a single invoice / bill / receipt PDF or image to create a draft bill or invoice via AI extraction (create_bt_from_attachment, with the file or a sourceUrl). Auto-sort a whole FOLDER, a .zip, or a Dropbox / Google Drive / OneDrive folder share link of mixed paperwork — \"create docs from this Dropbox folder link\", a pile/batch of invoices and bills — into invoices, bills, credit notes, and bank statements with classify_documents, then create the drafts with extract_documents. Upload and list attachments; track extraction workflows."
+      "description": "File attachments, spreadsheets, and document AI. Read and parse rows from attached spreadsheets — CSV, Excel, XLSX. Scan a single invoice / bill / receipt PDF or image to create a draft bill, invoice, or expense claim via AI extraction (create_bt_from_attachment, with the file or a sourceUrl). Auto-sort a whole FOLDER, a .zip, or a Dropbox / Google Drive / OneDrive folder share link of mixed paperwork — \"create docs from this Dropbox folder link\", a pile/batch of invoices and bills — into invoices, bills, credit notes, and bank statements with classify_documents, then create the drafts with extract_documents. Upload and list attachments; track extraction workflows."
     },
     {
       "name": "fixed_assets",
@@ -154,7 +154,7 @@
     },
     {
       "name": "payments_and_search",
-      "description": "Payment records: get, update, delete individual payments. List payments/credits on invoices and bills. Reverse credit applications. Cashflow transaction search. Universal cross-entity search. Also: payment run, batch payment, payment matching, void payment, payment history, credit note applications."
+      "description": "Payment records: get, update, delete individual payments. List payments/credits on invoices and bills. Reverse credit applications. Cashflow transaction search. Universal cross-entity search. Also: payment run, batch payment, payment matching, void payment, payment history, credit note applications, transaction summary."
     },
     {
       "name": "versions",
