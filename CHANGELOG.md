@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.47.22] - 2026-09-04
+
+The workflow examples in the CLI guide now run. Nine of them named a command or
+a flag that does not exist, so an assistant following them step by step hit
+"unknown option" or "unknown command" partway through. Five of the eight
+documented workflows were affected, including the invoice lifecycle, which could
+not get past finalizing the invoice it had just created, and document
+collection, which named a command that was never registered.
+
+Nothing changed about the commands themselves. The guide was describing a CLI
+that did not exist in those nine places, and now describes the real one.
+
 ## [5.47.21] - 2026-09-04
 
 Internal release automation update. No user-facing changes since 5.47.18.

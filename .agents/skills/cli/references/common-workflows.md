@@ -19,15 +19,15 @@ clio invoices create \
   --json
 
 # Capture the resourceId from output
-INVOICE_ID=$(clio invoices search --ref INV-2026-042 --json | jq -r '.data[0].resourceId')
+INVOICE_ID=$(clio invoices search --reference INV-2026-042 --json | jq -r '.data[0].resourceId')
 
 # Finalize (approve) the invoice
-clio invoices update "$INVOICE_ID" --finalize
+clio invoices draft finalize "$INVOICE_ID"
 
 # Record payment against the invoice
 clio invoices pay "$INVOICE_ID" \
   --amount 5000 \
-  --tx-amount 5000 \
+  --transaction-amount 5000 \
   --account "Bank - SGD" \
   --method BANK_TRANSFER \
   --ref "PAY-042" \
@@ -67,7 +67,7 @@ Generate a blueprint, run reports, and create any adjusting journals.
 
 ```bash
 # Generate month-end checklist (offline, no auth)
-clio jobs month-end --month 3 --year 2026 --currency SGD --json > month-end-checklist.json
+clio jobs month-end --period 2026-03 --currency SGD --json > month-end-checklist.json
 
 # Run key reports for review
 clio reports generate trial-balance --to 2026-03-31 --json > tb-mar.json
@@ -121,11 +121,11 @@ clio invoices create \
   --lines '[{"name":"Software License","quantity":1,"unitPrice":2000,"accountResourceId":"Revenue"}]' \
   --finalize
 
-# Record payment (cross-currency: amount in bank currency, tx-amount in invoice currency)
-INVOICE_ID=$(clio invoices search --ref INV-USD-001 --json | jq -r '.data[0].resourceId')
+# Record payment (cross-currency: amount in bank currency, transaction-amount in invoice currency)
+INVOICE_ID=$(clio invoices search --reference INV-USD-001 --json | jq -r '.data[0].resourceId')
 clio invoices pay "$INVOICE_ID" \
   --amount 2690 \
-  --tx-amount 2000 \
+  --transaction-amount 2000 \
   --account "Bank - SGD" \
   --method BANK_TRANSFER \
   --ref "PAY-USD-001" \
@@ -141,8 +141,8 @@ Record a fixed asset purchase, calculate depreciation, and create journal entrie
 clio fixed-assets create \
   --name "Office Printer" \
   --type "Office Equipment" \
-  --purchase-price 3600 \
-  --purchase-date 2026-01-01 \
+  --amount 3600 \
+  --date 2026-01-01 \
   --input '{"depreciationMethod":"STRAIGHT_LINE","usefulLifeMonths":36,"salvageValue":0}'
 
 # Preview the depreciation schedule (offline — no auth)
@@ -151,7 +151,6 @@ clio calc depreciation \
   --salvage 0 \
   --life 36 \
   --method straight-line \
-  --start-date 2026-01-01 \
   --currency SGD \
   --json
 
@@ -161,7 +160,6 @@ clio ct depreciation \
   --salvage 0 \
   --life 36 \
   --method straight-line \
-  --start-date 2026-01-01 \
   --ref "DEP-PRINTER" \
   --json
 
@@ -183,7 +181,7 @@ Find transactions matching criteria and bulk-update them.
 clio invoices search --query "customer:acme AND status:unpaid AND \$500+" --json
 
 # Or with discrete flags
-clio invoices search --contact "Acme Corp" --status DRAFT --from 2026-01-01 --json
+clio invoices search --contact-name "Acme Corp" --status DRAFT --from 2026-01-01 --json
 
 # Extract IDs of matching drafts
 DRAFT_IDS=$(clio invoices search --status DRAFT --from 2026-03-01 --to 2026-03-31 --json \
@@ -237,7 +235,7 @@ Ingest documents, extract data via AI, and review results.
 
 ```bash
 # Ingest a folder of mixed PDFs (invoices, bills, bank statements)
-clio jobs ingest ./inbox/ --json
+clio jobs document-collection --json
 
 # Or extract a single document (file, URL, or raw HTML)
 clio magic create --file ./invoice-from-supplier.pdf --type bill --json
