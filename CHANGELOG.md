@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.47.41] - 2026-09-04
+
+Internal release automation update. No user-facing changes since 5.47.40.
+
+Two deployment jobs that share one directory on the server could run at the same
+time and collide, which skipped a release for one of the two channels. They now
+take turns.
+
 ## [5.47.40] - 2026-09-04
 
 Seven examples in the documentation named commands and options that do not exist,
