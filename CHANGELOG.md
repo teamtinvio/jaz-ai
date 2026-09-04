@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.47.28] - 2026-09-04
+
+Creating a cash entry said it made a draft. It did not. Cash in and cash out are
+finalized on creation whatever you ask for, so the confirmation line said
+"(draft)" over a recorded cash movement. It now reports the state the record is
+actually in.
+
+Nothing about the records themselves has changed, and the --json output was
+always correct. If you have created cash entries expecting a draft to review,
+they were live.
+
 ## [5.47.27] - 2026-09-04
 
 Sending line items to the flat bulk-upsert now says so. There are two variants
