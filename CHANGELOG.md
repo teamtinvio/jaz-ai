@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.47.37] - 2026-09-04
+
+`clio bills create` now warns before recording the same bill twice. Creating a
+bill from the same supplier, on the same date, for the same amount used to go
+through silently — bill references are not unique, so nothing caught it, and a
+duplicate bill becomes a duplicate payment. It now stops and shows you the bill
+it found. Genuine repeats still work: pass `--allow-duplicate`.
+
 ## [5.47.36] - 2026-09-04
 
 Failed commands now tell you how to fix them. The platform's specific recovery
