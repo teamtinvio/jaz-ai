@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.47.38] - 2026-09-04
+
+Internal consolidation. No user-facing changes since 5.47.37 — the `list`
+commands behave identically, verified against live output before and after.
+
 ## [5.47.37] - 2026-09-04
 
 `clio bills create` now warns before recording the same bill twice. Creating a

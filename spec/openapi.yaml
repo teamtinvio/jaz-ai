@@ -53155,7 +53155,7 @@
             "type": "string"
           },
           {
-            "description": "Attachment file to upload (required if sourceType=FILE). Supported: PDF, PNG, JPEG, HEIC, XLS, XLSX, EML. Max 1 MB.",
+            "description": "Attachment file to upload (required if sourceType=FILE). Supported: PDF, PNG, JPEG, HEIC, XLS, XLSX, EML. Max 10 MB.",
             "in": "formData",
             "name": "sourceFile",
             "type": "file"
@@ -53265,7 +53265,7 @@
             "type": "string"
           },
           {
-            "description": "Receipt file (required if sourceType=FILE). Supported: PDF, PNG, JPEG, HEIC. Max 1 MB.",
+            "description": "Receipt file (required if sourceType=FILE). Supported: PDF, PNG, JPEG, HEIC. Max 10 MB.",
             "in": "formData",
             "name": "sourceFile",
             "type": "file"
@@ -53416,7 +53416,7 @@
             "type": "string"
           },
           {
-            "description": "Attachment file to upload (required if sourceType=FILE). Supported: PDF, PNG, JPEG, HEIC, XLS, XLSX, EML. Max 1 MB.",
+            "description": "Attachment file to upload (required if sourceType=FILE). Supported: PDF, PNG, JPEG, HEIC, XLS, XLSX, EML. Max 10 MB.",
             "in": "formData",
             "name": "sourceFile",
             "type": "file"
