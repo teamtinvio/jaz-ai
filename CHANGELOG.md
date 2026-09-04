@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.47.31] - 2026-09-04
+
+Internal release automation update. No user-facing changes since 5.47.30.
+
+Deployments now reclaim disk before building rather than only after, so a build
+server that has filled up can recover on its own instead of failing every
+release until someone clears it by hand.
+
 ## [5.47.30] - 2026-09-04
 
 Reconciling a bank entry in the wrong direction now explains itself. Matching a
