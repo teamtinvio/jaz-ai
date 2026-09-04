@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.47.30] - 2026-09-04
+
+Reconciling a bank entry in the wrong direction now explains itself. Matching a
+money-in entry as a bill payment, or money-out as an invoice receipt, returns an
+error named "Invalid business transaction type" — which sends you looking for a
+transaction type that is not the problem. The response now says the direction is
+what was rejected, which endpoint expects which, and that retrying unchanged will
+not help.
+
 ## [5.47.29] - 2026-09-04
 
 Cash transfers had the same problem cash entries did: creating one said it made a
