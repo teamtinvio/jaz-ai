@@ -42,8 +42,8 @@ On top of these, one layer for accountants closing real books across many compan
 
 ```bash
 clio invoices create --contact "ACME" --json           # draft an invoice, JSON back
-clio bank import statement.csv                          # import and auto-reconcile
-clio reports pdf profit-loss                            # download the P&L as a PDF
+clio bank import --file statement.csv --account <id>    # import and auto-reconcile
+clio exports download --type profit-and-loss --format PDF  # download the P&L as a PDF
 clio calc lease --payment 5000 --term 36 --rate 5      # IFRS 16, offline, instant
 clio jobs month-end --period 2026-03                   # step-by-step close playbook
 clio magic create --file receipt.pdf                   # AI extracts, drafts the transaction

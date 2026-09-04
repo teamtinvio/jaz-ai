@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.47.40] - 2026-09-04
+
+Seven examples in the documentation named commands and options that do not exist,
+so copying them produced an error. `clio reports pdf` was never a command — a PDF
+comes from `clio exports download --format PDF`. The leave-accrual calculator's
+flags were documented under old names. The account-resolution example used a
+command that has no `--account`. A depreciation example passed a date the
+calculator does not take, and a document-collection example passed a decryption
+flag that never existed, since decryption is automatic. A bank-import example passed
+the file as a bare argument when it needs `--file`.
+
 ## [5.47.39] - 2026-09-04
 
 `clio schema` listed commands that do not exist. Its CLI Command column showed a

@@ -52,7 +52,7 @@ If returns: halt. One leave capsule per FY.
 ### Step 1A — Cross-check (calculator)
 
 ```
-clio calc leave-accrual --headcount 20 --days-per-employee 14 --daily-rate 300 --periods 12 --start-date 2025-01-01 --currency SGD --json
+clio calc leave-accrual --employees 20 --days 14 --daily-rate 300 --periods 12 --start-date 2025-01-01 --currency SGD --json
 ```
 
 Returns: `{ totalAnnualCost: 84000, perPeriodAmount: 7000, schedule: [{period: 1, accrualDate: '2025-01-31', accrualAmount: 7000, journal: {...}}, ...12] }`. `daily-rate` should be average daily compensation rate (annual salary / 260 working days).

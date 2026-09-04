@@ -13,7 +13,7 @@
 ### CLI tools (jaz-cli — offline)
 - **`clio jobs document-collection ingest --source <local-dir> --json`** — step 2 ingest local: scan a local directory, classify per file-type heuristics, output JSON with per-file metadata (`{path, classifiedAs, confidence, encrypted, suggestedAction}`).
 - **`clio jobs document-collection ingest --source 'https://www.dropbox.com/scl/fo/...' --json`** — step 2 ingest cloud: same flow over a Dropbox / Google Drive / OneDrive shared link. Recursive folder traversal. Files downloaded to a temp dir.
-- **`clio jobs document-collection ingest --source <dir> --decrypt --json`** — step 3 decryption: detect password-protected PDFs and decrypt via `qpdf`. Per memory rule: if `__pw__<password>` is in the filename, the ingest tool extracts and uses the password automatically.
+- **step 3 decryption is AUTOMATIC — there is no flag.** The same `ingest` call detects password-protected PDFs and decrypts via `qpdf`. Per memory rule: if `__pw__<password>` is in the filename, the ingest tool extracts and uses the password automatically.
 
 ### External dependencies
 - **`qpdf`** binary — required for encrypted PDF decryption. Document-collection ingest detects encryption + invokes qpdf transparently. If qpdf missing: surface install instruction (`brew install qpdf` on macOS, `apt-get install qpdf` on Linux).
@@ -71,7 +71,7 @@ Keep the ingest result for the period.
 For files where `encrypted: true`:
 
 ```
-clio jobs document-collection ingest --source <dir> --decrypt --json
+clio jobs document-collection ingest --source <dir> --json
 ```
 
 Decryption flow:

@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.47.39
+version: 5.47.40
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -106,8 +106,8 @@ Examples:
 ```bash
 clio invoices create --contact "Acme"           # Fuzzy-resolves to "Acme Corp Pte Ltd"
 clio invoices create --contact abc12345-...     # UUID passthrough, no API call
-clio journals create --account "Bank - SGD"     # Resolves by account name
-clio journals create --account "1000"           # Resolves by account code
+clio cash-in create --account "Bank - SGD"      # Resolves by account name
+clio cash-in create --account "1000"            # Resolves by account code
 ```
 
 > **IMPORTANT for agents:** Fuzzy matching works for `--contact` and top-level `--account` flags. It does NOT work inside `--lines` JSON arrays. Line item `accountResourceId` must be a UUID or exact account name.

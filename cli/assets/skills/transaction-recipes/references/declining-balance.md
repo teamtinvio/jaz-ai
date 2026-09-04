@@ -37,7 +37,7 @@ If a result returns: halt and surface "Depreciation capsule for asset `<name>` a
 ### Step 1 — Independent cross-check (calculator)
 
 ```
-clio calc depreciation --cost 50000 --salvage 5000 --life 5 --method ddb --frequency monthly --start-date 2025-01-01 --currency SGD --json
+clio calc depreciation --cost 50000 --salvage 5000 --life 5 --method ddb --frequency monthly --currency SGD --json
 ```
 
 Returns: `{ totalDepreciation: 45000, schedule: [{period: 1, openingBookValue: 50000, depreciationAmount: 833.33, accumulatedDepreciation: 833.33, closingBookValue: 49166.67}, ...60] }`. For DDB: amounts decline each period (40% annual rate × declining book value × 1/12 monthly). Final period absorbs rounding to land at exactly salvage value ($5,000).
