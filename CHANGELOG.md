@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.47.36] - 2026-09-04
+
+Failed commands now tell you how to fix them. The platform's specific recovery
+advice — which account a claim type needs, why an employee will not bind, which
+line item is missing its GL account — already existed and only reached AI
+assistants. Running the same command yourself returned the bare error. That
+guidance now appears in the CLI too, in plain text and in `--json`, along with a
+command you can run next.
+
 ## [5.47.35] - 2026-09-04
 
 `--all` now works properly on six more commands. Fetching everything is capped at
