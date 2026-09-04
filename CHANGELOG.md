@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.47.32] - 2026-09-04
+
+A mistyped option now gets a one-line error instead of a page of internals.
+Commands that run offline — `clio schema` among them — used to answer an unknown
+`--format` value with a raw crash dump: eleven lines of stack trace, the paths of
+files on your own machine, and the sentence explaining the problem buried in the
+middle. They now say what is wrong the same way the rest of the CLI does, and
+`--json` returns the same structured error shape it already used elsewhere.
+
+Errors reported to automation now say whether the problem was your input or
+ours, so a tool retrying a request no longer loops against a fault a retry
+cannot fix. Long error messages also survive being piped to another program
+instead of being cut off partway through.
+
 ## [5.47.31] - 2026-09-04
 
 Internal release automation update. No user-facing changes since 5.47.30.
