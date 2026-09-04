@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.47.29] - 2026-09-04
+
+Cash transfers had the same problem cash entries did: creating one said it made a
+draft, when transfers are finalized on creation whatever you ask for. It now
+reports the state the record is actually in.
+
+The same change is applied to invoices, bills, journals and both credit notes,
+where the draft setting does work and the message is unchanged. On those, a
+finalized record now names its real status, so an invoice created with --finalize
+reads "(unpaid)" rather than "(finalized)" -- the same word a later lookup shows.
+
 ## [5.47.28] - 2026-09-04
 
 Creating a cash entry said it made a draft. It did not. Cash in and cash out are
