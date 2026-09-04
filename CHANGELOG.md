@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.47.25] - 2026-09-04
+
+The CLI guide said every create makes a draft. That is true only for
+transactions. Contacts, items, accounts, tags, tax profiles and the other
+master-data records have no draft state at all and are live the moment the
+command returns, which the guide now says.
+
+An assistant reading the old wording could believe it had something to review
+before a record took effect, and skip a confirmation on that basis.
+
 ## [5.47.24] - 2026-09-04
 
 The remaining calculator and transaction-recipe options now reject values they do

@@ -17,7 +17,7 @@
 | `--status DRAFT` | `status` | Uppercase enum |
 | `--lines '[...]'` | `lineItems` array | Each needs: name, quantity, unitPrice, accountResourceId |
 | `--entries '[...]'` | `journalEntries` array | Each needs: accountResourceId, debit OR credit |
-| `--finalize` | `saveAsDraft: false` | CLI defaults to draft (saveAsDraft: true) |
+| `--finalize` | `saveAsDraft: false` | Transaction commands only. CLI defaults to draft (saveAsDraft: true); master-data creates have no draft state |
 | `--bank-account "name"` | `bankAccountResourceId` | Fuzzy-resolved |
 | `--tax-profile "name"` | `taxProfileResourceId` | Fuzzy-resolved |
 
@@ -68,11 +68,11 @@ Use in search: `clio invoices search --status UNPAID --json`
 
 1. **Create returns minimal response** — only `{ "resourceId": "uuid" }`. Run `clio invoices get <id> --json` for full data.
 2. **Line-item accounts don't fuzzy-resolve** — `--lines` JSON requires exact account name or UUID. Top-level `--account` fuzzy-resolves.
-3. **All creates default to draft** — use `--finalize` to create as finalized (UNPAID for invoices, ACTIVE for journals).
+3. **Transaction creates default to draft** — invoices, bills, journals, cash entries, credit notes and orders. Use `--finalize` to create as finalized (UNPAID for invoices, ACTIVE for journals). Master data has no draft state: contacts, items, accounts, tags, tax profiles and the rest are created live, and accept no `--finalize`.
 4. **`--offset` is page number (0-indexed)** — not row skip count. offset=0 + limit=100 = page 1.
 5. **`customer` is boolean** — `--customer true`, not `--customer "Acme"`.
 6. **Dates are YYYY-MM-DD** — org-local timezone. API returns epoch ms but CLI formats them.
 7. **`--all` caps at 10,000 rows** — use `--max-rows 50000` for larger datasets.
 8. **JSON goes to stdout, errors to stderr** — `clio invoices list --json 2>/dev/null | jq .` is safe.
-9. **`--finalize` skips draft** — creates finalized (e.g., UNPAID for invoices). Without it, everything is DRAFT.
+9. **`--finalize` skips draft** — creates finalized (e.g., UNPAID for invoices). Without it a TRANSACTION is DRAFT; master data is live either way, because `saveAsDraft` does not exist for those entities.
 10. **Currency codes are uppercase** — `SGD` not `sgd`. API rejects lowercase.
