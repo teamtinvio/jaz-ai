@@ -72,7 +72,7 @@ Use in search: `clio invoices search --status UNPAID --json`
 4. **`--offset` is page number (0-indexed)** — not row skip count. offset=0 + limit=100 = page 1.
 5. **`customer` is boolean** — `--customer true`, not `--customer "Acme"`.
 6. **Dates are YYYY-MM-DD** — org-local timezone. API returns epoch ms but CLI formats them.
-7. **`--all` caps at 10,000 rows** — use `--max-rows 50000` for larger datasets.
+7. **`--all` caps at 1,000 rows** — lowered from 10,000 in 2026-04 (DEFAULT_MAX_ROWS in commands/pagination.ts). Pass `--max-rows 50000` for larger datasets, and check `truncated` in the response before treating a page as complete.
 8. **JSON goes to stdout, errors to stderr** — `clio invoices list --json 2>/dev/null | jq .` is safe.
 9. **`--finalize` skips draft** — creates finalized (e.g., UNPAID for invoices). Without it a TRANSACTION is DRAFT; master data is live either way, because `saveAsDraft` does not exist for those entities.
 10. **Currency codes are uppercase** — `SGD` not `sgd`. API rejects lowercase.

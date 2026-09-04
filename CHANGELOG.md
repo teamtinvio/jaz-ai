@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.47.26] - 2026-09-04
+
+`clio auth whoami --org <label> --json` printed the stored API key for that
+profile. It now returns only the organization name, currency, country and the
+date the profile was added, which is what the same command without --json has
+always shown.
+
+If you have run that command, the key was written to your terminal and to
+anything capturing it, such as shell history or CI logs. Consider rotating the
+key for any profile you inspected that way.
+
+Also corrected: the CLI guide said `--all` returns up to 10,000 rows. The limit
+has been 1,000 since April; pass --max-rows for more.
+
 ## [5.47.25] - 2026-09-04
 
 The CLI guide said every create makes a draft. That is true only for
