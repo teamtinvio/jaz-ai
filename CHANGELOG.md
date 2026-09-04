@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.47.39] - 2026-09-04
+
+`clio schema` listed commands that do not exist. Its CLI Command column showed a
+command for every group, but fourteen of them were never real — running one
+printed the general help and reported success, so there was no sign anything was
+wrong. Five of the fourteen do have a command under a different name and now show
+it; the other nine have no command of their own and now say so, pointing at
+`clio mcp-call`, which reaches every operation.
+
 ## [5.47.38] - 2026-09-04
 
 Internal consolidation. No user-facing changes since 5.47.37 — the `list`
