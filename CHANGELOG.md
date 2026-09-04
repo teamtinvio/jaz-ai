@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.47.33] - 2026-09-04
+
+Error messages from online commands are no longer cut off when piped to another
+program. A large error — an upstream response included in the detail, for
+instance — used to be truncated partway through, leaving a caller with a failure
+result and an unreadable explanation. The full message now arrives.
+
 ## [5.47.32] - 2026-09-04
 
 A mistyped option now gets a one-line error instead of a page of internals.
