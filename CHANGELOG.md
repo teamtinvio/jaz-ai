@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.47.34] - 2026-09-04
+
+Deleting an invoice, bill, journal or credit note now tells you what actually
+happened. Deleting one that is still active does not remove it — it voids it and
+keeps it on the books — but the command reported "deleted" either way. It now
+says "voided" when that is what occurred, and reports the same outcome in
+`--json`.
+
+These commands also gained `--force`, to remove a record outright instead of
+voiding it, and `--internal-notes` to record a note with the void. Without
+`--force` there was no way to remove an already-voided document from the command
+line at all.
+
 ## [5.47.33] - 2026-09-04
 
 Error messages from online commands are no longer cut off when piped to another
