@@ -1,5 +1,14 @@
 # Changelog
 
+## [5.47.35] - 2026-09-04
+
+`--all` now works properly on six more commands. Fetching everything is capped at
+1,000 rows, and when the cap bites the CLI says so and tells you to raise it with
+`--max-rows` — but `clio bank-rules list`, `fixed-assets list`, `subscriptions
+list`, `contact-groups list`, `custom-fields list` and `inventory items` did not
+accept that option. Anyone with more than 1,000 rows got 1,000 with no way to ask
+for the rest. All six now take `--max-rows`.
+
 ## [5.47.34] - 2026-09-04
 
 Deleting an invoice, bill, journal or credit note now tells you what actually
