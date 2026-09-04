@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.47.42] - 2026-09-04
+
+`clio schema` reported a different number of tools than the rest of the CLI. It
+counted 369 where `clio mcp` and the hosted server both report 368, because it
+included an interactive control that only works inside a chat and is served
+nowhere else. It now reports the same 368, and the per-group rows add up to that
+total, which they did not before.
+
 ## [5.47.41] - 2026-09-04
 
 Internal release automation update. No user-facing changes since 5.47.40.
