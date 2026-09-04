@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.47.27] - 2026-09-04
+
+Sending line items to the flat bulk-upsert now says so. There are two variants
+for invoices and bills: the flat one takes an amount per row, the other takes
+line items. Sending line items to the flat variant was accepted without comment,
+and because the amount lives inside those line items, the record was written at
+zero.
+
+The call now returns a note naming the variant that reads line items, and saying
+the amount did not arrive. The record is still written, so check any rows created
+this way.
+
 ## [5.47.26] - 2026-09-04
 
 `clio auth whoami --org <label> --json` printed the stored API key for that
