@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.48.1] - 2026-09-06
+
+You can now set the currency and exchange rate when updating a journal, a cash-in
+or a cash-out. Creating one of these has always accepted a currency; updating one
+did not, so there was no way to correct a rate or switch a document to a different
+currency after the fact.
+
+This matters more than it used to. The platform recently stopped rewriting the
+exchange rate when you edit something unrelated — previously, changing only a
+reference on a journal booked at your own agreed rate could quietly move it to the
+market rate for that date. Now the booked rate stays put unless you say otherwise,
+and saying otherwise is what this release makes possible: send the currency with a
+rate to set it exactly, or without one to take the market rate for the value date.
+
 ## [5.48.0] - 2026-09-05
 
 Documents now take the organization's own number instead of an invented one.
