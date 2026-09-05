@@ -1,5 +1,20 @@
 # Changelog
 
+## [5.47.43] - 2026-09-05
+
+Two corrections after a platform update.
+
+Sending a line item's account under its read-side name now works, and the
+assistant no longer says otherwise. It used to warn that the value had been
+dropped and tell you to send the request again — which, on a create, made a
+second invoice or bill. The platform accepts that name now, so the note says so.
+Where it still is not accepted, the warning remains, and it now tells you to
+correct the record rather than create another.
+
+Fixed assets can also be registered and sold against cash entries and transfers,
+not just manual journals. The platform added those four options; this release
+catches up, and the three places that had each allowed a different set now agree.
+
 ## [5.47.42] - 2026-09-04
 
 `clio schema` reported a different number of tools than the rest of the CLI. It

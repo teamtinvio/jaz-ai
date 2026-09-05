@@ -3074,7 +3074,11 @@
           "enum": [
             "PURCHASE",
             "SALE",
-            "JOURNAL_MANUAL"
+            "JOURNAL_MANUAL",
+            "JOURNAL_CASHFLOW",
+            "JOURNAL_DIRECT_CASH_IN",
+            "JOURNAL_DIRECT_CASH_OUT",
+            "JOURNAL_CASH_TRANSFER"
           ],
           "example": "PURCHASE",
           "type": "string"
@@ -10150,7 +10154,7 @@
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by approval status."
+          "description": "Filter by approval status. Approval state is a separate lifecycle from status: a credit note submitted for approval keeps status DRAFT and carries approval status PENDING, so reading status alone will not tell you whether a submission went through. This filter is the way to ask; the field is not returned on read."
         },
         "approvedAt": {
           "allOf": [
@@ -12386,6 +12390,18 @@
           ],
           "type": "string"
         },
+        "limit": {
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "description": "Zero-indexed row offset into the result set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
         "showRoundedValues": {
           "description": "Round all monetary values to the nearest whole number.",
           "type": "boolean"
@@ -12445,6 +12461,18 @@
             "DUE_MONTH"
           ],
           "type": "string"
+        },
+        "limit": {
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "description": "Zero-indexed row offset into the result set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
         },
         "showRoundedValues": {
           "description": "Round all monetary values to the nearest whole number.",
@@ -12657,8 +12685,21 @@
             "ACCOUNT",
             "CONTACT",
             "TRANSACTION",
-            "RELATIONSHIP"
+            "RELATIONSHIP",
+            "CAPSULE"
           ]
+        },
+        "limit": {
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "description": "Zero-indexed row offset into the result set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
         },
         "startDate": {
           "description": "Start date, in YYYY-MM-DD format (organization timezone).",
@@ -14202,9 +14243,13 @@
           "type": "string"
         },
         "saleBusinessTransactionType": {
-          "description": "How the sale was recorded: SALE (sales invoice), PURCHASE (purchase refund), or JOURNAL_MANUAL (manual journal).",
+          "description": "How the sale was recorded: SALE (sales invoice), PURCHASE (purchase refund), or a journal of any flavour (an asset can be disposed against a cash entry, not only a manual journal).",
           "enum": [
             "JOURNAL_MANUAL",
+            "JOURNAL_CASHFLOW",
+            "JOURNAL_DIRECT_CASH_IN",
+            "JOURNAL_DIRECT_CASH_OUT",
+            "JOURNAL_CASH_TRANSFER",
             "PURCHASE",
             "SALE"
           ],
@@ -15811,7 +15856,7 @@
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by approval status."
+          "description": "Filter by approval status. Approval state is a separate lifecycle from status: a bill submitted for approval keeps status DRAFT and carries approval status PENDING, so reading status alone will not tell you whether a submission went through. This filter is the way to ask; the field is not returned on read."
         },
         "approvedAt": {
           "allOf": [
@@ -15950,7 +15995,7 @@
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by status (DRAFT, UNPAID, PARTIALLY_PAID, PAID, OVERDUE, VOID)."
+          "description": "Filter by status (DRAFT, UNPAID, PARTIALLY_PAID, PAID, VOID)."
         },
         "submittedAt": {
           "allOf": [
@@ -19321,7 +19366,7 @@
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by approval status."
+          "description": "Filter by approval status. Approval state is a separate lifecycle from status: an invoice submitted for approval keeps status DRAFT and carries approval status PENDING, so reading status alone will not tell you whether a submission went through. This filter is the way to ask; the field is not returned on read."
         },
         "approvedAt": {
           "allOf": [
@@ -19460,7 +19505,7 @@
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by status: DRAFT, UNPAID, PARTIALLY_PAID, PAID, OVERDUE, or VOID."
+          "description": "Filter by status: DRAFT, UNPAID, PARTIALLY_PAID, PAID, or VOID."
         },
         "submittedAt": {
           "allOf": [
@@ -20018,14 +20063,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20152,14 +20197,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20217,14 +20262,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20260,7 +20305,7 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
@@ -20271,7 +20316,7 @@
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20304,14 +20349,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20421,14 +20466,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20461,14 +20506,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20501,14 +20546,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20541,14 +20586,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20581,14 +20626,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20621,14 +20666,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20661,14 +20706,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20701,14 +20746,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20750,14 +20795,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20790,14 +20835,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20839,14 +20884,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20879,14 +20924,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20919,14 +20964,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -20959,14 +21004,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21091,14 +21136,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21135,14 +21180,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21352,14 +21397,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21401,14 +21446,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21454,14 +21499,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is fixed server-side, so no sort field is needed.",
+          "description": "Zero-indexed row offset into the result set. Sort is fixed server-side, so no sort field is needed.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21481,14 +21526,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21530,14 +21575,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21592,14 +21637,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21632,14 +21677,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21672,14 +21717,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21733,14 +21778,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21773,14 +21818,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21813,14 +21858,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21853,14 +21898,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21897,14 +21942,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21946,14 +21991,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -21986,14 +22031,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -22035,14 +22080,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -22075,14 +22120,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -22115,14 +22160,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -22164,14 +22209,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -22204,14 +22249,14 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -22407,7 +22452,7 @@
         },
         "limit": {
           "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
@@ -22422,7 +22467,7 @@
         },
         "offset": {
           "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -22884,7 +22929,7 @@
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by approval status."
+          "description": "Filter by approval status. Approval state is a separate lifecycle from status: a credit note submitted for approval keeps status DRAFT and carries approval status PENDING, so reading status alone will not tell you whether a submission went through. This filter is the way to ask; the field is not returned on read."
         },
         "approvedAt": {
           "allOf": [
@@ -24470,6 +24515,18 @@
           "description": "When true, run the report as a preview.",
           "type": "boolean"
         },
+        "limit": {
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "description": "Zero-indexed row offset into the result set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
         "primarySnapshotDate": {
           "description": "Primary snapshot date, in YYYY-MM-DD format (organization timezone).",
           "type": "string"
@@ -24584,6 +24641,18 @@
         "isPreview": {
           "description": "When true, run the report as a preview.",
           "type": "boolean"
+        },
+        "limit": {
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "description": "Zero-indexed row offset into the result set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
         },
         "primarySnapshotDate": {
           "description": "Primary snapshot date, in YYYY-MM-DD format (organization timezone).",
@@ -25300,11 +25369,11 @@
         "groupBy": {
           "description": "How report rows are grouped.",
           "enum": [
+            "ACCOUNT",
             "CONTACT",
-            "CONTACT_GROUP",
-            "DUE_MONTH",
+            "TRANSACTION",
             "RELATIONSHIP",
-            "CURRENCY"
+            "CAPSULE"
           ],
           "type": "string"
         },
@@ -25321,15 +25390,13 @@
           "type": "boolean"
         },
         "limit": {
-          "default": 100,
-          "description": "Maximum number of results per page (default 100, max 1000).",
+          "description": "Maximum number of results per page (max 1000).",
           "maximum": 1000,
           "minimum": 1,
           "type": "integer"
         },
         "offset": {
-          "default": 0,
-          "description": "Zero-indexed page number. Sort is required when offset is set.",
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
@@ -25561,11 +25628,12 @@
         "groupBy": {
           "description": "How report rows are grouped.",
           "enum": [
-            "CONTACT",
-            "CONTACT_GROUP",
-            "DUE_MONTH",
-            "RELATIONSHIP",
-            "CURRENCY"
+            "NONE",
+            "IRAS_F5",
+            "VAT_PROFILE",
+            "VAT_TYPE",
+            "MY_SST_SALES_TAX",
+            "MY_SST_SERVICE_TAX"
           ],
           "type": "string"
         },
@@ -29676,14 +29744,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -29827,13 +29895,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -30313,14 +30381,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -30887,13 +30955,26 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "DRAFT",
+              "UNPAID",
+              "PARTIALLY_PAID",
+              "PAID",
+              "VOID"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -32998,13 +33079,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -33455,13 +33536,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -34132,13 +34213,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -34441,13 +34522,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -34750,13 +34831,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -35124,13 +35205,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -35581,13 +35662,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -38431,13 +38512,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -38888,13 +38969,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -39519,13 +39600,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -39989,7 +40070,7 @@
           },
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
@@ -40070,13 +40151,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -46310,14 +46391,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -46459,14 +46540,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -49462,14 +49543,14 @@
           },
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -49617,14 +49698,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -49772,14 +49853,27 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "DRAFT",
+              "UNPAID",
+              "PARTIALLY_PAID",
+              "PAID",
+              "VOID"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
+          },
+          {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -51428,14 +51522,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -52196,14 +52290,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -53733,14 +53827,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -53964,14 +54058,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -54447,7 +54541,7 @@
           },
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
@@ -54808,14 +54902,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -55268,13 +55362,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -55649,13 +55743,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -56028,13 +56122,13 @@
           },
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -57189,14 +57283,14 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -57435,7 +57529,7 @@
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -58944,7 +59038,7 @@
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -63269,7 +63363,7 @@
           },
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
@@ -65177,7 +65271,7 @@
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -66686,7 +66780,7 @@
           },
           {
             "default": 0,
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -68769,7 +68863,7 @@
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -69458,7 +69552,7 @@
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -69686,13 +69780,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -70074,13 +70168,13 @@
           },
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -70692,7 +70786,7 @@
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -71072,13 +71166,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -72418,13 +72512,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -72875,13 +72969,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -73332,13 +73426,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -73632,13 +73726,13 @@
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (default 100, max 1000).",
+            "description": "Maximum number of results per page (max 1000).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed page number.",
+            "description": "Zero-indexed row offset into the result set.",
             "in": "query",
             "name": "offset",
             "type": "integer"
