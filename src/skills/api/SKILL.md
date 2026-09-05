@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.47.43
+version: 5.48.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 159 production gotchas, error
@@ -350,7 +350,7 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 103. **Journal entries must balance** — Sum of all DEBIT amounts must exactly equal sum of all CREDIT amounts. Unbalanced journals are rejected with 422. Agent tools pre-flight check this client-side before hitting the API.
 
 ### Transaction References
-104. **Invoice/bill/CN references must be unique per org** — Creating a transaction with a `reference` that already exists causes 422 `Sale Reference already exists` (or `Purchase Reference`). Generate unique references with timestamps (e.g., `INV-20260309-1430`) when the user doesn't specify one.
+104. **References must be unique per org — NEVER invent one** — A duplicate `reference` causes 422 `Sale Reference already exists` (or `Purchase Reference`). Ask whose number it is. **Purchase side (bills, supplier credit notes): use the SUPPLIER'S own document number**, read off the document; only if it genuinely has none, set `autoReference: true`. **Everything we issue (invoices, customer credit notes, quotes, sale orders, purchase requests, purchase orders, journals, expense claims): set `autoReference: true`** to take the next number from the organization's own series, or call `get_next_reference` to preview it first. Never a timestamp, never a guess, never a pattern inferred from other documents. This covers the business transaction families only; payments, cash entries, transfers, employee payouts, scheduled invoices, scheduled bills, scheduled journals and subscriptions have no series here and keep their own references. The scheduled bodies additionally REQUIRE a literal reference: they mint per occurrence upstream, so `autoReference` is rejected there even though the published schema shows the field. Sending both `reference` and `autoReference` is not an error here: the client resolves the number before the request and your explicit `reference` wins, costing one wasted series read. Send one. The assigned number always carries today's date even on a back-dated document, and reading the series does not reserve it.
 
 ### Currency Rates
 105. **`add_currency_rate` for new rates, `update_currency_rate` only for editing existing records** — When a user says "update the rate" or "set the rate", use `add_currency_rate` (POST — creates a new rate entry for a date). Only use `update_currency_rate` (PUT) when explicitly modifying an existing rate record by its resourceId.

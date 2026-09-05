@@ -1,5 +1,34 @@
 # Changelog
 
+## [5.48.0] - 2026-09-05
+
+Documents now take the organization's own number instead of an invented one.
+
+Rule 104 used to say: generate a reference with a timestamp when the user does
+not supply one. It said that because the API offered nothing else. Those
+documents sat outside the organization's numbering series, and they consumed a
+number from it anyway, because the counter advances on insert whatever the
+reference field says. An invented number silently burned a real one and left a
+gap nobody caused.
+
+- `get_next_reference` previews the organization's next number for a document
+  family, the same number the web application prefills. Reading does not reserve
+  it.
+- `autoReference: true` on the eight create tools takes that number directly.
+  Numbering stays opt-in: omitting a reference still does not auto-number.
+- The reference is resolved before the retry boundary and sent as a literal, so
+  a retried create carries the same number rather than minting a new one.
+- Purchase-side guidance is unchanged in substance: use the supplier's own
+  document number, and only fall back to the series when their document has
+  none. The model still never invents a number.
+
+Consolidating the wiring onto one `applyReference` helper fixed four wire
+defects that typecheck and the full suite had both missed: `create_bill`
+unwired while leaking the flag upstream, `create_journal` binding nothing, both
+credit notes sending a reference and the flag together, and `create_invoice`
+passing blanks. A body-shape test now asserts that no create body ever puts
+`autoReference` on the wire.
+
 ## [5.47.43] - 2026-09-05
 
 Two corrections after a platform update.

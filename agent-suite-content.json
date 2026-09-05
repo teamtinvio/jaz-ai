@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.47.43+d88f6407",
+  "contentVersion": "5.48.0+0fe7feed",
   "counts": {
-    "tools": 368,
+    "tools": 369,
     "namespaces": 45,
     "calculators": 13,
     "recipes": 13,
@@ -142,7 +142,7 @@
     },
     {
       "name": "organization",
-      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). List/search saved report templates. Agent context bundle."
+      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). List/search saved report templates. Agent context bundle. Next document reference number (numbering series) for invoices, bills, credit notes, quotes, orders and journals."
     },
     {
       "name": "document_ai",
@@ -194,6 +194,13 @@
     }
   ],
   "tools": [
+    {
+      "name": "get_next_reference",
+      "namespace": "organization",
+      "description": "Next document number in the org's own series. Same number the web app prefills. Reading does NOT reserve it — two callers reading at once get the same value. Date embedded is always today. Never invent a reference; use this.",
+      "readOnly": true,
+      "destructive": false
+    },
     {
       "name": "get_organization",
       "namespace": "organization",
@@ -379,7 +386,7 @@
     {
       "name": "create_bill",
       "namespace": "bills",
-      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — use the SUPPLIER'S OWN invoice number; if the document has none, ask. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating — show it, retry with allowDuplicate only once the user confirms it is separate. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — use the SUPPLIER'S OWN invoice number. If the document genuinely has none, set autoReference:true for the org's next number. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating — show it, retry with allowDuplicate only once the user confirms it is separate. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -428,7 +435,7 @@
     {
       "name": "create_sale_order",
       "namespace": "sale_orders",
-      "description": "Create a Sale Quote or Sale Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` auto-generates (timestamped) if omitted — must be unique per org.",
+      "description": "Create a Sale Quote or Sale Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` unique per org; set autoReference:true for the org's next number.",
       "readOnly": false,
       "destructive": false
     },
@@ -463,7 +470,7 @@
     {
       "name": "create_purchase_order",
       "namespace": "purchase_orders",
-      "description": "Create a Purchase Request or Purchase Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` auto-generates (timestamped) if omitted — must be unique per org.",
+      "description": "Create a Purchase Request or Purchase Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` unique per org; set autoReference:true for the org's next number.",
       "readOnly": false,
       "destructive": false
     },
@@ -498,14 +505,14 @@
     {
       "name": "convert_sale_order_to_invoice",
       "namespace": "sale_orders",
-      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "convert_purchase_order_to_bill",
       "namespace": "purchase_orders",
-      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },

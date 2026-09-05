@@ -6267,6 +6267,10 @@
     },
     "CreateBillClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.\nThis document family is the one where that matters most: a duplicate number is\naccepted here rather than refused, so a collision is not reported to either caller\nand both documents keep the same number. Invoices, credit notes to customers,\nquotes and orders refuse a duplicate outright. Create these one at a time, or\nsupply your own reference.",
+          "type": "boolean"
+        },
         "capsuleRecipe": {
           "allOf": [
             {
@@ -6340,7 +6344,7 @@
           "type": "string"
         },
         "reference": {
-          "description": "Bill reference or number.",
+          "description": "Bill reference or number.\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "type": "string"
         },
         "saveAsDraft": {
@@ -6383,7 +6387,6 @@
       },
       "required": [
         "dueDate",
-        "reference",
         "valueDate"
       ],
       "type": "object"
@@ -7468,6 +7471,10 @@
     },
     "CreateCustomerCreditClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.",
+          "type": "boolean"
+        },
         "capsuleResourceId": {
           "description": "Resource ID of the capsule to link the customer credit note to.",
           "type": "string"
@@ -7540,7 +7547,7 @@
           "type": "array"
         },
         "reference": {
-          "description": "Customer credit note reference or number.",
+          "description": "Customer credit note reference or number.\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "type": "string"
         },
         "refunds": {
@@ -7586,7 +7593,6 @@
         }
       },
       "required": [
-        "reference",
         "valueDate"
       ],
       "type": "object"
@@ -7881,6 +7887,10 @@
     },
     "CreateInvoiceClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.",
+          "type": "boolean"
+        },
         "billFrom": {
           "allOf": [
             {
@@ -7977,7 +7987,7 @@
           "type": "array"
         },
         "reference": {
-          "description": "Invoice reference or number.",
+          "description": "Invoice reference or number.\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "type": "string"
         },
         "saleOrderResourceId": {
@@ -8045,7 +8055,6 @@
       },
       "required": [
         "dueDate",
-        "reference",
         "valueDate"
       ],
       "type": "object"
@@ -8520,6 +8529,10 @@
     },
     "CreateJournalClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.\nThis document family is the one where that matters most: a duplicate number is\naccepted here rather than refused, so a collision is not reported to either caller\nand both documents keep the same number. Invoices, credit notes to customers,\nquotes and orders refuse a duplicate outright. Create these one at a time, or\nsupply your own reference.",
+          "type": "boolean"
+        },
         "capsuleRecipe": {
           "allOf": [
             {
@@ -8559,7 +8572,7 @@
           "type": "array"
         },
         "reference": {
-          "description": "Journal reference or number.",
+          "description": "Journal reference or number.\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "type": "string"
         },
         "saveAsDraft": {
@@ -8599,7 +8612,6 @@
       },
       "required": [
         "journalEntries",
-        "reference",
         "valueDate"
       ],
       "type": "object"
@@ -8750,6 +8762,10 @@
     },
     "CreatePurchaseOrderClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.",
+          "type": "boolean"
+        },
         "billFrom": {
           "allOf": [
             {
@@ -8822,7 +8838,7 @@
           "type": "string"
         },
         "reference": {
-          "description": "Purchase order reference or number (unique within the organization).",
+          "description": "Purchase order reference or number (unique within the organization).\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "maxLength": 200,
           "type": "string"
         },
@@ -8871,13 +8887,16 @@
         }
       },
       "required": [
-        "reference",
         "valueDate"
       ],
       "type": "object"
     },
     "CreatePurchaseRequestClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.",
+          "type": "boolean"
+        },
         "billFrom": {
           "allOf": [
             {
@@ -8946,7 +8965,7 @@
           "type": "string"
         },
         "reference": {
-          "description": "Purchase request reference or number (unique within the organization).",
+          "description": "Purchase request reference or number (unique within the organization).\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "maxLength": 200,
           "type": "string"
         },
@@ -8995,13 +9014,16 @@
         }
       },
       "required": [
-        "reference",
         "valueDate"
       ],
       "type": "object"
     },
     "CreateSaleOrderClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.",
+          "type": "boolean"
+        },
         "billFrom": {
           "allOf": [
             {
@@ -9070,7 +9092,7 @@
           "type": "array"
         },
         "reference": {
-          "description": "Sale order reference or number (unique within the organization).",
+          "description": "Sale order reference or number (unique within the organization).\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "maxLength": 200,
           "type": "string"
         },
@@ -9114,13 +9136,16 @@
         }
       },
       "required": [
-        "reference",
         "valueDate"
       ],
       "type": "object"
     },
     "CreateSaleQuoteClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.",
+          "type": "boolean"
+        },
         "billFrom": {
           "allOf": [
             {
@@ -9189,7 +9214,7 @@
           "type": "array"
         },
         "reference": {
-          "description": "Sale quote reference or number (unique within the organization).",
+          "description": "Sale quote reference or number (unique within the organization).\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "maxLength": 200,
           "type": "string"
         },
@@ -9238,7 +9263,6 @@
         }
       },
       "required": [
-        "reference",
         "valueDate"
       ],
       "type": "object"
@@ -9251,7 +9275,7 @@
               "$ref": "#/definitions/CreateBillClientRequest"
             }
           ],
-          "description": "Define an ACTIVE Bill."
+          "description": "Define an ACTIVE Bill. The nested document must carry its own reference; automatic\nnumbering is not accepted here, because a scheduled run assigns a number per generated\noccurrence rather than from this preview.\nPublished schema note: this field reuses the create body, so the generated schema shows\nan autoReference property and marks reference optional. Neither holds here. Sending\nautoReference is rejected, and reference stays required."
         },
         "endDate": {
           "description": "End date, in YYYY-MM-DD format (organization timezone).",
@@ -9301,7 +9325,7 @@
               "$ref": "#/definitions/CreateInvoiceClientRequest"
             }
           ],
-          "description": "Define an ACTIVE Invoice."
+          "description": "Define an ACTIVE Invoice. The nested document must carry its own reference; automatic\nnumbering is not accepted here, because a scheduled run assigns a number per generated\noccurrence rather than from this preview.\nPublished schema note: this field reuses the create body, so the generated schema shows\nan autoReference property and marks reference optional. Neither holds here. Sending\nautoReference is rejected, and reference stays required."
         },
         "repeat": {
           "default": "ONE_TIME",
@@ -9445,7 +9469,7 @@
               "$ref": "#/definitions/CreateInvoiceClientRequest"
             }
           ],
-          "description": "Define an ACTIVE Invoice."
+          "description": "Define an ACTIVE Invoice. The nested document must carry its own reference; automatic\nnumbering is not accepted here, because a scheduled run assigns a number per generated\noccurrence rather than from this preview.\nPublished schema note: this field reuses the create body, so the generated schema shows\nan autoReference property and marks reference optional. Neither holds here. Sending\nautoReference is rejected, and reference stays required."
         },
         "proratedConfig": {
           "allOf": [
@@ -9491,6 +9515,10 @@
     },
     "CreateSupplierCreditClientRequest": {
       "properties": {
+        "autoReference": {
+          "description": "When true the next reference in the organization's own numbering series is assigned\nautomatically, and reference must be omitted. Leave unset to supply your own.\nThe assigned number always carries today's date in the organization's timezone, even\non a back dated document. Reading the series does not reserve it, so two documents\ncreated at the same moment can be assigned the same number, and a request that is\nretried after a timeout is assigned a new one rather than repeating the first.\nSupply your own reference when either matters.\nThis document family is the one where that matters most: a duplicate number is\naccepted here rather than refused, so a collision is not reported to either caller\nand both documents keep the same number. Invoices, credit notes to customers,\nquotes and orders refuse a duplicate outright. Create these one at a time, or\nsupply your own reference.",
+          "type": "boolean"
+        },
         "capsuleResourceId": {
           "description": "Resource ID of the capsule to link the supplier credit note to.",
           "type": "string"
@@ -9535,7 +9563,7 @@
           "type": "array"
         },
         "reference": {
-          "description": "Supplier credit note reference or number.",
+          "description": "Supplier credit note reference or number.\nRequired unless autoReference is true, in which case it must be omitted. The two are\nmutually exclusive and sending both is rejected. Always required on scheduled and\nsubscription requests, which do not accept autoReference.",
           "type": "string"
         },
         "refunds": {
@@ -9581,7 +9609,6 @@
         }
       },
       "required": [
-        "reference",
         "valueDate"
       ],
       "type": "object"
@@ -14396,6 +14423,21 @@
             }
           ],
           "description": "Transaction type the classifier applies to."
+        }
+      },
+      "type": "object"
+    },
+    "NextReferenceResponse": {
+      "properties": {
+        "lastCounter": {
+          "description": "The counter this reference was derived from, before the series start and offset are applied.\nA brand new organization returns zero.",
+          "example": 6,
+          "type": "integer"
+        },
+        "reference": {
+          "description": "The next reference, formatted with the organization's prefix, separator, optional date and\nzero padding. Reading it does not consume it: the number is only taken when a document is\ncreated, so repeated calls return the same value.",
+          "example": "INV-04/09/26-07",
+          "type": "string"
         }
       },
       "type": "object"
@@ -28791,7 +28833,7 @@
               "$ref": "#/definitions/CreateBillClientRequest"
             }
           ],
-          "description": "Define an ACTIVE Bill."
+          "description": "Define an ACTIVE Bill. The nested document must carry its own reference; automatic\nnumbering is not accepted here, because a scheduled run assigns a number per generated\noccurrence rather than from this preview.\nPublished schema note: this field reuses the create body, so the generated schema shows\nan autoReference property and marks reference optional. Neither holds here. Sending\nautoReference is rejected, and reference stays required."
         },
         "endDate": {
           "description": "End date, in YYYY-MM-DD format (organization timezone).",
@@ -28844,7 +28886,7 @@
               "$ref": "#/definitions/CreateInvoiceClientRequest"
             }
           ],
-          "description": "Define an ACTIVE Invoice."
+          "description": "Define an ACTIVE Invoice. The nested document must carry its own reference; automatic\nnumbering is not accepted here, because a scheduled run assigns a number per generated\noccurrence rather than from this preview.\nPublished schema note: this field reuses the create body, so the generated schema shows\nan autoReference property and marks reference optional. Neither holds here. Sending\nautoReference is rejected, and reference stays required."
         },
         "repeat": {
           "default": "ONE_TIME",
@@ -28992,7 +29034,7 @@
               "$ref": "#/definitions/CreateInvoiceClientRequest"
             }
           ],
-          "description": "Define an ACTIVE Invoice."
+          "description": "Define an ACTIVE Invoice. The nested document must carry its own reference; automatic\nnumbering is not accepted here, because a scheduled run assigns a number per generated\noccurrence rather than from this preview.\nPublished schema note: this field reuses the create body, so the generated schema shows\nan autoReference property and marks reference optional. Neither holds here. Sending\nautoReference is rejected, and reference stays required."
         },
         "proratedConfig": {
           "allOf": [
@@ -63521,6 +63563,105 @@
         "summary": "Resolve Record List Entities",
         "tags": [
           "Record Lists"
+        ]
+      }
+    },
+    "/api/v1/references/next": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Returns the next document number in the organization's own numbering series for\none business transaction family, formatted with its prefix, separator, optional\ndate and zero padding. This is the same number the web application prefills when\na user opens a new document, so the two surfaces never diverge.\nReading a number does not take it. The series only advances when a document is\nactually created, including one saved as a draft, so repeated calls return the\nsame value and a number read here is not reserved against another caller taking it\nfirst. Two callers reading at the same moment receive the same number.\nThe date embedded in the reference is always today in the organization's timezone,\neven when the document being created is back dated.\nWhat happens on a collision depends on the family. Sales invoices, credit notes to\ncustomers, quotes, sale orders, purchase requests and purchase orders refuse a\nduplicate number and return 422, so the second caller can read again and retry.\nBills, credit notes from suppliers and manual journals accept it, so both documents\nkeep the same number and neither caller is told. Supply your own reference for\nthose three when you create in parallel.",
+        "operationId": "list-reference-next",
+        "parameters": [
+          {
+            "description": "The document family whose next number is wanted.",
+            "enum": [
+              "SALE",
+              "SALE_CREDIT_NOTE",
+              "PURCHASE",
+              "PURCHASE_CREDIT_NOTE",
+              "FIXED_ASSET",
+              "JOURNAL_MANUAL",
+              "SALE_QUOTE",
+              "SALE_ORDER",
+              "PURCHASE_REQUEST",
+              "PURCHASE_ORDER",
+              "CLAIM"
+            ],
+            "in": "query",
+            "name": "type",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/NextReferenceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Next Reference",
+        "tags": [
+          "Organization"
         ]
       }
     },

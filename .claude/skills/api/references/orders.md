@@ -41,7 +41,7 @@ Both directions are now first-class endpoints:
 - **`convert_sale_order_to_invoice`** (documentType `SALE_QUOTE` | `SALE_ORDER`) → creates a new Invoice from the source.
 - **`convert_purchase_order_to_bill`** (documentType `PURCHASE_REQUEST` | `PURCHASE_ORDER`) → creates a new Bill from the source.
 
-Body: `valueDate` + `dueDate` + `reference` required; if `reference` is omitted the tool sends a unique placeholder — pass your own to follow your org's numbering sequence. Optional `terms`, `notes` (sales → `invoiceNotes`), `internalNotes`, `tag`, `saveAsDraft` (defaults true → the new document lands as a DRAFT; pass false to post immediately).
+Body: `valueDate` + `dueDate` required; `reference` is required unless you set `autoReference: true`, which takes the next number from your org's own numbering series; omitting both is an error. Optional `terms`, `notes` (sales → `invoiceNotes`), `internalNotes`, `tag`, `saveAsDraft` (defaults true → the new document lands as a DRAFT; pass false to post immediately).
 
 - **NON-IDEMPOTENT.** Each call creates ANOTHER invoice/bill. On a timeout or uncertain result, do NOT blind-retry — search for one already linked to this order (via the linkage fields below) first.
 - **Source must not be VOID.** The convert tools pre-flight this and return a `repair` hint instead of a bare 422.
@@ -49,7 +49,7 @@ Body: `valueDate` + `dueDate` + `reference` required; if `reference` is omitted 
 
 ## Fields (create)
 
-Required: `valueDate`. Recommended: `reference` (auto-generated, timestamped, if omitted — must be unique per org), `contactResourceId`, `lineItems`.
+Required: `valueDate`. Recommended: `reference` (omit it to take the next number from your org's own series — must be unique per org), `contactResourceId`, `lineItems`.
 
 - Line items reuse the standard shape: `{ name, quantity, unitPrice, accountResourceId?, taxProfileResourceId?, … }`. `accountResourceId` is **required on each line when the document is not a draft** (i.e. always for Sale Orders; for quotes/requests/POs when `saveAsDraft:false`). The `create_*` tools pre-flight this.
 - Notes field differs by side: **sales** use `invoiceNotes`, **purchases** use `purchaseNotes`. The `notes` tool param maps to the right one automatically.

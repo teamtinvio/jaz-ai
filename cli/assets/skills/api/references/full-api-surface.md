@@ -3,7 +3,7 @@
 > **The endpoints clio wraps — the REST surface is larger.** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 440 paths / 368 operations and is the authoritative list; check it before concluding
+> carries 454 paths / 369 operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >

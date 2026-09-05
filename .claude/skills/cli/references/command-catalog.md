@@ -602,7 +602,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker — any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp` — MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 368 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 369 operations.
 
 ### `clio serve` — HTTP daemon
 Starts the HTTP daemon for ChatKit and email channel integrations.

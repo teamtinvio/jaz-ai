@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.47.43",
+  "version": "5.48.0",
   "description": "Fastest way to manage money",
-  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 368 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
+  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 369 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
     "name": "Jaz",
     "email": "build.with@jaz.ai",
@@ -66,6 +66,10 @@
   },
   "tools_generated": true,
   "tools": [
+    {
+      "name": "get_next_reference",
+      "description": "Next document number in the org's own series. Same number the web app prefills. Reading does NOT reserve it — two callers reading at once get the same value. Date embedded is always today. Never invent a reference; use this."
+    },
     {
       "name": "get_organization",
       "description": "Get organization details: name, base currency, country, and financial year end."
@@ -132,7 +136,7 @@
     },
     {
       "name": "create_invoice",
-      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\naccountResourceId per lineItem required only when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\" }` — see the exchangeRate param for rate direction. Dates YYYY-MM-DD.\n\nreference MUST be unique per org — auto-generate with timestamp if user doesn't specify (e.g. INV-20260309-1430). Duplicate → 422.\n\nOptional capsuleRecipe (SALE base only — DEFERRED_REVENUE). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\naccountResourceId per lineItem required only when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\" }` — see the exchangeRate param for rate direction. Dates YYYY-MM-DD.\n\nreference MUST be unique per org. Never invent one — set autoReference:true to take the organization's next number. Omitting both is an error. Duplicate → 422.\n\nOptional capsuleRecipe (SALE base only — DEFERRED_REVENUE). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_invoice",
@@ -172,7 +176,7 @@
     },
     {
       "name": "create_bill",
-      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — use the SUPPLIER'S OWN invoice number; if the document has none, ask. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating — show it, retry with allowDuplicate only once the user confirms it is separate. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — use the SUPPLIER'S OWN invoice number. If the document genuinely has none, set autoReference:true for the org's next number. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating — show it, retry with allowDuplicate only once the user confirms it is separate. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_bill",
@@ -200,7 +204,7 @@
     },
     {
       "name": "create_sale_order",
-      "description": "Create a Sale Quote or Sale Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` auto-generates (timestamped) if omitted — must be unique per org.\n\nSALE_QUOTE: a draft estimate by default (saveAsDraft true → DRAFT). Lifecycle DRAFT → (issue: saveAsDraft:false) → CREATED → (transition_sale_order ACCEPT) → ACCEPTED. To order from a quote, create it with saveAsDraft:false — a DRAFT quote can be neither linked nor accepted.\nSALE_ORDER: created directly as CREATED (no draft state). Link to a quote via saleQuoteResourceId — the quote MUST be CREATED or ACCEPTED (not DRAFT/VOID). Lifecycle CREATED → CONFIRMED (transition_sale_order CONFIRM).\n\naccountResourceId is required on each lineItem when the document is not a draft. There is no order→invoice link field — raise the invoice separately with create_invoice. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a Sale Quote or Sale Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` unique per org; set autoReference:true for the org's next number.\n\nSALE_QUOTE: a draft estimate by default (saveAsDraft true → DRAFT). Lifecycle DRAFT → (issue: saveAsDraft:false) → CREATED → (transition_sale_order ACCEPT) → ACCEPTED. To order from a quote, create it with saveAsDraft:false — a DRAFT quote can be neither linked nor accepted.\nSALE_ORDER: created directly as CREATED (no draft state). Link to a quote via saleQuoteResourceId — the quote MUST be CREATED or ACCEPTED (not DRAFT/VOID). Lifecycle CREATED → CONFIRMED (transition_sale_order CONFIRM).\n\naccountResourceId is required on each lineItem when the document is not a draft. There is no order→invoice link field — raise the invoice separately with create_invoice. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_sale_order",
@@ -220,7 +224,7 @@
     },
     {
       "name": "create_purchase_order",
-      "description": "Create a Purchase Request or Purchase Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` auto-generates (timestamped) if omitted — must be unique per org.\n\nPURCHASE_REQUEST: draft requisition by default (saveAsDraft true → DRAFT). Lifecycle DRAFT → (issue: saveAsDraft:false) → ACTIVE → (transition_purchase_order ACCEPT) → ACCEPTED. To order from a request, create it with saveAsDraft:false — a DRAFT request can be neither linked nor accepted.\nPURCHASE_ORDER: draft by default; create with saveAsDraft:false to make it ACTIVE. Link to a request via purchaseRequestResourceId — the request MUST be ACTIVE or ACCEPTED (not DRAFT/VOID). Lifecycle DRAFT → ACTIVE → CONFIRMED (transition_purchase_order CONFIRM).\n\naccountResourceId is required on each lineItem when not a draft. There is no order→bill link field — raise the bill separately with create_bill. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a Purchase Request or Purchase Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` unique per org; set autoReference:true for the org's next number.\n\nPURCHASE_REQUEST: draft requisition by default (saveAsDraft true → DRAFT). Lifecycle DRAFT → (issue: saveAsDraft:false) → ACTIVE → (transition_purchase_order ACCEPT) → ACCEPTED. To order from a request, create it with saveAsDraft:false — a DRAFT request can be neither linked nor accepted.\nPURCHASE_ORDER: draft by default; create with saveAsDraft:false to make it ACTIVE. Link to a request via purchaseRequestResourceId — the request MUST be ACTIVE or ACCEPTED (not DRAFT/VOID). Lifecycle DRAFT → ACTIVE → CONFIRMED (transition_purchase_order CONFIRM).\n\naccountResourceId is required on each lineItem when not a draft. There is no order→bill link field — raise the bill separately with create_bill. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_purchase_order",
@@ -240,11 +244,11 @@
     },
     {
       "name": "convert_sale_order_to_invoice",
-      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "convert_purchase_order_to_bill",
-      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; if omitted a unique placeholder is generated — pass your own to follow your org's numbering. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_sale_order_line_items",
@@ -408,7 +412,7 @@
     },
     {
       "name": "create_customer_credit_note",
-      "description": "Create a customer credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- reference MUST be unique — generate one with a timestamp if user doesn't specify. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a customer credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- reference MUST be unique. Never invent one — set autoReference:true to take the org's next number. Omitting both is an error. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_customer_credit_note",

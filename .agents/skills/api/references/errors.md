@@ -829,7 +829,7 @@ Journals support a top-level `currency` object to create entries in a foreign cu
 
 ### "Sale Reference already exists" (422) — duplicate reference
 **Cause**: Creating an invoice/bill/CN with a `reference` that already exists in the org.
-**Fix**: Generate unique references with timestamps (e.g., `INV-20260309-1430`). References must be unique per org.
+**Fix**: Do not invent a number. For a bill or supplier credit note use the supplier's own document number. For anything the organization issues, set `autoReference: true` (or call `get_next_reference` first) to take the next number from its own series. References must be unique per org.
 
 ---
 
