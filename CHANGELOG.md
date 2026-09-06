@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.52.2] - 2026-09-06
+
+Document version history is listed **oldest first**, not newest first.
+
+The description said the opposite. Anyone following it to "restore to the earliest
+version" picked the most recent one instead — which restores a document to the
+state it is already in, returns success, and changes nothing. A silent no-op that
+looks like a working restore.
+
+Measured on a real document: `versionAt` ascends down the list, `CREATED` is the
+first entry, and the last entry is the current state.
+
+Restoring itself was never broken.
+
 ## [5.52.1] - 2026-09-06
 
 `--all` could return every row twice.

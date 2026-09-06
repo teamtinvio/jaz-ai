@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.52.1+a463d017",
+  "contentVersion": "5.52.2+ea782579",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -2745,7 +2745,7 @@
     {
       "name": "get_document_version_history",
       "namespace": "versions",
-      "description": "The stored versions of a document, newest first. Not paginated. Use before restoring to pick a version id.",
+      "description": "The stored versions of a document, OLDEST first (last entry = current). Not paginated. Use before restoring to pick a version id.",
       "readOnly": true,
       "destructive": false
     },
