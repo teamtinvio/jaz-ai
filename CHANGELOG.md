@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.52.0] - 2026-09-06
+
+You can now browse the purchase-side catalog from the command line.
+
+```
+clio purchase-items list
+clio purchase-items get <id>
+clio purchase-items search --name "Widget"
+```
+
+These are the items you can be billed for. Search matches on an exact name,
+reference or currency code — this endpoint takes plain values, so there is no
+partial-match option here.
+
+Read-only because that is what it is upstream — there is no create, update or
+delete for purchase items. Maintain them through `clio items`.
+
 ## [5.51.0] - 2026-09-06
 
 **Changed exit codes:** a mistake in what you passed now exits `1`, not `2`.

@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 67 command groups. Organized by domain.
+Complete reference for all 68 command groups. Organized by domain.
 
 ---
 
@@ -387,6 +387,17 @@ The other end of `drafts submit-for-approval`. Approving POSTS THE LEDGER and is
 Exit 1 carries three meanings here, so **read the JSON, not the number**: a refusal or UNCONFIRMED writes an outcome to **stdout** (`{"approved": false}` / `null`), while a rejected input writes `{"error":{"code":"VALIDATION_ERROR"}}` to **stderr** and nothing to stdout. Only the first two mean the request reached the API.
 
 Claims approve via `clio claims approve` (a different endpoint), not through this group.
+
+### `clio purchase-items` — Purchase-side catalog (read-only, 3 tools)
+What the organization can be billed for. No create/update/delete upstream; maintain via `clio items`.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` | `--limit`, `--offset`, `--all`, `--max-rows` |
+| `get <resourceId>` | — |
+| `search` | `--name`, `--reference`, `--currency-code` — all EXACT plain-string matches |
+
+No free-text `--query`: the endpoint rejects it (`The query field is not supported for this entity`). Filters here are **plain strings, not expression objects** — `PurchaseItemFilter` declares them as bare `string`, so there is no `contains`. `purchaseResourceId` and `resourceId` also exist upstream and are reachable via `--filter`.
 
 ### `clio inventory` (alias: `inv`) — Inventory tracking
 | Subcommand | Key flags |

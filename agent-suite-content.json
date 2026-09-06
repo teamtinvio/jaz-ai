@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.51.0+fcbe5e67",
+  "contentVersion": "5.52.0+27f00472",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -8,7 +8,7 @@
     "recipes": 13,
     "jobs": 12,
     "skills": 7,
-    "commands": 67,
+    "commands": 68,
     "apiRules": 159
   },
   "namespaces": [
@@ -2830,6 +2830,7 @@
     "org-users",
     "payments",
     "posting-rules",
+    "purchase-items",
     "purchase-orders",
     "quick-fix",
     "reconciliations",
