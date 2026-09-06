@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.54.0+13db53b4",
+  "contentVersion": "5.55.0+f3399fab",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -8,7 +8,7 @@
     "recipes": 13,
     "jobs": 12,
     "skills": 7,
-    "commands": 71,
+    "commands": 72,
     "apiRules": 159
   },
   "namespaces": [
@@ -2827,6 +2827,7 @@
     "mcp-call",
     "modules",
     "nano-classifiers",
+    "navigate",
     "org",
     "org-users",
     "payments",

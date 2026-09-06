@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.54.0
+version: 5.55.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -8,7 +8,7 @@ description: >-
   precedence, output formats, entity resolution, and common workflow patterns.
   Also use when the user asks how to use clio, what commands are available, or
   how to automate accounting tasks from the command line. Covers all
-  71 command groups and 369 tools, including employee-expense claims.
+  72 command groups and 369 tools, including employee-expense claims.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 ---
@@ -17,7 +17,7 @@ compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 
 > **Audience note:** for power users and CI/automation. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output. For day-to-day accounting inside Claude Desktop / Cowork, the MCP tools cover the common flows without dropping to the CLI.
 
-You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 71 command groups, 13 calculators, 12 job blueprints, 369 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
+You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting platform. 72 command groups, 13 calculators, 12 job blueprints, 369 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
 
 ## When to Use This Skill
 
@@ -291,9 +291,19 @@ Offline commands (no auth needed): `calc`, `jobs` (blueprints only), `capsule-tr
 
 Everything else requires authentication (API key).
 
-## Dashboard Deep Links (no CLI command — by design)
+## Dashboard Deep Links
 
-The navigation tool (`navigate` — no destination to discover keys, a destination to build the deep link) builds dashboard URLs for the user ("open this invoice", "take me to the P&L"). It is an agent/MCP tool only — this particular tool has no CLI twin — plenty of read-only tools do (`clio purchase-items`, `clio modules`, `clio report-templates`). Never hand-construct a dashboard URL in a script; if you need a link, call the MCP tool. Full usage rules live in the jaz-api skill under "Dashboard Deep Links".
+`clio navigate` (alias `nav`) builds dashboard URLs for the user ("open this invoice", "take me to the P&L"). Offline — no API key, no request.
+
+```
+clio navigate --query "profit"           # discover the key
+clio navigate reports.profit-and-loss    # build the link
+clio navigate sales.modal.view-sale --resource-id <id>
+```
+
+Only the URL goes to stdout, so `clio nav <key> | pbcopy` copies a link and nothing else. **Never hand-construct a dashboard URL and never guess a key** — routes are not guessable and a wrong link is worse than no link. An unknown key comes back with near-matches; follow them rather than improvising.
+
+The same operation is `navigate` on the MCP surface. Full usage rules live in the jaz-api skill under "Dashboard Deep Links"; the flag reference is in `references/command-catalog.md`.
 
 ## Error Handling
 

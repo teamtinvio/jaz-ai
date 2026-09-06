@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 71 command groups. Organized by domain.
+Complete reference for all 72 command groups. Organized by domain.
 
 ---
 
@@ -398,6 +398,24 @@ What the organization can be billed for. No create/update/delete upstream; maint
 | `search` | `--name`, `--reference`, `--currency-code` — all EXACT plain-string matches |
 
 No free-text `--query`: the endpoint rejects it (`The query field is not supported for this entity`). Filters here are **plain strings, not expression objects** — `PurchaseItemFilter` declares them as bare `string`, so there is no `contains`. `purchaseResourceId` and `resourceId` also exist upstream and are reachable via `--filter`.
+
+### `clio navigate` (alias: `nav`) — Dashboard deep links (offline, 1 tool)
+```
+clio navigate                                    # discover: all destinations, capped
+clio navigate --query invoice --kind modal      # discover: narrow the search
+clio navigate reports.profit-and-loss            # build: a screen link
+clio navigate sales.modal.view-sale --resource-id <id>   # build: focus one record
+clio navigate reports.profit-and-loss --org-id <orgResourceId>
+```
+**Offline** — no API key, no request. The route manifest is generated in the dashboard and committed here.
+
+Omit the destination to SEARCH; give one to BUILD a link. Discovery caps its output and reports the true total, so narrow with `--query`, `--resource` or `--kind` when it says it truncated.
+
+The `--query` search bridges accounting vocabulary to dashboard vocabulary: `invoice` finds the `sale` destinations, `bill` finds `purchase`, `credit note` finds `credit`. Without that, the word an accountant would type returns nothing.
+
+`--resource-id` attaches a record and is valid only on a record-modal destination (`<resource>.modal.view-*`); a screen rejects it rather than silently dropping it. An unknown key comes back with near-matches.
+
+The URL is the only thing on stdout — the label goes to stderr — so `clio nav <key> | pbcopy` copies a link and nothing else. Links carry no `&org=` unless you pass `--org-id`; without it the link opens in whichever organization the reader is already viewing.
 
 ### `clio modules` — Which features are enabled for the organization (read-only, 2 tools)
 Provisioned upstream; no create/update/delete exists.

@@ -1,5 +1,24 @@
 # Changelog
 
+## [5.55.0] - 2026-09-07
+
+**Get a link to any screen in Jaz, from the terminal.**
+
+```
+clio navigate --search "profit"          # find the destination
+clio navigate reports.profit-and-loss    # get the link
+```
+
+Search understands accounting words, not just the dashboard's: `--search invoice` finds the sales
+screens, `bill` finds purchases, `credit note` finds credits.
+
+Add `--resource-id` to link straight to one record, and `--org-id` if you want the link to name
+the organization explicitly rather than opening wherever the reader already is.
+
+Only the URL is printed, so `clio navigate <destination> | pbcopy` copies a link and nothing else.
+
+Works without an API key.
+
 ## [5.54.0] - 2026-09-07
 
 **Two more things you can now do from the command line.**
