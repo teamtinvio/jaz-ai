@@ -1,5 +1,16 @@
 # Changelog
 
+## [5.52.4] - 2026-09-07
+
+**Correcting the previous release note.** 5.52.3 said searching report templates returns a
+conventional response. It does not: that search returns a bare list with no wrapper, and the
+reference documentation repeated the wrong version in two more places.
+
+Searching them works, and always did. But it works because the client repairs the shape, not
+because the shape was fine, and the note credited the wrong thing. The corrected description is
+now in the API reference the assistant reads, so answers about this endpoint match what it
+actually returns.
+
 ## [5.52.3] - 2026-09-06
 
 Listing report templates returned nothing on organizations that have them.

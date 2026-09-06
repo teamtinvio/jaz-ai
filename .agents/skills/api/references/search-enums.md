@@ -548,7 +548,7 @@ All search endpoints return:
 }
 ```
 
-**Exception**: `GET /organization-report-template` returns its rows under a `reportTemplates` key, not `data` (measured 2026-09-06). Its `/search` sibling is conventional. The tools normalize the list — read `.data` on both.
+**Exception**: `GET /organization-report-template` returns its rows under a `reportTemplates` key, not `data` (measured 2026-09-06). Its `/search` sibling returns a **bare array** with no envelope (measured 2026-09-07). The tools normalize the list — read `.data` on both.
 
 ---
 
