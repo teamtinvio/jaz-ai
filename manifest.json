@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.55.1",
+  "version": "5.55.2",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 369 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -860,7 +860,7 @@
     },
     {
       "name": "view_auto_reconciliation",
-      "description": "Generate auto-reconciliation suggestions for specific bank statement entries (no account-wide mode). READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation — pass `includeReviewDetails:true` to also get `review[]` (the not-auto lines enriched with the bank line + the matched bill/invoice) for a side-by-side \"does this match?\" card. Pass `includeRaw:true` to also get the unmapped payload. Cost tracks entries passed — batch large backlogs. On a 500 the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher."
+      "description": "Generate auto-reconciliation suggestions for specific bank statement entries (no account-wide mode). READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation — pass `includeReviewDetails:true` to also get `review[]` (the not-auto lines enriched with the bank line + the matched bill/invoice) for a side-by-side \"does this match?\" card. Pass `includeRaw:true` to also get the unmapped payload. Cost tracks entries passed — batch large backlogs. On a 500 the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher. A line whose bank line could not be read omits `bankLine`; the reason is in `partialFailures` — read it before concluding a line has none."
     },
     {
       "name": "list_fixed_assets",

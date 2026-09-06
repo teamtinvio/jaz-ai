@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.55.2] - 2026-09-07
+
+**Reconciliation review no longer hides missing bank-line detail.**
+
+When you ask for reconciliation suggestions with review detail, each line is shown next to the bank
+record it matches — the date, amount, counterparty and description you check the match against. If
+that bank-record lookup failed, every line came back with no bank detail at all, which looks exactly
+like a line that has no bank record. There was no way to tell the difference, so a match could be
+approved on evidence that was never actually read.
+
+The lookup can still fail, but the response now says so.
+
 ## [5.55.1] - 2026-09-07
 
 **Transaction summaries now include payments, and no longer fail on a voided record.**
