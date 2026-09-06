@@ -548,7 +548,7 @@ All search endpoints return:
 }
 ```
 
-**Exception**: `POST /organization-report-template/search` returns a plain array (no pagination metadata).
+**Exception**: `POST /organization-report-template/search` returns a plain array upstream (no pagination metadata). The tools normalize it to the usual `{data, totalElements, totalPages}` envelope — read `.data`.
 
 ---
 

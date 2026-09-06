@@ -642,7 +642,7 @@ All 28 `POST /*/search` endpoints accept this filter structure in the POST body:
 
 ### Pagination
 
-See `endpoints.md` § "Pagination (All List Endpoints)" for the full spec (limit/offset semantics, defaults, constraints, sort requirement, examples). Key points: `offset` is a 0-indexed page number (not row-skip), default limit=100, max 1000, sort required on POST /search when offset is present. Exception: `organization-report-template/search` returns a plain array (no pagination).
+See `endpoints.md` § "Pagination (All List Endpoints)" for the full spec (limit/offset semantics, defaults, constraints, sort requirement, examples). Key points: `offset` is a 0-indexed page number (not row-skip), default limit=100, max 1000, sort required on POST /search when offset is present. Exception: `organization-report-template/search` returns a plain array upstream (no pagination); the tools normalize it to the standard envelope.
 
 ### Date Format Asymmetry (CRITICAL)
 

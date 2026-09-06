@@ -1,5 +1,32 @@
 # Changelog
 
+## [5.52.1] - 2026-09-06
+
+`--all` could return every row twice.
+
+When a listing came back complete in the first response — everything the server
+had, in one go — asking for all pages asked again anyway, and the same rows were
+added a second time. The count shown stayed correct while the rows underneath it
+doubled, so nothing looked wrong. Large listings could also fail outright. Now a
+first response that already holds everything is recognised as complete.
+
+Report template listings are also more consistent. They came back as a plain list
+where every other listing returns a counted envelope, so anything reading the
+count got nothing to read. Both shapes are understood now, and these listings
+return the same shape as the rest.
+
+Two corrections on report-template search, both from reading the API's contract
+rather than assuming it matched its neighbours:
+
+- Searching by report type sent the value wrapped in a match expression. That
+  field takes a plain value, so the filter may not have applied.
+- `query` is no longer offered. The endpoint never accepted one, so it could only
+  ever have been ignored.
+
+**If you read `list_organization_report_templates` output directly:** it now
+returns `{data: [...], totalElements, totalPages}` like every other listing tool,
+where it previously returned a bare array.
+
 ## [5.52.0] - 2026-09-06
 
 You can now browse the purchase-side catalog from the command line.
