@@ -58,7 +58,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 369 tools, 7 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.49.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.50.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -72,14 +72,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 369 tools, 7 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.49.0", "mcp"],
+      "args": ["-y", "jaz-clio@5.50.0", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.49.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.50.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -187,7 +187,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 | Layer | What it is | Use it alone when |
 |-------|------------|-------------------|
 | **Skills** | Domain knowledge as markdown (159 API rules, 13 recipes, 12 jobs, conversion playbooks). The agent reads these at session start. | Your agent reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
-| **CLI** (`jaz-clio`) | A `clio` binary: 66 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
+| **CLI** (`jaz-clio`) | A `clio` binary: 67 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
 | **MCP server** (`clio mcp`) | The same binary in MCP mode: 369 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
 Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install). **The same operations either way — packaged differently.** See [How many tools is it?](#how-many-tools-is-it).
@@ -313,7 +313,7 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company" — the skil
 - **[OpenAPI spec](spec/openapi.yaml)** · full HTTP surface, synced weekly
 - **[README-cli.md](README-cli.md)** · npm-package README, full CLI command catalog
 - **[help.jaz.ai](https://help.jaz.ai)** · Jaz product help center
-- **CLI surface**: 66 command groups across the `clio` binary
+- **CLI surface**: 67 command groups across the `clio` binary
 
 <details>
 <summary><strong>What's inside · skill file catalog</strong></summary>
@@ -434,7 +434,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.49.0", "mcp"],
+  "args": ["-y", "jaz-clio@5.50.0", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```

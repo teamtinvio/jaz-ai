@@ -1,5 +1,38 @@
 # Changelog
 
+## [5.50.0] - 2026-09-06
+
+`clio approvals` — approve documents, or send them back for changes, without
+dropping to `clio mcp-call`.
+
+You could already find documents awaiting approval. Acting on them was the part
+with no command.
+
+```
+clio approvals approve <id> -e invoices
+clio approvals request-changes <id> -e sale-orders -m "Wrong cost centre"
+clio approvals bulk-approve -e bills --ids id1,id2,id3
+clio approvals bulk-request-changes -e claims --ids id1,id2 -m "Missing receipts"
+```
+
+Approving posts the document's ledger entries and makes it live. It is one-shot
+and there is nothing to undo, so the command is careful about one thing: a refused
+approval does not always arrive as an error. It reads the per-record result rather
+than the response status, names the reason, and exits non-zero — so a script
+cannot record an approval that never happened.
+
+It is equally careful about not knowing. If the response carries no per-record
+outcome at all, the command says UNCONFIRMED and exits non-zero rather than
+assuming the best. Nothing was proven either way, and a ledger posting is not
+something to guess about.
+
+`request-changes` accepts more document types than `approve` does — orders,
+quotes, purchase requests and claims as well — and its message is required,
+because it opens the thread and is the only record of why.
+
+Bulk runs asynchronously and returns a job to poll; it never reports per-document
+outcomes inline, and the command says so rather than implying the work is done.
+
 ## [5.49.0] - 2026-09-06
 
 **Breaking:** a search term typed as a bare word is now an error instead of being

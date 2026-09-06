@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.49.0+102c2361",
+  "contentVersion": "5.50.0+41f95ced",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -8,7 +8,7 @@
     "recipes": 13,
     "jobs": 12,
     "skills": 7,
-    "commands": 66,
+    "commands": 67,
     "apiRules": 159
   },
   "namespaces": [
@@ -2780,6 +2780,7 @@
   ],
   "commands": [
     "accounts",
+    "approvals",
     "attachments",
     "auth",
     "background-jobs",

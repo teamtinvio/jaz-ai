@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 66 command groups. Organized by domain.
+Complete reference for all 67 command groups. Organized by domain.
 
 ---
 
@@ -369,6 +369,22 @@ Bulk-friendly: one call accepts mixed btTypes (max 500). NOT idempotent on alrea
 | `submit-for-approval` | async | `--input <file>` — route into approval workflow. Async → jobId |
 
 Body shape (all 3): `{ items: [{ btResourceId, btType }] }` with `btType ∈ {SALE | PURCHASE | SALE_CREDIT_NOTE | PURCHASE_CREDIT_NOTE}`.
+
+### `clio approvals` — Approve, or send back for changes (4 tools)
+The other end of `drafts submit-for-approval`. Approving POSTS THE LEDGER and is one-shot; there is nothing to undo.
+
+| Subcommand | Type | Key flags |
+|------------|------|-----------|
+| `approve <id>` | sync | `-e/--entity` — invoices, bills, customer-credit-notes, supplier-credit-notes |
+| `bulk-approve` | async | `-e/--entity`, `--ids a,b,c` (1-100, no duplicates). Async → jobId |
+| `request-changes <id>` | sync | `-e/--entity` (wider set), `-m/--message` REQUIRED — opens the thread, only record of the reason |
+| `bulk-request-changes` | async | `-e/--entity`, `--ids` (1-500), `-m/--message`. Async → jobId |
+
+`request-changes` accepts more families than `approve`: also `purchase-orders`, `purchase-requests`, `sale-orders`, `sale-quotes`, `claims`.
+
+**Exit codes carry the outcome, because a refusal is not always an error.** Credit notes refuse with HTTP 200, `isSuccess:false`, and an `approvalStatus` that still reads `APPROVED` — the document's state, not the call's. `0` = approved · `1` = refused (reason printed) or UNCONFIRMED (no per-record outcome came back) · `2` = API error. Never read HTTP 200 or `approvalStatus` as success.
+
+Claims approve via `clio claims approve` (a different endpoint), not through this group.
 
 ### `clio inventory` (alias: `inv`) — Inventory tracking
 | Subcommand | Key flags |
