@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.52.3] - 2026-09-06
+
+Listing report templates returned nothing on organizations that have them.
+
+The list returns its rows under a different name than every other listing, so the
+usual place to read them was empty and the count said zero. Measured against an
+organization holding twelve templates: twelve rows present, `data` empty,
+`totalElements: 0`. No error — it simply read as "you have none".
+
+Searching them was never affected.
+
+**Correcting the previous release note.** 5.52.1 said this endpoint returned a
+plain list. It does not, and neither does its search. The list uses its own key
+and the search was already conventional. That note repeated a description that had
+never been checked against the live API; it has now been, and the reference docs
+are corrected too.
+
 ## [5.52.2] - 2026-09-06
 
 Document version history is listed **oldest first**, not newest first.

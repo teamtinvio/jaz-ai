@@ -28,7 +28,7 @@ All search endpoints share this identical structure:
 
 **Response shape**: `{ totalElements, totalPages, data: [...] }` — all search/list endpoints return this flat structure directly (no outer `data` wrapper).
 
-> **Exception**: `POST /organization-report-template/search` returns a plain array upstream (no pagination metadata, no `totalElements`/`totalPages`). The `search_organization_report_templates` / `list_organization_report_templates` TOOLS normalize it, so what you receive is the usual `{data, totalElements, totalPages}` envelope like every other list tool. Read `.data`; do not treat the tool result as a top-level array.
+> **Exception**: the two halves of this family answer differently upstream. `POST /organization-report-template/search` returns a normal `{data, totalElements}` envelope; `GET /organization-report-template` returns its rows under a **`reportTemplates`** key with no counts. Measured 2026-09-06 — an earlier note here said both returned a plain array, and neither does. The tools normalize the list, so you always read `.data`.
 
 ---
 

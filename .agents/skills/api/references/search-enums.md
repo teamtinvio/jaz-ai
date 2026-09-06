@@ -548,7 +548,7 @@ All search endpoints return:
 }
 ```
 
-**Exception**: `POST /organization-report-template/search` returns a plain array upstream (no pagination metadata). The tools normalize it to the usual `{data, totalElements, totalPages}` envelope — read `.data`.
+**Exception**: `GET /organization-report-template` returns its rows under a `reportTemplates` key, not `data` (measured 2026-09-06). Its `/search` sibling is conventional. The tools normalize the list — read `.data` on both.
 
 ---
 
