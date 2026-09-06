@@ -23,7 +23,7 @@
 | Error | Cause | Fix |
 |-------|-------|-----|
 | `Multiple contacts match 'Acme'` | Fuzzy match found 2+ candidates above threshold | Use exact billingName or UUID |
-| `Contact not found: 'xyz'` | No match in org's contact list | Run `clio contacts search xyz` to check spelling |
+| `Contact not found: 'xyz'` | No match in org's contact list | Run `clio contacts search --name xyz` to check spelling |
 | `Account not found: 'xyz'` | No matching account name or code | Run `clio accounts list --json` to see available accounts |
 | `Bank account not found` | Name doesn't match any bank-type account | Run `clio bank accounts --json` for exact names |
 | `Tax profile not found` | No match on tax profile name or code | Run `clio tax-profiles list --json` for available profiles |
@@ -98,7 +98,7 @@ echo $JAZ_ORG             # Check for pinned org
 
 **Entity not found?** Search before creating:
 ```bash
-clio contacts search "partial name" --json | jq '.data[] | {name, resourceId}'
+clio contacts search --name "partial name" --json | jq '.data[] | {name, resourceId}'
 clio accounts list --json | jq '.data[] | {name, code: .accountCode, id: .resourceId}'
 ```
 

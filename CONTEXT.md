@@ -10,7 +10,7 @@ Runtime guidance for AI agents using Jaz AI tools (CLI, MCP, or skills).
 ## Working with Data
 
 3. **Always use `--json` for structured output.** Human-readable tables are for display only — agents should always parse JSON.
-4. **Resolve by name before creating.** Search for contacts, accounts, and items by name before creating duplicates. Use `clio contacts search "ACME"`, `clio accounts search "Cash"`, etc.
+4. **Resolve by name before creating.** Search for contacts, accounts, and items by name before creating duplicates. Use `clio contacts search --name "ACME"`, `clio accounts search "Cash"`, etc.
 5. **Use search endpoints for filtering.** `clio <entity> search` supports filters, sorting, and pagination. Prefer search over list when you need specific records.
 
 ## Mutations

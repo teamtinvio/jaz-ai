@@ -1,5 +1,36 @@
 # Changelog
 
+## [5.49.0] - 2026-09-06
+
+**Breaking:** a search term typed as a bare word is now an error instead of being
+ignored.
+
+Most search commands take their criteria from flags — `--name`, `--reference`,
+`--status` and so on. A bare term was accepted and then dropped, so the command
+ran an **unfiltered** search and returned the first page of everything. No error,
+no warning: the results looked like search results, they were just answering a
+different question.
+
+Twenty-nine commands behaved this way, including `contacts`, `invoices`, `bills`,
+`journals`, `payments`, `items`, `claims payouts`, `employees balances` and
+`subscriptions search-scheduled`. They now stop with "too many arguments", and
+`clio <group> search --help` lists the flags to use instead.
+
+The commands that **do** take a term — `accounts`, `tags`, `capsules`,
+`org-users`, `bank-rules`, `contact-groups`, `nano-classifiers` — still take it.
+What changes for them is the second word: `clio accounts search Trade Receivables`
+used to send exactly the same request as `clio accounts search Trade`, quietly
+dropping "Receivables". It now says so. Quote the term to search for both words:
+`clio accounts search "Trade Receivables"`.
+
+If you have scripts passing a bare term, they were not filtering — they were
+returning an arbitrary page. Move the term onto the matching flag:
+`clio contacts search --name "ACME"`.
+
+Also fixed: resolving a contact by name inside a transaction recipe searched an
+unsupported field, so it silently matched against an arbitrary 50 contacts rather
+than the ones you named. Contacts outside that group could not be found.
+
 ## [5.48.3] - 2026-09-06
 
 A clearer message when the SQL query feature is switched off for your
