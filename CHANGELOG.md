@@ -1,5 +1,33 @@
 # Changelog
 
+## [5.53.1] - 2026-09-07
+
+"Transfer 1000" no longer picks your bank accounts for you.
+
+The assistant was told that this phrase meant a cash transfer between "the two most
+common bank accounts". Nothing it can read ranks accounts by how often they are
+used, so that instruction had it choose a pair on no evidence — and a cash transfer
+records as active, not draft. A wrong pair misstates the balance of two accounts and
+has to be found and removed before either reconciles.
+
+It now reads the amount from the phrase and nothing else. If the accounts and the
+direction are both clear from what you said, it uses them and tells you which way the
+money went. If they are not, it asks which account out and which account in — and if
+you have fewer than two bank accounts it says a transfer is not possible and asks
+whether you meant money in or money out.
+
+Two transfers are now refused outright rather than recorded: one where the same
+account is on both sides, and one where the two halves disagree on the amount. Neither
+is a transfer, and neither can be quietly undone once recorded, so nothing is written
+and you are asked to confirm the direction and the amount.
+
+The assistant also picks a chart-of-accounts code more honestly. It could previously
+present a guess as though it were the code you used last time; it now either looks the
+previous one up or says it chose on what the transaction is for.
+
+Also corrected what the assistant says about itself: two of the seven skills were
+missing from the list it answers from, and the count of API rules appeared twice with
+two different numbers.
 ## [5.53.0] - 2026-09-07
 
 **Run reports as SQL from the command line.** `clio sql` (or `clio pseudo-sql`) queries the
@@ -22,7 +50,6 @@ Queries are read only. Long ones can come from a file with `--input query.sql` i
 quoted on the command line.
 
 This was already available to assistants; it had no command a person could type.
-
 ## [5.52.4] - 2026-09-07
 
 **Correcting the previous release note.** 5.52.3 said searching report templates returns a
