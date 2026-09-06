@@ -1,5 +1,22 @@
 # Changelog
 
+## [5.48.3] - 2026-09-06
+
+A clearer message when the SQL query feature is switched off for your
+organization.
+
+Asking for a SQL query while the feature is disabled returned a validation error
+telling you to check your field values against the tool description. The field
+values were not the problem, and the description was accurate — so the advice sent
+you back to rewrite a query that was already correct, and the rewrite failed the
+same way.
+
+The message now says the query text is not what was rejected, that rewriting it
+will not help, and that enabling the feature is an organization setting rather than
+something the caller can change. It also warns that the table catalog stays
+readable while the feature is off, so seeing a table listed is not a sign that you
+can query it yet.
+
 ## [5.48.2] - 2026-09-06
 
 Internal release automation and test-suite fixes. No user-facing changes since the
@@ -1413,7 +1430,7 @@ Internal release. Cloud email channel deploy workflow now reads the kubeconfig f
 ### Internal
 
 - New `clio mcp-call <tool> [--args '<json>']` CLI command for invoking MCP tools directly from the CLI. Used by smoke + debug workflows when an MCP tool has no `clio` shadow (read-only tools like `get_pseudo_sql_schema`, `list_capsule_recipes`, etc.). Always emits JSON on stdout. Not an agent surface; zero token-budget impact.
-- All pseudo-SQL + capsule-recipe smoke sections (61-66) now invoke MCP tools via `clio mcp-call` instead of raw HTTP — matches the rest of the smoke suite's `$CLIO ...` pattern and eliminates the `FREKI_URL` env var contract that drifted across the v5.5.0 → v5.5.1 releases.
+- All pseudo-SQL + capsule-recipe smoke sections (61-66) now invoke MCP tools via `clio mcp-call` instead of raw HTTP — matches the rest of the smoke suite's `$CLIO ...` pattern and eliminates the API base-URL env var contract that drifted across the v5.5.0 → v5.5.1 releases.
 - Smoke section 67 exercises `get_pseudo_sql_schema` end-to-end against the demo org (catalog floors + version stability + agentSkillsDoc structural marker).
 
 ## [5.5.3] - 2026-05-27
@@ -1428,7 +1445,7 @@ Internal release. Email-channel infrastructure prep: tightened secret handling o
 
 Internal release automation update. No user-facing changes since v5.5.0.
 
-Fixes the post-deploy fire-test smoke suite (sections 61–63, pseudo-SQL preview / validation / export probes) which was crashing on every fire run since v5.5.0 because `$FREKI_URL` was referenced unset and tripped `set -u`. Added a default so the smoke script can run end-to-end against the public Jaz API without extra env wiring.
+Fixes the post-deploy fire-test smoke suite (sections 61–63, pseudo-SQL preview / validation / export probes) which was crashing on every fire run since v5.5.0 because the API base-URL env var was referenced unset and tripped `set -u`. Added a default so the smoke script can run end-to-end against the public Jaz API without extra env wiring.
 
 ## [5.5.0] - 2026-05-27
 

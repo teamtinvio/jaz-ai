@@ -31,6 +31,28 @@ Surfaces when the query is syntactically valid but semantically rejected — wro
 | `a query must SELECT FROM at least one table` | `SELECT 1` (constant-only) | Add `FROM <table>` from the curated set. |
 | `unknown table "<name>"` (note: lowercased) | Table not in curated schema | Call `get_pseudo_sql_schema` for the live inventory. Common typos: plural vs singular (`invoice` vs `invoices`), wrong case. |
 
+## `PSEUDOSQL_DISABLED` (engine switched off)
+
+Surfaces on **both** `/sql-query/preview` and `/sql-query/export` when the query engine is not
+running. Delivered as a **422**, which reads like a validation failure and is not one.
+
+| Message | Trigger | Recovery |
+|---|---|---|
+| `The SQL query feature is not available.` | The reporting service has no read-only query pool: its connection string is unset for this deployment, or the pool failed to build, ping, or match the catalog at startup | None available to you. Do not rewrite the query. Use the report tools (`generate_report`, the operational report family) and tell the user the engine is off. |
+
+**The catalog stays readable while the engine is off.** `get_pseudo_sql_schema` is served from a
+static in-process snapshot and never touches the query pool, so it keeps returning the full table,
+join and function list. Measured on 2026-09-06: the schema endpoint returned 79 tables / 104 joins
+/ 47 functions in the same run where every preview and export returned `PSEUDOSQL_DISABLED`.
+
+So **a table appearing in the catalog is not evidence you can query it.** Confirming a table exists
+before querying is a reasonable habit and it will not detect this state. The only signal is the
+error itself.
+
+This is not an organization setting and not a plan entitlement — it is a platform deployment
+change, so neither you, the user, nor an organization admin can turn it on. Retrying later is only
+worth it if someone has said the engine is being re-enabled.
+
 ## Export-specific terminal states
 
 The `export_pseudo_sql` + `get_pseudo_sql_export` flow uses status enums (NOT error codes). Terminal states:
