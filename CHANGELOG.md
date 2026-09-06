@@ -1,5 +1,41 @@
 # Changelog
 
+## [5.51.0] - 2026-09-06
+
+**Changed exit codes:** a mistake in what you passed now exits `1`, not `2`.
+
+Commands check some things before sending anything — that an id looks like an id,
+that a batch is under its ceiling and has no duplicates, that a required note is
+not blank. Those checks were reported the same way as a server failure: exit `2`,
+and an error labelled as ours rather than yours.
+
+That matters most for anything automated. The label is the signal for whether
+trying again with different input can help — and saying "our fault" about an id
+you can fix leaves a script or an agent no reason to change it, and every reason
+to send the same thing again.
+
+Now, for the commands that talk to the API:
+
+- `1` — the input needs changing (bad id, duplicate or over-limit batch, blank
+  required text, unknown document family)
+- `2` — the request was fine and the API refused or failed, or something broke on
+  our side
+- `3` — authentication
+
+Offline commands (`calc`, `jobs`, `init`, `schema`) still exit `1` for any failure,
+which is unchanged. On every command, `--json` puts the reason in `error.code`, and
+that is the more reliable thing to branch on than the number.
+
+Nothing about which inputs are accepted has changed; only how a rejection is
+reported. If you have a script branching on exit `2` for a bad id, it needs to
+branch on `1`.
+
+Also fixed: a rejected input no longer suggests an unrelated recovery step. The
+suggestion was picked by matching the error text, and the error text quotes what
+you passed — so an id of `401` was answered with "run clio auth whoami", and an id
+of `rate limit` with "wait 30 seconds, then retry". Both sent you back to try the
+same thing again.
+
 ## [5.50.0] - 2026-09-06
 
 `clio approvals` — approve documents, or send them back for changes, without

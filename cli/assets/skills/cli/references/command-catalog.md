@@ -382,7 +382,9 @@ The other end of `drafts submit-for-approval`. Approving POSTS THE LEDGER and is
 
 `request-changes` accepts more families than `approve`: also `purchase-orders`, `purchase-requests`, `sale-orders`, `sale-quotes`, `claims`.
 
-**Exit codes carry the outcome, because a refusal is not always an error.** Credit notes refuse with HTTP 200, `isSuccess:false`, and an `approvalStatus` that still reads `APPROVED` — the document's state, not the call's. `0` = approved · `1` = refused (reason printed) or UNCONFIRMED (no per-record outcome came back) · `2` = API error. Never read HTTP 200 or `approvalStatus` as success.
+**Exit codes carry the outcome, because a refusal is not always an error.** Credit notes refuse with HTTP 200, `isSuccess:false`, and an `approvalStatus` that still reads `APPROVED` — the document's state, not the call's. `0` = approved · `1` = refused, UNCONFIRMED, **or your input was rejected before anything was sent** · `2` = API error. Never read HTTP 200 or `approvalStatus` as success.
+
+Exit 1 carries three meanings here, so **read the JSON, not the number**: a refusal or UNCONFIRMED writes an outcome to **stdout** (`{"approved": false}` / `null`), while a rejected input writes `{"error":{"code":"VALIDATION_ERROR"}}` to **stderr** and nothing to stdout. Only the first two mean the request reached the API.
 
 Claims approve via `clio claims approve` (a different endpoint), not through this group.
 

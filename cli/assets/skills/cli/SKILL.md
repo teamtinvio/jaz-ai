@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.50.0
+version: 5.51.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -299,8 +299,15 @@ The navigation tool (`navigate` — no destination to discover keys, a destinati
 
 CLI commands exit with standard codes:
 - **Exit 0** — success
-- **Exit 1** — user error (missing flags, invalid input, validation failure)
-- **Exit 2** — auth error (invalid key, unreachable API)
+- **Exit 1** — your input needs changing (missing flags, malformed id, over-limit or duplicate batch, blank required text, unknown enum value). Also a business refusal on some commands, e.g. `approvals`.
+- **Exit 2** — the request was fine and the API refused or failed, OR an internal defect
+- **Exit 3** — auth (invalid, missing or unresolvable key)
+
+**Branch on the `code` in the `--json` error envelope, not on the number alone.** Exit 1 is
+`VALIDATION_ERROR` for bad input but is also used by commands that report a refusal (there the
+outcome is on stdout, not stderr). Exit 2 splits into `API_ERROR` (the server refused; a
+different request may work) and `UNKNOWN_ERROR` (our defect; an identical retry fails
+identically). The code is the signal for whether retrying with different input can help.
 
 Error messages go to stderr. When `--json` is set, the error is still on stderr so stdout stays parseable. Common errors:
 
