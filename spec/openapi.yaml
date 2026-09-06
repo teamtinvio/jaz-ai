@@ -13493,7 +13493,7 @@
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by status (DRAFT, APPROVED, VOID)."
+          "description": "Filter by status (DRAFT, ACTIVE, VOID)."
         },
         "tags": {
           "allOf": [
@@ -19734,7 +19734,7 @@
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by status: DRAFT, ACTIVE, CONFIRMED, or VOID."
+          "description": "Filter by status: CREATED, CONFIRMED, or VOID."
         },
         "tags": {
           "allOf": [
@@ -40214,6 +40214,19 @@
             "in": "query",
             "name": "view",
             "type": "string"
+          },
+          {
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "APPLIED",
+              "PARTIALLY_APPLIED",
+              "UNAPPLIED",
+              "DRAFT",
+              "VOID"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
           }
         ],
         "produces": [
@@ -52354,6 +52367,17 @@
             "in": "query",
             "name": "view",
             "type": "string"
+          },
+          {
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "DRAFT",
+              "VOID",
+              "ACTIVE"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
           }
         ],
         "produces": [
@@ -57586,6 +57610,18 @@
             "in": "query",
             "name": "view",
             "type": "string"
+          },
+          {
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "CONFIRMED",
+              "VOID"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
           }
         ],
         "produces": [
@@ -59084,6 +59120,18 @@
             "in": "query",
             "name": "offset",
             "type": "integer"
+          },
+          {
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "ACCEPTED",
+              "VOID"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
           }
         ],
         "produces": [
@@ -65427,6 +65475,17 @@
             "in": "query",
             "name": "view",
             "type": "string"
+          },
+          {
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "CREATED",
+              "CONFIRMED",
+              "VOID"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
           }
         ],
         "produces": [
@@ -66925,6 +66984,18 @@
             "in": "query",
             "name": "offset",
             "type": "integer"
+          },
+          {
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "DRAFT",
+              "CREATED",
+              "ACCEPTED",
+              "VOID"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
           }
         ],
         "produces": [
@@ -71327,6 +71398,19 @@
             ],
             "in": "query",
             "name": "view",
+            "type": "string"
+          },
+          {
+            "description": "Return only records with this status. Omit to return every status.",
+            "enum": [
+              "APPLIED",
+              "PARTIALLY_APPLIED",
+              "UNAPPLIED",
+              "DRAFT",
+              "VOID"
+            ],
+            "in": "query",
+            "name": "status",
             "type": "string"
           }
         ],

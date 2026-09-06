@@ -1,5 +1,10 @@
 # Changelog
 
+## [5.48.2] - 2026-09-06
+
+Internal release automation and test-suite fixes. No user-facing changes since the
+previous release.
+
 ## [5.48.1] - 2026-09-06
 
 You can now set the currency and exchange rate when updating a journal, a cash-in
