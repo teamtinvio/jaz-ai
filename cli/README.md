@@ -9,7 +9,7 @@
 
 <p align="center"><b>Jaz accounting on the command line, and inside any AI agent.</b></p>
 
-369 tools · 68 command groups · 7 skills · 13 calculators · 12 close playbooks · 159 field-tested API rules.
+369 tools · 69 command groups · 7 skills · 13 calculators · 12 close playbooks · 159 field-tested API rules.
 
 ```bash
 npm install -g jaz-clio
@@ -50,7 +50,7 @@ clio magic create --file receipt.pdf                   # AI extracts, drafts the
 clio invoices search --query 'status:unpaid AND $500+' # structured per-entity search
 ```
 
-68 command groups, 16 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
+69 command groups, 16 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
 
 ### Foreign currency
 

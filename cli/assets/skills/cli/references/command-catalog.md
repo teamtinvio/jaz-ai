@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 68 command groups. Organized by domain.
+Complete reference for all 69 command groups. Organized by domain.
 
 ---
 
@@ -398,6 +398,25 @@ What the organization can be billed for. No create/update/delete upstream; maint
 | `search` | `--name`, `--reference`, `--currency-code` — all EXACT plain-string matches |
 
 No free-text `--query`: the endpoint rejects it (`The query field is not supported for this entity`). Filters here are **plain strings, not expression objects** — `PurchaseItemFilter` declares them as bare `string`, so there is no `contains`. `purchaseResourceId` and `resourceId` also exist upstream and are reachable via `--filter`.
+
+### `clio pseudo-sql` (alias: `sql`) — Read-only SQL over the curated reporting tables (6 tools)
+A restricted SQL subset against Jaz's curated reporting schema, **not** the customer's database. SELECT only, single statement, 16384-char cap — the engine rejects DML, so there is no write verb.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `preview [query]` | `--input <file>` |
+| `export [query]` | `--input <file>`, `--out <abs-path>`, `--download`, `--no-wait`, `--timeout <s>` |
+| `export-status <jobId>` | — |
+| `schema [table]` | — |
+| `syntax` | — |
+
+The query comes from a positional argument, `--input <file>`, or stdin (`cat q.sql | clio sql preview`) — pick one; passing two is refused.
+
+`preview` caps at 100 rows upstream and renders at most 8 columns (use `--json` for all). Its `truncated` flag means MORE ROWS MATCH, not that the returned rows were cut.
+
+`export` waits for the job by default and prints a pre-signed URL that expires in ~15 minutes; `--out` (absolute paths only) or `--download` writes the CSV instead. `--no-wait` returns the jobId for `export-status` and cannot be combined with `--out`/`--download`/`--timeout`, which it would otherwise ignore. Anything other than a delivered file exits non-zero, including a COMPLETED job whose download failed.
+
+`schema <table>` scopes the catalog to one table plus the joins touching it, and recomputes its counts. Table and column names come from here, syntax rules from `syntax` — both served by one endpoint.
 
 ### `clio inventory` (alias: `inv`) — Inventory tracking
 | Subcommand | Key flags |

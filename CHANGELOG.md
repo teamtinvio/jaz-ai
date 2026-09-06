@@ -1,5 +1,28 @@
 # Changelog
 
+## [5.53.0] - 2026-09-07
+
+**Run reports as SQL from the command line.** `clio sql` (or `clio pseudo-sql`) queries the
+curated reporting schema directly, so you can answer a question that no built-in report covers
+without leaving the terminal.
+
+```
+clio sql preview "SELECT contact_id, total FROM invoices WHERE status = 'PAID' LIMIT 20"
+clio sql export  "SELECT * FROM invoices WHERE issue_date >= '2026-01-01'" --download
+clio sql schema invoices
+```
+
+- `preview` prints up to 100 rows as a table, and tells you when more rows match.
+- `export` runs the full query and hands back a CSV. It waits for the job by default; add
+  `--no-wait` for a job id you can check later with `export-status`.
+- `schema` lists the available tables, or one table with its columns and the joins that touch it.
+- `syntax` prints the query language reference.
+
+Queries are read only. Long ones can come from a file with `--input query.sql` instead of being
+quoted on the command line.
+
+This was already available to assistants; it had no command a person could type.
+
 ## [5.52.4] - 2026-09-07
 
 **Correcting the previous release note.** 5.52.3 said searching report templates returns a
