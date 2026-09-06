@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.55.1] - 2026-09-07
+
+**Transaction summaries now include payments, and no longer fail on a voided record.**
+
+Asking the assistant to summarize an invoice or bill fetches the record, its attachments and its
+payment history together. Three parts of that were broken:
+
+- **The payment history was never there.** It was fetched the wrong way, the request was rejected
+  every time, and the error was hidden — so a paid invoice was summarized as though no payment
+  had ever been made against it.
+- **Credit notes never showed their refunds.** A refunded credit note was summarized as though
+  no money had moved.
+- **A voided record returned nothing at all.** Attachments cannot be listed on a voided invoice or
+  credit note, and that one failure discarded the whole summary, reporting it as "not found" when
+  the record was there all along.
+
+A summary now comes back even when part of it cannot be fetched, and names the part that was
+missing instead of leaving it out silently. A count you can see is a count that was actually
+read: if a section could not be fetched, it is absent and flagged, never shown as zero.
+
 ## [5.55.0] - 2026-09-07
 
 **Get a link to any screen in Jaz, from the terminal.**

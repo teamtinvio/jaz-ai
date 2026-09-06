@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.55.0",
+  "version": "5.55.1",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 369 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -1256,7 +1256,7 @@
     },
     {
       "name": "get_transaction_summary",
-      "description": "Get a complete summary of any transaction — fetches the transaction, its attachments, and payment history in one call.\nWorks for invoices, bills, customer credit notes, supplier credit notes, and journals."
+      "description": "Get a complete summary of any transaction — fetches the transaction, its attachments, and payment history in one call.\nWorks for invoices, bills, customer credit notes, supplier credit notes, and journals. Invoices and bills carry payments, credit notes refunds, journals neither. A failed leg omits its keys and is named in 'partialFailures'."
     },
     {
       "name": "bulk_finalize_drafts",
