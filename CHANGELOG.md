@@ -1,5 +1,27 @@
 # Changelog
 
+## [5.54.0] - 2026-09-07
+
+**Two more things you can now do from the command line.**
+
+`clio modules` shows which features are switched on for your organization, and which roles can
+use each one. A module can be enabled and still refuse you, because access is per role, so the
+roles column is usually the answer to "why can't I do this".
+
+`clio report-templates` browses your saved report layouts.
+
+```
+clio modules list
+clio report-templates list
+clio report-templates search --report-type BALANCE_SHEET
+```
+
+Both are read-only: modules are provisioned for you, and templates are authored in the app.
+
+Known limitation while we fix it upstream: of the three report-template search filters,
+`--report-type` is reliable. `--report-category` currently fails unless you also pass
+`--report-type`, and `--default` fails either way.
+
 ## [5.53.1] - 2026-09-07
 
 "Transfer 1000" no longer picks your bank accounts for you.

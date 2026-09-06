@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 69 command groups. Organized by domain.
+Complete reference for all 71 command groups. Organized by domain.
 
 ---
 
@@ -398,6 +398,31 @@ What the organization can be billed for. No create/update/delete upstream; maint
 | `search` | `--name`, `--reference`, `--currency-code` — all EXACT plain-string matches |
 
 No free-text `--query`: the endpoint rejects it (`The query field is not supported for this entity`). Filters here are **plain strings, not expression objects** — `PurchaseItemFilter` declares them as bare `string`, so there is no `contains`. `purchaseResourceId` and `resourceId` also exist upstream and are reachable via `--filter`.
+
+### `clio modules` — Which features are enabled for the organization (read-only, 2 tools)
+Provisioned upstream; no create/update/delete exists.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` | `--limit`, `--offset`, `--all`, `--max-rows` |
+| `get <resourceId>` | — |
+
+`roleCodes` is the column that matters: a module can be enabled and still deny the caller, because access is per role. "The module is on" and "I can use it" are different questions.
+
+### `clio report-templates` — Saved report layouts (read-only, 3 tools)
+Authored in the dashboard; no create/update/delete exists.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` | `--json`, `--format` — **no paging flags, deliberately** |
+| `get <resourceId>` | — |
+| `search` | `--report-type`, `--report-category`, `--default`, `--filter`, `--sort`, `--order` — **no paging flags** |
+
+Neither `list` nor `search` declares `--limit`/`--offset`/`--all`/`--max-rows`: both ignore them upstream, returning the full set in one response regardless. The flags are omitted rather than accepted-and-ignored.
+
+Two of the three search filters 500 upstream today (measured 2026-09-07): `--report-category` fails alone but works when `--report-type` is also supplied, and `--default` fails. `--report-type` alone is reliable.
+
+`templateConfiguration` is a JSON **string**, not an object — read it with `--json`.
 
 ### `clio pseudo-sql` (alias: `sql`) — Read-only SQL over the curated reporting tables (6 tools)
 A restricted SQL subset against Jaz's curated reporting schema, **not** the customer's database. SELECT only, single statement, 16384-char cap — the engine rejects DML, so there is no write verb.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.53.1+6ad5871d",
+  "contentVersion": "5.54.0+13db53b4",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -8,7 +8,7 @@
     "recipes": 13,
     "jobs": 12,
     "skills": 7,
-    "commands": 69,
+    "commands": 71,
     "apiRules": 159
   },
   "namespaces": [
@@ -2825,6 +2825,7 @@
     "magic",
     "mcp",
     "mcp-call",
+    "modules",
     "nano-classifiers",
     "org",
     "org-users",
@@ -2835,6 +2836,7 @@
     "purchase-orders",
     "quick-fix",
     "reconciliations",
+    "report-templates",
     "reports",
     "resolve",
     "sale-orders",
