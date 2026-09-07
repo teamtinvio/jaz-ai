@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.55.8",
+  "version": "5.55.9",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 369 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -696,7 +696,7 @@
     },
     {
       "name": "download_export",
-      "description": "Analytical / financial / audit report file (XLSX or PDF). Returns { fileName, fileUrl } (pre-signed, ~5 min). Use this tool, not export_records, for anomaly / audit / risk analyses, statements, aging, summaries, ledgers, statement-of-account.\n\nPer-type date / scope (wrong set → 422 \"X is required\"):\n- balance-sheet → snapshotDate\n- cashflow, equity-movement → primaryStartDate + primaryEndDate (secondary* optional)\n- bank-closing-balance → reportDate\n- bank-reconciliation-* → startDate + endDate + bankAccountResourceId\n- fixed-assets-reconciliation-summary → startDate + endDate + accountResourceId (fixed-asset UUIDs; search fixed_assets first)\n- trial-balance, cash-balance, ar-report, ap-report → endDate\n- other summaries (P&L, GL, sales/purchase, tax, fixed-assets-register, etc.) → startDate + endDate\n\nFor raw entity rows use export_records; for ad-hoc SELECT use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow returns the IAS 7 templated report (404 template_not_found if none configured, jaz-api Rule 147)."
+      "description": "Analytical / financial / audit report file (XLSX or PDF). Returns { fileName, fileUrl } (pre-signed, ~5 min). Use this tool, not export_records, for anomaly / audit / risk analyses, statements, aging, summaries, ledgers, statement-of-account.\n\nPer-type date / scope (wrong set → 422 \"X is required\"):\n- balance-sheet → snapshotDate\n- cashflow, equity-movement → primaryStartDate + primaryEndDate (secondary* optional)\n- bank-closing-balance → reportDate\n- bank-reconciliation-* → startDate + endDate + bankAccountResourceId\n- fixed-assets-reconciliation-summary → startDate + endDate + accountResourceId (fixed-asset UUIDs; search fixed_assets first)\n- statement-of-account-export → contactResourceId (dates optional; omitted = all-time)\n- trial-balance, cash-balance, ar-report, ap-report → endDate\n- other summaries (P&L, GL, sales/purchase, tax, fixed-assets-register, etc.) → startDate + endDate\n\nFor raw entity rows use export_records; for ad-hoc SELECT use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow returns the IAS 7 templated report (404 template_not_found if none configured, jaz-api Rule 147)."
     },
     {
       "name": "preview_pseudo_sql",

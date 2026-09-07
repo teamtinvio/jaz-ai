@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.55.9] - 2026-09-07
+
+**Statement of account exports no longer lose their download link.**
+
+Exporting a statement of account succeeded but showed only "Export ready" — no file name, no link.
+The file had been generated and was reachable; the response simply arrived in a different shape from
+every other report, and the link was dropped on the way out. It now appears, as it does for every
+other export.
+
+The assistant also now knows what a statement of account needs: a contact. Dates are optional, and
+leaving them out exports the full history. That was the one export whose requirement went
+undocumented, so a request following the written guidance was rejected every time.
+
 ## [5.55.8] - 2026-09-07
 
 **Asking for a report as a PDF no longer silently hands back a spreadsheet.**
