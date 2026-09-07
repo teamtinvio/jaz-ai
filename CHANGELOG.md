@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.55.4] - 2026-09-07
+
+**Job playbooks asked for a sort order the API silently ignored.**
+
+Fifteen instructions across seven playbooks sorted results with `sort: 'valueDate:asc'`. That is not
+a parameter any search accepts, and it is not rejected either — it is ignored. So a step that asked
+for oldest-first quietly got newest-first, and a reconciliation or payment run walked its records in
+the opposite order to the one written down.
+
+Two of those also named a field that cannot be sorted on at all.
+
+Every correction was checked against a live account, and the check that catches this class now
+covers a search call's other arguments, not just its filter.
+
 ## [5.55.3] - 2026-09-07
 
 **Supplier reconciliation and payment-run playbooks asked the API for fields that do not exist.**

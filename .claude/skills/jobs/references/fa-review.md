@@ -33,7 +33,7 @@ Walk steps 1-8 below. (Local CLI: `clio jobs fa-review` prints the same phased c
 ## Step 1 — Enumerate FAs
 
 ```
-search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'WRITTEN_OFF']}}, limit: 200, sort: 'acquisitionDate:asc')
+search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'WRITTEN_OFF']}}, limit: 200, sortBy: 'purchaseDate', sortOrder: 'ASC')
 ```
 
 Paginate via offset. For year-end review: include DISPOSED and WRITTEN_OFF (disposed during the year are part of the recon).

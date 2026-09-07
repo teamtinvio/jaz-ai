@@ -5,7 +5,7 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools — pre-close gates
-- **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, sort: 'valueDate:asc', limit: 200)`** — step 1: confirm sales invoices entered. Paginate via `offset`.
+- **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, sortBy: 'valueDate', sortOrder: 'ASC', limit: 200)`** — step 1: confirm sales invoices entered. Paginate via `offset`.
 - **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}}, ...)`** — step 2: confirm purchase bills entered.
 - **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', startDate: <from>, endDate: <to>)`** — step 3: pull unreconciled bank statement entries per account.
 - **`generate_aged_ar(period_end: <date>)` / `generate_aged_ap(period_end: <date>)`** — steps 4-5: aging reports tied to TB AR / AP balances.
@@ -56,7 +56,7 @@ This playbook runs 5 phases for the period: pre-close gates → accruals & adjus
 ### Step 1 — Verify sales invoices entered
 
 ```
-search_invoices(filter: {valueDate: {between: ['2025-01-01', '2025-01-31']}}, sort: 'valueDate:asc', limit: 200)
+search_invoices(filter: {valueDate: {between: ['2025-01-01', '2025-01-31']}}, sortBy: 'valueDate', sortOrder: 'ASC', limit: 200)
 ```
 
 Compare count + sum against POS / sales register. Missing invoices = understated revenue. Per `jaz-api/SKILL.md` rule 38, paginate via `offset` if `totalElements > 200`.
@@ -64,7 +64,7 @@ Compare count + sum against POS / sales register. Missing invoices = understated
 ### Step 2 — Verify bills entered (most common SMB gap)
 
 ```
-search_bills(filter: {valueDate: {between: ['2025-01-01', '2025-01-31']}}, sort: 'valueDate:asc', limit: 200)
+search_bills(filter: {valueDate: {between: ['2025-01-01', '2025-01-31']}}, sortBy: 'valueDate', sortOrder: 'ASC', limit: 200)
 ```
 
 Cross-reference against email + supplier portals + physical mail. Late bills = missed expenses = overstated profit. For PDFs in hand: invoke `mcp magic create --file <pdf>` (Jaz Magic OCR + autofill) to generate the bill draft.
@@ -74,7 +74,7 @@ Cross-reference against email + supplier portals + physical mail. Late bills = m
 For each bank account:
 
 1. If you don't already have the account's resourceId: `list_bank_accounts()`, match by `name + currency`, confirm with the user.
-2. `search_bank_records(accountResourceId: <bank account resourceId>, status: 'UNRECONCILED', startDate: '2025-01-01', endDate: '2025-01-31', limit: 200, sort: 'valueDate:asc')`.
+2. `search_bank_records(accountResourceId: <bank account resourceId>, status: 'UNRECONCILED', startDate: '2025-01-01', endDate: '2025-01-31', limit: 200, sortBy: 'valueDate', sortOrder: 'ASC')`.
 3. If results: drive the 5-phase cascade matcher (Step 4 in `bank-recon.md`; local CLI: `clio jobs bank-recon match --input <records> --tolerance 0.01 --date-window 14 --json`). For each match, invoke the matching `reconcile_*` tool.
 4. `view_auto_reconciliation(bankStatementEntryResourceIds: [<id>, ...], recommendationType: 'MAGIC_MATCH')` — READ-ONLY suggestions for residuals (per-entry; get ids from `search_bank_records`, status `UNRECONCILED`); commit via `quick_reconcile` / `apply_bank_rule` / per-entry `reconcile_*`.
 5. `generate_bank_recon_summary(period_end: '2025-01-31', accountResourceId: <id>)`. Confirm `unreconciledCount == 0` OR document the residuals for the period and surface to the user.

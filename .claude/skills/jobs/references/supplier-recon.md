@@ -55,7 +55,7 @@ Pull `paymentTerms`, `bankAccountNumber`, `taxId`, `paymentMethod` for narrative
 ```
 search_bills(
   filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: ['2025-01-01', '2025-01-31']}},
-  sort: 'valueDate:asc',
+  sortBy: 'valueDate', sortOrder: 'ASC',
   limit: 200
 )
 ```

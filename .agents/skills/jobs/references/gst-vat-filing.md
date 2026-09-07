@@ -66,7 +66,7 @@ Halt if any expected profile is missing — surface to practitioner with create 
 ## Step 3 — Output-tax detail review
 
 ```
-search_invoices(filter: {valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {in: ['UNPAID', 'PARTIALLY_PAID', 'PAID']}}, limit: 200, sort: 'valueDate:asc')
+search_invoices(filter: {valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {in: ['UNPAID', 'PARTIALLY_PAID', 'PAID']}}, limit: 200, sortBy: 'valueDate', sortOrder: 'ASC')
 ```
 
 Paginate via offset if `totalElements > 200`. For each invoice:

@@ -6,7 +6,7 @@
 
 ### Platform tools
 - **`generate_aged_ar(period_end: <date>)`** — step 1: AR aging report with bucket breakdown.
-- **`search_invoices(filter: {status: {eq: 'UNPAID'}, dueDate: {lt: <date>}, contactResourceId: <customer>}, sort: 'dueDate:asc', limit: 200)`** — step 2: per-customer overdue detail. Paginate.
+- **`search_invoices(filter: {status: {eq: 'UNPAID'}, dueDate: {lt: <date>}, contactResourceId: <customer>}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`** — step 2: per-customer overdue detail. Paginate.
 - **`get_contact(resourceId: <customer id>)`** — step 2: pull contact info (email, phone, primary contact).
 - **`get_contact_signals(resourceId: <id>, btType: 'SALE')`** — step 3: pull cadence + outlier signals + outstanding balance for the customer. Mid-7 endpoint.
 - **`apply_credit_to_invoice(...)`** / **`create_customer_credit_note(...)`** — step 6: write-off path A for stage-3 specific impairment.
@@ -44,7 +44,7 @@ search_invoices(
     contactResourceId: <customer id>,
     dueDate: {lt: '2025-01-31'}
   },
-  sort: 'dueDate:asc',
+  sortBy: 'dueDate', sortOrder: 'ASC',
   limit: 200
 )
 ```

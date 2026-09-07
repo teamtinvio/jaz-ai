@@ -5,7 +5,7 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools (jaz-api)
-- **`search_bills(filter: {status: {eq: 'UNPAID'}, balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sort: 'dueDate:asc', limit: 200)`** — used in step 2: pull due bills (paginate via `offset` if `>200`).
+- **`search_bills(filter: {status: {eq: 'UNPAID'}, balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`** — used in step 2: pull due bills (paginate via `offset` if `>200`).
 - **`generate_aged_ap(period_end: <cutoff>)`** — used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
 - **`generate_bank_balance_summary(period_end: <cutoff>)`** — used in step 5: confirm cash availability before approving the batch.
 - **`get_contact(resourceId: <contactResourceId>)`** — used in step 4 (per supplier): pull payment terms / preferred payment method / bank details (especially `taxId`, `bankAccountNumber`, `bicSwift` for GIRO file generation).
@@ -49,7 +49,7 @@ search_bills(
     balanceAmount: {gt: 0},
     dueDate: {lte: '2025-02-28'}
   },
-  sort: 'dueDate:asc',
+  sortBy: 'dueDate', sortOrder: 'ASC',
   limit: 200
 )
 ```
@@ -151,7 +151,7 @@ Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)
 
 ## Variations
 
-- **Priority-based payment ordering:** `sort: 'dueDate:asc'` covers chronological. For overdue-first, sort by `daysOverdue:desc`. For supplier-strategic, ask the user which suppliers are priority and process those first.
+- **Priority-based payment ordering:** `sortBy: 'dueDate', sortOrder: 'ASC'` covers chronological. For overdue-first there is no sort field — `daysOverdue` is not sortable and the API answers `422 sort.sortBy[0] must be one of [...]`, naming the set (measured 2026-09-07). Sort by `dueDate` ASC, which puts the most overdue first, or compute the age per row after fetching. For supplier-strategic, ask the user which suppliers are priority and process those first.
 - **Multi-currency runs:** Split the run by currency. SGD bills → SGD bank; USD bills → USD bank or SWIFT-routed. The actual bank disbursement is handled outside Jaz (via the bank's portal); Jaz records the payment after it clears.
 - **Approval workflow (multi-signatory SMBs):** Build the batch in step 5, get out-of-band approval, then execute step 6 only after sign-off. Do NOT post payments before the actual bank transfer is initiated — Jaz payments are not "payment instructions", they record completed payments.
 - **Early-payment discounts:** If supplier offers `2% 10 Net 30`, computing the equivalent annualized return is `(2% / 98%) × (365 / 20) ≈ 37.2%`. Take it when cash allows. Apply the discount as: pay `transactionAmount = (derived outstanding) × 0.98`, then post a separate journal Dr Bank Charges/Discount Income for the 2% saved (cleaner than partial payment of the original bill).
