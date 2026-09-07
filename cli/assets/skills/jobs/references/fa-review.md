@@ -5,12 +5,12 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools
-- **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'WRITTEN_OFF']}}, limit: 200)`** — step 1: enumerate FAs. Paginate.
+- **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'DISCARDED']}}, limit: 200)`** — step 1: enumerate FAs. Paginate.
 - **`get_fixed_asset(resourceId: <id>)`** — step 2: per-asset detail (cost, acquisitionDate, usefulLifeMonths, depreciationMethod, salvageValue, NBV).
 - **`generate_fa_summary(period_end: <date>)`** — step 3: aggregate FA register at period end.
 - **`generate_fa_recon_summary(period_start: <year-start>, period_end: <year-end>)`** — step 3: reconcile movement (opening + additions − disposals − depreciation = closing).
 - **`generate_general_ledger(accountResourceId: <FA category GL>, period_start, period_end)`** — step 4: per-FA-category GL movement vs FA register.
-- **`update_fixed_asset(resourceId: <id>, status: 'DISPOSED' | 'WRITTEN_OFF', disposalDate, disposalProceeds)`** — step 5: status updates for disposals. Mirror endpoints `POST /api/v1/mark-as-sold/fixed-assets` (sale) / `POST /api/v1/discard-fixed-assets/{id}` (scrap).
+- **`mark_fixed_asset_sold(resourceId: <id>, disposalDate, disposalProceeds)`** — step 5: status updates for disposals. Mirror endpoints `POST /api/v1/mark-as-sold/fixed-assets` (sale) / `POST /api/v1/discard-fixed-assets/{id}` (scrap).
 - **`plan_recipe(recipe: 'asset-disposal', ...)` + `execute_recipe(...)`** — step 5: invoke per disposal identified during review (see the `asset-disposal` recipe).
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 / 6: finalize disposal journals + any pending DDB / 150DB depreciation DRAFTs from the `depreciation` recipe.
 
@@ -33,10 +33,10 @@ Walk steps 1-8 below. (Local CLI: `clio jobs fa-review` prints the same phased c
 ## Step 1 — Enumerate FAs
 
 ```
-search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'WRITTEN_OFF']}}, limit: 200, sortBy: 'purchaseDate', sortOrder: 'ASC')
+search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'DISCARDED']}}, limit: 200, sortBy: 'purchaseDate', sortOrder: 'ASC')
 ```
 
-Paginate via offset. For year-end review: include DISPOSED and WRITTEN_OFF (disposed during the year are part of the recon).
+Paginate via offset. For year-end review: include DISPOSED and DISCARDED (disposed during the year are part of the recon).
 
 ## Step 2 — Identify candidates for review
 
@@ -96,7 +96,7 @@ Then the manual FA-register status update (engine-skipped — see the `asset-dis
 update_fixed_asset(resourceId: <asset id>, status: 'DISPOSED', disposalDate, disposalProceeds)
 ```
 
-For scrap / write-off (no proceeds): `update_fixed_asset(status: 'WRITTEN_OFF', disposalDate)`.
+For scrap / write-off (no proceeds): `discard_fixed_asset(...)` — its own description is "Discard (write off) a fixed asset". There is no `WRITTEN_OFF` status; the declared set is ACTIVE, ONGOING, COMPLETED, DRAFT, DISPOSED, SOLD, DISCARDED, CLOSED_OUT.
 
 ## Step 6 — Write-off of fully depreciated unused assets
 

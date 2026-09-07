@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.55.5] - 2026-09-07
+
+**Fixed-asset write-offs pointed at a status that does not exist.**
+
+Ten instructions across four playbooks used `WRITTEN_OFF` as a fixed-asset status. There is no such
+status, and searching for it is not an error — it simply matches nothing, so a year-end review
+asking "which assets were written off?" answered "none" every time.
+
+Writing one off is its own operation rather than a status change: the assistant now uses the discard
+action, and reviews look for `DISCARDED`.
+
+The check that catches this class now covers the values a playbook asks for, not just the field
+names — so a status, type or method that the tool would never accept is caught before release.
+
 ## [5.55.4] - 2026-09-07
 
 **Job playbooks asked for a sort order the API silently ignored.**

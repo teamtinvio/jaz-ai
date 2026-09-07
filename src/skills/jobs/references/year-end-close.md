@@ -11,7 +11,7 @@
 - **`generate_fa_summary(period_end: <FY-end>)`** — Y1 FA reconciliation: full-year depreciation movement per asset.
 - **`generate_fa_recon_summary(period_start: <FY-start>, period_end: <FY-end>)`** — Y1 verification: opening NBV + additions − disposals − depreciation = closing NBV.
 - **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED']}})`** — Y1 enumeration of FAs.
-- **`update_fixed_asset(resourceId: <id>, status: 'ACTIVE'|'DISPOSED'|'WRITTEN_OFF')`** — Y1 fallback if any FA has incorrect status at FY-end.
+- **`mark_fixed_asset_sold(...)` for a sale or `discard_fixed_asset(...)` for a write-off — both are operations, not status mutations** — Y1 fallback if any FA has incorrect status at FY-end.
 - **`search_journals(filter: {tags: {eq: 'leave-accrual'}, valueDate: {between: [<FY-start>, <FY-end>]}})` / `search_journals(filter: {tags: {eq: 'bonus-accrual'}, ...})`** — Y2 true-up: pull all FY accrual journals to compare against actuals.
 - **`create_journal(...)`** — Y2 true-up adjustment journals (manual one-off, not recipe-driven).
 - **`plan_recipe(recipe: 'dividend', ...)` + `execute_recipe(...)`** — Y3 dividend declaration + payment (engine emits the 2-step pattern: declaration journal + payment cash-out).

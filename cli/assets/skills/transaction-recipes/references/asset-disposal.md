@@ -16,7 +16,7 @@
 - **`generate_fa_summary(period_end: <disposalDate>)`** — step 1 alt: pull NBV directly from Jaz's running FA register. If this matches your independent calc, use it as the authoritative NBV. If they diverge: investigate (likely a missing depreciation journal).
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check. Each disposal is unique; duplicate disposal journals would corrupt the FA register reconciliation.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation — Vehicles', 'Gain on Disposal', 'Loss on Disposal']}})`** — step 3.
-- **`update_fixed_asset(resourceId: <id>, status: 'DISPOSED' | 'WRITTEN_OFF')`** OR **`POST /api/v1/mark-as-sold/fixed-assets`** OR **`POST /api/v1/discard-fixed-assets/{id}`** — step 5 manual FA-register update (the engine-skipped note step).
+- **`mark_fixed_asset_sold(...)` for a sale (it links the sale transaction and records gain/loss) or `discard_fixed_asset(...)` for a write-off — a disposal is its own operation, never a `status` mutation via update_fixed_asset** OR **`POST /api/v1/mark-as-sold/fixed-assets`** OR **`POST /api/v1/discard-fixed-assets/{id}`** — step 5 manual FA-register update (the engine-skipped note step).
 - **`generate_trial_balance(period_end: <disposalDate>)`** — step 6: verify cost + accumulated depreciation cleared; gain/loss in P&L.
 
 ### Cross-references
@@ -134,13 +134,13 @@ POST /api/v1/discard-fixed-assets/<FA UUID>
   notes: 'Scrapped; capsule <capsuleResourceId>'
 }
 ```
-OR `update_fixed_asset(resourceId: <id>, status: 'WRITTEN_OFF', disposalDate: '2026-03-15')`.
+OR `discard_fixed_asset(resourceId: <id>, disposalDate: '2026-03-15')` for a write-off.
 
 **Trade-in (proceeds + replacement asset):**
 1. First: invoke this recipe with `proceeds: <fair value of trade-in credit>` for the disposal of the old asset.
 2. Then: `create_fixed_asset(...)` for the new asset with cost = cash paid + trade-in credit (the trade-in is part-payment).
 
-After the FA-register update: `get_fixed_asset(resourceId: <id>)` should return `status: 'DISPOSED'` (or `'WRITTEN_OFF'`).
+After the FA-register update: `get_fixed_asset(resourceId: <id>)` should return `status: 'DISPOSED'` (or `'DISCARDED'`).
 
 ### Step 6 — Verify
 
