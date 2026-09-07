@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.55.8] - 2026-09-07
+
+**Asking for a report as a PDF no longer silently hands back a spreadsheet.**
+
+Most report exports accept a PDF request and return an `.xlsx` file anyway, with no error. You asked
+for a PDF, got a spreadsheet, and nothing said so. The assistant now tells you when that happens,
+and still gives you the file.
+
+The list of reports that genuinely produce a PDF was also wrong: it named four. Eleven do. Seven
+reports you could have had as a PDF were being described as unavailable — including AR and AP
+ageing, the tax ledger, equity movement, bank closing balance and the fixed-asset register.
+
 ## [5.55.7] - 2026-09-07
 
 Internal release automation update. No user-facing changes since v5.55.6.
