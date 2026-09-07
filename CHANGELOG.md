@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.55.13] - 2026-09-07
+
+Internal release automation fix. No user-facing changes since v5.55.12.
+
+An automated API-drift report stated that its informational findings were not the reason its tracking
+ticket stayed open. They were. The report now says what the automation actually does.
+
 ## [5.55.12] - 2026-09-07
 
 **Bank reconciliation guidance corrected: a retry is safe, and a partial match is not possible.**
