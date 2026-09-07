@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.55.14] - 2026-09-07
+
+**Contradictory access grants are now refused instead of quietly granting more access.**
+
+Asking to add someone as an admin *and* restrict them to particular modules is a contradiction. Both
+the command line and the assistant used to resolve it the same way — by ignoring the restriction and
+granting full admin, reporting success. Someone meant to have limited access got all of it, and
+nothing said so.
+
+Those combinations are now rejected, with a message naming the safe alternative. Granting an admin,
+or granting per-module access, both work exactly as before.
+
 ## [5.55.13] - 2026-09-07
 
 Internal release automation fix. No user-facing changes since v5.55.12.
