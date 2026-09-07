@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.55.7] - 2026-09-07
+
+Internal release automation update. No user-facing changes since v5.55.6.
+
+Adds a check that the activity-summary classification tables can only name tools and groups that
+actually exist, so a rename cannot quietly turn a described action into an unlabelled one.
+
 ## [5.55.6] - 2026-09-07
 
 Internal release automation fix. No user-facing changes since v5.55.5.
