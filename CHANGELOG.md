@@ -1,5 +1,23 @@
 # Changelog
 
+## [5.55.3] - 2026-09-07
+
+**Supplier reconciliation and payment-run playbooks asked the API for fields that do not exist.**
+
+Seven of the bundled job playbooks told the assistant to search payments, bills, credit notes,
+journals and capsules using filter names the API does not accept. An unrecognised filter name is
+rejected outright, so each of those searches returned an error instead of results.
+
+The most serious was in the payment run. Its duplicate-payment check — the step that stops a re-run
+from paying every supplier a second time — searched for payment references using both a wrong field
+name and a wrong operator, so it could never find the payments it was looking for.
+
+Two of the corrected instructions asked for something the API does not offer at all: capsules cannot
+be searched by type, and journals cannot be searched by capsule or by fixed asset. Those playbooks
+now say so, and say what to do instead.
+
+Every correction was verified against a live account.
+
 ## [5.55.2] - 2026-09-07
 
 **Reconciliation review no longer hides missing bank-line detail.**

@@ -14,7 +14,7 @@
 ### Tools (jaz-api / direct)
 - **`list_bank_accounts()`** — used in step 3: resolve the disbursement target bank account by `name + currency` if the bank account resourceId isn't already known.
 - **`search_accounts(filter: {name: {in: ['Loan Payable', 'Interest Expense']}})`** — used in step 3: confirm liability + expense GL accounts exist.
-- **`search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}, name: {eq: <capsuleName>}})`** — used in step 0: detect duplicate setup before re-running. Loan capsules are unique per facility — duplicate creation is almost always an agent error.
+- **`search_capsules(filter: {title: {eq: <capsuleName>}})`** — used in step 0: detect duplicate setup before re-running. Loan capsules are unique per facility — duplicate creation is almost always an agent error.
 - **`generate_trial_balance(period_end: <date>)`** — used in step 5: verify the loan liability balance matches the schedule's `closingBalance` column.
 - **`update_journal(resourceId: <id>, saveAsDraft: false)`** — used in step 4 verification: lift draft journals to ACTIVE once practitioner confirms.
 
@@ -30,7 +30,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}, name: {eq: 'Bank Loan — ABC Bank — 2025'}})
+search_capsules(filter: {title: {eq: 'Bank Loan — ABC Bank — 2025'}})
 ```
 
 If a result returns: halt and surface "Loan capsule `<name>` already exists (resourceId `<id>`). Re-running the recipe would create a duplicate disbursement. Confirm the practitioner intent — if extending an existing loan, use `update_capsule` not `execute_recipe`."
@@ -95,7 +95,7 @@ Note: This is NOT the Jaz scheduler primitive. The recipe pre-emits all 60 journ
 After the actual bank payment posts each month, the corresponding repayment journal already exists in the capsule as DRAFT. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 ```
 
 Returns the one DRAFT for that period (the engine pre-emitted it). Finalize:
@@ -131,7 +131,7 @@ After the FINAL period (60th repayment) is finalized:
 | `execute_recipe` | 422 `currency_mismatch_bank_account` | Loan currency ≠ bank account currency. Either pass a `currencyAccount` for FX-on-disbursement, or pick a bank account in the loan's source currency (per `jaz-api/SKILL.md` rule 24). |
 | `execute_recipe` | 409 `capsule_already_exists` | Duplicate setup. Step 0 idempotency check should have caught this — go back to step 0. |
 | Scheduler | Repayment journal posts but interest amount is off by cents | Engine uses effective interest method per period; if the entity's materiality threshold is below 1 cent, narrow the assertion. Otherwise expected behavior. |
-| Scheduler | Repayment journal does NOT post on expected date | `update_scheduler` may have paused it. `search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {eq: <expected>}})` — if empty, check scheduler status. Resume or document the pause in your working notes. |
+| Scheduler | Repayment journal does NOT post on expected date | `update_scheduler` may have paused it. **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. — if empty, check scheduler status. Resume or document the pause in your working notes. |
 | `update_capsule` | 422 `capsule_locked` | The capsule is in a closed period (lock date passed). Lift the lock first via `update_account` lock_date OR add the new entry in the next open period. |
 
 ---

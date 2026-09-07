@@ -25,9 +25,9 @@ The two patterns share the same `Employee Benefits` capsule type but use differe
 - **`clio calc accrued-expense --amount <quarterly bonus> --periods 1 --json`** — bonus cross-check.
 
 ### Tools (jaz-api / direct)
-- **`search_capsules(filter: {capsuleType: {eq: 'Employee Benefits'}})`** — step 0: discover existing leave + bonus capsules.
+- **`search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable — see `jobs/references/building-blocks.md` § Filter limits)`** — step 0: discover existing leave + bonus capsules.
 - **`search_accounts(filter: {name: {in: ['Leave Expense', 'Leave Liability', 'Bonus Expense', 'Bonus Payable']}})`** — step 3.
-- **`search_journals(filter: {tag: 'leave-accrual', valueDate: {between: [<period-start>, <period-end>]}, status: 'DRAFT'})`** — step 5 monthly: pull this period's pre-emitted leave DRAFT.
+- **`search_journals(filter: {tags: {eq: 'leave-accrual'}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})`** — step 5 monthly: pull this period's pre-emitted leave DRAFT.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — monthly finalize.
 - **`generate_trial_balance(period_end: <date>)`** — verification.
 - For year-end true-up: see `year-end-close.md` Y2 — manual journal pattern with HR-supplied actuals.
@@ -44,7 +44,7 @@ The two patterns share the same `Employee Benefits` capsule type but use differe
 ### Step 0A — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Employee Benefits'}, name: {eq: 'Annual Leave Accrual — FY2025'}})
+search_capsules(filter: {title: {eq: 'Annual Leave Accrual — FY2025'}})
 ```
 
 If returns: halt. One leave capsule per FY.
@@ -82,7 +82,7 @@ Engine emits **12 future-dated DRAFT journals** (one per month, fixed $7,000 eac
 ### Step 5A — Monthly action
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <leave capsule id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
@@ -99,7 +99,7 @@ Year-end true-up: see `year-end-close.md` Y2a. Compare actual unused-leave-balan
 ### Step 0B — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Employee Benefits'}, name: {startsWith: 'Bonus Accrual — Q'}})
+search_capsules(filter: {title: {startWith: 'Bonus Accrual — Q'}})
 ```
 
 If a current-quarter result returns: halt. One bonus capsule per quarter.
@@ -108,7 +108,7 @@ If a current-quarter result returns: halt. One bonus capsule per quarter.
 
 Estimate quarterly bonus per the entity's bonus policy estimation method:
 - `revenue_pct` (e.g., 5% of quarterly revenue): pull `generate_profit_and_loss(period_start: <quarter-start>, period_end: <quarter-end>)`, multiply Operating Revenue by the percentage.
-- `prior_quarter`: pull last quarter's posted bonus journal via `search_journals(filter: {tag: 'bonus-accrual', valueDate: <prior-quarter>-end})`.
+- `prior_quarter`: pull last quarter's posted bonus journal via `search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: <prior-quarter>-end})`.
 - `fixed_amount`: use the bonus policy's fixed amount per quarter.
 
 ```
@@ -157,7 +157,7 @@ Per quarter-end-close (`quarter-end-close.md`):
 | `plan_recipe` (bonus) | 422 `unsupported_recipe` | Use `accrued-expense` for bonus — leave is `leave-accrual`. |
 | `execute_recipe` | 422 `account_not_found` | Step 3 incomplete. Common gap: `Bonus Payable` (most CoAs lack); create via `create_account(accountType: 'Current Liability')`. |
 | Verification | Leave Liability balance > expected | Practitioner posted manual leave-utilization journals against the wrong account, OR the original recipe estimate was high. Year-end Y2a true-up will catch this. |
-| Verification | Bonus accrual nonzero after quarterly reversal posts | Reversal didn't finalize. `search_journals(filter: {capsuleResourceId: {eq: <bonus capsule>}, valueDate: <reversal date>, status: 'DRAFT'})` then `bulk_finalize_drafts`. |
+| Verification | Bonus accrual nonzero after quarterly reversal posts | Reversal didn't finalize. **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. then `bulk_finalize_drafts`. |
 | 13th-month bonus (PH-specific) | (process — separate from Q4 bonus) | Use `accrued-expense` recipe with `amount: <annual base / 12>`, `periods: 12`, accruing throughout FY. Settle in December via Dr Bonus Payable / Cr Cash. |
 
 ---

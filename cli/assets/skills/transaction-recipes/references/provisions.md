@@ -12,7 +12,7 @@
 - **`clio calc provision --amount <undiscounted total> --rate <annual %> --term <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: compute PV at recognition + per-period unwinding charge. Returns `{ presentValue, totalUnwindingCharge, schedule[n] }` where each row has `period`, `openingProvision`, `unwindingCharge`, `closingProvision`.
 
 ### Tools (jaz-api / direct)
-- **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check.
+- **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Provision for Warranties', 'Finance Cost', 'Warranty Expense']}})`** — step 3.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify provision balance matches schedule's `closingProvision`.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly finalize.
@@ -29,7 +29,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Provisions'}, name: {eq: 'Warranty Provision — FY2025-FY2029'}})
+search_capsules(filter: {title: {eq: 'Warranty Provision — FY2025-FY2029'}})
 ```
 
 If a result returns: halt. Provision capsules are unique per obligation; duplicate setup means double-recognition.
@@ -90,7 +90,7 @@ Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, r
 For each month after recipe execution:
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
@@ -156,5 +156,5 @@ If actual settlement amount differs from estimated $500,000 (highly likely for w
 
 - Year-end close (Y5) — year-end provision remeasurement per IAS 37.59. Review each `Provisions` capsule's underlying assumptions vs current data; trigger manual remeasurement if needed.
 - Month-end close — finalize this period's pre-emitted unwinding DRAFT for each existing provision capsule.
-- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Provisions'}})` + per-capsule recompute via `clio calc provision`. Auditor tests assumptions (cash flow estimate, discount rate, term).
+- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable — see `jobs/references/building-blocks.md` § Filter limits)` + per-capsule recompute via `clio calc provision`. Auditor tests assumptions (cash flow estimate, discount rate, term).
 - Sibling `bad-debt-provision.md` (engine name `ecl`) — much simpler IFRS 9 ECL pattern, no PV unwinding.

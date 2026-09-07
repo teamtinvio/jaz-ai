@@ -15,10 +15,10 @@ CWIP costs accumulate as construction progresses — multiple bills from contrac
 - **`create_fixed_asset(...)`** — step 4: register the completed asset in Jaz native FA register; from this point forward, Jaz auto-posts SL depreciation.
 
 ### Tools (jaz-api / direct)
-- **`search_capsules(filter: {capsuleType: {eq: 'Capital Projects'}, name: {eq: <project>}})`** — step 1 idempotency check.
+- **`search_capsules(filter: {title: {eq: <project>}})`** — step 1 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Capital Work-in-Progress', '<target FA category>', '<target Accumulated Depreciation>']}})`** — step 0 + step 4.
 - **`generate_general_ledger(accountResourceId: <CWIP id>, period_start: <project start>, period_end: <today>)`** — step 3: pull all CWIP entries to confirm the accumulated cost.
-- **`search_bills(filter: {capsuleResourceId: {eq: <CWIP capsule id>}})`** — step 3 alt: pull all bills attached to the project capsule.
+- ****STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.** — step 3 alt: pull all bills attached to the project capsule.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify CWIP balance is zero post-transfer; FA balance reflects new asset.
 
 ### Cross-references
@@ -50,7 +50,7 @@ create_capsule(
 )
 ```
 
-Each construction project gets its own capsule. The capsule is the audit trail — every bill paid for this project, plus the eventual transfer journal, attaches to it. Auditor can pull `search_bills(filter: {capsuleResourceId: {eq: <id>}})` and see the full cost build.
+Each construction project gets its own capsule. The capsule is the audit trail — every bill paid for this project, plus the eventual transfer journal, attaches to it. Auditor can pull **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. and see the full cost build.
 
 ### Step 2 — Accumulate construction costs (multiple bills over months)
 
@@ -98,7 +98,7 @@ generate_general_ledger(accountResourceId: <CWIP GL>, period_start: <project sta
 Confirm the accumulated CWIP balance matches expectations vs the project's estimated cost. Variance > 10% → flag for budget review.
 
 ```
-search_bills(filter: {capsuleResourceId: {eq: <project capsule id>}, status: {ne: 'PAID'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 ```
 
 Identify unpaid bills attached to the project — payment timing matters for cash-flow planning.

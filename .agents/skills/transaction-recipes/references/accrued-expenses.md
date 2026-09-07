@@ -12,11 +12,11 @@
 - **`clio calc accrued-expense --amount <per-period> --periods <n> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: independently produce the schedule. Returns `{ totalAccrued, schedule[n] }` where each row carries `accrualDate`, `reversalDate`, `accrualJournal`, `reversalJournal`.
 
 ### Tools (jaz-api / direct)
-- **`search_journals(filter: {tag: <accrual.name>, valueDate: <prior-period>-end})`** — step 1 estimation: pull last period's posted accrual amount when `estimation_method: 'prior_month'`.
-- **`search_journals(filter: {tag: <accrual.name>, valueDate: {between: [<-3 months>, <today>]}})`** — step 1 alt: trailing 3-month average when `estimation_method: 'trailing_3m_avg'`.
+- **`search_journals(filter: {tags: {eq: <accrual.name>}, valueDate: <prior-period>-end})`** — step 1 estimation: pull last period's posted accrual amount when `estimation_method: 'prior_month'`.
+- **`search_journals(filter: {tags: {eq: <accrual.name>}, valueDate: {between: [<-3 months>, <today>]}})`** — step 1 alt: trailing 3-month average when `estimation_method: 'trailing_3m_avg'`.
 - **`search_contacts(filter: {name: {eq: <vendor>}})`** — step 3: resolve the accrual's vendor.
 - **`search_accounts(filter: {name: {in: ['<expense GL>', '<accrued liability GL>']}})`** — step 3: confirm both sides of the journal exist in CoA.
-- **`search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: 'DRAFT'})`** — step 5 monthly: find this period's pre-emitted DRAFT for finalization.
+- ****STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.** — step 5 monthly: find this period's pre-emitted DRAFT for finalization.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5: finalize this period's accrual + reversal pair.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verification: confirm Accrued Expenses balance and net P&L impact.
 
@@ -33,7 +33,7 @@
 
 Per the accrual's estimation method:
 
-- **`prior_month`**: pull last period's posted amount via `search_journals(filter: {tag: <accrual.name>, valueDate: <prior-period>-end})`. Use that amount.
+- **`prior_month`**: pull last period's posted amount via `search_journals(filter: {tags: {eq: <accrual.name>}, valueDate: <prior-period>-end})`. Use that amount.
 - **`trailing_3m_avg`**: pull last 3 months' posted amounts and average.
 - **`budget`**: use the accrual's budget amount.
 - **`fixed_amount`**: use the accrual's fixed amount directly.
@@ -92,7 +92,7 @@ Engine output journals:
 For the current period (Jan 2025), the accrual journal exists in DRAFT in the capsule. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 update_journal(resourceId: <accrual journal id>, saveAsDraft: false)
 ```
 
@@ -119,7 +119,7 @@ When the actual quarterly bill arrives (typically Mar 31, $9,000 total): post a 
 | `plan_recipe` | 422 `invalid_amount` | Amount is non-positive. Computed amount may have been a credit (e.g. `prior_month` returned a credit balance). Switch `estimation_method` to `fixed_amount` for this row this period, OR investigate the credit. |
 | `execute_recipe` | 422 `account_not_found` | Step 3 resolution incomplete. `search_accounts`; create via `create_account` if the practitioner confirms classification. |
 | `bulk_finalize_drafts` | 422 `journal_unbalanced` | Engine-emitted journals are always balanced. If you see this, the source schema changed — escalate (do not retry). |
-| Verification | Net P&L impact stuck after reversal posts | Likely the reversal hasn't been finalized yet. `search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: <reversal-date>, status: 'DRAFT'})` — if non-empty, finalize. |
+| Verification | Net P&L impact stuck after reversal posts | Likely the reversal hasn't been finalized yet. **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. — if non-empty, finalize. |
 | Verification | Accrued Expenses balance nonzero after the actual bill posts AND all reversals run | Either the bill amount diverged from the accrual estimate (post a true-up journal: Dr/Cr `<expense GL>` for the difference) OR a reversal was missed. Audit via `generate_general_ledger(accountResourceId: 'Accrued Expenses', period_end: <today>)`. |
 | Actual bill posted against `Accrued Expenses` instead of `<expense GL>` | (process error) | The reversal AND the bill both touch `Accrued Expenses` — net to zero on liability, but expense gets double-recognized. Reverse the bill, re-post against `<expense GL>`. Note the risk in your working notes. |
 

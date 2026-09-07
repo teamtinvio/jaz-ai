@@ -15,7 +15,7 @@
 - **`generate_aged_ar(period_end: <date>)`** — step 1 input: pull AR aged into the same 5 buckets the calculator expects (current, 30d, 60d, 90d, 120d+).
 - **`search_accounts(filter: {name: {in: ['Allowance for Doubtful Debts', 'Bad Debt Expense']}})`** — step 3.
 - **`generate_trial_balance(period_end: <date>)`** — step 1 input: pull `existingProvision` from current `Allowance for Doubtful Debts` balance; step 5 verify post-journal balance matches calculated ECL.
-- **`search_capsules(filter: {capsuleType: {eq: 'ECL Provision'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check (one ECL capsule per period; quarterly = 4 per FY).
+- **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check (one ECL capsule per period; quarterly = 4 per FY).
 - **`apply_credit_to_invoice(...)` / `create_customer_credit_note(...)`** — step 6 specific write-off pattern: when individual invoices are deemed unrecoverable, write them off via credit note OR direct payment with `paymentMethod: 'DEBT_WRITE_OFF'` (per memory rule).
 
 ### Cross-references
@@ -30,7 +30,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'ECL Provision'}, name: {eq: 'FY2025 Year-End ECL True-Up'}})
+search_capsules(filter: {title: {eq: 'FY2025 Year-End ECL True-Up'}})
 ```
 
 If a result returns: halt. ECL is one-shot per period; duplicate would double-recognize.

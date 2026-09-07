@@ -12,7 +12,7 @@
 - **`clio calc fixed-deposit --principal <p> --rate <annual %> --term <months> --start-date <YYYY-MM-DD> --currency <code> [--compound monthly|annually] --json`** — used in step 1: compute monthly accrual amounts. Default simple interest; `--compound` for compound interest. Returns `{ totalInterest, schedule[n] }` where each row carries `period`, `accrualDate`, `accrualAmount`, `accruedToDate`, `journal`.
 
 ### Tools (jaz-api / direct)
-- **`search_capsules(filter: {capsuleType: {eq: 'Fixed Deposit'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check.
+- **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Fixed Deposit Receivable', 'Accrued Interest Receivable', 'Interest Income']}})`** — step 3.
 - **`search_contacts(filter: {supplier: true, name: {eq: <bank>}})`** — step 3 optional: bank contact for narrative.
 - **`generate_trial_balance(period_end: <date>)`** — step 5 verify accrued interest unwinds; FD principal stays at carrying amount until maturity.
@@ -30,7 +30,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Fixed Deposit'}, name: {eq: 'DBS FD — SGD 100,000 — 12 months — 3.5% (FY2025)'}})
+search_capsules(filter: {title: {eq: 'DBS FD — SGD 100,000 — 12 months — 3.5% (FY2025)'}})
 ```
 
 If a result returns: halt. Each FD placement is unique; duplicate setup means double-counted financial asset.
@@ -90,7 +90,7 @@ Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, r
 For each month after recipe execution, this period's DRAFT accrual journal already exists. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
@@ -102,7 +102,7 @@ Verify after finalize:
 
 At maturity (month 12), finalize the maturity cash-in:
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {eq: <maturityDate>}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 update_cash_in(resourceId: <cash-in id>, saveAsDraft: false)
 ```
 
@@ -145,5 +145,5 @@ If the bank auto-rolls the FD at maturity: do NOT close the capsule. Instead, po
 
 - Month-end close — invoked monthly to finalize this period's pre-emitted accrual DRAFT for each existing FD capsule. New FD placements during the period: invoke recipe; this period's accrual auto-included in the bulk_finalize queue.
 - Year-end close — final FY accrual cross-check + classification (current vs non-current depending on remaining term at FY-end).
-- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Fixed Deposit'}})` + per-capsule recompute via `clio calc fixed-deposit`. Auditor reconciles to bank confirmation letters.
+- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable — see `jobs/references/building-blocks.md` § Filter limits)` + per-capsule recompute via `clio calc fixed-deposit`. Auditor reconciles to bank confirmation letters.
 - `bank-loan.md` — mirror pattern (money out instead of in, expense vs income).

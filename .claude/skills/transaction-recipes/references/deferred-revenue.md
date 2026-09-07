@@ -16,7 +16,7 @@
 - **`create_contact(...)` with `customer: true`** — step 3 fallback: create the customer if `search_contacts` returns empty.
 - **`search_accounts(filter: {name: {in: ['<deferred liability GL>', '<revenue GL>']}})`** — step 3: confirm both GL accounts exist.
 - **`generate_trial_balance(period_end: <date>)`** — step 5: verify Deferred Revenue balance unwinds correctly.
-- **`search_capsules(filter: {capsuleType: {eq: 'Deferred Revenue'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check.
+- **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`finalize_invoice(resourceId: <id>)`** — step 4 fallback: lift the upfront invoice from DRAFT to ACTIVE once practitioner confirms the engagement is genuinely starting.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT recognition journal.
 
@@ -32,7 +32,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Deferred Revenue'}, name: {eq: 'FY2025 Acme Annual License'}})
+search_capsules(filter: {title: {eq: 'FY2025 Acme Annual License'}})
 ```
 
 If a result returns: halt and surface "Deferred revenue capsule `<name>` already exists. Re-running would create a duplicate upfront invoice. Confirm intent — if extending an existing arrangement, use `update_capsule` not `execute_recipe`."
@@ -94,7 +94,7 @@ All N journals attach to the same capsule. Customer payment: handled separately 
 For each month after recipe execution, the corresponding DRAFT recognition journal already exists in the capsule. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 

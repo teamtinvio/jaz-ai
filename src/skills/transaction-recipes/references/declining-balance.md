@@ -12,7 +12,7 @@
 - **`clio calc depreciation --cost <c> --salvage <s> --life <years> --method <ddb|150db|sl> --frequency <annual|monthly> --json`** — used in step 1: full depreciation schedule. Returns `{ totalDepreciation, schedule[n] }` where each row carries `period`, `openingBookValue`, `depreciationAmount`, `accumulatedDepreciation`, `closingBookValue`. Final period absorbs rounding to land at salvage value exactly.
 
 ### Tools (jaz-api / direct)
-- **`search_capsules(filter: {capsuleType: {eq: 'Depreciation'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check. One depreciation capsule per asset; duplicate setup is almost always an error.
+- **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check. One depreciation capsule per asset; duplicate setup is almost always an error.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation — Vehicles', 'Depreciation Expense']}})`** — step 3: confirm the asset, contra-asset, and expense GL accounts exist.
 - **`generate_trial_balance(period_end: <date>)`** — step 5: verify NBV matches schedule.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT depreciation journal.
@@ -29,7 +29,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Depreciation'}, name: {eq: 'DDB Depreciation — 5 years (Delivery Vehicle FY2025)'}})
+search_capsules(filter: {title: {eq: 'DDB Depreciation — 5 years (Delivery Vehicle FY2025)'}})
 ```
 
 If a result returns: halt and surface "Depreciation capsule for asset `<name>` already exists. Re-running would create duplicate depreciation journals. Confirm — if revising the depreciation schedule (changed useful life or salvage), close the existing capsule, reverse remaining DRAFT journals via `delete_journal`, then re-execute."
@@ -93,7 +93,7 @@ If the asset MUST be in the FA register for reporting reasons (e.g. fixed-assets
 For each month after recipe execution, this period's DRAFT depreciation journal already exists. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
@@ -140,4 +140,4 @@ After the FINAL period (month 60):
 - Year-end close — full FY-end depreciation reconciliation: sum 12 monthly journals against `clio calc depreciation --frequency annual` cross-check; auditor will sample-test.
 - Data migration — opening accumulated depreciation loaded via conversion (Conversion Clearing > Accumulated Depreciation account); recipe runs forward from the migration date with `cost: <NBV at migration>` instead of original cost. Useful-life-years should be `remaining life`, not original.
 - Sibling recipe `asset-disposal.md` — end-of-life de-recognition.
-- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Depreciation'}})` + per-capsule `clio calc depreciation` recompute.
+- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable — see `jobs/references/building-blocks.md` § Filter limits)` + per-capsule `clio calc depreciation` recompute.

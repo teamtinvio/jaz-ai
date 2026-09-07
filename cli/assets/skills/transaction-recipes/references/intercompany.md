@@ -16,8 +16,8 @@ Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity
 - **`apply_credit_to_invoice(...)` / `apply_credit_to_bill(...)`** — netting if both entities owe each other (one entity's invoice clears against the other's bill via credit note).
 
 ### Search tools for reconciliation
-- **`search_invoices(filter: {capsuleResourceId: {eq: <Entity A IC capsule>}})`** — pull all Entity A intercompany invoices.
-- **`search_bills(filter: {capsuleResourceId: {eq: <Entity B IC capsule>}})`** — pull all Entity B intercompany bills.
+- ****STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.** — pull all Entity A intercompany invoices.
+- ****STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.** — pull all Entity B intercompany bills.
 - **`generate_general_ledger(accountResourceId: <Intercompany Receivable>, period_end: <date>)` / same for Intercompany Payable** — eliminate at consolidation.
 
 ### Multi-org targeting (CRITICAL)

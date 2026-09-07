@@ -11,10 +11,10 @@
 - **`generate_vat_ledger(period_start: <Q-start>, period_end: <Q-end>)`** — Q1 GST/VAT filing prep: full quarterly tax ledger.
 - **`generate_aged_ar(period_end: <Q-end>)`** — Q2 ECL formal review input.
 - **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — Q2 ECL top-up if material.
-- **`search_journals(filter: {tag: 'bonus-accrual', valueDate: {between: [<Q-start>, <Q-end>]}})`** — Q3 bonus YTD pull.
+- **`search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: {between: [<Q-start>, <Q-end>]}})`** — Q3 bonus YTD pull.
 - **`create_journal(...)`** — Q3 bonus true-up adjustment (manual one-off).
-- **`search_capsules(filter: {capsuleType: {eq: 'Intercompany'}})`** — Q4 IC reconciliation per pair of entities (multi-org coordination — see the `intercompany` recipe).
-- **`search_capsules(filter: {capsuleType: {eq: 'Provisions'}})` + `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
+- **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)** — Q4 IC reconciliation per pair of entities (multi-org coordination — see the `intercompany` recipe).
+- **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits) + `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
 - **`generate_trial_balance(period_end: <Q-end>)`** — verification.
 - **`update_account(resourceId: <CoA root>, lockDate: <Q-end>)`** — final lock.
 
@@ -87,7 +87,7 @@ Save the ECL analysis for the quarter — the auditor will request it each quart
 If the org has a bonus policy with an estimation method:
 
 ```
-search_journals(filter: {tag: 'bonus-accrual', valueDate: {between: ['2025-01-01', '2025-03-31']}})
+search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: {between: ['2025-01-01', '2025-03-31']}})
 ```
 
 Sum YTD accruals. Re-estimate full-year bonus per current performance data. If revised quarterly estimate ≠ already-accrued amount: post manual `create_journal` true-up against `Bonus Expense` / `Bonus Payable` for the delta.
@@ -109,15 +109,19 @@ Full pattern in the `intercompany` recipe.
 For each active IAS 37 provision capsule:
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Provisions'}, status: {eq: 'ACTIVE'}})
+search_capsules(filter: {status: {eq: 'ACTIVE'}})
 ```
 
 Per capsule: this period's quarter-end unwinding DRAFT journals (3 monthly DRAFTs from `provision` recipe execution) should already be in the capsule. Verify and finalize:
 
-```
-search_journals(filter: {capsuleResourceId: {eq: <provision capsule id>}, valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {eq: 'DRAFT'}})
-bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])
-```
+> **STOP — this step cannot be scoped, and must not be automated.** Narrowing journals to one
+> capsule is not possible: `JournalFilter` declares no `capsuleResourceId`, a journal row carries no
+> capsule link even at `view: 'full'` or on `GET /journals/{id}`, and `GET /capsules/{id}` returns
+> only `totalTransactions` — a count (all measured 2026-09-07). A search by date and status alone
+> returns **every** matching DRAFT in the org, including drafts a practitioner deliberately parked,
+> so feeding it to `bulk_update_journals(saveAsDraft: false)` or `delete_journal` would finalize or
+> destroy unrelated work. Surface the capsule and its expected journal count to the practitioner and
+> let them identify the journals; do not select them with a filter.
 
 If the user determines remeasurement is needed (cash-flow estimate changed, discount rate moved): recompute, post the adjustment, reverse the remaining DRAFT unwinding journals, and re-execute the `provision` recipe with the new inputs.
 

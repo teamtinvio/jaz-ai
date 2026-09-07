@@ -61,7 +61,7 @@ The recipe engine uses capsules automatically. But capsules also enable advanced
 
 1. **One capsule per LIFECYCLE, not per period.** A 5-year loan = ONE capsule (not 12 per year). A construction project = ONE capsule (not one per contractor bill). The capsule's job is to span the full lifecycle.
 
-2. **Use Capsule Types as the search axis, not Capsule Name.** Capsule names are unique per instance ("FY2025 Office Insurance"); types are reusable ("Prepaid Expenses"). `search_capsules(filter: {capsuleType: {eq: 'Prepaid Expenses'}})` returns ALL prepaid capsules across history.
+2. **Use Capsule Types as the search axis, not Capsule Name.** Capsule names are unique per instance ("FY2025 Office Insurance"); types are reusable ("Prepaid Expenses"). `search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable — see `jobs/references/building-blocks.md` § Filter limits)` returns ALL prepaid capsules across history.
 
 3. **Tie capsule entries back for the auditor.** `generate_general_ledger` does NOT group by capsule -- `groupBy` is ACCOUNT, CONTACT, TRANSACTION or RELATIONSHIP, and `CAPSULE` returns 422 (verified live 2026-09-01). Auditor sample-test: pick 3 capsules per type, read each with `get_capsule` to get its transaction resource ids, then pull those documents (bills, invoices, journals) directly. Same evidence, one more hop.
 
@@ -87,9 +87,9 @@ create_cash_out_entry(..., capsuleResourceId: <capsule id>)
 **Search and audit patterns:**
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}}, status: {eq: 'ACTIVE'}})
+search_capsules(filter: {status: {eq: 'ACTIVE'}})  # capsule type is not filterable — narrow on the row's `type` / `capsuleType.name`
   # All open loan capsules — feed into year-end-close.md Y6 reclassification
-search_journals(filter: {capsuleResourceId: {eq: <id>}}, sort: 'valueDate:asc')
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
   # Full GL for one capsule — the auditor's view
 get_capsule(resourceId)   # returns the capsule's transactions; GL cannot group by capsule
   # Period activity grouped by capsule — the practitioner's view

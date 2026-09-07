@@ -5,12 +5,14 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools (jaz-api)
-- **`search_bills(filter: {status: 'UNPAID', balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sort: 'dueDate:asc', limit: 200)`** — used in step 2: pull due bills (paginate via `offset` if `>200`).
+- **`search_bills(filter: {status: {eq: 'UNPAID'}, balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sort: 'dueDate:asc', limit: 200)`** — used in step 2: pull due bills (paginate via `offset` if `>200`).
 - **`generate_aged_ap(period_end: <cutoff>)`** — used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
 - **`generate_bank_balance_summary(period_end: <cutoff>)`** — used in step 5: confirm cash availability before approving the batch.
 - **`get_contact(resourceId: <contactResourceId>)`** — used in step 4 (per supplier): pull payment terms / preferred payment method / bank details (especially `taxId`, `bankAccountNumber`, `bicSwift` for GIRO file generation).
 - **`create_bill_payment(billResourceId: <id>, payments: [{...}])`** — used in step 6: post the payment per bill. NO BATCH PAYMENT ENDPOINT yet — one POST per bill.
-- **`search_payments(filter: {reference: {startsWith: <run-prefix>}, valueDate: {eq: <run-date>}})`** — used in step 8: idempotency / verification check (re-running the run won't duplicate-pay if all references match).
+- **`search_payments(filter: {businessTransactionReference: {startWith: <run-prefix>}, valueDate: {eq: <run-date>}})`** — used in step 8: idempotency / verification check (re-running the run won't duplicate-pay if all references match).
+
+  > **The field and the operator are both exact.** `search_payments` hits `POST /cashflow-transactions/search` → `TransactionsFilter`, which declares no `additionalProperties`, so an undeclared field is rejected outright rather than ignored. It has **no `reference`** (that is `businessTransactionReference`) and `StringExpression` has **no `startsWith`** — the prefix operator is spelled **`startWith`**, no "s". Until 5.55.3 this line asked for both wrong names, so the idempotency check — the step standing between a re-run and paying every supplier twice — could not return anything. Use `startWith`, not `contains`: measured on the sandbox 2026-09-07, `contains: 'PR-'` matched 3 rows that do **not** start with that prefix, and a looser match here silently widens what the run treats as already-paid.
 - **`finalize_bill(resourceId: <id>)`** — used in step 0 fallback: bills must be `status: APPROVED` (not `DRAFT`) before they accept payments.
 
 ### CLI tools (jaz-cli)
@@ -29,7 +31,7 @@
 Generate a run prefix: `PAYRUN-<YYYY-MM-DD>-<seq>`. Before proceeding:
 
 ```
-search_payments(filter: {reference: {startsWith: 'PAYRUN-2025-02-28-'}})
+search_payments(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}})
 ```
 
 If results: surface "A payment run with prefix `PAYRUN-2025-02-28-*` already executed on this date (`<n>` payments totalling `<amt>`). Confirm intent — re-run will create duplicate payments." Halt unless practitioner confirms.
@@ -118,7 +120,7 @@ After all `create_bill_payment` calls succeed:
 
 ```
 generate_aged_ap(period_end: '2025-02-28')
-search_payments(filter: {reference: {startsWith: 'PAYRUN-2025-02-28-'}, valueDate: {eq: '2025-02-28'}})
+search_payments(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}, valueDate: {eq: '2025-02-28'}})
 ```
 
 Assert:

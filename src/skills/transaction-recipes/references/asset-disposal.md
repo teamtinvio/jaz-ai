@@ -14,7 +14,7 @@
 ### Tools (jaz-api / direct)
 - **`get_fixed_asset(resourceId: <id>)`** — step 1: pull the asset's actual `cost`, `acquisitionDate`, `usefulLifeMonths`, `depreciationMethod`, `salvageValue` to feed the calculator (use the live FA-register values — auditor wants those, not a cached estimate).
 - **`generate_fa_summary(period_end: <disposalDate>)`** — step 1 alt: pull NBV directly from Jaz's running FA register. If this matches your independent calc, use it as the authoritative NBV. If they diverge: investigate (likely a missing depreciation journal).
-- **`search_capsules(filter: {capsuleType: {eq: 'Asset Disposal'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check. Each disposal is unique; duplicate disposal journals would corrupt the FA register reconciliation.
+- **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check. Each disposal is unique; duplicate disposal journals would corrupt the FA register reconciliation.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation — Vehicles', 'Gain on Disposal', 'Loss on Disposal']}})`** — step 3.
 - **`update_fixed_asset(resourceId: <id>, status: 'DISPOSED' | 'WRITTEN_OFF')`** OR **`POST /api/v1/mark-as-sold/fixed-assets`** OR **`POST /api/v1/discard-fixed-assets/{id}`** — step 5 manual FA-register update (the engine-skipped note step).
 - **`generate_trial_balance(period_end: <disposalDate>)`** — step 6: verify cost + accumulated depreciation cleared; gain/loss in P&L.
@@ -31,7 +31,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Asset Disposal'}, name: {eq: 'Disposal — Delivery Vehicle (Truck-001) — 2026-03-15'}})
+search_capsules(filter: {title: {eq: 'Disposal — Delivery Vehicle (Truck-001) — 2026-03-15'}})
 ```
 
 If a result returns: halt. Disposal capsules are unique per asset+date — duplicates would double-book the disposal.
@@ -54,7 +54,7 @@ Cross-check with Jaz FA register:
 ```
 generate_fa_summary(period_end: '2026-03-15', fixedAssetResourceId: <FA UUID>)
 ```
-Should report `accumulatedDepreciation: 28500, netBookValue: 21500` matching the independent calc within 1 cent. Variance investigation: missing monthly depreciation journals (search via `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, status: 'DRAFT'})`); finalize them BEFORE disposal recipe.
+Should report `accumulatedDepreciation: 28500, netBookValue: 21500` matching the independent calc within 1 cent. Variance investigation: missing monthly depreciation journals (search via **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.); finalize them BEFORE disposal recipe.
 
 ### Step 2 — Plan the recipe
 
@@ -174,7 +174,7 @@ Should reflect the disposal in the year's movement: `openingNbv − depreciation
 | `plan_recipe` | 422 `acquisition_after_disposal` | Inputs swapped. Verify and re-run. |
 | `execute_recipe` | 422 `account_not_found` for `Gain on Disposal` / `Loss on Disposal` | Step 3 incomplete. Create via `create_account(accountType: 'Other Revenue' / 'Other Expense', ...)`. |
 | Step 5 manual update missed | (process error — Jaz FA continues auto-depreciating) | Surface to practitioner: "Asset `<name>` (resourceId `<id>`) is still ACTIVE in FA register but disposal journal posted. Auto-depreciation will continue. Run `update_fixed_asset(status: 'DISPOSED')` immediately." |
-| `update_fixed_asset` to DISPOSED | 422 `pending_depreciation_journals` | DRAFT depreciation journals exist for periods after disposal date. Delete them: `search_journals(filter: {fixedAssetResourceId: <id>, valueDate: {gt: '<disposal>'}, status: 'DRAFT'})` then `delete_journal` per result. |
+| `update_fixed_asset` to DISPOSED | 422 `pending_depreciation_journals` | DRAFT depreciation journals exist for periods after disposal date. Delete them: **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. then `delete_journal` per result. |
 | Cross-check | Calculator NBV ≠ FA register NBV | Investigate missing depreciation journals (recipe pre-emitted DRAFTs that weren't finalized monthly). Finalize all up to disposal date BEFORE running this recipe. |
 | Recipe NBV ≠ TB Vehicles − TB Accum Dep | (audit failure) | Likely a manual journal touched Vehicles or Accum Dep without going through the recipe. Audit `generate_general_ledger(accountResourceId: <Vehicles>, period_end: <today>)`. |
 
@@ -196,6 +196,6 @@ Should reflect the disposal in the year's movement: `openingNbv − depreciation
 
 - Year-end close — FA disposals discovered during the year-end review trigger this recipe per asset.
 - Month-end close — ad-hoc invocation when a disposal happens mid-period.
-- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Asset Disposal'}, valueDate: {between: [<FY-start>, <FY-end>]}})` plus per-capsule recompute via `clio calc asset-disposal`. Auditor tests proceeds against bank statements, NBV against FA register.
+- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` then narrow by date on the rows — **do not filter capsules by date**: `startDate`/`endDate` are declared on `CapsuleFilter` and pass validation, but every form of them answers `500 Internal Server Error` (measured 2026-09-07: `{gte}`, `{between}`, and `{gte}`+`{lte}` all 500) plus per-capsule recompute via `clio calc asset-disposal`. Auditor tests proceeds against bank statements, NBV against FA register.
 - `fa-review.md` job — annual FA register review identifies candidates for disposal (assets fully depreciated, assets no longer in use, assets damaged) → invoke this recipe per identified disposal.
 - Sibling recipe `declining-balance.md` — depreciation up to the disposal date; complete all DRAFT depreciation finalizations BEFORE running this recipe to ensure NBV is correct.

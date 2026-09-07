@@ -8,7 +8,7 @@
 - **`generate_vat_ledger(period_start: <period-start>, period_end: <period-end>)`** — step 1: the canonical tax ledger. Returns input + output tax totals + per-tax-profile breakdown.
 - **`search_tax_profiles(filter: {})`** — step 2 setup verification: confirm all expected tax profiles exist (`SR`, `ZR`, `ES`, `IES`, `OS`, `TX`, `BL`, `OP`, `EP`, `RC` for SG; `VAT-RC`, `VAT-EXP`, `VAT-ZR`, `VAT-EXM`, `VAT-EXC` for PH).
 - **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, limit: 200)`** — step 3 output-tax detail: per-invoice GST cross-check against tax ledger.
-- **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}, status: {ne: 'DRAFT'}}, limit: 200)`** — step 4 input-tax detail: per-bill GST cross-check, with blocked-input filter.
+- **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}, status: {neq: 'DRAFT'}}, limit: 200)`** — step 4 input-tax detail: per-bill GST cross-check, with blocked-input filter.
 - **`quick_fix_invoices(...)` / `quick_fix_bills(...)`** — step 5 corrections: bulk-update tax-profile / tax-vat-applicable across multiple transactions if errors found.
 - **`download_export(exportType: 'analysis-exchange-rate-audit', startDate, endDate)`** — step 6 pre-filing check: FX rates outside expected band can shift GST on FX invoices.
 - **`generate_trial_balance(period_end: <period-end>)`** — step 7 GST account reconciliation: `GST Control` / `Input Tax Recoverable` / `Output Tax Payable` accounts.
@@ -66,7 +66,7 @@ Halt if any expected profile is missing — surface to practitioner with create 
 ## Step 3 — Output-tax detail review
 
 ```
-search_invoices(filter: {valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {in: ['ACTIVE', 'PAID', 'PARTIALLY_PAID']}}, limit: 200, sort: 'valueDate:asc')
+search_invoices(filter: {valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {in: ['UNPAID', 'PARTIALLY_PAID', 'PAID']}}, limit: 200, sort: 'valueDate:asc')
 ```
 
 Paginate via offset if `totalElements > 200`. For each invoice:
@@ -82,7 +82,7 @@ Flag invoices where:
 ## Step 4 — Input-tax detail review
 
 ```
-search_bills(filter: {valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {ne: 'DRAFT'}}, limit: 200)
+search_bills(filter: {valueDate: {between: ['2025-01-01', '2025-03-31']}, status: {neq: 'DRAFT'}}, limit: 200)
 ```
 
 For each bill:
@@ -172,7 +172,7 @@ Save the filing summary for the quarter. The user files via the appropriate port
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| Step 1 | `generate_vat_ledger` returns 0 for input tax despite bills exist | Likely all bills are DRAFT. `search_bills(filter: {status: 'DRAFT', valueDate: {between: [<Q-start>, <Q-end>]}})`; finalize via `bulk_finalize_drafts` (or `finalize_bill` per ID). |
+| Step 1 | `generate_vat_ledger` returns 0 for input tax despite bills exist | Likely all bills are DRAFT. `search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<Q-start>, <Q-end>]}})`; finalize via `bulk_finalize_drafts` (or `finalize_bill` per ID). |
 | Step 2 | Tax profile missing for jurisdiction | `create_tax_profile(...)` per IRAS / BIR spec. Halt and surface to practitioner — practitioner judgment on rate. |
 | Step 3 | Per-invoice GST ≠ tax-ledger output total | Investigate per-invoice tax-profile assignment. Quick Fix typically resolves. |
 | Step 4 | BL bills coded as TX | Quick Fix re-assigns to BL. Practitioner approval required (changes input tax claim). |

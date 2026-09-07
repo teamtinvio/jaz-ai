@@ -7,7 +7,7 @@
 ### Platform tools — pre-close gates
 - **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, sort: 'valueDate:asc', limit: 200)`** — step 1: confirm sales invoices entered. Paginate via `offset`.
 - **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}}, ...)`** — step 2: confirm purchase bills entered.
-- **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', valueDateRange: {from, to})`** — step 3: pull unreconciled bank statement entries per account.
+- **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', startDate: <from>, endDate: <to>)`** — step 3: pull unreconciled bank statement entries per account.
 - **`generate_aged_ar(period_end: <date>)` / `generate_aged_ap(period_end: <date>)`** — steps 4-5: aging reports tied to TB AR / AP balances.
 
 ### Platform tools — accruals + valuations
@@ -28,7 +28,7 @@
 - **`generate_trial_balance(period_end: <date>)`** — step 14: master reconciliation.
 - **`generate_profit_and_loss(period_start, period_end)`** — step 15.
 - **`generate_balance_sheet(period_end)`** — step 16.
-- **`search_journals(filter: {status: 'DRAFT', valueDate: {between: [<period-start>, <period-end>]}})`** — step 17: gate on zero drafts.
+- **`search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<period-start>, <period-end>]}})`** — step 17: gate on zero drafts.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 17: clear residual drafts before lock.
 - **`update_account(resourceId: <CoA root>, lockDate: <period-end>)`** — step 18: lock the period.
 
@@ -74,7 +74,7 @@ Cross-reference against email + supplier portals + physical mail. Late bills = m
 For each bank account:
 
 1. If you don't already have the account's resourceId: `list_bank_accounts()`, match by `name + currency`, confirm with the user.
-2. `search_bank_records(accountResourceId: <bank account resourceId>, status: 'UNRECONCILED', valueDateRange: {from: '2025-01-01', to: '2025-01-31'}, limit: 200, sort: 'valueDate:asc')`.
+2. `search_bank_records(accountResourceId: <bank account resourceId>, status: 'UNRECONCILED', startDate: '2025-01-01', endDate: '2025-01-31', limit: 200, sort: 'valueDate:asc')`.
 3. If results: drive the 5-phase cascade matcher (Step 4 in `bank-recon.md`; local CLI: `clio jobs bank-recon match --input <records> --tolerance 0.01 --date-window 14 --json`). For each match, invoke the matching `reconcile_*` tool.
 4. `view_auto_reconciliation(bankStatementEntryResourceIds: [<id>, ...], recommendationType: 'MAGIC_MATCH')` — READ-ONLY suggestions for residuals (per-entry; get ids from `search_bank_records`, status `UNRECONCILED`); commit via `quick_reconcile` / `apply_bank_rule` / per-entry `reconcile_*`.
 5. `generate_bank_recon_summary(period_end: '2025-01-31', accountResourceId: <id>)`. Confirm `unreconciledCount == 0` OR document the residuals for the period and surface to the user.
@@ -108,9 +108,9 @@ Cross-check: `generate_trial_balance(period_end: '2025-01-31')`. Sum credit move
 
 ### Step 7 — Prepaid expense recognition (finalize this period's pre-emitted journal)
 
-For each existing `Prepaid Expenses` capsule (via `search_capsules(filter: {capsuleType: {eq: 'Prepaid Expenses'}})`):
+For each existing `Prepaid Expenses` capsule (via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)):
 
-1. `search_journals(filter: {capsuleResourceId: {eq: <capsule.id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})`. The recipe pre-emitted this period's recognition journal as DRAFT at recipe-execution time.
+1. **STOP — do not select these with a filter.** Journals cannot be narrowed to one capsule: `JournalFilter` declares no `capsuleResourceId`, a journal row carries no capsule link even at `view: 'full'` or on `GET /journals/{id}`, and `GET /capsules/{id}` returns only `totalTransactions` — a count (all measured 2026-09-07). A date+status search returns EVERY matching DRAFT in the org, including drafts a practitioner deliberately parked, so passing it to `bulk_update_journals(saveAsDraft: false)` finalizes unrelated work. Surface the capsule and its expected journal count and let the practitioner identify the journals to finalize.
 2. If empty: either the recipe was set up wrong (no journal for this period — investigate via `search_journals` without status filter to see if it's already ACTIVE, then skip), OR the practitioner went off-recipe. Surface to practitioner.
 3. If found: collect resourceIds, then `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`.
 4. New prepaid setups during this period (a new prepaid started this month): invoke `plan_recipe(recipe: 'prepaid-expense', ...)` (see the `prepaid-expense` recipe in the transaction-recipes skill) — this creates the bill + N future-dated DRAFT journals; the current period's journal is then in the bulk_finalize_drafts queue above.
@@ -139,9 +139,9 @@ On first month of FY only — engine creates the scheduler and posts the first a
 
 ### Step 11 — Loan interest (finalize this period's pre-emitted journal)
 
-For each active loan capsule (via `search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}})`):
+For each active loan capsule (via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)):
 
-1. `search_journals(filter: {capsuleResourceId: {eq: <loan-capsule-id>}, valueDate: {between: ['2025-01-01', '2025-01-31']}, status: {eq: 'DRAFT'}})`. The `loan` recipe pre-emitted all `termMonths` future-dated DRAFT journals at execution time — this period's repayment is one of them.
+1. **STOP — do not select these with a filter.** Journals cannot be narrowed to one capsule: `JournalFilter` declares no `capsuleResourceId`, a journal row carries no capsule link even at `view: 'full'` or on `GET /journals/{id}`, and `GET /capsules/{id}` returns only `totalTransactions` — a count (all measured 2026-09-07). A date+status search returns EVERY matching DRAFT in the org, including drafts a practitioner deliberately parked, so passing it to `bulk_update_journals(saveAsDraft: false)` finalizes unrelated work. Surface the capsule and its expected journal count and let the practitioner identify the journals to finalize.
 2. Should return exactly one DRAFT journal per active loan. Each is a 3-line entry (debit Loan Payable, debit Interest Expense, credit Cash) with the correct amortization split for the period.
 3. Collect resourceIds, then `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`.
 4. Do NOT post manual loan-interest accruals — the recipe already emitted the journal with the correct split per `clio calc loan` schedule.

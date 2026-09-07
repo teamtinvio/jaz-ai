@@ -68,8 +68,8 @@ For each ACTIVE SL asset (Jaz auto-depreciates):
 - Should match within rounding ($0.12 tolerance for full-year SL).
 
 For each ACTIVE DDB / 150DB asset (recipe-managed, see the `depreciation` recipe):
-- Per capsule: `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, valueDate: {between: [<year-start>, <year-end>]}, status: 'DRAFT'})`. Should be zero — all 12 months' DRAFT depreciation journals should already be FINALIZED via the monthly close.
-- If non-zero: `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])` for each remaining DRAFT.
+- Per capsule: the 12 monthly DRAFT depreciation journals should already be FINALIZED via the monthly close. This cannot be verified with a filter — journals carry no capsule or fixed-asset link in either direction (measured 2026-09-07) — so report the capsule and its `totalTransactions` count for the practitioner to check, rather than searching by date.
+- If the practitioner identifies remaining DRAFTs, finalize those specific resourceIds with `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])` — never a set collected by an unscoped search.
 
 Cross-check via `clio calc depreciation --frequency annual --json` per asset; auditor will sample-test.
 
@@ -134,7 +134,7 @@ These feed `audit-prep.md` step 8 supporting schedules.
 | Step 3 | Recon doesn't tie | Disposed asset still ACTIVE in register (the `asset-disposal` recipe leaves the FA-register status update to you). Audit each disposal's status. |
 | Step 4 | DDB / 150DB DRAFTs unfinalized | Likely a missed monthly close. Finalize the current ones and surface to the user — the auditor will otherwise see 12 months' depreciation in one period. |
 | Step 4 | SL depreciation off by > $0.12 | A monthly depreciation period was skipped (asset created mid-month with mis-aligned `acquisitionDate`). Reconcile per asset. |
-| Step 5 | `update_fixed_asset` to DISPOSED | 422 `pending_depreciation_journals` | DRAFT depreciation journals exist for periods after disposal date. `search_journals(filter: {fixedAssetResourceId: <id>, valueDate: {gt: <disposal>}, status: 'DRAFT'})` → `delete_journal` per result. Then retry. |
+| Step 5 | `update_fixed_asset` to DISPOSED | 422 `pending_depreciation_journals` | DRAFT depreciation journals exist for periods after disposal date. **Do not select these with a filter** — journals cannot be narrowed to one fixed asset (`JournalFilter` has no `fixedAssetResourceId`, and a journal row carries no asset link), so a date+status search returns every DRAFT in the org and `delete_journal` over it would destroy unrelated work. Surface the asset and the blocking periods to the practitioner and let them identify the journals, then retry. |
 | Step 6 | Trying to dispose an FA at NBV = 0 with no proceeds | Recipe still works but creates a no-effect journal. May be skippable; surface to practitioner. |
 
 ---

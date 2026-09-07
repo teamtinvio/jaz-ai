@@ -12,15 +12,15 @@
 - **`generate_fa_recon_summary(period_start: <FY-start>, period_end: <FY-end>)`** — Y1 verification: opening NBV + additions − disposals − depreciation = closing NBV.
 - **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED']}})`** — Y1 enumeration of FAs.
 - **`update_fixed_asset(resourceId: <id>, status: 'ACTIVE'|'DISPOSED'|'WRITTEN_OFF')`** — Y1 fallback if any FA has incorrect status at FY-end.
-- **`search_journals(filter: {tag: 'leave-accrual', valueDate: {between: [<FY-start>, <FY-end>]}})` / `search_journals(filter: {tag: 'bonus-accrual', ...})`** — Y2 true-up: pull all FY accrual journals to compare against actuals.
+- **`search_journals(filter: {tags: {eq: 'leave-accrual'}, valueDate: {between: [<FY-start>, <FY-end>]}})` / `search_journals(filter: {tags: {eq: 'bonus-accrual'}, ...})`** — Y2 true-up: pull all FY accrual journals to compare against actuals.
 - **`create_journal(...)`** — Y2 true-up adjustment journals (manual one-off, not recipe-driven).
 - **`plan_recipe(recipe: 'dividend', ...)` + `execute_recipe(...)`** — Y3 dividend declaration + payment (engine emits the 2-step pattern: declaration journal + payment cash-out).
 - **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — Y4 IFRS 9 ECL year-end true-up against `generate_aged_ar`.
 - **`update_account(resourceId: <CoA root>, lockDate: <FY-end>)`** — Y8 final lock.
 
 ### Platform tools — current/non-current reclassification (manual annual journals)
-- **`search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}})`** + per-capsule `clio calc loan` to compute next-12-months principal portion.
-- **`search_capsules(filter: {capsuleType: {eq: 'Lease'}})`** + per-capsule `clio calc lease` for IFRS 16 reclassification.
+- **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)** + per-capsule `clio calc loan` to compute next-12-months principal portion.
+- **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)** + per-capsule `clio calc lease` for IFRS 16 reclassification.
 - **`create_journal(...)`** for the reclassification entries (Dr Loan Payable Non-current / Cr Loan Payable Current; Dr Lease Liability Non-current / Cr Lease Liability Current).
 
 ### Handoff to audit-prep
@@ -66,16 +66,16 @@ generate_fa_recon_summary(period_start: '2025-01-01', period_end: '2025-12-31')
 
 For Jaz native straight-line depreciation: should be automatic and correct. Verify the 12-month aggregate against `generate_general_ledger(accountResourceId: <Depreciation Expense>, period_start, period_end)`.
 
-For non-SL assets (DDB, 150DB) where `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db')` was used: each capsule pre-emitted 12 future-dated DRAFT journals at recipe-execution time. Confirm all 12 are FINALIZED via `search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})` — should be empty. If non-empty: route back to `month-end-close.md` step 9.
+For non-SL assets (DDB, 150DB) where `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db')` was used: each capsule pre-emitted 12 future-dated DRAFT journals at recipe-execution time. Confirm all 12 are FINALIZED via `search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})` — should be empty. If non-empty: route back to `month-end-close.md` step 9.
 
-Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond the materiality threshold → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {capsuleResourceId: {eq: <dep capsule>}, startDate: <FY-start>, endDate: <FY-end>})`) — typical cause is a disposal posted without `update_fixed_asset(status: 'DISPOSED')`.
+Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond the materiality threshold → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {valueDate: {between: [<FY-start>, <FY-end>]}})`) — typical cause is a disposal posted without `update_fixed_asset(status: 'DISPOSED')`.
 
 ### Y2 — Annual true-ups (manual journals)
 
 **Leave balance true-up:**
 
 ```
-search_journals(filter: {tag: 'leave-accrual', valueDate: {between: ['2025-01-01', '2025-12-31']}})
+search_journals(filter: {tags: {eq: 'leave-accrual'}, valueDate: {between: ['2025-01-01', '2025-12-31']}})
 ```
 
 Sum FY accruals (the recipe-pre-emitted journals already finalized monthly). Compare against actual unused leave days × daily rate per employee at FY-end (HR data). Difference: post manual `create_journal`:
@@ -149,7 +149,7 @@ For specific large customers requiring stage-3 provision (specific impairment vs
 For each existing IAS 37 provision capsule (warranty, legal, decommissioning):
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Provision'}, status: 'ACTIVE'})
+search_capsules(filter: {status: {eq: 'ACTIVE'}})
 ```
 
 Per capsule, recompute the present value at FY-end (`clio calc provision`). Top-up via additional `plan_recipe(recipe: 'provision', ...)` + `execute_recipe` if required, OR reverse via `create_journal` if the obligation reduced.
@@ -211,7 +211,7 @@ Invoke `audit-prep.md` job. Year-end-close output (TB final, all reports, all re
 | Source | Error | Recovery |
 |--------|-------|----------|
 | Phase 1-7 (standalone) | Quarters not all closed | One or more quarters incomplete. Route back to the missing `quarter-end-close.md`. Run annual extras only once all 4 quarters are locked. |
-| Y1 FA recon | NBV doesn't tie | Investigate disposed assets posted without status update. `search_fixed_assets(filter: {status: 'ACTIVE'})` then check each against current physical existence. |
+| Y1 FA recon | NBV doesn't tie | Investigate disposed assets posted without status update. `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` then check each against current physical existence. |
 | Y3 `execute_recipe` for dividend | 422 `dividends_payable_account_missing` | Create `Dividends Payable` account (`Current Liability`) via `create_account` first. |
 | Y4 ECL | top-up amount surprisingly large | Possibly the existing provision is stale (no monthly mental ECL check ran). Confirm `--existing-provision` matches `TB[Allowance for Doubtful Debts].balance`. If yes, real impairment event occurred — surface to practitioner. |
 | Y6 reclassification | Existing reclassification entry from prior year still present | Reverse the prior-year reclassification first (it sits in opening balances). The reclassification entry is per-FY; should be reset at the start of each FY. |

@@ -12,7 +12,7 @@
 - **`clio calc dividend --amount <gross> --withholding-rate <%> --currency <code> --json`** — used in step 1: computes net dividend payable to shareholder + withholding tax to remit. Returns `{ grossAmount, withholdingTax, netToShareholder }`.
 
 ### Tools (jaz-api / direct)
-- **`search_capsules(filter: {capsuleType: {eq: 'Dividends'}, name: {eq: <capsule.name>}})`** — step 0 idempotency check. Each declared dividend gets its own capsule; duplicate setup means double-declaration.
+- **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check. Each declared dividend gets its own capsule; duplicate setup means double-declaration.
 - **`search_accounts(filter: {name: {in: ['Retained Earnings', 'Dividends Payable', 'Withholding Tax Payable']}})`** — step 3.
 - **`search_contacts(filter: {name: {eq: <shareholder>}})`** — step 3 (the payee — typically a shareholder or a holding entity).
 - **`generate_balance_sheet(period_end: <date>)`** — step 5 verification: Retained Earnings reduced; Dividends Payable nil after payment.
@@ -30,7 +30,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Dividends'}, name: {eq: 'FY2025 Final Dividend'}})
+search_capsules(filter: {title: {eq: 'FY2025 Final Dividend'}})
 ```
 
 If a result returns: halt and surface "Dividend capsule `<name>` already exists. Re-running would create a duplicate declaration. Confirm — if posting an interim dividend, use a different capsule name (e.g., `Q3 2025 Interim Dividend`)."

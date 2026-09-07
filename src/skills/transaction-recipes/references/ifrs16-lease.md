@@ -12,7 +12,7 @@
 - **`clio calc lease --payment <monthly> --term <months> --rate <annual %> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: independently produce `{ presentValue, totalInterest, schedule[n] }` (monthly payment splits into interest + principal portions, principal reducing the liability).
 
 ### Tools (jaz-api / direct)
-- **`search_capsules(filter: {capsuleType: {eq: 'Lease'}, name: {eq: <capsuleName>}})`** — step 0 idempotency check.
+- **`search_capsules(filter: {title: {eq: <capsuleName>}})`** — step 0 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Right-of-Use Asset', 'Lease Liability', 'Interest Expense — Leases']}})`** — step 3.
 - **`search_contacts(filter: {supplier: true, name: {eq: <lessor>}})`** — step 3 (lease counterparty).
 - **`create_fixed_asset(...)`** — step 4 manual: register the ROU asset in Jaz native FA. `cost` = PV from calculator, `usefulLifeMonths` = lease term, `depreciationMethod` = 'sl' (straight-line). Jaz auto-posts monthly depreciation thereafter.
@@ -32,7 +32,7 @@
 ### Step 0 — Idempotency check
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Lease'}, name: {eq: 'Office Lease — Marina One — 36 months'}})
+search_capsules(filter: {title: {eq: 'Office Lease — Marina One — 36 months'}})
 ```
 
 If a result returns: halt and surface "Lease capsule `<name>` already exists. Re-running would create a duplicate ROU + Lease Liability. Confirm intent — if modifying lease terms (rent revision, term extension), use the IFRS 16 lease re-measurement pattern (manual journal); do NOT re-execute the recipe."
@@ -116,7 +116,7 @@ For each month after recipe execution:
 **5a — Finalize this period's unwinding journal (3-line, lease payment):**
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
@@ -173,5 +173,5 @@ After the FINAL period (month 36):
 - Month-end close — invoked monthly to finalize this period's pre-emitted unwinding DRAFT (5a) + verify Jaz auto-posted ROU depreciation (5b).
 - `jobs/references/year-end-close.md` Y6 — current/non-current reclassification (manual annual journal) + auditor sample-test of the lease schedule via `clio calc lease`.
 - Data migration — opening lease balances loaded via conversion (`jaz-conversion/SKILL.md § Option 2` with the Conversion Clearing > Lease account); recipe runs forward only from migration date.
-- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {capsuleType: {eq: 'Lease'}})` + per-capsule `clio calc lease` recompute. Auditor reconciles to TB Lease Liability + ROU Asset NBV.
+- `audit-prep.md` step 8 — supporting schedule via `search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable — see `jobs/references/building-blocks.md` § Filter limits)` + per-capsule `clio calc lease` recompute. Auditor reconciles to TB Lease Liability + ROU Asset NBV.
 - Sibling recipe `hire-purchase.md` — same engine, different useful-life parameter.

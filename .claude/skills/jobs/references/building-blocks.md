@@ -54,7 +54,7 @@ Recipe engine creates ALL future-dated journals upfront as DRAFT (loan: 60 month
 
 Monthly action per recipe-managed capsule:
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+search_journals(filter: {valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
 update_journal(resourceId: <this period's pre-emitted journal>, saveAsDraft: false)
 ```
 
@@ -65,7 +65,7 @@ For Jaz-scheduler-driven recurrences (`create_scheduled_journal`, `create_schedu
 Every recipe-engine call attaches its outputs to a capsule. Search across all capsules of a type for cross-cutting reporting:
 
 ```
-search_capsules(filter: {capsuleType: {eq: 'Loan Repayment'}, status: {eq: 'ACTIVE'}})
+search_capsules(filter: {status: {eq: 'ACTIVE'}})
 ```
 
 Capsule types used by jobs:
@@ -87,7 +87,7 @@ Capsule types used by jobs:
 
 Group GL by capsule for the auditor:
 ```
-get_capsule(resourceId)   # returns the capsule's transactions; GL cannot group by capsule
+get_capsule(resourceId)   # returns totalTransactions (a COUNT), not the transactions; GL cannot group by capsule
 ```
 
 ## Platform tools every job uses
@@ -148,3 +148,31 @@ Every leg carries its own explicit `org_id` — a wrong "active" org silently po
 
 - `transaction-recipes/references/building-blocks.md` — recipe-side primitives (capsules, schedulers, the engine itself, recipe-name aliases). Pair with this file for full context.
 - `jaz-api/SKILL.md` — endpoint-by-endpoint API rules. Cited per-job for specific gotchas.
+
+### Filter limits on capsules and journals (measured 2026-09-07)
+
+Two things these playbooks used to instruct are **not supported by the search filters**, and an
+undeclared filter field is REJECTED, not ignored — the call returns a 400 rather than a wider result.
+
+**Capsules cannot be filtered by type.** `CapsuleFilter` declares only `and`, `description`,
+`endDate`, `or`, `resourceId`, `startDate`, `status`, `title`. Fetch with the filters that exist and
+narrow client-side on the row: `type` is the flat string, `capsuleType` is an OBJECT
+(`{name, displayName, resourceId, status, ...}`). Match on `type` or `capsuleType.name`, and expect
+BOTH casings — the same field carries `Prepaid Expenses` on one row and `TAX_PAYMENT` on another, so
+compare case-insensitively with separators normalized rather than testing equality against a label.
+
+**Journals cannot be filtered by capsule or by fixed asset.** `JournalFilter` declares `and`,
+`andGroup`, `contact`, `createdAt`, `creator`, `internalNotes`, `or`, `orGroup`, `reference`,
+`resourceId`, `status`, `tags`, `templateType`, `type`, `updatedAt`, `valueDate` — no
+`capsuleResourceId`, no `fixedAssetResourceId`. There is no reverse route either: a capsule exposes
+only `totalTransactions` (a count), and no `/capsules/{id}/journals` endpoint exists. Narrow with
+the declared fields — `valueDate`, `status`, `type`, `templateType`, `tags`, `reference` — and report the capsule
+and its `totalTransactions` count and let the practitioner identify the journals. Do NOT assume the
+recipe left a link to match on: `referencePrefix` is optional with no default (`core/recipe/types.ts`),
+is caller-chosen text unrelated to the capsule id, and the engine sets no tags on anything it creates
+(`core/recipe/engine.ts`). Note `tags` is PLURAL; `tag` is rejected.
+
+**Capsules cannot be filtered by date either.** `startDate` and `endDate` are declared on
+`CapsuleFilter` and pass validation, but every form measured on 2026-09-07 — `{gte}`, `{between}`,
+and `{gte}` paired with `{lte}` — answers `500 Internal Server Error`. Filter on `status`/`title`
+and narrow dates on the rows.

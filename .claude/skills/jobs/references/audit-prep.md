@@ -138,7 +138,7 @@ Assert: `fa_recon.openingNbv + additions - disposals - depreciation == fa_recon.
 
 For non-FA-register schedules (loan, lease, ECL, fixed-deposit, prepaid, intercompany), pull the underlying capsules:
 ```
-search_capsules(filter: {capsuleType: {in: ['Loan Repayment', 'Lease', 'Fixed Deposit', 'Prepaid Expenses', 'Provision']}})
+search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable — see `building-blocks.md` § Filter limits)
 ```
 For each capsule, run the matching `clio calc <type>` to produce the independent schedule. Keep one schedule per capsule — the auditor uses these to test the IFRS 9 / IFRS 16 / IAS 37 measurements.
 

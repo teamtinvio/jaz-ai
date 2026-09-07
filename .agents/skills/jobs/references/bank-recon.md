@@ -7,7 +7,7 @@
 ### Platform tools — discovery + auto-match
 - **`list_bank_accounts()`** — step 1: pull all bank-type CoA accounts (per `jaz-api/SKILL.md` rule 18: GET `/bank-accounts` returns flat array `[{...}]`, NOT the standard paginated `{ data, totalElements, totalPages }` shape — normalize before consuming).
 - **`search_accounts(filter: {accountType: {eq: 'Bank Accounts'}})`** — step 1 alternative: same data via standard CoA-search envelope if downstream wants pagination.
-- **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', valueDateRange: {from, to}, limit: 200, sort: 'valueDate:asc')`** — step 2: per-account work queue.
+- **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', startDate: <from>, endDate: <to>, limit: 200, sort: 'valueDate:asc')`** — step 2: per-account work queue.
 - **`search_bank_records(accountResourceId: <id>, status: 'POSSIBLE_DUPLICATE')`** — step 3: handle dups FIRST or you'll double-create reconciling them.
 - **`view_auto_reconciliation(bankStatementEntryResourceIds: [<id>, ...], recommendationType: 'MAGIC_MATCH' | 'RECOMMENDATIONS' | 'MAGIC_RECONCILE_WITH_CASH_TRANSFER' | 'MAGIC_RECONCILE_WITH_BANK_RULE' | 'MAGIC_QUICK_RECONCILE' | 'MAGIC_RECONCILE_WITH_CASH_IN_OUT', bankAccountResourceId?: <id>, autoCommitMaxAmount?: <number>)`** — step 4: READ-ONLY auto-match suggestions. **Pick the group, not the whole world:** `RECOMMENDATIONS` returns every type except `MAGIC_MATCH` in one ranked call and is the cheaper request; `MAGIC_MATCH` scans open transactions across the account and is asked for on its own. The four specific values narrow to one type. There is no value that returns everything at once, so a two-sided sweep is two calls. `recommendationType` is a REQUEST selector only: `RECOMMENDATIONS` never comes back as a suggestion's own `recommendationType`, which is always a concrete type. **`bankStatementEntryResourceIds` is REQUIRED — this endpoint is per-entry and there is no account-wide mode.** Source the ids from `search_bank_records` with status `UNRECONCILED`. Pass `bankAccountResourceId` too: it is merged into each suggestion's `execute` args for `reconcile_magic_match`. Returns **execution-ready `suggestions[]`** — each carries `recommendedTool`, `execute` (ready-to-pass args), `confidenceTier`, and `autoCommitEligible`. This is the entry point for the auto-match decision gate (step 4a). `MAGIC_RECONCILE_WITH_CASH_IN_OUT` returns Learned-Predictions. Does NOT write. NOTE: cost tracks the entries you pass — batch large backlogs. On a 500 it degrades to `{degraded:true}`; fall back to the cascade matcher (see error table).
 - **`search_cashflow_transactions(filter: {organizationAccountResourceId: <bank-id>, totalAmount: {eq: <amt>}, valueDate: {between: [<-3d>, <+3d>]}})`** — step 5 manual match: search book-side transactions for the same amount within ±3 day window.
@@ -66,13 +66,14 @@ For each bank account `B`:
 search_bank_records(
   accountResourceId: B.resourceId,
   status: 'UNRECONCILED',
-  valueDateRange: { from: '2025-01-01', to: '2025-01-31' },
+  startDate: '2025-01-01',
+  endDate: '2025-01-31',
   limit: 200,
   sort: 'valueDate:asc'
 )
 ```
 
-Omit `valueDateRange` for full catch-up across all open periods. Paginate via `offset` if `totalElements > 200`. Each row: `{resourceId, valueDate, netAmount, extContactName, description, balance}`. `netAmount > 0` = cash-in; `< 0` = cash-out. `extContactName + description` are the highest-signal match clues.
+Omit `startDate`/`endDate` for full catch-up across all open periods. Paginate via `offset` if `totalElements > 200`. Each row: `{resourceId, valueDate, netAmount, extContactName, description, balance}`. `netAmount > 0` = cash-in; `< 0` = cash-out. `extContactName + description` are the highest-signal match clues.
 
 Flag any item older than 60 days as red — surface to practitioner.
 
@@ -229,7 +230,7 @@ Per account: `bookBalance == bankStatementBalance ± documentedTimingDifference`
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| `view_auto_reconciliation` | 500 on high-volume account → returns `{degraded:true}` | Documented OOM quirk on accounts with thousands of unreconciled rows. The tool degrades (doesn't throw): scope per-period (`valueDateRange`) OR fall back to `clio jobs bank-recon match` cascade. |
+| `view_auto_reconciliation` | 500 on high-volume account → returns `{degraded:true}` | Documented OOM quirk on accounts with thousands of unreconciled rows. The tool degrades (doesn't throw): scope per-period (`startDate`/`endDate`) OR fall back to `clio jobs bank-recon match` cascade. |
 | `view_auto_reconciliation` | 404 → returns `{notSupported:true}` | Endpoint not enabled for the org's plan tier. Use cascade matcher only. |
 | `quick_reconcile` | PARTIAL_SUCCESS jobId | Async result. Poll `search_background_jobs(filter: {resourceId: {eq: <jobId>}})` until terminal. Read `data[0].errorDetails[]` for per-row failures; loop back to step 4 for the failed rows. |
 | `quick_reconcile` / `reconcile_*` | (any) — NOT idempotent (rule 125) | On 500 / network error, do NOT retry. Confirm reconciled state via `view_auto_reconciliation` OR `search_bank_records(status: 'RECONCILED')` first. |

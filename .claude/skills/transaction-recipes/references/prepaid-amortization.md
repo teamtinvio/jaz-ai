@@ -16,7 +16,7 @@
 - **`create_contact(...)`** — used in step 3 fallback: create the supplier if `search_contacts` returns empty.
 - **`search_accounts(filter: {name: {in: ['<asset GL>', '<expense GL>']}})`** — used in step 3: confirm the prepaid asset and expense GL accounts exist; if missing, surface to practitioner before retry.
 - **`generate_trial_balance(period_end: <date>)`** — used in step 5: verify the recognition has unwound the prepaid balance correctly.
-- **`search_capsules(filter: {capsuleType: {eq: 'Prepaid Expenses'}, name: {eq: <capsule.name>}})`** — used to detect duplicate setup in re-runs.
+- **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — used to detect duplicate setup in re-runs.
 
 ### Cross-references
 - Operational context: invoked during month-end close (initial setup of new prepaids; ongoing recognition runs from the scheduler created here).
@@ -86,7 +86,7 @@ Note: This is NOT the Jaz scheduler primitive (`create_scheduled_journal`). The 
 For each month after recipe execution, the corresponding DRAFT journal already exists in the capsule. Monthly close action:
 
 ```
-search_journals(filter: {capsuleResourceId: {eq: <id>}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
+**STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
 ```
 
 Returns the one DRAFT for that period. Finalize:
