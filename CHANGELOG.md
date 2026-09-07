@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.55.11] - 2026-09-07
+
+Internal release automation fix. No user-facing changes since v5.55.10.
+
+The nightly job that checks dashboard links resolved its own alert but never closed it, so a
+long-fixed alert stayed open reading as urgent. It now closes the alert when the problem clears.
+
 ## [5.55.10] - 2026-09-07
 
 Internal performance change. No user-facing behaviour change since v5.55.9.
