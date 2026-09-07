@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.55.6] - 2026-09-07
+
+Internal release automation fix. No user-facing changes since v5.55.5.
+
+The nightly job that refreshes the dashboard link list could publish a removal before its own safety
+check reported, which could take a release offline. It now refuses to publish that change at all.
+
 ## [5.55.5] - 2026-09-07
 
 **Fixed-asset write-offs pointed at a status that does not exist.**
