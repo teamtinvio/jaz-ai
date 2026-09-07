@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.55.10] - 2026-09-07
+
+Internal performance change. No user-facing behaviour change since v5.55.9.
+
+The assistant's standing operating policies are identical on every turn, but were being re-sent in
+full each time instead of being reused. They are now sent once and reused, cutting about 13,000
+tokens of repeated content from every turn on the chat and email assistants.
+
 ## [5.55.9] - 2026-09-07
 
 **Statement of account exports no longer lose their download link.**
