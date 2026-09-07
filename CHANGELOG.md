@@ -1,5 +1,18 @@
 # Changelog
 
+## [5.55.12] - 2026-09-07
+
+**Bank reconciliation guidance corrected: a retry is safe, and a partial match is not possible.**
+
+The assistant was told that reconciling the same bank line twice would create duplicate journal
+entries. It does not — the platform rejects the second attempt. That warning made the assistant
+reluctant to retry a reconciliation it should simply have retried, and left it unprepared for the
+error the platform actually returns.
+
+It also now knows that a bank line must be reconciled for its full amount. Splitting one line across
+several things — a 1,500 payment covering a 1,400 invoice and a 100 bank fee — needs the multi-line
+cash journal, which was never explained.
+
 ## [5.55.11] - 2026-09-07
 
 Internal release automation fix. No user-facing changes since v5.55.10.

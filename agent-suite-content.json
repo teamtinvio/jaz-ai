@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.55.11+f1f227a3",
+  "contentVersion": "5.55.12+1b8183eb",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -2591,42 +2591,42 @@
     {
       "name": "reconcile_direct_cash_entry",
       "namespace": "reconciliations",
-      "description": "Reconcile a bank statement entry with a single cash-in / cash-out line. Direction (cash-in vs cash-out) is INFERRED from the bank entry sign. Sync — returns the reconciled entry status. NOT idempotent: calling twice on the same bankStatementEntryResourceId creates duplicate journals. Confirm reconciled-state via view_auto_reconciliation before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Reconcile a bank statement entry with a single cash-in / cash-out line. Direction (cash-in vs cash-out) is INFERRED from the bank entry sign. Sync — returns the reconciled entry status. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "reconcile_cash_journal",
       "namespace": "reconciliations",
-      "description": "Reconcile a bank statement entry with a multi-line cashflow journal (multiple cash splits, max 200 lines). Sync — returns the reconciled entry status. NOT idempotent — confirm reconciled-state before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Reconcile a bank statement entry with a multi-line cashflow journal (multiple cash splits, max 200 lines). Sync — returns the reconciled entry status. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "reconcile_manual_journal",
       "namespace": "reconciliations",
-      "description": "⚠️ CALLER PROVIDES ONLY THE OFFSET LEG(S) — backend AUTO-ADDS the bank-side leg from the statement entry. Sending both debit AND credit legs → 422 \"sum of debit and credit amounts are not equal\" (your sides duplicate after the auto-add). Reconcile a bank statement entry with a double-entry manual journal. Sync — returns the reconciled entry status. valueDate prefills from bank entry if omitted. NOT idempotent. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "⚠️ CALLER PROVIDES ONLY THE OFFSET LEG(S) — backend AUTO-ADDS the bank-side leg from the statement entry. Sending both debit AND credit legs → 422 \"sum of debit and credit amounts are not equal\" (your sides duplicate after the auto-add). Reconcile a bank statement entry with a double-entry manual journal. Sync — returns the reconciled entry status. valueDate prefills from bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "reconcile_cash_transfer",
       "namespace": "reconciliations",
-      "description": "Reconcile a bank statement entry with an inter-account transfer. Sync — returns the reconciled entry status. amount is required only when the counterparty account is in a non-functional currency. NOT idempotent. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Reconcile a bank statement entry with an inter-account transfer. Sync — returns the reconciled entry status. amount is required only when the counterparty account is in a non-functional currency. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "reconcile_invoice_receipt",
       "namespace": "reconciliations",
-      "description": "CREATES A NEW invoice and auto-reconciles it to a bank statement entry (AR). To match an EXISTING open invoice instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYIN` (money in — AR). Produce via `bank add-records` with a POSITIVE amount (creates `credit_amount > 0` → PAYIN). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. NOT idempotent. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "CREATES A NEW invoice and auto-reconciles it to a bank statement entry (AR). To match an EXISTING open invoice instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYIN` (money in — AR). Produce via `bank add-records` with a POSITIVE amount (creates `credit_amount > 0` → PAYIN). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "reconcile_bill_receipt",
       "namespace": "reconciliations",
-      "description": "CREATES A NEW bill and auto-reconciles it to a bank statement entry (AP). To match an EXISTING open bill instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYOUT` (money out — AP). Produce via `bank add-records` with a NEGATIVE amount (creates `debit_amount > 0` → PAYOUT). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. NOT idempotent. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "CREATES A NEW bill and auto-reconciles it to a bank statement entry (AP). To match an EXISTING open bill instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYOUT` (money out — AP). Produce via `bank add-records` with a NEGATIVE amount (creates `debit_amount > 0` → PAYOUT). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
