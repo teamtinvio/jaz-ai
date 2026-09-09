@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.58.3] - 2026-09-09
+
+**A document fetched from a link is filed under a clean name.**
+
+When a document was pulled from a URL, the filename recorded against the record came straight off the link's path, unchecked. A crafted link could put a path-like or unprintable name on a financial record. The name is now cleaned the same way everywhere, and falls back to a plain one when the link does not offer a usable name.
+
 ## [5.58.2] - 2026-09-09
 
 **A refused link no longer reports the private address it resolved to.**
