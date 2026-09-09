@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.55.15] - 2026-09-09
+
+**A "make this the default" setting on claim types and profiles has been removed, because it never did anything.**
+
+Claim types and claim profiles offered a default flag. The accounting platform stopped accepting it, and a request that set it came back successful with the setting silently discarded — so anyone who used it was told the change had been saved when nothing had changed. It has been removed rather than left in place looking functional.
+
+The `--default` flag is gone from `clio claim-types create/update` and `clio claim-profiles create/update`. A script still passing it will now stop with "unknown option" instead of appearing to work — which is the point, but it is a change a scripted caller will notice. Searching claim types or profiles by default flag has also been removed, for the same reason: the platform does not hold the value, so the filter was quietly returning unfiltered results.
+
+Posting rules are unaffected and keep their default setting, which does work.
+
 ## [5.55.14] - 2026-09-07
 
 **Contradictory access grants are now refused instead of quietly granting more access.**

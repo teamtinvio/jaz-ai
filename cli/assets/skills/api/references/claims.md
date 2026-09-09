@@ -194,8 +194,8 @@ One MCP namespace wraps all three: **`claim_settings`**. CLI: `clio claim-types 
 
 | Entity | What it is | Key fields |
 |--------|-----------|-----------|
-| **Claim Type** | An expense category (e.g. "Travel", "Meals"). | `name` (unique/org), `expenseAccountResourceId`, `taxProfileResourceId`, `classifierConfig`, `isDefault` |
-| **Claim Profile** | A per-employee policy bundle (who approves, spend limits, which types are visible, the liability account). | `name` (unique/org), `approverUserResourceId`, `visibleClaimTypeIds[]`, `visibleTaxProfileIds[]`, `visibleClassifierIds[]`, `visibleVendorResourceIds[]`, `allowedCurrencies[]`, `minClaimAmount`, `maxClaimAmount`, `maxPerPeriodAmount`, `perPeriod`, `employeeBalanceAccountResourceId`, `taxMode`, `isDefault` |
+| **Claim Type** | An expense category (e.g. "Travel", "Meals"). | `name` (unique/org), `expenseAccountResourceId`, `taxProfileResourceId`, `classifierConfig` |
+| **Claim Profile** | A per-employee policy bundle (who approves, spend limits, which types are visible, the liability account). | `name` (unique/org), `approverUserResourceId`, `visibleClaimTypeIds[]`, `visibleTaxProfileIds[]`, `visibleClassifierIds[]`, `visibleVendorResourceIds[]`, `allowedCurrencies[]`, `minClaimAmount`, `maxClaimAmount`, `maxPerPeriodAmount`, `perPeriod`, `employeeBalanceAccountResourceId`, `taxMode` |
 | **Posting Rule** | How approved claims group into journals at conversion (the "Posting Rules" tab). | `name` (unique/org), `outerAxis`, `innerAxis`, `lineDescriptionTemplate`, `journalReferenceTemplate`, `defaultBankAccountResourceId`, `defaultIncludeReimbursementPayout`, `isDefault` |
 
 ## Enums (use EXACT values)
@@ -219,4 +219,4 @@ One MCP namespace wraps all three: **`claim_settings`**. CLI: `clio claim-types 
 
 ## Search
 
-Standard `{ filter, sort }` envelope (filter-only — no natural-language `query`). Sort keys: `resourceId`, `name`, `isDefault`, `createdAt`, `updatedAt`. Filterable fields mirror the key fields above (name = contains; ids = eq; amounts = gte/lte; flags = boolean).
+Standard `{ filter, sort }` envelope (filter-only — no natural-language `query`). Sort keys: `resourceId`, `name`, `createdAt`, `updatedAt` (posting rules also sort by `isDefault`). Filterable fields mirror the key fields above (name = contains; ids = eq; amounts = gte/lte; flags = boolean).

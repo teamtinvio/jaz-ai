@@ -5256,14 +5256,6 @@
           ],
           "description": "Filter by employee balance account resource ID."
         },
-        "isDefault": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BooleanExpression"
-            }
-          ],
-          "description": "Filter by default flag."
-        },
         "maxClaimAmount": {
           "allOf": [
             {
@@ -5379,14 +5371,6 @@
             }
           ],
           "description": "Filter by expense account resource ID."
-        },
-        "isDefault": {
-          "allOf": [
-            {
-              "$ref": "#/definitions/BooleanExpression"
-            }
-          ],
-          "description": "Filter by default flag."
         },
         "name": {
           "allOf": [
@@ -6891,10 +6875,6 @@
           "description": "Resource ID of the per-employee liability account. Required for reimbursement\nconversion (includeReimbursementPayout); must be a CURRENT_LIABILITY account in the organization.\nOnce set with a non-zero balance it cannot be changed or cleared.",
           "type": "string"
         },
-        "isDefault": {
-          "description": "When true, becomes the organization's sole default.",
-          "type": "boolean"
-        },
         "maxClaimAmount": {
           "description": "Maximum claim total.",
           "minimum": 0,
@@ -7086,10 +7066,6 @@
         "expenseAccountResourceId": {
           "description": "Default expense CoA for lines of this type (UUIDv4). Schema-optional, but the\nserver requires a resolvable posting account by submit time; supplying it here\nmakes the type self-sufficient.",
           "type": "string"
-        },
-        "isDefault": {
-          "description": "When true, becomes the organization's sole default (prior default is swept).",
-          "type": "boolean"
         },
         "name": {
           "description": "Display name (max 255, case-insensitive unique per organization). Required.",
@@ -26760,10 +26736,6 @@
           "description": "Resource ID of the per-employee liability account. Required for reimbursement conversion (includeReimbursementPayout); must be a CURRENT_LIABILITY account in the organization. Once set with a non-zero balance it cannot be changed or cleared.",
           "type": "string"
         },
-        "isDefault": {
-          "description": "When true, becomes the organization's sole default.",
-          "type": "boolean"
-        },
         "maxClaimAmount": {
           "description": "Maximum claim total.",
           "minimum": 0,
@@ -26965,10 +26937,6 @@
         "expenseAccountResourceId": {
           "description": "Default expense CoA for lines of this type (UUIDv4). Schema-optional, but the server requires a resolvable posting account by submit time; supplying it here makes the type self-sufficient.",
           "type": "string"
-        },
-        "isDefault": {
-          "description": "When true, becomes the organization's sole default (prior default is swept).",
-          "type": "boolean"
         },
         "name": {
           "description": "Display name (max 255, case-insensitive unique per organization). Null means no change.",

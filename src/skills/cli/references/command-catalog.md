@@ -281,7 +281,7 @@ EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPO
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` / `get <id>` / `search` | `--limit`, `--offset`, `--all`, `--json` |
-| `create` | `--name`, `--expense-account <id>`, `--tax-profile <id>`, `--default` |
+| `create` | `--name`, `--expense-account <id>`, `--tax-profile <id>` |
 | `update <id>` / `delete <id>` | partial update; default-protected delete |
 
 ### `clio claim-profiles` — Per-employee spend policies (master data)
