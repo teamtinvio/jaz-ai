@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.58.6] - 2026-09-10
+
+**When a document can't be accepted, the reply says what to do instead — and offers to open the right screen.**
+
+The four tools that take a document — bills and invoices, expense claims, bank statements, and folder sorting — all ask for exactly one source. They answered a wrong or missing source four different ways, and two of them gave the refusal with no next step, so an assistant would often try the same thing again in a slightly different shape. All four now answer the same way: what was wrong, what to do about it, and that repeating the call cannot help.
+
+The advice is now written for the tool you called. It no longer suggests uploading a file and passing an attachment id to a tool that has no place to put one, and a call that named two sources is told to drop one rather than handed a list of places to find a document it already has.
+
+Each refusal also carries a link to the import screen for what you were doing — the bills or invoices importer, the claims importer, or the bank feed importer — so an assistant can offer that instead of guessing.
+
+Note for anyone scripting the CLI: a link the platform will not fetch now exits 1 (invalid input) rather than 2 (unknown error), for `magic create --url`, `bank import --url`, `claims from-attachment --source-url` and `employees preprocess`.
+
 ## [5.58.5] - 2026-09-09
 
 **The same link check now covers every tool that hands a link to the platform.**
