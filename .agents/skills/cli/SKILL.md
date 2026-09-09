@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.58.6
+version: 5.58.7
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -380,7 +380,7 @@ clio ct loan --principal 100000 --rate 5 --term 60 --start-date 2026-01-01 \
 1. **Pipe JSON to jq**: `clio invoices list --json | jq '.data[] | {ref: .reference, amount: .totalAmount}'`
 2. **Export to CSV**: `clio contacts list --all --format csv > contacts.csv`
 3. **Multi-org scripts**: `clio invoices list --org acme-sg --json && clio invoices list --org acme-ph --json`
-4. **Draft-then-finalize**: The CLI defaults to saving as draft (overrides the API default of `saveAsDraft: false`). Use `--finalize` to create a finalized transaction immediately. Note: cash entries (`cash-in`, `cash-out`) do NOT override — they follow the API default (`saveAsDraft: false`, i.e. finalized).
+4. **Draft-then-finalize**: The CLI defaults to saving as draft (overrides the API default of `saveAsDraft: false`). Use `--finalize` to create a finalized transaction immediately. Note: `cash-in`, `cash-out` and `cash-transfer` have no draft state and so take no `--finalize` — they always post ACTIVE.
 5. **Idempotent creates**: Use `--input` with the same JSON to get consistent results. The API dedup guards catch duplicate contacts, items, and accounts.
 6. **Check before bulk ops**: Always preview with `--json | jq length` before piping IDs into `quick-fix`.
 7. **Offline calculators for exploration**: `clio calc` commands need no auth -- use them to explore scenarios before committing with `clio ct`.

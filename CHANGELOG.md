@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.58.7] - 2026-09-10
+
+**Recording cash in, cash out and cash transfers works again.**
+
+`clio cash-in create`, `cash-out create` and `cash-transfer create` had started failing outright with "Cash entries are always recorded as active and cannot be saved as a draft". The CLI asked for a draft on every one of them, the way it does for invoices and bills. The platform used to ignore that and post the entry anyway; it now refuses the request instead. Cash movements have no draft state, so asking for one was never meaningful.
+
+The three commands no longer ask, and `--finalize` is gone from all of them: there is nothing to finalize. `cash-in update` and `cash-out update` were failing the same way and now work. The confirmation line after a create already reported the state the record is in, so it still reads "(active)".
+
+Recipes that post a cash step were failing for the same reason and now run.
+
+For assistants: `create_cash_in`, `create_cash_out`, `create_cash_transfer`, `update_cash_in` and `update_cash_out` no longer offer `saveAsDraft`. The two update tools also claimed an existing cash entry could not be edited and had to be deleted and recreated. That was wrong, and no delete tool exists to do it with; they edit in place.
+
 ## [5.58.6] - 2026-09-10
 
 **When a document can't be accepted, the reply says what to do instead — and offers to open the right screen.**

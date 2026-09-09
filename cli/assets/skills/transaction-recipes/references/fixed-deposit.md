@@ -100,10 +100,10 @@ Verify after finalize:
 - Assert: `balance['Interest Income'] (period MTD) == schedule[periodIndex].accrualAmount`.
 - `balance['Fixed Deposit Receivable']` stays at `100,000` until maturity.
 
-At maturity (month 12), finalize the maturity cash-in:
+At maturity (month 12), the maturity cash-in needs no finalize step — a cash entry is recorded ACTIVE the moment it is created and has no draft state. Edit it only if the amounts changed:
 ```
 **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
-update_cash_in(resourceId: <cash-in id>, saveAsDraft: false)
+update_cash_in(resourceId: <cash-in id>, lines: [...])   # only to correct it
 ```
 
 Verify after maturity:

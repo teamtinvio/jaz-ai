@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.58.6
+version: 5.58.7
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 159 production gotchas, error
@@ -70,7 +70,7 @@ The rest of this skill — field names, gotchas, error catalog, dependency order
 13. **Invoice/bill number is `reference`** — not `referenceNumber`.
 
 ### Transaction Creation
-14. **`saveAsDraft` has OPPOSITE defaults on the two surfaces.** Raw REST: omitting it creates a FINALIZED transaction (`false`). MCP/CLI tools: creates for invoices, bills, both credit notes, journals, sale quotes, purchase requests/orders, and the order-conversions inject `true` — omitting it creates a DRAFT; pass `saveAsDraft: false` to post immediately. When the landing state matters, pass the field explicitly and read `status` off the create response rather than assuming either default. (Cash entries and cash transfers are currently unreliable around this flag — pass it explicitly and verify `status`.)
+14. **`saveAsDraft` has OPPOSITE defaults on the two surfaces.** Raw REST: omitting it creates a FINALIZED transaction (`false`). MCP/CLI tools: creates for invoices, bills, both credit notes, journals, sale quotes, purchase requests/orders, and the order-conversions inject `true` — omitting it creates a DRAFT; pass `saveAsDraft: false` to post immediately. When the landing state matters, pass the field explicitly and read `status` off the create response rather than assuming either default. Cash entries and cash transfers are the exception on both surfaces: they have no draft state, so `saveAsDraft: true` is refused with a 422 and the tools do not offer the field at all.
 15. **If `saveAsDraft: false`** (or omitted on the raw REST surface — see Rule 14), every lineItem MUST have `accountResourceId`.
 16. **Phones MUST be E.164** — `+65XXXXXXXX` (SG), `+63XXXXXXXXXX` (PH). No spaces.
 

@@ -5,7 +5,7 @@
 
 ---
 
-1. **Cash entries finalize immediately.** `clio cash-in` and `clio cash-out` default to `saveAsDraft: false` (API default). Unlike invoices/bills/journals which the CLI overrides to draft. Use `--finalize` on invoices to finalize; cash entries are already final.
+1. **Cash entries and transfers post ACTIVE and take no `--finalize`.** `clio cash-in`, `clio cash-out` and `clio cash-transfer` have no draft state at all — the API refuses `saveAsDraft: true` with a 422 — so there is no flag to pass and nothing to finalize afterwards. Invoices, bills and journals are the ones the CLI saves as draft and `--finalize` posts.
 
 2. **Line-item account resolution is NOT fuzzy.** The `accountResourceId` field inside `--lines` JSON arrays requires a UUID or exact account name. Fuzzy matching only works for top-level flags (`--contact`, `--account`). Always resolve accounts first: `clio accounts list --json | jq '.data[] | {name, id: .resourceId}'`.
 

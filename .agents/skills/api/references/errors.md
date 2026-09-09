@@ -682,13 +682,18 @@ Journals support a top-level `currency` object to create entries in a foreign cu
 
 ## Cash Entry Errors
 
-### Missing saveAsDraft field (422)
-**Cause**: Omitting `saveAsDraft` from `POST /cash-in-entries` or `POST /cash-out-entries`.
-**Fix**: `saveAsDraft` is required on cash journal endpoints. Always include it:
+### saveAsDraft: true on a cash endpoint (422)
+```
+Cash entries are always recorded as active and cannot be saved as a draft
+Cash transfers are always recorded as active and cannot be saved as a draft
+```
+**Cause**: Sending `saveAsDraft: true` to `POST /cash-in-entries`, `POST /cash-out-entries` or `POST /cash-transfers`. The accounting service records every direct cash journal ACTIVE, so the flag cannot be honoured; the API refuses it rather than dropping it and handing back a posted entry.
+**Fix**: Send `false`, or omit it (the endpoint defaults to `false`). There is no draft to finalize later.
 ```json
 { "saveAsDraft": false, "reference": "CI-001", "valueDate": "2026-02-08",
   "accountResourceId": "uuid-bank", "lines": [...] }
 ```
+The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` returns 422 `Journal is not draft`, because the stored entry never is one.
 
 ### Wrong structure — flat fields vs lines
 **Cause**: Using flat structure with `amount`, `bankAccountResourceId`, `description` fields.

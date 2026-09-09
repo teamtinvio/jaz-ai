@@ -118,12 +118,12 @@ This is in `year-end-close.md` Y5.
 ### Step 7 — Settlement (final period)
 
 When settlement date arrives:
-- Finalize the settlement cash-out: `update_cash_in(resourceId: <settlement id>, saveAsDraft: false)`.
+- The settlement cash-out needs no finalize step — a cash entry is recorded ACTIVE on creation and has no draft state.
 - Verify: `balance['Provision for Warranties'] == 0`; `balance['Cash']` reduced by 500,000.
 - Close capsule: a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only).
 
 If actual settlement amount differs from estimated $500,000 (highly likely for warranty / decommissioning):
-- Edit the settlement cash-out before finalizing: `update_cash_out_entry(resourceId: <id>, lines: [{accountResourceId: <Provision>, amount: <actual>}, ...])`.
+- Edit the settlement cash-out to the actual amount: `update_cash_out(resourceId: <id>, lines: [{accountResourceId: <Provision>, amount: <actual>}, ...])`.
 - Post a true-up journal for the difference: Dr/Cr Warranty Expense for the over/under-provision. (If under-provided: Dr Warranty Expense / Cr Cash for the shortfall. If over-provided: Dr Provision / Cr Warranty Expense for the reversal.)
 
 ---
@@ -137,7 +137,7 @@ If actual settlement amount differs from estimated $500,000 (highly likely for w
 | `plan_recipe` | 422 `rate_invalid` | Discount rate must be > 0. Per IAS 37.47, use a pre-tax rate reflecting current market + obligation-specific risks. SG: typically gov't bond rate + risk premium. |
 | `execute_recipe` | 422 `account_not_found` for `Finance Cost` | Step 3 incomplete. Create via `create_account(accountType: 'Finance Cost', name: 'Finance Cost')`. Note `Finance Cost` is both a valid account TYPE and the account NAME here — the error refers to the missing account, not a bad type. |
 | Step 6 remeasurement | Recipe doesn't natively support mid-life remeasurement | Manual journal + delete remaining DRAFT unwinding journals + re-execute recipe for remaining term. |
-| Step 7 actual settlement ≠ estimated | (always, for real-world provisions) | Edit settlement cash-out via `update_cash_out_entry` before finalizing, post true-up journal for the delta. |
+| Step 7 actual settlement ≠ estimated | (always, for real-world provisions) | Edit settlement cash-out via `update_cash_out`, post true-up journal for the delta. |
 | Provision presented as Operating Expense vs Finance Cost confusion | (presentation) | Per IAS 37.84, the unwinding charge is presented in P&L as a Finance Cost (separate from the recognition expense which is Operating Expense). Practitioner judgment if jurisdiction disagrees. |
 
 ---

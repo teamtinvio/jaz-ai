@@ -68,7 +68,7 @@ Use in search: `clio invoices search --status UNPAID --json`
 
 1. **Create returns minimal response** — only `{ "resourceId": "uuid" }`. Run `clio invoices get <id> --json` for full data.
 2. **Line-item accounts don't fuzzy-resolve** — `--lines` JSON requires exact account name or UUID. Top-level `--account` fuzzy-resolves.
-3. **Transaction creates default to draft** — invoices, bills, journals, cash entries, credit notes and orders. Use `--finalize` to create as finalized (UNPAID for invoices, ACTIVE for journals). Master data has no draft state: contacts, items, accounts, tags, tax profiles and the rest are created live, and accept no `--finalize`.
+3. **Transaction creates default to draft** — invoices, bills, journals, credit notes and orders. Use `--finalize` to create as finalized (UNPAID for invoices, ACTIVE for journals). Cash entries and cash transfers are the exception: they post ACTIVE and accept no `--finalize`. Master data has no draft state either: contacts, items, accounts, tags, tax profiles and the rest are created live.
 4. **`--offset` is page number (0-indexed)** — not row skip count. offset=0 + limit=100 = page 1.
 5. **`customer` is boolean** — `--customer true`, not `--customer "Acme"`.
 6. **Dates are YYYY-MM-DD** — org-local timezone. API returns epoch ms but CLI formats them.

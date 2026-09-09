@@ -285,7 +285,7 @@ Uses `purchaseAmount` + `purchaseDate` + `effectiveLife` + `purchaseAssetAccount
 | `description` | NOT USED | Cash entries do not have a flat `description` field |
 | `bankAccount` | `accountResourceId` (top level) | Same as above |
 | offset account | `lines[].accountResourceId` | The offsetting account goes in `lines` |
-| (omit saveAsDraft) | `saveAsDraft` | **REQUIRED** — must be included on cash-in and cash-out entries |
+| (omit saveAsDraft) | `saveAsDraft` | Send `false` or omit. `true` is refused with a 422 — cash entries have no draft state |
 
 ## Cash Entries (LIST/GET response shape — DIFFERENT from CREATE!)
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.58.6+18f4154f",
+  "contentVersion": "5.58.7+752365f9",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -1121,7 +1121,7 @@
     {
       "name": "update_cash_in",
       "namespace": "cash_entries",
-      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: a cash entry is always ACTIVE and has no draft state; edit it in place here rather than deleting and recreating it. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1135,7 +1135,7 @@
     {
       "name": "update_cash_out",
       "namespace": "cash_entries",
-      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: cash entries created without saveAsDraft:true are ACTIVE (finalized) and cannot be updated — they must be deleted and recreated. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: a cash entry is always ACTIVE and has no draft state; edit it in place here rather than deleting and recreating it. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
