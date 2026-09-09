@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.58.0] - 2026-09-09
+
+**When a folder of documents produces nothing, it now says why — and the reason is the right one.**
+
+Sharing a folder that yielded nothing used to report "19 files, 0 usable" and stop there. You could not tell whether the files were the problem, the folder names were, or something had gone wrong.
+
+It now tells you which, because those need different answers:
+
+- Files the platform cannot read here are named by kind ("19 .rar"), with what is accepted.
+- Files it *can* read, but not for the type their folder implies — a CSV bank statement sitting in an invoices folder — are called out as misfiled rather than unsupported.
+- Files another route handles, like HEIC photos, point at that route instead of being called unsupported.
+- Documents that are perfectly readable and only sitting in a folder nobody could classify now name the folder and suggest renaming it or forcing a type. Previously these were told to convert their PDFs, which was worse than saying nothing.
+- An empty folder simply says so.
+
 ## [5.57.0] - 2026-09-09
 
 **Importing a pile of documents now ends with a link to where they went, instead of a count.**

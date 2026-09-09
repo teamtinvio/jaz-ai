@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.57.0+c235247f",
+  "contentVersion": "5.58.0+eab94576",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -1471,7 +1471,7 @@
     {
       "name": "classify_documents",
       "namespace": "document_ai",
-      "description": "Use this when the user points at a FOLDER, a .zip, a Dropbox / Google Drive / OneDrive folder share link, or a pile/batch of mixed documents (\"create docs from this Dropbox folder link\", \"here is a folder of invoices and bills\"). Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Files in unrecognized folders come back as needs-review. Returns a manifest (per-file type + confidence + counts) plus a collectionId; review it, then call extract_documents with that collectionId to create the drafts. The source is FETCHED BY THE JAZ SERVER: a direct .zip/file link, or a Dropbox / Google Drive / OneDrive share link. A local path works only when this tool runs on your own machine. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Use this when the user points at a FOLDER, a .zip, a Dropbox / Google Drive / OneDrive folder share link, or a pile/batch of mixed documents. Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Returns a manifest (per-file type + confidence + counts) plus a collectionId. If nothing is extractable it returns `hint` (why + what to do) and `summary.skippedExtensions` — relay it, do NOT call extract_documents; review it, then call extract_documents with that collectionId to create the drafts. The source is FETCHED BY THE JAZ SERVER: a direct .zip/file link, or a Dropbox / Google Drive / OneDrive share link. A local path works only when this tool runs on your own machine. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
