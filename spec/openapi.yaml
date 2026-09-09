@@ -6723,7 +6723,7 @@
         },
         "saveAsDraft": {
           "default": false,
-          "description": "When true, create the journal as a draft. When omitted the journal is created active.",
+          "description": "Cash entries are always recorded as active. Sending true is rejected.",
           "type": "boolean"
         },
         "tags": {
@@ -6836,7 +6836,7 @@
         },
         "saveAsDraft": {
           "default": false,
-          "description": "When true, create the journal as a draft. When omitted the journal is created active.",
+          "description": "Cash transfers are always recorded as active. Sending true is rejected.",
           "type": "boolean"
         },
         "tags": {

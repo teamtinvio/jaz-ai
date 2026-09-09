@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.58.4] - 2026-09-09
+
+**A working document link is no longer refused because our own name lookup had a bad moment.**
+
+Most document links are not fetched by this extension at all — they are handed to the platform, which fetches them from its own network. A recent security fix started checking those links here first, and refused them whenever the local name lookup failed for any reason: a slow resolver, a rate limit, a machine with no working DNS. The link was fine; the message said it was not.
+
+Those links now go through. Links that point somewhere the platform will not fetch are still refused, and the refusal no longer depends on DNS working: loopback, private, link-local and cloud-metadata addresses are recognised from the address itself. That now includes their IPv6 spellings, which were previously being resolved instead of recognised — and an ordinary public IPv6 address in a link is no longer refused by mistake.
+
 ## [5.58.3] - 2026-09-09
 
 **A document fetched from a link is filed under a clean name.**
