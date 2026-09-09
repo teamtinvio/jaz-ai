@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.58.2] - 2026-09-09
+
+**A refused link no longer reports the private address it resolved to.**
+
+When a document link pointed somewhere the platform will not fetch, the refusal named the internal address it had resolved to. It now says only that the address is not publicly reachable, and the detail goes to the server log where an operator can see it. The link itself is still named, so the message stays useful.
+
 ## [5.58.1] - 2026-09-09
 
 **A shared folder that turns out to be enormous is now refused with a clear message, instead of being pulled into memory.**
