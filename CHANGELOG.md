@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.57.0] - 2026-09-09
+
+**Importing a pile of documents now ends with a link to where they went, instead of a count.**
+
+Sorting and extracting a folder used to finish with "19 uploaded" and leave you to go and find them. It now hands back the screen each kind of document landed on — invoice drafts, bill drafts, credit note drafts — along with how many of each were submitted and how many failed, so a partial result reads as a partial result rather than a success. Bank statements point at bank reconciliation, and name the account they were imported against.
+
+The assistant is told to pass those links straight through, so it no longer has to go and look them up separately, and to say the drafts are still being prepared — they appear as extraction finishes rather than instantly.
+
 ## [5.56.0] - 2026-09-09
 
 **Attach a zip of paperwork to the conversation and it can now be sorted and drafted in place — and a document that cannot be reached is explained instead of retried.**

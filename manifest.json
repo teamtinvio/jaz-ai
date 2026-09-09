@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.56.0",
+  "version": "5.57.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 369 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -800,7 +800,7 @@
     },
     {
       "name": "extract_documents",
-      "description": "Create draft transactions from a classified document collection (see classify_documents). Uploads each file to the right AI-extraction endpoint — invoices/bills/credit notes via business-transaction extraction, bank statements via statement import — de-duplicates identical files, and returns the workflow ids to poll with wait_for_magic_workflows. Processing is async; drafts appear once the workflows reach a terminal state. Pass the collectionId from classify_documents. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create draft transactions from a classified document collection (see classify_documents). Uploads each file to the right AI-extraction endpoint — invoices/bills/credit notes via business-transaction extraction, bank statements via statement import — de-duplicates identical files, and returns the workflow ids to poll with wait_for_magic_workflows. Processing is async; drafts appear once the workflows reach a terminal state. Pass the collectionId from classify_documents. Returns `whereToSee[]`: the screen each landed type appears on + its uploaded/failed split — relay those links (no `navigate`) and say drafts are still arriving. An unbuildable link is omitted, named in `partialFailures`. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_attachments",
