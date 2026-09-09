@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.58.5] - 2026-09-09
+
+**The same link check now covers every tool that hands a link to the platform.**
+
+Creating a claim from a receipt link, importing a bank statement from a link, and previewing an employee import sheet all pass that link to the platform to fetch. None of the three checked it first, so a link naming an address the platform should never reach was passed on without comment. The employee sheet preview was the sharpest of them, because it returns the fetched content straight back as a parsed table.
+
+All of them now refuse such a link, and so does the same operation run from the command line. The rule is unchanged from the last release: an address we can recognise on sight is refused, and a link is never refused just because our own name lookup failed.
+
 ## [5.58.4] - 2026-09-09
 
 **A working document link is no longer refused because our own name lookup had a bad moment.**
