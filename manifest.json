@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.58.7",
+  "version": "5.58.8",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 369 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -808,7 +808,7 @@
     },
     {
       "name": "add_attachment",
-      "description": "Add an attachment to a business transaction. Provide sourceUrl (downloads and uploads as file) or attachmentId (links existing); a file provided by the host conversation is used when neither is given. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_attachment",

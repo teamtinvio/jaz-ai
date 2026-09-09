@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.58.8] - 2026-09-10
+
+**A file you attach is never quietly ignored in favour of a link.**
+
+If you attached a document to a request and the assistant also named a source — a link, or an attachment id — the tools that create bills, invoices, credit notes, expense claims and attachments used the named one and threw your file away. Nothing was sent, nothing was said, and the document you actually provided did not reach your books. Folder sorting and bank-statement import already refused that combination; the other three did not, including the email path, where an inbound email body silently outranked everything else.
+
+All of them now stop and ask which one you meant, naming the sources you actually passed rather than listing every one the tool accepts, and saying how to answer: send it again with no source named to use the file you attached, or without the attachment to use the link. A file attached on its own still works exactly as before, and so does a link on its own.
+
+Two smaller corrections in the same area. Attaching a file to a transaction now refuses a link and an attachment id together, instead of quietly preferring the link while still sending the id — if you script that combination, it will now come back as an error. And the advice offered when no source is given is written for the surface you are on: it no longer suggests attaching a file where there is no way to attach one, or uploading in the dashboard for document types that cannot be linked that way.
+
 ## [5.58.7] - 2026-09-10
 
 **Recording cash in, cash out and cash transfers works again.**

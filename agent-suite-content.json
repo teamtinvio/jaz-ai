@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.58.7+752365f9",
+  "contentVersion": "5.58.8+0dc7fbf2",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -1492,7 +1492,7 @@
     {
       "name": "add_attachment",
       "namespace": "document_ai",
-      "description": "Add an attachment to a business transaction. Provide sourceUrl (downloads and uploads as file) or attachmentId (links existing); a file provided by the host conversation is used when neither is given. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
