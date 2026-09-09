@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.56.0] - 2026-09-09
+
+**Attach a zip of paperwork to the conversation and it can now be sorted and drafted in place — and a document that cannot be reached is explained instead of retried.**
+
+Attach a zip of mixed invoices, bills and credit notes and the assistant can sort it and create the drafts, without you first putting the file somewhere public. Bank statements attached the same way now import too. Attaching a single document instead of a zip is recognised and routed to the right place rather than failing.
+
+Document types are no longer case-sensitive. Asking for `invoice` where the tool wanted `INVOICE`, or `credit-note-customer` where it wanted `CUSTOMER_CREDIT_NOTE`, used to be refused; both are understood now, and the same applies to every other list of allowed values in the product. When a spelling is corrected for you, the reply says so, so the next request can use the right one.
+
+When a document genuinely cannot be reached — a file that exists only on the machine the assistant is running on, for instance — the refusal now explains that the Jaz server fetches documents itself, and names the routes that do work: upload in the dashboard and use the attachment, share a Dropbox / Google Drive / OneDrive link, or attach the file to the conversation. Previously it said the file could only be used from the command line, which was no help to anyone not at a command line, and led to the same failure being retried several times over.
+
+A document URL is now checked before it is fetched, including after a redirect, so a link that points back into private infrastructure is refused rather than downloaded and stored as an attachment. Compressed archives are also bounded, so an archive that expands to far more than it appears to contain is refused rather than filling the disk.
+
 ## [5.55.15] - 2026-09-09
 
 **A "make this the default" setting on claim types and profiles has been removed, because it never did anything.**

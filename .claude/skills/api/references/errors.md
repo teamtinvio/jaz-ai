@@ -628,6 +628,24 @@ account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-gl
 
 ---
 
+## Jaz Magic / Document-Source Errors
+
+### A local path silently fails at every spelling
+**Cause**: Treating `sourceURL` (or an MCP `file.download_url`, or `classify_documents`'s `source`) as somewhere to put a path on the calling machine — `/mnt/user-data/uploads/Archive.zip`, `/tmp/invoice.pdf`, `C:\Users\...`. The server FETCHES the source; it does not receive bytes through these fields. A path visible only to the caller is not a URL the server can open, so it fails no matter how it is written.
+**Note**: This is the same class as the inventory-adjustment endpoints — the thing being reached for does not exist at any spelling, so re-spelling never helps. Four consecutive re-tries of the same path in different shapes is the signature.
+**Fix**: Pick a route that actually delivers the bytes or a reachable address:
+- **FILE mode** — send the bytes yourself: `sourceType: "FILE"` with a `sourceFile` multipart blob (see Rule 58/59).
+- **attachmentId** — upload in the Jaz dashboard first, then reference it.
+- **Share link** — Dropbox / Google Drive / OneDrive, or any public https URL.
+- **Attach it to the conversation** — on MCP surfaces the host then populates `file` itself. Never author that object by hand.
+- **Local folder or `.zip`** — valid for `classify_documents` ONLY when the client is running on the caller's own machine, not on a hosted server.
+
+### "The file reference has no fetchable https download_url"
+**Cause**: A `file` object was constructed by the caller rather than supplied by the host, usually with a sandbox path in `download_url`.
+**Fix**: Omit `file` entirely when the user attached nothing, and pass `sourceUrl` or `attachmentId` instead. `file` is host-populated; there is no way to synthesize one.
+
+---
+
 ## Journal Errors
 
 ### Multi-currency journals — `currency` object
