@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.58.1] - 2026-09-09
+
+**A shared folder that turns out to be enormous is now refused with a clear message, instead of being pulled into memory.**
+
+Downloading a Dropbox, Google Drive or OneDrive share had no size ceiling: a link that kept sending would keep being read. Cloud downloads are now capped at 200MB, matching direct links, and going over says so and suggests sharing a smaller folder rather than failing obscurely.
+
 ## [5.58.0] - 2026-09-09
 
 **When a folder of documents produces nothing, it now says why — and the reason is the right one.**
