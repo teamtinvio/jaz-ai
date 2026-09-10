@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.59.0] - 2026-09-10
+
+**Snap a receipt in Telegram, file it as an expense claim.**
+
+Photograph a receipt in Telegram and ask for an expense claim, and nothing happened. Telegram's file links can only be opened with a token, so the platform could not fetch one — and on that channel the link is the only handle there is on the photo, so there was no other way to hand it over either. Bills and invoices had always worked, because that path downloads the file itself; claims was built from it without that step.
+
+Claims now downloads it the same way, and so does the command line for both. The file is sent instead of the link, so the token in the link is no longer passed on to the accounting platform — on either path; bills and invoices were sending it too. (The link still travels to the assistant itself, as it always has, because that is how the message arrives.)
+
+The file type is read from the file itself, since Telegram rarely reports it correctly, and the name is corrected to match, so extraction gets what it needs. That now includes HEIC, which is what an iPhone sends when you pick "send as file". Ordinary links are still handed to the platform exactly as before.
+
 ## [5.58.8] - 2026-09-10
 
 **A file you attach is never quietly ignored in favour of a link.**
