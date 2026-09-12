@@ -192,11 +192,24 @@ After creating, loop back to step 4 to reconcile.
 ```
 create_bank_rule(
   name: 'Monthly DBS Service Charge',
-  matchCriteria: {description: {contains: 'service charge'}, amount: {between: [20, 30]}},
-  action: 'RECONCILE_WITH_DIRECT_CASH_ENTRY',
-  cashEntryTemplate: {accountResourceId: <Bank Charges>, ...}
+  appliesToReconciliationAccount: '<bank-account-uuid>',
+  searchFilter: {
+    version: 1,
+    raw: 'description:service charge',
+    parsed: {and: {description: {contains: 'service charge'}, netAmount: {inRange: [20, 30]}}}
+  },
+  configuration: {
+    reconcileWithDirectCashEntry: {
+      reference: 'AUTO-{{bankReference}}',
+      amountAllocationType: 'PERCENTAGE',
+      percentageAllocation: [{organizationAccountResourceId: '<Bank Charges uuid>', amount: 100}]
+    }
+  }
 )
 ```
+`searchFilter` is the WHEN side and is what makes the rule eligible for suggestion at all — a rule
+without one is never offered by auto-reconciliation. `configuration` is the THEN side. Condition
+fields: `description`, `extReference`, `extContactName`, `netAmount`, `valueDate`.
 Next month's same charge auto-reconciles via `apply_bank_rule`.
 
 **Path D — flag for investigation:** if no match and no source document, surface to the user with the `extContactName + description` and the `netAmount`. Common: personal transactions, refunds, intercompany unrecorded, bank-feed errors. Record the unresolved item so it carries forward.

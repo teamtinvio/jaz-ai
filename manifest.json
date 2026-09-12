@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.59.0",
+  "version": "5.59.1",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 369 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -848,11 +848,11 @@
     },
     {
       "name": "create_bank_rule",
-      "description": "Bank reconciliation rule — auto-matches bank records. Use directly on request; don't just list existing.\n\nRequired: name, appliesToReconciliationAccount (bank account UUID, no \"ResourceId\" suffix), configuration.\n\nconfiguration MUST nest under reconcileWithDirectCashEntry: reference (REQUIRED), amountAllocationType (\"PERCENTAGE\" | \"FIXED\" — don't send \"FIXED_AND_PERCENTAGE\"), percentageAllocation[] / fixedAllocation[] of { organizationAccountResourceId, amount }. Advanced: column-value mapping — amountSourceColumnKey + the *Map fields drive amount/account/tax/classifier/contact/tags from a bank column (amount XOR amountSourceColumnKey).\n\nOptional fields, the minimum payload, and the mapping shape: jaz-api skill (bank rules). Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bank reconciliation rule — auto-matches bank records. Use directly on request; don't just list existing.\n\nRequired: name, appliesToReconciliationAccount (bank account UUID, no \"ResourceId\" suffix), configuration.\n\nconfiguration MUST nest under reconcileWithDirectCashEntry: reference (REQUIRED), amountAllocationType (\"PERCENTAGE\" | \"FIXED\" — don't send \"FIXED_AND_PERCENTAGE\"), percentageAllocation[] / fixedAllocation[] of { organizationAccountResourceId, amount }. Advanced: column-value mapping — amountSourceColumnKey + the *Map fields drive amount/account/tax/classifier/contact/tags from a bank column (amount XOR amountSourceColumnKey).\n\nsearchFilter = the WHEN side; without it the rule is never suggested.\n\nOptional fields, the minimum payload, the mapping shape and the condition grammar: jaz-api skill (bank rules, 90d). Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_bank_rule",
-      "description": "Update an existing bank reconciliation rule. FULL REPLACEMENT — the API replaces the entire rule on update. You MUST provide the complete configuration, appliesToReconciliationAccount, and name every time. Use get_bank_rule first to read the current state, merge your changes, then call this tool with the full payload. Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing bank reconciliation rule. FULL REPLACEMENT — the API replaces the entire rule on update. You MUST provide the complete configuration, appliesToReconciliationAccount, and name every time. Use get_bank_rule first to read the current state, merge your changes, then call this tool with the full payload. searchFilter is the ONE exception: omit keeps it, null removes it. Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_bank_rule",

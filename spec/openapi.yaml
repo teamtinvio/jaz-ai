@@ -6240,6 +6240,10 @@
           "description": "Display name for the bank rule.",
           "minLength": 1,
           "type": "string"
+        },
+        "searchFilter": {
+          "description": "Condition that decides which bank statement entries the rule applies to, as an object with `version` (always 1), `raw` (the one-line form shown in the app, for example `description:grab`) and `parsed` (the structured condition, for example `{\"description\": {\"contains\": \"grab\"}}`). Conditions can test `description`, `extReference`, `extContactName`, `netAmount` and `valueDate`. `raw` may be blank; some conditions saved in the app carry no one-line form. Magic reconciliation suggests only rules that have a condition.",
+          "type": "object"
         }
       },
       "required": [
@@ -26328,6 +26332,10 @@
         "resourceId": {
           "description": "UUID of the bank rule to update.",
           "type": "string"
+        },
+        "searchFilter": {
+          "description": "Condition that decides which bank statement entries the rule applies to, in the same shape as on create. Omit it to keep the rule's current condition, or send `null` to remove it.",
+          "type": "object"
         }
       },
       "required": [

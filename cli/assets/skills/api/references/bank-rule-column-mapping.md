@@ -6,7 +6,7 @@ A bank rule's `reconcileWithDirectCashEntry` shortcut can resolve fields **per r
 
 The columns referenced by `columnKey` are **Bank Fields** — typed custom columns (`DATE` / `STRING` / `AMOUNT`) defined per bank account and captured when a statement is imported. They make any statement column (branch code, bank charge, cost centre, settlement ref) first-class: usable in a rule's **conditions** (matching) and in its **outputs** (the maps below). `AMOUNT` fields keep their sign; `amountSourceColumnKey` uses the **absolute** value.
 
-Scope note: the maps here are the rule **outputs** (what `create_bank_rule` / `update_bank_rule` set via `configuration`). The rule **conditions** (which statement lines the rule matches, including by Bank Field) are held in a linked search shortcut (`relatedSearchShortcutResourceIds`) configured in the product, not by these tools.
+Scope note: the maps here are the rule **outputs** (what `create_bank_rule` / `update_bank_rule` set via `configuration`). The rule **conditions** (which statement lines the rule matches) are a separate field, `searchFilter`, which those same tools now set directly — `{ version: 1, raw, parsed }`, and a rule without one is never suggested by magic reconciliation. See jaz-api skill rule 90d for the condition grammar. The older linked-search-shortcut path (`relatedSearchShortcutResourceIds`) was retired upstream and is not exposed by this API.
 
 ## ColumnValueMapConfig shape
 

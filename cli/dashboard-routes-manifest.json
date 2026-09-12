@@ -812,6 +812,11 @@
       "label": "Due Purchase Payments"
     },
     {
+      "key": "purchase-payments.all-payments.unapplied-batch-purchase-payments",
+      "path": "/purchase-payments/all-payments/unapplied-batch-purchase-payments",
+      "label": "Unapplied Batch Purchase Payments"
+    },
+    {
       "key": "purchase-payments.disbursements.cancelled",
       "path": "/purchase-payments/disbursements/cancelled",
       "label": "Cancelled"
@@ -1115,6 +1120,11 @@
       "key": "sale-payments.all-payments.due-sale-payments",
       "path": "/sale-payments/all-payments/due-sale-payments",
       "label": "Due Sale Payments"
+    },
+    {
+      "key": "sale-payments.all-payments.unapplied-batch-sale-payments",
+      "path": "/sale-payments/all-payments/unapplied-batch-sale-payments",
+      "label": "Unapplied Batch Sale Payments"
     },
     {
       "key": "sale-payments.due-payments.due-customer-credit-refunds",

@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.59.1] - 2026-09-12
+
+**Bank rules can now carry the condition that decides which lines they match.**
+
+A bank rule has two halves: what it matches, and what it posts. Only the second half could be set from here, so any rule created through the assistant or the command line was built without a condition — and a rule without one is never offered by automatic reconciliation. It would sit in your rule list, apply if you ran it by hand, and otherwise do nothing.
+
+Creating a rule now takes its condition, reading a rule shows it, and updating a rule leaves it alone unless you say otherwise — so editing a rule's account or reference no longer wipes the matching it was built on. Conditions can test the description, reference, contact name, amount or date on a bank line.
+
 ## [5.59.0] - 2026-09-10
 
 **Snap a receipt in Telegram, file it as an expense claim.**

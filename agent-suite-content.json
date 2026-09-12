@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.59.0+39da82e5",
+  "contentVersion": "5.59.1+62587563",
   "counts": {
     "tools": 369,
     "namespaces": 45,
@@ -1569,7 +1569,7 @@
     {
       "name": "update_bank_rule",
       "namespace": "bank_rules",
-      "description": "Update an existing bank reconciliation rule. FULL REPLACEMENT — the API replaces the entire rule on update. You MUST provide the complete configuration, appliesToReconciliationAccount, and name every time. Use get_bank_rule first to read the current state, merge your changes, then call this tool with the full payload. Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing bank reconciliation rule. FULL REPLACEMENT — the API replaces the entire rule on update. You MUST provide the complete configuration, appliesToReconciliationAccount, and name every time. Use get_bank_rule first to read the current state, merge your changes, then call this tool with the full payload. searchFilter is the ONE exception: omit keeps it, null removes it. Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
