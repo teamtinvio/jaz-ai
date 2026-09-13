@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.59.2] - 2026-09-13
+
+**Setting a bank rule's condition now works from the command line too.**
+
+The last release gave the assistant the ability to set, read and preserve the condition that decides which bank lines a rule matches. The command line did not get it. A rule created with `clio bank-rules create` was still built without a condition, which means automatic reconciliation never offered it — the rule sat in the list, applied if you ran it by hand, and otherwise did nothing.
+
+`create` and `update` now take `--search-filter`, and `update` also takes `--clear-search-filter` to remove one. Leaving both off an update keeps the condition already on the rule, so changing a rule's name or account does not wipe the matching it was built on. Creating a rule without a condition now says so, rather than leaving you to wonder why it never fires.
+
+`clio bank-rules get` prints the rule's condition, or tells you it has none. It previously showed only the name, action and id — everything except the field that decides whether the rule does anything on its own.
+
 ## [5.59.1] - 2026-09-12
 
 **Bank rules can now carry the condition that decides which lines they match.**

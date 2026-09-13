@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.59.1
+version: 5.59.2
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -259,7 +259,7 @@ Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $
 
 **Contacts & Configuration**: `contacts`, `contact-groups`, `accounts`, `items`, `tags`, `currencies`, `currency-rates`, `tax-profiles`, `custom-fields`, `bookmarks`, `nano-classifiers`
 
-**Bank & Reconciliation**: `bank` (accounts, get, records, add-records, import, auto-recon), `bank-rules`
+**Bank & Reconciliation**: `bank` (accounts, get, records, add-records, import, auto-recon), `bank-rules` (a rule needs `--search-filter` or auto-reconciliation never suggests it; on `update`, omitting the flag keeps the stored condition and `--clear-search-filter` removes it)
 
 **Employee Claims & Settings**: `claims` (lifecycle + `create` + `from-attachment` + convert + payout), `employees`, `claim-types`, `claim-profiles`, `posting-rules`
 

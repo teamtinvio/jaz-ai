@@ -167,7 +167,7 @@ Match bank statement lines to Jaz transactions to verify cash balances. This is 
 
 **Bank Feeds**: Connect Airwallex, Aspire, Stripe, Wise, or Xendit for automated statement sync (up to 12 months history, daily auto-sync).
 
-**Bank Rules**: Auto-allocate amounts using percentage-only or fixed+percentage splits (max 10 fixed + 10 percentage lines). Support dynamic strings like `#{{bankReference}}`, `#{{payeeName}}`.
+**Bank Rules**: Two halves. The WHEN is the inline `searchFilter` condition deciding which statement lines the rule applies to — without one the rule is never suggested under Apply Rule, only applied by hand. The THEN auto-allocates amounts using percentage-only or fixed+percentage splits (max 10 fixed + 10 percentage lines). Support dynamic strings `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescription}}`.
 
 Statement amounts are recorded in the bank account's currency — no auto-conversion. Cross-currency transactions prompt for cash received/spent in statement currency. Reconciled transactions become uneditable (must reset to edit).
 

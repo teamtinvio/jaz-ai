@@ -2535,4 +2535,82 @@ Append one review verb to a jot (append-only: annotates, never mutates).
 
 ---
 
-*Last updated: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09 — Added: Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13 — Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*
+## 26. Bank Rules CRUD
+
+A bank rule has two halves: the **WHEN** (`searchFilter`, the condition deciding which statement lines it applies to) and the **THEN** (`configuration.reconcileWithDirectCashEntry`, the allocation). **A rule with no `searchFilter` is never suggested** — auto-reconciliation only considers rules whose stored condition is non-null, so it exists, lists, and can be applied by hand, but is never offered. See jaz-api rules 90a-90d for the full payload.
+
+### GET /api/v1/bank-rules
+
+Lists bank rules. Standard pagination (`limit`, `offset`).
+
+### GET /api/v1/bank-rules/:resourceId
+
+Returns one rule, including its `searchFilter`.
+
+```json
+// Response (data):
+{
+  "resourceId": "uuid",
+  "name": "Grab rides",
+  "actionType": "RECONCILE_WITH_DIRECT_CASH_ENTRY",
+  "appliesToReconciliationAccount": { "code": "1001", "currencyCode": "SGD", "name": "Business Bank Account" },
+  "searchFilter": {
+    "version": 1,
+    "raw": "description:grab",
+    "parsed": { "description": { "contains": "grab" } }
+  },
+  "configuration": { "reconcileWithDirectCashEntry": { "...": "..." } }
+}
+```
+
+`appliesToReconciliationAccount` comes back as an OBJECT on read but is sent as a bare UUID on write, so a rule cannot be round-tripped without substituting it.
+
+### POST /api/v1/bank-rules
+
+Creates a rule. `searchFilter` is optional on the wire and effectively required in practice.
+
+```json
+// Request:
+{
+  "name": "Grab rides",
+  "appliesToReconciliationAccount": "<bank-account-uuid>",
+  "searchFilter": {
+    "version": 1,
+    "raw": "description:grab",
+    "parsed": { "description": { "contains": "grab" } }
+  },
+  "configuration": {
+    "reconcileWithDirectCashEntry": {
+      "amountAllocationType": "PERCENTAGE",
+      "reference": "AUTO-{{bankReference}}",
+      "percentageAllocation": [{ "organizationAccountResourceId": "<acct-uuid>", "amount": 100 }]
+    }
+  }
+}
+```
+
+`searchFilter` rules: `version` must be `1`; `raw` must be PRESENT but **may be the empty string** (the app itself saves conditions that way); `parsed` must be a non-empty object. Condition fields are `description`, `extReference`, `extContactName`, `netAmount`, `valueDate`, plus the account's active custom Bank Fields. An unsupported field path does NOT error — the rule saves and then never fires.
+
+### PUT /api/v1/bank-rules/:resourceId
+
+Full replacement: send `resourceId`, `appliesToReconciliationAccount` and the whole `configuration` every time.
+
+**`searchFilter` is the one exception to full replacement.** Omit the key and the stored condition is KEPT; send `null` to remove it; send an object to replace it. This matters because the obvious read-modify-write (GET, change the name, PUT) drops the condition unless you carry it across — which silently stops the rule ever being suggested again.
+
+### DELETE /api/v1/bank-rules/:resourceId
+
+Deletes a rule.
+
+### POST /api/v1/bank-rules/search
+
+Searches rules. Filter fields: `name`, `resourceId`, `actionType`, `appliesToReconciliationAccount`, `businessTransactionType`, `reference`, plus `and`/`or`.
+
+```json
+{ "filter": { "name": { "contains": "grab" } }, "sort": { "sortBy": ["name"], "order": "ASC" }, "limit": 100 }
+```
+
+**There is no filter on `searchFilter`**, so "which of my rules have no condition" cannot be asked server-side — list the rules and check the field client-side.
+
+---
+
+*Last updated: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 — added Jots judgment journal, section 25. Previous: 2026-04-09 — Added: Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13 — Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*

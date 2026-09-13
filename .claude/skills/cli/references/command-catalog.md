@@ -318,13 +318,15 @@ EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPO
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
-| `get <id>` | `--json` |
-| `search <query>` | `--limit`, `--offset` |
-| `create` | `--input` (JSON body with rule definition) |
-| `update <id>` | `--input` |
+| `get <id>` | `--json`. Prints the rule's condition, or says it has none |
+| `search <query>` | `--limit`, `--offset`, `--account` |
+| `create` | `--name`, `--account`, `--config`, `--search-filter <json>`, `--input` |
+| `update <id>` | `--account` (required), `--name`, `--config`, `--search-filter <json>`, `--clear-search-filter`, `--input` |
 | `delete <id>` | |
 
 Dynamic strings in rules: `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescription}}`
+
+**A rule without a condition is never suggested.** `--search-filter` is the rule's WHEN side; auto-reconciliation only considers rules whose stored condition is non-null, so a rule created without one exists, lists and applies by hand but is never offered. On `update` the condition is the one field a full-replacement PUT need not resend: **omit `--search-filter` and the stored condition is kept**, pass `--clear-search-filter` to remove it. Shape: `{"version":1,"raw":"description:grab","parsed":{"description":{"contains":"grab"}}}` — `raw` may be blank.
 
 ---
 
