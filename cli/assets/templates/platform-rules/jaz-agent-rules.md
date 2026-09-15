@@ -6,11 +6,11 @@ Source of truth lives in the installed skills (`.claude/skills/jaz-*/SKILL.md` o
 
 ## Discovery
 
-Jaz exposes **369 tools across 45 namespaces**. Your tool list shows **3, 45, or 369** entries depending on packaging — **never infer capability from its length.**
+Jaz exposes **371 tools across 45 namespaces**. Your tool list shows **3, 45, or 371** entries depending on packaging — **never infer capability from its length.**
 
 - **3** — `search_tools(query)` → `describe_tools(names)` → `execute_tool(name, args)`. Empty query returns the namespace map.
-- **43** — namespace routers; call one with `{ operation, arguments }`. Its description lists its operations.
-- **369** — call operations directly by name.
+- **45** — namespace routers; call one with `{ operation, arguments }`. Its description lists its operations.
+- **371** — call operations directly by name.
 
 `describe_capabilities` returns the capability map on all three. **Call it before telling the user Jaz cannot do something.**
 
@@ -36,6 +36,7 @@ Exception: `fx-reval` is verification-only — Jaz auto-handles period-end IAS 2
 
 ## Bulk operations
 
+- Find & fix (recode) many records: `preview_ledger_find_fix`, then apply once the user confirms.
 - `bulk_upsert_*` tools accept up to 500 rows per call. Async tools return a `jobId` — poll `search_background_jobs(filter:{resourceId:{eq:jobId}})` until SUCCESS / FAILED / PARTIAL_SUCCESS.
 - On `PARTIAL_SUCCESS`: succeeded rows are committed. Inspect `errorDetails[].rowIndex` and re-submit only failed rows.
 - Sync `bulk_upsert_chart_of_accounts` returns `failedRows[]` inline — no polling.

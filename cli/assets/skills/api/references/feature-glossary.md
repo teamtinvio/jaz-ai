@@ -255,6 +255,12 @@ Mass-edit transactions and line items in a single operation. Replaces the need t
 
 **API**: `POST /api/v1/quick-fix/{entity}` (transaction-level) + `POST /api/v1/quick-fix/{entity}/line-items` (line-item-level). 20 endpoints total.
 
+### Ledger Find & Fix
+
+Find and fix, or recode, records across record types in one pass: find invoices, bills, credit notes, journals and cash entries by a condition (reference, date range, contact, current account), preview one change to their contact, date, capsule, tags, account or classifiers, and apply it once the user has checked the preview. Users ask for it as "find & fix", "recode", "reclassify", "retag", "re-date" or "move these to account X". Quick Fix stays for a known set of records of one type and for the fields this does not change.
+
+**API**: `POST /api/v1/ledger/find-fix/transactions/preview` or `POST /api/v1/ledger/find-fix/line-items/preview`, then `POST /api/v1/ledger/find-fix/apply`. See rule 107a.
+
 ---
 
 *Maintained alongside [help.jaz.ai](https://help.jaz.ai).*

@@ -1,5 +1,25 @@
 # Changelog
 
+## [5.60.0] - 2026-09-16
+
+**Find records across your ledger and fix them in one step, after a preview.**
+
+Changing the contact, date, capsule or tags on a set of documents, or the account or tracking categories on their lines, used to mean one record type at a time: invoices in one call, bills in another, journals in a third, each with a list of ids collected first. Ledger Find & Fix finds invoices, bills, customer and supplier credit notes, journals and cash entries with one filter (a reference, a date range, a contact, an account) and plans one change for all of them.
+
+Nothing changes until you have seen the preview. It lists every record it found, the ones it will change, and the ones it will leave alone with the reason, such as a void record. When one field cannot change on a record, for example a new contact that is not a supplier on a bill, that field is left as it is and the record's other fields still change. Applying runs exactly what the preview showed, once, within 30 minutes.
+
+For assistants: `preview_ledger_find_fix` and `apply_ledger_find_fix`. Ask the way you would say it, such as "find & fix", "find and recode", "retag these", "re-date" or "move these to account X", and the assistant previews first. It shows you what would change and waits for your reply before applying: an apply in the same turn as its preview is refused. A plain "yes" to a preview now reaches the assistant on Telegram and by email instead of being taken as a thank-you, and by email only the inbox owner's reply applies a preview. If an apply's answer is lost, the apply keeps running for up to 4 minutes: the assistant waits that long before previewing those records again or re-reading them, and never applies that preview again.
+
+Several applies can run at the same time. When two applies change records on one document at once, the one saved last can undo the other's changes, including fields and line items it did not set. Preview again to check the result.
+
+In the hosted connector, the quick fix area is now marked as one that can overwrite records, so a host that asks before destructive actions asks before an apply.
+
+From the command line: `clio ledger-find-fix preview` shows each record's values before and after, and `clio ledger-find-fix apply -- <previewId>` applies it. Keep the `--`: a preview id can start with a dash. Apply exits 1 unless every record changed.
+
+When any change made through the assistant runs past its 30 second limit, the reply now says the change may still land and to check the records before trying again, instead of suggesting different parameters.
+
+The GST filing and quarter-end playbooks named two tools that do not exist for correcting tax profiles. They now name the real one.
+
 ## [5.59.2] - 2026-09-13
 
 **Setting a bank rule's condition now works from the command line too.**

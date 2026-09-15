@@ -193,6 +193,15 @@ clio quick-fix invoices --ids "$DRAFT_IDS" --tag "Q1-Review" --due 2026-04-30
 # Bulk-update line items (e.g., reassign account)
 clio quick-fix invoices --line-items --ids "$LINE_ITEM_IDS" \
   --account "<target-account-resourceId>"
+
+# Find & fix (recode) across record types: no ID list needed. Preview moves every
+# journal and cash entry line on the old account to the new one, writing nothing
+clio ledger-find-fix preview --level LINE_ITEMS \
+  --filter '{"types":["JOURNAL","CASH_ENTRY"],"organizationAccountResourceId":{"eq":"<old-account-resourceId>"}}' \
+  --change '{"organizationAccountResourceId":"<new-account-resourceId>"}'
+
+# Apply the preview once you have checked it (-- because a previewId can start with "-")
+clio ledger-find-fix apply -- "<previewId>"
 ```
 
 ## 7. Multi-Org Management

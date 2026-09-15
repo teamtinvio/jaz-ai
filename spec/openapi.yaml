@@ -8770,6 +8770,14 @@
           "description": "Resource ID of the supplier contact.",
           "type": "string"
         },
+        "currency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BTCurrency"
+            }
+          ],
+          "description": "Transaction currency and exchange rate details. Omit to use the organization's\nbase currency. The currency must be enabled on the organization.\nWhen this order is linked to a purchase request, name the same currency as that\nrequest: a linked order in a different currency is refused."
+        },
         "customFields": {
           "description": "Custom field values for this purchase order.",
           "items": {
@@ -8901,6 +8909,14 @@
           "description": "Resource ID of the supplier contact.",
           "type": "string"
         },
+        "currency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BTCurrency"
+            }
+          ],
+          "description": "Transaction currency and exchange rate details. Omit to use the organization's\nbase currency. The currency must be enabled on the organization."
+        },
         "customFields": {
           "description": "Custom field values.",
           "items": {
@@ -9028,6 +9044,14 @@
           "description": "Resource ID of the customer contact.",
           "type": "string"
         },
+        "currency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BTCurrency"
+            }
+          ],
+          "description": "Transaction currency and exchange rate details. Omit to use the organization's\nbase currency. The currency must be enabled on the organization.\nWhen this order is linked to a sale quote, name the same currency as that quote:\na linked order in a different currency is refused."
+        },
         "customFields": {
           "description": "Custom field values.",
           "items": {
@@ -9149,6 +9173,14 @@
         "contactResourceId": {
           "description": "Resource ID of the customer contact.",
           "type": "string"
+        },
+        "currency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BTCurrency"
+            }
+          ],
+          "description": "Transaction currency and exchange rate details. Omit to use the organization's\nbase currency. The currency must be enabled on the organization."
         },
         "customFields": {
           "description": "Custom field values.",
@@ -13636,6 +13668,585 @@
       ],
       "type": "object"
     },
+    "LedgerFindFixApplyRequest": {
+      "properties": {
+        "previewId": {
+          "description": "Preview ID returned by a Ledger Find & Fix preview. A preview can be applied once within 30 minutes, by the same user or key that created it. Credentials that act for the whole organization share previews within it.",
+          "example": "Q2rX8vK1mZ4p",
+          "type": "string"
+        }
+      },
+      "required": [
+        "previewId"
+      ],
+      "type": "object"
+    },
+    "LedgerFindFixBlockedField": {
+      "properties": {
+        "code": {
+          "description": "Why the field is not set.",
+          "enum": [
+            "CONTACT_NOT_CUSTOMER",
+            "CONTACT_NOT_SUPPLIER",
+            "HAS_CREDIT_OFFSETS",
+            "FOREIGN_CURRENCY_VALUE_DATE",
+            "VALUE_DATE_AFTER_DUE_DATE",
+            "TOO_MANY_TAGS",
+            "TAGS_TOO_LONG",
+            "CONTROL_LINE"
+          ],
+          "type": "string"
+        },
+        "field": {
+          "description": "Field the change does not set on this record.",
+          "enum": [
+            "contactResourceId",
+            "valueDate",
+            "tags",
+            "organizationAccountResourceId"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixDateCondition": {
+      "properties": {
+        "between": {
+          "description": "Match dates from the first to the second, both included.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "eq": {
+          "description": "Match this date.",
+          "example": "2026-09-30",
+          "type": "string"
+        },
+        "gte": {
+          "description": "Match this date or later.",
+          "type": "string"
+        },
+        "lte": {
+          "description": "Match this date or earlier.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixFailedEntry": {
+      "properties": {
+        "error": {
+          "description": "Human-readable error message.",
+          "type": "string"
+        },
+        "errorCode": {
+          "description": "Machine-readable error code.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID that failed. Empty when the failure could not be matched to a record.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Kind of record the resource ID belongs to.",
+          "enum": [
+            "INVOICE",
+            "BILL",
+            "CUSTOMER_CREDIT_NOTE",
+            "SUPPLIER_CREDIT_NOTE",
+            "JOURNAL",
+            "CASH_ENTRY"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixIdCondition": {
+      "properties": {
+        "eq": {
+          "description": "Match this resource ID.",
+          "type": "string"
+        },
+        "in": {
+          "description": "Match any of these resource IDs.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixLineItemsChange": {
+      "properties": {
+        "classifierConfig": {
+          "description": "Classifiers to set or remove on each line item, at most 50 and one entry per classifier. Classifiers not listed are left as they are.",
+          "items": {
+            "$ref": "#/definitions/QuickFixClassifierConfigRequest"
+          },
+          "maxItems": 50,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "organizationAccountResourceId": {
+          "description": "Resource ID of the account to post each line item to. Bank, cash and control accounts are refused. A journal line already on a bank, cash or control account keeps its account, and its other changes still apply.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixLineItemsFilter": {
+      "properties": {
+        "contactResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixIdCondition"
+            }
+          ],
+          "description": "Filter by contact."
+        },
+        "organizationAccountResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixIdCondition"
+            }
+          ],
+          "description": "Filter by the account the line item posts to."
+        },
+        "reference": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixTextCondition"
+            }
+          ],
+          "description": "Filter by reference."
+        },
+        "resourceIds": {
+          "description": "Resource IDs of the records to change. In a line items preview these are line item IDs, not document IDs. An ID that matches no record of the listed types is reported as NOT_FOUND.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "type": "array"
+        },
+        "types": {
+          "description": "Record types to search: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, JOURNAL or CASH_ENTRY. Cash transfers are never matched.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "valueDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixDateCondition"
+            }
+          ],
+          "description": "Filter by record date."
+        }
+      },
+      "required": [
+        "types"
+      ],
+      "type": "object"
+    },
+    "LedgerFindFixLineItemsPreviewRequest": {
+      "properties": {
+        "change": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixLineItemsChange"
+            }
+          ],
+          "description": "Change to make to every matched line item. Set at least one field."
+        },
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixLineItemsFilter"
+            }
+          ],
+          "description": "Line items to change. Set at least one condition besides types, or list resource IDs."
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixPreviewCounts": {
+      "properties": {
+        "blockedByCode": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Fields left as they are, by reason code, across all records.",
+          "type": "object"
+        },
+        "byType": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Records found, by record type.",
+          "type": "object"
+        },
+        "eligible": {
+          "description": "Records the apply will change.",
+          "type": "integer"
+        },
+        "excluded": {
+          "description": "Records the apply will not change, including resource IDs that matched no record.",
+          "type": "integer"
+        },
+        "excludedByCode": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Excluded records, by reason code.",
+          "type": "object"
+        },
+        "matched": {
+          "description": "Records found.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixPreviewRecord": {
+      "properties": {
+        "after": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixPreviewValues"
+            }
+          ],
+          "description": "Values the apply will save. Set for an eligible record, with only the fields that change."
+        },
+        "before": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixPreviewValues"
+            }
+          ],
+          "description": "Current values of the fields the change sets."
+        },
+        "blocked": {
+          "description": "Fields the change leaves as they are on this record, with the reason. The record's other fields still change.",
+          "items": {
+            "$ref": "#/definitions/LedgerFindFixBlockedField"
+          },
+          "type": "array"
+        },
+        "code": {
+          "description": "Why the record is excluded: NOT_FOUND, VOID, NO_CHANGE, or BLOCKED when every field it would change is blocked.",
+          "enum": [
+            "NOT_FOUND",
+            "VOID",
+            "BLOCKED",
+            "NO_CHANGE"
+          ],
+          "type": "string"
+        },
+        "reference": {
+          "description": "Reference of the record, or of the line item's document.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the record the apply changes.",
+          "type": "string"
+        },
+        "status": {
+          "description": "ELIGIBLE when the apply will change the record, EXCLUDED when it will not.",
+          "enum": [
+            "ELIGIBLE",
+            "EXCLUDED"
+          ],
+          "type": "string"
+        },
+        "type": {
+          "description": "Kind of record. Left out for a resource ID that matched no record.",
+          "enum": [
+            "INVOICE",
+            "BILL",
+            "CUSTOMER_CREDIT_NOTE",
+            "SUPPLIER_CREDIT_NOTE",
+            "JOURNAL",
+            "CASH_ENTRY"
+          ],
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Date of the record, or of the line item's document, in YYYY-MM-DD format.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixPreviewResponse": {
+      "properties": {
+        "counts": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixPreviewCounts"
+            }
+          ],
+          "description": "How many records the preview found, can change and excluded."
+        },
+        "data": {
+          "description": "Each record found or named, with its planned change or the reason it is excluded.",
+          "items": {
+            "$ref": "#/definitions/LedgerFindFixPreviewRecord"
+          },
+          "type": "array"
+        },
+        "expiresAt": {
+          "description": "When the preview expires, in RFC 3339 format. Left out with previewId.",
+          "type": "string"
+        },
+        "level": {
+          "description": "What the preview changes: whole records or line items.",
+          "enum": [
+            "TRANSACTIONS",
+            "LINE_ITEMS"
+          ],
+          "type": "string"
+        },
+        "previewId": {
+          "description": "Pass to Apply Ledger Find & Fix within 30 minutes. Left out when no record can be changed.",
+          "example": "Q2rX8vK1mZ4p",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixPreviewValues": {
+      "properties": {
+        "capsuleResourceId": {
+          "description": "Resource ID of the capsule.",
+          "type": "string"
+        },
+        "classifierConfig": {
+          "description": "Classifiers on the line item.",
+          "items": {
+            "$ref": "#/definitions/ClassifierConfigRequest"
+          },
+          "type": "array"
+        },
+        "contactResourceId": {
+          "description": "Resource ID of the contact.",
+          "type": "string"
+        },
+        "organizationAccountResourceId": {
+          "description": "Resource ID of the account the line item posts to.",
+          "type": "string"
+        },
+        "tags": {
+          "description": "Tags on the record.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "valueDate": {
+          "description": "Record date, in YYYY-MM-DD format.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixRecord": {
+      "properties": {
+        "resourceId": {
+          "description": "Resource ID of the record changed: the document, or the line item when the preview changed line items.",
+          "type": "string"
+        },
+        "type": {
+          "description": "Kind of record the resource ID belongs to.",
+          "enum": [
+            "INVOICE",
+            "BILL",
+            "CUSTOMER_CREDIT_NOTE",
+            "SUPPLIER_CREDIT_NOTE",
+            "JOURNAL",
+            "CASH_ENTRY"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixResponse": {
+      "properties": {
+        "failed": {
+          "description": "Records that were not changed, with the reason. Preview again before retrying any of them: OUTCOME_UNKNOWN means the change may have been saved, and NOT_ATTEMPTED means apply reached its time limit before sending them.",
+          "items": {
+            "$ref": "#/definitions/LedgerFindFixFailedEntry"
+          },
+          "type": "array"
+        },
+        "updated": {
+          "description": "Records that were changed.",
+          "items": {
+            "$ref": "#/definitions/LedgerFindFixRecord"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixTagsChange": {
+      "properties": {
+        "add": {
+          "description": "Tags to add. A record can end with at most 50 tags. On invoices, bills and credit notes, its tags can total at most 1000 characters combined.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "remove": {
+          "description": "Tags to remove.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixTextCondition": {
+      "properties": {
+        "contains": {
+          "description": "Match values containing this text.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "eq": {
+          "description": "Match values equal to this.",
+          "minLength": 1,
+          "type": "string"
+        },
+        "in": {
+          "description": "Match values equal to any of these.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "startWith": {
+          "description": "Match values starting with this text.",
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "in"
+      ],
+      "type": "object"
+    },
+    "LedgerFindFixTransactionsChange": {
+      "properties": {
+        "capsuleResourceId": {
+          "description": "Resource ID of the capsule to put each record in. A cash entry that is not void is always listed as changing, since its current capsule is not shown.",
+          "type": "string"
+        },
+        "contactResourceId": {
+          "description": "Resource ID of the contact to set. It is set only where the contact is a customer on invoices and customer credit notes, a supplier on bills and supplier credit notes, and the record has no credits applied.",
+          "type": "string"
+        },
+        "tags": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixTagsChange"
+            }
+          ],
+          "description": "Tags to add to or remove from each record. Apply saves the tag list the preview showed, so tags edited on a record after the preview are replaced."
+        },
+        "valueDate": {
+          "description": "Record date to set, in YYYY-MM-DD format, no later than one year from today. It is not set on records in a foreign currency, or on invoices and bills due before the new date.",
+          "example": "2026-09-30",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "LedgerFindFixTransactionsFilter": {
+      "properties": {
+        "contactResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixIdCondition"
+            }
+          ],
+          "description": "Filter by contact."
+        },
+        "reference": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixTextCondition"
+            }
+          ],
+          "description": "Filter by reference."
+        },
+        "resourceIds": {
+          "description": "Resource IDs of the records to change. In a line items preview these are line item IDs, not document IDs. An ID that matches no record of the listed types is reported as NOT_FOUND.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 500,
+          "type": "array"
+        },
+        "types": {
+          "description": "Record types to search: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, JOURNAL or CASH_ENTRY. Cash transfers are never matched.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "valueDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixDateCondition"
+            }
+          ],
+          "description": "Filter by record date."
+        }
+      },
+      "required": [
+        "types"
+      ],
+      "type": "object"
+    },
+    "LedgerFindFixTransactionsPreviewRequest": {
+      "properties": {
+        "change": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixTransactionsChange"
+            }
+          ],
+          "description": "Change to make to every matched record. Set at least one field."
+        },
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/LedgerFindFixTransactionsFilter"
+            }
+          ],
+          "description": "Records to change. Set at least one condition besides types, or list resource IDs."
+        }
+      },
+      "type": "object"
+    },
     "LineItemDetail": {
       "properties": {
         "accountName": {
@@ -14610,6 +15221,75 @@
           "maxItems": 25,
           "type": "array",
           "uniqueItems": true
+        }
+      },
+      "type": "object"
+    },
+    "OrderUpdateLineItem": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the account the line posts to.",
+          "type": "string"
+        },
+        "classifierConfig": {
+          "description": "Classifier assignments for the line.",
+          "items": {
+            "$ref": "#/definitions/ClassifierConfigRequest"
+          },
+          "type": "array"
+        },
+        "deleted": {
+          "description": "Set to true, with resourceId, to remove that line item from the document.",
+          "type": "boolean"
+        },
+        "discount": {
+          "description": "Flat discount amount applied to the line item.",
+          "minimum": 0,
+          "type": "number"
+        },
+        "itemResourceId": {
+          "description": "Resource ID of the catalog item.",
+          "type": "string"
+        },
+        "name": {
+          "description": "Line item name. Required when itemResourceId is not set.",
+          "type": "string"
+        },
+        "quantity": {
+          "description": "Quantity of the item.",
+          "type": "number"
+        },
+        "resourceId": {
+          "description": "Resource ID of a line item already on this document. Send it to edit or delete that line; omit it to add a new line.",
+          "type": "string"
+        },
+        "taxProfileResourceId": {
+          "description": "Resource ID of the line's tax profile. Required on every line when isTaxVATApplicable is true.",
+          "type": "string"
+        },
+        "taxVatAdjustment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/CreateBillClientRequestLineItemTaxVatAdjustment"
+            }
+          ],
+          "description": "Manual tax adjustment for the line."
+        },
+        "unit": {
+          "description": "Unit of measure.",
+          "type": "string"
+        },
+        "unitPrice": {
+          "description": "Price per unit in the transaction currency.",
+          "type": "number"
+        },
+        "withholdingTax": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/WithholdingTaxRequest"
+            }
+          ],
+          "description": "Withholding tax code (Philippines only)."
         }
       },
       "type": "object"
@@ -16677,9 +17357,9 @@
           "type": "number"
         },
         "classifierConfig": {
-          "description": "Tracking category (classifier) configuration.",
+          "description": "Classifiers to set or remove on each line item. Classifiers not listed are left as they are, and an empty list changes none.",
           "items": {
-            "$ref": "#/definitions/ClassifierConfigRequest"
+            "$ref": "#/definitions/QuickFixClassifierConfigRequest"
           },
           "type": "array"
         },
@@ -16757,7 +17437,7 @@
           "type": "string"
         },
         "tags": {
-          "description": "Tags to apply to the bill.",
+          "description": "Tags to apply to the bill. Together they can total at most 1000 characters.",
           "items": {
             "type": "string"
           },
@@ -16991,6 +17671,41 @@
       },
       "type": "object"
     },
+    "QuickFixClassifierConfigRequest": {
+      "properties": {
+        "deleted": {
+          "description": "When true, removes this classifier from the line item, and only resourceId is needed. When false or left out, type, printable and at least one selected class are required.",
+          "type": "boolean"
+        },
+        "printable": {
+          "description": "When true, the classifier appears on printed and PDF documents. Required unless deleted is true.",
+          "type": "boolean"
+        },
+        "resourceId": {
+          "description": "Resource ID of the classifier.",
+          "type": "string"
+        },
+        "selectedClasses": {
+          "description": "Classes selected within the classifier. Required unless deleted is true.",
+          "items": {
+            "$ref": "#/definitions/SelectedClassRequest"
+          },
+          "type": "array"
+        },
+        "type": {
+          "description": "Transaction type the classifier applies to. Required unless deleted is true.",
+          "enum": [
+            "bill",
+            "invoice"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "resourceId"
+      ],
+      "type": "object"
+    },
     "QuickFixCustomerCreditNoteAttributes": {
       "properties": {
         "capsuleResourceId": {
@@ -17037,7 +17752,7 @@
           "type": "string"
         },
         "tags": {
-          "description": "Tags to apply to the credit note.",
+          "description": "Tags to apply to the credit note. Together they can total at most 1000 characters.",
           "items": {
             "type": "string"
           },
@@ -17142,7 +17857,7 @@
           "type": "string"
         },
         "resourceId": {
-          "description": "Resource ID that failed.",
+          "description": "Resource ID that failed. Empty when the failure could not be matched to a record.",
           "type": "string"
         }
       },
@@ -17198,7 +17913,7 @@
           "type": "string"
         },
         "tags": {
-          "description": "Tags to apply to the invoice.",
+          "description": "Tags to apply to the invoice. Together they can total at most 1000 characters.",
           "items": {
             "type": "string"
           },
@@ -17380,9 +18095,9 @@
           "type": "number"
         },
         "classifierConfig": {
-          "description": "Tracking category (classifier) configuration.",
+          "description": "Classifiers to set or remove on each line item. Classifiers not listed are left as they are, and an empty list changes none.",
           "items": {
-            "$ref": "#/definitions/ClassifierConfigRequest"
+            "$ref": "#/definitions/QuickFixClassifierConfigRequest"
           },
           "type": "array"
         },
@@ -17528,9 +18243,9 @@
     "QuickFixPurchaseLineItemAttributes": {
       "properties": {
         "classifierConfig": {
-          "description": "Tracking category (classifier) configuration.",
+          "description": "Classifiers to set or remove on each line item. Classifiers not listed are left as they are, and an empty list changes none.",
           "items": {
-            "$ref": "#/definitions/ClassifierConfigRequest"
+            "$ref": "#/definitions/QuickFixClassifierConfigRequest"
           },
           "type": "array"
         },
@@ -17737,9 +18452,9 @@
     "QuickFixSaleLineItemAttributes": {
       "properties": {
         "classifierConfig": {
-          "description": "Tracking category (classifier) configuration.",
+          "description": "Classifiers to set or remove on each line item. Classifiers not listed are left as they are, and an empty list changes none.",
           "items": {
-            "$ref": "#/definitions/ClassifierConfigRequest"
+            "$ref": "#/definitions/QuickFixClassifierConfigRequest"
           },
           "type": "array"
         },
@@ -17943,9 +18658,9 @@
     "QuickFixSchedulerLineItemAttributes": {
       "properties": {
         "classifierConfig": {
-          "description": "Tracking category (classifier) configuration.",
+          "description": "Classifiers to set or remove on each line item. Classifiers not listed are left as they are, and an empty list changes none.",
           "items": {
-            "$ref": "#/definitions/ClassifierConfigRequest"
+            "$ref": "#/definitions/QuickFixClassifierConfigRequest"
           },
           "type": "array"
         },
@@ -18180,7 +18895,7 @@
           "type": "array"
         },
         "tags": {
-          "description": "Tags to apply to the credit note.",
+          "description": "Tags to apply to the credit note. Together they can total at most 1000 characters.",
           "items": {
             "type": "string"
           },
@@ -28251,9 +28966,9 @@
           "type": "boolean"
         },
         "lineItems": {
-          "description": "Replace existing line items (max 200).",
+          "description": "Line items (max 200). To edit or delete lines, send every line item already on the document with its resourceId, in the order they should appear: a line with deleted set to true is removed, and a line without a resourceId is added. An edited line keeps no tax profile, tax adjustment or withholding tax that is not sent, and an edit that would drop a line's tax profile or a non-zero tax adjustment is refused. When no line names a resourceId, the lines sent are added to the document.",
           "items": {
-            "$ref": "#/definitions/CreateBillClientRequestLineItem"
+            "$ref": "#/definitions/OrderUpdateLineItem"
           },
           "maxItems": 200,
           "type": "array"
@@ -28383,9 +29098,9 @@
           "type": "boolean"
         },
         "lineItems": {
-          "description": "Replace existing line items (max 200).",
+          "description": "Line items (max 200). To edit or delete lines, send every line item already on the document with its resourceId, in the order they should appear: a line with deleted set to true is removed, and a line without a resourceId is added. An edited line keeps no tax profile, tax adjustment or withholding tax that is not sent, and an edit that would drop a line's tax profile or a non-zero tax adjustment is refused. When no line names a resourceId, the lines sent are added to the document.",
           "items": {
-            "$ref": "#/definitions/CreateBillClientRequestLineItem"
+            "$ref": "#/definitions/OrderUpdateLineItem"
           },
           "maxItems": 200,
           "type": "array"
@@ -28614,9 +29329,9 @@
           "type": "boolean"
         },
         "lineItems": {
-          "description": "Replace existing line items (max 200).",
+          "description": "Line items (max 200). To edit or delete lines, send every line item already on the document with its resourceId, in the order they should appear: a line with deleted set to true is removed, and a line without a resourceId is added. An edited line keeps no tax profile, tax adjustment or withholding tax that is not sent, and an edit that would drop a line's tax profile or a non-zero tax adjustment is refused. When no line names a resourceId, the lines sent are added to the document.",
           "items": {
-            "$ref": "#/definitions/CreateBillClientRequestLineItem"
+            "$ref": "#/definitions/OrderUpdateLineItem"
           },
           "maxItems": 200,
           "type": "array"
@@ -28742,9 +29457,9 @@
           "type": "boolean"
         },
         "lineItems": {
-          "description": "Replace existing line items (max 200).",
+          "description": "Line items (max 200). To edit or delete lines, send every line item already on the document with its resourceId, in the order they should appear: a line with deleted set to true is removed, and a line without a resourceId is added. An edited line keeps no tax profile, tax adjustment or withholding tax that is not sent, and an edit that would drop a line's tax profile or a non-zero tax adjustment is refused. When no line names a resourceId, the lines sent are added to the document.",
           "items": {
-            "$ref": "#/definitions/CreateBillClientRequestLineItem"
+            "$ref": "#/definitions/OrderUpdateLineItem"
           },
           "maxItems": 200,
           "type": "array"
@@ -53187,6 +53902,246 @@
         ]
       }
     },
+    "/api/v1/ledger/find-fix/apply": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Apply the changes a Ledger Find & Fix preview planned. Apply saves the values the preview showed without checking the records again, so a field edited after the preview, such as tags, is replaced. A preview can be applied once within 30 minutes, by the same user or key that created it; credentials that act for the whole organization share previews within it. Several applies can run at the same time. When two applies change records on one document at once, the one saved last can undo the other's changes, including fields and line items it did not set. Preview again to check the result. Apply stops starting new updates 3 minutes after the request arrives. If the connection drops, apply keeps running for up to 4 minutes. Wait that long before previewing or applying again on the same records. A service restart can stop an apply; preview again to check. Changing a record has the same follow-up effects as editing it, such as e-invoice updates. Lock dates are checked when the change is saved, so a record in a locked period comes back in failed. Every record comes back as updated or failed; preview again before retrying a failed record. Only a 503 with the code PREVIEW_STORE_UNAVAILABLE means nothing was applied.",
+        "operationId": "create-ledger-find-fix-apply",
+        "parameters": [
+          {
+            "description": "The Ledger Find & Fix preview to apply.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LedgerFindFixApplyRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/LedgerFindFixResponse"
+            }
+          },
+          "207": {
+            "description": "Multi-Status",
+            "schema": {
+              "$ref": "#/definitions/LedgerFindFixResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Apply Ledger Find & Fix",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
+    "/api/v1/ledger/find-fix/line-items/preview": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Plan a find and recode of line items across invoices, bills, customer and supplier credit notes, journals and cash entries in one search: one change to all of them, to the account they post to or their classifiers. Nothing is saved. Each line item is listed as eligible, with any field the change leaves as it is and why, or excluded with the reason. Pass the preview ID to Apply Ledger Find & Fix within 30 minutes. A preview can match at most 500 line items. Lock dates are checked when the change is saved, so a line item in a locked period comes back in failed from Apply Ledger Find & Fix. An unknown key anywhere in the body is refused with 400, naming the key. A preview that cannot be planned is refused with 422 and one of these codes: ACCOUNT_NOT_FOUND, ACCOUNT_NOT_ALLOWED, CLASSIFIER_NOT_FOUND, CLASS_NOT_FOUND or TOO_MANY_RECORDS.",
+        "operationId": "create-ledger-find-fix-line-item-preview",
+        "parameters": [
+          {
+            "description": "The line items to find and the change to plan.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LedgerFindFixLineItemsPreviewRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/LedgerFindFixPreviewResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Preview Ledger Find & Fix for Line Items",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
+    "/api/v1/ledger/find-fix/transactions/preview": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Find records across invoices, bills, customer and supplier credit notes, journals and cash entries in one search, and plan one change to all of them: contact, date, capsule or tags. Nothing is saved. Each record is listed as eligible, with any field the change leaves as it is and why, or excluded with the reason. Pass the preview ID to Apply Ledger Find & Fix within 30 minutes. A preview can match at most 500 records. Lock dates are checked when the change is saved, so a record in a locked period comes back in failed from Apply Ledger Find & Fix. An unknown key anywhere in the body is refused with 400, naming the key. A preview that cannot be planned is refused with 422 and one of these codes: CONTACT_NOT_FOUND, CAPSULE_NOT_FOUND, TOO_MANY_RECORDS or TOO_MANY_CALLS.",
+        "operationId": "create-ledger-find-fix-transaction-preview",
+        "parameters": [
+          {
+            "description": "The records to find and the change to plan.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LedgerFindFixTransactionsPreviewRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/LedgerFindFixPreviewResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Preview Ledger Find & Fix for Transactions",
+        "tags": [
+          "Organization"
+        ]
+      }
+    },
     "/api/v1/ledger/highlights": {
       "get": {
         "consumes": [
@@ -58401,6 +59356,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "422": {
             "description": "Unprocessable Entity",
             "schema": {
@@ -60264,7 +61225,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Apply a partial fast-fix to a purchase request's mutable attributes (dates, contact, notes, tags, currency).",
+        "description": "Apply a partial fast-fix to a purchase request's mutable attributes (dates, contact, notes, tags).",
         "operationId": "create-purchase-request-fast-fix",
         "parameters": [
           {
@@ -60728,7 +61689,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple bills. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple bills. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-bill",
         "parameters": [
           {
@@ -60804,7 +61765,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple bill line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple bill line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-bill-line-item",
         "parameters": [
           {
@@ -60880,7 +61841,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple cash entries. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple cash entries. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-cash-entry",
         "parameters": [
           {
@@ -60956,7 +61917,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple cash entry line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple cash entry line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-cash-entry-line-item",
         "parameters": [
           {
@@ -61032,7 +61993,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple customer credit notes. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple customer credit notes. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-customer-credit-note",
         "parameters": [
           {
@@ -61108,7 +62069,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple customer credit note line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple customer credit note line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-customer-credit-note-line-item",
         "parameters": [
           {
@@ -61184,7 +62145,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple invoices. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple invoices. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-invoice",
         "parameters": [
           {
@@ -61260,7 +62221,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple invoice line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple invoice line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-invoice-line-item",
         "parameters": [
           {
@@ -61336,7 +62297,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple journal schedules. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple journal schedules. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-journal-schedule",
         "parameters": [
           {
@@ -61412,7 +62373,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple journal schedule line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple journal schedule line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-journal-schedule-line-item",
         "parameters": [
           {
@@ -61488,7 +62449,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple journals. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple journals. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-journal",
         "parameters": [
           {
@@ -61564,7 +62525,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple journal line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple journal line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-journal-line-item",
         "parameters": [
           {
@@ -61640,7 +62601,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple purchase order line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple purchase order line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-purchase-order-line-item",
         "parameters": [
           {
@@ -61716,7 +62677,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple purchase request line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple purchase request line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-purchase-request-line-item",
         "parameters": [
           {
@@ -61792,7 +62753,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple purchase schedules. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple purchase schedules. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-purchase-schedule",
         "parameters": [
           {
@@ -61868,7 +62829,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple purchase schedule line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple purchase schedule line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-purchase-schedule-line-item",
         "parameters": [
           {
@@ -61944,7 +62905,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple sale order line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple sale order line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-sale-order-line-item",
         "parameters": [
           {
@@ -62020,7 +62981,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple sale quote line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple sale quote line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-sale-quote-line-item",
         "parameters": [
           {
@@ -62096,7 +63057,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple sale schedules. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple sale schedules. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-sale-schedule",
         "parameters": [
           {
@@ -62172,7 +63133,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple sale schedule line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple sale schedule line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-sale-schedule-line-item",
         "parameters": [
           {
@@ -62248,7 +63209,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple subscription schedules. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple subscription schedules. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-subscription-schedule",
         "parameters": [
           {
@@ -62324,7 +63285,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple subscription schedule line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple subscription schedule line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved.",
         "operationId": "create-quick-fix-subscription-schedule-line-item",
         "parameters": [
           {
@@ -62400,7 +63361,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple supplier credit notes. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple supplier credit notes. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-supplier-credit-note",
         "parameters": [
           {
@@ -62476,7 +63437,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-update fields across multiple supplier credit note line items. Only provided fields are updated.",
+        "description": "Bulk-update fields across multiple supplier credit note line items. Only provided fields are updated. If some or all records fail, the response is 207: failed lists each record with its reason, and records in updated are saved. To change several record types at once, use Ledger Find & Fix.",
         "operationId": "create-quick-fix-supplier-credit-note-line-item",
         "parameters": [
           {
@@ -66265,6 +67226,12 @@
               "$ref": "#/definitions/ErrorResponse"
             }
           },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
           "422": {
             "description": "Unprocessable Entity",
             "schema": {
@@ -68128,7 +69095,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Apply a partial fast-fix to a sale quote's mutable attributes (dates, contact, notes, tags, currency).",
+        "description": "Apply a partial fast-fix to a sale quote's mutable attributes (dates, contact, notes, tags).",
         "operationId": "create-sale-quote-fast-fix",
         "parameters": [
           {
@@ -74190,7 +75157,7 @@
       "name": "Record Lists"
     },
     {
-      "description": "View organization details.",
+      "description": "View organization details and ledger highlights, and use Ledger Find & Fix to find and fix many records at once.",
       "name": "Organization"
     },
     {

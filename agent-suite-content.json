@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.59.2+5952d2f0",
+  "contentVersion": "5.60.0+be6981ab",
   "counts": {
-    "tools": 369,
+    "tools": 371,
     "namespaces": 45,
     "calculators": 13,
     "recipes": 13,
     "jobs": 12,
     "skills": 7,
-    "commands": 72,
+    "commands": 73,
     "apiRules": 159
   },
   "namespaces": [
@@ -166,7 +166,7 @@
     },
     {
       "name": "quick_fix",
-      "description": "Quick Fix: bulk-update multiple transactions or line items in one call. Change dates, contacts, tags, accounts, tax profiles, custom fields across many invoices/bills/journals/credit-notes/cash-entries/schedulers at once. Also: batch update, mass edit."
+      "description": "Quick Fix: bulk-update transactions or line items in one call: dates, contacts, tags, accounts, tax profiles, custom fields on invoices/bills/journals/credit-notes/cash-entries/schedulers. Ledger Find & Fix: preview one change to records found by filter across those types, run it once the user confirms. Also: batch update, mass edit, find & fix, find and fix, find & recode, find and recode, recode, reclassify, bulk edit, change all, move these to account, retag, re-date, change the contact on all, fix the account on every."
     },
     {
       "name": "export_records",
@@ -2302,16 +2302,30 @@
       "destructive": false
     },
     {
+      "name": "preview_ledger_find_fix",
+      "namespace": "quick_fix",
+      "description": "Find and fix (recode) records across invoices, bills, credit notes, journals and cash entries: one filter, one change, max 500. Returns previewId (30 min), counts, reasons and before/after rows; a blocked field stays, the rest changes. Show counts, exclusions, blocked fields and sample rows, ask to confirm, end the turn; last line `Preview ID: <id>`. LINE_ITEMS ids are line IDs. One record or other fields: quick fix tools.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "apply_ledger_find_fix",
+      "namespace": "quick_fix",
+      "description": "Apply a find and fix preview once, only after the user confirms it in a later message (enforced on chat, email and Telegram; by email, the inbox owner). Saves previewed values over later edits (tags too); e-invoice filings may re-submit. UNKNOWN: runs up to 4 more minutes; wait before re-previewing, never re-apply. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
       "name": "quick_fix_transactions",
       "namespace": "quick_fix",
-      "description": "Bulk-update transactions of the same type. Only included fields change; omitted fields preserved.",
+      "description": "One record, or other fields on many records of one type. Contact, date, capsule or tags on several records: preview_ledger_find_fix. Only included fields change.",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "quick_fix_line_items",
       "namespace": "quick_fix",
-      "description": "Bulk-update line items across transactions. Only included fields change.",
+      "description": "One line, or other fields on many lines. Account or classifiers on several lines: preview_ledger_find_fix. Only included fields change.",
       "readOnly": false,
       "destructive": false
     },
@@ -2822,6 +2836,7 @@
     "jobs",
     "jots",
     "journals",
+    "ledger-find-fix",
     "magic",
     "mcp",
     "mcp-call",

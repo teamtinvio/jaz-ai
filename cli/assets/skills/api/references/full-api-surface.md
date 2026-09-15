@@ -3,7 +3,7 @@
 > **The endpoints clio wraps — the REST surface is larger.** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 454 paths / 369 operations and is the authoritative list; check it before concluding
+> carries 454 paths / 371 operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -404,6 +404,9 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/generate-reports/fixed-assets-recon-summary` |
 | POST | `/generate-reports/templated-*` | Templated versions of above |
 | GET | `/ledger/highlights` | GL summary metadata (counts, date range, currencies) |
+| POST | `/ledger/find-fix/transactions/preview` | Ledger Find & Fix: find records across types, plan a contact, date, capsule or tag change (rule 107a) |
+| POST | `/ledger/find-fix/line-items/preview` | Ledger Find & Fix for line items: plan an account or classifier change |
+| POST | `/ledger/find-fix/apply` | Apply a Ledger Find & Fix preview once |
 
 ### Data Exports (downloadable)
 | Method | Path |

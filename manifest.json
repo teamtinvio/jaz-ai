@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.59.2",
+  "version": "5.60.0",
   "description": "Fastest way to manage money",
-  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 369 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
+  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 371 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
     "name": "Jaz",
     "email": "build.with@jaz.ai",
@@ -1271,12 +1271,20 @@
       "description": "Create multiple contacts in one call. Deduplicates against existing contacts (exact name match).\nReturns per-contact result: created, skipped (duplicate), or failed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
+      "name": "preview_ledger_find_fix",
+      "description": "Find and fix (recode) records across invoices, bills, credit notes, journals and cash entries: one filter, one change, max 500. Returns previewId (30 min), counts, reasons and before/after rows; a blocked field stays, the rest changes. Show counts, exclusions, blocked fields and sample rows, ask to confirm, end the turn; last line `Preview ID: <id>`. LINE_ITEMS ids are line IDs. One record or other fields: quick fix tools."
+    },
+    {
+      "name": "apply_ledger_find_fix",
+      "description": "Apply a find and fix preview once, only after the user confirms it in a later message (enforced on chat, email and Telegram; by email, the inbox owner). Saves previewed values over later edits (tags too); e-invoice filings may re-submit. UNKNOWN: runs up to 4 more minutes; wait before re-previewing, never re-apply. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
       "name": "quick_fix_transactions",
-      "description": "Bulk-update transactions of the same type. Only included fields change; omitted fields preserved.\n\nEntities: invoices, bills, customer-credit-notes, supplier-credit-notes, journals, cash-entries, sale-schedules, purchase-schedules, subscription-schedules, journal-schedules.\n\nCommon attrs: valueDate, contactResourceId, tags, customFields, capsuleResourceId, currencySettings. Per-entity: invoices/bills + dueDate; cash-entries use currencySetting SINGULAR ({rateFunctionalToSource, exchangeToken}); journal-schedules + startDate/endDate/interval. Full matrix in jaz-api Rule 107.\n\nTags: string[] max 50 items × 50 chars.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. HTTP 207 = partial — retry only failed resourceIds. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "One record, or other fields on many records of one type. Contact, date, capsule or tags on several records: preview_ledger_find_fix. Only included fields change.\n\nCommon attrs: valueDate, contactResourceId, tags, customFields, capsuleResourceId, currencySettings. Per-entity: invoices/bills + dueDate; cash-entries use currencySetting SINGULAR ({rateFunctionalToSource, exchangeToken}); journal-schedules + startDate/endDate/interval. Full matrix in jaz-api Rule 107.\n\ntags REPLACES all the record's tags: string[] max 50 × 50 chars.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }; 207 = partial, retry only failed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "quick_fix_line_items",
-      "description": "Bulk-update line items across transactions. Only included fields change.\n\nRequest patterns:\n- ARAP + accounting (invoices, bills, CNs, journals, cash-entries): lineItemResourceIds + attributes.\n- Sale/purchase/subscription schedules: schedulerUpdates with arrayIndex (zero-based).\n- Journal schedules: schedulerUpdates with lineItemResourceId (UUID), NOT arrayIndex.\n\nCommon line attrs: name, quantity, unit, unitPrice, discount, organizationAccountResourceId, taxProfileResourceId, classifierConfig. Purchase + withholdingTax. Journals/cash-entries use amount + description instead of unit/unitPrice. Full matrix in jaz-api Rule 107.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. HTTP 207 = partial. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "One line, or other fields on many lines. Account or classifiers on several lines: preview_ledger_find_fix. Only included fields change.\n\nRequest patterns:\n- Invoices, bills, CNs, journals, cash-entries: lineItemResourceIds + attributes.\n- Sale/purchase/subscription schedules: schedulerUpdates with arrayIndex (zero-based).\n- Journal schedules: schedulerUpdates with lineItemResourceId (UUID), NOT arrayIndex.\n\nCommon line attrs: name, quantity, unit, unitPrice, discount, organizationAccountResourceId, taxProfileResourceId, classifierConfig. Purchase + withholdingTax. Journals/cash-entries use amount + description instead of unit/unitPrice. Full matrix in jaz-api Rule 107.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. HTTP 207 = partial. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_nano_classifiers",

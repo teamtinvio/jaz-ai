@@ -2039,6 +2039,131 @@ Note: journal-schedules use `lineItemResourceId` (UUID), NOT `arrayIndex`.
 
 ---
 
+## 17a. Ledger Find & Fix
+
+Find and fix (recode) records across invoices, bills, both credit notes, journals and cash entries with one filter: preview one change, then apply the stored preview once. SKILL.md rule 107a carries the rules an agent must follow; the conditions, shapes and codes are here.
+
+| Filter condition | Operators |
+|------------------|-----------|
+| `types` (required) | `INVOICE`, `BILL`, `CUSTOMER_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE`, `JOURNAL` (manual and cashflow journals only), `CASH_ENTRY` |
+| `resourceIds` | Up to 500; line item ids at line level |
+| `reference` | `eq`, `in`, `contains`, `startWith` |
+| `valueDate` | `eq`, `gte`, `lte`, `between: [from, to]` |
+| `contactResourceId` | `eq`, `in` |
+| `organizationAccountResourceId` | `eq`, `in`; line level only |
+
+A filter needs a condition besides `types`, or the preview answers 422. A condition with no operator is ignored. A key or operator the API does not take, at any level of the request, is a 400 `invalid_filter` whose message names it. At line level, `resourceIds` are line item ids, and reference, date and contact conditions match the line's document.
+
+### POST /api/v1/ledger/find-fix/transactions/preview
+
+Finds records and plans one change: `contactResourceId`, `valueDate` (at most a year ahead), `capsuleResourceId` or `tags` (`{ add, remove }`; the record's other tags stay). A cash entry that is not void is always listed as changing its capsule, since its current capsule is not shown.
+
+```json
+{
+  "filter": { "types": ["INVOICE", "BILL"], "valueDate": { "between": ["2026-04-01", "2026-06-30"] } },
+  "change": { "contactResourceId": "new-contact-uuid", "tags": { "add": ["Q2"] } }
+}
+```
+
+### POST /api/v1/ledger/find-fix/line-items/preview
+
+Finds and recodes line items: `organizationAccountResourceId` (not a bank, cash or control account) or `classifierConfig` (max 50 entries, unique by resourceId, at most 100 classes each; unlisted classifiers stay, and `{ "resourceId": "classifier-uuid", "deleted": true }` removes one, with type and printable filled in by the API; a set needs type, printable and at least one class). On a set entry, a classifier the organization lacks, or a class it lacks or has deleted, is 422 `CLASSIFIER_NOT_FOUND` / `CLASS_NOT_FOUND`. A removal is not checked: removing a classifier the organization lacks is `NO_CHANGE`, so stored bad IDs can be cleaned up. A selection drawn from a record list (`entityResourceId`) is not checked either.
+
+```json
+{
+  "filter": { "types": ["JOURNAL", "CASH_ENTRY"], "organizationAccountResourceId": { "eq": "old-account-uuid" } },
+  "change": { "organizationAccountResourceId": "new-account-uuid" }
+}
+```
+
+Preview response (both levels). The contact change below reaches the invoice; on the bill the contact is blocked, so only its tags change. `after` holds only the fields that will change:
+
+```json
+{
+  "previewId": "Q2rX8vK1mZ4p",
+  "expiresAt": "2026-09-15T10:30:00Z",
+  "level": "TRANSACTIONS",
+  "counts": {
+    "matched": 3, "eligible": 2, "excluded": 1,
+    "byType": { "INVOICE": 2, "BILL": 1 },
+    "excludedByCode": { "VOID": 1 },
+    "blockedByCode": { "CONTACT_NOT_SUPPLIER": 1 }
+  },
+  "data": [
+    {
+      "type": "INVOICE", "resourceId": "invoice-uuid", "reference": "INV-12", "valueDate": "2026-04-01", "status": "ELIGIBLE",
+      "before": { "contactResourceId": "old-contact-uuid", "tags": [] },
+      "after": { "contactResourceId": "new-contact-uuid", "tags": ["Q2"] }
+    },
+    {
+      "type": "BILL", "resourceId": "bill-uuid", "reference": "BILL-7", "valueDate": "2026-04-02", "status": "ELIGIBLE",
+      "blocked": [{ "field": "contactResourceId", "code": "CONTACT_NOT_SUPPLIER" }],
+      "before": { "contactResourceId": "old-contact-uuid", "tags": [] },
+      "after": { "tags": ["Q2"] }
+    }
+  ]
+}
+```
+
+No `previewId` means nothing is eligible and nothing was stored. A row is `EXCLUDED` only for these codes:
+
+| Row `code` | Meaning |
+|------------|---------|
+| `NOT_FOUND` | A listed id matched no record of the listed types; transfer and trial-balance journals and cash transfers never match |
+| `VOID` | The record, or the line's document, is void |
+| `NO_CHANGE` | Every field the change sets already has that value |
+| `BLOCKED` | Every field the change sets is blocked on this record |
+
+A blocked field is left as it is while the record's other fields still change, and the row stays `ELIGIBLE`:
+
+| `blocked[].code` | Field | Why |
+|------------------|-------|-----|
+| `CONTACT_NOT_CUSTOMER`, `CONTACT_NOT_SUPPLIER` | contact | The new contact is not the customer or supplier the document needs |
+| `HAS_CREDIT_OFFSETS` | contact | Credits applied to the document would stay with the old contact |
+| `FOREIGN_CURRENCY_VALUE_DATE` | date | A new date on a foreign currency record would take a new exchange rate |
+| `VALUE_DATE_AFTER_DUE_DATE` | date | The new date is after the document's due date |
+| `TOO_MANY_TAGS` | tags | The record would end with more than 50 tags |
+| `CONTROL_LINE` | account | A journal line on a bank, cash or control account |
+
+### POST /api/v1/ledger/find-fix/apply
+
+```json
+{ "previewId": "Q2rX8vK1mZ4p" }
+```
+
+Single use. Saves the preview-time values, so a field edited between preview and apply, tags included, is overwritten. Once it has taken the preview, the apply runs to the end even if the caller leaves, sends calls of about 100 records (a document's lines stay together, so one call can carry more), and starts no new call 3 minutes after the request arrived. Lock dates are checked when a change is saved, so a record in a locked period comes back in `failed`. 200 when every record changed, 207 otherwise:
+
+```json
+{
+  "failed": [{ "type": "INVOICE", "resourceId": "invoice-uuid", "error": "…", "errorCode": "OUTCOME_UNKNOWN" }],
+  "updated": [{ "type": "BILL", "resourceId": "bill-uuid" }]
+}
+```
+
+| `failed[].errorCode` | Meaning |
+|----------------------|---------|
+| `OUTCOME_UNKNOWN` | The answer for this record was lost, so it may or may not have changed |
+| `NOT_ATTEMPTED` | The apply reached its 3-minute limit before sending this record, so it did not change |
+| `UPSTREAM_REJECTED` | The platform refused the update before this record changed |
+| `UNSUPPORTED_RECORD_TYPE` | The stored preview names a record type this version cannot change |
+
+Several applies can run at the same time. When two applies change records on one document at once, the one saved last can undo the other's changes, including fields and line items it did not set. Preview again to check the result.
+
+| Status | `error_details.code` | Meaning |
+|--------|----------------------|---------|
+| 404 | `PREVIEW_NOT_FOUND` | Expired, already applied or being applied, or another caller's preview. Preview again, never resend. |
+| 400 | none; `error_type` is `invalid_filter` | A key or operator the request may not carry; the message names it |
+| 422 | `CONTACT_NOT_FOUND`, `CAPSULE_NOT_FOUND` | Transactions preview: the contact or capsule the change sets does not exist; `resourceId` names it |
+| 422 | `ACCOUNT_NOT_FOUND`, `ACCOUNT_NOT_ALLOWED` | Line items preview: the account the change sets does not exist, is inactive, or is a bank, cash or control account; `resourceId` names it |
+| 422 | `CLASSIFIER_NOT_FOUND`, `CLASS_NOT_FOUND` | Line items preview, set entries only: a classifier the change sets does not exist, or a class it selects is not a current class of that classifier; `resourceId` names the classifier or class. A removal and a record-list selection (`entityResourceId`) are not checked |
+| 422 | `TOO_MANY_RECORDS` | Either preview: at least `count` records or line items match, more than `limit` |
+| 422 | `TOO_MANY_CALLS` | Transactions preview: the change needs `count` separate updates, more than `limit`, because records whose resulting values differ need separate updates. A line items preview never answers it |
+| 503 | `PREVIEW_STORE_UNAVAILABLE` | Nothing applied |
+
+Any other 5xx, or a timeout, on apply: the outcome is unknown. If the connection drops, apply keeps running for up to 4 minutes. Wait that long before previewing or applying again on the same records, then preview again or re-read them. Never apply this previewId again. A service restart can stop an apply; preview again to check.
+
+---
+
 ## 18b. Transfer Trial Balance
 
 ### POST /api/v1/transfer-trial-balance

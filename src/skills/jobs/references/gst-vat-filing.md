@@ -9,7 +9,7 @@
 - **`search_tax_profiles(filter: {})`** — step 2 setup verification: confirm all expected tax profiles exist (`SR`, `ZR`, `ES`, `IES`, `OS`, `TX`, `BL`, `OP`, `EP`, `RC` for SG; `VAT-RC`, `VAT-EXP`, `VAT-ZR`, `VAT-EXM`, `VAT-EXC` for PH).
 - **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, limit: 200)`** — step 3 output-tax detail: per-invoice GST cross-check against tax ledger.
 - **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}, status: {neq: 'DRAFT'}}, limit: 200)`** — step 4 input-tax detail: per-bill GST cross-check, with blocked-input filter.
-- **`quick_fix_invoices(...)` / `quick_fix_bills(...)`** — step 5 corrections: bulk-update tax-profile / tax-vat-applicable across multiple transactions if errors found.
+- **`quick_fix_line_items(entity: 'invoices' | 'bills', lineItemResourceIds, attributes)`** — step 5 corrections: re-assign the tax profile on the affected lines if errors are found. The tax profile sits on each line, so the fix is at line level.
 - **`download_export(exportType: 'analysis-exchange-rate-audit', startDate, endDate)`** — step 6 pre-filing check: FX rates outside expected band can shift GST on FX invoices.
 - **`generate_trial_balance(period_end: <period-end>)`** — step 7 GST account reconciliation: `GST Control` / `Input Tax Recoverable` / `Output Tax Payable` accounts.
 
@@ -97,23 +97,17 @@ Flag bills where:
 
 ## Step 5 — Corrections (if errors found)
 
-For tax-profile errors detected in steps 3-4:
+For tax-profile errors detected in steps 3-4. The tax profile sits on each line item, so correct the lines:
 
 ```
-quick_fix_invoices({
-  resourceIds: [<list of invoice ids>],
+quick_fix_line_items({
+  entity: 'invoices',
+  lineItemResourceIds: [<line item ids from the step 3 invoices>],
   attributes: { taxProfileResourceId: <correct profile id> }
 })
 ```
 
-Mirror for bills via `quick_fix_bills`. For line-item-level fixes:
-
-```
-quick_fix_invoices({
-  lineItemResourceIds: [<list of line item ids>],
-  attributes: { taxProfileResourceId: <correct profile> }
-})
-```
+Mirror for bills with `entity: 'bills'`. Ledger Find & Fix (`preview_ledger_find_fix`) does not change tax profiles, so these per-type calls are the route for this correction.
 
 Per `jaz-api/SKILL.md` rule 107: Quick Fix returns 207 Multi-Status on partial failures; retry only failed resourceIds.
 
@@ -176,7 +170,7 @@ Save the filing summary for the quarter. The user files via the appropriate port
 | Step 2 | Tax profile missing for jurisdiction | `create_tax_profile(...)` per IRAS / BIR spec. Halt and surface to practitioner — practitioner judgment on rate. |
 | Step 3 | Per-invoice GST ≠ tax-ledger output total | Investigate per-invoice tax-profile assignment. Quick Fix typically resolves. |
 | Step 4 | BL bills coded as TX | Quick Fix re-assigns to BL. Practitioner approval required (changes input tax claim). |
-| Step 5 | `quick_fix_invoices` 207 Multi-Status | Retry only failed resourceIds (per rule 107). Likely cause: invoice in locked period. |
+| Step 5 | `quick_fix_line_items` 207 Multi-Status | Retry only failed resourceIds (per rule 107). Likely cause: invoice in locked period. |
 | Step 7 | TB GST Control ≠ tax-ledger net | Surface to practitioner. Investigate manual journals against GST accounts. Auditor will catch this if unresolved. |
 | Step 8 | Box 13 Revenue ≠ P&L Operating Revenue | Box 13 includes ALL revenue (zero-rated + exempt + standard); P&L may show split. Re-confirm Box 13 definition with IRAS. |
 | Filing rejected by myTax / BIR | (post-filing) | Pull rejection reason. Amend filing summary; refile within allowed window. Practitioner judgment on penalty exposure. |

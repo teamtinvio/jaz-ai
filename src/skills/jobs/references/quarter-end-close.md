@@ -155,7 +155,7 @@ update_account(resourceId: <CoA root>, lockDate: '2025-03-31')
 | Source | Error | Recovery |
 |--------|-------|----------|
 | Phase 1-5 (standalone) | Months not all closed | Months incomplete. Route to missing `month-end-close.md`. Run quarterly extras only once all 3 months are locked. |
-| Q1 verification | Tax ledger ≠ sum of GST per invoice/bill | Likely tax-profile assignment errors. Audit each invoice / bill for correct tax profile. Quick Fix: `quick_fix_invoices(...)` / `quick_fix_bills(...)`. |
+| Q1 verification | Tax ledger ≠ sum of GST per invoice/bill | Likely tax-profile assignment errors. Audit each invoice / bill for correct tax profile. Quick Fix: `quick_fix_line_items(entity: 'invoices' \| 'bills', ...)` on the affected lines, since the tax profile sits on each line. |
 | Q2 ECL recipe | 422 `account_not_found` | `Allowance for Doubtful Debts` missing. Create via `create_account(accountType: 'Current Asset')`. |
 | Q3 | YTD accrual mismatches monthly recipe expectations | Likely a manual journal posted directly to Bonus Liability (not via recipe). Audit `generate_general_ledger(accountResourceId: <Bonus Liability>, period_start: <FY-start>, period_end: <today>)`. |
 | Q4 IC recon | Entity A IC Receivable ≠ Entity B IC Payable (sign-flipped) | See the `intercompany` recipe error table. Common causes: timing, FX confusion, posting skipped in one entity. |
