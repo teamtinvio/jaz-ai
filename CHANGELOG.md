@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.60.1] - 2026-09-17
+
+**The extension starts again in Claude Desktop 2.110.0.**
+
+After Claude Desktop updated to version 2.110.0, Jaz Accounting closed a moment after launch with "Server disconnected". Turning it off and on, reinstalling it and updating it did not help. The cause was a background check for newer versions of Jaz Accounting that ran every time the extension started. Claude Desktop 2.110.0 does not allow an extension to start that kind of background process, and closes the extension when it tries.
+
+The extension no longer runs that check, so it starts and connects as before. Your settings, API key and organizations are unchanged.
+
 ## [5.60.0] - 2026-09-16
 
 **Find records across your ledger and fix them in one step, after a preview.**
