@@ -58,7 +58,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 371 tools, 7 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.60.1", "mcp"],
+      "args": ["-y", "jaz-clio@5.60.2", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
@@ -72,14 +72,14 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 371 tools, 7 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.60.1", "mcp"],
+      "args": ["-y", "jaz-clio@5.60.2", "mcp"],
       "env": { "JAZ_API_KEY": "jk-your-api-key" }
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.60.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.60.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -299,7 +299,7 @@ Each company's key lives in its own folder's `.env`. A `jk-` key is scoped to on
 
 **One organization per session, enforced.** Every call names its organization explicitly rather than relying on whichever one happens to be active. If something in your shell would silently override that choice — an exported `JAZ_API_KEY`, or several comma-separated keys — the command stops instead of posting to the wrong company's books.
 
-Multi-organization work needs the CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Windows is supported by design but not yet verified — [tell us](https://github.com/teamtinvio/jaz-ai/issues) if you hit something.
+Multi-organization work needs the CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Windows is supported by design but not yet verified — [tell us](mailto:build.with@jaz.ai) if you hit something.
 
 Start with `/jk-setup`, or just say "set up Jaz Kit for my company" — the skill triggers the same flows in Codex CLI, Cursor, and Copilot, which have no slash commands.
 
@@ -419,6 +419,27 @@ clio auth list                     # Confirm the right org is active
 
 If you use env vars, set `JAZ_API_KEY` in the current shell or your MCP config's `env` block.
 
+### Claude Desktop says "Server disconnected"
+
+Jaz Accounting closes a moment after it starts, and turning it off and on or reinstalling it does not help.
+
+1. **Update the extension to 5.60.1 or later.** Claude Desktop 2.110.0 closes any extension that starts a background copy of its Node.js runtime, and earlier versions of Jaz Accounting did that to check for updates.
+2. **If the update has not reached you yet**, switch that check off, then fully quit and reopen Claude Desktop:
+
+   ```bash
+   # macOS
+   mkdir -p ~/.config/configstore && printf '{"optOut":true}' > ~/.config/configstore/update-notifier-jaz-clio.json
+   ```
+
+   On Windows, create the file `%USERPROFILE%\.config\configstore\update-notifier-jaz-clio.json` containing `{"optOut":true}`.
+3. **Still disconnecting?** The extension's own log only says the server closed. The reason is in Claude Desktop's main log:
+
+   ```bash
+   grep -a -E "Jaz Accounting|nodeHost|UtilityProcess" ~/Library/Logs/Claude/main.log | tail -40
+   ```
+
+   Send that output to build.with@jaz.ai.
+
 ### MCP not connecting
 
 The config path is wrong, the command is wrong, or the server crashes on startup.
@@ -434,7 +455,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.60.1", "mcp"],
+  "args": ["-y", "jaz-clio@5.60.2", "mcp"],
   "env": { "JAZ_API_KEY": "jk-your-api-key" }
 }
 ```
@@ -492,7 +513,6 @@ Full policy: [jaz.ai/legal](https://jaz.ai/legal). Vulnerability disclosure: [SE
 ## Support
 
 - **Help center**: [help.jaz.ai](https://help.jaz.ai)
-- **Issues**: [github.com/teamtinvio/jaz-ai/issues](https://github.com/teamtinvio/jaz-ai/issues)
 - **Email**: build.with@jaz.ai
 
 ## License

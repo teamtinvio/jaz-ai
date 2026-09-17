@@ -1,6 +1,6 @@
 {
   "name": "jaz-clio",
-  "version": "5.60.1",
+  "version": "5.60.2",
   "description": "Clio: Command Line Interface Operator for Jaz AI.",
   "type": "module",
   "bin": {
@@ -69,7 +69,6 @@
     "ora": "^8.1.1",
     "papaparse": "^5.5.3",
     "undici": "^6.26.0",
-    "update-notifier": "^7.3.1",
     "yaml": "^2.8.2"
   },
   "devDependencies": {

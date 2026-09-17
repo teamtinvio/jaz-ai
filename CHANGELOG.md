@@ -1,5 +1,17 @@
 # Changelog
 
+## [5.60.2] - 2026-09-17
+
+**The command line tells you when a new version is out.**
+
+The "Update available" notice in the terminal stopped working in March. Now, when a newer version exists, `clio` shows a short notice after a command finishes, or offers to install it in one keypress when you start `clio` on its own. Each new version is mentioned at most once a day.
+
+`clio update` now recognises the version you have. It used to report "vunknown" and reinstall even when you were already up to date.
+
+The check only runs when you use `clio` yourself in a terminal. Jaz Accounting running as an MCP server (in Claude Desktop, Claude Code, Cursor or another assistant), commands run with `--json`, and output piped to another program are never checked. To turn the notice off, set `NO_UPDATE_NOTIFIER=1`.
+
+The extension's Support link now opens the Jaz help center. It pointed to a GitHub page that is switched off.
+
 ## [5.60.1] - 2026-09-17
 
 **The extension starts again in Claude Desktop 2.110.0.**
