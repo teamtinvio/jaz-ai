@@ -1,3 +1,7 @@
+Set up Jaz in the tools I choose using the instructions below. Handle installation and configuration wherever you have access, preserve my existing settings, and guide me through sign-in or private credential entry. Verify the selected targets, then help me get started.
+
+---
+
 # Jaz Agent Setup
 
 Jaz is an accounting platform for invoices, bills, journal entries, reconciliation, reporting, and period close. Set up its CLI, MCP server, or hosted connector in the user's chosen tools. Prefer OAuth sign-in, then verify access to the correct organization. Offer API-key access as an optional alternative for existing integrations or unattended environments. Keep setup read-only: never create or modify accounting records to test it.
@@ -20,7 +24,7 @@ Reuse working connections and credentials. Merge settings and guidance without o
 
 First inspect your runtime, available Jaz tools, and accessible application settings without installing anything or reading secret values.
 
-Group unresolved target, connection, and skills choices into one short interaction where possible. Omit questions already answered by the request or existing setup. Then ask **"Where would you like to use Jaz?"** Use a multi-select interface when available; otherwise show a numbered list that accepts multiple choices:
+Make target selection the only setup-preference question. Include skills by default where supported, with a Tools only opt-out in the same interaction. Omit questions already answered by the request or existing setup. Ask **"Where would you like to use Jaz?"** Use a multi-select interface when available; otherwise show a numbered list that accepts multiple choices:
 
 - Claude Code
 - Codex
@@ -45,18 +49,13 @@ Choose the simplest supported connection:
 - **Hosted MCP with OAuth** for connector-only use, including terminal and editor agents that support it.
 - **Local CLI/MCP** when the user wants local tooling, scripts, or a development setup that needs it. Check the installed release for OAuth support before initiating authentication.
 
-If the request leaves that choice open, offer **Connect my agent (recommended)** or **Set up local CLI and MCP** once. Do not ask separately for every target unless their needs differ.
+Choose the connection method yourself from the selected targets and available capabilities. Prefer one shared local OAuth session when local CLI and MCP are selected together; use hosted OAuth for hosted targets. Explain the choice briefly without asking another preference question. Honor explicit preferences. Separate hosted applications may each require their own consent.
 
-### Offer skills separately
+### Include skills where supported
 
 Skills provide reusable accounting instructions and workflows; tools provide access to Jaz data and actions. Skills can work with either hosted OAuth or local MCP. A hosted connection does not mean the user has declined skills.
 
-For selected targets that support skill installation, check for existing Jaz skills. Installing files in your sandbox does not install them in the user's application; use the target's persistent workspace or supported skill import interface. If the user's preference is not already known, ask **"Would you like to add Jaz skills for guided accounting workflows?"** Offer:
-
-- **Tools + skills (recommended):** connect Jaz and install reusable workflow guidance. Explain that local skill installation downloads files using Jaz's installer; it does not require an API key or changing a hosted connection.
-- **Tools only:** connect Jaz now and leave skills for later.
-
-Offer this even when a connection is already live. Reuse installed skills. For targets without supported skill installation, explain that tools are available and workflow documentation can be consulted, without promising native skill shortcuts.
+Install or reuse Jaz skills for selected targets that support them unless the user chooses Tools only. Explain that skills provide workflow guidance alongside the connection; do not ask a separate skills question. Use the target's persistent workspace or supported import interface. Installing files in your sandbox does not install them in the user's application. For targets without skill support, use their available tools and workflow documentation without promising native skill shortcuts.
 
 Briefly state the chosen targets, connection method, and skills choice, then proceed. Skip only the components already working; continue setting up the other selected components and targets.
 
@@ -79,7 +78,7 @@ If the selected plugin or extension bundles Jaz skills, install or reuse it in s
 npx -y jaz-clio@latest init --platform <platform> --skill all
 ```
 
-Supported values: `claude`, `codex`, `cursor`, `windsurf`, `copilot`, `gemini`, or `agents`. For existing or partial installations, generate files in a temporary workspace and merge the required changes, including the platform's instruction file. Do not rerun initialization over existing skills or use force to replace user guidance. For multiple targets, stage each platform separately, merge shared skills once, and preserve each target's instruction file and configuration. Verify that the target discovers the installed skills; reload if needed. Distinguish installed files from skills available in the current session. Use skill names from their metadata, which can differ from folder names. Installing skills does not require authentication. Use hosted tools for workflows they support. Use the installed workflow's supported connection. Jaz Kit identifies each company by its organization ID; pin that ID on every call. Do not request an API key merely to install or use skills. If older instructions require key-based access, check for an update before offering that alternative.
+Supported values: `claude`, `codex`, `cursor`, `windsurf`, `copilot`, `gemini`, or `agents`. For existing or partial installations, generate files in a temporary workspace and merge the required changes, including the platform's instruction file. Do not rerun initialization over existing skills or use force to replace user guidance. For multiple targets, stage each platform separately, merge shared skills once, and preserve each target's instruction file and configuration. Verify that the target discovers the installed skills and load one without running accounting actions. Reload yourself when supported; otherwise state the exact remaining activation step. Distinguish installed files from skills available in the current session. Use the target's live skill listing to verify invocation names; they can differ from both metadata names and folder names. Installing skills does not require authentication. Use hosted tools for workflows they support. Use the installed workflow's supported connection. Jaz Kit identifies each company by its organization ID; pin that ID on every call. Do not request an API key merely to install or use skills. If older instructions require key-based access, check for an update before offering that alternative.
 
 ### Authenticate with OAuth
 
@@ -91,11 +90,11 @@ For local CLI/MCP, reuse a working OAuth session. Otherwise start:
 npx -y jaz-clio@latest auth login --json
 ```
 
-The command opens Jaz sign-in and waits for a callback. Show the returned sign-in link as a clickable link, keep the process alive, and let the user sign in and consent. The browser must be able to reach the computer running Jaz. For an isolated sandbox, configure the user's intended machine or use hosted OAuth instead; never copy tokens between applications.
+Run sign-in in a process that stays alive while waiting for the user; keep its handle and capture the sign-in link separately so you can recover it. The command opens Jaz sign-in and waits for a callback. Show the returned sign-in link as a clickable link, keep the process alive, and let the user sign in and consent. The browser must be able to reach the computer running Jaz. For an isolated sandbox, configure the user's intended machine or use hosted OAuth instead; never copy tokens between applications.
 
 Use the returned organization choices as described in section 4 before configuring local targets. If needed, refresh the choices with `auth organizations --json`, then run `auth select <resourceId> --json`. CLI and local MCP share this session and refresh it automatically.
 
-Use `oauth:<resourceId>` as the local **organization selector**. For optional API-key access, the selector is the saved profile label. Remove an old key override from the selected target's launch environment only when migrating that target to OAuth; preserve its stored key profile.
+Use `oauth:<resourceId>` as the local **organization selector**. For optional API-key access, the selector is the saved profile label. An explicit `--org` selector overrides inherited `JAZ_API_KEY`; preserve existing keys and profiles. If a target pins its organization only through `JAZ_ORG`, avoid a conflicting inherited key in that server's launch environment.
 
 If the installed release does not offer `auth login`, update it while respecting explicit pins. If an update is unavailable, explain the limitation and offer hosted OAuth or optional API-key access. Do not invent a login command or silently change authentication methods.
 
@@ -253,7 +252,7 @@ Use the tool's supported MCP configuration with the same hosted URL or local com
 
 ## 4. Select an organization and verify
 
-List organizations reachable through the authenticated connection. Use the only available organization automatically, or the user's existing explicit choice. If several remain, present their names in a selector or numbered list, distinguish duplicate names, and wait for a choice. If none are available, explain that organization access is needed.
+List organizations reachable through the authenticated connection. Use the only available organization automatically, or the user's existing explicit choice. If consent or existing trusted context already identifies the intended organization, reuse it. If several still remain with no explicit choice, present their names once and wait for a choice; never guess a financial organization to reduce setup questions. If none are available, explain that organization access is needed.
 
 Reuse that choice across targets; ask again only if another connection cannot access it. Read the chosen organization's name and resource ID. For hosted MCP, where available, call `list_organizations`, then `organization` with:
 
@@ -263,11 +262,11 @@ Reuse that choice across targets; ask again only if another connection cannot ac
 
 For local OAuth, use the choices returned by sign-in or `auth organizations --json`, then `auth select <resourceId> --json`; skip another selection if sign-in already verified the intended organization. For local CLI, use the `org info` command above. For local MCP, discover the equivalent read through live tool descriptions. A single-organization key selects its organization automatically; still verify its identity.
 
-Verify each selected target where possible. A successful installation, "Connected" status, tool discovery, or zero exit code does not prove authenticated data access. Require the organization read to succeed. CLI success alone does not prove an editor's MCP connection is active. Confirm that targets intended for the same organization resolve to the same ID. Mark inaccessible targets as configured but pending verification rather than ready.
+Verify each selected target where possible. Use the active session's actual connection when checking tools; a separate CLI configuration listing does not prove which server that session loaded. Do not invent scope-precedence explanations or recommend removing an existing connection without evidence of a real conflict. A successful installation, "Connected" status, tool discovery, or zero exit code does not prove authenticated data access. Require the selected organization detail operation to succeed through each connection. Listing accessible organizations is a selection step, not sufficient verification: for MCP, call `get_organization` through the live tool schema and confirm its returned resource ID. CLI success alone does not prove an editor's MCP connection is active. Confirm that targets intended for the same organization resolve to the same ID. Mark inaccessible targets as configured but pending verification rather than ready.
 
 ## 5. Complete setup and hand off
 
-Give a brief result for each selected target: **Ready**, **Needs sign-in**, **Needs activation**, or **Needs verification**. Name the verified organization. If anything remains, provide the next action and resume afterward; do not repeat completed steps.
+Keep the successful handoff focused on the selected targets and how to use them. Omit unused connections, installation diagnostics, and optional cleanup offers unless they caused a verified failure in a selected target. Give a brief result for each selected target: **Ready**, **Needs sign-in**, **Needs activation**, or **Needs verification**. Name the verified organization. If anything remains, provide the next action and resume afterward; do not repeat completed steps.
 
 Save non-secret connection details, authentication method, target scopes, profile labels when applicable, organization ID, skills choice and availability, verification date, and remaining steps in the workspace or platform's supported persistent context. Preserve existing instructions.
 

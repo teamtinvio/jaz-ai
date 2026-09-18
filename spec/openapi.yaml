@@ -775,6 +775,24 @@
       ],
       "type": "object"
     },
+    "AttachPaymentToUnappliedPaymentRequest": {
+      "properties": {
+        "hash": {
+          "description": "Optimistic-lock token, as on every other action.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "paymentResourceId": {
+          "description": "Resource ID of the existing payment record to bring under this payment.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "hash",
+        "paymentResourceId"
+      ],
+      "type": "object"
+    },
     "AttachmentNestedFilter": {
       "properties": {
         "fileName": {
@@ -810,6 +828,29 @@
           "description": "Filter by attachment resource ID."
         }
       },
+      "type": "object"
+    },
+    "AttributeUnappliedPaymentRequest": {
+      "properties": {
+        "attributions": {
+          "description": "The transactions this cash settles.",
+          "items": {
+            "$ref": "#/definitions/UnappliedAttributionRequest"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array"
+        },
+        "hash": {
+          "description": "Optimistic-lock token, as on every other action.",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "attributions",
+        "hash"
+      ],
       "type": "object"
     },
     "BTCurrency": {
@@ -1169,6 +1210,19 @@
       },
       "type": "object"
     },
+    "BatchPaymentContactResponse": {
+      "properties": {
+        "name": {
+          "description": "Display name of the contact.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the contact.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "BatchPaymentFilter": {
       "properties": {
         "and": {
@@ -1235,6 +1289,14 @@
           ],
           "description": "Filter by the resource ID of the bank or cash account the batch posts to."
         },
+        "origin": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by how the row was created: BATCH or UNAPPLIED. Use the top-level origin\ninstead for the plain case; this one exists so origin can be combined inside an\nandGroup or orGroup. Note that batches created before unapplied payments existed\nhave no origin at all, so an equality test on BATCH silently drops them."
+        },
         "paymentMethod": {
           "allOf": [
             {
@@ -1273,7 +1335,7 @@
               "$ref": "#/definitions/BigDecimalExpression"
             }
           ],
-          "description": "Filter by the sum of the batch's payment records."
+          "description": "Filter by the sum of the batch's payment records. On an unapplied payment this is\nthe cash that arrived instead, which its attributions consume."
         },
         "type": {
           "allOf": [
@@ -1303,6 +1365,191 @@
         "or": {
           "description": "Combine with another filter using OR.",
           "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "BatchPaymentRecordResponse": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the account the payment posts to.",
+          "type": "string"
+        },
+        "amount": {
+          "description": "Amount of the payment record.",
+          "type": "number"
+        },
+        "bankStatementEntryResourceId": {
+          "description": "Resource ID of the bank record this payment record is itself reconciled to. On an\nunapplied payment's records this is the bank record the whole payment was matched\nto, which is how a client can tell a reconciled attribution from an unreconciled\none.",
+          "type": "string"
+        },
+        "businessTransactionResourceId": {
+          "description": "Resource ID of the transaction the payment settles.",
+          "type": "string"
+        },
+        "businessTransactionType": {
+          "description": "Type of that transaction.",
+          "type": "string"
+        },
+        "contactResourceId": {
+          "description": "Resource ID of the contact on the transaction.",
+          "type": "string"
+        },
+        "currencyCode": {
+          "description": "Currency of the payment record (ISO 4217).",
+          "type": "string"
+        },
+        "currencySymbol": {
+          "description": "Display symbol for that currency.",
+          "type": "string"
+        },
+        "organizationAccountResourceId": {
+          "description": "Resource ID of the bank or cash account the payment was received into or paid from.",
+          "type": "string"
+        },
+        "paymentAmount": {
+          "description": "Amount applied to the transaction, when it differs from the payment amount.",
+          "type": "number"
+        },
+        "paymentMethod": {
+          "description": "How the payment was made.",
+          "type": "string"
+        },
+        "reference": {
+          "description": "Reference on the payment record.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the payment record.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the payment record.",
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Payment date, as epoch milliseconds.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "BatchPaymentResponse": {
+      "properties": {
+        "bankStatementEntryResourceId": {
+          "description": "Resource ID of the bank record the batch is reconciled to, when it is matched.",
+          "type": "string"
+        },
+        "batchPaymentVoucherReference": {
+          "description": "Voucher reference generated for the batch.",
+          "type": "string"
+        },
+        "consumedAmount": {
+          "description": "On an unapplied payment, how much of the cash has been attributed so far. Null on\nan ordinary batch, where the idea does not apply.",
+          "type": "number"
+        },
+        "contacts": {
+          "description": "The contacts those records belong to.",
+          "items": {
+            "$ref": "#/definitions/BatchPaymentContactResponse"
+          },
+          "type": "array"
+        },
+        "crossCurrency": {
+          "description": "True when the record is in a currency other than the organization's own. This is\nthe only read path for the rate a payment was recorded at, so it is returned here\nrather than only on the response of whichever call last touched the record.",
+          "type": "boolean"
+        },
+        "currencyCode": {
+          "description": "Currency of the batch (ISO 4217).",
+          "type": "string"
+        },
+        "currencySymbol": {
+          "description": "Display symbol for that currency.",
+          "type": "string"
+        },
+        "functionalCurrencyCode": {
+          "description": "Reporting currency of the organization, which the amounts are converted into.",
+          "type": "string"
+        },
+        "hash": {
+          "description": "Optimistic-lock token. Pass it back when calling any Unapplied Payments endpoint\nagainst this record.",
+          "type": "string"
+        },
+        "lastEmailOn": {
+          "description": "When the batch was last emailed, as epoch milliseconds.",
+          "type": "integer"
+        },
+        "organizationAccountResourceId": {
+          "description": "Resource ID of the bank or cash account the batch posts to.",
+          "type": "string"
+        },
+        "organizationResourceId": {
+          "description": "Resource ID of the organization that owns the batch.",
+          "type": "string"
+        },
+        "origin": {
+          "description": "How the row was created: UNAPPLIED for an unapplied payment, BATCH for an ordinary\nbatch, and null for batches created before unapplied payments existed, which are\nordinary batches too. It records how the record STARTED and never changes.",
+          "enum": [
+            "BATCH",
+            "UNAPPLIED"
+          ],
+          "type": "string"
+        },
+        "paymentMethod": {
+          "description": "How the payment was made.",
+          "type": "string"
+        },
+        "paymentRecords": {
+          "description": "The payment records grouped under the batch.",
+          "items": {
+            "$ref": "#/definitions/BatchPaymentRecordResponse"
+          },
+          "type": "array"
+        },
+        "rateToFunctional": {
+          "description": "Exchange rate applied to reach the functional currency. Read it together with\ncrossCurrency: on a record in the organization's own currency the rate is 1 and\nconverting by it is a no-op.",
+          "type": "number"
+        },
+        "reference": {
+          "description": "Reference on the batch.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the payment batch.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Lifecycle status of the batch.",
+          "type": "string"
+        },
+        "totalAmount": {
+          "description": "For an ordinary batch, the sum of its payment records. For an unapplied payment,\nthe cash that arrived, which its records consume instead of adding to.",
+          "type": "number"
+        },
+        "type": {
+          "description": "AR for batches against invoices and customer credit notes, AP for those against\nbills and supplier credit notes.",
+          "enum": [
+            "AR",
+            "AP"
+          ],
+          "type": "string"
+        },
+        "unappliedBalance": {
+          "description": "On an unapplied payment, what is still unattributed. Null on an ordinary batch.",
+          "type": "number"
+        },
+        "unappliedStatus": {
+          "description": "Where an unapplied payment is in its life: DRAFT before it is activated, UNAPPLIED\nwhile it still holds cash, APPLIED once it has all been attributed. Null on an\nordinary batch.\n\nThis is the field to group a list on, not origin: origin never changes, so a fully\napplied unapplied payment still reads UNAPPLIED there for life.",
+          "enum": [
+            "DRAFT",
+            "UNAPPLIED",
+            "APPLIED"
+          ],
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Payment date, as epoch milliseconds.",
+          "type": "integer"
         }
       },
       "type": "object"
@@ -10814,6 +11061,91 @@
       ],
       "type": "object"
     },
+    "EditUnappliedPaymentRequest": {
+      "properties": {
+        "amount": {
+          "description": "Restates the cash that arrived. Releases an existing bank match.",
+          "type": "number"
+        },
+        "attachments": {
+          "description": "Files to attach to the record.",
+          "items": {
+            "$ref": "#/definitions/ClaimAttachmentRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "children": {
+          "description": "The attributed transactions, as a full replacement list. A row already on the\npayment that is left out of this list is KEPT: to remove one, send it with\ndeleted set to true.",
+          "items": {
+            "$ref": "#/definitions/UnappliedPaymentChildRequest"
+          },
+          "maxItems": 500,
+          "type": "array"
+        },
+        "customFields": {
+          "description": "Custom field values to store on the record.",
+          "items": {
+            "$ref": "#/definitions/CustomField"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "externalReference": {
+          "description": "The counterparty's reference.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "hash": {
+          "description": "Optimistic-lock token, as on every other action.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "notes": {
+          "description": "Free-text notes.",
+          "maxLength": 5000,
+          "type": "string"
+        },
+        "organizationAccountResourceId": {
+          "description": "Moves the payment to another bank or cash account. Releases an existing bank match.",
+          "type": "string"
+        },
+        "paymentMethod": {
+          "description": "How the payment was made.",
+          "enum": [
+            "CASH",
+            "CREDIT_CARD",
+            "BANK_TRANSFER",
+            "E_WALLET",
+            "CHEQUE",
+            "WITHHOLDING_TAX_CERTIFICATE",
+            "CLEARING_SETTLEMENT",
+            "DEBT_WRITE_OFF",
+            "INTER_COMPANY",
+            "OTHER",
+            "PAYMENT_GATEWAY"
+          ],
+          "type": "string"
+        },
+        "rateToFunctional": {
+          "description": "New exchange rate to the functional currency.",
+          "type": "number"
+        },
+        "reference": {
+          "description": "Your own reference for the payment.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "New value date, in YYYY-MM-DD format. Releases an existing bank match.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "hash"
+      ],
+      "type": "object"
+    },
     "EmployeeBalanceFilter": {
       "properties": {
         "active": {
@@ -15887,6 +16219,45 @@
       ],
       "type": "object"
     },
+    "PaymentTransactionFeeRequest": {
+      "properties": {
+        "feeDescription": {
+          "description": "Description shown against the fee.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "feeOrganizationAccountResourceId": {
+          "description": "Account the fee posts to.",
+          "type": "string"
+        },
+        "feeTaxVatApplicable": {
+          "description": "Whether tax applies to the fee.",
+          "type": "boolean"
+        },
+        "feeType": {
+          "description": "Whether feeValue is an absolute amount or a percentage.",
+          "enum": [
+            "AMOUNT",
+            "PERCENTAGE"
+          ],
+          "type": "string"
+        },
+        "feeValue": {
+          "description": "Fee amount, or percentage when feeType is PERCENTAGE.",
+          "type": "number"
+        },
+        "taxVatProfileResourceId": {
+          "description": "Tax profile applied to the fee.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "feeOrganizationAccountResourceId",
+        "feeType",
+        "feeValue"
+      ],
+      "type": "object"
+    },
     "PaymentsReconcileClientRequest": {
       "properties": {
         "adjustment": {
@@ -19606,6 +19977,107 @@
       ],
       "type": "object"
     },
+    "RecordUnappliedPaymentRequest": {
+      "properties": {
+        "amount": {
+          "description": "The cash that arrived. Attributions consume this; they do not define it.",
+          "type": "number"
+        },
+        "attachments": {
+          "description": "Files to attach to the record.",
+          "items": {
+            "$ref": "#/definitions/ClaimAttachmentRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "businessTransactionType": {
+          "description": "Which side of the ledger the cash belongs to: SALE for money received from a\ncustomer, PURCHASE for money paid to a supplier. Sets the control account and\nthe cash direction, and therefore what this payment can later settle.",
+          "enum": [
+            "SALE",
+            "PURCHASE"
+          ],
+          "type": "string"
+        },
+        "contactResourceId": {
+          "description": "Contact the cash belongs to. Optional: an unapplied payment need not be\ncontact-scoped, and one left unset appears under the list's no-contact section.",
+          "type": "string"
+        },
+        "currencyCode": {
+          "description": "Currency of the cash (ISO 4217).",
+          "type": "string"
+        },
+        "customFields": {
+          "description": "Custom field values to store on the record.",
+          "items": {
+            "$ref": "#/definitions/CustomField"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "externalReference": {
+          "description": "The counterparty's reference, such as the bank's transaction description.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "functionalCurrencyCode": {
+          "description": "Reporting currency of the organization. Defaults to the organization's own\nsetting when omitted.",
+          "type": "string"
+        },
+        "notes": {
+          "description": "Free-text notes.",
+          "maxLength": 5000,
+          "type": "string"
+        },
+        "organizationAccountResourceId": {
+          "description": "Resource ID of the bank or cash account the payment was received into or paid from.",
+          "type": "string"
+        },
+        "paymentMethod": {
+          "description": "How the payment was made.",
+          "enum": [
+            "CASH",
+            "CREDIT_CARD",
+            "BANK_TRANSFER",
+            "E_WALLET",
+            "CHEQUE",
+            "WITHHOLDING_TAX_CERTIFICATE",
+            "CLEARING_SETTLEMENT",
+            "DEBT_WRITE_OFF",
+            "INTER_COMPANY",
+            "OTHER",
+            "PAYMENT_GATEWAY"
+          ],
+          "type": "string"
+        },
+        "rateToFunctional": {
+          "description": "Exchange rate to the functional currency. Required when the cash is in any other\ncurrency, because a foreign receipt would otherwise reach the aged reports\nunconverted.",
+          "type": "number"
+        },
+        "reference": {
+          "description": "Your own reference for the payment.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "saveAsDraft": {
+          "description": "When true the payment is recorded as a draft and posts no ledger entry until it\nis activated.",
+          "type": "boolean"
+        },
+        "valueDate": {
+          "description": "Date of the payment, in YYYY-MM-DD format. The ledger entry is dated here\npermanently.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "businessTransactionType",
+        "currencyCode",
+        "organizationAccountResourceId",
+        "paymentMethod",
+        "valueDate"
+      ],
+      "type": "object"
+    },
     "RecordWithholdingClientRequest": {
       "properties": {
         "attachments": {
@@ -21057,6 +21529,20 @@
           "maximum": 65536,
           "minimum": 0,
           "type": "integer"
+        },
+        "origin": {
+          "description": "Which kinds of row to return. BATCH is ordinary batch payments; UNAPPLIED is\nunapplied payments, which are cash recorded without being attributed to anything\nyet; ALL is both. Defaults to ALL, so a caller that wants only ordinary batches\nmust ask for BATCH.\n\nRead origin on each row to tell the two apart, and unappliedStatus to tell a row\nstill holding cash from one that has been fully applied.",
+          "items": {
+            "enum": [
+              "BATCH",
+              "UNAPPLIED",
+              "ALL"
+            ],
+            "type": "string"
+          },
+          "maxItems": 3,
+          "type": "array",
+          "uniqueItems": true
         },
         "query": {
           "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
@@ -26994,6 +27480,422 @@
       },
       "type": "object"
     },
+    "UnappliedAttributionRequest": {
+      "properties": {
+        "amount": {
+          "description": "How much of the unapplied balance to apply to it.",
+          "type": "number"
+        },
+        "businessTransactionResourceId": {
+          "description": "Resource ID of the invoice, bill or credit note being settled.",
+          "type": "string"
+        },
+        "businessTransactionType": {
+          "description": "Type of that transaction.",
+          "enum": [
+            "SALE",
+            "PURCHASE",
+            "SALE_CREDIT_NOTE",
+            "PURCHASE_CREDIT_NOTE"
+          ],
+          "type": "string"
+        },
+        "transactionAmount": {
+          "description": "Amount in the transaction's own currency, when that differs from the payment's.",
+          "type": "number"
+        },
+        "transactionFee": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentTransactionFeeRequest"
+            }
+          ],
+          "description": "Bank or processor fee deducted from this attribution."
+        },
+        "transactionFeeCollected": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentTransactionFeeRequest"
+            }
+          ],
+          "description": "Fee collected from the contact on this attribution."
+        }
+      },
+      "required": [
+        "amount",
+        "businessTransactionResourceId",
+        "businessTransactionType"
+      ],
+      "type": "object"
+    },
+    "UnappliedPaymentActionRequest": {
+      "properties": {
+        "hash": {
+          "description": "Optimistic-lock token for the unapplied payment, as returned by Search Batch\nPayments or by any of these endpoints. A stale hash is rejected rather than\nsilently overwriting a concurrent change.",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "hash"
+      ],
+      "type": "object"
+    },
+    "UnappliedPaymentChildRequest": {
+      "properties": {
+        "businessTransactionResourceId": {
+          "description": "Resource ID of the transaction being settled. Required when adding a row.",
+          "type": "string"
+        },
+        "businessTransactionType": {
+          "description": "Type of that transaction.",
+          "enum": [
+            "SALE",
+            "PURCHASE",
+            "SALE_CREDIT_NOTE",
+            "PURCHASE_CREDIT_NOTE"
+          ],
+          "type": "string"
+        },
+        "deleted": {
+          "description": "Set true to remove this attribution and return its cash to the unapplied balance.",
+          "type": "boolean"
+        },
+        "paymentAmount": {
+          "description": "Amount applied to the transaction.",
+          "type": "number"
+        },
+        "resourceId": {
+          "description": "Resource ID of an existing payment record. Omit to add a new attribution.",
+          "type": "string"
+        },
+        "transactionAmount": {
+          "description": "Amount in the transaction's own currency, when that differs.",
+          "type": "number"
+        },
+        "transactionFee": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentTransactionFeeRequest"
+            }
+          ],
+          "description": "Bank or processor fee deducted from this attribution."
+        },
+        "transactionFeeCollected": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PaymentTransactionFeeRequest"
+            }
+          ],
+          "description": "Fee collected from the contact on this attribution."
+        }
+      },
+      "type": "object"
+    },
+    "UnappliedPaymentChildResponse": {
+      "properties": {
+        "amount": {
+          "description": "Amount of the payment record.",
+          "type": "number"
+        },
+        "businessTransactionReference": {
+          "description": "Reference of that transaction.",
+          "type": "string"
+        },
+        "businessTransactionResourceId": {
+          "description": "Resource ID of the transaction it settles.",
+          "type": "string"
+        },
+        "businessTransactionType": {
+          "description": "Type of that transaction.",
+          "type": "string"
+        },
+        "childOrigin": {
+          "description": "How this row got here, which decides what removing it does. ATTRIBUTED means the\nunapplied payment created it and removing it deletes the payment record;\nATTACHED means it existed beforehand and removing it returns it to a standalone\npayment. Read this before offering a removal.",
+          "enum": [
+            "ATTRIBUTED",
+            "ATTACHED"
+          ],
+          "type": "string"
+        },
+        "contact": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/UnappliedPaymentContact"
+            }
+          ],
+          "description": "The contact itself."
+        },
+        "contactResourceId": {
+          "description": "Resource ID of the contact on the transaction.",
+          "type": "string"
+        },
+        "paymentAmount": {
+          "description": "Amount applied to the transaction, when it differs from the payment amount.",
+          "type": "number"
+        },
+        "resourceId": {
+          "description": "Resource ID of the payment record.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the payment record.",
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Date of the payment record, as epoch milliseconds.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "UnappliedPaymentContact": {
+      "properties": {
+        "name": {
+          "description": "Display name of the contact.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the contact.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "UnappliedPaymentDeleteResponse": {
+      "properties": {
+        "resourceId": {
+          "description": "Resource ID of the unapplied payment that was removed.",
+          "type": "string"
+        },
+        "resourceIds": {
+          "description": "Resource IDs of the records affected, where the operation touched more than one.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "UnappliedPaymentFromBankRecord": {
+      "properties": {
+        "amount": {
+          "description": "Amount to record. Optional, and when supplied it must EQUAL the bank record's own\namount -- any other value is rejected, because the whole line is what is being\nmatched. Omitting it is the normal case and takes the same amount. There is no\npartial reconciliation here: to record less than the line, reconcile it against\nsomething else or split the line first.",
+          "type": "number"
+        },
+        "attachments": {
+          "description": "Files to attach to the record.",
+          "items": {
+            "$ref": "#/definitions/ClaimAttachmentRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "contactResourceId": {
+          "description": "Contact the cash belongs to.",
+          "type": "string"
+        },
+        "customFields": {
+          "description": "Custom field values to store on the record.",
+          "items": {
+            "$ref": "#/definitions/CustomField"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "externalReference": {
+          "description": "The counterparty's reference.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "notes": {
+          "description": "Free-text notes.",
+          "maxLength": 5000,
+          "type": "string"
+        },
+        "paymentMethod": {
+          "description": "How the payment was made.",
+          "enum": [
+            "CASH",
+            "CREDIT_CARD",
+            "BANK_TRANSFER",
+            "E_WALLET",
+            "CHEQUE",
+            "WITHHOLDING_TAX_CERTIFICATE",
+            "CLEARING_SETTLEMENT",
+            "DEBT_WRITE_OFF",
+            "INTER_COMPANY",
+            "OTHER",
+            "PAYMENT_GATEWAY"
+          ],
+          "type": "string"
+        },
+        "rateToFunctional": {
+          "description": "Exchange rate to the functional currency. Required when the bank record's account\nis in a currency other than the organization's own, which this endpoint does\nsupport: the currency comes from the account, and only the rate cannot be derived.",
+          "type": "number"
+        },
+        "reference": {
+          "description": "Your own reference for the payment. Defaults to the bank record's reference.",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "paymentMethod"
+      ],
+      "type": "object"
+    },
+    "UnappliedPaymentReconcileClientRequest": {
+      "properties": {
+        "bankStatementEntryResourceId": {
+          "description": "Resource ID of the bank record to reconcile.",
+          "type": "string"
+        },
+        "unappliedPaymentDetails": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/UnappliedPaymentFromBankRecord"
+            }
+          ],
+          "description": "The unapplied payment to record against it."
+        }
+      },
+      "required": [
+        "bankStatementEntryResourceId",
+        "unappliedPaymentDetails"
+      ],
+      "type": "object"
+    },
+    "UnappliedPaymentReconcileResponse": {
+      "properties": {
+        "bankStatementEntryResourceId": {
+          "description": "Resource ID of the bank record that was matched.",
+          "type": "string"
+        },
+        "reference": {
+          "description": "Reference on the bank record.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of that bank record after the match.",
+          "type": "string"
+        },
+        "unappliedPaymentResourceId": {
+          "description": "Resource ID of the unapplied payment that was created and matched to it.",
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Value date of the bank record, as epoch milliseconds.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "UnappliedPaymentResponse": {
+      "properties": {
+        "bankStatementEntryResourceId": {
+          "description": "Resource ID of the bank record this payment is reconciled to, when it is matched.",
+          "type": "string"
+        },
+        "children": {
+          "description": "The transactions this cash has been attributed to.",
+          "items": {
+            "$ref": "#/definitions/UnappliedPaymentChildResponse"
+          },
+          "type": "array"
+        },
+        "consumedAmount": {
+          "description": "How much of that cash has been attributed so far.",
+          "type": "number"
+        },
+        "contact": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/UnappliedPaymentContact"
+            }
+          ],
+          "description": "The contact itself."
+        },
+        "contactResourceId": {
+          "description": "Resource ID of the contact the cash belongs to, when it is contact-scoped.",
+          "type": "string"
+        },
+        "crossCurrency": {
+          "description": "True when the cash is in a currency other than the functional one.",
+          "type": "boolean"
+        },
+        "currencyCode": {
+          "description": "Currency of the cash (ISO 4217).",
+          "type": "string"
+        },
+        "currencySymbol": {
+          "description": "Display symbol for that currency.",
+          "type": "string"
+        },
+        "externalReference": {
+          "description": "The counterparty's reference.",
+          "type": "string"
+        },
+        "functionalCurrencyCode": {
+          "description": "Reporting currency of the organization.",
+          "type": "string"
+        },
+        "hash": {
+          "description": "Optimistic-lock token. Pass it back on the next action against this record.",
+          "type": "string"
+        },
+        "notes": {
+          "description": "Free-text notes.",
+          "type": "string"
+        },
+        "organizationAccountResourceId": {
+          "description": "Resource ID of the bank or cash account the payment was received into or paid from.",
+          "type": "string"
+        },
+        "paymentMethod": {
+          "description": "How the payment was made.",
+          "type": "string"
+        },
+        "rateToFunctional": {
+          "description": "Exchange rate applied to reach the functional currency.",
+          "type": "number"
+        },
+        "reference": {
+          "description": "Your own reference for the payment.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the unapplied payment.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Lifecycle status of the record.",
+          "type": "string"
+        },
+        "totalAmount": {
+          "description": "The cash that arrived. Attributions consume this rather than adding to it.",
+          "type": "number"
+        },
+        "type": {
+          "description": "AR for cash received from customers, AP for cash paid to suppliers.",
+          "enum": [
+            "AR",
+            "AP"
+          ],
+          "type": "string"
+        },
+        "unappliedBalance": {
+          "description": "What is still unattributed: totalAmount minus consumedAmount.",
+          "type": "number"
+        },
+        "valueDate": {
+          "description": "Date of the payment, as epoch milliseconds.",
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
     "UnarchiveBankStatementEntriesRequest": {
       "properties": {
         "accountResourceId": {
@@ -31613,7 +32515,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Search payment batches, with filters, sort, and pagination. Each result carries the payment records grouped under it. Filter on type for one side only: AR for the batches created against invoices and customer credit notes, AP for those against bills and supplier credit notes.",
+        "description": "Search payment batches, with filters, sort, and pagination. Each result carries the payment records grouped under it. Filter on type for one side only: AR for the batches created against invoices and customer credit notes, AP for those against bills and supplier credit notes. Two kinds of record come back: ordinary batch payments and unapplied payments, which are cash recorded before it was attributed to anything. Both are returned by default, send origin BATCH for ordinary batches alone, or UNAPPLIED for the other kind, and origin on each row says which it is. The distinction matters because totalAmount means the opposite thing on each: on a batch it is the sum of the payment records, on an unapplied payment it is the cash that arrived, which those records consume.",
         "operationId": "search-batch-payment",
         "parameters": [
           {
@@ -31633,7 +32535,22 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/PageableResponse"
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PageableResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/definitions/BatchPaymentResponse"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
             }
           },
           "400": {
@@ -64290,6 +65207,88 @@
         ]
       }
     },
+    "/api/v1/reconciliations/unapplied-payment": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Record an unapplied payment for a bank record and match the two in one call, for cash that has arrived with nothing to attribute it to yet. Direction, bank account, currency, value date and amount are all taken from the bank record, so only the payment method is required. amount is optional and must EQUAL the bank record's own amount when sent, since the whole line is what is being matched; any other value is rejected with TOTAL_RECONCILIATION_AMOUNT_MISMATCHED_WITH_STATEMENT_ENTRY_AMOUNT. There is no partial reconciliation on this endpoint. Attribute the cash later through the Unapplied Payments endpoints. Sync. NOT idempotent.",
+        "operationId": "create-reconciliation-unapplied-payment",
+        "parameters": [
+          {
+            "description": "The unapplied payment reconciliation request.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnappliedPaymentReconcileClientRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentReconcileResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Reconcile Bank Statement with Unapplied Payment",
+        "tags": [
+          "Reconciliation"
+        ]
+      }
+    },
     "/api/v1/reconciliations/with-payments": {
       "post": {
         "consumes": [
@@ -74810,6 +75809,758 @@
         ]
       }
     },
+    "/api/v1/unapplied-payments": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Record cash that has arrived without attributing it to anything yet. businessTransactionType decides the direction: SALE for money received from a customer, PURCHASE for money paid to a supplier. The amount is the cash that arrived, later attributions consume it rather than adding to it. Read the result back through Search Batch Payments with origin UNAPPLIED.",
+        "operationId": "create-unapplied-payment",
+        "parameters": [
+          {
+            "description": "The cash that arrived.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RecordUnappliedPaymentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Record Unapplied Payment",
+        "tags": [
+          "Unapplied Payments"
+        ]
+      }
+    },
+    "/api/v1/unapplied-payments/{resourceId}": {
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Delete an unapplied payment. ITS ATTRIBUTIONS GO WITH IT, every payment record under it is deleted through the same path the batch payment screen uses, so each invoice or bill it settled is un-relieved, and its ledger and cashflow entries are reversed afterwards. Refused while it is reconciled to a bank record, attributed or not: unmatch it first.",
+        "operationId": "delete-unapplied-payment",
+        "parameters": [
+          {
+            "description": "Resource ID of the unapplied payment.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The record's current hash.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnappliedPaymentActionRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentDeleteResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete Unapplied Payment",
+        "tags": [
+          "Unapplied Payments"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Correct an unapplied payment. Reference, external reference and notes are always safe to change. Changing the amount, the bank account or the value date re-states the cash itself, so a record that is reconciled to a bank record is released from it and has to be matched again. children is a full replacement list, but a row left out is KEPT, to remove one, send it with deleted set to true. There is no currencyCode here: the currency follows the bank account, so moving the record to an account in another currency changes it, and that move requires amount restated in the new currency or it is refused with CONTAINER_CURRENCY_CHANGE_INCOMPLETE.",
+        "operationId": "update-unapplied-payment",
+        "parameters": [
+          {
+            "description": "Resource ID of the unapplied payment.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The corrections to apply.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/EditUnappliedPaymentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Unapplied Payment",
+        "tags": [
+          "Unapplied Payments"
+        ]
+      }
+    },
+    "/api/v1/unapplied-payments/{resourceId}/activate": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Move a draft unapplied payment to active. The cash becomes real and the ledger entry posts here, not when the draft was recorded.",
+        "operationId": "create-unapplied-payment-activate",
+        "parameters": [
+          {
+            "description": "Resource ID of the unapplied payment.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The record's current hash.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnappliedPaymentActionRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Activate Unapplied Payment",
+        "tags": [
+          "Unapplied Payments"
+        ]
+      }
+    },
+    "/api/v1/unapplied-payments/{resourceId}/attributions": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Say what the cash pays for. Each entry creates a payment record against the transaction it names and consumes that much of the unapplied balance. Attributing the whole balance, or more than it, converts the record into an ordinary batch payment, which is one-way and grows totalAmount to the sum of the records. Detect that from unappliedBalance reaching zero in the response, or by reading the record back through Search Batch Payments, where origin then reads BATCH. This response cannot report origin, because a record that has converted is no longer an unapplied payment and the shape returned here only describes one.",
+        "operationId": "create-unapplied-payment-attribution",
+        "parameters": [
+          {
+            "description": "Resource ID of the unapplied payment.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The transactions this cash settles.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AttributeUnappliedPaymentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Attribute Unapplied Payment",
+        "tags": [
+          "Unapplied Payments"
+        ]
+      }
+    },
+    "/api/v1/unapplied-payments/{resourceId}/children/{childResourceId}": {
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Remove one attribution. The cash RETURNS to unattributed: the total is unchanged and the unapplied balance rises by the amount removed. What happens to the payment record itself depends on its childOrigin, an ATTRIBUTED record was created by this unapplied payment and is deleted, while an ATTACHED one existed beforehand and survives as a standalone payment.",
+        "operationId": "delete-unapplied-payment-children",
+        "parameters": [
+          {
+            "description": "Resource ID of the unapplied payment.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the payment record to remove.",
+            "in": "path",
+            "name": "childResourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The record's current hash.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnappliedPaymentActionRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Remove Attribution from Unapplied Payment",
+        "tags": [
+          "Unapplied Payments"
+        ]
+      }
+    },
+    "/api/v1/unapplied-payments/{resourceId}/payments": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Group an existing standalone payment under this unapplied payment. The payment keeps the transaction it already settles; this only records what funded it, so the unapplied balance falls while the total stays put. Use Attribute instead to create a new payment against a transaction. As with Attribute, an attachment that takes the last of the cash converts the record into an ordinary batch payment, one-way.",
+        "operationId": "create-unapplied-payment-payment",
+        "parameters": [
+          {
+            "description": "Resource ID of the unapplied payment.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The existing payment to bring under it.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AttachPaymentToUnappliedPaymentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Attach Payment to Unapplied Payment",
+        "tags": [
+          "Unapplied Payments"
+        ]
+      }
+    },
+    "/api/v1/unapplied-payments/{resourceId}/unbatch": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Break the unapplied payment up. Its attributed payment records are RELEASED as ordinary standalone payments, each keeping the transaction it settles, and the unapplied payment itself is deleted. Refused while it is reconciled to a bank record: unmatch it first.",
+        "operationId": "create-unapplied-payment-unbatch",
+        "parameters": [
+          {
+            "description": "Resource ID of the unapplied payment.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The record's current hash.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnappliedPaymentActionRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/UnappliedPaymentDeleteResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Unbatch Unapplied Payment",
+        "tags": [
+          "Unapplied Payments"
+        ]
+      }
+    },
     "/api/v1/undo-disposal/fixed-assets/{resourceId}": {
       "post": {
         "consumes": [
@@ -75023,6 +76774,10 @@
     {
       "description": "Manage payment records on invoices, bills, and credit notes.",
       "name": "Payments"
+    },
+    {
+      "description": "Record cash that has arrived before it is attributed to an invoice or bill, then attribute it as the transactions it settles become known. Read them back through Search Batch Payments with origin UNAPPLIED.",
+      "name": "Unapplied Payments"
     },
     {
       "description": "Create and manage customer credit notes, refunds, and credit applications.",

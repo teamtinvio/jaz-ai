@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.61.1] - 2026-09-18
+
+**Copy one complete prompt for a guided Jaz setup.**
+
+The README links to `agent-setup-prompt.md`, which includes the initial request to paste into your agent. Choose your tools; the agent selects connection defaults, includes skills unless you opt out, and guides sign-in. Existing organization choices are reused, and setup verifies the selected organization through each connection before marking it ready.
+
+The prompt also checks which skill names your agent actually exposes and keeps the handoff focused on using Jaz. Platform-required approvals and organization choices still apply when needed.
+
 ## [5.61.0] - 2026-09-18
 
 **Sign in once to use Jaz from the command line and your local AI assistant.**
