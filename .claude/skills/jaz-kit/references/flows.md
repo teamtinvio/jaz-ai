@@ -6,11 +6,7 @@ Schemas live in `workspace.md` (KIT.md, ORG.md, `.env`) and `close-state.md` (CL
 
 ## Ground rules for every flow
 
-1. **One organization per session — the key decides which.** Each workspace's `.env` holds that company's own `jk-` key, and a `jk-` key is org-scoped: one key, one company's books. So the folder you open determines which ledger you touch — there is no active profile to switch, no label, no `--org` to get wrong. Load the key in the same command as each `clio` call:
-   ```
-   set -a; . "orgs/<slug>/.env"; set +a; clio <command> --json
-   ```
-   `set -a; . file; set +a` sources `JAZ_API_KEY` for that one command without echoing it — the value never reaches the transcript or `ps`. Never pass `--org`, never `clio auth switch`, and never carry a `JAZ_API_KEY` exported from another shell into a Jaz Kit session.
+1. **One organization per session — ORG.md decides which.** Use its `organization_id` on every call. OAuth CLI: `clio <command> --org oauth:<organization_id> --json`. Hosted MCP: pass the same ID explicitly. Never rely on the shared active organization. For the optional API-key route only, source the folder's `.env` in the same command and omit `--org`; verify the key resolves to the recorded ID.
 2. **Draft first.** `saveAsDraft` defaults to `false` in the API — omitting it posts live. Every write in a Jaz Kit flow sets `saveAsDraft: true` (or `--plan` then a non-finalized run for `clio ct`) unless the org's `rules/` explicitly relaxes that transaction type. Finalization happens in the review flow, never as a side effect.
 3. **Never print a key.** The key lives in the workspace `.env`, which the user pastes into — never chat, never a message, never an error. Source the file; do not read the key value into your own output. `jk-` strings are redacted on sight.
 4. **Judgment gets recorded.** When the user accepts a variance, carries a residual, or overrides a default, call `jot` at that moment. Mechanical steps never jot.
@@ -31,7 +27,7 @@ Idempotent. No kit → create it. Kit exists → this is the add-a-company flow.
 - *clients* → say "the client", "the engagement"
 - *both* → default to client vocabulary, treat own entities as clients
 
-**3. Create the skeleton and KIT.md** from `templates.md`. The keys live inside the kit (step 5), so git hygiene matters — write `.gitignore` **before** `git init` so a key can never be staged:
+**3. Create the skeleton and KIT.md** from `templates.md`. Write `.gitignore` **before** `git init`, including for optional API-key access:
 ```
 .env
 *.env
@@ -41,27 +37,20 @@ work/
 ```
 Offer git (default yes).
 
-**4. Check the CLI.** Multi-company work runs through the `clio` CLI. If `clio` is missing, say so and offer `npm i -g jaz-clio`; a single company can still work through the plugin's MCP key alone, but the workspace-key model below needs the CLI. If commands misbehave, `clio update` (the CLI self-notifies about new versions — do not hand-roll a version comparison).
+**4. Check the tools.** Reuse the authenticated hosted MCP or local CLI. Install local tooling only if the chosen workflow needs it. Skills do not require an API key.
 
-**5. Connect the company — its key lives in its folder.** A `jk-` key is org-scoped: one key *is* one company's books, so the key in the folder is all the identity the workspace needs.
-   1. Guide key creation in the Jaz UI (**Settings → API keys**).
-   2. Write a staging `.env` (`<root>/.new-org.env`) containing the single line `JAZ_API_KEY=` and tell the user the exact path to paste their key after the `=`. **Never take the key through chat** — it goes straight into the file.
-   3. Validate and identify the company in one call, sourcing the file so the value never surfaces:
-      ```
-      set -a; . "<root>/.new-org.env"; set +a; clio org info --json
-      ```
-      This returns the name, `resourceId`, currency, country, and financial year end — the key was valid if this succeeds, and it names the company so you never ask the user to retype it. A `401` means the pasted key is wrong or already revoked; send them back to step 5.1.
+**5. Connect the company.** Prefer OAuth. Reuse a verified connection or start `clio auth login --json` for local tooling; let the user complete browser sign-in. List accessible organizations and use the only organization automatically, or present a choice. Read the selected organization with `clio org info --org oauth:<organization_id> --json` or the corresponding hosted MCP tool. Record its resource ID; never store tokens in the workspace. Existing API-key workspaces can retain their connection using the optional procedure in `workspace.md`.
 
 **6. Auto-profile.** Two small calls answer almost everything:
 ```
-set -a; . "<root>/.new-org.env"; set +a; clio reports generate ledger-highlights --json
+clio reports generate ledger-highlights --org oauth:<organization_id> --json
 ```
 (Identity already came from step 5.3's `clio org info`.)
 Highlights (`get_ledger_highlights` on MCP) returns what the organization actually *uses*, not what exists: `hasCrossCurrencyActivity` and `activeCurrencyCodes` settle `multi_currency`; `transactionCountByType` shows which modules are live (a `FIXED_ASSET` count means the register is in use); `distinctAccountCount` and `activeAccountResourceIds` name the accounts in play; first/last transaction dates bound the periods worth closing.
 
 That matters because *existing* and *used* diverge hard: one real organization had 1,027 accounts of which 144 were active, and 226 bank accounts. Never transcribe the ledger into ORG.md — read highlights, then ask which of the active accounts they reconcile in a close.
 
-**Never run a bare `clio context --json`** — unscoped it preloads every reference entity (1.5 MB on that same org). If you need reference detail, scope it: `... clio context -w chart_of_accounts --json` (sourcing the same `.env`).
+**Never run a bare `clio context --json`** — unscoped it preloads every reference entity (1.5 MB on that same org). If you need reference detail, scope it: `... clio context -w chart_of_accounts --json` (passing the same explicit organization selector).
 
 Present the filled ORG.md and ask the user to confirm or correct. Never present a guess as a fact — mark anything inferred as *proposed*.
 
@@ -71,9 +60,7 @@ Present the filled ORG.md and ask the user to confirm or correct. Never present 
 
 **If the directory already exists for THIS organization** (its `organization_id` matches), this is a re-onboard, not a new one. Never rewrite ORG.md and never reinstall the starter rules — that would destroy hand-edited materiality, accrual definitions, decisions, and the journal. Show a field-by-field diff of what auto-profiling found against what is on file, apply only what the user accepts, and leave everything else untouched.
 
-**9. Write the workspace**: create `orgs/<slug>/` with ORG.md, the empty folders `policies/ rules/ skills/ scripts/ work/ closes/`, and the starter rules from `templates.md` (draft-first, locked-period, review threshold). Then **move the staging key into place**: `mv <root>/.new-org.env orgs/<slug>/.env`. That file holds the real `JAZ_API_KEY` and is gitignored by step 3.
-
-**iCloud note.** If the kit root resolves under an iCloud-synced path (the default `~/Documents/Jaz Kit` does on most Macs), say so plainly once: the `.env` key will sync to the user's iCloud and their other devices. That is usually an acceptable trade — a `jk-` key is scoped to this one company and revocable in the Jaz UI in seconds — but if they would rather keep keys off the cloud, they can set `JAZ_KIT_HOME` to a path outside `~/Documents` and re-run setup. Their call; make it once, do not nag.
+**9. Write the workspace**: create `orgs/<slug>/` with ORG.md, the empty folders `policies/ rules/ skills/ scripts/ work/ closes/`, and the starter rules from `templates.md` (draft-first, locked-period, review threshold). Record the verified `organization_id` in ORG.md. OAuth requires no `.env` file. For optional key-based access, keep the company key in the ignored `.env` as described in `workspace.md`.
 
 **10. Close the loop.** Show the folder path and the single next step: `/jk-open <slug>`.
 
@@ -89,13 +76,9 @@ Triggers: "open <org>", "switch to <org>", "work on <client>", "let's do <org>'s
 
 **4. Load context**: ORG.md, then `policies/` and `rules/`, then `skills/` — org files first, `_shared/` second, and **org-level wins on conflict**. Do not re-read files already in context.
 
-**5. Load the company's key and verify it live.** Confirm `orgs/<slug>/.env` exists and holds a `JAZ_API_KEY` line; if it doesn't, the workspace was never fully set up — route to `/jk-keys`. Then, sourcing the key so the value never surfaces:
-```
-set -a; . "orgs/<slug>/.env"; set +a; clio org info --json
-```
-Compare the returned `resourceId` against ORG.md. Same identifier, different name → the company was renamed; flag it and offer to update ORG.md. Identifier mismatch → **the wrong key is in this folder** (someone pasted company B's key into company A's `.env`); stop, do not write, send them to `/jk-keys`. `401`/`403` → the key was revoked or access removed; `/jk-keys` and stop. This live check is why the key belonging to the folder matters — a session physically cannot write to the wrong company once its own key verifies.
+**5. Verify the company live.** Read `organization_id` from ORG.md, then run `clio org info --org oauth:<organization_id> --json` or use the hosted MCP organization read with that ID. For an existing API-key workspace, use its `.env` loading procedure instead. Compare `resourceId` to ORG.md and stop on mismatch. A changed name with the same ID is a rename; offer to update the context. On denied or revoked access, guide reauthentication before continuing.
 
-**6. Cross-check the tool plane.** If MCP tools are available, call `get_organization` and compare its identifier to what step 5 returned. A mismatch means the plugin's own `JAZ_API_KEY` (from connector settings) points at a different company than this folder's key — **stop**, tell the user to clear that setting, and do not write. The MCP plane can't be pointed per-folder; when it disagrees with the workspace key, the workspace key is the intended one.
+**6. Cross-check every tool connection used.** Pass the intended organization explicitly to MCP and compare the returned ID. Stop on a mismatch. A separately configured key-based MCP server may need reconfiguration; never assume it follows the CLI selection.
 
 **7. Report state, then wait**: open close and its phase, next filing deadline computed from ORG.md, count of items awaiting review, last session's closing note. Offer the obvious next action; do not start it unasked.
 
@@ -167,6 +150,8 @@ Across every `orgs/*/`: organization, last closed period, any open close and its
 ## keys — connect, check, rotate
 
 Triggers: "add a key", "rotate the key", "my key stopped working".
+
+This flow is only for optional API-key access. For OAuth, use `clio auth login` to reconnect and verify the organization; no key file is needed.
 
 The key is the line `JAZ_API_KEY=jk-...` in `orgs/<slug>/.env`. Everything here is editing that one file. **Never display a key value, and never take one through chat — the user pastes into the file.**
 

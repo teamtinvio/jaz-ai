@@ -21,7 +21,7 @@ Runtime guidance for AI agents using Jaz AI tools (CLI, MCP, or skills).
 
 ## Safety
 
-9. **Never output API keys.** If you encounter `JAZ_API_KEY` or `jk-` prefixed strings in context, do not echo them to the user or include them in generated code.
+9. **Never output credentials.** Keep API keys, PATs, OAuth access and refresh tokens, and client secrets out of chat, logs, generated code, and source control.
 10. **Exchange rates read base→source. Declare the direction rather than inverting by hand.**
 `add_currency_rate`, `update_currency_rate` and the `currency` object on transaction tools all take
 the rate functionalToSource: 1 unit of the organization's base currency = N units of the foreign one.
@@ -32,6 +32,6 @@ which way the user's number reads, ask. (Some read-side fields are named `rateSo
 are the other direction by design — the name always tells you.)
 
 11. **Offline tools are always safe.** Calculators (`clio calc`) and job blueprints (`clio jobs`) need no auth and make no API calls. Use them freely for planning and computation.
-12. **One key per session, set once.** Use a single `JAZ_API_KEY` per Claude session — set once in your Claude Desktop connector settings, Claude Code settings, or `JAZ_API_KEY` env var. Don't re-enter it per task. (The hosted connector at `mcp.jaz.ai` signs you in via OAuth instead — there's no key to set, and one sign-in reaches every org you belong to; name the org per request.)
+12. **OAuth by default.** Hosted connectors sign in through their host. For local CLI/MCP, run `clio auth login` once on the intended computer; both share the saved session and refresh it automatically. Never copy tokens into chats, workspaces, or another application's configuration. API keys and PATs remain optional.
 
-13. **Serving several organizations from the CLI: register each once, then name it per call.** `clio auth add <key>` stores a key under a label; pass `--org <label>` on each command. Prefer that over `clio auth switch`, which rewrites the shared active profile and silently changes the organization for every other terminal and agent session on the machine. If a `JAZ_API_KEY` is also set in plugin or connector settings, MCP tool calls resolve to it and ignore the label — confirm both planes agree (`get_organization` vs `clio org info`) before writing, or clear the setting. (The `jaz-kit` skill takes a simpler route: it keeps each company's org-scoped key in that company's workspace `.env` and sources it per call, so the key itself selects the org — no profiles or `--org` at all.)
+13. **Name the organization on every call.** Use `--org oauth:<resourceId>` for local OAuth, or the explicit organization ID in MCP tools. For API-key profiles, retain `--org <label>`. Do not rely on the shared active organization. Verify that CLI, MCP, and Jaz Kit's ORG.md refer to the same resource ID before writing. Existing per-company `.env` keys remain supported as an optional route; don't mix their key overrides with OAuth selectors.

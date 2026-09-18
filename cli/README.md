@@ -82,6 +82,8 @@ that ends up in a journal.
 
 > **No install at all?** Claude.ai, ChatGPT, Cowork, and Microsoft Copilot Studio can use Jaz through the hosted connector. Add `https://mcp.jaz.ai/mcp` as a custom connector and sign in with OAuth, no key. The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
 
+Run `clio auth login` once on this computer before enabling local MCP.
+
 **Claude Code**
 
 ```bash
@@ -95,14 +97,13 @@ claude mcp add jaz -- npx jaz-clio mcp
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio", "mcp"],
-      "env": { "JAZ_API_KEY": "jk-your-api-key" }
+      "args": ["-y", "jaz-clio", "mcp"]
     }
   }
 }
 ```
 
-Several companies at once: comma-separate the keys, or use a personal access token.
+OAuth can reach the organizations granted at sign-in; name the organization on each call. Optional key-based access also supports comma-separated keys or a personal access token.
 
 ```json
 { "env": { "JAZ_API_KEY": "jk-org1-key,jk-org2-key" } }
@@ -137,18 +138,18 @@ A close is not one conversation. Month-end runs many steps over several days, an
 
 Also `/jk-keys`, `/jk-policy`, `/jk-teach`, `/jk-save`, `/jk-help`. **`/jaz-*` runs a single workflow; `/jk-*` runs your practice.**
 
-Each company lives under `~/Documents/Jaz Kit/orgs/<company>/`, holding its close config, its policies, and its own API key in a gitignored `.env`. A Jaz key is scoped to one company, so the folder you open is the company you work on: nothing to switch, and no way to post to the wrong books once a folder's key checks out.
+Each company lives under `~/Documents/Jaz Kit/orgs/<company>/`, holding its close config, policies, and organization ID. OAuth credentials stay outside the kit. Pin that ID on every CLI or MCP call and verify it before working. Existing per-company API keys remain optional.
 
 Everything is drafted first, every record carries a link into Jaz for you to review, and an interrupted close resumes exactly where it stopped. Multi-company work needs this CLI, which you already have. Full guide in the [repository README](https://github.com/teamtinvio/jaz-ai#jaz-kit--run-your-practice).
 
 ## Auth
 
 ```bash
-clio auth add <api-key>   # from Settings → API keys in Jaz
+clio auth login           # Sign in to Jaz in your browser
 clio auth whoami          # verify
 ```
 
-Or set `JAZ_API_KEY` in your environment for scripts and CI. For several companies from the CLI, register each with `clio auth add` and pass `--org <label>` per command, or let Jaz Kit keep one key per company folder for you. Every command takes `--json` for structured output.
+Pin an OAuth organization with `--org oauth:<resourceId>`. For optional API-key access, set `JAZ_API_KEY` or register a key using `clio auth add` and pass `--org <label>`. Every command takes `--json` for structured output.
 
 ## Semantic help-center search (optional)
 
@@ -165,3 +166,11 @@ Runs on your machine. Calls go to the Jaz API over HTTPS. No telemetry, no data 
 ## License
 
 [MIT](LICENSE)
+
+## OAuth sign-in (default)
+
+Run `clio auth login` to open Jaz sign-in. CLI and local MCP share the session and refresh tokens automatically. Add `--no-browser` to open the printed link yourself on the same computer. Agents can use `--json`; the sign-in link is printed to stderr, and stdout contains only the result and organization choices.
+
+Use `clio auth organizations --json` to list accessible organizations, `clio auth select <resourceId>` to select one, and `--org oauth:<resourceId>` on every organization-scoped command to pin it. `clio auth logout` removes the local session without deleting API-key profiles; revoke its grant in Jaz to remove remote access.
+
+API-key profiles, `--api-key`, `JAZ_API_KEY`, and PATs remain supported. Use `--org oauth:<resourceId>` for OAuth or `--org <label>` for a saved key profile; either overrides an inherited `JAZ_API_KEY`. Without `--org`, the environment key still takes precedence. Do not combine `--api-key` with `--org`. Do not share OAuth storage or commit it to a workspace.

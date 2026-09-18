@@ -209,7 +209,8 @@ clio ledger-find-fix apply -- "<previewId>"
 Manage multiple organizations from one machine.
 
 ```bash
-# Add multiple org keys
+# Prefer OAuth: clio auth login, then pin --org oauth:<resourceId> per call.
+# Optional alternative: add multiple org keys
 clio auth add jk-sg-key-here --as acme-sg
 clio auth add jk-ph-key-here --as acme-ph
 clio auth add jk-us-key-here --as acme-us

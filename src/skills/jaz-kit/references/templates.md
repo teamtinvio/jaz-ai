@@ -182,7 +182,7 @@ Create the file empty apart from its heading. **Do not seed it with suggestions*
 
 ## orgs/<slug>/.env
 
-One line, the company's own org-scoped key. Created during setup as a staging file the user pastes into, then moved into the folder. Gitignored. Never echoed.
+Optional API-key access only. OAuth workspaces use the organization ID in ORG.md and need no `.env`. When the user chooses API-key access, store one company key privately in this gitignored file. Never echo it.
 
 ```
 JAZ_API_KEY=<paste this company's Jaz API key here>

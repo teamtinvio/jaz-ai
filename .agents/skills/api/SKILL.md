@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.60.2
+version: 5.61.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 159 production gotchas, error
@@ -10,16 +10,16 @@ description: >-
   schedulers, subscriptions, attachments, claim settings, and Jaz Magic extraction. Also use
   when building API clients, seeding test data, or adding new endpoint support.
 license: MIT
-compatibility: Requires Jaz API key (x-jk-api-key header). Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown.
+compatibility: Uses Jaz OAuth by default; organization API keys remain supported. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown.
 ---
 
 # Jaz API Skill
 
 You are working with the **Jaz REST API** — the accounting platform backend. Also fully compatible with Juan Accounting (same API, same endpoints).
 
-## Pick the right invocation path first
+Prefer the configured OAuth connection. Local CLI/MCP shares `clio auth login`; hosted MCP uses its host's sign-in. Select the organization explicitly. For a direct integration, follow the repository's OAuth sign-in reference; the API-key header examples below describe the optional key-based route. Never copy a host's tokens into another application.
 
-Before touching this skill's HTTP details, check what's actually available:
+## Pick the right invocation path first
 
 - **Running inside an MCP host (Claude Desktop, Cowork)**: use the MCP tools (`execute_tool` with `create_invoice`, `list_bills`, etc.). Do not write direct HTTP. The MCP server handles auth, retries, and field shape for you.
 - **Running Claude Code with the `jaz-clio` CLI**: use the CLI commands (`clio invoices list --json`, etc.). Same code path, structured output.

@@ -9,7 +9,8 @@
 
 ```
 Base URL: https://api.getjaz.com
-Auth Header: x-jk-api-key: <key>
+Auth: OAuth through the configured CLI/MCP connection by default.
+Optional API-key header: x-jk-api-key: <key>
 Content-Type: application/json
 ```
 

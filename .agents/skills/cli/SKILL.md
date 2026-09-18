@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.60.2
+version: 5.61.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -41,19 +41,26 @@ You are working with **Clio** (`jaz-clio`) — the CLI for the Jaz accounting pl
 
 Use **jaz-cli** when running commands. Use **jaz-api** when debugging API errors or understanding field mappings.
 
+## OAuth sign-in (default)
+
+Run `clio auth login` on the user's intended machine and guide browser sign-in. With `--json`, stdout returns organization choices and verification status; the sign-in URL goes to stderr. If there is one organization, it is selected automatically. Otherwise show the choices and run `clio auth select <resourceId> --json`. Use `--org oauth:<resourceId>` on each scoped CLI command. Local MCP shares the session and refreshes tokens automatically; hosted MCP uses its host's OAuth session. `auth organizations --json` refreshes accessible organizations. `auth logout` removes only local OAuth credentials.
+
+Never put tokens in chat or workspace files. Keep the login process alive until the callback completes. Browser callbacks must reach the computer running Jaz; use the user's persistent environment or hosted OAuth when an isolated sandbox cannot receive them. The key-profile commands below remain optional. Use `--org oauth:<resourceId>` for OAuth or `--org <label>` for a saved key profile, even when `JAZ_API_KEY` is inherited.
+
 ## Auth Precedence
 
-Resolution stops at the first match. Higher priority wins silently.
+Explicit `--org` wins over inherited credentials. Do not combine `--api-key` and `--org`. If both `JAZ_API_KEY` and `JAZ_ORG` are set, select explicitly with `--org` or remove one environment override.
 
 | Priority | Source | How to set |
 |----------|--------|------------|
 | 1 | `--api-key <key>` | Per-command flag |
-| 2 | `JAZ_API_KEY` env | `export JAZ_API_KEY=jk-...` |
-| 3 | `--org <label>` flag | Per-command profile lookup |
+| 2 | `--org <selector>` flag | Saved key profile or `oauth:<resourceId>` |
+| 3 | `JAZ_API_KEY` env | `export JAZ_API_KEY=jk-...` |
 | 4 | `JAZ_ORG` env | `export JAZ_ORG=acme-sg` (pinned session) |
-| 5 | Active profile | `clio auth switch <label>` (stored in `~/.config/jaz-clio/credentials.json`) |
+| 5 | Preferred OAuth session | `clio auth login` / `clio auth select <resourceId>` |
+| 6 | Active API-key profile | `clio auth switch <label>` (stored in `~/.config/jaz-clio/credentials.json`) |
 
-**Critical gotcha**: If `JAZ_API_KEY` is set in your shell, it overrides `--org` and the active profile. Run `unset JAZ_API_KEY` before switching tenants with `clio auth switch`.
+**Key access**: Use `--org <label>` to select a saved API-key profile. Without `--org`, `JAZ_API_KEY` remains the default when set. An unknown explicit selection fails without falling back to the environment key.
 
 Auth subcommands:
 ```
@@ -332,7 +339,7 @@ Multiple contacts match "Acme":
 Be more specific, or use the full billingName.
 
 # Auth not configured
-No API key configured. Run `clio auth add <key>`, set JAZ_API_KEY, or pass --api-key.
+No Jaz authentication configured. Run `clio auth login`, or use optional API-key access.
 
 # API validation error (422)
 API error 422: lineItems[0].accountResourceId is required when saveAsDraft is false
@@ -394,7 +401,7 @@ See `references/common-workflows.md` for end-to-end multi-command patterns.
 2. **Line-item accounts don't fuzzy-resolve.** Use UUID or exact name.
 3. **Cash entries finalize immediately.** Unlike invoices which default to draft.
 4. **--offset is page number (0-indexed), not row count.**
-5. **JAZ_API_KEY env overrides --org.** Unset to use profiles.
+5. **Explicit organization selection wins.** `--org` uses the selected OAuth organization or saved key profile even when `JAZ_API_KEY` is set.
 
 See [references/agent-gotchas.md](./references/agent-gotchas.md) for the full list of 19 critical gotchas. See [references/output-shapes.md](./references/output-shapes.md) for `--json` output structures. See [references/error-recovery.md](./references/error-recovery.md) for 30+ error patterns with fixes.
 

@@ -15,7 +15,7 @@
 
 5. **--all caps at 1,000 rows by default** (lowered from 10,000 in 2026-04). For large orgs, pass `--max-rows 50000` explicitly. The CLI auto-paginates with concurrent requests and **stops fetching once `--max-rows` is reached** (early-stop, not slice-after — the previous behavior would pull every page and discard the excess, causing minute-long hangs on busy sandboxes).
 
-6. **JAZ_API_KEY env var overrides --org and active profile.** If set, all commands use that key regardless of `--org` or `clio auth switch`. Run `unset JAZ_API_KEY` to restore profile-based auth. Run `echo $JAZ_API_KEY` to check.
+6. **Explicit --org wins over JAZ_API_KEY.** Use `--org oauth:<resourceId>` for OAuth or `--org <label>` for a saved key profile. Without `--org`, the environment key remains the default. Never print its value.
 
 7. **--json output goes to stdout; errors go to stderr.** Piping `clio invoices list --json | jq .` works cleanly. Resolution feedback ("Contact: Acme Corp (abc1234...)") is on stderr and won't corrupt JSON. Always parse stdout only.
 

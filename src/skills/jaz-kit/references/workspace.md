@@ -89,40 +89,28 @@ The next deadline is `filing_periods` + `filing_offset`. Past due with nothing r
 
 Estimation methods for accruals must match what the jobs skill's month-end playbook expects — see its accruals step for the list.
 
-## .env — the company's key
+## Authentication
 
-Each company's folder holds its own key:
+OAuth is the default. Store only `organization_id` in ORG.md. Run `clio auth login` on the machine running Jaz, then use `clio <command> --org oauth:<organization_id> --json` for every organization-scoped call. Never rely on the shared active organization. Refresh tokens stay in Jaz's private local configuration, outside the kit. Hosted MCP uses its own OAuth session; always pass the same organization ID and verify it.
 
-```
-JAZ_API_KEY=jk-<this company's key>
-```
+Before opening a company, run `clio org info --org oauth:<organization_id> --json` and compare `resourceId` with ORG.md. Refuse a mismatch. Reauthenticate when access expires or is revoked; never silently switch to an API key. If CLI is unavailable, the same identity check can use hosted MCP.
 
-That is a real secret, gitignored by `.env` / `*.env` / `.env.*` (write `.gitignore` before `git init`). Nothing else belongs in this file — no other config, no second key.
+### Optional .env API key
 
-## Auth model
-
-A `jk-` key is **org-scoped**: it grants access to exactly one company's books. So the key that sits in `orgs/acme/.env` *is* Acme's identity — there is no separate profile, label, or active-org to keep in sync, and nothing to switch. Open a folder, its key is the org.
-
-**Loading the key.** The CLI reads `JAZ_API_KEY` from the environment (it does not itself read `.env` files), so every `clio` call in a session sources the folder's file in the same command:
+Existing key-based workspaces remain supported. Keep their single `JAZ_API_KEY=jk-...` in a gitignored `.env`. Never read or print the value. For this route only, source the folder's `.env` in the same command as each CLI call, without `--org`:
 
 ```
 set -a; . "orgs/<slug>/.env"; set +a; clio <command> --json
 ```
 
-`set -a; . file; set +a` is the safe form — never `export $(… | xargs)`, whose `xargs` subprocess exposes the key in `ps` argv and word-splits the value. Never run the loader under `set -x`, and never echo the variable. Because each command sources exactly one folder's key and passes no `--org`, there is no ambient state to leak between sessions.
-
-**Two guards still apply** (they protect against habit and misconfiguration): the CLI refuses `--org` when `JAZ_API_KEY` is set — Jaz Kit never passes `--org`, so this only fires if something slips — and it refuses comma-separated keys. Neither is part of the normal path; both are backstops.
-
-**The one cross-check worth doing.** The plugin's MCP server has its own `JAZ_API_KEY` from connector settings, which may point at a different company than the folder you opened. The MCP plane can't be re-pointed per folder, so at open the flow compares `get_organization` (MCP) against `clio org info` (the folder's key) and stops on a mismatch. Otherwise the two models coexist cleanly: MCP for a single-company user with no CLI, the folder key for everyone running several.
-
-**iCloud.** The default root `~/Documents/Jaz Kit` syncs on most Macs, so the `.env` keys ride to the user's iCloud and their other devices. That is a real exposure and worth saying once at setup — but a bounded one: a `jk-` key reaches one company's books and is revocable in the Jaz UI in seconds. A user who would rather keep keys off the cloud sets `JAZ_KIT_HOME` to a path outside `~/Documents`. Git is separately handled by the ignore rules above.
+Do not mix key overrides with OAuth organization selectors. Keep `.env`, `*.env`, and `.env.*` ignored. When migrating an existing folder to OAuth, verify access to its recorded organization first, stop loading its `.env`, and preserve the old key until the user chooses to remove it. Keys placed in a cloud-synced folder will sync with it; OAuth tokens must never be placed in the kit.
 
 ## Sharing a kit across a team
 
 The kit is a git repository (offered at setup; `.env` / `*.env` / `work/` ignored). To share:
 
 1. Push to a **private** repository. The `.env` keys stay behind — they are gitignored, so nothing sensitive travels.
-2. Each colleague clones it and pastes their **own** key into each `orgs/<slug>/.env`. Keys are per-machine; only the ORG.md context and policies are shared.
+2. Each colleague clones it and signs in to Jaz themselves. Share organization context and policies, never OAuth sessions. Colleagues choosing API-key access configure their own ignored `.env` files.
 3. Pull before starting, push after finishing.
 
 Coordinate who works which company. Two people closing the same period simultaneously will conflict in CLOSE.md, and worse, may both finalize the same drafts. Git surfaces the file conflict; nothing prevents the double-finalize, so agree who owns a client before starting.

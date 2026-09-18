@@ -1,6 +1,6 @@
 ---
 name: jaz-kit
-version: 5.60.2
+version: 5.61.0
 description: >-
   Use this skill when an accountant, bookkeeper, or owner is running real books
   in Jaz across one or more organizations from the terminal — setting up a
@@ -30,7 +30,7 @@ Jaz Kit gives each organization a folder: what the organization is, how it likes
   _shared/policies/ skills/      firm-wide, applies to every organization
   orgs/<slug>/
     ORG.md                       the close config + session journal
-    .env                         JAZ_API_KEY — this company's key (gitignored)
+    .env                         optional API-key access only (gitignored)
     policies/ rules/ skills/     how this organization works
     scripts/  work/              automations · scratch (swept on exit, after asking)
     closes/<period>/
@@ -38,7 +38,7 @@ Jaz Kit gives each organization a folder: what the organization is, how it likes
       workpapers/                permanent audit file
 ```
 
-The company's key lives in its own folder. A `jk-` key is org-scoped — it reaches exactly one company's books — so the folder you open decides which ledger you touch; there is no profile to switch and no `--org` to get wrong. The `.env` is gitignored and its value is never printed. (On a default Mac, `~/Documents` syncs to iCloud, so the key syncs too — bounded and revocable, and set `JAZ_KIT_HOME` outside `~/Documents` to avoid it. See `references/workspace.md`.)
+ORG.md's `organization_id` identifies the company's ledger. Use OAuth by default: sign in with `clio auth login`, then pin every command with `--org oauth:<organization_id>`. CLI and local MCP share the local sign-in; tokens stay outside the kit. Hosted MCP uses its own OAuth connection and the same explicit organization ID. Verify that each connection returns that ID before work. Existing per-company `.env` API keys remain an optional route; see `references/workspace.md`.
 
 ## Operations
 

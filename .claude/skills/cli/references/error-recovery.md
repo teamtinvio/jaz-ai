@@ -9,12 +9,12 @@
 
 | Error | Cause | Fix |
 |-------|-------|-----|
-| `No API key configured` | No auth source found in resolution chain | `clio auth add jk-xxx` or `export JAZ_API_KEY=jk-xxx` |
+| `No API key configured` | No auth source found in resolution chain | `clio auth login`; optional API-key access uses `clio auth add` |
 | `Invalid API key` | Key doesn't start with `jk-` or is malformed | Verify key format: must be `jk-` prefix + UUID |
-| `Unauthorized (401)` | Key expired, revoked, or wrong org | Run `clio auth whoami` to check; re-add key with `clio auth add` |
+| `Unauthorized (401)` | Session/key expired, revoked, or wrong org | Run `clio auth whoami` to check; reconnect OAuth with `clio auth login`, or repair the chosen API-key profile |
 | `--api-key and --org cannot be used together` | Conflicting auth flags | Use one or the other, not both |
 | `Profile 'xyz' not found` | `--org xyz` references non-existent profile | Run `clio auth list` to see available profiles |
-| `JAZ_API_KEY overrides --org` | Env var takes precedence silently | `unset JAZ_API_KEY` before using `--org` or `clio auth switch` |
+| `JAZ_API_KEY and JAZ_ORG are both set` | Two inherited authentication choices | Select explicitly with `--org oauth:<resourceId>` or `--org <label>`, or remove one environment override |
 
 ---
 
@@ -92,7 +92,7 @@
 ```bash
 clio auth whoami          # Check current auth source
 clio auth list            # See all saved profiles
-echo $JAZ_API_KEY         # Check for env override
+test -n "${JAZ_API_KEY:-}" && printf "JAZ_API_KEY is set\n" # Never print its value
 echo $JAZ_ORG             # Check for pinned org
 ```
 

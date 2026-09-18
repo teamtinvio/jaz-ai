@@ -20,7 +20,7 @@
 | `x-jk-api-key` | Standard API key | `jk-` prefix + 48 hex chars |
 | `x-magic-api-key` | Magic/AI endpoints | Separate key |
 
-**Use `x-jk-api-key` for all API access.**
+**Prefer OAuth through the configured CLI/MCP connection.** Direct applications use Jaz's authorization-code flow with PKCE and send the granted token as `Authorization: Bearer <access-token>`. Choose the intended organization during consent. The `x-jk-api-key` header remains supported for optional organization-key access.
 
 ---
 

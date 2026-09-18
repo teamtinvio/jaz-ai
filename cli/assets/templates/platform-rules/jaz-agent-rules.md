@@ -1,8 +1,6 @@
 # Jaz — Agent Operating Rules
 
-How any AI agent (Claude / GPT / Gemini / Copilot / Cursor) should use the Jaz accounting stack in this workspace. Drop this file into the path your platform expects and your agent picks it up automatically.
-
-Source of truth lives in the installed skills (`.claude/skills/jaz-*/SKILL.md` or `.agents/skills/jaz-*/SKILL.md`). This file is a 30-second bias prompt — load the skill for the deep contract.
+Jaz accounting guidance for this workspace. Load the installed Jaz skills for detailed workflows and API contracts.
 
 ## Discovery
 
@@ -43,7 +41,9 @@ Exception: `fx-reval` is verification-only — Jaz auto-handles period-end IAS 2
 
 ## Safety
 
-- Never echo `JAZ_API_KEY` or `jk-*` strings to the user or into generated code.
+Prefer OAuth (`clio auth login` locally); API keys are optional.
+
+- Never echo OAuth tokens, `JAZ_API_KEY`, or `jk-*` strings to the user or into generated code.
 - Never invent enum values (UPPER_SNAKE_CASE only — match exactly).
 - Errors come back structured (`code`, `message`, `failedRows[]`, `errorDetails[]`). Read them — don't guess at what went wrong.
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.61.0] - 2026-09-18
+
+**Sign in once to use Jaz from the command line and your local AI assistant.**
+
+`clio auth login` opens browser sign-in. The CLI and local MCP connection share the session and renew access automatically. Choose an organization when your account has several; a single organization is selected automatically. API keys and saved key profiles still work.
+
+Use `--org oauth:<organization-id>` for an OAuth organization or `--org <profile>` for a saved API-key profile. An explicit choice takes precedence over an inherited API key, and identity checks honor that choice. `clio auth logout` signs out locally; revoke access in Jaz to remove the authorization grant.
+
+The setup guide walks your assistant through installation targets, sign-in, optional skills, organization selection, and getting started with Jaz. API-key setup remains available as an alternative.
+
 ## [5.60.2] - 2026-09-17
 
 **The command line tells you when a new version is out.**

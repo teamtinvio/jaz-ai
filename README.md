@@ -36,6 +36,20 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 371 tools, 7 sk
 - [Privacy & security](#privacy--security)
 - [Support](#support)
 
+For guided installation, ask your agent to follow [Jaz Agent Setup](setup.md).
+
+## Sign in with OAuth
+
+OAuth is the default for new setups. Hosted connectors handle sign-in inside the agent. For the CLI, local MCP, Claude Code plugin, Desktop extension, or Gemini extension, run `npx -y jaz-clio@latest auth login` on the computer that runs Jaz. The browser opens for Jaz sign-in and consent; local tools share the saved session and refresh it automatically. No key belongs in the MCP configuration.
+
+If several organizations are available, choose one after sign-in. Agents can use `auth login --json` to obtain the choices, then `auth select <resourceId> --json`. Pin commands and local MCP with `--org oauth:<resourceId>`. Use `auth organizations --json` to refresh the list. Install skills independently of authentication.
+
+For a custom application calling the API directly, use Jaz's authorization-code flow with PKCE and refresh tokens. Register the application's callback at `https://api.getjaz.com/oauth/register`, start consent at `https://api.getjaz.com/oauth/authorize`, and exchange or refresh tokens at `https://api.getjaz.com/oauth/token`. Registration returns the client credentials used by the token endpoint. Keep them private. Select the intended organization during consent for a single-organization integration; use explicit organization selection through CLI/MCP for agent workflows. The published OpenAPI specification's API-key examples describe the optional key-based route.
+
+API keys and PATs remain supported. Explicit `--org` selects its saved credentials ahead of an inherited `JAZ_API_KEY`; without `--org`, the environment key retains precedence. Do not combine `--api-key` with `--org`. Existing key profiles remain available through `--org <label>`; use `auth add <key> --as <label>` for optional key-based access. Never paste credentials into agent chat. `auth logout` removes only the local OAuth session; revoke the grant in Jaz to remove server-side access.
+
+Browser login requires a callback to the computer running Jaz. For an isolated agent sandbox, configure the user's intended machine or use a hosted connector. Do not copy refresh tokens from another application.
+
 ## Install · 30 seconds
 
 | Your agent | Install |
@@ -49,7 +63,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 371 tools, 7 sk
 | **Gemini CLI** | `gemini extensions install https://github.com/teamtinvio/jaz-ai` |
 | **OpenAI Codex CLI / Agents SDK** | Add the stdio MCP config (below) |
 | **OpenAI Responses API** | Hosted HTTP MCP only (see [Responses API note](#openai-responses-api)) |
-| **npm (CLI)** | `npm install -g jaz-clio && clio auth add <jk-your-api-key>` |
+| **npm (CLI)** | `npm install -g jaz-clio && clio auth login` |
 
 **Stdio MCP config** (Claude Desktop, Cursor, Windsurf, OpenAI Codex CLI / Agents SDK, any host that runs MCP servers as local processes):
 
@@ -58,8 +72,7 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 371 tools, 7 sk
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.60.2", "mcp"],
-      "env": { "JAZ_API_KEY": "jk-your-api-key" }
+      "args": ["-y", "jaz-clio@5.61.0", "mcp"]
     }
   }
 }
@@ -72,14 +85,13 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 371 tools, 7 sk
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.60.2", "mcp"],
-      "env": { "JAZ_API_KEY": "jk-your-api-key" }
+      "args": ["-y", "jaz-clio@5.61.0", "mcp"]
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.60.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.61.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: OAuth supports accessible organizations with explicit `org_id` selection. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -105,7 +117,7 @@ Same tool surface and per-call organization checks as the [remote connector](#re
 
 **If sign-in fails with "Could not discover authorization server metadata":** choose **Dynamic** instead of **Dynamic discovery** in step 3, then enter `https://api.getjaz.com/oauth/authorize` as the Authorization URL and `https://api.getjaz.com/oauth/token` as the Token URL. Copilot Studio still registers itself, so you need no client ID or secret. Everything else is unchanged.
 
-**Prefer a local install on the Microsoft stack?** Copilot Studio is cloud-only and cannot run local MCP servers. Use VS Code with GitHub Copilot Chat instead: the [VS Code MCP config](#install--30-seconds) runs Jaz locally with an API key, and `npx jaz-clio init --platform copilot` installs the skills to `.github/copilot-instructions.md`.
+**Prefer a local install on the Microsoft stack?** Copilot Studio is cloud-only and cannot run local MCP servers. Use VS Code with GitHub Copilot Chat instead: the [VS Code MCP config](#install--30-seconds) runs Jaz locally with the shared OAuth sign-in (or an optional API key), and `npx jaz-clio init --platform copilot` installs the skills to `.github/copilot-instructions.md`.
 
 ### OpenAI Responses API
 
@@ -409,7 +421,7 @@ export PATH="$(npm config get prefix)/bin:$PATH"   # Add to ~/.bashrc or ~/.zshr
 
 ### Auth error / 401 Unauthorized
 
-Missing or invalid API key. Keys expire if regenerated in the Jaz app.
+Missing, expired, or revoked authentication. Reconnect OAuth with `clio auth login`, then restart local MCP. For optional API-key access, check whether the key was regenerated in Jaz.
 
 ```bash
 clio auth whoami
@@ -450,17 +462,16 @@ claude mcp list                    # Confirm Claude Code sees "jaz"
 claude mcp add jaz -- npx jaz-clio mcp
 ```
 
-For Cursor / VS Code / Windsurf, validate the JSON and pin the API key:
+For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sign in first with `clio auth login`:
 
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.60.2", "mcp"],
-  "env": { "JAZ_API_KEY": "jk-your-api-key" }
+  "args": ["-y", "jaz-clio@5.61.0", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 
-> Pin `JAZ_API_KEY` in MCP config rather than relying on the active CLI profile. MCP servers cache credentials at startup so `clio auth switch` won't take effect until restart. For multi-org, use comma-separated keys.
+> Pin the intended organization explicitly. Local MCP refreshes OAuth tokens automatically; restart it after a new login or a configuration change. API-key profiles and comma-separated keys remain optional alternatives.
 
 ### Skills not loading
 
@@ -504,7 +515,7 @@ Or use multi-org mode and skip restarts: comma-separated keys (`jk-aaa,jk-bbb`) 
 
 ## Privacy & security
 
-Runs entirely on your machine. API calls go directly from your machine to the Jaz API over HTTPS. No telemetry. The API key lives locally in `~/.config/jaz-clio/credentials.json`.
+Runs entirely on your machine. API calls go directly from your machine to the Jaz API over HTTPS. No telemetry. OAuth tokens live in `~/.config/jaz-clio/oauth.json`; optional API-key profiles live in `~/.config/jaz-clio/credentials.json`. Both are private local credential files.
 
 The **hosted remote connector** (`mcp.jaz.ai`) is different by design: you connect over OAuth 2.1 + PKCE (no API key stored anywhere, never your password), requests run server-side over HTTPS, and the connector reaches the organizations your Jaz account belongs to; access is checked on every call.
 
