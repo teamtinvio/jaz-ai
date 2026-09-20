@@ -1,160 +1,101 @@
-Set up Jaz in the tools I choose using the instructions below. Handle installation and configuration wherever you have access, preserve my existing settings, and guide me through sign-in or private credential entry. Verify the selected targets, then help me get started.
+Set up Jaz in the tools I choose using the instructions below. Show every listed tool as its own selection row. Handle installation and configuration, guide me through sign-in, verify access, and help me get started.
 
 ---
 
 # Jaz Agent Setup
 
-Jaz is an accounting platform for invoices, bills, journal entries, reconciliation, reporting, and period close. Set up its CLI, MCP server, or hosted connector in the user's chosen tools. Prefer OAuth sign-in, then verify access to the correct organization. Offer API-key access as an optional alternative for existing integrations or unattended environments. Keep setup read-only: never create or modify accounting records to test it.
+Jaz is an accounting platform for managing business finances, from day-to-day transactions to reporting and closing the books. Its connectors, MCP server, and CLI let you access the user's accounting data and take actions on their behalf. Jaz skills provide guidance for recording transactions, reconciling accounts, analyzing reports, and completing accounting workflows.
 
 ## Guide the user; perform the setup
 
-Begin: "I'll check your environment, help you choose where to connect Jaz, and handle the setup."
+Run setup independently through supported tools, commands, and APIs. When a step needs the user, provide a direct link or exact instructions, then continue and verify after they finish. Ask only for selections, sign-in, required permissions, or missing information.
 
-Run commands, edit configuration, install components, and check results yourself wherever your tools permit. Do not ask the user to copy commands, paste configuration, download files, or run scripts you can execute. Use the platform's required approval controls; avoid redundant confirmation questions.
+Configure the intended app or persistent workspace; installing in a disposable sandbox does not configure the user's computer. Mark inaccessible targets as pending and give the next step.
 
-Ask the user only for a target choice, sign-in, private credential entry, required permissions, or information you cannot determine. Give one concrete action at a time, explain what happens next, and resume when it is complete. Never treat silence as completion.
-
-For connector sign-in, always include the target's direct connect link as a clickable Markdown link in your message. Open it yourself when supported, but still show the link to the user. Do not send them to search a directory or navigate settings when a direct link is provided below. Use manual navigation only if the link fails or is unavailable to their account.
-
-Assess actual access rather than assuming capabilities from the app's name. A shell may reach the user's computer, a persistent remote workspace, or an isolated sandbox. Connected folders and app controls may be accessible independently of the shell. Configure only the intended environment, and distinguish saved configuration from a running, authenticated connection.
-
-Reuse working connections and credentials. Merge settings and guidance without overwriting user content. Keep keys and tokens out of chat, logs, generated instructions, and source control.
+For installed targets, check for updates and verify access. Reconfigure only to fix a problem. Preserve user settings and files, respect version pins, and keep credentials out of chat, logs, and source control.
 
 ## 1. Choose installation targets
 
-First inspect your runtime, available Jaz tools, and accessible application settings without installing anything or reading secret values.
+Ask **"Where would you like to use Jaz?"** Show every tool below in a multi-select UI, with one row per tool. Skip this question if the user already chose their targets.
 
-Make target selection the only setup-preference question. Include skills by default where supported, with a Tools only opt-out in the same interaction. Omit questions already answered by the request or existing setup. Ask **"Where would you like to use Jaz?"** Use a multi-select interface when available; otherwise show a numbered list that accepts multiple choices:
+List the current app and its sibling first: ChatGPT with Codex, or Claude with Claude Code. Keep the remaining options in the order below. If the current app is unknown, use the standard order.
 
-- Claude Code
+If the UI requires smaller groups, present every group with individual tool choices. Without multi-select, use a numbered list accepting multiple names or numbers.
+
+**ChatGPT and Claude**
+
+- ChatGPT
 - Codex
+- Claude (Web and Desktop)
+- Claude Code
+
+**IDEs**
+
 - Cursor
 - Windsurf
-- VS Code / GitHub Copilot
+- VS Code (GitHub Copilot)
+
+**Other tools**
+
 - Gemini CLI
-- Claude web, Desktop, or Cowork
-- ChatGPT
-- Microsoft 365 Copilot / Copilot Studio
-- Terminal or scripts — Jaz CLI
-- Another tool
-
-Recommend OAuth with skills where supported; terminal/scripts implies local tooling. Choose the connection around the user's task, keeping authentication a separate choice. Do not ask the user to choose a connection method when only one is applicable.
-
-Mark the current platform as recommended and identify detected existing connections. If the user already named their targets, use those choices without asking again. Ask which tool only when they choose "Another tool."
-
-For each selected target, check whether you can configure it directly. Access to another selected application's settings is sufficient; you are not limited to your own application's configuration. If the intended machine or workspace is unclear, resolve that before making changes.
-
-Choose the simplest supported connection:
-
-- **Hosted MCP with OAuth** for connector-only use, including terminal and editor agents that support it.
-- **Local CLI/MCP** when the user wants local tooling, scripts, or a development setup that needs it. Check the installed release for OAuth support before initiating authentication.
-
-Choose the connection method yourself from the selected targets and available capabilities. Prefer one shared local OAuth session when local CLI and MCP are selected together; use hosted OAuth for hosted targets. Explain the choice briefly without asking another preference question. Honor explicit preferences. Separate hosted applications may each require their own consent.
-
-### Include skills where supported
-
-Skills provide reusable accounting instructions and workflows; tools provide access to Jaz data and actions. Skills can work with either hosted OAuth or local MCP. A hosted connection does not mean the user has declined skills.
-
-Install or reuse Jaz skills for selected targets that support them unless the user chooses Tools only. Explain that skills provide workflow guidance alongside the connection; do not ask a separate skills question. Use the target's persistent workspace or supported import interface. Installing files in your sandbox does not install them in the user's application. For targets without skill support, use their available tools and workflow documentation without promising native skill shortcuts.
-
-Briefly state the chosen targets, connection method, and skills choice, then proceed. Skip only the components already working; continue setting up the other selected components and targets.
+- Microsoft 365 Copilot
+- Copilot Studio
+- Jaz CLI (terminal or scripts)
+- Another tool (specify)
 
 ## 2. Prepare selected components
 
-Skip this section only when neither local tooling nor skill installation was selected. For either, check for a compatible Node.js LTS and npm, installing prerequisites when your environment supports it.
+For local tooling or skill installation, check for Node.js LTS and npm and install prerequisites where needed. Check the current Jaz release:
 
 ```sh
 npm view jaz-clio version
 npx -y jaz-clio@latest --version
 ```
 
-The second command downloads and runs Jaz as needed without a global installation. Reuse a working installation and respect explicit version pins.
+### Install skills
 
-### Skills, if selected
-
-If the selected plugin or extension bundles Jaz skills, install or reuse it in section 3 and verify those skills instead of installing duplicates. Otherwise, for a fresh workspace, install guidance for the selected platform, including when its tools use hosted OAuth:
+Install all Jaz skills supported by each selected target. Use bundled skills when available; otherwise install them in the target's persistent workspace:
 
 ```sh
 npx -y jaz-clio@latest init --platform <platform> --skill all
 ```
 
-Supported values: `claude`, `codex`, `cursor`, `windsurf`, `copilot`, `gemini`, or `agents`. For existing or partial installations, generate files in a temporary workspace and merge the required changes, including the platform's instruction file. Do not rerun initialization over existing skills or use force to replace user guidance. For multiple targets, stage each platform separately, merge shared skills once, and preserve each target's instruction file and configuration. Verify that the target discovers the installed skills and load one without running accounting actions. Reload yourself when supported; otherwise state the exact remaining activation step. Distinguish installed files from skills available in the current session. Use the target's live skill listing to verify invocation names; they can differ from both metadata names and folder names. Installing skills does not require authentication. Use hosted tools for workflows they support. Use the installed workflow's supported connection. Jaz Kit identifies each company by its organization ID; pin that ID on every call. Do not request an API key merely to install or use skills. If older instructions require key-based access, check for an update before offering that alternative.
+Supported values: `claude`, `codex`, `cursor`, `windsurf`, `copilot`, `gemini`, or `agents`.
 
-### Authenticate with OAuth
+Confirm the skills appear in the target's live listing and load one without taking accounting actions. Reload if needed.
 
-For hosted connections, start the target's OAuth flow in section 3 and let the user complete Jaz sign-in and consent. Handle configuration, activation, and verification yourself wherever supported. Do not ask for an API key.
+### Sign in
 
-For local CLI/MCP, reuse a working OAuth session. Otherwise start:
+Use OAuth for setup. Connectors sign in through their app in section 3; each may require separate consent. For CLI and local MCP:
 
 ```sh
 npx -y jaz-clio@latest auth login --json
 ```
 
-Run sign-in in a process that stays alive while waiting for the user; keep its handle and capture the sign-in link separately so you can recover it. The command opens Jaz sign-in and waits for a callback. Show the returned sign-in link as a clickable link, keep the process alive, and let the user sign in and consent. The browser must be able to reach the computer running Jaz. For an isolated sandbox, configure the user's intended machine or use hosted OAuth instead; never copy tokens between applications.
+Keep sign-in processes alive while the user completes consent and show the returned link. For local sign-in, the browser callback must reach the computer running Jaz. CLI and local MCP share this session and refresh it automatically.
 
-Use the returned organization choices as described in section 4 before configuring local targets. If needed, refresh the choices with `auth organizations --json`, then run `auth select <resourceId> --json`. CLI and local MCP share this session and refresh it automatically.
-
-Use `oauth:<resourceId>` as the local **organization selector**. For optional API-key access, the selector is the saved profile label. An explicit `--org` selector overrides inherited `JAZ_API_KEY`; preserve existing keys and profiles. If a target pins its organization only through `JAZ_ORG`, avoid a conflicting inherited key in that server's launch environment.
-
-If the installed release does not offer `auth login`, update it while respecting explicit pins. If an update is unavailable, explain the limitation and offer hosted OAuth or optional API-key access. Do not invent a login command or silently change authentication methods.
-
-### Optional: API-key access
-
-Use this route when the user requests key-based access or chooses it for a surface that cannot yet use OAuth. Preserve existing working key-based setups unless the user wants to migrate them.
-
-Reuse a valid organization profile. Otherwise, open Jaz's **Manage API Keys** screen through available app controls or a verified dashboard link, then prepare private credential entry in the intended environment.
-
-The registration command is:
-
-```text
-npx -y jaz-clio@latest auth add <key> --as <profile-label>
-```
-
-Prefer a supported secure credential field or private local input flow that runs registration without exposing the key to the agent or transcript. Prepare and launch the flow yourself when possible; the user's action should be entering the credential. Do not request the key in chat or invent an interactive mode.
-
-If private input is unavailable, hand off only credential registration in a private terminal and continue all other setup yourself. Let Jaz's tooling store the key; retain only the profile label. Verify its organization before use.
+Select the organization using section 4 before configuring local targets. If `auth login` is unavailable, update Jaz before continuing.
 
 ## 3. Configure each selected target
 
-Use the instructions for every selected target. Match existing connections by endpoint or launch command, not just the name `jaz`. Keep existing server names and configuration scopes, and substitute the actual name in commands below. Register either hosted or local MCP for a target, avoiding duplicate connections. For local commands below, replace `<organization-selector>` with `oauth:<resourceId>` for OAuth, or the registered profile label for API-key access.
+Use the hosted server for agent access, or local CLI/MCP for terminal workflows and targets that require it. Follow explicit user preferences. Choose one connection per target.
+
+Replace `<organization-selector>` with `oauth:<resourceId>`. Use the same value if an extension pins its organization through `JAZ_ORG`.
 
 **Hosted connection:** name `Jaz`, URL `https://mcp.jaz.ai/mcp`, authentication `OAuth`.
 
-### Claude Code
+### ChatGPT
 
-Check existing connections, including any inherited Claude connectors:
+Show both links and let the user choose:
 
-```sh
-claude mcp list
-```
+- [Open Jaz in ChatGPT Desktop](codex://plugins/plugin_asdk_app_6a28b9cc16948191a008db1db0a56533)
+- [Open Jaz in ChatGPT Web](https://chatgpt.com/plugins/plugin_asdk_app_6a28b9cc16948191a008db1db0a56533)
 
-If absent, choose the selected method:
-
-```sh
-# Hosted MCP
-claude mcp add --transport http jaz https://mcp.jaz.ai/mcp
-
-# Local MCP
-claude mcp add jaz -- npx -y jaz-clio@latest mcp --org <organization-selector>
-```
-
-If authentication is needed and the installed CLI supports it, initiate it yourself in an interactive terminal:
-
-```sh
-claude mcp login jaz
-```
-
-Let the user complete browser sign-in. Keep the login process alive while waiting. In a remote environment, use the CLI's supported callback flow; keep authorization codes and redirect URLs out of chat. Use Claude Code's in-app `/mcp` interface only if command-line sign-in is unavailable.
+Ask them to select **Install plugin** or **Connect**, sign in, and enable Jaz in the conversation. Installing in either makes Jaz available in both on the same account; the other may need an app restart or browser refresh. If the desktop link is unsupported, guide them to **Plugins → Jaz** inside the app.
 
 ### Codex
 
-Check available connected apps as well as MCP servers; an app connection may not appear in the MCP list.
-
-```sh
-codex mcp list --json
-```
-
-If absent, choose the selected method:
+Add Jaz using one connection:
 
 ```sh
 # Hosted MCP
@@ -164,13 +105,39 @@ codex mcp add jaz --url https://mcp.jaz.ai/mcp
 codex mcp add jaz -- npx -y jaz-clio@latest mcp --org <organization-selector>
 ```
 
-If hosted sign-in has not started or needs resuming, initiate it yourself:
+If adding the hosted server did not start sign-in, run:
 
 ```sh
 codex mcp login jaz
 ```
 
-Adding the hosted server may already start sign-in; do not start a second flow. Keep the process alive while the user completes browser sign-in. If commands are unavailable, use Codex's MCP settings.
+If commands are unavailable, use Codex's MCP settings.
+
+### Claude (Web and Desktop)
+
+Ask the user to complete this in their existing signed-in Claude session:
+
+> Open [Connectors](https://claude.ai/settings/connectors), choose **Add custom connector**, set the name to **Jaz** and the URL to **`https://mcp.jaz.ai/mcp`**, then click **Connect** and sign in to Jaz.
+
+### Claude Code
+
+Add Jaz using one connection:
+
+```sh
+# Hosted MCP
+claude mcp add --transport http jaz https://mcp.jaz.ai/mcp
+
+# Local MCP
+claude mcp add jaz -- npx -y jaz-clio@latest mcp --org <organization-selector>
+```
+
+For hosted sign-in, run this if supported by the installed CLI:
+
+```sh
+claude mcp login jaz
+```
+
+Otherwise use Claude Code's `/mcp` sign-in interface.
 
 ### Cursor, Windsurf, and VS Code / GitHub Copilot
 
@@ -198,45 +165,25 @@ Hosted entry for Cursor:
 
 For Windsurf, use `serverUrl` instead of `url`. For VS Code, use `url` and add `"type":"http"`.
 
-Enable the server and initiate hosted sign-in through the editor. Perform activation or reload yourself if supported; otherwise give the user the single required action.
+Enable the server, complete hosted sign-in through the editor, and reload if needed.
 
 ### Gemini CLI
 
-Reuse an existing Jaz extension. Otherwise install it:
+Install the Jaz extension:
 
 ```sh
 gemini extensions install https://github.com/teamtinvio/jaz-ai
 ```
 
-For the extension's local MCP, complete local OAuth sign-in on the same computer and restart or reload the extension. Pin its organization through the supported launch configuration. The extension includes workflow guidance; do not install duplicate skills. API-key access remains optional.
-
-### Claude web, Desktop, or Cowork
-
-Reuse an available Jaz connector. For hosted OAuth, open Claude's connector settings through available app controls and add `https://mcp.jaz.ai/mcp` as a custom connector. If user action is needed, give the clickable [Open Claude](https://claude.ai/) link and the precise **Settings → Connectors → Add custom connector** action, then guide sign-in.
-
-[Jaz in Claude's directory](https://claude.ai/directory/ant.dir.gh.teamtinvio.jaz-ai) is also available, with a [public listing](https://claude.com/connectors/jaz-accounting). Inspect the offered installation type: if it offers a Desktop extension or API-key setup, do not substitute it for the user's selected hosted OAuth connection.
-
-For local MCP in Claude Desktop, merge the local entry from the editor section under `mcpServers` in its configuration file: `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS or `%APPDATA%\Claude\claude_desktop_config.json` on Windows. Use the selected organization selector. Local stdio configuration does not configure Claude web or Cowork; use their supported hosted connector instead.
-
-After sign-in or activation, check whether Jaz tools are available. Enable or reload yourself when supported; otherwise give the one required action. Report workspace restrictions only if encountered.
-
-### ChatGPT
-
-Reuse an available Jaz app. If connection or sign-in is needed, show:
-
-> [Connect Jaz to ChatGPT](https://chatgpt.com/plugins/plugin_asdk_app_6a28b9cc16948191a008db1db0a56533), select the available **Install plugin** or **Connect** action, and complete sign-in. Come back here when you're done; I'll check the connection.
-
-After sign-in, check whether Jaz tools are available. Enable Jaz yourself if supported; otherwise give the next action to enable it in the conversation.
-
-Only if the direct link fails, guide the user to find Jaz in the app directory. If unavailable there, use a custom remote MCP connection where the account and workspace support it. Report any administrator requirement only if encountered.
+Complete sign-in from section 2 on the same computer, pin the organization in its launch configuration, and reload. The extension includes workflow guidance.
 
 ### Microsoft 365 Copilot / Copilot Studio
 
-In [Copilot Studio](https://copilotstudio.microsoft.com), open the intended agent and add an MCP tool with the hosted URL. Select OAuth with dynamic discovery, create the connection, and let the user sign in to Jaz. Add it to the agent.
+In [Copilot Studio](https://copilotstudio.microsoft.com), add an MCP tool to the intended agent using the hosted URL. Select OAuth with dynamic discovery, create the connection, and sign in.
 
 If discovery reports "Could not discover authorization server metadata," select **Dynamic** and use `https://api.getjaz.com/oauth/authorize` and `https://api.getjaz.com/oauth/token` as the authorization and token URLs. Do not ask for a client ID or secret for dynamic registration.
 
-Use available controls yourself. Publishing to Microsoft 365 Copilot or Teams is a separate deployment step; report it as pending unless the user requested publication.
+Publish to Microsoft 365 Copilot or Teams only if requested.
 
 ### Terminal or scripts
 
@@ -248,47 +195,61 @@ npx -y jaz-clio@latest org info --org <organization-selector> --json
 
 ### Other tools
 
-Use the tool's supported MCP configuration with the same hosted URL or local command and organization selector. If it does not support the selected connection method, explain the available alternative before changing the plan.
+Use its supported MCP interface with the same URL or local command and organization selector.
 
 ## 4. Select an organization and verify
 
-List organizations reachable through the authenticated connection. Use the only available organization automatically, or the user's existing explicit choice. If consent or existing trusted context already identifies the intended organization, reuse it. If several still remain with no explicit choice, present their names once and wait for a choice; never guess a financial organization to reduce setup questions. If none are available, explain that organization access is needed.
+Keep setup verification read-only.
 
-Reuse that choice across targets; ask again only if another connection cannot access it. Read the chosen organization's name and resource ID. For hosted MCP, where available, call `list_organizations`, then `organization` with:
+List accessible organizations. Use the user's chosen organization, or select the only available one automatically. Otherwise show their names in a native single-select or numbered list and wait for a choice. If none are available, explain that organization access is needed.
+
+Apply the choice across targets, asking again only if one cannot access it. For hosted MCP, call `list_organizations`, then use the live `organization` schema to read the selected organization:
 
 ```json
 {"operation":"get_organization","arguments":{},"org_id":"<selected organization resourceId>"}
 ```
 
-For local OAuth, use the choices returned by sign-in or `auth organizations --json`, then `auth select <resourceId> --json`; skip another selection if sign-in already verified the intended organization. For local CLI, use the `org info` command above. For local MCP, discover the equivalent read through live tool descriptions. A single-organization key selects its organization automatically; still verify its identity.
+For local sign-in, use the returned choices or `auth organizations --json`, then `auth select <resourceId> --json`. Verify with `org info` for CLI or the equivalent live MCP tool.
 
-Verify each selected target where possible. Use the active session's actual connection when checking tools; a separate CLI configuration listing does not prove which server that session loaded. Do not invent scope-precedence explanations or recommend removing an existing connection without evidence of a real conflict. A successful installation, "Connected" status, tool discovery, or zero exit code does not prove authenticated data access. Require the selected organization detail operation to succeed through each connection. Listing accessible organizations is a selection step, not sufficient verification: for MCP, call `get_organization` through the live tool schema and confirm its returned resource ID. CLI success alone does not prove an editor's MCP connection is active. Confirm that targets intended for the same organization resolve to the same ID. Mark inaccessible targets as configured but pending verification rather than ready.
+Read the organization's details through each target's actual connection and confirm the resource ID. Sign-in, tool discovery, and organization lists alone do not verify access. CLI success does not verify an editor's MCP connection.
 
 ## 5. Complete setup and hand off
 
-Keep the successful handoff focused on the selected targets and how to use them. Omit unused connections, installation diagnostics, and optional cleanup offers unless they caused a verified failure in a selected target. Give a brief result for each selected target: **Ready**, **Needs sign-in**, **Needs activation**, or **Needs verification**. Name the verified organization. If anything remains, provide the next action and resume afterward; do not repeat completed steps.
+Name the verified organization and give each selected target a status: **Ready**, **Needs sign-in**, **Needs activation**, or **Needs verification**. For pending targets, give the next action. Omit installation diagnostics.
 
-Save non-secret connection details, authentication method, target scopes, profile labels when applicable, organization ID, skills choice and availability, verification date, and remaining steps in the workspace or platform's supported persistent context. Preserve existing instructions.
+List every installed Jaz skill by its verified name, noting which target it is available in. Clearly mark skills still awaiting installation or activation. Show how to invoke one.
 
-### Help the user start using Jaz
+For a ready connection, explain that the user can describe the outcome they want in ordinary language, adding a period, customer, supplier, or document when relevant. The agent will use Jaz's tools and skills and ask for missing details; the user does not need to know commands or tool names.
 
-Give a short onboarding message tailored to the target they selected and the work they described. Explain:
+If the user already gave a task, begin it. Otherwise offer up to three short prompts tailored to their organization, work, and available capabilities. Use these examples or relevant ones from the repository's [Quick start](https://github.com/teamtinvio/jaz-ai#quick-start) and [workflow guides](https://github.com/teamtinvio/jaz-ai/tree/main/src/skills):
 
-- **Where to work:** name the connected app and organization. If it is the current conversation, say they can continue here. Otherwise, tell them where to open the connected agent and how to enable Jaz if needed.
-- **How to ask:** describe the outcome in ordinary language. Include a period, customer, supplier, or document when relevant; the user does not need tool names, account IDs, or commands. For a development setup, ask for the workflow or integration they want to build and where it should run.
-- **How to use skills and tools directly:** state whether skills are available, pending activation, or were skipped. For installed skills, show how to select or invoke one using the target's actual interface and a verified skill name. Explain that the user can also ask the agent to call a named Jaz tool; use an available tool as the example. Do not invent shortcuts or present a tool name as a terminal command.
-- **What happens next:** the agent finds the relevant Jaz data, asks for missing details, and helps complete the task. Explain proposed record changes clearly and follow the platform's permissions and approval settings. Mention only capabilities available through the verified connection.
-- **How to continue:** follow-up questions can refine the same task. To work in another organization, ask to switch; verify the new organization before using it. In a new conversation, enable Jaz if required.
+- "Show me the 10 largest unpaid invoices."
+- "Help me record a payment against an invoice."
+- "Compare last month's profit and loss with the previous month, showing absolute and percentage variances by account."
 
-Keep this to a few sentences, not a feature list or menu of sample prompts. If an example would help, give one grounded in the user's stated work.
+Invite them to choose one or describe their own task. For development setups, use examples relevant to the workflow or integration they want to build.
 
-End with one contextual question, such as **"What are you working on in <organization name> today?"** If the user already gave a task, summarize it and begin, asking only for the next missing detail. Guide them through that first task instead of ending at setup confirmation.
+Save non-secret connection details, organization ID, skill availability, and pending steps in supported persistent context.
+
+## API-key access (optional)
+
+Use this section when the user requests API-key access for CLI or local MCP.
+
+Tell the user to get an API key from **Manage API Keys** in Jaz, then run this command in their own terminal, replacing `<key>` and `<profile-label>`:
+
+```sh
+npx -y jaz-clio@latest auth add <key> --as <profile-label>
+```
+
+Ask them to confirm when it is done and share only the profile label, not the key. Use the profile label as `<organization-selector>` or `JAZ_ORG` instead of the OAuth selector. The key determines the organization; verify it through the selected target's connection.
+
+When using a named profile or OAuth selector, remove any conflicting `JAZ_API_KEY` override from the target's launch environment without displaying its value.
 
 ## Use the configured setup
 
-Select the organization explicitly on every call. Discover operations through live tools, use JSON output for CLI work, and stay within the user's request.
+Select the organization explicitly on every call and verify any requested switch. Discover operations through live tools, use JSON output for CLI work, and follow the user's scope and platform permissions.
 
-At setup and each new session, check relevant updates. Respect pinned versions; for unpinned local tooling, compare the published and resolved versions using the commands in §2. Preserve customizations when updating guidance and restart updated MCP processes. Hosted service updates are managed by Jaz; apply platform-offered connector updates when needed. Reauthenticate only when required, then re-verify access.
+At setup and each new session, check for relevant updates. Use section 2 for local versions and the app's update controls for connectors. Jaz manages hosted service updates. Restart changed components and re-verify access; sign in again only when required.
 
 Read only the resources needed for the task:
 

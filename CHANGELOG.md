@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.61.2] - 2026-09-20
+
+**A clearer guided setup for your AI tools.**
+
+Choose each tool where you want to use Jaz, then let your agent handle installation and guide sign-in. Claude Web and Desktop now follow the same connector setup, and ChatGPT offers separate links for its desktop and web apps.
+
+Setup includes all supported Jaz skills, verifies access to your chosen organization, and explains how to use the installed skills. Start with examples for unpaid invoices, recording a payment, or comparing profit and loss by account. API-key instructions are available in a separate optional section.
+
 ## [5.61.1] - 2026-09-18
 
 **Copy one complete prompt for a guided Jaz setup.**
