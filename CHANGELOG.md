@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.66.0] - 2026-09-24
+
+**Payments and documents are never sent twice, and a brief outage no longer signs you out.**
+
+When the answer to a create, payment, credit application, approval or other money-moving request is lost in transit, Jaz no longer sends it again. Some documents, such as bills and manual journals, accept a repeated reference number, so a resend could book a duplicate. You now get an "unconfirmed" result that tells you which record to check before trying again.
+
+The hosted connector at mcp.jaz.ai answers a temporary backend problem with "try again shortly" instead of "your sign-in is invalid", so Claude and ChatGPT keep your connection instead of asking you to reconnect. One organization's errors can no longer pause requests for other organizations.
+
+When Jaz asks you to slow down, the wait it gives is now honoured and shown instead of retried blindly. Approving an invoice, bill or credit note is marked as irreversible, and your assistant confirms before approving. A quick fix where every record failed now reads as a failure. Ledger Find & Fix waits longer for large changes to finish from the command line.
+
 ## [5.65.1] - 2026-09-24
 
 **Assistants find overdue invoices and follow the playbooks with the right tools.**

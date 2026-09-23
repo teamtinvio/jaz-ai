@@ -851,8 +851,8 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 ## Invoices / Bills
 
 ### "Sale Reference already exists" (422) — duplicate reference
-**Cause**: Creating an invoice/bill/CN with a `reference` that already exists in the org.
-**Fix**: Do not invent a number. For a bill or supplier credit note use the supplier's own document number. For anything the organization issues, set `autoReference: true` (or call `get_next_reference` first) to take the next number from its own series. References must be unique per org.
+**Cause**: Creating an invoice, customer credit note, quote or order with a `reference` that already exists in the org.
+**Fix**: Do not invent a number. For anything the organization issues, set `autoReference: true` (or call `get_next_reference` first) to take the next number from its own series. Bills, supplier credit notes and manual journals never return this error: they accept a duplicate reference silently and book a second document, so search by reference before re-creating one after an uncertain result. For a bill or supplier credit note use the supplier's own document number.
 
 ---
 

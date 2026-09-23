@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.65.1",
+  "version": "5.66.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 371 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -1516,11 +1516,11 @@
     },
     {
       "name": "approve_documents",
-      "description": "Approve one document awaiting approval. Posts its ledger entries and makes it live. One-shot, and the refusal channel differs by entity: invoices/bills THROW 422; credit notes return 200 with isSuccess:false and a STALE approvalStatus of APPROVED. Check isSuccess and catch the throw — approvalStatus alone cannot tell refusal from success. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Approve one PENDING document (a DRAFT takes finalize_*). Irreversible, posts its ledger: confirm with the user first. Unknown or other-org id: 404. A refusal or an unconfirmed answer returns error. After a timeout or 500, read approvalStatus before retrying. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_approve_documents",
-      "description": "Approve up to 100 documents awaiting approval. Async — returns a jobId; poll search_background_jobs. Each approval posts a ledger. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Approve up to 100 PENDING documents. Irreversible, posts each ledger: confirm first. Async: returns a jobId, poll search_background_jobs. One unknown or other-org id: whole batch 422. Non-pending ones are skipped, listed on the job tasks. After a timeout or 500, read approvalStatus before retrying. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "request_document_changes",

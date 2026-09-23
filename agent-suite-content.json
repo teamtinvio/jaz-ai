@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.65.1+3023d195",
+  "contentVersion": "5.66.0+8d586424",
   "counts": {
     "tools": 371,
     "namespaces": 45,
@@ -2731,16 +2731,16 @@
     {
       "name": "approve_documents",
       "namespace": "approvals",
-      "description": "Approve one document awaiting approval. Posts its ledger entries and makes it live. One-shot, and the refusal channel differs by entity: invoices/bills THROW 422; credit notes return 200 with isSuccess:false and a STALE approvalStatus of APPROVED. Check isSuccess and catch the throw — approvalStatus alone cannot tell refusal from success. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Approve one PENDING document (a DRAFT takes finalize_*). Irreversible, posts its ledger: confirm with the user first. Unknown or other-org id: 404. A refusal or an unconfirmed answer returns error. After a timeout or 500, read approvalStatus before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "bulk_approve_documents",
       "namespace": "approvals",
-      "description": "Approve up to 100 documents awaiting approval. Async — returns a jobId; poll search_background_jobs. Each approval posts a ledger. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Approve up to 100 PENDING documents. Irreversible, posts each ledger: confirm first. Async: returns a jobId, poll search_background_jobs. One unknown or other-org id: whole batch 422. Non-pending ones are skipped, listed on the job tasks. After a timeout or 500, read approvalStatus before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "request_document_changes",
