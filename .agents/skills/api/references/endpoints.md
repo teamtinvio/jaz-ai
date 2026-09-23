@@ -1937,7 +1937,7 @@ Middleware on payment, credit, and refund endpoints automatically wraps a flat J
 
 ## 17. Quick Fix (Bulk Update)
 
-20 endpoints for bulk-updating transactions and line items in a single API call.
+24 endpoints for bulk-updating transactions and line items in a single API call: 10 entities with both routes, plus 4 order entities with a line-items route only.
 
 ### Pattern
 
@@ -1951,6 +1951,7 @@ POST /api/v1/quick-fix/{entity}/line-items
 **ARAP**: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`
 **Accounting**: `journals`, `cash-entries`
 **Schedulers**: `sale-schedules`, `purchase-schedules`, `subscription-schedules`, `journal-schedules`
+**Orders (line items only)**: `sale-orders`, `sale-quotes`, `purchase-orders`, `purchase-requests`. There is no `POST /api/v1/quick-fix/{order-entity}` route.
 
 ### Transaction-Level Request
 
@@ -1967,7 +1968,7 @@ POST /api/v1/quick-fix/bills
 }
 ```
 
-### Line-Item-Level Request (ARAP + Accounting)
+### Line-Item-Level Request (ARAP, Accounting, Orders)
 
 ```json
 POST /api/v1/quick-fix/invoices/line-items
@@ -1999,9 +2000,9 @@ POST /api/v1/quick-fix/sale-schedules/line-items
 }
 ```
 
-### Response (all 20 endpoints)
+### Response (all 24 endpoints)
 
-**HTTP status codes**: 200 = complete success (`failed` always `[]`). **207 Multi-Status** = partial or total failure with per-item detail (same body shape as 200). 422/500 = total failure, standard error shape (no per-item data). On 207, retry only `failed` resourceIds — `updated` ones are done.
+**HTTP status codes**: 200 = complete success (`failed` always `[]`). **207 Multi-Status** = partial or total failure with per-item detail (same body shape as 200). 422/500 = total failure, standard error shape (no per-item data). On 207, retry only `failed` resourceIds (`updated` ones are done). A `failed` entry's `resourceId` is empty when the failure could not be matched to a record.
 
 ```json
 {
@@ -2027,7 +2028,16 @@ Only included fields are changed — omitted fields are left unchanged.
 - **Purchase schedules**: endDate, interval, contactResourceId, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId
 - **Journal schedules**: startDate, endDate, interval, contactResourceId, tags, internalNotes, capsuleResourceId
 
-**Line items — ARAP (Pattern B)**: name, quantity, unit, unitPrice, discount, itemResourceId, organizationAccountResourceId, taxProfileResourceId, classifierConfig, withholdingTax (bills/supplier-CNs only).
+**Line items, ARAP and orders (Pattern B)**: name, quantity, unit, unitPrice, discount, itemResourceId, organizationAccountResourceId, taxProfileResourceId, classifierConfig, withholdingTax (purchase side only: bills, supplier CNs, purchase orders, purchase requests).
+
+**Quick fix line-item shapes differ from create/update** (every Pattern B route, orders included):
+
+| Field | Quick fix shape | Create / update shape |
+|-------|-----------------|-----------------------|
+| `discount` | `{ "rateType": "PERCENTAGE" \| "FLAT", "rateValue": 10 }` (rateValue ≥ 0; a percentage is 0-100) | a number |
+| `withholdingTax` | `{ "code", "rate", "rateType", "type", "description"? }`: code, rate, rateType and type required | `{ "code", "rate" }` |
+
+**Line item `classifierConfig`** (every line-item route): each entry sets or removes ONE classifier; classifiers the request does not name are left as they are, and `[]` changes nothing. Set: `{ resourceId, type, printable, selectedClasses }` with at least one class. Remove: `{ resourceId, deleted: true }` (type, printable and selectedClasses not needed). Each selected class needs `className` plus `resourceId`, or `entityResourceId` instead when the classifier draws its options from customers, suppliers, contacts, employees or users.
 
 **Line items — journal/cash-entry (Pattern B)**: organizationAccountResourceId, amount, description, taxProfileResourceId, classifierConfig.
 
@@ -2057,7 +2067,7 @@ POST /api/v1/quick-fix/journal-schedules/line-items
 
 Note: journal-schedules use `lineItemResourceId` (UUID), NOT `arrayIndex`.
 
-**Tags**: string array, max 50 items, max 50 chars each.
+**Tags**: string array, max 50 items, max 50 chars each. On invoices, bills and both credit notes the tags, joined with `|`, total at most 1000 characters, else 422.
 
 ---
 
@@ -2069,7 +2079,7 @@ Find and fix (recode) records across invoices, bills, both credit notes, journal
 |------------------|-----------|
 | `types` (required) | `INVOICE`, `BILL`, `CUSTOMER_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE`, `JOURNAL` (manual and cashflow journals only), `CASH_ENTRY` |
 | `resourceIds` | Up to 500; line item ids at line level |
-| `reference` | `eq`, `in`, `contains`, `startWith` |
+| `reference` | `eq`, `in` (up to 100 values, as for every `in`), `contains`, `startWith` |
 | `valueDate` | `eq`, `gte`, `lte`, `between: [from, to]` |
 | `contactResourceId` | `eq`, `in` |
 | `organizationAccountResourceId` | `eq`, `in`; line level only |
@@ -2145,6 +2155,7 @@ A blocked field is left as it is while the record's other fields still change, a
 | `FOREIGN_CURRENCY_VALUE_DATE` | date | A new date on a foreign currency record would take a new exchange rate |
 | `VALUE_DATE_AFTER_DUE_DATE` | date | The new date is after the document's due date |
 | `TOO_MANY_TAGS` | tags | The record would end with more than 50 tags |
+| `TAGS_TOO_LONG` | tags | Invoices, bills and credit notes: the record's tags, joined with `\|`, would total more than 1000 characters |
 | `CONTROL_LINE` | account | A journal line on a bank, cash or control account |
 
 ### POST /api/v1/ledger/find-fix/apply
@@ -2180,7 +2191,7 @@ Several applies can run at the same time. When two applies change records on one
 | 422 | `CLASSIFIER_NOT_FOUND`, `CLASS_NOT_FOUND` | Line items preview, set entries only: a classifier the change sets does not exist, or a class it selects is not a current class of that classifier; `resourceId` names the classifier or class. A removal and a record-list selection (`entityResourceId`) are not checked |
 | 422 | `TOO_MANY_RECORDS` | Either preview: at least `count` records or line items match, more than `limit` |
 | 422 | `TOO_MANY_CALLS` | Transactions preview: the change needs `count` separate updates, more than `limit`, because records whose resulting values differ need separate updates. A line items preview never answers it |
-| 503 | `PREVIEW_STORE_UNAVAILABLE` | Nothing applied |
+| 503 | `PREVIEW_STORE_UNAVAILABLE` | On apply: nothing applied, and the preview may be used up (preview again if a retry answers `PREVIEW_NOT_FOUND`). On preview: no previewId was issued; run the preview again |
 
 Any other 5xx, or a timeout, on apply: the outcome is unknown. If the connection drops, apply keeps running for up to 4 minutes. Wait that long before previewing or applying again on the same records, then preview again or re-read them. Never apply this previewId again. A service restart can stop an apply; preview again to check.
 

@@ -81,6 +81,8 @@ To change lines:
 
 The update tools (and `clio … update --lines`) pre-flight this against the stored document: lines with no `resourceId` at all on a document that already has lines are refused locally (nothing is written) unless `appendLines: true` (CLI `--append-lines`) says adding is the intent; naming some stored lines but not all is refused locally with the missing ids.
 
+To change a few fields on some lines without resending the document, use `quick_fix_line_items` (`clio quick-fix <entity> --line-items`) with entity `sale-orders`, `sale-quotes`, `purchase-orders` or `purchase-requests`: `{ lineItemResourceIds, attributes }`, only the fields sent change, and the lines not named are untouched. Attributes: name, quantity, unit, unitPrice, discount, itemResourceId, organizationAccountResourceId, taxProfileResourceId, classifierConfig, plus withholdingTax on purchase orders and requests. `discount` and `withholdingTax` take the quick fix shapes, not the ones this page's create/update use (`discount: { rateType, rateValue }`, `withholdingTax: { code, rate, rateType, type }`): see endpoints.md section 17. Orders have line-item quick fix only: `quick_fix_transactions` refuses them.
+
 ## Delete vs Void
 
 - **DELETE is draft-only** (422 on anything non-draft). `transition_* action:DELETE` pre-flights status and returns a `repair` hint to use `VOID` for non-draft records.

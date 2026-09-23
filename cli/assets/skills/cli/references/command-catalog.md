@@ -539,7 +539,7 @@ Also: `clio reports pdf` — generate PDF from a message/document.
 | `status <workflowIds>` | Comma-separated workflow IDs |
 
 ### `clio quick-fix <entity>` — Bulk-update transactions
-Entities: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `journals`, `cash-entries`, `sale-schedules`, `purchase-schedules`, `subscription-schedules`, `journal-schedules`
+Entities: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `journals`, `cash-entries`, `sale-schedules`, `purchase-schedules`, `subscription-schedules`, `journal-schedules`, and with `--line-items` only: `sale-orders`, `sale-quotes`, `purchase-orders`, `purchase-requests`
 
 | Flag | Purpose |
 |------|---------|

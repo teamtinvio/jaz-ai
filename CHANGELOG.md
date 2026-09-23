@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.69.0] - 2026-09-24
+
+**Quick fix the lines on quotes, orders and purchase requests.**
+
+Quick fix now edits line items on quotes, sales orders, purchase orders and purchase requests: price, quantity, account, tax, discount, classifiers and, on the purchase side, withholding tax. Order-level fields still go through the order's own update. The quick fix guide lists the exact shapes for discount and withholding tax on line edits, which differ from the ones used when creating a document.
+
+Classifier selections can name a record such as a customer or supplier. Ledger Find & Fix explains when a record's tags would exceed the 1,000-character limit, and says more precisely what to do when its preview service is briefly unavailable.
+
 ## [5.68.0] - 2026-09-24
 
 **Jaz Magic reads quotes, sales orders, purchase requests and purchase orders.**

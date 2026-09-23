@@ -251,9 +251,9 @@ Bank statement import supports CSV and PDF with configurable column mapping. Sta
 
 ### Quick Fix (Bulk Update)
 
-Mass-edit transactions and line items in a single operation. Replaces the need to open and update each transaction individually. Supports all transaction types (invoices, bills, credit notes, journals, cash entries) and their scheduled/subscription variants. Common use cases: batch date corrections, reassigning contacts, bulk-tagging for reporting, changing accounts/tax profiles across multiple line items.
+Mass-edit transactions and line items in a single operation. Replaces the need to open and update each transaction individually. Supports all transaction types (invoices, bills, credit notes, journals, cash entries) and their scheduled/subscription variants, plus line items on sale orders, sale quotes, purchase orders and purchase requests. Common use cases: batch date corrections, reassigning contacts, bulk-tagging for reporting, changing accounts/tax profiles across multiple line items.
 
-**API**: `POST /api/v1/quick-fix/{entity}` (transaction-level) + `POST /api/v1/quick-fix/{entity}/line-items` (line-item-level). 20 endpoints total.
+**API**: `POST /api/v1/quick-fix/{entity}` (transaction-level) + `POST /api/v1/quick-fix/{entity}/line-items` (line-item-level). 24 endpoints total (orders: line items only).
 
 ### Ledger Find & Fix
 

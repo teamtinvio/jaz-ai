@@ -733,13 +733,14 @@ These features exist in the Jaz platform and may affect API responses or cause u
 - Move transactions between capsules via `POST /api/v1/moveTransactionCapsules`
 - Search transactions within capsules
 
-### Quick Fix (Bulk Update) — 20 Endpoints
+### Quick Fix (Bulk Update): 24 Endpoints
 
 Bulk-update transactions or line items in a single call. Pattern: `POST /api/v1/quick-fix/{entity}` + `POST /api/v1/quick-fix/{entity}/line-items`.
 
 **ARAP**: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes` (× 2 = 8)
 **Accounting**: `journals`, `cash-entries` (× 2 = 4)
 **Schedulers**: `sale-schedules`, `purchase-schedules`, `subscription-schedules`, `journal-schedules` (× 2 = 8)
+**Orders**: `sale-orders`, `sale-quotes`, `purchase-orders`, `purchase-requests` (line items only = 4)
 
 Request: `{ resourceIds: [...], attributes: {...} }` (transactions) or `{ lineItemResourceIds: [...], attributes: {...} }` (line items) or `{ schedulerUpdates: [...] }` (scheduler line items).
 Response: `{ updated: [...], failed: [{ resourceId, error, errorCode }] }`. HTTP 200 = all succeeded. **207 Multi-Status** = partial failure (check both arrays). 422/500 = total failure (standard error shape).

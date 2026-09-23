@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.68.0+25997cf8",
+  "contentVersion": "5.69.0+121d37c8",
   "counts": {
     "tools": 379,
     "namespaces": 46,
@@ -2322,14 +2322,14 @@
     {
       "name": "quick_fix_transactions",
       "namespace": "quick_fix",
-      "description": "One record, or other fields on many records of one type. Contact, date, capsule or tags on several records: preview_ledger_find_fix. Only included fields change.",
+      "description": "One record, or other fields on many records of one type. Contact/date/capsule/tags on several: preview_ledger_find_fix.",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "quick_fix_line_items",
       "namespace": "quick_fix",
-      "description": "One line, or other fields on many lines. Account or classifiers on several lines: preview_ledger_find_fix. Only included fields change.",
+      "description": "One line, or other fields on many lines. Account/classifiers on several lines: preview_ledger_find_fix.",
       "readOnly": false,
       "destructive": false
     },

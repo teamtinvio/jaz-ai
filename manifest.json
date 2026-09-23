@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.68.0",
+  "version": "5.69.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 379 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -1280,11 +1280,11 @@
     },
     {
       "name": "quick_fix_transactions",
-      "description": "One record, or other fields on many records of one type. Contact, date, capsule or tags on several records: preview_ledger_find_fix. Only included fields change.\n\nCommon attrs: valueDate, contactResourceId, tags, customFields, capsuleResourceId, currencySettings. Per-entity: invoices/bills + dueDate; cash-entries use currencySetting SINGULAR ({rateFunctionalToSource, exchangeToken}); journal-schedules + startDate/endDate/interval. Full matrix in jaz-api Rule 107.\n\ntags REPLACES all the record's tags: string[] max 50 × 50 chars.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }; 207 = partial, retry only failed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "One record, or other fields on many records of one type. Contact/date/capsule/tags on several: preview_ledger_find_fix.\n\nCommon: valueDate, contactResourceId, tags, customFields, capsuleResourceId, currencySettings. invoices/bills + dueDate; cash-entries: currencySetting SINGULAR ({rateFunctionalToSource, exchangeToken}); journal-schedules + startDate/endDate/interval. Matrix: jaz-api Rule 107.\n\ntags REPLACES all tags: max 50 × 50 chars; AR/AP ≤1000 chars joined, else 422.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }; 207: retry failed only. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "quick_fix_line_items",
-      "description": "One line, or other fields on many lines. Account or classifiers on several lines: preview_ledger_find_fix. Only included fields change.\n\nRequest patterns:\n- Invoices, bills, CNs, journals, cash-entries: lineItemResourceIds + attributes.\n- Sale/purchase/subscription schedules: schedulerUpdates with arrayIndex (zero-based).\n- Journal schedules: schedulerUpdates with lineItemResourceId (UUID), NOT arrayIndex.\n\nCommon line attrs: name, quantity, unit, unitPrice, discount, organizationAccountResourceId, taxProfileResourceId, classifierConfig. Purchase + withholdingTax. Journals/cash-entries use amount + description instead of unit/unitPrice. Full matrix in jaz-api Rule 107.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. HTTP 207 = partial. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "One line, or other fields on many lines. Account/classifiers on several lines: preview_ledger_find_fix.\n\nBody:\n- Invoices, bills, CNs, journals, cash-entries, orders: lineItemResourceIds, attributes.\n- Sale/purchase/subscription schedules: schedulerUpdates, arrayIndex (0-based).\n- Journal schedules: schedulerUpdates, lineItemResourceId.\n\nCommon: name, quantity, unit, unitPrice, discount {rateType: PERCENTAGE|FLAT, rateValue}, organizationAccountResourceId, taxProfileResourceId, classifierConfig. Purchase + withholdingTax {code, rate, rateType, type}. Not create shapes. Journals/cash-entries: amount + description. Matrix: jaz-api Rule 107.\n\nclassifierConfig: set one (≥1 class by resourceId or entityResourceId) or remove one ({resourceId, deleted: true}); others stay; [] no-op.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_nano_classifiers",
