@@ -52,7 +52,7 @@ Space between conditions = AND (implicit). AND binds tighter than OR. Parenthese
 
 ## Amount Search
 
-Prefix with any currency symbol or type a numeric range.
+Prefix with any currency symbol, or use the `amount:` field. A number with no symbol or field key is plain text.
 
 | Input | Meaning |
 |-------|---------|
@@ -68,9 +68,9 @@ Prefix with any currency symbol or type a numeric range.
 | `$500+` | amount >= 500 |
 | `$<200` | amount < 200 |
 | `$>=1000` | amount >= 1000 |
-| `100-500` | amount range (no symbol needed for ranges) |
-| `>500` | amount > 500 (no symbol needed for comparisons) |
-| `500+` | amount >= 500 (no symbol needed) |
+| `$100-500` | amount range |
+| `$>500` | amount > 500 |
+| `$500+` | amount >= 500 |
 
 ### Magnitude Suffixes
 
@@ -104,7 +104,7 @@ Supported currency symbols: `$` `€` `£` `¥` `₱` `₹` `₩` `฿` `₫` `�
 
 Also works with ISO codes: `SGD500`, `PHP1000`, `EUR200-500`
 
-A bare number like `500` searches all text fields (reference, ID, etc.). Add `$` or use range/comparison syntax to search amounts specifically.
+A bare number like `500` — and any keyless expression like `100-500`, `>500`, or `5k` — searches all text fields (reference, ID, etc.). Add `$` or use `amount:` to search amounts specifically.
 
 ---
 
@@ -448,6 +448,9 @@ Aliases: `reference:` = `ref:`, `valuedate:` = `date:`
 
 Aliases: `reference:` = `ref:`, `customer:` / `supplier:` = `contact:`, `total:` = `amount:`, `valuedate:` = `date:`
 
+### Deposit Transactions
+`contact` `ref` `date` `amount` `currency`
+
 ### Bank Accounts
 `name` `code` `status` `currency` `id` `balance`
 
@@ -493,31 +496,31 @@ Aliases: `bttype:` = `type:`, `documenttype:` = `doctype:`, `workflowstatus:` = 
 `id` `ref` `date` `due` `approved` `currency` `amount` `customer` `regid` `taxid` `tag` `created` `status` `customfields`
 
 ### Sale Order Line Items
-`id` `name` `currency` `amount` `customer` `status` `ref` `date`
+`id` `name` `currency` `amount` `customer` `status` `ref` `date` `createdby` `createdat`
 
 ### Sale Quotes
 `id` `ref` `date` `due` `currency` `amount` `customer` `regid` `taxid` `tag` `created` `status` `customfields` `signing` `changesrequested`
 
 ### Sale Quote Line Items
-`id` `name` `currency` `amount` `customer` `status` `ref` `date`
+`id` `name` `currency` `amount` `customer` `status` `ref` `date` `createdby` `createdat`
 
 ### Purchase Orders
 `id` `ref` `date` `due` `approved` `currency` `amount` `supplier` `regid` `taxid` `tag` `created` `status` `customfields`
 
 ### Purchase Order Line Items
-`id` `name` `currency` `amount` `supplier` `status` `ref` `date`
+`id` `name` `currency` `amount` `supplier` `status` `ref` `date` `createdby` `createdat`
 
 ### Purchase Requests
 `id` `ref` `date` `due` `currency` `amount` `supplier` `regid` `taxid` `tag` `created` `status` `customfields` `signing` `changesrequested`
 
 ### Purchase Request Line Items
-`id` `name` `currency` `amount` `supplier` `status` `ref` `date`
+`id` `name` `currency` `amount` `supplier` `status` `ref` `date` `createdby` `createdat`
 
 ### Employees / Directory
 `id` `name` `email` `phone` `currency` `employmenttype` `beneficiary` `paymentmethod` `manager` `claimprofile` `created` `updated`
 
 ### Employees / Claims
-`id` `ref` `currency` `date` `created` `amount` `employee` `vendor` `customfields` `hasattachment` `createdby` `changesrequested`
+`id` `ref` `currency` `date` `created` `amount` `employee` `vendor` `customfields` `hasattachment` `createdby` `changesrequested` `tags`
 
 ### Employees / Payouts
 `employee` `ref` `type` `valuedate`

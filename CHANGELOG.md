@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.61.3] - 2026-09-23
+
+Internal test automation update. No user-facing changes since v5.61.2.
+
 ## [5.61.2] - 2026-09-20
 
 **A clearer guided setup for your AI tools.**
