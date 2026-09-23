@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.64.0] - 2026-09-23
+
+**Updating an employee no longer erases details you did not mean to change.**
+
+Jaz now treats an explicit empty value on an employee update as "clear this field". Your assistant could send empty values for fields it was not changing, which silently removed an employee's phone, manager, employment type or linked login. Empty values are now ignored, and a field is cleared only when you ask for it by name (`clearFields`, or `--clear-email`, `--clear-phone`, `--clear-manager`, `--clear-employment-type` and `--unlink-user` on the CLI).
+
+An employee's linked login can now be changed or removed on update (`--user`, `--unlink-user`). Creating an employee needs a name and a claim profile; a linked login is optional, so you can add offline employees.
+
 ## [5.63.1] - 2026-09-23
 
 **Transaction recipes post correctly without a reference prefix.**

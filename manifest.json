@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.63.1",
+  "version": "5.64.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 371 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -1192,11 +1192,11 @@
     },
     {
       "name": "add_employee",
-      "description": "Create an employee (expense-claim member). The server requires userResourceId (a login user to bind — binding is PERMANENT) and claimProfileResourceId (REQUIRED — carries the employee balance account; the org default is NOT auto-applied). Dedups by email. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create an employee (expense-claim member). claimProfileResourceId is REQUIRED (carries the employee balance account; the org default is NOT auto-applied). userResourceId is optional: omit for an offline employee with no login. Dedups by email. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_employee",
-      "description": "Update an employee (partial; omit = no change). To ARCHIVE, set active=false (reversible — prefer over delete_employee). userResourceId is NOT editable here — use bind_employee_user. Set clearEmploymentType to unset the classification. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an employee (partial; omitted or null = no change). Clear only via clearFields (userResourceId = unlink). To ARCHIVE, set active=false (reversible, prefer over delete_employee). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_employees",
@@ -1216,7 +1216,7 @@
     },
     {
       "name": "bind_employee_user",
-      "description": "Bind a login user to an OFFLINE employee (one with no user bound yet — e.g. created via import without a binding email). ONE-WAY and PERMANENT: allowed only while unbound; rebind is blocked once set. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bind a login user to an OFFLINE employee (no user bound yet, e.g. imported without a binding email). Refused once bound: relink or unlink via update_employee. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "preprocess_employees_file",
@@ -1224,7 +1224,7 @@
     },
     {
       "name": "import_employees",
-      "description": "Bulk create/update/delete employees from resolved rows (max 100 per array). Server validates rows synchronously (422 with row errors) then queues an async job — poll search_background_jobs by jobId. Create rows need a bound user + claim profile. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk create/update/delete employees (max 100 rows per array). Rows validate synchronously (422 row errors), then an async job queues: poll search_background_jobs by jobId. Create rows need name + claimProfileResourceId (userResourceId optional). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_inventory_items",

@@ -930,8 +930,8 @@ Two of the seven never reach you through this path: a zero `adjustmentValue` and
 **Fix**: Find an expense GL account via `search_accounts` — `accountType` is a **display label** (`"Operating Expense"`, `"Direct Costs"`), NOT an enum like `"EXPENSE"` (which returns zero rows) — then pass its `resourceId` as `expenseAccountResourceId`.
 
 ### "EMPLOYEE_USER_NOT_FOUND" (422)
-**Cause**: `add_employee` / `bind_employee_user` was given a `userResourceId` that isn't a user ("User not found for userResourceId …"). The usual mistake: passing an org-user record's own `resourceId` instead of its `userResourceId`.
-**Fix**: Use `search_org_users` and read the member's **`userResourceId`** field (not the org-user record's `resourceId`), then retry. Each user binds to at most one employee, and the binding is permanent once set.
+**Cause**: `add_employee` / `update_employee` / `bind_employee_user` was given a `userResourceId` that isn't a user ("User not found for userResourceId …"). The usual mistake: passing an org-user record's own `resourceId` instead of its `userResourceId`.
+**Fix**: Use `search_org_users` and read the member's **`userResourceId`** field (not the org-user record's `resourceId`), then retry. Each user links to at most one employee per org. To move a link, relink with `update_employee` `userResourceId` or unlink with `clearFields: ["userResourceId"]`.
 
 ### "EMPLOYEE_CLAIM_PROFILE_REQUIRED" (422)
 **Cause**: `add_employee` was called without `claimProfileResourceId` ("A claim profile is required for an employee — it carries the employee balance account used to convert and pay claims"). The claim profile is **server-required** — the org default is NOT auto-applied for employees (unlike claims), even when a default profile exists.

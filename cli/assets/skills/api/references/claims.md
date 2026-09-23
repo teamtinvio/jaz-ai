@@ -149,22 +149,28 @@ Turn APPROVED claims into journal entries, and record books-only employee payout
 The expense-claim members. CLI: `clio employees …`. `list = search_employees` (no
 bare list endpoint).
 
-- **`add_employee`** — `name`, **`userResourceId`, and `claimProfileResourceId` are
-  required** (the server rejects a create without a user to bind:
-  `422 EMPLOYEE_USER_RESOURCE_ID_MISSING`). **`userResourceId` is the user's resourceId —
+- **`add_employee`** — **`name` and `claimProfileResourceId` are required** (without a
+  profile: `422 EMPLOYEE_CLAIM_PROFILE_REQUIRED`). `userResourceId` is optional: omit it
+  for an offline employee with no login. **`userResourceId` is the user's resourceId —
   read it as the `userResourceId` FIELD on an org-user (`search_org_users`), NOT the
   org-user record's own `resourceId`; passing the membership id returns
-  `422 EMPLOYEE_USER_NOT_FOUND`.** Each user binds to at most one employee. Binding is
-  **PERMANENT** (rotation blocked once set). An **offline employee** (no user bound yet) can
-  still arise via import — bind it later with `bind_employee_user`. Dedups by email (per-org unique).
+  `422 EMPLOYEE_USER_NOT_FOUND`.** Each user links to at most one employee per org. The link
+  can be changed later: `update_employee` `userResourceId` relinks, `clearFields: ["userResourceId"]`
+  unlinks. An **offline employee** (no user bound yet) can also arise via import; bind it with
+  `bind_employee_user` or `update_employee` `userResourceId`. Dedups by email (per-org unique).
 - **The approver comes from the claim profile, not the employee.** An employee's approver
   is `claimProfile.approverUserResourceId` (set on the Claim Profile) — the employee record
   has no own approver field. To change who approves, edit the profile or move the employee
   to another profile. `claimProfileResourceId` is locked while the employee has unsettled claims.
-- **`update_employee`** — partial (omit = no change; email `""` clears). **Archive with
-  `active: false`** (reversible — prefer over `delete_employee`). `userResourceId` is NOT
-  editable here; for an **offline employee** (no user bound yet), use **`bind_employee_user`**
-  (one-way, permanent — only while unbound). `clearEmploymentType` unsets the classification.
+- **`update_employee`** — partial: an omitted, `null` or `""` param is left unchanged (the
+  tool drops them, because the raw API treats an explicit `null` on email, phone,
+  managerEmployeeResourceId, employmentType or userResourceId, and `phone: ""`, as a clear).
+  To clear, list the fields in **`clearFields`** (`email`, `phone`, `managerEmployeeResourceId`,
+  `employmentType`, `userResourceId`); a field both set and cleared in one call is refused.
+  One exception: `email: ""` is passed through and clears email, same as `clearFields: ["email"]`.
+  `userResourceId` links or relinks the login user; `clearFields: ["userResourceId"]`
+  unlinks it. **Archive with `active: false`** (reversible, prefer over `delete_employee`).
+  `bind_employee_user` only binds an employee that has no user yet.
 - **`delete_employee`** — server validates the employee is settled (else error). Prefer archive.
 - **`search_employees`** / **`search_employee_balances`** — the second is the balance
   directory (per-currency reimbursement owed). `search_employee_payouts` lives in `claim_processing`.
@@ -176,7 +182,8 @@ bare list endpoint).
 - **Import**: `preprocess_employees_file` (sync — pass a sheet `fileUrl`, returns a row
   preview) → `import_employees` (`create`/`update`/`delete` arrays, **max 100 each**;
   sync-validates rows with row-level 422s, then queues an async job — poll
-  `search_background_jobs`). Create rows need a bound user + claim profile.
+  `search_background_jobs`). Create rows need `name` + `claimProfileResourceId`;
+  `userResourceId` is optional (omit for an offline employee).
 
 ---
 

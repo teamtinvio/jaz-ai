@@ -268,9 +268,9 @@ Same subcommands and flags as `cash-in`.
 | `search` | `--name`, `--email`, `--active`, `--claim-profile-resource-id`, `--sort`, `--order` |
 | `balances` (alias `search-balances`) | per-employee, per-currency reimbursement owed |
 | `get <id>` | `--json` |
-| `create` | `--name`, `--user`* (bind login), `--claim-profile`*, `--employment-type`, `--email`, `--manager` |
-| `update <id>` | `--name`, `--claim-profile`, `--employment-type`, `--archive` / `--activate`, `--clear-employment-type` |
-| `bind-user <id> <userId>` | bind a login user to an offline employee (no user yet) — one-way, only while unbound |
+| `create` | `--name`*, `--claim-profile`*, `--user` (link login, optional), `--employment-type`, `--email`, `--manager` |
+| `update <id>` | `--name`, `--email`, `--phone`, `--manager`, `--claim-profile`, `--employment-type`, `--user` (link/relink), `--archive` / `--activate`, `--clear-email`, `--clear-phone`, `--clear-manager`, `--clear-employment-type`, `--unlink-user` |
+| `bind-user <id> <userId>` | bind a login user to an offline employee (no user yet); relink or unlink via `update` |
 | `delete <id>` | only if settled (no outstanding balance) |
 | `preprocess <fileUrl>` | `--file-type` (CSV / XLS / XLSX) — preview rows before import |
 | `import` | `--create` / `--update` / `--delete` (JSON arrays) — async, returns jobId |

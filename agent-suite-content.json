@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.63.1+747420ec",
+  "contentVersion": "5.64.0+bd4ca7c8",
   "counts": {
     "tools": 371,
     "namespaces": 45,
@@ -126,7 +126,7 @@
     },
     {
       "name": "employees",
-      "description": "Employees (expense-claim members): create, update, get, delete, and search employees; search the employee-balance directory (reimbursement balances owed); bind a login user to an employee (permanent); and bulk-import employees from a sheet (preprocess preview → async import). Archive an employee with update active=false rather than deleting."
+      "description": "Employees (expense-claim members): create, update, get, delete, and search employees; search the employee-balance directory (reimbursement balances owed); link or unlink a login user; and bulk-import employees from a sheet (preprocess preview → async import). Archive an employee with update active=false rather than deleting."
     },
     {
       "name": "capsules_and_recipes",
@@ -2164,14 +2164,14 @@
     {
       "name": "add_employee",
       "namespace": "employees",
-      "description": "Create an employee (expense-claim member). The server requires userResourceId (a login user to bind — binding is PERMANENT) and claimProfileResourceId (REQUIRED — carries the employee balance account; the org default is NOT auto-applied). Dedups by email. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create an employee (expense-claim member). claimProfileResourceId is REQUIRED (carries the employee balance account; the org default is NOT auto-applied). userResourceId is optional: omit for an offline employee with no login. Dedups by email. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "update_employee",
       "namespace": "employees",
-      "description": "Update an employee (partial; omit = no change). To ARCHIVE, set active=false (reversible — prefer over delete_employee). userResourceId is NOT editable here — use bind_employee_user. Set clearEmploymentType to unset the classification. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an employee (partial; omitted or null = no change). Clear only via clearFields (userResourceId = unlink). To ARCHIVE, set active=false (reversible, prefer over delete_employee). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -2206,7 +2206,7 @@
     {
       "name": "bind_employee_user",
       "namespace": "employees",
-      "description": "Bind a login user to an OFFLINE employee (one with no user bound yet — e.g. created via import without a binding email). ONE-WAY and PERMANENT: allowed only while unbound; rebind is blocked once set. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bind a login user to an OFFLINE employee (no user bound yet, e.g. imported without a binding email). Refused once bound: relink or unlink via update_employee. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2220,7 +2220,7 @@
     {
       "name": "import_employees",
       "namespace": "employees",
-      "description": "Bulk create/update/delete employees from resolved rows (max 100 per array). Server validates rows synchronously (422 with row errors) then queues an async job — poll search_background_jobs by jobId. Create rows need a bound user + claim profile. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk create/update/delete employees (max 100 rows per array). Rows validate synchronously (422 row errors), then an async job queues: poll search_background_jobs by jobId. Create rows need name + claimProfileResourceId (userResourceId optional). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
