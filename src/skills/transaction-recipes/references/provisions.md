@@ -6,7 +6,7 @@
 
 ### Recipe engine entry point
 - **`plan_recipe(recipe: 'provision', ...)`** — used in step 2: returns RecipePlan with PV-recognition journal + N period unwinding journals + settlement cash-out.
-- **`execute_recipe(recipe: 'provision', ...)`** — used in step 4: posts initial PV journal (today), N future-dated DRAFT discount-unwinding journals (one per month), and settlement cash-out (dated `settlementDate`, also DRAFT).
+- **`execute_recipe(recipe: 'provision', ...)`** — used in step 4: posts initial PV journal (today), N future-dated DRAFT discount-unwinding journals (one per month), and settlement cash-out (dated `settlementDate`, posted ACTIVE immediately: cash entries have no draft state).
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc provision --amount <undiscounted total> --rate <annual %> --term <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — used in step 1: compute PV at recognition + per-period unwinding charge. Returns `{ presentValue, totalUnwindingCharge, schedule[n] }` where each row has `period`, `openingProvision`, `unwindingCharge`, `closingProvision`.
@@ -83,7 +83,7 @@ Bank account: only needed for the settlement cash-out at the end of the term.
 execute_recipe(recipe: 'provision', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
-Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...62], summary: {total: 62, created: 62} }`. Initial recognition journal (today, ACTIVE if `finalize: true`); 60 future-dated DRAFT unwinding journals; 1 future-dated DRAFT settlement cash-out.
+Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...62], summary: {total: 62, created: 62} }`. Initial recognition journal (today, ACTIVE if `finalize: true`); 60 future-dated DRAFT unwinding journals; 1 future-dated settlement cash-out, posted ACTIVE immediately (cash entries have no draft state).
 
 ### Step 5 — Monthly action (during monthly-close)
 

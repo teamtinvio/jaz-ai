@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.63.0",
+  "version": "5.63.1",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 371 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -728,7 +728,7 @@
     },
     {
       "name": "execute_recipe",
-      "description": "Execute a recipe end-to-end — calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).\n\nSupported: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nALTERNATIVE — for 5 recipes (loan, lease, prepaid-expense, deferred-revenue, accrued-expense) server-side capsule-recipe engine is also available via capsuleRecipe payload on create_bill/create_invoice/create_journal/create_cash_in.\n\nRequires startDate. Auto-resolves accounts from CoA. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Execute a recipe end-to-end — calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).\n\nSupported: loan, lease, depreciation, prepaid-expense, deferred-revenue, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nALTERNATIVE — for 5 recipes (loan, lease, prepaid-expense, deferred-revenue, accrued-expense) server-side capsule-recipe engine is also available via capsuleRecipe payload on create_bill/create_invoice/create_journal/create_cash_in.\n\nRequires startDate. Auto-resolves accounts from CoA. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_capsule_recipes",

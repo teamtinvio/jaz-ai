@@ -118,7 +118,7 @@ plan_recipe(
 )
 ```
 
-Then `execute_recipe(...)`. Engine emits 2 journals: declaration (Dr Retained Earnings / Cr Dividends Payable, with optional withholding leg) and payment cash-out. Both attached to the dividend capsule. Both can be DRAFT or ACTIVE based on `finalize` flag.
+Then `execute_recipe(...)`. Engine emits a declaration journal (Dr Retained Earnings / Cr Dividends Payable) and a payment cash-out, plus a withholding cash-out when `withholdingRate > 0`. Only the declaration journal follows the `finalize` flag (DRAFT or ACTIVE). The cash-outs post ACTIVE immediately, dated `paymentDate`: cash entries have no draft state. So run `execute_recipe` on the actual payment date, not at FY-end when the dividend is only declared. If the declaration must be booked in the FY-end close, post it alone with `create_journal` and record the payment with `create_cash_out` when the money leaves the account.
 
 For interim dividends declared during the year: those should already be posted in their respective monthly closes. Y3 covers FY-end final dividend only.
 

@@ -95,17 +95,19 @@ execute_recipe(recipe: 'dividend', ...same args...)  // accounts auto-resolved f
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...], summary: {total: 2 or 3, created: 2 or 3} }`. The recipe creates 2 entries (or 3 with withholding), all attached to the same capsule:
 - Declaration journal (DRAFT or ACTIVE per `finalize` flag)
-- Payment cash-out (DRAFT — the actual bank payment hasn't happened yet at recipe-execution time; finalize when payment leaves the account)
-- Withholding cash-out (DRAFT — same; finalize when the WHT remittance is made to tax authority)
+- Payment cash-out: posted ACTIVE immediately, dated `paymentDate`. Cash entries have no draft state, so `finalize` does not apply and there is nothing to finalize later.
+- Withholding cash-out: same, posted ACTIVE immediately, dated `paymentDate`.
 
-### Step 5 — Verify (after both finalized)
+**Run the recipe on the actual payment date**, once the money has left the bank account. The declaration journal still carries `declarationDate`, so booking it late puts it in the right period. Running at declaration time instead posts a live bank payment that has not happened yet, which the bank reconciliation will not match until the real payment arrives. If the declaration must be booked before the payment (for example at FY-end), post the declaration alone with `create_journal` (Dr Retained Earnings / Cr Dividends Payable) and record the payment with `create_cash_out` when the money leaves the account.
+
+### Step 5 — Verify (after the declaration is finalized and the payment is posted)
 
 After declaration finalized (Dec 31, 2025):
 - `generate_balance_sheet(period_end: '2025-12-31')`.
 - Assert: `balance['Retained Earnings']` reduced by 200,000.
 - Assert: `balance['Dividends Payable']` increased by 200,000.
 
-After payment finalized (Mar 15, 2026):
+After payment posted (Mar 15, 2026):
 - `generate_balance_sheet(period_end: '2026-03-15')`.
 - Assert: `balance['Dividends Payable']` is now 0.
 - Assert: `balance['Cash']` reduced by 200,000 (or 180,000 if withholding).
@@ -148,6 +150,6 @@ After payment AND WHT remittance:
 ## Cross-references
 
 - Year-end close (Y3 in year-end-close) — final FY dividend declaration AFTER the FY's audited net profit is determined. The declared amount and withholding rate drive the recipe inputs.
-- Month-end close — interim dividends declared mid-year are posted in the month they were declared. Recipe runs once at declaration; payment cash-out finalizes when the actual bank disbursement happens (typically next month).
+- Month-end close — interim dividends declared mid-year are posted in the month they were declared. The payment cash-outs post ACTIVE the moment the recipe runs, so run it once the bank disbursement has happened (typically next month), or book the declaration alone with `create_journal` in the declaration month and record the payment with `create_cash_out` when it is made.
 - `audit-prep.md` step 8 — auditor reviews `generate_equity_movement` to verify dividends are correctly classified as equity reduction (not P&L expense).
 - `statutory-filing.md` — SG Form C-S Box 12 (dividends paid during YA) reads from this capsule's payment cash-out entries.

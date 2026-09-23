@@ -31,7 +31,7 @@
 
 ### Engine entry points (DO NOT INVOKE in normal operation)
 - ~~`plan_recipe(recipe: 'fx-reval', ...)`~~ — engine still accepts this for legacy reasons; output is for inspection only.
-- ~~`execute_recipe(recipe: 'fx-reval', ...)`~~ — **double-posts. Never invoke in a production org.**
+- ~~`execute_recipe(recipe: 'fx-reval', ...)`~~ (and `clio ct fx-reval` without `--plan`): **refused.** Executing would double-post, so the engine rejects the call before it creates anything.
 
 ### Cross-references
 - Operational context: invoked during month-end close only as a VERIFICATION step (cross-check Jaz's auto-posted reval against an independent calculation; surface any variance). Same during the GST/VAT filing cycle and year-end close.
@@ -130,9 +130,9 @@ This file feeds `audit-prep.md` step 8 supporting schedules. Auditors love indep
 
 ---
 
-## Why the engine still accepts the recipe
+## Why the engine still plans the recipe
 
-Historical: pre-platform-auto-FX-reval orgs needed this. Some orgs may still run on a configuration where auto-FX is disabled (rare, legacy). For those orgs, `execute_recipe(recipe: 'fx-reval', ...)` posts the manual reval per the prior version of this recipe (period-end journal + Day 1 reversal). DO NOT use this path in any modern org.
+Historical: pre-platform-auto-FX-reval orgs needed this. Some orgs may still run on a configuration where auto-FX is disabled (rare, legacy). `execute_recipe(recipe: 'fx-reval', ...)` is refused for every org, so for those orgs take the period-end journal and Day 1 reversal from `plan_recipe(recipe: 'fx-reval', ...)` and post them as two manual journals with `create_journal` (the reversal dated the first day of the next period). DO NOT do this in any modern org.
 
 If you genuinely need to know whether auto-FX is enabled for a specific org: check organization settings via `get_organization()`. If the auto-FX flag is on (default and typical), this recipe is verification-only as documented above.
 

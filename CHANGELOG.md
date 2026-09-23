@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.63.1] - 2026-09-23
+
+**Transaction recipes post correctly without a reference prefix.**
+
+Running a recipe without a reference prefix now numbers each journal, bill and invoice from your organization's own series, and cash entries get a generated reference. Every posted step is linked to the recipe's capsule. Bills and invoices created by a recipe now carry only their own side, so a prepaid expense or deferred revenue document totals the recipe amount instead of twice it.
+
+Every step is checked before anything is written, so a recipe that cannot run leaves nothing behind. If a step fails partway, the result says which steps are already in the books and which to check before posting again. The expected credit loss recipe now posts, dated from its start date, and does nothing when no adjustment is needed. The FX revaluation recipe is plan-only, because posting it would double-count revaluation that Jaz already performs.
+
 ## [5.63.0] - 2026-09-23
 
 **Edit quote and order lines in place, and create them in any enabled currency.**

@@ -83,7 +83,7 @@ execute_recipe(recipe: 'loan', ...same args...)  // accounts auto-resolved from 
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...], summary: {total, created, ...} }`. The recipe creates **termMonths + 1 entries upfront**:
-- Step 1: 1 cash-in for the loan disbursement (per `jaz-api/SKILL.md` rule 26: `accountResourceId` at top level for the bank account, `lines: [{accountResourceId: <Loan Payable>, amount: 100000}]` for the offset). Posted ACTIVE if `finalize: true` was passed; otherwise DRAFT.
+- Step 1: 1 cash-in for the loan disbursement (per `jaz-api/SKILL.md` rule 26: `accountResourceId` at top level for the bank account, `lines: [{accountResourceId: <Loan Payable>, amount: 100000}]` for the offset). Posted ACTIVE immediately, whatever `finalize` says: cash entries have no draft state.
 - Steps 2..termMonths+1: **N future-dated DRAFT journals** (one per repayment period, dated end-of-month for each month from `<startDate>+1 month` through `<startDate>+termMonths`). Each is a 3-line entry: debit Loan Payable (principal portion per amortization schedule), debit Interest Expense (interest portion), credit Cash.
 
 All N journals attach to the same capsule. They sit DRAFT until you finalize them — typically one per month during monthly-close after the actual bank payment posts.

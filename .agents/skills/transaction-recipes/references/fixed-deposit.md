@@ -6,7 +6,7 @@
 
 ### Recipe engine entry point
 - **`plan_recipe(recipe: 'fixed-deposit', ...)`** — used in step 2: returns RecipePlan with placement + N accrual + maturity steps.
-- **`execute_recipe(recipe: 'fixed-deposit', ...)`** — used in step 4: posts the placement cash-out (today), N future-dated DRAFT accrual journals (one per period), and maturity cash-in (dated termMonths later, also DRAFT).
+- **`execute_recipe(recipe: 'fixed-deposit', ...)`** — used in step 4: posts the placement cash-out (today), N future-dated DRAFT accrual journals (one per period), and maturity cash-in (dated termMonths later, posted ACTIVE immediately: cash entries have no draft state).
 
 ### Calculator (cross-check, no API key needed)
 - **`clio calc fixed-deposit --principal <p> --rate <annual %> --term <months> --start-date <YYYY-MM-DD> --currency <code> [--compound monthly|annually] --json`** — used in step 1: compute monthly accrual amounts. Default simple interest; `--compound` for compound interest. Returns `{ totalInterest, schedule[n] }` where each row carries `period`, `accrualDate`, `accrualAmount`, `accruedToDate`, `journal`.
@@ -83,7 +83,7 @@ Bank account: resolve `bankAccountResourceId` for the disbursement bank (where t
 execute_recipe(recipe: 'fixed-deposit', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
 
-Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...14], summary: {total: 14, created: 14} }`. The recipe creates 14 entries upfront: 1 placement cash-out (immediately ACTIVE if `finalize: true`), 12 future-dated DRAFT accrual journals, 1 future-dated DRAFT maturity cash-in (dated `startDate + termMonths`).
+Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...14], summary: {total: 14, created: 14} }`. The recipe creates 14 entries upfront: 1 placement cash-out (ACTIVE immediately, whatever `finalize` says), 12 future-dated DRAFT accrual journals, 1 future-dated maturity cash-in (dated `startDate + termMonths`, also ACTIVE immediately: cash entries have no draft state).
 
 ### Step 5 — Monthly action (during monthly-close)
 

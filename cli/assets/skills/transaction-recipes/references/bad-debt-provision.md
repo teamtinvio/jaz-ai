@@ -77,22 +77,17 @@ If `topUpRequired` is below the entity's materiality threshold: skip the recipe 
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
   recipe: 'ecl',
-  receivables: [
-    {bucket: 'current', balance: 100000, lossRate: 0.005},
-    {bucket: '30d', balance: 50000, lossRate: 0.02},
-    {bucket: '60d', balance: 20000, lossRate: 0.05},
-    {bucket: '90d', balance: 10000, lossRate: 0.10},
-    {bucket: '120d+', balance: 5000, lossRate: 0.50}
+  buckets: [
+    {name: 'Current', balance: 100000, rate: 0.5},
+    {name: '1-30 days', balance: 50000, rate: 2},
+    {name: '31-60 days', balance: 20000, rate: 5},
+    {name: '61-90 days', balance: 10000, rate: 10},
+    {name: '91+ days', balance: 5000, rate: 50}
   ],
   existingProvision: 5000,
   currency: 'SGD',
-  glAllowance: <resourceId of 'Allowance for Doubtful Debts' account>,
-  glBadDebtExpense: <resourceId of 'Bad Debt Expense' account>,
-  valueDate: '2025-12-31',
-  capsuleType: 'ECL Provision',
-  capsuleName: 'FY2025 Year-End ECL True-Up'
+  startDate: '2025-12-31'  // provision date: the aged AR report date. The ECL journal is dated on it.
 )
 ```
 
@@ -112,6 +107,10 @@ If `Allowance for Doubtful Debts` doesn't exist in the CoA: `create_account(name
 ```
 execute_recipe(recipe: 'ecl', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
+
+`startDate` is required: it dates the ECL journal, so pass the aged AR report date (`2025-12-31` here).
+
+When the calculated ECL equals `existingProvision` there is no adjustment: the plan has no steps and `execute_recipe` refuses with "Nothing to post" before creating anything.
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step: 1, action: 'journal', status: 'created', resourceId: <journal id>}], summary: {total: 1, created: 1} }`. The single journal is DRAFT — finalize via `update_journal(resourceId: <id>, saveAsDraft: false)` once the practitioner confirms the inputs.
 
