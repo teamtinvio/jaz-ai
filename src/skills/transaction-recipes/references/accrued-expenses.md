@@ -16,9 +16,9 @@
 - **`search_journals(filter: {tags: {eq: <accrual.name>}, valueDate: {between: [<-3 months>, <today>]}})`** — step 1 alt: trailing 3-month average when `estimation_method: 'trailing_3m_avg'`.
 - **`search_contacts(filter: {name: {eq: <vendor>}})`** — step 3: resolve the accrual's vendor.
 - **`search_accounts(filter: {name: {in: ['<expense GL>', '<accrued liability GL>']}})`** — step 3: confirm both sides of the journal exist in CoA.
-- ****STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.** — step 5 monthly: find this period's pre-emitted DRAFT for finalization.
+- **`get_journal(resourceId)` per candidate DRAFT**: step 5 monthly: find this period's pre-emitted DRAFT for finalization; journals cannot be filtered by capsule: check each candidate with `get_journal` (its `capsule.resourceId`) and confirm the set with the practitioner.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5: finalize this period's accrual + reversal pair.
-- **`generate_trial_balance(period_end: <date>)`** — step 5 verification: confirm Accrued Expenses balance and net P&L impact.
+- **`generate_trial_balance(endDate: <date>)`** — step 5 verification: confirm Accrued Expenses balance and net P&L impact.
 
 ### Cross-references
 - Operational context: invoked during month-end close, once per recurring accrual whose last-posted period precedes the current period end. The close loop supplies the estimation method, GL account, vendor, and fixed/budget amount for each accrual.
@@ -50,17 +50,12 @@ Returns `{ totalAccrued: 3000, schedule: [{accrualDate: '2025-01-31', reversalDa
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'accrued-expense',
   amount: 3000,
   periods: 1,
   startDate: '2025-01-31',
-  currency: 'SGD',
-  glExpense: <accrual expense account resourceId>,
-  glAccruedLiability: <resourceId of 'Accrued Expenses' account>,
-  vendor: 'PowerCo Singapore',
-  capsuleType: 'Accrued Expenses',
-  capsuleName: 'Electricity Accrual — Jan 2025'
+  currency: 'SGD'
 )
 ```
 
@@ -99,7 +94,7 @@ update_journal(resourceId: <accrual journal id>, saveAsDraft: false)
 The reversal journal (dated 2025-02-01) stays DRAFT until February's monthly-close. **Do NOT finalize both at once** — that defeats the period-matching purpose. February's close finalizes the reversal AND any new accrual for Feb if the bill still hasn't arrived (run `plan_recipe + execute_recipe` again for Feb's `period`).
 
 Verify after January finalize:
-- `generate_trial_balance(period_end: '2025-01-31')`.
+- `generate_trial_balance(endDate: '2025-01-31')`.
 - Assert: `balance['Accrued Expenses']` increased by 3000.
 - Assert: `balance['<expense GL>']` (period MTD) increased by 3000.
 - Net P&L impact for January: $3,000 expense.
@@ -118,9 +113,9 @@ When the actual quarterly bill arrives (typically Mar 31, $9,000 total): post a 
 | `plan_recipe` | 422 `unsupported_recipe` | File-name alias `accrued-expenses` was used. Use canonical engine name `accrued-expense` (singular). |
 | `plan_recipe` | 422 `invalid_amount` | Amount is non-positive. Computed amount may have been a credit (e.g. `prior_month` returned a credit balance). Switch `estimation_method` to `fixed_amount` for this row this period, OR investigate the credit. |
 | `execute_recipe` | 422 `account_not_found` | Step 3 resolution incomplete. `search_accounts`; create via `create_account` if the practitioner confirms classification. |
-| `bulk_finalize_drafts` | 422 `journal_unbalanced` | Engine-emitted journals are always balanced. If you see this, the source schema changed — escalate (do not retry). |
-| Verification | Net P&L impact stuck after reversal posts | Likely the reversal hasn't been finalized yet. **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. — if non-empty, finalize. |
-| Verification | Accrued Expenses balance nonzero after the actual bill posts AND all reversals run | Either the bill amount diverged from the accrual estimate (post a true-up journal: Dr/Cr `<expense GL>` for the difference) OR a reversal was missed. Audit via `generate_general_ledger(accountResourceId: 'Accrued Expenses', period_end: <today>)`. |
+| `bulk_update_journals` | 422 `journal_unbalanced` | Engine-emitted journals are always balanced. If you see this, the source schema changed — escalate (do not retry). |
+| Verification | Net P&L impact stuck after reversal posts | Likely the reversal hasn't been finalized yet. Find it (journals cannot be filtered by capsule: check each candidate with `get_journal` (its `capsule.resourceId`) and confirm the set with the practitioner); if it is still DRAFT, finalize it. |
+| Verification | Accrued Expenses balance nonzero after the actual bill posts AND all reversals run | Either the bill amount diverged from the accrual estimate (post a true-up journal: Dr/Cr `<expense GL>` for the difference) OR a reversal was missed. Audit via `generate_general_ledger(accountResourceIds: [<Accrued Expenses id>], startDate: <accrual date>, endDate: <today>)`. |
 | Actual bill posted against `Accrued Expenses` instead of `<expense GL>` | (process error) | The reversal AND the bill both touch `Accrued Expenses` — net to zero on liability, but expense gets double-recognized. Reverse the bill, re-post against `<expense GL>`. Note the risk in your working notes. |
 
 ---

@@ -10,16 +10,16 @@ CWIP costs accumulate as construction progresses — multiple bills from contrac
 
 ### Primitive MCP tools (no engine wrapper)
 - **`create_bill(...)`** — used in step 2 (multiple times during construction): each contractor bill / supplier invoice / permit fee coded to `Capital Work-in-Progress` GL account, NOT to Operating Expense. The asset is BEING BUILT — these are capitalized costs, not period expenses.
-- **`create_capsule(capsuleType: 'Capital Projects', ...)`** — step 1: one capsule per construction project, accumulates all bills + the eventual transfer journal.
+- **`create_capsule(capsuleTypeResourceId: <id of 'Capital Projects' from list_capsule_types>, ...)`** — step 1: one capsule per construction project, accumulates all bills + the eventual transfer journal.
 - **`create_journal(...)`** — step 4: the CWIP-to-FA transfer journal (Dr Fixed Asset / Cr Capital Work-in-Progress).
 - **`create_fixed_asset(...)`** — step 4: register the completed asset in Jaz native FA register; from this point forward, Jaz auto-posts SL depreciation.
 
 ### Tools (jaz-api / direct)
 - **`search_capsules(filter: {title: {eq: <project>}})`** — step 1 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Capital Work-in-Progress', '<target FA category>', '<target Accumulated Depreciation>']}})`** — step 0 + step 4.
-- **`generate_general_ledger(accountResourceId: <CWIP id>, period_start: <project start>, period_end: <today>)`** — step 3: pull all CWIP entries to confirm the accumulated cost.
-- ****STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.** — step 3 alt: pull all bills attached to the project capsule.
-- **`generate_trial_balance(period_end: <date>)`** — step 5 verify CWIP balance is zero post-transfer; FA balance reflects new asset.
+- **`generate_general_ledger(accountResourceIds: [<CWIP id>], startDate: <project start>, endDate: <today>)`** — step 3: pull all CWIP entries to confirm the accumulated cost.
+- **`get_capsule(resourceId: <project capsule>)`**: step 3 alt: confirm the capsule's transaction count; bills and journals cannot be filtered by capsule, so reconcile the count with the practitioner.
+- **`generate_trial_balance(endDate: <date>)`** — step 5 verify CWIP balance is zero post-transfer; FA balance reflects new asset.
 
 ### Cross-references
 - Operational context: invoked during month-end close (per active capital project); during year-end close (year-end review of CWIP balances — IAS 16.20 capitalization criteria; flag any CWIP not capitalized for > 12 months as potential expense).
@@ -38,7 +38,7 @@ search_accounts(filter: {name: {in: ['Capital Work-in-Progress', 'Office Improve
 
 `Capital Work-in-Progress` is the holding account. The eventual FA destination (`Office Improvements`, `Buildings`, `Plant & Equipment`, etc.) and its corresponding accumulated depreciation account both need to exist before completion-time transfer.
 
-If `Capital Work-in-Progress` doesn't exist: `create_account(name: 'Capital Work-in-Progress', accountType: 'Non-current Asset')` first. CRITICAL: classify as Non-current Asset (not Operating Expense) — the whole point of CWIP is to defer expense recognition.
+If `Capital Work-in-Progress` doesn't exist: `create_account(name: 'Capital Work-in-Progress', code: <unused account code>, accountType: 'Non-current Asset')` first. CRITICAL: classify as Non-current Asset (not Operating Expense) — the whole point of CWIP is to defer expense recognition.
 
 ### Step 1 — Create the project capsule
 
@@ -50,7 +50,7 @@ create_capsule(
 )
 ```
 
-Each construction project gets its own capsule. The capsule is the audit trail — every bill paid for this project, plus the eventual transfer journal, attaches to it. Auditor can pull **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. and see the full cost build.
+Each construction project gets its own capsule. The capsule is the audit trail — every bill paid for this project, plus the eventual transfer journal, attaches to it. Auditor can open the capsule in Jaz and see the full cost build.
 
 ### Step 2 — Accumulate construction costs (multiple bills over months)
 
@@ -64,8 +64,8 @@ create_bill(
   lineItems: [{
     name: '<description of work>',
     accountResourceId: <Capital Work-in-Progress GL>,
-    amount: <bill amount>,
-    quantity: 1
+    quantity: 1,
+    unitPrice: <bill amount>
   }],
   capsuleResourceId: <project capsule>,
   saveAsDraft: false
@@ -85,14 +85,14 @@ Costs NOT capitalizable per IAS 16.19-22:
 
 If the project is FINANCED by a specific loan and qualifies under IAS 23: capitalize the borrowing costs (`Interest Expense`) into CWIP via a journal: Dr Capital Work-in-Progress / Cr Interest Expense for the period's interest. This transfers the interest from P&L to balance sheet during the construction period. Out of scope for this recipe — handled via manual journal.
 
-Pay each bill as normal (`create_bill_payment(...)`). Cash flow for construction is typically lumpy.
+Pay each bill as normal (`pay_bill(...)`). Cash flow for construction is typically lumpy.
 
 ### Step 3 — Periodic review during construction
 
 At each month-end during construction:
 
 ```
-generate_general_ledger(accountResourceId: <CWIP GL>, period_start: <project start>, period_end: <month-end>)
+generate_general_ledger(accountResourceIds: [<CWIP GL>], startDate: <project start>, endDate: <month-end>)
 ```
 
 Confirm the accumulated CWIP balance matches expectations vs the project's estimated cost. Variance > 10% → flag for budget review.
@@ -110,7 +110,7 @@ When construction is COMPLETE per IAS 16.23 — asset is in location and conditi
 **4a — Pull final CWIP balance:**
 
 ```
-generate_general_ledger(accountResourceId: <CWIP GL>, period_end: <completion date>)
+generate_general_ledger(accountResourceIds: [<CWIP GL>], startDate: <project start>, endDate: <completion date>)
 ```
 
 Note the closing balance — this is the asset's cost on initial recognition (IAS 16.15).
@@ -126,13 +126,13 @@ create_journal(
       accountResourceId: <Office Improvements GL>,
       amount: <final CWIP balance>,
       type: 'DEBIT',
-      name: 'Capitalize Marina One renovation on completion'
+      description: 'Capitalize Marina One renovation on completion'
     },
     {
       accountResourceId: <Capital Work-in-Progress GL>,
       amount: <final CWIP balance>,
       type: 'CREDIT',
-      name: 'Transfer to Office Improvements on completion'
+      description: 'Transfer to Office Improvements on completion'
     }
   ],
   capsuleResourceId: <project capsule>,
@@ -147,24 +147,29 @@ Per `jaz-api/SKILL.md` rules 23-25: journals use `journalEntries` with `amount` 
 ```
 create_fixed_asset(
   name: 'Office Renovation — Marina One',
-  reference: 'FA-OFFICE-MARINA-2025',
-  cost: <final CWIP balance>,
-  acquisitionDate: '<completion date>',
-  usefulLifeMonths: 60,                  // 5-year SL amortization typical for office reno
-  depreciationMethod: 'sl',
+  purchaseAmount: <final CWIP balance>,
+  purchaseDate: '<completion date>',
+  purchaseAssetAccountResourceId: <Office Improvements GL>,
+  depreciationStartDate: '<completion date>',
+  depreciationMethod: 'STRAIGHT_LINE',
+  effectiveLife: 60,                     // months: 5-year SL typical for office reno
+  depreciationExpenseAccountResourceId: <Depreciation Expense GL>,
+  accumulatedDepreciationAccountResourceId: <Accumulated Depreciation GL>,
+  purchaseBusinessTransactionType: 'JOURNAL_MANUAL',
+  purchaseBusinessTransactionResourceId: <the transfer journal's Office Improvements LINE id>,
   capsuleResourceId: <project capsule>,
   saveAsDraft: false
 )
 ```
 
-`usefulLifeMonths` per the entity's capex useful-life policy for the asset type (or your judgment). Common defaults: office renovations 60 months, computer hardware 36 months, motor vehicles 60 months, buildings 240 months.
+`effectiveLife` (months) per the entity's capex useful-life policy for the asset type (or your judgment). Common defaults: office renovations 60 months, computer hardware 36 months, motor vehicles 60 months, buildings 240 months.
 
 From this point forward, Jaz auto-posts SL depreciation each month-end. NO manual depreciation journal required.
 
 ### Step 5 — Verify
 
 ```
-generate_trial_balance(period_end: '<completion date>')
+generate_trial_balance(endDate: '<completion date>')
 ```
 
 Assert:
@@ -172,7 +177,7 @@ Assert:
 - `balance['Office Improvements'] == <final CWIP balance>` (asset cost recognized).
 
 ```
-generate_fa_summary(period_end: '<completion date>', fixedAssetResourceId: <FA UUID>)
+get_fixed_asset(resourceId: <FA UUID>)
 ```
 
 Should show `cost: <final CWIP balance>, accumulatedDepreciation: 0, NBV: <cost>, status: 'ACTIVE'`. From next month-end onward, NBV reduces by `cost / 60` per month (SL).
@@ -188,13 +193,13 @@ Close the project capsule (or keep ACTIVE for traceability — the FA still refe
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| Step 0 | `Capital Work-in-Progress` doesn't exist as Non-current Asset | `create_account(accountType: 'Non-current Asset')`. Common gap in CoAs that haven't done capital projects. |
-| Step 2 | Bill posted to Operating Expense instead of CWIP | Reverse via `delete_bill` (if DRAFT) OR `create_supplier_credit_note` + `apply_credit_to_bill` (if ACTIVE). Re-post correctly. AVOID year-end audit headache — auditor will challenge any P&L expense for capital project items. |
+| Step 0 | `Capital Work-in-Progress` doesn't exist as Non-current Asset | `create_account(name: 'Capital Work-in-Progress', code: <unused account code>, accountType: 'Non-current Asset')`. Common gap in CoAs that haven't done capital projects. |
+| Step 2 | Bill posted to Operating Expense instead of CWIP | Reverse via `delete_bill` (if DRAFT) OR `create_supplier_credit_note` + `apply_credits_to_bill` (if ACTIVE). Re-post correctly. AVOID year-end audit headache — auditor will challenge any P&L expense for capital project items. |
 | Step 4b | Transfer journal unbalanced | Verify the `amount` on both lines exactly matches the closing CWIP balance from step 4a. Per `jaz-api/SKILL.md` rule 23 — total debits = total credits. |
 | Step 4c | `create_fixed_asset` 422 `cost_mismatch` | Cost passed differs from the transfer journal amount. Both must equal CWIP closing balance. Re-pull `generate_general_ledger` and re-confirm. |
-| Step 4c | Asset created but Jaz auto-depreciation not running | FA may have been created as DRAFT. `update_fixed_asset(resourceId: <id>, status: 'ACTIVE')`. From next month-end, auto-depreciation runs. |
+| Step 4c | Asset created but Jaz auto-depreciation not running | FA may have been created as DRAFT. `update_fixed_asset(resourceId: <id>, isDraftToActive: true)`. From next month-end, auto-depreciation runs. |
 | Step 5 | CWIP balance nonzero post-transfer | A bill was posted to CWIP AFTER step 4a — common when contractor sends final invoice late. Two options: (a) extend the project (post the late bill, re-do step 4 transfer for the additional amount + create a SECOND FA OR update the existing FA cost via `update_fixed_asset`); (b) expense the late bill directly to operating expense if immaterial. |
-| Project abandoned mid-construction | (process — IAS 16.20 / IAS 36.18 impairment) | If asset will not be completed: write off CWIP balance to Loss on Abandoned Project. `create_journal({capsuleResourceId: <project capsule>, tags: ['abandoned', 'impairment'], internalNotes: '<abandonment date + reason + IAS 36.18 cite>', ...})` — the journal carries the abandonment narrative; the capsule already aggregates every bill + this journal as the audit trail. |
+| Project abandoned mid-construction | (process — IAS 16.20 / IAS 36.18 impairment) | If asset will not be completed: write off CWIP balance to Loss on Abandoned Project. `create_journal({capsuleResourceId: <project capsule>, tags: ['abandoned', 'impairment'], notes: '<abandonment date + reason + IAS 36.18 cite>', ...})` — the journal carries the abandonment narrative; the capsule already aggregates every bill + this journal as the audit trail. |
 | Borrowing costs incorrectly capitalized post-completion | (IAS 23 violation) | Per IAS 23.22, capitalization stops when asset is ready for intended use. Any interest capitalized after completion → expense. Reverse via journal: Dr Interest Expense / Cr Capital Work-in-Progress (or the FA if already transferred). |
 
 ---

@@ -8,7 +8,7 @@
 - **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, sortBy: 'valueDate', sortOrder: 'ASC', limit: 200)`** — step 1: confirm sales invoices entered. Paginate via `offset`.
 - **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}}, ...)`** — step 2: confirm purchase bills entered.
 - **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', startDate: <from>, endDate: <to>)`** — step 3: pull unreconciled bank statement entries per account.
-- **`generate_aged_ar(period_end: <date>)` / `generate_aged_ap(period_end: <date>)`** — steps 4-5: aging reports tied to TB AR / AP balances.
+- **`generate_aged_ar(endDate: <date>)` / `generate_aged_ap(endDate: <date>)`** — steps 4-5: aging reports tied to TB AR / AP balances.
 
 ### Platform tools — accruals + valuations
 - **`plan_recipe(recipe: 'accrued-expense', ...)` / `execute_recipe(...)`** — step 6: per recurring accrual whose last posting predates the period end.
@@ -25,9 +25,9 @@
 - **`quick_reconcile(...)` / `reconcile_direct_cash_entry(...)` / `reconcile_cash_journal(...)` / `reconcile_manual_journal(...)` / `reconcile_cash_transfer(...)` / `reconcile_invoice_receipt(...)` / `reconcile_bill_receipt(...)`** — step 3: per matched pair from the cascade.
 
 ### Platform tools — verification + close
-- **`generate_trial_balance(period_end: <date>)`** — step 14: master reconciliation.
-- **`generate_profit_and_loss(period_start, period_end)`** — step 15.
-- **`generate_balance_sheet(period_end)`** — step 16.
+- **`generate_trial_balance(endDate: <date>)`** — step 14: master reconciliation.
+- **`generate_profit_and_loss(startDate, endDate)`** — step 15.
+- **`generate_balance_sheet(snapshotDate)`** — step 16.
 - **`search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<period-start>, <period-end>]}})`** — step 17: gate on zero drafts.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 17: clear residual drafts before lock.
 - **`update_account(resourceId: <CoA root>, lockDate: <period-end>)`** — step 18: lock the period.
@@ -77,15 +77,15 @@ For each bank account:
 2. `search_bank_records(accountResourceId: <bank account resourceId>, status: 'UNRECONCILED', startDate: '2025-01-01', endDate: '2025-01-31', limit: 200, sortBy: 'valueDate', sortOrder: 'ASC')`.
 3. If results: drive the 5-phase cascade matcher (Step 4 in `bank-recon.md`; local CLI: `clio jobs bank-recon match --input <records> --tolerance 0.01 --date-window 14 --json`). For each match, invoke the matching `reconcile_*` tool.
 4. `view_auto_reconciliation(bankStatementEntryResourceIds: [<id>, ...], recommendationType: 'MAGIC_MATCH')` — READ-ONLY suggestions for residuals (per-entry; get ids from `search_bank_records`, status `UNRECONCILED`); commit via `quick_reconcile` / `apply_bank_rule` / per-entry `reconcile_*`.
-5. `generate_bank_recon_summary(period_end: '2025-01-31', accountResourceId: <id>)`. Confirm `unreconciledCount == 0` OR document the residuals for the period and surface to the user.
+5. `generate_bank_recon_summary(bankAccountResourceId: <id>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31')`. Confirm `unreconciledCount == 0` OR document the residuals for the period and surface to the user.
 
 Full detail in `bank-recon.md`. NOT idempotent — see error table.
 
 ### Steps 4-5 — AR / AP aging
 
 ```
-generate_aged_ar(period_end: '2025-01-31')
-generate_aged_ap(period_end: '2025-01-31')
+generate_aged_ar(endDate: '2025-01-31')
+generate_aged_ap(endDate: '2025-01-31')
 ```
 
 Use `endDate` (rule 36 — point-in-time, not period-range). Assert: aging totals match `generate_trial_balance` AR/AP lines within the org's materiality threshold. Flag > 60d for credit-control / payment-priority. Disputed bills exit the active aging — annotate for the user.
@@ -98,26 +98,26 @@ For each recurring accrual the org runs whose last posting predates `2025-01-31`
 
 1. Compute amount per the accrual's estimation method (`prior_month` via `search_journals`, `trailing_3m_avg`, `budget`, `fixed_amount`).
 2. Cross-check: `clio calc accrued-expense --amount <computed> --periods 1 --json`.
-3. `plan_recipe(recipe: 'accrued-expense', amount: <computed>, glAccount: <accrual GL account>, vendor: <accrual vendor>, valueDate: '2025-01-31', reversalDate: '2025-02-01')`.
+3. `plan_recipe(recipe: 'accrued-expense', amount: <computed>, periods: 1, startDate: '2025-01-31')` (the engine dates the reversal itself; the accrual accounts resolve from the CoA and the vendor goes to `execute_recipe` as `contactName`).
 4. Resolve `requiredAccounts` + `needsContact` (search/create as needed).
 5. `execute_recipe(...)`. Engine emits dual-entry accrual + reversal scheduler.
 6. `validate_journal_draft(resourceId: <id>)` for each draft journal.
 7. After all accruals processed: `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`.
 
-Cross-check: `generate_trial_balance(period_end: '2025-01-31')`. Sum credit movements against accrual liability accounts. Verify `|sum - expected| ≤ materiality threshold`.
+Cross-check: `generate_trial_balance(endDate: '2025-01-31')`. Sum credit movements against accrual liability accounts. Verify `|sum - expected| ≤ materiality threshold`.
 
 ### Step 7 — Prepaid expense recognition (finalize this period's pre-emitted journal)
 
 For each existing `Prepaid Expenses` capsule (via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)):
 
-1. **STOP — do not select these with a filter.** Journals cannot be narrowed to one capsule by a filter: `JournalFilter` declares no `capsuleResourceId`, and `GET /capsules/{id}` returns only `totalTransactions`, a count (measured 2026-09-07). A date+status search returns EVERY matching DRAFT in the org, including drafts a practitioner deliberately parked, so passing it to `bulk_update_journals(saveAsDraft: false)` finalizes unrelated work. `get_journal` (`GET /journals/{id}`) does return the link as `capsule: {resourceId, type, title}` (measured 2026-09-23), so check each candidate journal's `capsule.resourceId` against this capsule, keep only the matches, and confirm the count with the practitioner before finalizing.
+1. **STOP — do not select these with a filter.** Journals cannot be narrowed to one capsule by a filter: `JournalFilter` declares no `capsuleResourceId`, and `GET /capsules/{id}` returns only `totalTransactions`, a count (measured 2026-09-07). A date+status search returns EVERY matching DRAFT in the org, including drafts a practitioner deliberately parked, so passing it to `bulk_update_journals(items: [{resourceId, saveAsDraft: false}])` finalizes unrelated work. `get_journal` (`GET /journals/{id}`) does return the link as `capsule: {resourceId, type, title}` (measured 2026-09-23), so check each candidate journal's `capsule.resourceId` against this capsule, keep only the matches, and confirm the count with the practitioner before finalizing.
 2. If empty: either the recipe was set up wrong (no journal for this period — investigate via `search_journals` without status filter to see if it's already ACTIVE, then skip), OR the practitioner went off-recipe. Surface to practitioner.
 3. If found: collect resourceIds, then `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`.
-4. New prepaid setups during this period (a new prepaid started this month): invoke `plan_recipe(recipe: 'prepaid-expense', ...)` (see the `prepaid-expense` recipe in the transaction-recipes skill) — this creates the bill + N future-dated DRAFT journals; the current period's journal is then in the bulk_finalize_drafts queue above.
+4. New prepaid setups during this period (a new prepaid started this month): invoke `plan_recipe(recipe: 'prepaid-expense', ...)` (see the `prepaid-expense` recipe in the transaction-recipes skill) — this creates the bill + N future-dated DRAFT journals; the current period's journal joins the `bulk_update_journals` set above (`bulk_finalize_drafts` takes invoices, bills and credit notes only, never journals).
 
 ### Step 8 — Deferred revenue recognition
 
-Mirror of step 7. Existing `Deferred Revenue` capsules: search for this period's DRAFT journal in each, then `bulk_finalize_drafts`. New deferred setups: `plan_recipe(recipe: 'deferred-revenue', ...)` then handle the current period's journal in the same bulk_finalize.
+Mirror of step 7. Existing `Deferred Revenue` capsules: find this period's DRAFT journal in each, then `bulk_update_journals(items: [{resourceId, saveAsDraft: false}])`. New deferred setups: `plan_recipe(recipe: 'deferred-revenue', ...)` then finalize the current period's journal in the same `bulk_update_journals` call.
 
 ### Step 9 — Depreciation
 
@@ -125,14 +125,14 @@ Mirror of step 7. Existing `Deferred Revenue` capsules: search for this period's
 search_fixed_assets(filter: {status: {eq: 'ACTIVE'}, depreciationMethod: {in: ['ddb', '150db']}})
 ```
 
-For Jaz-native SL assets: depreciation auto-posts; verify via `generate_fa_summary(period_end: '2025-01-31')` showing month's depreciation movement. For non-SL methods returned above: `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db', cost, salvage, life, ...)` per asset, then `execute_recipe`.
+For Jaz-native SL assets: depreciation auto-posts; verify via `generate_fa_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31', groupBy: 'CATEGORY')` showing month's depreciation movement. For non-SL methods returned above: `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db', cost, salvageValue, usefulLifeYears, ...)` per asset, then `execute_recipe`.
 
 ### Step 10 — Employee benefit accruals
 
 If the org has headcount and tracks leave balances:
 
 ```
-plan_recipe(recipe: 'leave-accrual', headcount: <headcount>, daysPerEmployee: <leave days per year>, dailyRate: <avg-daily-rate>, startDate: '2025-01-01', termMonths: 12)
+plan_recipe(recipe: 'leave-accrual', employees: <headcount>, daysPerYear: <leave days per year>, dailyRate: <avg-daily-rate>, startDate: '2025-01-01', periods: 12)
 ```
 
 On first month of FY only — engine creates the scheduler and posts the first accrual. Subsequent months: scheduler emits automatically. Cross-check via `clio calc leave-accrual`.
@@ -141,7 +141,7 @@ On first month of FY only — engine creates the scheduler and posts the first a
 
 For each active loan capsule (via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)):
 
-1. **STOP — do not select these with a filter.** Journals cannot be narrowed to one capsule by a filter: `JournalFilter` declares no `capsuleResourceId`, and `GET /capsules/{id}` returns only `totalTransactions`, a count (measured 2026-09-07). A date+status search returns EVERY matching DRAFT in the org, including drafts a practitioner deliberately parked, so passing it to `bulk_update_journals(saveAsDraft: false)` finalizes unrelated work. `get_journal` (`GET /journals/{id}`) does return the link as `capsule: {resourceId, type, title}` (measured 2026-09-23), so check each candidate journal's `capsule.resourceId` against this capsule, keep only the matches, and confirm the count with the practitioner before finalizing.
+1. **STOP — do not select these with a filter.** Journals cannot be narrowed to one capsule by a filter: `JournalFilter` declares no `capsuleResourceId`, and `GET /capsules/{id}` returns only `totalTransactions`, a count (measured 2026-09-07). A date+status search returns EVERY matching DRAFT in the org, including drafts a practitioner deliberately parked, so passing it to `bulk_update_journals(items: [{resourceId, saveAsDraft: false}])` finalizes unrelated work. `get_journal` (`GET /journals/{id}`) does return the link as `capsule: {resourceId, type, title}` (measured 2026-09-23), so check each candidate journal's `capsule.resourceId` against this capsule, keep only the matches, and confirm the count with the practitioner before finalizing.
 2. Should return exactly one DRAFT journal per active loan. Each is a 3-line entry (debit Loan Payable, debit Interest Expense, credit Cash) with the correct amortization split for the period.
 3. Collect resourceIds, then `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`.
 4. Do NOT post manual loan-interest accruals — the recipe already emitted the journal with the correct split per `clio calc loan` schedule.
@@ -159,7 +159,7 @@ This step is a verification cross-check. If the org is multi-currency:
 1. Pull what Jaz auto-posted to FX accounts during the period:
 ```
 search_accounts(filter: {name: {in: ['FX Unrealized Gain', 'FX Unrealized Loss', 'FX Bank Revaluation']}})
-generate_general_ledger(period_end: '2025-01-31', accountResourceIds: [<FX account ids>], groupBy: 'ACCOUNT')
+generate_general_ledger(startDate: '2025-01-01', endDate: '2025-01-31', accountResourceIds: [<FX account ids>], groupBy: 'ACCOUNT')
 ```
 
 2. For each foreign-currency monetary balance at period end (from a separate `generate_general_ledger` filtered to non-base-currency accounts), independently compute:
@@ -180,7 +180,7 @@ Per memory rule [Bank FX is Revaluation, not Realized]: bank/cash FX uses `FX Ba
 Mental check on AR aging > 90d bucket changes. If material change vs prior month: invoke ECL recipe.
 
 ```
-plan_recipe(recipe: 'ecl', receivables: <generate_aged_ar.buckets>, ratesPerBucket: <org ECL loss-rate matrix>)
+plan_recipe(recipe: 'ecl', buckets: <generate_aged_ar buckets, each {name, balance, rate} with rate from the org ECL loss-rate matrix>, existingProvision, startDate)
 ```
 
 For most SMBs, formal ECL adjustment runs in `quarter-end-close.md`. Skip in routine monthly close unless a major customer default / dispute occurred.
@@ -190,7 +190,7 @@ For most SMBs, formal ECL adjustment runs in `quarter-end-close.md`. Skip in rou
 ### Step 14 — Trial balance
 
 ```
-generate_trial_balance(period_end: '2025-01-31')
+generate_trial_balance(endDate: '2025-01-31')
 ```
 
 Save the close trial balance for the period (you'll diff next month against it). Assert:
@@ -203,8 +203,8 @@ Save the close trial balance for the period (you'll diff next month against it).
 ### Steps 15-16 — P&L + Balance Sheet
 
 ```
-generate_profit_and_loss(period_start: '2025-01-01', period_end: '2025-01-31')
-generate_balance_sheet(period_end: '2025-01-31')
+generate_profit_and_loss(startDate: '2025-01-01', endDate: '2025-01-31')
+generate_balance_sheet(snapshotDate: '2025-01-31')
 ```
 
 Save both. Assert: BS Total Assets == Total Liabilities + Total Equity. P&L net profit ties to BS Equity Movement.
@@ -219,7 +219,7 @@ search_invoices(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-0
 search_bills(filter: {status: {eq: 'DRAFT'}, valueDate: {between: ['2025-01-01', '2025-01-31']}})
 ```
 
-All three must return zero. If any rows: classify per practitioner judgment, then `bulk_finalize_drafts` for the keep-set OR delete via `delete_journal` / `delete_invoice` / `delete_bill`. Record the judgment: `jot(kind: SCOPE)` naming which drafts were finalized, which were deleted, and the rule applied.
+All three must return zero. If any rows: classify per practitioner judgment, then finalize the keep-set (`bulk_update_journals` for journals, `bulk_finalize_drafts` for invoices and bills) OR delete via `delete_journal` / `delete_invoice` / `delete_bill`. Record the judgment: `jot(kind: SCOPE)` naming which drafts were finalized, which were deleted, and the rule applied.
 
 ## Phase 5 — Lock
 
@@ -244,10 +244,10 @@ If residuals were documented at steps 3 or 17, record the judgment after the loc
 | `reconcile_invoice_receipt` | 422 `invoice_status_invalid` | Matched invoice still DRAFT. `finalize_invoice(resourceId: <id>)` first. |
 | `reconcile_*` | (any) — NOT idempotent | Per `jaz-api/SKILL.md` rule 125. On 500 / network error, do NOT retry. Confirm reconciled state via `view_auto_reconciliation` or `search_bank_records(status: 'RECONCILED')` first. |
 | `plan_recipe` | 422 `account_not_found` / `contact_not_found` | Step resolution incomplete. `search_accounts` / `search_contacts`; create if missing. Halt and surface to the user. |
-| `bulk_finalize_drafts` | 422 `journal_unbalanced` | Recipe regression. Halt; do not retry without manual review. |
+| `bulk_update_journals` | 422 `journal_unbalanced` | Recipe regression. Halt; do not retry without manual review. |
 | `update_account` lockDate | 422 `lock_date_violated` | Open drafts in the period. Re-run step 17 gates. |
 | `update_account` lockDate | 422 `period_already_locked` | Period already closed. Confirm with the user before re-opening. |
-| FA `depreciation` posting | 0 movement when expected | Asset not `status: ACTIVE` in FA register. `update_fixed_asset(resourceId: <id>, status: 'ACTIVE')` first. |
+| FA `depreciation` posting | 0 movement when expected | Asset not `status: ACTIVE` in FA register. `update_fixed_asset(resourceId: <id>, isDraftToActive: true)` first. |
 
 ---
 

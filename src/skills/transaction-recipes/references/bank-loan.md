@@ -15,7 +15,7 @@
 - **`list_bank_accounts()`** — used in step 3: resolve the disbursement target bank account by `name + currency` if the bank account resourceId isn't already known.
 - **`search_accounts(filter: {name: {in: ['Loan Payable', 'Interest Expense']}})`** — used in step 3: confirm liability + expense GL accounts exist.
 - **`search_capsules(filter: {title: {eq: <capsuleName>}})`** — used in step 0: detect duplicate setup before re-running. Loan capsules are unique per facility — duplicate creation is almost always an agent error.
-- **`generate_trial_balance(period_end: <date>)`** — used in step 5: verify the loan liability balance matches the schedule's `closingBalance` column.
+- **`generate_trial_balance(endDate: <date>)`** — used in step 5: verify the loan liability balance matches the schedule's `closingBalance` column.
 - **`update_journal(resourceId: <id>, saveAsDraft: false)`** — used in step 4 verification: lift draft journals to ACTIVE once practitioner confirms.
 
 ### Cross-references
@@ -47,19 +47,13 @@ Returns: `{ perPeriodAmount: 1933.28, totalInterest: 15996.80, schedule: [{perio
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'loan',
   principal: 100000,
   annualRate: 6,
   termMonths: 60,
   startDate: '2025-01-01',
-  currency: 'SGD',
-  glLoanLiability: <resourceId of 'Loan Payable' account>,
-  glInterestExpense: <resourceId of 'Interest Expense' account>,
-  bankAccountResourceId: <bank account resourceId>,
-  capsuleType: 'Loan Repayment',
-  capsuleName: 'Bank Loan — ABC Bank — 2025',
-  vendor: 'ABC Bank Singapore'
+  currency: 'SGD'
 )
 ```
 
@@ -105,12 +99,12 @@ update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 After disbursement (period 0):
-- `generate_trial_balance(period_end: <startDate>)`.
+- `generate_trial_balance(endDate: <startDate>)`.
 - Assert: `balance['Cash / Bank Account']` increased by `principal`.
 - Assert: `balance['Loan Payable']` = `-principal` (credit).
 
 After each monthly finalize:
-- `generate_trial_balance(period_end: <month-end>)`.
+- `generate_trial_balance(endDate: <month-end>)`.
 - Assert: `balance['Loan Payable'] == -schedule[periodIndex].closingBalance` (within 1 cent).
 - Assert: `balance['Interest Expense'] (period MTD) == schedule[periodIndex].interest` (within 1 cent).
 
@@ -131,14 +125,14 @@ After the FINAL period (60th repayment) is finalized:
 | `execute_recipe` | 422 `currency_mismatch_bank_account` | Loan currency ≠ bank account currency. Either pass a `currencyAccount` for FX-on-disbursement, or pick a bank account in the loan's source currency (per `jaz-api/SKILL.md` rule 24). |
 | `execute_recipe` | 409 `capsule_already_exists` | Duplicate setup. Step 0 idempotency check should have caught this — go back to step 0. |
 | Scheduler | Repayment journal posts but interest amount is off by cents | Engine uses effective interest method per period; if the entity's materiality threshold is below 1 cent, narrow the assertion. Otherwise expected behavior. |
-| Scheduler | Repayment journal does NOT post on expected date | `update_scheduler` may have paused it. **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. — if empty, check scheduler status. Resume or document the pause in your working notes. |
+| Scheduler | Repayment journal does NOT post on expected date | The schedule may have been set INACTIVE (`update_scheduled_journal(status: 'INACTIVE')`). Look for this period's repayment journal (journals cannot be filtered by capsule: check each candidate with `get_journal` (its `capsule.resourceId`) and confirm the set with the practitioner); if none, check scheduler status. Resume or document the pause in your working notes. |
 | `update_capsule` | 422 `capsule_locked` | The capsule is in a closed period (lock date passed). Lift the lock first via `update_account` lock_date OR add the new entry in the next open period. |
 
 ---
 
 ## Variations
 
-- **Variable-rate loan:** Cannot model in a single `plan_recipe` call. Run the recipe for the initial fixed period; when the rate changes, halt the existing scheduler (`update_scheduler(status: 'PAUSED')`), recompute with new rate via `clio calc loan` from the current outstanding balance, and run `plan_recipe` again with the new schedule plus an `existingCapsuleResourceId` pointer so the new repayments append to the same capsule.
+- **Variable-rate loan:** Cannot model in a single `plan_recipe` call. Run the recipe for the initial fixed period; when the rate changes, halt the existing schedule (`update_scheduled_journal(resourceId: <scheduler id>, status: 'INACTIVE')`; `PAUSED` is rejected with 422), recompute with new rate via `clio calc loan` from the current outstanding balance, and run `plan_recipe` + `execute_recipe` again with the new schedule, passing `existingTxnId: <original disbursement id>` so the engine skips re-posting the disbursement. The engine files the new repayments under a new capsule; to keep one capsule per facility, move them with `move_transaction_capsules(businessTransactionResourceIds, oldCapsuleResourceId: <new capsule>, newCapsuleResourceId: <original capsule>)`.
 - **Lump-sum principal repayment:** Post a manual journal (`create_journal`) Dr Loan Payable / Cr Cash. Then halt the existing scheduler and re-plan with the new outstanding balance.
 - **Interest-only period:** Not supported by the loan calculator. Workaround: post N manual interest-only journals via `create_journal` (Dr Interest Expense / Cr Cash) for the interest-only window, then run `plan_recipe(recipe: 'loan', ...)` from the start of the amortizing window with the full outstanding principal.
 - **Multi-currency loan (USD loan with SGD base):** Pass `currency: 'USD'`. Disbursement records via `currency: { sourceCurrency: 'USD' }` per `jaz-api/SKILL.md` rule 25. Monthly repayments stay in USD. Period-end FX revaluation against base currency is auto-handled by Jaz (Loan Payable is a monetary item per IAS 21.23 — Jaz auto-translates at closing rate). Verify via the month-end close FX verification flow; do NOT invoke `execute_recipe(recipe: 'fx-reval', ...)`.

@@ -14,7 +14,7 @@
 ### Tools (jaz-api / direct)
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Provision for Warranties', 'Finance Cost', 'Warranty Expense']}})`** — step 3.
-- **`generate_trial_balance(period_end: <date>)`** — step 5 verify provision balance matches schedule's `closingProvision`.
+- **`generate_trial_balance(endDate: <date>)`** — step 5 verify provision balance matches schedule's `closingProvision`.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly finalize.
 
 ### Cross-references
@@ -48,20 +48,13 @@ Save schedule to `workpapers/<period>/provision-warranty-FY2025.json`.
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'provision',
   amount: 500000,
   annualRate: 4,
   termMonths: 60,
   startDate: '2025-01-01',
-  settlementDate: '2030-01-01',
-  currency: 'SGD',
-  glProvision: <resourceId of 'Provision for Warranties' account>,
-  glExpense: <resourceId of 'Warranty Expense' account>,
-  glFinanceCost: <resourceId of 'Finance Cost' account>,
-  bankAccountResourceId: <bank account resourceId>,
-  capsuleType: 'Provisions',
-  capsuleName: 'Warranty Provision — FY2025-FY2029'
+  currency: 'SGD'
 )
 ```
 
@@ -95,7 +88,7 @@ update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 Verify after finalize:
-- `generate_trial_balance(period_end: <month-end>)`.
+- `generate_trial_balance(endDate: <month-end>)`.
 - Assert: `balance['Provision for Warranties'] == -schedule[periodIndex].closingProvision` (within 1 cent).
 - Assert: `balance['Finance Cost'] (period MTD) == schedule[periodIndex].unwindingCharge`.
 
@@ -135,7 +128,7 @@ If actual settlement amount differs from estimated $500,000 (highly likely for w
 | `plan_recipe` | 422 `unsupported_recipe` | Use canonical engine name `provision` (not `provisions`). |
 | `plan_recipe` | 422 `term_too_short` | Provision must span ≥ 2 periods (otherwise PV unwinding is immaterial). For short-term provisions (settlement < 6 months): post directly via `create_journal` at face value, no PV needed. |
 | `plan_recipe` | 422 `rate_invalid` | Discount rate must be > 0. Per IAS 37.47, use a pre-tax rate reflecting current market + obligation-specific risks. SG: typically gov't bond rate + risk premium. |
-| `execute_recipe` | 422 `account_not_found` for `Finance Cost` | Step 3 incomplete. Create via `create_account(accountType: 'Finance Cost', name: 'Finance Cost')`. Note `Finance Cost` is both a valid account TYPE and the account NAME here — the error refers to the missing account, not a bad type. |
+| `execute_recipe` | 422 `account_not_found` for `Finance Cost` | Step 3 incomplete. Create via `create_account(accountType: 'Finance Cost', name: 'Finance Cost', code: <unused account code>)`. Note `Finance Cost` is both a valid account TYPE and the account NAME here — the error refers to the missing account, not a bad type. |
 | Step 6 remeasurement | Recipe doesn't natively support mid-life remeasurement | Manual journal + delete remaining DRAFT unwinding journals + re-execute recipe for remaining term. |
 | Step 7 actual settlement ≠ estimated | (always, for real-world provisions) | Edit settlement cash-out via `update_cash_out`, post true-up journal for the delta. |
 | Provision presented as Operating Expense vs Finance Cost confusion | (presentation) | Per IAS 37.84, the unwinding charge is presented in P&L as a Finance Cost (separate from the recognition expense which is Operating Expense). Practitioner judgment if jurisdiction disagrees. |

@@ -18,7 +18,7 @@ Period derivation:
 
 **Period boundaries matter for:**
 - `search_*` filters — `{valueDate: {between: [<period-start>, <period-end>]}}` per `jaz-api/SKILL.md` rule 2.
-- Reports — `period_end` for snapshots; `period_start + period_end` for ranges.
+- Reports — each tool names its own dates: `endDate` (trial balance, aged AR/AP, cash balance), `snapshotDate` (balance sheet), `startDate` + `endDate` (P&L, cashflow, general ledger, VAT ledger), `primarySnapshotStartDate` + `primarySnapshotEndDate` (FA summary/recon, equity movement, bank recon), `primarySnapshotDate` (bank balance summary).
 - Lock dates — `update_account` lockDate sets the close marker.
 
 ## Lock dates
@@ -36,17 +36,17 @@ Per-account locks (rare): set `lockDate` on a specific bank account or controlle
 Run after every period close:
 
 ```
-generate_trial_balance(period_end: <period-end>)
-generate_profit_and_loss(period_start: <period-start>, period_end: <period-end>)
-generate_balance_sheet(period_end: <period-end>)
+generate_trial_balance(endDate: <period-end>)
+generate_profit_and_loss(startDate: <period-start>, endDate: <period-end>)
+generate_balance_sheet(snapshotDate: <period-end>)
 ```
 
 Standard assertions:
 - TB: `Debits == Credits` (always; if not, system bug).
 - BS: `Total Assets == Total Liabilities + Total Equity`.
-- TB AR == `generate_aged_ar(period_end)` total.
-- TB AP == `generate_aged_ap(period_end)` total.
-- TB Cash == `generate_bank_balance_summary(period_end)` per-bank total (via `bank-recon.md`).
+- TB AR == `generate_aged_ar(endDate)` total.
+- TB AP == `generate_aged_ap(endDate)` total.
+- TB Cash == `generate_bank_balance_summary(primarySnapshotDate)` per-bank total (via `bank-recon.md`).
 
 ## Pre-emitted DRAFT journal pattern
 

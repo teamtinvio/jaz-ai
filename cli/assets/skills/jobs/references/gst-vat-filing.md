@@ -5,13 +5,13 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools
-- **`generate_vat_ledger(period_start: <period-start>, period_end: <period-end>)`** — step 1: the canonical tax ledger. Returns input + output tax totals + per-tax-profile breakdown.
+- **`generate_vat_ledger(startDate: <period-start>, endDate: <period-end>)`** — step 1: the canonical tax ledger. Returns input + output tax totals + per-tax-profile breakdown.
 - **`search_tax_profiles(filter: {})`** — step 2 setup verification: confirm all expected tax profiles exist (`SR`, `ZR`, `ES`, `IES`, `OS`, `TX`, `BL`, `OP`, `EP`, `RC` for SG; `VAT-RC`, `VAT-EXP`, `VAT-ZR`, `VAT-EXM`, `VAT-EXC` for PH).
 - **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, limit: 200)`** — step 3 output-tax detail: per-invoice GST cross-check against tax ledger.
 - **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}, status: {neq: 'DRAFT'}}, limit: 200)`** — step 4 input-tax detail: per-bill GST cross-check, with blocked-input filter.
 - **`quick_fix_line_items(entity: 'invoices' | 'bills', lineItemResourceIds, attributes)`** — step 5 corrections: re-assign the tax profile on the affected lines if errors are found. The tax profile sits on each line, so the fix is at line level.
 - **`download_export(exportType: 'analysis-exchange-rate-audit', startDate, endDate)`** — step 6 pre-filing check: FX rates outside expected band can shift GST on FX invoices.
-- **`generate_trial_balance(period_end: <period-end>)`** — step 7 GST account reconciliation: `GST Control` / `Input Tax Recoverable` / `Output Tax Payable` accounts.
+- **`generate_trial_balance(endDate: <period-end>)`** — step 7 GST account reconciliation: `GST Control` / `Input Tax Recoverable` / `Output Tax Payable` accounts.
 
 ### Cross-references
 - Org inputs this job needs (confirm with the user when not already on file): the GST scheme, the GST registration number, and the country code (`SG` | `PH`).
@@ -27,7 +27,7 @@ Walk steps 1-8 below. (Local CLI: `clio jobs gst-vat --period 2025-Q1` prints th
 ## Step 1 — Pull the tax ledger
 
 ```
-generate_vat_ledger(period_start: '2025-01-01', period_end: '2025-03-31')
+generate_vat_ledger(startDate: '2025-01-01', endDate: '2025-03-31')
 ```
 
 Save the quarter's VAT ledger. Returns:
@@ -126,14 +126,14 @@ For PH (country code `PH`): also run `download_export(exportType: 'analysis-anom
 ## Step 7 — GST account reconciliation
 
 ```
-generate_trial_balance(period_end: '2025-03-31')
+generate_trial_balance(endDate: '2025-03-31')
 ```
 
 For SG: balance['GST Control'] should equal tax-ledger's `netPayable` for the quarter. Pre-existing balance from prior quarter (carried forward) must be netted.
 
 For PH: separate accounts for Input VAT Recoverable + Output VAT Payable; verify each independently.
 
-If TB doesn't tie to tax ledger: likely a manual journal posted directly to GST accounts (bypassing the per-transaction tax-profile). Audit via `generate_general_ledger(accountResourceId: <GST Control>, period_start, period_end)` — surface any non-source-system entries.
+If TB doesn't tie to tax ledger: likely a manual journal posted directly to GST accounts (bypassing the per-transaction tax-profile). Audit via `generate_general_ledger(accountResourceIds: [<GST Control>], startDate, endDate)` — surface any non-source-system entries.
 
 ## Step 8 — Filing summary
 

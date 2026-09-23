@@ -6,11 +6,11 @@
 
 ### Platform tools
 - **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'DISCARDED']}}, limit: 200)`** — step 1: enumerate FAs. Paginate.
-- **`get_fixed_asset(resourceId: <id>)`** — step 2: per-asset detail (cost, acquisitionDate, usefulLifeMonths, depreciationMethod, salvageValue, NBV).
-- **`generate_fa_summary(period_end: <date>)`** — step 3: aggregate FA register at period end.
-- **`generate_fa_recon_summary(period_start: <year-start>, period_end: <year-end>)`** — step 3: reconcile movement (opening + additions − disposals − depreciation = closing).
-- **`generate_general_ledger(accountResourceId: <FA category GL>, period_start, period_end)`** — step 4: per-FA-category GL movement vs FA register.
-- **`mark_fixed_asset_sold(resourceId: <id>, disposalDate, disposalProceeds)`** — step 5: status updates for disposals. Mirror endpoints `POST /api/v1/mark-as-sold/fixed-assets` (sale) / `POST /api/v1/discard-fixed-assets/{id}` (scrap).
+- **`get_fixed_asset(resourceId: <id>)`** — step 2: per-asset detail (purchaseAmount, purchaseDate, depreciationStartDate, effectiveLife in months, depreciationMethod, depreciableValueResidualAmount, NBV).
+- **`generate_fa_summary(primarySnapshotStartDate: <period-start>, primarySnapshotEndDate: <period-end>, groupBy: 'CATEGORY')`** — step 3: aggregate FA register at period end.
+- **`generate_fa_recon_summary(primarySnapshotStartDate: <year-start>, primarySnapshotEndDate: <year-end>)`** — step 3: reconcile movement (opening + additions − disposals − depreciation = closing).
+- **`generate_general_ledger(accountResourceIds: [<FA category GL>], startDate, endDate)`** — step 4: per-FA-category GL movement vs FA register.
+- **`mark_fixed_asset_sold(resourceId: <id>, depreciationEndDate, assetDisposalGainLossAccountResourceId, saleBusinessTransactionType, saleItemResourceId)` / `discard_fixed_asset(resourceId: <id>, disposalDate, depreciationEndDate)`** — step 5: status updates for disposals. Mirror endpoints `POST /api/v1/mark-as-sold/fixed-assets` (sale) / `POST /api/v1/discard-fixed-assets/{id}` (scrap).
 - **`plan_recipe(recipe: 'asset-disposal', ...)` + `execute_recipe(...)`** — step 5: invoke per disposal identified during review (see the `asset-disposal` recipe).
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 / 6: finalize disposal journals + any pending DDB / 150DB depreciation DRAFTs from the `depreciation` recipe.
 
@@ -42,7 +42,7 @@ Paginate via offset. For year-end review: include DISPOSED and DISCARDED (dispos
 
 For each ACTIVE asset, flag for practitioner attention:
 - **Fully depreciated** (`NBV == salvageValue` per FA summary): consider disposal if no longer in use; consider impairment review per IAS 36 if NBV > recoverable amount.
-- **Recently acquired without `usefulLifeMonths`**: depreciation can't run; halt and surface.
+- **Recently acquired without `effectiveLife`**: depreciation can't run; halt and surface.
 - **Pre-flagged by the user as a disposal candidate**: act on it.
 - **Damaged / no longer in use** (per practitioner inspection): write off.
 - **Mid-life disposals** (sold or traded in during the period): per asset-disposal recipe.
@@ -50,21 +50,21 @@ For each ACTIVE asset, flag for practitioner attention:
 ## Step 3 — FA register reconciliation
 
 ```
-generate_fa_summary(period_end: '2025-12-31')
-generate_fa_recon_summary(period_start: '2025-01-01', period_end: '2025-12-31')
+generate_fa_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
+generate_fa_recon_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
 ```
 
 Keep both the FA summary and the recon summary. Assert per FA category:
 - `closingNbv == openingNbv + additions - disposals - depreciation` (the recon formula).
 - Sum of per-asset NBV in the register equals TB `<FA cost> - <Accumulated Depreciation>` line for that category.
 
-If mismatch beyond the materiality threshold: investigate via `generate_general_ledger(accountResourceId: <FA category cost GL>, period_start, period_end)`. Common: a disposal posted via the `asset-disposal` recipe but `update_fixed_asset(status: 'DISPOSED')` step 5 missed — Jaz continues auto-depreciating.
+If mismatch beyond the materiality threshold: investigate via `generate_general_ledger(accountResourceIds: [<FA category cost GL>], startDate, endDate)`. Common: a disposal posted via the `asset-disposal` recipe but the step 5 `mark_fixed_asset_sold` / `discard_fixed_asset` was missed — Jaz continues auto-depreciating.
 
 ## Step 4 — Depreciation cross-check
 
 For each ACTIVE SL asset (Jaz auto-depreciates):
-- Pull FA's expected annual depreciation: `(cost - salvage) / (usefulLifeMonths / 12)`.
-- Compare to actual `generate_general_ledger(accountResourceId: <Depreciation Expense for this category>, period_start: <year-start>, period_end: <year-end>)` movement.
+- Pull FA's expected annual depreciation: `(purchaseAmount - depreciableValueResidualAmount) / (effectiveLife / 12)`.
+- Compare to actual `generate_general_ledger(accountResourceIds: [<Depreciation Expense for this category>], startDate: <year-start>, endDate: <year-end>)` movement.
 - Should match within rounding ($0.12 tolerance for full-year SL).
 
 For each ACTIVE DDB / 150DB asset (recipe-managed, see the `depreciation` recipe):
@@ -79,13 +79,10 @@ For each disposal identified in step 2:
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from the CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'asset-disposal',
   cost, salvageValue, usefulLifeYears, acquisitionDate, disposalDate, proceeds, method,
-  ...,
-  fixedAssetResourceId: <asset id>,
-  capsuleType: 'Asset Disposal',
-  capsuleName: 'Disposal — <asset name> — <disposal date>'
+  ...
 )
 execute_recipe(...)
 update_journal(resourceId: <disposal journal id>, saveAsDraft: false)
@@ -93,7 +90,9 @@ update_journal(resourceId: <disposal journal id>, saveAsDraft: false)
 
 Then the manual FA-register status update (engine-skipped — see the `asset-disposal` recipe):
 ```
-update_fixed_asset(resourceId: <asset id>, status: 'DISPOSED', disposalDate, disposalProceeds)
+mark_fixed_asset_sold(resourceId: <asset id>, depreciationEndDate, assetDisposalGainLossAccountResourceId, saleBusinessTransactionType, saleItemResourceId)
+// or, for a write-off with no sale:
+discard_fixed_asset(resourceId: <asset id>, disposalDate, depreciationEndDate)
 ```
 
 For scrap / write-off (no proceeds): `discard_fixed_asset(...)` — its own description is "Discard (write off) a fixed asset". There is no `WRITTEN_OFF` status; the declared set is ACTIVE, ONGOING, COMPLETED, DRAFT, DISPOSED, SOLD, DISCARDED, CLOSED_OUT.
@@ -109,7 +108,7 @@ For assets at salvage value AND no longer in use:
 
 For each FA category (e.g., Vehicles, Office Equipment, Computers, Buildings):
 ```
-generate_general_ledger(accountResourceId: <FA cost GL>, period_start: '2025-01-01', period_end: '2025-12-31', groupBy: 'ACCOUNT')
+generate_general_ledger(accountResourceIds: [<FA cost GL>], startDate: '2025-01-01', endDate: '2025-12-31', groupBy: 'ACCOUNT')
 ```
 
 Group by capsule shows per-asset / per-disposal trail. Auditor sample-test will pick 2-3 assets per category and trace GL → original purchase bill → FA registration → depreciation history → disposal (if any).
@@ -133,7 +132,7 @@ These feed `audit-prep.md` step 8 supporting schedules.
 | Step 1 | `search_fixed_assets` returns more than the page limit | Paginate via `offset`. Most SMBs have <100 FAs. |
 | Step 3 | Recon doesn't tie | Disposed asset still ACTIVE in register (the `asset-disposal` recipe leaves the FA-register status update to you). Audit each disposal's status. |
 | Step 4 | DDB / 150DB DRAFTs unfinalized | Likely a missed monthly close. Finalize the current ones and surface to the user — the auditor will otherwise see 12 months' depreciation in one period. |
-| Step 4 | SL depreciation off by > $0.12 | A monthly depreciation period was skipped (asset created mid-month with mis-aligned `acquisitionDate`). Reconcile per asset. |
+| Step 4 | SL depreciation off by > $0.12 | A monthly depreciation period was skipped (asset created mid-month with mis-aligned `depreciationStartDate`). Reconcile per asset. |
 | Step 5 | `update_fixed_asset` to DISPOSED | 422 `pending_depreciation_journals` | DRAFT depreciation journals exist for periods after disposal date. **Do not select these with a filter** — journals cannot be narrowed to one fixed asset (`JournalFilter` has no `fixedAssetResourceId`, and a journal row carries no asset link), so a date+status search returns every DRAFT in the org and `delete_journal` over it would destroy unrelated work. Surface the asset and the blocking periods to the practitioner and let them identify the journals, then retry. |
 | Step 6 | Trying to dispose an FA at NBV = 0 with no proceeds | Recipe still works but creates a no-effect journal. May be skippable; surface to practitioner. |
 

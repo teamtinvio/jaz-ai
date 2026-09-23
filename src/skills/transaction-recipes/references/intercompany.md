@@ -11,14 +11,14 @@ Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity
 ### Primitive MCP tools (no engine wrapper)
 - **`create_invoice(...)`** — Entity A side: post the management-fee invoice to Entity B (the customer in Entity A's org).
 - **`create_bill(...)`** — Entity B side: post the same management-fee as a bill from Entity A (the supplier in Entity B's org).
-- **`create_capsule(capsuleType: 'Intercompany', ...)`** — one capsule per entity, both with matching reference (e.g., `IC-MGMT-2025-Q1`).
-- **`create_invoice_payment(...)` / `create_bill_payment(...)`** — settlement legs in each entity's org.
-- **`apply_credit_to_invoice(...)` / `apply_credit_to_bill(...)`** — netting if both entities owe each other (one entity's invoice clears against the other's bill via credit note).
+- **`create_capsule(capsuleTypeResourceId: <id of 'Intercompany' from list_capsule_types>, ...)`** — one capsule per entity, both with matching reference (e.g., `IC-MGMT-2025-Q1`).
+- **`pay_invoice(...)` / `pay_bill(...)`** — settlement legs in each entity's org.
+- **`apply_credits_to_invoice(...)` / `apply_credits_to_bill(...)`** — netting if both entities owe each other (one entity's invoice clears against the other's bill via credit note).
 
 ### Search tools for reconciliation
-- ****STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.** — pull all Entity A intercompany invoices.
-- ****STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.** — pull all Entity B intercompany bills.
-- **`generate_general_ledger(accountResourceId: <Intercompany Receivable>, period_end: <date>)` / same for Intercompany Payable** — eliminate at consolidation.
+- **`search_invoices(contactId: <Entity B in A's org>, startDate, endDate)`**: pull all Entity A intercompany invoices (invoices cannot be filtered by capsule).
+- **`search_bills(contactId: <Entity A in B's org>, startDate, endDate)`**: pull all Entity B intercompany bills.
+- **`generate_general_ledger(accountResourceIds: [<Intercompany Receivable>], startDate: <period-start>, endDate: <date>)` / same for Intercompany Payable** — eliminate at consolidation.
 
 ### Multi-org targeting (CRITICAL)
 Each entity is a separate Jaz org. Pin the org **explicitly per call** with `org_id` (from `list_organizations`). NEVER rely on ambient session, `--org` alias, or `JAZ_API_KEY` env state — a wrong "active" org silently posts to the wrong tenant and corrupts both entities' books.
@@ -74,8 +74,8 @@ create_invoice(
   lineItems: [{
     name: 'Management services — January 2025',
     accountResourceId: <Entity A's 'Intercompany Revenue' GL>,
-    amount: 15000,
-    quantity: 1
+    quantity: 1,
+    unitPrice: 15000
   }],
   capsuleResourceId: <Entity A IC capsule>,
   saveAsDraft: false
@@ -95,8 +95,8 @@ create_bill(
   lineItems: [{
     name: 'Management services — January 2025',
     accountResourceId: <Entity B's 'Intercompany Expense' or 'Management Fee Expense' GL>,
-    amount: 15000,
-    quantity: 1
+    quantity: 1,
+    unitPrice: 15000
   }],
   capsuleResourceId: <Entity B IC capsule>,
   saveAsDraft: false
@@ -111,31 +111,27 @@ The amount, valueDate, and reference MUST match Entity A's invoice exactly. Reco
 
 In Entity B's org (the payer):
 ```
-create_bill_payment(
-  billResourceId: <Entity B IC bill id>,
-  payments: [{
-    paymentAmount: 15000,
-    transactionAmount: 15000,
-    accountResourceId: <Entity B's bank account>,
-    paymentMethod: 'BANK_TRANSFER',
-    reference: 'IC-PAY-2025-Q1-JAN',
-    valueDate: '2025-02-15'
-  }]
+pay_bill(
+  resourceId: <Entity B IC bill id>,
+  paymentAmount: 15000,
+  transactionAmount: 15000,
+  accountResourceId: <Entity B's bank account>,
+  paymentMethod: 'BANK_TRANSFER',
+  reference: 'IC-PAY-2025-Q1-JAN',
+  valueDate: '2025-02-15'
 )
 ```
 
 In Entity A's org (the payee):
 ```
-create_invoice_payment(
-  invoiceResourceId: <Entity A IC invoice id>,
-  payments: [{
-    paymentAmount: 15000,
-    transactionAmount: 15000,
-    accountResourceId: <Entity A's bank account>,
-    paymentMethod: 'BANK_TRANSFER',
-    reference: 'IC-PAY-2025-Q1-JAN',
-    valueDate: '2025-02-15'
-  }]
+pay_invoice(
+  resourceId: <Entity A IC invoice id>,
+  paymentAmount: 15000,
+  transactionAmount: 15000,
+  accountResourceId: <Entity A's bank account>,
+  paymentMethod: 'BANK_TRANSFER',
+  reference: 'IC-PAY-2025-Q1-JAN',
+  valueDate: '2025-02-15'
 )
 ```
 
@@ -146,8 +142,8 @@ Both payments use the SAME bank reference. Bank-recon (`bank-recon.md`) on each 
 Less cash-flow-intensive: net off intercompany charges across both directions. Requires posting credit notes:
 
 1. In Entity A: `create_customer_credit_note(...)` for the amount Entity B charges back.
-2. `apply_credit_to_invoice(invoiceResourceId: <Entity A's outstanding IC invoice to B>, creditNoteResourceId: <CN>, amount: <netting amount>)`.
-3. Mirror in Entity B with a supplier credit note + `apply_credit_to_bill`.
+2. `apply_credits_to_invoice(resourceId: <Entity A's outstanding IC invoice to B>, credits: [{creditNoteResourceId: <CN>, amountApplied: <netting amount>}])`.
+3. Mirror in Entity B with a supplier credit note + `apply_credits_to_bill`.
 
 **Settlement option C: Loan-account treatment**
 
@@ -157,7 +153,7 @@ Long-term IC balances: instead of settling, keep as a loan. Same as `bank-loan.m
 
 In each entity:
 ```
-generate_general_ledger(accountResourceId: <IC Receivable in A | IC Payable in B>, period_end: <month-end>)
+generate_general_ledger(accountResourceIds: [<IC Receivable in A | IC Payable in B>], startDate: <month-start>, endDate: <month-end>)
 ```
 
 Cross-entity reconcile:
@@ -173,7 +169,7 @@ For consolidation (if the practitioner manages a group): the matched IC balances
 | Source | Error | Recovery |
 |--------|-------|----------|
 | Step 2 / 3 | Wrong-org posting — Entity A's invoice posted to Entity B's org | DELETE the wrongly-posted entry immediately. Re-post with the correct explicit `org_id`, after confirming it via `get_organization(org_id: <entity>)`. THIS IS THE #1 IC ERROR — pass and verify `org_id` on every leg; never rely on which org was active last. |
-| Step 5 | IC Receivable in A ≠ IC Payable in B | Investigate per-transaction: pull both `search_invoices(capsuleResourceId)` and `search_bills(capsuleResourceId)`, line-by-line compare amounts, valueDates, references. Common: one side posted Jan 31, other posted Feb 1 — timing diff that should resolve next period. Or one side posted USD-denominated and the other SGD — currency confusion. |
+| Step 5 | IC Receivable in A ≠ IC Payable in B | Investigate per-transaction: pull both `search_invoices(contactId: <B in A's org>, startDate, endDate)` and `search_bills(contactId: <A in B's org>, startDate, endDate)` (neither search filters by capsule), line-by-line compare amounts, valueDates, references. Common: one side posted Jan 31, other posted Feb 1 — timing diff that should resolve next period. Or one side posted USD-denominated and the other SGD — currency confusion. |
 | Cross-FX intercompany | Entity A in SGD, Entity B in USD — IC Receivable in A doesn't match USD-equivalent in B | Both sides should agree on the transaction-currency amount (e.g., USD 15,000). Translation to base currency happens at each entity's books separately. Reconciliation at the SOURCE currency level, not base. |
 | Transfer-pricing dispute (IRAS audit) | (process — separate from posting) | IC charges must satisfy arm's-length principle (SG: ITA s34D / OECD TPG). Maintain a transfer-pricing study and keep the supporting documentation on file. |
 | Both entities forget to post | (audit risk) | Year-end audit-prep step — auditor reconciles IC balances. Build a quarterly review into the close routine. |

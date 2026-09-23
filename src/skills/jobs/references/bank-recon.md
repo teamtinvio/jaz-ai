@@ -29,14 +29,14 @@
 - **`reconcile_cash_transfer(...)`** — inter-account transfer.
 
 ### Platform tools — create missing transactions
-- **`mcp magic create --file <pdf>` / `create_business_transaction_from_attachment(...)`** — step 6 path B: OCR + autofill bill or invoice from receipt PDF/JPG.
-- **`create_cash_in_entry(...)` / `create_cash_out_entry(...)`** — step 6 path C: bank fees, interest, FX charges that have no source document.
+- **`mcp magic create --file <pdf>` / `create_bt_from_attachment(...)`** — step 6 path B: OCR + autofill bill or invoice from receipt PDF/JPG.
+- **`create_cash_in(...)` / `create_cash_out(...)`** — step 6 path C: bank fees, interest, FX charges that have no source document.
 - **`create_bank_rule(...)`** — preventive: build a rule for any recurring pattern you handled this run (subscription, rent, utility) so it auto-applies next time.
 
 ### Platform tools — verification
-- **`generate_bank_recon_summary(period_end, accountResourceId)`** — step 7: per-account formal recon statement.
-- **`generate_bank_recon_details(period_end, accountResourceId)`** — step 7: line-level recon detail for audit pack.
-- **`generate_bank_balance_summary(period_end)`** — step 8: book balance vs bank statement balance per account.
+- **`generate_bank_recon_summary(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate)`** — step 7: per-account formal recon statement.
+- **`generate_bank_recon_details(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate, filter: {valueDate: {range: [from, to]}})`** — step 7: line-level recon detail for audit pack.
+- **`generate_bank_balance_summary(primarySnapshotDate)`** — step 8: book balance vs bank statement balance per account.
 
 ### CLI tools — bulk auto-match cascade (offline)
 - **`clio jobs bank-recon match --input <records.json> --tolerance 0.01 --date-window 14 --max-group 5 --json`** — the 5-phase cascade matcher (Phase 1 exact 1:1 hash join, Phase 2 fuzzy 1:1 greedy with weighted scoring, Phase 3 N:1, Phase 4 1:N, Phase 5 N:M). Returns matches sorted by confidence — feed each into the appropriate `reconcile_*` tool. See `bank-match.md` for the full algorithm.
@@ -83,7 +83,7 @@ Flag any item older than 60 days as red — surface to practitioner.
 search_bank_records(accountResourceId: B.resourceId, status: 'POSSIBLE_DUPLICATE', limit: 200)
 ```
 
-Two bank-feed entries with same `valueDate + netAmount + description` = system-flagged duplicate. Review each pair: archive the duplicate via `archive_bank_record(resourceId: <id>)` BEFORE running step 4. If you reconcile a duplicated row, you'll create double cashflow entries.
+Two bank-feed entries with same `valueDate + netAmount + description` = system-flagged duplicate. Review each pair and ask the user to archive the duplicate in the Jaz app BEFORE running step 4 (no tool archives a bank record). Until it is archived, reconcile neither row of the pair: reconciling a duplicated row creates double cashflow entries.
 
 Record the judgment per archived pair: `jot(kind: MATCH)` naming the kept entry, the archived entry, and the tie-breaker used.
 
@@ -158,33 +158,30 @@ For unreconciled rows that have no book-side counterpart yet:
 ```
 mcp magic create --file <invoice-or-receipt-path>
 # OR equivalent MCP call:
-create_business_transaction_from_attachment(
-  sourceFile: <base64 or upload>,
+create_bt_from_attachment(
   businessTransactionType: 'BILL' | 'INVOICE',
-  sourceType: 'FILE'
+  sourceUrl: <file URL>   // omit when the host attaches the file to the call
 )
 ```
 Magic does OCR + line item extraction + contact matching + CoA suggestion. Returns draft. Review, finalize via `finalize_bill` / `finalize_invoice`, then loop back to step 4 to reconcile.
 
 **Path C — bank fees / interest / FX charges (no document):**
 ```
-create_cash_out_entry(
+create_cash_out(
   reference: 'BANK-FEE-2025-01-15-001',
   valueDate: '2025-01-15',
   accountResourceId: <bank-account-id>,
   lines: [{
     accountResourceId: <Bank Charges expense GL>,
     amount: 25.00,
-    type: 'DEBIT',
-    name: 'Monthly service charge — Jan 2025'
-  }],
-  saveAsDraft: false
+    description: 'Monthly service charge, Jan 2025'
+  }]
 )
 ```
 
-Per rule 26: `accountResourceId` at top level is the BANK account; `lines[]` carries the offset (expense / income).
+Per rule 26: `accountResourceId` at top level is the BANK account; `lines[]` carries the offset (expense / income). Cash lines take no `type`: the endpoint sets the direction.
 
-For interest income: `create_cash_in_entry(...)` with `type: 'CREDIT'` line against `Interest Income`.
+For interest income: `create_cash_in(...)` with a line against `Interest Income`.
 
 After creating, loop back to step 4 to reconcile.
 
@@ -223,8 +220,8 @@ search_bank_records(accountResourceId: B.resourceId, status: 'UNRECONCILED', lim
 Target: zero rows OR all remaining are documented timing differences (outstanding cheques, deposits in transit clearing next period — practitioner annotates). Record the judgment: `jot(kind: SCOPE)` naming each residual accepted as a timing difference and why it clears next period.
 
 ```
-generate_bank_recon_summary(period_end: '2025-01-31', accountResourceId: B.resourceId)
-generate_bank_recon_details(period_end: '2025-01-31', accountResourceId: B.resourceId)
+generate_bank_recon_summary(bankAccountResourceId: B.resourceId, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31')
+generate_bank_recon_details(bankAccountResourceId: B.resourceId, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31', filter: {valueDate: {range: ['2025-01-01', '2025-01-31']}})
 ```
 
 Keep both the summary and the line-level detail per account — audit-prep step 7 will require them.
@@ -232,7 +229,7 @@ Keep both the summary and the line-level detail per account — audit-prep step 
 ## Step 8 — Cross-account verify
 
 ```
-generate_bank_balance_summary(period_end: '2025-01-31')
+generate_bank_balance_summary(primarySnapshotDate: '2025-01-31')
 ```
 
 Per account: `bookBalance == bankStatementBalance ± documentedTimingDifference`. Discrepancy = unreconciled item missed → loop back to step 2 for that account.
@@ -253,9 +250,9 @@ Per account: `bookBalance == bankStatementBalance ± documentedTimingDifference`
 | `reconcile_with_payments` | 422 `TOTAL_RECONCILIATION_AMOUNT_MISMATCHED...` | Payments + adjustments ≠ bank entry amount. Add the delta as an `adjustment.cashAdjustmentEntries[]` leg (over/under-payment or FX write-off) so the total matches, then resend. |
 | `reconcile_with_payments` | 422 `...does not exist` / invalid status | The BT isn't an open bill/invoice (wrong id, already paid, or draft). Re-fetch via `search_cashflow_transactions`; finalize if draft. |
 | `reconcile_invoice_receipt` | 422 `invoice_status_invalid` | Matched invoice still DRAFT. `finalize_invoice(resourceId: <id>)` first. |
-| `reconcile_invoice_receipt` | 422 `amount_mismatch` | Bank amount ≠ invoice balance. Either partial payment (post via `create_invoice_payment` with partial amount, then reconcile), or wrong match (revisit step 4/5). |
+| `reconcile_invoice_receipt` | 422 `amount_mismatch` | Bank amount ≠ invoice balance. Either partial payment (post via `pay_invoice` with partial amount, then reconcile), or wrong match (revisit step 4/5). |
 | `apply_bank_rule` | 422 `rule_action_unsupported` | Rule's configured action doesn't match the bank entry shape (e.g., rule expects positive amount, entry is negative). Edit the rule via `update_bank_rule`. |
-| `create_cash_out_entry` | 422 `lock_date_violated` | `valueDate` in locked period. Lift lock via `update_account` lockDate, post, re-lock. |
+| `create_cash_out` | 422 `lock_date_violated` | `valueDate` in locked period. Lift lock via `update_account` lockDate, post, re-lock. |
 | Step 7 `unreconciledCount > 0` after step 6 | (residual misses) | Surface to the user with categorized residual ("3 bank charges to expense via path C, 1 unidentified deposit pending client query"). Record the residuals. Do NOT progress the month-end close with open items. |
 
 ---

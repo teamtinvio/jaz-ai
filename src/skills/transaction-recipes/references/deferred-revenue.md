@@ -15,7 +15,7 @@
 - **`search_contacts(filter: {customer: true, name: {eq: <customer>}})`** — step 3: resolve the paying customer.
 - **`create_contact(...)` with `customer: true`** — step 3 fallback: create the customer if `search_contacts` returns empty.
 - **`search_accounts(filter: {name: {in: ['<deferred liability GL>', '<revenue GL>']}})`** — step 3: confirm both GL accounts exist.
-- **`generate_trial_balance(period_end: <date>)`** — step 5: verify Deferred Revenue balance unwinds correctly.
+- **`generate_trial_balance(endDate: <date>)`** — step 5: verify Deferred Revenue balance unwinds correctly.
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`finalize_invoice(resourceId: <id>)`** — step 4 fallback: lift the upfront invoice from DRAFT to ACTIVE once practitioner confirms the engagement is genuinely starting.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT recognition journal.
@@ -49,17 +49,12 @@ Returns: `{ perPeriodAmount: 2000, recognitionStartDate: '2025-01-31', recogniti
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'deferred-revenue',
   amount: 24000,
   periods: 12,
   startDate: '2025-01-01',
-  currency: 'SGD',
-  glDeferredLiability: <resourceId of 'Deferred Revenue' account>,
-  glRevenue: <resourceId of 'Subscription Revenue' account>,
-  capsuleType: 'Deferred Revenue',
-  capsuleName: 'FY2025 Acme Annual License',
-  customer: 'Acme Pte Ltd'
+  currency: 'SGD'
 )
 ```
 
@@ -87,7 +82,7 @@ Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, r
 - Step 1: 1 invoice (upfront $24,000 to customer; line coded to Deferred Revenue). DRAFT — finalize via `finalize_invoice(resourceId: <invoiceResourceId>)` once the engagement starts.
 - Steps 2..N+1: **N future-dated DRAFT recognition journals** (each Dr Deferred Revenue $2,000 / Cr Subscription Revenue $2,000), dated end-of-month for periods 1 through 12.
 
-All N journals attach to the same capsule. Customer payment: handled separately via the standard payment flow on the invoice (NOT part of this recipe — recipe assumes upfront cash arrives via `create_invoice_payment` separately and rolls into AR settlement).
+All N journals attach to the same capsule. Customer payment: handled separately via the standard payment flow on the invoice (NOT part of this recipe — recipe assumes upfront cash arrives via `pay_invoice` separately and rolls into AR settlement).
 
 ### Step 5 — Monthly action (during monthly-close)
 
@@ -99,7 +94,7 @@ update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 Verify after finalize:
-- `generate_trial_balance(period_end: <period-end>)`.
+- `generate_trial_balance(endDate: <period-end>)`.
 - Assert: `balance['Deferred Revenue'] == amount - (perPeriodAmount × periodsFinalizedSoFar)` (within 1 cent).
 - Assert: `balance['Subscription Revenue'] (period MTD) == perPeriodAmount` (within 1 cent).
 
@@ -122,7 +117,7 @@ If customer cancels mid-term: invoke ad-hoc adjustment — delete remaining DRAF
 | `execute_recipe` | 422 `currency_not_enabled` | The recipe currency isn't enabled for the org. `add_currency` first. |
 | `execute_recipe` | 409 `capsule_already_exists` | Step 0 should have caught this. Re-run step 0. |
 | `finalize_invoice` | 422 `invoice_unbalanced` | Engine output is always balanced. Escalate. |
-| `bulk_finalize_drafts` | 422 `journal_in_locked_period` | Period was locked before this monthly-close. Lift lock, finalize, re-lock. |
+| `bulk_update_journals` | 422 `journal_in_locked_period` | Period was locked before this monthly-close. Lift lock, finalize, re-lock. |
 | Customer cancels mid-term | (process) | Delete remaining DRAFT journals via `delete_journal(resourceId: <id>)` per period; issue customer credit note for the unrecognized portion via `create_customer_credit_note`. |
 
 ---

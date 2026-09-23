@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.65.1] - 2026-09-24
+
+**Assistants find overdue invoices and follow the playbooks with the right tools.**
+
+Asking for overdue invoices or bills now returns them. The assistant used to search for an "overdue" status that does not exist, which returned nothing without an error. It now looks for unpaid and partly paid documents due before today in your organization's timezone.
+
+The month-end, quarter-end, year-end, audit, payment run, GST, credit control, bank reconciliation and supplier reconciliation playbooks, and the transaction recipes, now name tools and parameters that exist. Earlier text named some tools that were never available and used report parameters the tools ignore, so a general ledger meant for one account could come back unfiltered. The payment run and GST checks now include partly paid documents.
+
+The MCP connection now states correctly that documents are created as drafts unless you ask to post them.
+
 ## [5.65.0] - 2026-09-23
 
 Internal hosted-agent model update. No user-facing changes since v5.64.0.

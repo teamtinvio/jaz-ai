@@ -5,19 +5,19 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools — financial statements
-- **`generate_trial_balance(period_end: <FY-end>)`** — step 2: master reconciliation. Every other report ties back to this.
-- **`generate_balance_sheet(period_end: <FY-end>)`** — step 3.
-- **`generate_profit_and_loss(period_start: <FY-start>, period_end: <FY-end>)`** — step 3.
-- **`generate_cashflow(period_start, period_end)`** — step 4.
-- **`generate_equity_movement(period_start, period_end)`** — step 4.
-- **`generate_general_ledger(period_start, period_end, groupBy: 'ACCOUNT')`** — step 5: the auditor's primary working document.
+- **`generate_trial_balance(endDate: <FY-end>)`** — step 2: master reconciliation. Every other report ties back to this.
+- **`generate_balance_sheet(snapshotDate: <FY-end>)`** — step 3.
+- **`generate_profit_and_loss(startDate: <FY-start>, endDate: <FY-end>)`** — step 3.
+- **`generate_cashflow(startDate, endDate)`** — step 4.
+- **`generate_equity_movement(primarySnapshotStartDate, primarySnapshotEndDate)`** — step 4.
+- **`generate_general_ledger(startDate, endDate, groupBy: 'ACCOUNT')`** — step 5: the auditor's primary working document.
 
 ### Platform tools — supporting schedules
-- **`generate_aged_ar(period_end)` / `generate_aged_ap(period_end)`** — step 6.
-- **`generate_bank_recon_summary(period_end)` / `generate_bank_recon_details(period_end)`** — step 7. NON-NEGOTIABLE deliverable.
-- **`generate_bank_balance_summary(period_end)`** — step 7. Cross-reference to bank confirmation letters.
-- **`generate_fa_summary(period_end)` / `generate_fa_recon_summary(period_start, period_end)`** — step 8.
-- **`generate_vat_ledger(period_start, period_end)`** — step 9. Annual total ties to sum of quarterly F5 returns.
+- **`generate_aged_ar(endDate)` / `generate_aged_ap(endDate)`** — step 6.
+- **`generate_bank_recon_summary(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate)` / `generate_bank_recon_details(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate, filter)` per bank account** — step 7. NON-NEGOTIABLE deliverable.
+- **`generate_bank_balance_summary(primarySnapshotDate)`** — step 7. Cross-reference to bank confirmation letters.
+- **`generate_fa_summary(primarySnapshotStartDate, primarySnapshotEndDate, groupBy)` / `generate_fa_recon_summary(primarySnapshotStartDate, primarySnapshotEndDate)`** — step 8.
+- **`generate_vat_ledger(startDate, endDate)`** — step 9. Annual total ties to sum of quarterly F5 returns.
 
 ### Platform tools — XLSX deliverables
 - **`download_export(exportType: '<type>', startDate, endDate)`** — step 10: pre-signed XLSX URL (~5 min expiry). Per `jaz-api/SKILL.md` rule (data-exports), supported types include `trial-balance`, `profit-and-loss`, `balance-sheet`, `general-ledger`, `ar-report`, `ap-report`, `cashflow`, `analysis-anomalous-bills`, `analysis-anomalous-invoices`, `analysis-cashflow-anomalies`, `analysis-gl-journal-audit`, `analysis-exchange-rate-audit`, `analysis-receivables-customer-risk`, `analysis-cash-expense-health`. The audit-analyses are essential pre-emptive flags for the auditor.
@@ -61,7 +61,7 @@ The jurisdiction-specific deliverable list. SG: TB / BS / P&L / CF / EM / AR agi
 ## Step 2 — Trial balance (the master)
 
 ```
-generate_trial_balance(period_end: '2025-12-31', currency: <base currency>)
+generate_trial_balance(endDate: '2025-12-31', currencyCode: <base currency>)
 ```
 
 Save the FY trial balance. Verify: every report from step 3 onwards must tie back to a TB line.
@@ -69,14 +69,14 @@ Save the FY trial balance. Verify: every report from step 3 onwards must tie bac
 ## Step 3 — Primary financial statements
 
 ```
-generate_balance_sheet(period_end: '2025-12-31')
-generate_profit_and_loss(period_start: '2025-01-01', period_end: '2025-12-31')
+generate_balance_sheet(snapshotDate: '2025-12-31')
+generate_profit_and_loss(startDate: '2025-01-01', endDate: '2025-12-31')
 ```
 
 Optional comparative:
 ```
-generate_profit_and_loss(period_start: '2024-01-01', period_end: '2024-12-31')
-generate_balance_sheet(period_end: '2024-12-31')
+generate_profit_and_loss(startDate: '2024-01-01', endDate: '2024-12-31')
+generate_balance_sheet(snapshotDate: '2024-12-31')
 ```
 
 Assert: BS Total Assets = Total Liabilities + Total Equity. P&L Net Profit ties to Equity Movement (step 4) `netProfit` line.
@@ -84,8 +84,8 @@ Assert: BS Total Assets = Total Liabilities + Total Equity. P&L Net Profit ties 
 ## Step 4 — Cashflow + Equity Movement
 
 ```
-generate_cashflow(period_start: '2025-01-01', period_end: '2025-12-31')
-generate_equity_movement(period_start: '2025-01-01', period_end: '2025-12-31')
+generate_cashflow(startDate: '2025-01-01', endDate: '2025-12-31')
+generate_equity_movement(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
 ```
 
 Cashflow classifies into Operating / Investing / Financing per IAS 7. Equity Movement reconciles opening equity → net profit → dividends → other movements → closing equity. The closing equity must tie to BS step 3 Total Equity.
@@ -93,7 +93,7 @@ Cashflow classifies into Operating / Investing / Financing per IAS 7. Equity Mov
 ## Step 5 — General Ledger (auditor's working document)
 
 ```
-generate_general_ledger(period_start: '2025-01-01', period_end: '2025-12-31', groupBy: 'ACCOUNT')
+generate_general_ledger(startDate: '2025-01-01', endDate: '2025-12-31', groupBy: 'ACCOUNT')
 ```
 
 The tool returns 50 rows per call by default. Page it at `limit` 50-100: a GL row is about 1KB, so larger pages get cut to the tool's result cap and come back with `_truncated`. The offset is a ROW offset (`jaz-api/SKILL.md` rule 38): step it by the rows the call actually returned, which is what `_paging.nextOffset` holds, and stop when a result carries no `_paging`. Keep the full GL for the pack, since the auditor will sample-test from it. From the CLI, `clio reports generate general-ledger --all` pages it for you.
@@ -101,8 +101,8 @@ The tool returns 50 rows per call by default. Page it at `limit` 50-100: a GL ro
 ## Step 6 — AR / AP aging
 
 ```
-generate_aged_ar(period_end: '2025-12-31')
-generate_aged_ap(period_end: '2025-12-31')
+generate_aged_ar(endDate: '2025-12-31')
+generate_aged_ap(endDate: '2025-12-31')
 ```
 
 Use `endDate` not `startDate` (rule 36 — point-in-time snapshot). Assert:
@@ -111,16 +111,16 @@ Use `endDate` not `startDate` (rule 36 — point-in-time snapshot). Assert:
 
 If ECL provision feels inadequate for the > 90d bucket, run the ECL recipe immediately:
 ```
-plan_recipe(recipe: 'ecl', receivables: <aged_ar.buckets converted to ECL input>, ...)
+plan_recipe(recipe: 'ecl', buckets: <aged AR buckets as [{name, balance, rate}]>, existingProvision, startDate, ...)
 ```
 And post any top-up provision via `execute_recipe`. This avoids an auditor-proposed adjustment at fieldwork.
 
 ## Step 7 — Bank reconciliation (NON-NEGOTIABLE)
 
 ```
-generate_bank_recon_summary(period_end: '2025-12-31')
-generate_bank_recon_details(period_end: '2025-12-31')
-generate_bank_balance_summary(period_end: '2025-12-31')
+generate_bank_recon_summary(bankAccountResourceId: <each bank account>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
+generate_bank_recon_details(bankAccountResourceId: <each bank account>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', filter: {valueDate: {range: ['2025-01-01', '2025-12-31']}})
+generate_bank_balance_summary(primarySnapshotDate: '2025-12-31')
 ```
 
 For each bank account: `unreconciledCount` MUST be 0 OR every unreconciled item has a documented timing-difference explanation. The auditor will request bank confirmation letters DIRECTLY from your banks — `generate_bank_balance_summary` total must reconcile to those letters within tolerance.
@@ -130,8 +130,8 @@ If `unreconciledCount > 0`: halt audit-prep and route back to `bank-recon.md` jo
 ## Step 8 — Fixed assets + supporting schedules
 
 ```
-generate_fa_summary(period_end: '2025-12-31')
-generate_fa_recon_summary(period_start: '2025-01-01', period_end: '2025-12-31')
+generate_fa_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
+generate_fa_recon_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
 ```
 
 Assert: `fa_recon.openingNbv + additions - disposals - depreciation == fa_recon.closingNbv == TB['Fixed Assets'].balance`.
@@ -145,7 +145,7 @@ For each capsule, run the matching `clio calc <type>` to produce the independent
 ## Step 9 — Tax ledger
 
 ```
-generate_vat_ledger(period_start: '2025-01-01', period_end: '2025-12-31')
+generate_vat_ledger(startDate: '2025-01-01', endDate: '2025-12-31')
 ```
 
 For SG: annual total ties to sum of 4 quarterly GST F5 returns. For PH: annual total ties to monthly VAT returns + quarterly summary. The annual reconciliation should already be clean if the `gst-vat-filing.md` job ran each period.
@@ -223,8 +223,8 @@ The SG Form C-S wizard walks the user field-by-field through the C-S form, prefi
 | `generate_bank_recon_*` | `unreconciledCount > 0` | Route to `bank-recon.md`; do NOT hand pack with this open. |
 | `download_export` | 422 `period_too_long` | GL XLSX rejected for >12 months. Split into per-quarter exports. |
 | `download_export` | 504 timeout | Large org. Re-run with smaller `endDate` range or contact infrastructure team. |
-| `update_account` | 422 `lock_date_in_future` | The CoA `lockDate` must be ≤ `period_end`. Use today if unsure. |
-| Reconciliation | TB AR ≠ AR aging | Likely a mid-period credit-note application missed. `search_customer_credit_notes(filter: {valueDate: {between: ...}})` and verify each was applied via `apply_credit_to_invoice`. |
+| `update_account` | 422 `lock_date_in_future` | The CoA `lockDate` must be ≤ the period end date. Use today if unsure. |
+| Reconciliation | TB AR ≠ AR aging | Likely a mid-period credit-note application missed. `search_customer_credit_notes(filter: {valueDate: {between: ...}})` and verify each was applied via `apply_credits_to_invoice`. |
 | Reconciliation | TB Cash ≠ bank balance summary | Unposted bank journal or unreconciled item. Re-run step 7. |
 | Step 12 gate | Drafts present at year-end | Either clear (finalize) or document the residuals and surface to the user. NEVER hand the pack over with drafts in the audit period. |
 

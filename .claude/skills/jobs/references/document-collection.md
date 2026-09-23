@@ -5,9 +5,9 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools
-- **`mcp magic create --file <pdf>` / `create_business_transaction_from_attachment(sourceFile, businessTransactionType: 'BILL'|'INVOICE'|'CREDIT_NOTE', sourceType: 'FILE')`** — step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction.
+- **`mcp magic create --file <pdf>` / `create_bt_from_attachment(businessTransactionType: 'BILL'|'INVOICE'|'CUSTOMER_CREDIT_NOTE'|'SUPPLIER_CREDIT_NOTE', sourceUrl)`** — step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction.
 - **`finalize_bill(...)` / `finalize_invoice(...)` / `finalize_customer_credit_note(...)`** — step 5: finalize practitioner-reviewed Magic-extracted DRAFTs.
-- **`import_bank_statement(bankAccountResourceId, sourceFile, sourceType: 'FILE')`** — step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
+- **`import_bank_statement(accountResourceId, sourceUrl | attachmentId)`** — step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
 - **`search_background_jobs(filter: {resourceId: {eq: <jobId>}})`** — step 7: poll Magic / bank-import async jobs to terminal status.
 
 ### CLI tools (jaz-cli — offline)
@@ -88,10 +88,9 @@ For each file with `suggestedAction: 'magic-create-bill' | 'magic-create-invoice
 ```
 mcp magic create --file <decrypted path> --type bill
 # OR equivalent MCP call:
-create_business_transaction_from_attachment(
-  sourceFile: <multipart upload>,
+create_bt_from_attachment(
   businessTransactionType: 'BILL',
-  sourceType: 'FILE'
+  sourceUrl: <file URL>   // omit when the host attaches the file to the call
 )
 ```
 
@@ -117,7 +116,7 @@ When approved:
 ```
 finalize_bill(resourceId: <id>)
 # OR for batch:
-bulk_finalize_drafts({kind: 'bill', resourceIds: [...]})
+bulk_finalize_drafts(items: [{type: 'bill', resourceId: <id>}, ...])
 ```
 
 ## Step 6 — Bank statement import
@@ -133,9 +132,8 @@ Match by name + currency to the statement (typically the bank logo + account num
 
 ```
 import_bank_statement(
-  bankAccountResourceId: <bank id>,
-  sourceFile: <statement file>,
-  sourceType: 'FILE'
+  accountResourceId: <bank id>,
+  sourceUrl: <statement file URL>   // or attachmentId
 )
 ```
 
@@ -174,9 +172,9 @@ Auditor sample-test traces from a posted bill back to the source PDF. Audit trai
 | Step 4 Magic | 422 `unsupported_file_type` | Convert to PDF / JPG first. Excel / Word formats not supported by Magic OCR. |
 | Step 4 Magic | Job stays in QUEUED for > 5 minutes | Magic queue is backed up. Check status; consider manual posting if blocking close. |
 | Step 4 Magic | `PARTIAL_SUCCESS` with low-confidence extractions | Review each in step 5; practitioner overrides. Magic confidence < 0.7 = manual review required. |
-| Step 5 review | Wrong contact assigned | `update_bill(contactResourceId: <correct id>)` before finalize. |
+| Step 5 review | Wrong contact assigned | `update_bill(resourceId: <bill id>, ...)` does not take `contactResourceId`: delete the draft and re-create it against the correct contact, then finalize. |
 | Step 5 review | Wrong line-item GL | `update_bill(lineItems: [<corrected>])` before finalize. |
-| Step 6 bank import | 422 `bank_format_unsupported` | Bank format not supported (some niche banks). Manual `add_bank_records(bankAccountResourceId, records: [...])` per statement line. |
+| Step 6 bank import | 422 `bank_format_unsupported` | Bank format not supported (some niche banks). Manual `add_bank_records(accountResourceId, records: [...])` per statement line. |
 | Step 7 polling | Job stuck in PROCESSING > 10 minutes | Escalate; usually a Magic backend issue. |
 
 ---

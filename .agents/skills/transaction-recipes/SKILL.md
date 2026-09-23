@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 5.65.0
+version: 5.65.1
 description: >-
   Use this skill when modeling complex multi-step accounting transactions —
   anything that spans multiple periods, involves changing amounts, or requires
@@ -312,8 +312,8 @@ The trigger mutation is **best-effort post-commit**: if the recipe publish fails
 | Gate | Constraint | Pre-flight check |
 |---|---|---|
 | **Base trx type** | `recipeName` must match a trigger mutation in the recipe's `allowedBaseTransactionTypes`. PREPAID_AMORTIZATION→PURCHASE, DEFERRED_REVENUE→SALE, ACCRUAL_REVERSAL→JOURNAL_MANUAL, IFRS16_LEASE→JOURNAL_MANUAL, LOAN_AMORTIZATION→JOURNAL_DIRECT_CASH_IN \| JOURNAL_MANUAL | `get_capsule_recipe(name).allowedBaseTransactionTypes` ↔ trigger mutation |
-| **Currency** | Recipe `currency`, every `*AccountResourceId` account's `currencyCode`, and base trx `currencyCode` ALL must match (v1 recipes are single-currency) | `get_account(<id>).currencyCode` for every input account |
-| **Account class** | Each `*AccountResourceId` slot has an `x-accountClass` constraint in the recipe inputSchema (Asset/Liability/Expense/Revenue) | `get_capsule_recipe(name).versions[0].inputSchema.properties.<field>['x-accountClass']` vs `get_account(<id>).accountClass` |
+| **Currency** | Recipe `currency`, every `*AccountResourceId` account's `currencyCode`, and base trx `currencyCode` ALL must match (v1 recipes are single-currency) | `currencyCode` of every input account, via `search_accounts(filter: {resourceId: {in: [<ids>]}})` |
+| **Account class** | Each `*AccountResourceId` slot has an `x-accountClass` constraint in the recipe inputSchema (Asset/Liability/Expense/Revenue) | `get_capsule_recipe(name).versions[0].inputSchema.properties.<field>['x-accountClass']` vs each account's `accountClass` from the same `search_accounts` read |
 
 **The canonical pre-flight is one call**: `preview_capsule_recipe(recipeName, inputs)`. Pure-compute (no side effects). Surfaces every input/class/currency violation as a clean 422 with a concrete `error_type`. The trigger mutation does NOT surface these — it just returns its normal success status with no `capsuleRecipeJob`. Always preview first if you can't trust the inputs.
 

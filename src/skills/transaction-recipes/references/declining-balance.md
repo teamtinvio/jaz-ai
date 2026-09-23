@@ -14,7 +14,7 @@
 ### Tools (jaz-api / direct)
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check. One depreciation capsule per asset; duplicate setup is almost always an error.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation — Vehicles', 'Depreciation Expense']}})`** — step 3: confirm the asset, contra-asset, and expense GL accounts exist.
-- **`generate_trial_balance(period_end: <date>)`** — step 5: verify NBV matches schedule.
+- **`generate_trial_balance(endDate: <date>)`** — step 5: verify NBV matches schedule.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted DRAFT depreciation journal.
 
 ### Cross-references
@@ -51,6 +51,7 @@ Save schedule to `workpapers/<period>/depreciation-<asset-id>.json` for the work
 
 ```
 plan_recipe(
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'depreciation',
   cost: 50000,
   salvageValue: 5000,
@@ -58,12 +59,7 @@ plan_recipe(
   method: 'ddb',
   frequency: 'monthly',
   startDate: '2025-01-01',
-  currency: 'SGD',
-  glAsset: <resourceId of 'Vehicles' account>,
-  glAccumDep: <resourceId of 'Accumulated Depreciation — Vehicles' account>,
-  glDepExpense: <resourceId of 'Depreciation Expense' account>,
-  capsuleType: 'Depreciation',
-  capsuleName: 'DDB Depreciation — 5 years (Delivery Vehicle FY2025)'
+  currency: 'SGD'
 )
 ```
 
@@ -98,7 +94,7 @@ update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 Verify after finalize:
-- `generate_trial_balance(period_end: <month-end>)`.
+- `generate_trial_balance(endDate: <month-end>)`.
 - Assert: `balance['Accumulated Depreciation — Vehicles'] == -schedule[periodIndex].accumulatedDepreciation` (within 1 cent).
 - Assert: `balance['Depreciation Expense'] (period MTD) == schedule[periodIndex].depreciationAmount` (within 1 cent).
 - Assert: `balance['Vehicles'] - |balance['Accumulated Depreciation — Vehicles']| == schedule[periodIndex].closingBookValue`.

@@ -5,12 +5,12 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools
-- **`generate_aged_ar(period_end: <date>)`** — step 1: AR aging report with bucket breakdown.
+- **`generate_aged_ar(endDate: <date>)`** — step 1: AR aging report with bucket breakdown.
 - **`search_invoices(filter: {status: {eq: 'UNPAID'}, dueDate: {lt: <date>}, contactResourceId: <customer>}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`** — step 2: per-customer overdue detail. Paginate.
 - **`get_contact(resourceId: <customer id>)`** — step 2: pull contact info (email, phone, primary contact).
 - **`get_contact_signals(resourceId: <id>, btType: 'SALE')`** — step 3: pull cadence + outlier signals + outstanding balance for the customer. Mid-7 endpoint.
-- **`apply_credit_to_invoice(...)`** / **`create_customer_credit_note(...)`** — step 6: write-off path A for stage-3 specific impairment.
-- **`create_invoice_payment(... paymentMethod: 'DEBT_WRITE_OFF' ...)`** — step 6: write-off path B (direct).
+- **`apply_credits_to_invoice(...)`** / **`create_customer_credit_note(...)`** — step 6: write-off path A for stage-3 specific impairment.
+- **`pay_invoice(... paymentMethod: 'DEBT_WRITE_OFF' ...)`** — step 6: write-off path B (direct).
 - **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — step 7: ECL collective top-up if material change in aging.
 - **`download_export(exportType: 'analysis-receivables-customer-risk', startDate, endDate)`** — step 8: pre-empt audit by surfacing high-risk customers.
 
@@ -28,7 +28,7 @@ Walk steps 1-8 below. (Local CLI: `clio jobs credit-control --overdue-days 30` p
 ## Step 1 — AR aging snapshot
 
 ```
-generate_aged_ar(period_end: '2025-01-31')
+generate_aged_ar(endDate: '2025-01-31')
 ```
 
 Save the AR aging snapshot. Returns aging buckets (current, 30d, 60d, 90d, 120d+) per customer. Total per bucket informs collection priority.
@@ -93,7 +93,7 @@ For each customer chased: keep a chase log with:
 - Promised payment date (if any)
 - Next action date
 
-Capsule alternative: `create_capsule(capsuleType: 'Bad Debt Write-off', title: 'Credit Control — <customer> — FY2025')` with the chase log as the description; attach any eventual write-off journal / credit note to the same capsule for audit trail.
+Capsule alternative: `create_capsule(capsuleTypeResourceId: <id of 'Bad Debt Write-off' from list_capsule_types>, title: 'Credit Control — <customer> — FY2025')` with the chase log as the description; attach any eventual write-off journal / credit note to the same capsule for audit trail.
 
 ## Step 6 — Specific write-off (stage-3 impairment)
 
@@ -108,26 +108,25 @@ create_customer_credit_note(
   lineItems: [{
     name: 'Write-off — uncollectible (formal insolvency)',
     accountResourceId: <Bad Debt Expense GL>,
-    amount: <balance to write off>,
-    saveAsDraft: false
+    quantity: 1,
+    unitPrice: <balance to write off>
   }],
+  saveAsDraft: false,
   capsuleResourceId: <credit-control capsule>
 )
-apply_credit_to_invoice(invoiceResourceId: <inv>, creditNoteResourceId: <cn>, amount: <balance>)
+apply_credits_to_invoice(resourceId: <inv>, credits: [{creditNoteResourceId: <cn>, amountApplied: <balance>}])
 ```
 
 **Path B — direct write-off**:
 ```
-create_invoice_payment(
-  invoiceResourceId: <inv>,
-  payments: [{
-    paymentAmount: <balance>,
-    transactionAmount: <balance>,
-    accountResourceId: <Bad Debt Expense GL>,
-    paymentMethod: 'DEBT_WRITE_OFF',
-    reference: 'WRITE-OFF-<inv>',
-    valueDate: '2025-01-31'
-  }]
+pay_invoice(
+  resourceId: <inv>,
+  paymentAmount: <balance>,
+  transactionAmount: <balance>,
+  accountResourceId: <Bad Debt Expense GL>,
+  paymentMethod: 'DEBT_WRITE_OFF',
+  reference: 'WRITE-OFF-<inv>',
+  valueDate: '2025-01-31'
 )
 ```
 
@@ -145,9 +144,9 @@ clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rate
 
 If `topUpRequired > materiality threshold`:
 ```
-plan_recipe(recipe: 'ecl', ..., capsuleResourceId: <credit-control capsule OR new ECL Provision capsule>)
-execute_recipe(...)
-bulk_finalize_drafts({kind: 'journal'}, resourceIds: [...]})
+plan_recipe(recipe: 'ecl', ...)
+execute_recipe(...)   // creates its own ECL Provision capsule; regroup with move_transaction_capsules if needed
+bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])
 ```
 
 Note: monthly ECL is typically a mental check; formal ECL provision recompute is quarterly (per `quarter-end-close.md` Q2). Trigger this monthly only on material shifts.
@@ -168,7 +167,7 @@ Returns XLSX with high-risk customer flags (rising aging trends, recently-defaul
 |--------|-------|----------|
 | Step 2 | `search_invoices` returns 0 despite aging shows overdue | Aging report may include `PARTIALLY_PAID` invoices; expand filter `status: {in: ['UNPAID', 'PARTIALLY_PAID']}`. |
 | Step 3 | `get_contact_signals` returns `null` | The freshness layer is offline; skip the signals step and use aging alone. Don't halt the job. |
-| Step 6 Path A | `apply_credit_to_invoice` 422 `credit_exceeds_balance` | Split the credit across multiple invoices, OR reduce the credit amount to match the bill balance. |
+| Step 6 Path A | `apply_credits_to_invoice` 422 `credit_exceeds_balance` | Split the credit across multiple invoices, OR reduce the credit amount to match the bill balance. |
 | Step 6 Path B | `paymentMethod: 'DEBT_WRITE_OFF'` rejected | Verify the enum value via `jaz-api/SKILL.md` (some orgs may have custom payment-method config; default supports DEBT_WRITE_OFF). |
 | Step 7 ECL recipe | Top-up causes Bad Debt Expense to spike | Expected — material aging shift = material P&L impact. Surface to practitioner; potentially split across multiple periods if it's a known one-off (rare). |
 | Customer files insolvency mid-chase | (process) | Stop chase. Move directly to step 6 specific write-off. Document the insolvency filing reference. |

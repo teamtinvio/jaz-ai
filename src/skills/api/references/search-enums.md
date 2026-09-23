@@ -2,7 +2,7 @@
 
 > Valid enum values for every searchable field, organized by entity.
 > For filter syntax and operators, see [search-reference.md](./search-reference.md).
-> For complex composition and recipes, see [search-recipes.md](./search-recipes.md).
+> For the `query` expression language and composition examples, see [search-syntax.md](./search-syntax.md).
 
 ---
 
@@ -110,7 +110,7 @@ org has no such account". `search_accounts` does not normalise — only
 **Amount fields**: `totalAmount`, `balanceAmount`, `reconciledAmount`, `paymentRecordedAmount`, `creditAppliedAmount`
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
 
-> **Note**: `OVERDUE` is not a direct status value. To find overdue invoices, use a compound filter: `status IN [UNPAID, PARTIALLY_PAID] AND dueDate < {today}`. See [search-recipes.md](./search-recipes.md#virtual-statuses).
+> **Note**: `OVERDUE` is not a status value (a list with it returns 422, a search matches nothing). To find overdue invoices, filter `{"status": {"in": ["UNPAID", "PARTIALLY_PAID"]}, "dueDate": {"lt": "<today in the organization's timezone>"}}`. With `search_invoices`: `status: "UNPAID,PARTIALLY_PAID"` and `dueDateTo` set to yesterday in the organization's timezone. Same for bills.
 
 ---
 

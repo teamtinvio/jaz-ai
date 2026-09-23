@@ -12,11 +12,11 @@
 - **`clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <r1>,<r2>,<r3>,<r4>,<r5> --existing-provision <ep> --currency <code> --json`** — used in step 1: applies per-bucket loss rates to receivables aged into 5 buckets. Returns `{ totalReceivables, calculatedEcl, existingProvision, topUpRequired, perBucket: [{bucket, balance, lossRate, ecl}, ...] }`. Top-up positive = increase provision; negative = release / reverse.
 
 ### Tools (jaz-api / direct)
-- **`generate_aged_ar(period_end: <date>)`** — step 1 input: pull AR aged into the same 5 buckets the calculator expects (current, 30d, 60d, 90d, 120d+).
+- **`generate_aged_ar(endDate: <date>)`** — step 1 input: pull AR aged into the same 5 buckets the calculator expects (current, 30d, 60d, 90d, 120d+).
 - **`search_accounts(filter: {name: {in: ['Allowance for Doubtful Debts', 'Bad Debt Expense']}})`** — step 3.
-- **`generate_trial_balance(period_end: <date>)`** — step 1 input: pull `existingProvision` from current `Allowance for Doubtful Debts` balance; step 5 verify post-journal balance matches calculated ECL.
+- **`generate_trial_balance(endDate: <date>)`** — step 1 input: pull `existingProvision` from current `Allowance for Doubtful Debts` balance; step 5 verify post-journal balance matches calculated ECL.
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check (one ECL capsule per period; quarterly = 4 per FY).
-- **`apply_credit_to_invoice(...)` / `create_customer_credit_note(...)`** — step 6 specific write-off pattern: when individual invoices are deemed unrecoverable, write them off via credit note OR direct payment with `paymentMethod: 'DEBT_WRITE_OFF'` (per memory rule).
+- **`apply_credits_to_invoice(...)` / `create_customer_credit_note(...)`** — step 6 specific write-off pattern: when individual invoices are deemed unrecoverable, write them off via credit note OR direct payment with `paymentMethod: 'DEBT_WRITE_OFF'` (per memory rule).
 
 ### Cross-references
 - Operational context: invoked during year-end close (Y4 in `year-end-close.md`) for FY-end ECL; during the GST/VAT filing cycle if quarterly cadence is set; rarely during month-end close (mental check during variance review only).
@@ -38,7 +38,7 @@ If a result returns: halt. ECL is one-shot per period; duplicate would double-re
 ### Step 1 — Pull AR aging + existing provision
 
 ```
-generate_aged_ar(period_end: '2025-12-31')
+generate_aged_ar(endDate: '2025-12-31')
 ```
 
 Returns aging buckets. Map to calculator inputs:
@@ -49,7 +49,7 @@ Returns aging buckets. Map to calculator inputs:
 - `120d+` (over 120d)
 
 ```
-generate_trial_balance(period_end: '2025-12-31')
+generate_trial_balance(endDate: '2025-12-31')
 ```
 
 Pull `balance['Allowance for Doubtful Debts']` (sign-flipped — it's a contra-asset, naturally credit balance). This is `existingProvision`.
@@ -100,7 +100,7 @@ If `topUpRequired` is negative (calculated ECL < existing provision): the journa
 For each account in `requiredAccounts`:
 - `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Allowance for Doubtful Debts` → `Current Asset` (contra-AR; sometimes set up as separate account, sometimes as a sub-account of `Accounts Receivable`); `Bad Debt Expense` → `Operating Expense`.
 
-If `Allowance for Doubtful Debts` doesn't exist in the CoA: `create_account(name: 'Allowance for Doubtful Debts', accountType: 'Current Asset')` first. Common gap in CoAs that haven't run formal ECL.
+If `Allowance for Doubtful Debts` doesn't exist in the CoA: `create_account(name: 'Allowance for Doubtful Debts', code: <unused account code>, accountType: 'Current Asset')` first. Common gap in CoAs that haven't run formal ECL.
 
 ### Step 4 — Execute
 
@@ -117,7 +117,7 @@ Returns: `{ capsule: {resourceId, type, title}, steps: [{step: 1, action: 'journ
 ### Step 5 — Verify
 
 ```
-generate_trial_balance(period_end: '2025-12-31')
+generate_trial_balance(endDate: '2025-12-31')
 ```
 
 Assert:
@@ -138,25 +138,24 @@ create_customer_credit_note(
   lineItems: [{
     name: 'Write-off — uncollectible',
     accountResourceId: <Bad Debt Expense GL>,
-    amount: <invoice balance>,
-    saveAsDraft: false
-  }]
+    quantity: 1,
+    unitPrice: <invoice balance>
+  }],
+  saveAsDraft: false
 )
-apply_credit_to_invoice(invoiceResourceId: <inv>, creditNoteResourceId: <cn>, amount: <balance>)
+apply_credits_to_invoice(resourceId: <inv>, credits: [{creditNoteResourceId: <cn>, amountApplied: <balance>}])
 ```
 
 **Path B — direct write-off** (simpler):
 ```
-create_invoice_payment(
-  invoiceResourceId: <inv>,
-  payments: [{
-    paymentAmount: <balance>,
-    transactionAmount: <balance>,
-    accountResourceId: <Bad Debt Expense GL>,
-    paymentMethod: 'DEBT_WRITE_OFF',
-    reference: 'WRITE-OFF-<inv-ref>',
-    valueDate: '2025-12-31'
-  }]
+pay_invoice(
+  resourceId: <inv>,
+  paymentAmount: <balance>,
+  transactionAmount: <balance>,
+  accountResourceId: <Bad Debt Expense GL>,
+  paymentMethod: 'DEBT_WRITE_OFF',
+  reference: 'WRITE-OFF-<inv-ref>',
+  valueDate: '2025-12-31'
 )
 ```
 
@@ -173,8 +172,8 @@ Write-offs reduce both the gross AR balance AND offset against the existing Allo
 | `plan_recipe` | 422 `unsupported_recipe` | File-name alias `bad-debt-provision` was used. Use canonical engine name `ecl`. |
 | `plan_recipe` | 422 `bucket_count_invalid` | Engine expects exactly 5 buckets: current, 30d, 60d, 90d, 120d+. Adjust input. |
 | `plan_recipe` | 422 `loss_rate_invalid` | Each rate must be 0-1 (decimal) OR 0-100 (percent). Engine accepts both — verify your --rates 0.5,2,5,10,50 means 0.5%, 2%, 5%, 10%, 50% (NOT 50%, 200%, 500%...). |
-| `execute_recipe` | 422 `account_not_found` for `Allowance for Doubtful Debts` | Step 3 incomplete. Most-commonly-missing account. Create via `create_account(accountType: 'Current Asset')`. |
-| Verification | TB Allowance ≠ calculated ECL after journal posts | Investigate — likely an interim period had its own ECL recipe that wasn't reversed (cumulative). Audit via `generate_general_ledger(accountResourceId: <Allowance>, period_end: <today>)`. |
+| `execute_recipe` | 422 `account_not_found` for `Allowance for Doubtful Debts` | Step 3 incomplete. Most-commonly-missing account. Create via `create_account(name: 'Allowance for Doubtful Debts', code: <unused account code>, accountType: 'Current Asset')`. |
+| Verification | TB Allowance ≠ calculated ECL after journal posts | Investigate — likely an interim period had its own ECL recipe that wasn't reversed (cumulative). Audit via `generate_general_ledger(accountResourceIds: [<Allowance>], startDate: <FY-start>, endDate: <today>)`. |
 | Specific write-off changes ECL inputs | (process) | After Path A or Path B write-off, re-run step 1 `generate_aged_ar` and re-execute the ECL recipe with updated buckets — the calculated ECL likely reduces because the worst customer is now off the books. |
 
 ---

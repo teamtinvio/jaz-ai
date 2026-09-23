@@ -15,10 +15,10 @@
 - **`search_capsules(filter: {title: {eq: <capsuleName>}})`** — step 0 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Right-of-Use Asset', 'Lease Liability', 'Interest Expense — Leases']}})`** — step 3.
 - **`search_contacts(filter: {supplier: true, name: {eq: <lessor>}})`** — step 3 (lease counterparty).
-- **`create_fixed_asset(...)`** — step 4 manual: register the ROU asset in Jaz native FA. `cost` = PV from calculator, `usefulLifeMonths` = lease term, `depreciationMethod` = 'sl' (straight-line). Jaz auto-posts monthly depreciation thereafter.
-- **`generate_trial_balance(period_end: <date>)`** — step 5 verify.
+- **`create_fixed_asset(...)`** — step 4 manual: register the ROU asset in Jaz native FA. `purchaseAmount` = PV from calculator, `effectiveLife` = lease term in months, `depreciationMethod` = 'STRAIGHT_LINE', `depreciationStartDate` = lease start. Jaz auto-posts monthly depreciation thereafter.
+- **`generate_trial_balance(endDate: <date>)`** — step 5 verify.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly: finalize this period's pre-emitted unwinding DRAFT.
-- **`generate_fa_summary(period_end: <date>)`** — step 5 verify Jaz auto-posted ROU depreciation.
+- **`generate_fa_summary(primarySnapshotStartDate: <period-start>, primarySnapshotEndDate: <period-end>, groupBy: 'CATEGORY')`** — step 5 verify Jaz auto-posted ROU depreciation.
 
 ### Cross-references
 - Operational context: invoked during month-end close (verify scheduler / pre-emitted unwinding journal + verify Jaz FA posted ROU depreciation) and at `jobs/references/year-end-close.md` Y6 (current/non-current reclassification of the next 12 months' principal portion).
@@ -49,20 +49,13 @@ Returns: `{ presentValue: 167287.43, totalInterest: 12712.57, schedule: [{period
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'lease',
   monthlyPayment: 5000,
   termMonths: 36,
   annualRate: 5,
   startDate: '2025-01-01',
-  currency: 'SGD',
-  glRouAsset: <resourceId of 'Right-of-Use Asset' account>,
-  glLeaseLiability: <resourceId of 'Lease Liability' account>,
-  glInterestExpense: <resourceId of 'Interest Expense — Leases' account>,
-  bankAccountResourceId: <bank account resourceId>,
-  capsuleType: 'Lease',
-  capsuleName: 'Office Lease — Marina One — 36 months',
-  lessor: 'Marina One Holdings'
+  currency: 'SGD'
 )
 ```
 
@@ -87,7 +80,7 @@ Bank account:
 ### Step 4 — Execute
 
 ```
-execute_recipe(recipe: 'lease', ...same args..., accountMap: <resolved>, contactName: <resolved>, bankAccountName: <resolved>)
+execute_recipe(recipe: 'lease', ...same args..., contactName: <resolved>, bankAccountName: <resolved>)
 ```
 
 Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId | 'skipped'}], summary: {total: 38, created: 37, skipped: 1, notes: ['Step 2 (fixed-asset): Register ROU asset in Jaz FA module — see step 4 manual action below.']} }`. The recipe creates **37 entries upfront** (1 initial journal + 36 unwinding journals). All journals attach to the same capsule.
@@ -97,11 +90,16 @@ Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, r
 ```
 create_fixed_asset(
   name: 'Right-of-Use Asset — Marina One Office (FY2025)',
-  reference: 'ROU-MARINA-2025',
-  cost: 167287.43,
-  acquisitionDate: '2025-01-01',
-  usefulLifeMonths: 36,
-  depreciationMethod: 'sl',
+  purchaseAmount: 167287.43,
+  purchaseDate: '2025-01-01',
+  purchaseAssetAccountResourceId: <Right-of-Use Asset GL>,
+  depreciationStartDate: '2025-01-01',
+  depreciationMethod: 'STRAIGHT_LINE',
+  effectiveLife: 36,                     // months
+  depreciationExpenseAccountResourceId: <Depreciation Expense GL>,
+  accumulatedDepreciationAccountResourceId: <Accumulated Depreciation GL>,
+  purchaseBusinessTransactionType: 'JOURNAL_MANUAL',
+  purchaseBusinessTransactionResourceId: <initial-recognition journal's ROU LINE id>,
   capsuleResourceId: <capsule from execute_recipe>,
   saveAsDraft: false
 )
@@ -125,13 +123,13 @@ This posts the cash payment + interest split per the amortization schedule.
 **5b — Verify Jaz auto-posted ROU depreciation:**
 
 ```
-generate_fa_summary(period_end: <period-end>, fixedAssetResourceId: <ROU asset id>)
+get_fixed_asset(resourceId: <ROU asset id>)
 ```
 
-Should show this month's $4,646.87 depreciation movement. If missing: the FA wasn't activated (still DRAFT) — `update_fixed_asset(resourceId: <id>, status: 'ACTIVE')` first, then re-run.
+Should show this month's $4,646.87 depreciation movement. If missing: the FA wasn't activated (still DRAFT) — `update_fixed_asset(resourceId: <id>, isDraftToActive: true)` first, then re-run.
 
 **5c — Verify TB:**
-- `generate_trial_balance(period_end: <month-end>)`.
+- `generate_trial_balance(endDate: <month-end>)`.
 - Assert: `balance['Lease Liability'] == -schedule[periodIndex].closingLiability` (within 1 cent).
 - Assert: `balance['Interest Expense — Leases'] (period MTD) == schedule[periodIndex].interest`.
 - Assert: `balance['Right-of-Use Asset'] - balance['Accumulated Depreciation — ROU'] == 167287.43 - (4646.87 × monthsElapsed)`.
@@ -139,7 +137,7 @@ Should show this month's $4,646.87 depreciation movement. If missing: the FA was
 After the FINAL period (month 36):
 - Assert: `balance['Lease Liability'] == 0` exactly.
 - Assert: `balance['Right-of-Use Asset']` net of accumulated depreciation `== 0`.
-- Close capsule via a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only). Decommission FA via `update_fixed_asset(status: 'DISPOSED')` (lease end = de-recognition per IFRS 16.46).
+- Close capsule via a manual `update_capsule(title: '<original> [CLOSED]')` (the API has no `status` field for capsules — closure is informational only). Decommission FA via `discard_fixed_asset(resourceId, disposalDate, depreciationEndDate)` (lease end = de-recognition per IFRS 16.46).
 
 ---
 
@@ -150,11 +148,11 @@ After the FINAL period (month 36):
 | `plan_recipe` | 422 `unsupported_recipe` | File-name alias `ifrs16-lease` was used. Use canonical engine name `lease`. |
 | `plan_recipe` | 422 `term_too_short` | Lease must be ≥2 periods. Short-term lease exemption (IFRS 16.5): for ≤12 months, expense as incurred via `create_bill` per period; do NOT capitalize — skip this recipe. |
 | `execute_recipe` | engine output `summary.skipped >= 1` | Expected. The fixed-asset step is intentionally skipped — invoke `create_fixed_asset` manually per step 4. |
-| `create_fixed_asset` | 422 `cost_mismatch` | The PV used here must match `plan_recipe.calculator.presentValue`. If they diverge, you re-ran the calc with different inputs — recompute. |
-| `create_fixed_asset` | 422 `useful_life_not_set` | `usefulLifeMonths` is required for ROU; otherwise Jaz can't auto-depreciate. |
-| Jaz auto-depreciation not running | (verification fail in 5b) | FA may still be DRAFT. `update_fixed_asset(status: 'ACTIVE')`. Or the depreciation start date is wrong — verify `acquisitionDate` matches `startDate`. |
+| `create_fixed_asset` | 422 `cost_mismatch` | The `purchaseAmount` used here must match `plan_recipe.calculator.presentValue`. If they diverge, you re-ran the calc with different inputs — recompute. |
+| `create_fixed_asset` | 422 `useful_life_not_set` | `effectiveLife` (months) is required for ROU; otherwise Jaz can't auto-depreciate. |
+| Jaz auto-depreciation not running | (verification fail in 5b) | FA may still be DRAFT. `update_fixed_asset(resourceId: <id>, isDraftToActive: true)`. Or the depreciation start date is wrong — verify the asset's `depreciationStartDate` matches the lease `startDate`. |
 | Lease re-measurement (rent revision) | (process) | NOT supported by this recipe. Manual journal pattern: revalue Lease Liability at new PV, offset Dr/Cr Right-of-Use Asset for the same delta (per IFRS 16.39-46). Do NOT re-execute the recipe — it would duplicate the entire amortization. |
-| Lease termination (early exit) | (process) | Manual journal pattern: derecognize remaining ROU + Lease Liability balances; post any termination penalty as P&L. Decommission FA via `update_fixed_asset(status: 'DISPOSED')`. |
+| Lease termination (early exit) | (process) | Manual journal pattern: derecognize remaining ROU + Lease Liability balances; post any termination penalty as P&L. Decommission FA via `discard_fixed_asset(resourceId, disposalDate, depreciationEndDate)`. |
 
 ---
 
@@ -163,7 +161,7 @@ After the FINAL period (month 36):
 - **Hire purchase** (`useful-life-months` ≠ `term-months`): use the `lease` engine but pass `usefulLifeMonths: <asset's life>` distinct from `termMonths: <financing term>`. ROU depreciates over useful life, liability unwinds over financing term. See `hire-purchase.md`.
 - **Variable rent** (CPI-linked, turnover-linked): NOT supported by initial recipe. Recompute PV at each reset event and re-measure manually.
 - **Multi-currency lease** (USD payments from SGD bank): pass `currency: 'USD'`. ROU + Lease Liability denominate in USD; Jaz auto-translates BS balances at closing rate per IAS 21.23 (do NOT invoke `fx-reval` recipe).
-- **Lease with prepayments** (initial payment at signing): post the prepayment as `create_cash_out_entry` against ROU Asset BEFORE invoking the recipe. The recipe's PV calculation should exclude the upfront payment portion.
+- **Lease with prepayments** (initial payment at signing): post the prepayment as `create_cash_out` against ROU Asset BEFORE invoking the recipe. The recipe's PV calculation should exclude the upfront payment portion.
 - **Year-end current/non-current reclassification**: Out of scope for the engine. Manual annual journal: Dr Lease Liability (Non-current) / Cr Lease Liability (Current) for the next 12 months' principal portion. Job blueprint `jobs/references/year-end-close.md` Y6 covers this.
 
 ---

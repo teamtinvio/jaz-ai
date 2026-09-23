@@ -29,7 +29,7 @@ The two patterns share the same `Employee Benefits` capsule type but use differe
 - **`search_accounts(filter: {name: {in: ['Leave Expense', 'Leave Liability', 'Bonus Expense', 'Bonus Payable']}})`** — step 3.
 - **`search_journals(filter: {tags: {eq: 'leave-accrual'}, valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})`** — step 5 monthly: pull this period's pre-emitted leave DRAFT.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — monthly finalize.
-- **`generate_trial_balance(period_end: <date>)`** — verification.
+- **`generate_trial_balance(endDate: <date>)`** — verification.
 - For year-end true-up: see `year-end-close.md` Y2 — manual journal pattern with HR-supplied actuals.
 
 ### Cross-references
@@ -61,18 +61,14 @@ Returns: `{ totalAnnualCost: 84000, perPeriodAmount: 7000, schedule: [{period: 1
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'leave-accrual',
-  headcount: 20,
-  daysPerEmployee: 14,
+  employees: 20,
+  daysPerYear: 14,
   dailyRate: 300,
   periods: 12,
   startDate: '2025-01-01',
-  currency: 'SGD',
-  glLeaveExpense: <resourceId of 'Leave Expense' account>,
-  glLeaveLiability: <resourceId of 'Leave Liability' account>,
-  capsuleType: 'Employee Benefits',
-  capsuleName: 'Annual Leave Accrual — FY2025'
+  currency: 'SGD'
 )
 execute_recipe(recipe: 'leave-accrual', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
 ```
@@ -107,7 +103,7 @@ If a current-quarter result returns: halt. One bonus capsule per quarter.
 ### Step 1B — Cross-check + estimate
 
 Estimate quarterly bonus per the entity's bonus policy estimation method:
-- `revenue_pct` (e.g., 5% of quarterly revenue): pull `generate_profit_and_loss(period_start: <quarter-start>, period_end: <quarter-end>)`, multiply Operating Revenue by the percentage.
+- `revenue_pct` (e.g., 5% of quarterly revenue): pull `generate_profit_and_loss(startDate: <quarter-start>, endDate: <quarter-end>)`, multiply Operating Revenue by the percentage.
 - `prior_quarter`: pull last quarter's posted bonus journal via `search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: <prior-quarter>-end})`.
 - `fixed_amount`: use the bonus policy's fixed amount per quarter.
 
@@ -119,17 +115,12 @@ clio calc accrued-expense --amount <est> --periods 1 --start-date 2025-03-31 --j
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'accrued-expense',
   amount: <est>,
   periods: 1,
   startDate: '2025-03-31',
-  currency: 'SGD',
-  glExpense: <resourceId of 'Bonus Expense' account>,
-  glAccruedLiability: <resourceId of 'Bonus Payable' account>,
-  vendor: 'Employee Bonus Pool',
-  capsuleType: 'Employee Benefits',
-  capsuleName: 'Bonus Accrual — Q1 2025'
+  currency: 'SGD'
 )
 execute_recipe(recipe: 'accrued-expense', ...)
 ```
@@ -155,9 +146,9 @@ Per quarter-end-close (`quarter-end-close.md`):
 |--------|-------|----------|
 | `plan_recipe` (leave) | 422 `unsupported_recipe` | Use canonical engine name `leave-accrual` (file alias `employee-accruals` covers BOTH leave and bonus). |
 | `plan_recipe` (bonus) | 422 `unsupported_recipe` | Use `accrued-expense` for bonus — leave is `leave-accrual`. |
-| `execute_recipe` | 422 `account_not_found` | Step 3 incomplete. Common gap: `Bonus Payable` (most CoAs lack); create via `create_account(accountType: 'Current Liability')`. |
+| `execute_recipe` | 422 `account_not_found` | Step 3 incomplete. Common gap: `Bonus Payable` (most CoAs lack); create via `create_account(name: 'Bonus Payable', code: <unused account code>, accountType: 'Current Liability')`. |
 | Verification | Leave Liability balance > expected | Practitioner posted manual leave-utilization journals against the wrong account, OR the original recipe estimate was high. Year-end Y2a true-up will catch this. |
-| Verification | Bonus accrual nonzero after quarterly reversal posts | Reversal didn't finalize. **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. then `bulk_finalize_drafts`. |
+| Verification | Bonus accrual nonzero after quarterly reversal posts | Reversal didn't finalize. Identify the reversal journal (journals cannot be filtered by capsule: check each candidate with `get_journal` (its `capsule.resourceId`) and confirm the set with the practitioner), then finalize it with `update_journal(resourceId, saveAsDraft: false)`. |
 | 13th-month bonus (PH-specific) | (process — separate from Q4 bonus) | Use `accrued-expense` recipe with `amount: <annual base / 12>`, `periods: 12`, accruing throughout FY. Settle in December via Dr Bonus Payable / Cr Cash. |
 
 ---

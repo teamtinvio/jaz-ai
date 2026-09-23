@@ -38,7 +38,7 @@ running. Delivered as a **422**, which reads like a validation failure and is no
 
 | Message | Trigger | Recovery |
 |---|---|---|
-| `The SQL query feature is not available.` | The reporting service has no read-only query pool: its connection string is unset for this deployment, or the pool failed to build, ping, or match the catalog at startup | None available to you. Do not rewrite the query. Use the report tools (`generate_report`, the operational report family) and tell the user the engine is off. |
+| `The SQL query feature is not available.` | The reporting service has no read-only query pool: its connection string is unset for this deployment, or the pool failed to build, ping, or match the catalog at startup | None available to you. Do not rewrite the query. Use the report tools (`generate_trial_balance`, `generate_profit_and_loss`, the operational report family) and tell the user the engine is off. |
 
 **The catalog stays readable while the engine is off.** `get_pseudo_sql_schema` is served from a
 static in-process snapshot and never touches the query pool, so it keeps returning the full table,

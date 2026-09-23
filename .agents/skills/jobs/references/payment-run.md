@@ -6,10 +6,10 @@
 
 ### Platform tools (jaz-api)
 - **`search_bills(filter: {status: {eq: 'UNPAID'}, balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`** — used in step 2: pull due bills (paginate via `offset` if `>200`).
-- **`generate_aged_ap(period_end: <cutoff>)`** — used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
-- **`generate_bank_balance_summary(period_end: <cutoff>)`** — used in step 5: confirm cash availability before approving the batch.
+- **`generate_aged_ap(endDate: <cutoff>)`** — used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
+- **`generate_bank_balance_summary(primarySnapshotDate: <cutoff>)`** — used in step 5: confirm cash availability before approving the batch.
 - **`get_contact(resourceId: <contactResourceId>)`** — used in step 4 (per supplier): pull payment terms / preferred payment method / bank details (especially `taxId`, `bankAccountNumber`, `bicSwift` for GIRO file generation).
-- **`create_bill_payment(billResourceId: <id>, payments: [{...}])`** — used in step 6: post the payment per bill. NO BATCH PAYMENT ENDPOINT yet — one POST per bill.
+- **`pay_bill(resourceId: <id>, paymentAmount, transactionAmount, accountResourceId, valueDate, ...)`** — used in step 6: post the payment per bill. NO BATCH PAYMENT ENDPOINT yet — one POST per bill.
 - **`search_payments(filter: {businessTransactionReference: {startWith: <run-prefix>}, valueDate: {eq: <run-date>}})`** — used in step 8: idempotency / verification check (re-running the run won't duplicate-pay if all references match).
 
   > **The field and the operator are both exact.** `search_payments` hits `POST /cashflow-transactions/search` → `TransactionsFilter`, which declares no `additionalProperties`, so an undeclared field is rejected outright rather than ignored. It has **no `reference`** (that is `businessTransactionReference`) and `StringExpression` has **no `startsWith`** — the prefix operator is spelled **`startWith`**, no "s". Until 5.55.3 this line asked for both wrong names, so the idempotency check — the step standing between a re-run and paying every supplier twice — could not return anything. Use `startWith`, not `contains`: measured on the sandbox 2026-09-07, `contains: 'PR-'` matched 3 rows that do **not** start with that prefix, and a looser match here silently widens what the run treats as already-paid.
@@ -61,7 +61,7 @@ For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, 
 ## Step 3 — AP aging cross-check
 
 ```
-generate_aged_ap(period_end: '2025-02-28')
+generate_aged_ap(endDate: '2025-02-28')
 ```
 
 Verify: `sum(derived outstanding) ≈ generate_aged_ap.totalOutstanding` (within the materiality threshold). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling — surface to the user.
@@ -79,12 +79,12 @@ Suppliers prefer one consolidated payment per run. Multi-currency suppliers need
 ## Step 5 — Cash availability gate
 
 ```
-generate_bank_balance_summary(period_end: '2025-02-28')
+generate_bank_balance_summary(primarySnapshotDate: '2025-02-28')
 ```
 
 For each `bankAccountResourceId` you'll pay from: confirm `availableBalance >= sum of payments to be drawn from it`. If insufficient: defer the bottom of the priority stack to the next run; surface the deferred list to practitioner with explanation.
 
-Apply the org's cash-buffer policy (default: 14 days operating expenses) — never drain to zero. Compute buffer-required from last 30 days' opex via `generate_profit_and_loss(period_start: <-30d>, period_end: <today>)`.
+Apply the org's cash-buffer policy (default: 14 days operating expenses) — never drain to zero. Compute buffer-required from last 30 days' opex via `generate_profit_and_loss(startDate: <-30d>, endDate: <today>)`.
 
 Record the judgment: `jot(kind: SCOPE)` naming the deferred bills and the cash-buffer rule applied.
 
@@ -93,16 +93,14 @@ Record the judgment: `jot(kind: SCOPE)` naming the deferred bills and the cash-b
 For each approved bill (one POST per bill — no batch endpoint):
 
 ```
-create_bill_payment(
-  billResourceId: <id>,
-  payments: [{
-    paymentAmount: 5350.00,
-    transactionAmount: 5350.00,
-    accountResourceId: <bank-account-resourceId>,
-    paymentMethod: 'BANK_TRANSFER',
-    reference: 'PAYRUN-2025-02-28-001',
-    valueDate: '2025-02-28'
-  }]
+pay_bill(
+  resourceId: <id>,
+  paymentAmount: 5350.00,
+  transactionAmount: 5350.00,
+  accountResourceId: <bank-account-resourceId>,
+  paymentMethod: 'BANK_TRANSFER',
+  reference: 'PAYRUN-2025-02-28-001',
+  valueDate: '2025-02-28'
 )
 ```
 
@@ -116,10 +114,10 @@ create_bill_payment(
 
 ## Step 7 — Verify
 
-After all `create_bill_payment` calls succeed:
+After all `pay_bill` calls succeed:
 
 ```
-generate_aged_ap(period_end: '2025-02-28')
+generate_aged_ap(endDate: '2025-02-28')
 search_payments(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}, valueDate: {eq: '2025-02-28'}})
 ```
 
@@ -129,7 +127,7 @@ Assert:
 - `search_payments` returns N rows where N = bills paid in step 6.
 
 ```
-generate_bank_balance_summary(period_end: '2025-02-28')
+generate_bank_balance_summary(primarySnapshotDate: '2025-02-28')
 ```
 
 Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)`. Cross-reference to actual bank statement when it arrives — this is the next-day bank-recon job.
@@ -140,11 +138,11 @@ Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| `create_bill_payment` | 422 `bill_not_approved` | Bill is `DRAFT`. `finalize_bill(resourceId: <id>)` first, then retry. Do NOT pay drafts. |
-| `create_bill_payment` | 422 `currency_mismatch` | `paymentAmount` currency ≠ bank account currency. Either pay from the matching-currency bank account, or model as FX (different `paymentAmount` and `transactionAmount`). |
-| `create_bill_payment` | 422 `bill_already_paid` | Bill went `PAID` since step 2. Re-run `search_bills` for fresh state; remove from batch. |
-| `create_bill_payment` | 422 `lock_date_violated` | `valueDate` is in a locked period. Either lift the lock via `update_account` lock_date OR adjust `valueDate` to the next open period. |
-| `create_bill_payment` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent — re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. Record the judgment: `jot(kind: RECOVERY)` naming the resume point and the bills already paid. |
+| `pay_bill` | 422 `bill_not_approved` | Bill is `DRAFT`. `finalize_bill(resourceId: <id>)` first, then retry. Do NOT pay drafts. |
+| `pay_bill` | 422 `currency_mismatch` | `paymentAmount` currency ≠ bank account currency. Either pay from the matching-currency bank account, or model as FX (different `paymentAmount` and `transactionAmount`). |
+| `pay_bill` | 422 `bill_already_paid` | Bill went `PAID` since step 2. Re-run `search_bills` for fresh state; remove from batch. |
+| `pay_bill` | 422 `lock_date_violated` | `valueDate` is in a locked period. Either lift the lock via `update_account` lock_date OR adjust `valueDate` to the next open period. |
+| `pay_bill` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent — re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. Record the judgment: `jot(kind: RECOVERY)` naming the resume point and the bills already paid. |
 | `generate_aged_ap` | Total mismatch with `search_bills` | Likely `PARTIALLY_PAID` bills excluded from `search_bills` filter. Add `status: {in: ['UNPAID', 'PARTIALLY_PAID']}` and retry. |
 
 ---

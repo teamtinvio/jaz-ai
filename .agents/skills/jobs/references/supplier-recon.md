@@ -23,8 +23,8 @@
   > The amount filter differs by endpoint: `totalAmount` is accepted on bills and on
   > cashflow-transactions but **rejected on supplier credit notes**, and no `paymentAmount` filter
   > exists anywhere — it is a response field on a payment, not a filter key.
-- **`generate_aged_ap(period_end: <date>)`** — step 5: per-supplier outstanding balance.
-- **`create_bill(...)`** / **`apply_credit_to_bill(...)`** / **`create_supplier_credit_note(...)`** — step 6: post any missing items identified during recon.
+- **`generate_aged_ap(endDate: <date>)`** — step 5: per-supplier outstanding balance.
+- **`create_bill(...)`** / **`apply_credits_to_bill(...)`** / **`create_supplier_credit_note(...)`** — step 6: post any missing items identified during recon.
 
 ### Cross-references
 - Run ad-hoc per major supplier, and at year-end as a mandatory recon for major suppliers (feeds `audit-prep.md` AP confirmations).
@@ -62,7 +62,7 @@ search_bills(
 
 Per bill: `{resourceId, reference, valueDate, currency, originalAmount, paymentRecords, status, dueDate}`. `balanceAmount` is a FILTER key only — the API accepts it in a filter but never returns it on a bill or invoice. Reading it back yields undefined. Derive outstanding instead: `totalAmount - sum(paymentRecords[].transactionAmount) - sum(creditsApplied[].amountApplied)`, and fetch with `view: 'full'` because a lean row omits `paymentRecords` entirely. Keep the Jaz-side bill list for the recon pack.
 
-For an opening-balance recon: also pull the supplier's pre-period balance via `generate_aged_ap(period_end: <period-start - 1 day>)` and filter to this supplier.
+For an opening-balance recon: also pull the supplier's pre-period balance via `generate_aged_ap(endDate: <period-start - 1 day>)` and filter to this supplier.
 
 ## Step 3 — Pull payments
 
@@ -83,7 +83,7 @@ Save. Each credit note may have been applied to one or more bills; the applicati
 ## Step 5 — Compute Jaz-side closing balance
 
 ```
-generate_aged_ap(period_end: '2025-01-31')
+generate_aged_ap(endDate: '2025-01-31')
 ```
 
 Filter to this supplier. Compute: opening balance + new bills (step 2) - payments (step 3) - applied credit notes (step 4) = closing balance per Jaz.
@@ -99,7 +99,7 @@ Practitioner provides the supplier's statement (PDF, email, paper). Per-line-ite
 | Different amounts on same reference | Pricing dispute | Practitioner contacts supplier for clarification. Possible adjustment journal post-resolution. |
 | Bill paid per Jaz, supplier says unpaid | Bank reconciliation gap | Pull bank statement for the payment date; verify the wire/cheque cleared. If cleared, send remittance proof to supplier. |
 | Bill unpaid per Jaz, supplier says paid | Payment recorded against wrong supplier OR bill | Audit `search_payments(filter: {valueDate: {eq: <date>}, totalAmount: {eq: <amount>}})`; identify mis-routing; post correcting journal OR re-issue payment. |
-| Supplier credit note not in Jaz | Missed credit | `create_supplier_credit_note(...)` per supplier statement. Then `apply_credit_to_bill(...)` to the offsetting bill. |
+| Supplier credit note not in Jaz | Missed credit | `create_supplier_credit_note(...)` per supplier statement. Then `apply_credits_to_bill(...)` to the offsetting bill. |
 | Currency mismatch | FX bills with different rates | Confirm Jaz used the right rate per `jaz-api/SKILL.md` rule 25; the supplier statement may use spot rate, Jaz uses recorded rate. Document the FX gap. |
 
 ## Step 7 — Post corrections + verify
@@ -108,7 +108,7 @@ For each missing bill / credit note: post via `create_bill` / `create_supplier_c
 
 After corrections:
 ```
-generate_aged_ap(period_end: '2025-01-31')
+generate_aged_ap(endDate: '2025-01-31')
 ```
 
 Filter to supplier. New closing balance should match the supplier statement closing balance within tolerance (typically zero — pricing rounding on long-running accounts can leave cents).
@@ -131,7 +131,7 @@ Keep, per supplier:
 | Step 2 | Bill count > page limit | Paginate via `offset`. |
 | Step 6 | Currency mismatch on supplier statement | Standard FX handling — supplier records in the supplier's base currency, Jaz records in the org's base currency. Compare in the supplier's currency for the parity check; FX gap goes to FX gain/loss separately. |
 | Step 7 | `create_bill` 422 `valueDate_in_locked_period` | The missing bill belongs to a locked period. Lift lock via `update_account` lockDate, post, re-lock. Surface to practitioner — auditor will see late posting. |
-| Step 7 | `apply_credit_to_bill` 422 `credit_exceeds_balance` | Trying to apply more credit than the bill has remaining. Practitioner judgment — split the credit across multiple bills OR carry forward. |
+| Step 7 | `apply_credits_to_bill` 422 `credit_exceeds_balance` | Trying to apply more credit than the bill has remaining. Practitioner judgment — split the credit across multiple bills OR carry forward. |
 
 ---
 

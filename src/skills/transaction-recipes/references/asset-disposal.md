@@ -13,11 +13,11 @@
 
 ### Tools (jaz-api / direct)
 - **`get_fixed_asset(resourceId: <id>)`** — step 1: pull the asset's actual `cost`, `acquisitionDate`, `usefulLifeMonths`, `depreciationMethod`, `salvageValue` to feed the calculator (use the live FA-register values — auditor wants those, not a cached estimate).
-- **`generate_fa_summary(period_end: <disposalDate>)`** — step 1 alt: pull NBV directly from Jaz's running FA register. If this matches your independent calc, use it as the authoritative NBV. If they diverge: investigate (likely a missing depreciation journal).
+- **`generate_fa_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <disposalDate>, groupBy: 'CATEGORY')`** — step 1 alt: pull NBV directly from Jaz's running FA register. If this matches your independent calc, use it as the authoritative NBV. If they diverge: investigate (likely a missing depreciation journal).
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check. Each disposal is unique; duplicate disposal journals would corrupt the FA register reconciliation.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation — Vehicles', 'Gain on Disposal', 'Loss on Disposal']}})`** — step 3.
 - **`mark_fixed_asset_sold(...)` for a sale (it links the sale transaction and records gain/loss) or `discard_fixed_asset(...)` for a write-off — a disposal is its own operation, never a `status` mutation via update_fixed_asset** OR **`POST /api/v1/mark-as-sold/fixed-assets`** OR **`POST /api/v1/discard-fixed-assets/{id}`** — step 5 manual FA-register update (the engine-skipped note step).
-- **`generate_trial_balance(period_end: <disposalDate>)`** — step 6: verify cost + accumulated depreciation cleared; gain/loss in P&L.
+- **`generate_trial_balance(endDate: <disposalDate>)`** — step 6: verify cost + accumulated depreciation cleared; gain/loss in P&L.
 
 ### Cross-references
 - Operational context: invoked during year-end close (FA disposals discovered during the year-end review) or ad-hoc during month-end close if a disposal happens mid-period.
@@ -52,14 +52,15 @@ Returns: `{ accumulatedDepreciation: 28500, netBookValue: 21500, proceeds: 18000
 
 Cross-check with Jaz FA register:
 ```
-generate_fa_summary(period_end: '2026-03-15', fixedAssetResourceId: <FA UUID>)
+get_fixed_asset(resourceId: <FA UUID>)
 ```
-Should report `accumulatedDepreciation: 28500, netBookValue: 21500` matching the independent calc within 1 cent. Variance investigation: missing monthly depreciation journals (search via **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.); finalize them BEFORE disposal recipe.
+Should report `accumulatedDepreciation: 28500, netBookValue: 21500` matching the independent calc within 1 cent. Variance investigation: missing monthly depreciation journals (journals cannot be filtered by capsule: check each candidate with `get_journal` (its `capsule.resourceId`) and confirm the set with the practitioner); finalize them BEFORE disposal recipe.
 
 ### Step 2 — Plan the recipe
 
 ```
 plan_recipe(
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'asset-disposal',
   cost: 50000,
   salvageValue: 5000,
@@ -68,15 +69,7 @@ plan_recipe(
   disposalDate: '2026-03-15',
   proceeds: 18000,
   method: 'sl',
-  currency: 'SGD',
-  glAsset: <resourceId of 'Vehicles' account>,
-  glAccumDep: <resourceId of 'Accumulated Depreciation — Vehicles' account>,
-  glGainOnDisposal: <resourceId of 'Gain on Disposal' account>,
-  glLossOnDisposal: <resourceId of 'Loss on Disposal' account>,
-  bankAccountResourceId: <bank account resourceId>,
-  fixedAssetResourceId: <FA UUID>,
-  capsuleType: 'Asset Disposal',
-  capsuleName: 'Disposal — Delivery Vehicle (Truck-001) — 2026-03-15'
+  currency: 'SGD'
 )
 ```
 
@@ -124,7 +117,7 @@ POST /api/v1/mark-as-sold/fixed-assets
   notes: 'Sold to <buyer>; capsule <capsuleResourceId>'
 }
 ```
-OR equivalent MCP tool if exposed: `update_fixed_asset(resourceId: <id>, status: 'DISPOSED', disposalDate: '2026-03-15', disposalProceeds: 18000)`.
+OR the MCP tool: `mark_fixed_asset_sold(resourceId: <id>, depreciationEndDate: '2026-03-15', assetDisposalGainLossAccountResourceId: <Gain/Loss on Disposal>, saleBusinessTransactionType: 'SALE', saleItemResourceId: <sale line item id>)` for a sale, or `discard_fixed_asset(resourceId: <id>, disposalDate: '2026-03-15', depreciationEndDate: '2026-03-15')` for a write-off.
 
 **Scrap / write-off (no proceeds, asset destroyed/donated):**
 ```
@@ -145,7 +138,7 @@ After the FA-register update: `get_fixed_asset(resourceId: <id>)` should return 
 ### Step 6 — Verify
 
 ```
-generate_trial_balance(period_end: '2026-03-15')
+generate_trial_balance(endDate: '2026-03-15')
 ```
 
 Assert:
@@ -155,12 +148,12 @@ Assert:
 - `balance['Loss on Disposal'] (period MTD) == 3,500` (or Gain on Disposal of `gainOrLoss` if positive).
 
 ```
-generate_fa_summary(period_end: '2026-03-15', fixedAssetResourceId: <FA UUID>)
+get_fixed_asset(resourceId: <FA UUID>)
 ```
 Should now show `status: 'DISPOSED'`, NBV = 0, no further depreciation auto-posting.
 
 ```
-generate_fa_recon_summary(period_start: <FY-start>, period_end: <FY-end>)
+generate_fa_recon_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>)
 ```
 Should reflect the disposal in the year's movement: `openingNbv − depreciation − disposals == closingNbv`.
 
@@ -170,13 +163,13 @@ Should reflect the disposal in the year's movement: `openingNbv − depreciation
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| `plan_recipe` | 422 `disposal_after_period_end` | `disposalDate` later than the engagement's `<period_end>`. Disposal belongs to next period; halt and confirm with practitioner. |
+| `plan_recipe` | 422 `disposal_after_period_end` | `disposalDate` later than the engagement's period end. Disposal belongs to next period; halt and confirm with practitioner. |
 | `plan_recipe` | 422 `acquisition_after_disposal` | Inputs swapped. Verify and re-run. |
 | `execute_recipe` | 422 `account_not_found` for `Gain on Disposal` / `Loss on Disposal` | Step 3 incomplete. Create via `create_account(accountType: 'Other Revenue' / 'Other Expense', ...)`. |
-| Step 5 manual update missed | (process error — Jaz FA continues auto-depreciating) | Surface to practitioner: "Asset `<name>` (resourceId `<id>`) is still ACTIVE in FA register but disposal journal posted. Auto-depreciation will continue. Run `update_fixed_asset(status: 'DISPOSED')` immediately." |
-| `update_fixed_asset` to DISPOSED | 422 `pending_depreciation_journals` | DRAFT depreciation journals exist for periods after disposal date. Delete them: **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals. then `delete_journal` per result. |
+| Step 5 manual update missed | (process error — Jaz FA continues auto-depreciating) | Surface to practitioner: "Asset `<name>` (resourceId `<id>`) is still ACTIVE in FA register but disposal journal posted. Auto-depreciation will continue. Run `mark_fixed_asset_sold` (sale) or `discard_fixed_asset` (write-off) immediately." |
+| `mark_fixed_asset_sold` / `discard_fixed_asset` | 422 `pending_depreciation_journals` | DRAFT depreciation journals exist for periods after disposal date. Identify them (journals cannot be filtered by capsule: check each candidate with `get_journal` (its `capsule.resourceId`) and confirm the set with the practitioner), then `delete_journal` per confirmed journal. |
 | Cross-check | Calculator NBV ≠ FA register NBV | Investigate missing depreciation journals (recipe pre-emitted DRAFTs that weren't finalized monthly). Finalize all up to disposal date BEFORE running this recipe. |
-| Recipe NBV ≠ TB Vehicles − TB Accum Dep | (audit failure) | Likely a manual journal touched Vehicles or Accum Dep without going through the recipe. Audit `generate_general_ledger(accountResourceId: <Vehicles>, period_end: <today>)`. |
+| Recipe NBV ≠ TB Vehicles − TB Accum Dep | (audit failure) | Likely a manual journal touched Vehicles or Accum Dep without going through the recipe. Audit `generate_general_ledger(accountResourceIds: [<Vehicles>], startDate: <acquisition date>, endDate: <today>)`. |
 
 ---
 

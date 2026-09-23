@@ -15,7 +15,7 @@
 - **`search_contacts(filter: {name: {eq: <vendor>}})`** — used in step 3: resolve the insurance supplier resourceId before bill creation.
 - **`create_contact(...)`** — used in step 3 fallback: create the supplier if `search_contacts` returns empty.
 - **`search_accounts(filter: {name: {in: ['<asset GL>', '<expense GL>']}})`** — used in step 3: confirm the prepaid asset and expense GL accounts exist; if missing, surface to practitioner before retry.
-- **`generate_trial_balance(period_end: <date>)`** — used in step 5: verify the recognition has unwound the prepaid balance correctly.
+- **`generate_trial_balance(endDate: <date>)`** — used in step 5: verify the recognition has unwound the prepaid balance correctly.
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — used to detect duplicate setup in re-runs.
 
 ### Cross-references
@@ -39,17 +39,12 @@ Returns: `{ perPeriodAmount, recognitionStartDate, recognitionEndDate, schedule[
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'prepaid-expense',
   amount: 12000,
   periods: 12,
   startDate: '2025-01-01',
-  currency: 'SGD',
-  glAsset: <resourceId of 'Prepaid Insurance' account>,
-  glExpense: <resourceId of 'Insurance Expense' account>,
-  capsuleType: 'Prepaid Expenses',
-  capsuleName: 'FY2025 Office Insurance',
-  vendor: 'AXA Insurance Singapore'
+  currency: 'SGD'
 )
 ```
 
@@ -96,7 +91,7 @@ update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 After finalize:
-- `generate_trial_balance(period_end: <period-end>)`.
+- `generate_trial_balance(endDate: <period-end>)`.
 - Assert: `balance['Prepaid Insurance'] == amount - (perPeriodAmount × periodsFinalizedSoFar)` (within 1 cent).
 - Assert: `balance['Insurance Expense'] (period MTD) == perPeriodAmount` (within 1 cent).
 
@@ -114,10 +109,10 @@ After the FINAL period (period N+1) is finalized:
 | `plan_recipe` | 422 `invalid_period` (`periods <= 0`) | Verify `periods` is a positive integer. Quarterly = `periods: 4` with `frequency: quarterly` (NOT 12). |
 | `execute_recipe` | 422 `account_not_found` | Step 3 resolution incomplete. Re-run `search_accounts`; if missing, create via `create_account` first. |
 | `execute_recipe` | 422 `contact_not_found` | Step 3 resolution incomplete. Re-run `search_contacts`; if missing, create via `create_contact` first. |
-| `execute_recipe` | 422 `currency_not_enabled` | The recipe currency isn't enabled for the org. `add_currency(currencyCode: ...)` first; rates default-resolve from the latest `list_currency_rates`. |
+| `execute_recipe` | 422 `currency_not_enabled` | The recipe currency isn't enabled for the org. `add_currency(currencies: [...])` first; rates default-resolve from the latest `list_currency_rates`. |
 | `execute_recipe` | 409 `capsule_already_exists` | Re-run on the same `capsuleName` is rejected. Either pick a different name (e.g. include policy number) or `search_capsules` to find the existing one and append additional bills/journals via `update_capsule`. |
 | `finalize_bill` | 422 `bill_unbalanced` | Engine-emitted bills are always balanced. If you see this, the source schema changed — escalate (do not retry). |
-| Scheduler | Missing recognition journal at month-end | Verify `schedulerResourceId` is `status: ACTIVE`. If `PAUSED`, the scheduler was halted manually during a period-end review. Resume via `update_scheduler` or document the pause in your working notes. |
+| Scheduler | Missing recognition journal at month-end | Verify `schedulerResourceId` is `status: ACTIVE`. If `INACTIVE`, the schedule was halted manually during a period-end review. Resume via `update_scheduled_journal(resourceId: <scheduler id>, status: 'ACTIVE')` or document the pause in your working notes. |
 
 ---
 

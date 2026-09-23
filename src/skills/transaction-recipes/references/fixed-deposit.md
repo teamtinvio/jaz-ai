@@ -15,7 +15,7 @@
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check.
 - **`search_accounts(filter: {name: {in: ['Fixed Deposit Receivable', 'Accrued Interest Receivable', 'Interest Income']}})`** — step 3.
 - **`search_contacts(filter: {supplier: true, name: {eq: <bank>}})`** — step 3 optional: bank contact for narrative.
-- **`generate_trial_balance(period_end: <date>)`** — step 5 verify accrued interest unwinds; FD principal stays at carrying amount until maturity.
+- **`generate_trial_balance(endDate: <date>)`** — step 5 verify accrued interest unwinds; FD principal stays at carrying amount until maturity.
 - **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — step 5 monthly finalize.
 
 ### Cross-references
@@ -49,19 +49,13 @@ Save schedule to `workpapers/<period>/fd-<bank>-<reference>.json`.
 
 ```
 plan_recipe(
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'fixed-deposit',
   principal: 100000,
   annualRate: 3.5,
   termMonths: 12,
   startDate: '2025-01-01',
-  currency: 'SGD',
-  glFdReceivable: <resourceId of 'Fixed Deposit Receivable' account>,
-  glAccruedInterestReceivable: <resourceId of 'Accrued Interest Receivable' account>,
-  glInterestIncome: <resourceId of 'Interest Income' account>,
-  bankAccountResourceId: <bank account resourceId>,
-  bank: 'DBS Bank',
-  capsuleType: 'Fixed Deposit',
-  capsuleName: 'DBS FD — SGD 100,000 — 12 months — 3.5% (FY2025)'
+  currency: 'SGD'
 )
 ```
 
@@ -95,7 +89,7 @@ update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
 Verify after finalize:
-- `generate_trial_balance(period_end: <month-end>)`.
+- `generate_trial_balance(endDate: <month-end>)`.
 - Assert: `balance['Accrued Interest Receivable'] == schedule[periodIndex].accruedToDate` (within 1 cent).
 - Assert: `balance['Interest Income'] (period MTD) == schedule[periodIndex].accrualAmount`.
 - `balance['Fixed Deposit Receivable']` stays at `100,000` until maturity.
@@ -123,7 +117,7 @@ If the bank auto-rolls the FD at maturity: do NOT close the capsule. Instead, po
 |--------|-------|----------|
 | `plan_recipe` | 422 `unsupported_recipe` | Use canonical engine name `fixed-deposit` (already canonical). |
 | `plan_recipe` | 422 `term_too_short` | FD term must be ≥ 1 month. For overnight / call deposits: classify as Cash equivalent (IAS 7.6); use `create_cash_in` with a bank-side FD account, no recipe. |
-| `execute_recipe` | 422 `account_not_found` for `Accrued Interest Receivable` | Step 3 incomplete. Common gap — many CoAs lack this account. Create via `create_account(accountType: 'Current Asset')`. |
+| `execute_recipe` | 422 `account_not_found` for `Accrued Interest Receivable` | Step 3 incomplete. Common gap — many CoAs lack this account. Create via `create_account(name: 'Accrued Interest Receivable', code: <unused account code>, accountType: 'Current Asset')`. |
 | `execute_recipe` | 422 `currency_mismatch_bank_account` | Placement bank ≠ FD currency. Either pass matching-currency bank account, OR model as FX (USD FD funded from SGD account → different `paymentAmount` and `transactionAmount`). |
 | Premature withdrawal (penalty) | (process) | Bank pays reduced interest. Manual journal: Dr Cash (reduced amount), Dr Loss on Premature Withdrawal (penalty), Cr Fixed Deposit Receivable (full principal), Cr Accrued Interest Receivable (any settled portion). Reverse remaining DRAFT accrual journals (`delete_journal` per future period). |
 | Compound vs simple mismatch | Verification fails — accrued interest off by cents | Engine uses simple interest by default. If bank actually compounds: re-run calc with `--compound monthly`, recompute schedule, halt and re-execute with corrected inputs. |

@@ -8,8 +8,8 @@
 - **`quarter-end-close.md`** — invoked four times in standalone mode (Q1, Q2, Q3, Q4) before annual extras run.
 
 ### Platform tools — annual extras
-- **`generate_fa_summary(period_end: <FY-end>)`** — Y1 FA reconciliation: full-year depreciation movement per asset.
-- **`generate_fa_recon_summary(period_start: <FY-start>, period_end: <FY-end>)`** — Y1 verification: opening NBV + additions − disposals − depreciation = closing NBV.
+- **`generate_fa_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>, groupBy: 'CATEGORY')`** — Y1 FA reconciliation: full-year depreciation movement per asset.
+- **`generate_fa_recon_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>)`** — Y1 verification: opening NBV + additions − disposals − depreciation = closing NBV.
 - **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED']}})`** — Y1 enumeration of FAs.
 - **`mark_fixed_asset_sold(...)` for a sale or `discard_fixed_asset(...)` for a write-off — both are operations, not status mutations** — Y1 fallback if any FA has incorrect status at FY-end.
 - **`search_journals(filter: {tags: {eq: 'leave-accrual'}, valueDate: {between: [<FY-start>, <FY-end>]}})` / `search_journals(filter: {tags: {eq: 'bonus-accrual'}, ...})`** — Y2 true-up: pull all FY accrual journals to compare against actuals.
@@ -60,15 +60,15 @@ For each quarter Q1-Q4: invoke `quarter-end-close.md` job. Each builds on its ow
 ### Y1 — Final FA reconciliation
 
 ```
-generate_fa_summary(period_end: '2025-12-31')
-generate_fa_recon_summary(period_start: '2025-01-01', period_end: '2025-12-31')
+generate_fa_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
+generate_fa_recon_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
 ```
 
-For Jaz native straight-line depreciation: should be automatic and correct. Verify the 12-month aggregate against `generate_general_ledger(accountResourceId: <Depreciation Expense>, period_start, period_end)`.
+For Jaz native straight-line depreciation: should be automatic and correct. Verify the 12-month aggregate against `generate_general_ledger(accountResourceIds: [<Depreciation Expense>], startDate, endDate)`.
 
 For non-SL assets (DDB, 150DB) where `plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db')` was used: each capsule pre-emitted 12 future-dated DRAFT journals at recipe-execution time. Confirm all 12 are FINALIZED via `search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})` — should be empty. If non-empty: route back to `month-end-close.md` step 9.
 
-Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond the materiality threshold → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {valueDate: {between: [<FY-start>, <FY-end>]}})`) — typical cause is a disposal posted without `update_fixed_asset(status: 'DISPOSED')`.
+Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond the materiality threshold → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {valueDate: {between: [<FY-start>, <FY-end>]}})`) — typical cause is a disposal posted without `mark_fixed_asset_sold` / `discard_fixed_asset`.
 
 ### Y2 — Annual true-ups (manual journals)
 
@@ -85,8 +85,8 @@ create_journal({
   valueDate: '2025-12-31',
   reference: 'YE-LEAVE-TRUEUP-FY25',
   journalEntries: [
-    { accountResourceId: <Leave Expense>, amount: <delta>, type: 'DEBIT', name: 'Leave accrual true-up FY2025' },
-    { accountResourceId: <Leave Liability>, amount: <delta>, type: 'CREDIT', name: 'Leave accrual true-up FY2025' }
+    { accountResourceId: <Leave Expense>, amount: <delta>, type: 'DEBIT', description: 'Leave accrual true-up FY2025' },
+    { accountResourceId: <Leave Liability>, amount: <delta>, type: 'CREDIT', description: 'Leave accrual true-up FY2025' }
   ],
   saveAsDraft: false
 })
@@ -104,17 +104,12 @@ If the org declared a final dividend for the FY:
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from the CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'dividend',
   amount: <gross-dividend>,
   withholdingRate: <dividend withholding rate>,
   declarationDate: '2025-12-31',
-  paymentDate: '<paymentDate>',
-  glRetainedEarnings: <CoA Retained Earnings>,
-  glDividendsPayable: <CoA Dividends Payable>,
-  bankAccountResourceId: <bank>,
-  capsuleType: 'Dividends',
-  capsuleName: 'FY2025 Final Dividend'
+  paymentDate: '<paymentDate>'
 )
 ```
 
@@ -125,7 +120,7 @@ For interim dividends declared during the year: those should already be posted i
 ### Y4 — IFRS 9 ECL year-end true-up
 
 ```
-generate_aged_ar(period_end: '2025-12-31')
+generate_aged_ar(endDate: '2025-12-31')
 ```
 
 Bucket AR by aging band per the org's ECL loss-rate matrix (current 0.5%, 30d 2%, 60d 5%, 90d 10%, 120d+ 50% — tune per the org's historical loss data).
@@ -137,7 +132,7 @@ clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rate
 If top-up needed > the materiality threshold:
 
 ```
-plan_recipe(recipe: 'ecl', receivables: <buckets>, ratesPerBucket: <rates>, existingProvisionAccount: <Allowance for Doubtful Debts>, glBadDebtExpense: <Bad Debt Expense>, valueDate: '2025-12-31', capsuleType: 'ECL Provision', capsuleName: 'FY2025 ECL Year-End True-Up')
+plan_recipe(recipe: 'ecl', buckets: <[{name, balance, rate}]>, existingProvision: <Allowance for Doubtful Debts balance>, startDate: '2025-12-31')
 ```
 
 Then `execute_recipe(...)`. Engine emits 1 journal: Dr Bad Debt Expense / Cr Allowance for Doubtful Debts for the top-up amount. ECL recipe is one-shot per FY (no ongoing schedule) — capsule closes on execution.
@@ -178,7 +173,7 @@ Mirror for IFRS 16 lease liability (`Lease Liability Non-current` → `Lease Lia
 ### Y7 — Final TB + draft gate + report pack handoff
 
 ```
-generate_trial_balance(period_end: '2025-12-31')
+generate_trial_balance(endDate: '2025-12-31')
 ```
 
 Save the final FY trial balance. Assert: BS Total Assets = Total Liabilities + Total Equity; P&L Net Profit ties to Equity Movement closing balance.

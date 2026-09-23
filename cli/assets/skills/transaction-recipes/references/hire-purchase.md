@@ -6,13 +6,13 @@
 
 Per IFRS 16.32: when ownership transfers at the end of the lease term, OR a purchase option is reasonably certain, the ROU asset is depreciated to the end of its USEFUL LIFE (not the lease term). For a vehicle on a 36-month HP with 60-month useful life: financing/liability over 36 months, depreciation over 60 months.
 
-The recipe engine handles both: pass `usefulLifeMonths` distinct from `termMonths`. The lease/financing schedule (36 monthly DRAFT journals for the unwinding) tracks the liability; the FA register's `usefulLifeMonths: 60` controls depreciation cadence.
+The recipe engine handles both: pass `usefulLifeMonths` distinct from `termMonths`. The lease/financing schedule (36 monthly DRAFT journals for the unwinding) tracks the liability; the FA register's `effectiveLife: 60` (months) controls depreciation cadence.
 
 ## Tools, recipes, calculators this recipe uses
 
 ### Recipe engine entry point
 - **`plan_recipe(recipe: 'lease', ...)`** — used in step 2: same engine as IFRS 16 lease, with `usefulLifeMonths > termMonths` to flag hire-purchase pattern.
-- **`execute_recipe(recipe: 'lease', ...)`** — step 4: posts initial recognition + N future-dated DRAFT unwinding journals over `termMonths`. The fixed-asset step is engine-SKIPPED — practitioner manually invokes `create_fixed_asset(usefulLifeMonths: 60, ...)` with the longer useful life.
+- **`execute_recipe(recipe: 'lease', ...)`** — step 4: posts initial recognition + N future-dated DRAFT unwinding journals over `termMonths`. The fixed-asset step is engine-SKIPPED — practitioner manually invokes `create_fixed_asset(effectiveLife: 60, ...)` (months) with the longer useful life.
 
 ### Calculator
 - **`clio calc lease --payment <monthly> --term <months> --rate <annual %> --useful-life <months> --start-date <YYYY-MM-DD> --currency <code> --json`** — same calc as IFRS 16 lease, with explicit `--useful-life` flag distinguishing it from the financing term. Returns the LeaseResult shape: `{ presentValue, totalInterest, totalDepreciation, monthlyRouDepreciation, depreciationMonths, isHirePurchase, schedule[termMonths] }`. The depreciation side is implicit — `monthlyRouDepreciation × depreciationMonths` (where `depreciationMonths == usefulLifeMonths`, longer than the financing `schedule[]`).
@@ -66,17 +66,22 @@ The engine's `plan_recipe` accepts `usefulLifeMonths` as an explicit input. Reci
 ```
 create_fixed_asset(
   name: 'Motor Vehicle — HP — Truck-002 (FY2025)',
-  reference: 'HP-TRUCK-002-2025',
-  cost: <PV from calc>,
-  acquisitionDate: '2025-01-01',
-  usefulLifeMonths: 60,         ← Use USEFUL LIFE, not term-months
-  depreciationMethod: 'sl',
+  purchaseAmount: <PV from calc>,
+  purchaseDate: '2025-01-01',
+  purchaseAssetAccountResourceId: <Motor Vehicles asset GL>,
+  depreciationStartDate: '2025-01-01',
+  depreciationMethod: 'STRAIGHT_LINE',
+  effectiveLife: 60,            ← months. Use USEFUL LIFE, not term-months
+  depreciationExpenseAccountResourceId: <Depreciation Expense GL>,
+  accumulatedDepreciationAccountResourceId: <Accumulated Depreciation GL>,
+  purchaseBusinessTransactionType: 'JOURNAL_MANUAL',
+  purchaseBusinessTransactionResourceId: <initial-recognition journal's asset LINE id>,
   capsuleResourceId: <capsule from execute_recipe>,
   saveAsDraft: false
 )
 ```
 
-Critical: `usefulLifeMonths: 60` (not 36). After registration, Jaz auto-posts `PV / 60` per month for 60 months. The FA continues depreciating for 24 months AFTER the financing term ends — that's the period during which you OWN the asset outright but it's still in service.
+Critical: `effectiveLife: 60` (not 36). After registration, Jaz auto-posts `PV / 60` per month for 60 months. The FA continues depreciating for 24 months AFTER the financing term ends — that's the period during which you OWN the asset outright but it's still in service.
 
 ### Step 5 — Monthly action
 
@@ -84,7 +89,7 @@ Months 1-36: same as lease — finalize this period's unwinding DRAFT (`bulk_fin
 
 Months 37-60: ONLY verify Jaz auto-posted depreciation. No more financing journals (the unwinding schedule ended at month 36; the 36 DRAFT journals exhausted). The Lease Liability should be 0 from month 37 onward.
 
-Month 60: final depreciation post. NBV = 0. Decommission FA via `update_fixed_asset(status: 'DISPOSED')` if asset is then sold/scrapped, OR keep ACTIVE and continue using (no further depreciation, but asset remains tracked).
+Month 60: final depreciation post. NBV = 0. Decommission FA via `mark_fixed_asset_sold` (sold) or `discard_fixed_asset` (scrapped) if the asset leaves the business, OR keep ACTIVE and continue using (no further depreciation, but asset remains tracked).
 
 ---
 
@@ -92,7 +97,7 @@ Month 60: final depreciation post. NBV = 0. Decommission FA via `update_fixed_as
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| `create_fixed_asset` | `usefulLifeMonths` set to 36 (term) instead of 60 (useful life) | Re-create with correct value. Reverse any incorrect depreciation already auto-posted. The most-common HP mistake. |
+| `create_fixed_asset` | `effectiveLife` set to 36 (term) instead of 60 (useful life) | Re-create with correct value. Reverse any incorrect depreciation already auto-posted. The most-common HP mistake. |
 | Verification month 37+ | Jaz still auto-posting depreciation but TB Lease Liability is 0 | Expected — financing ended at month 36, depreciation continues to month 60 (per IFRS 16.32). |
 | Verification month 37+ | Lease Liability nonzero after term end | The `loan` recipe was used instead of `lease` engine. Or `termMonths` was wrong. Audit the unwinding schedule. |
 | Asset sold mid-term | (process) | Two scenarios: (a) sold WHILE still on HP — practitioner pays off remaining liability + invokes `asset-disposal.md` recipe; (b) sold AFTER HP ends but before useful life — invoke `asset-disposal.md` only. |

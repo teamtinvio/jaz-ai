@@ -8,14 +8,14 @@
 - **`month-end-close.md`** — invoked 3× in standalone mode (months 1, 2, 3 of the quarter) before quarterly extras.
 
 ### Platform tools — quarterly extras
-- **`generate_vat_ledger(period_start: <Q-start>, period_end: <Q-end>)`** — Q1 GST/VAT filing prep: full quarterly tax ledger.
-- **`generate_aged_ar(period_end: <Q-end>)`** — Q2 ECL formal review input.
+- **`generate_vat_ledger(startDate: <Q-start>, endDate: <Q-end>)`** — Q1 GST/VAT filing prep: full quarterly tax ledger.
+- **`generate_aged_ar(endDate: <Q-end>)`** — Q2 ECL formal review input.
 - **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — Q2 ECL top-up if material.
 - **`search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: {between: [<Q-start>, <Q-end>]}})`** — Q3 bonus YTD pull.
 - **`create_journal(...)`** — Q3 bonus true-up adjustment (manual one-off).
 - **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)** — Q4 IC reconciliation per pair of entities (multi-org coordination — see the `intercompany` recipe).
 - **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits) + `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
-- **`generate_trial_balance(period_end: <Q-end>)`** — verification.
+- **`generate_trial_balance(endDate: <Q-end>)`** — verification.
 - **`update_account(resourceId: <CoA root>, lockDate: <Q-end>)`** — final lock.
 
 ### Calculators (cross-check, no API key needed)
@@ -49,7 +49,7 @@ Invoke `month-end-close.md` job for each of months 1, 2, 3 of the quarter. By en
 ### Q1 — GST/VAT filing preparation
 
 ```
-generate_vat_ledger(period_start: '2025-01-01', period_end: '2025-03-31')
+generate_vat_ledger(startDate: '2025-01-01', endDate: '2025-03-31')
 ```
 
 Save the quarter's VAT ledger. Verify:
@@ -68,14 +68,14 @@ Full step-by-step in `gst-vat-filing.md`.
 ### Q2 — ECL formal review
 
 ```
-generate_aged_ar(period_end: '2025-03-31')
+generate_aged_ar(endDate: '2025-03-31')
 clio calc ecl --current 100000 --30d 50000 --60d 20000 --90d 10000 --120d 5000 --rates 0.5,2,5,10,50 --existing-provision <TB Allowance balance> --currency <base currency> --json
 ```
 
 If `topUpRequired > materiality threshold`:
 
 ```
-plan_recipe(recipe: 'ecl', receivables: <buckets>, ratesPerBucket: <rates from the org ECL loss-rate matrix>, ...)
+plan_recipe(recipe: 'ecl', buckets: <[{name, balance, rate}], rate from the org ECL loss-rate matrix>, ...)
 execute_recipe(...)
 update_journal(resourceId: <ecl journal>, saveAsDraft: false)
 ```
@@ -97,10 +97,10 @@ Sum YTD accruals. Re-estimate full-year bonus per current performance data. If r
 If the org has intercompany arrangements:
 
 For each arrangement (per pair of entities):
-1. Per-entity TB pull: `generate_trial_balance(period_end: '2025-03-31')` under EACH entity's org credentials (multi-org work — see the `intercompany` recipe).
+1. Per-entity TB pull: `generate_trial_balance(endDate: '2025-03-31')` under EACH entity's org credentials (multi-org work — see the `intercompany` recipe).
 2. Verify `Entity A's IC Receivable balance == Entity B's IC Payable balance` (sign flipped).
 3. Investigate discrepancies (timing, FX, missing posting).
-4. If settling balances: post `create_cash_out_entry` in payer org + `create_cash_in_entry` (or invoice payment) in payee org.
+4. If settling balances: post `create_cash_out` in payer org + `create_cash_in` (or invoice payment) in payee org.
 
 Full pattern in the `intercompany` recipe.
 
@@ -119,7 +119,7 @@ Per capsule: this period's quarter-end unwinding DRAFT journals (3 monthly DRAFT
 > capsule link even at `view: 'full'` or on `GET /journals/{id}`, and `GET /capsules/{id}` returns
 > only `totalTransactions` — a count (all measured 2026-09-07). A search by date and status alone
 > returns **every** matching DRAFT in the org, including drafts a practitioner deliberately parked,
-> so feeding it to `bulk_update_journals(saveAsDraft: false)` or `delete_journal` would finalize or
+> so feeding it to `bulk_update_journals(items: [{resourceId, saveAsDraft: false}])` or `delete_journal` would finalize or
 > destroy unrelated work. Surface the capsule and its expected journal count to the practitioner and
 > let them identify the journals; do not select them with a filter.
 
@@ -128,9 +128,9 @@ If the user determines remeasurement is needed (cash-flow estimate changed, disc
 ## Phase 7 — Quarterly verification
 
 ```
-generate_trial_balance(period_end: '2025-03-31')
-generate_profit_and_loss(period_start: '2025-01-01', period_end: '2025-03-31')
-generate_balance_sheet(period_end: '2025-03-31')
+generate_trial_balance(endDate: '2025-03-31')
+generate_profit_and_loss(startDate: '2025-01-01', endDate: '2025-03-31')
+generate_balance_sheet(snapshotDate: '2025-03-31')
 ```
 
 Save the quarter's reports. Quarterly-specific assertions:
@@ -156,8 +156,8 @@ update_account(resourceId: <CoA root>, lockDate: '2025-03-31')
 |--------|-------|----------|
 | Phase 1-5 (standalone) | Months not all closed | Months incomplete. Route to missing `month-end-close.md`. Run quarterly extras only once all 3 months are locked. |
 | Q1 verification | Tax ledger ≠ sum of GST per invoice/bill | Likely tax-profile assignment errors. Audit each invoice / bill for correct tax profile. Quick Fix: `quick_fix_line_items(entity: 'invoices' \| 'bills', ...)` on the affected lines, since the tax profile sits on each line. |
-| Q2 ECL recipe | 422 `account_not_found` | `Allowance for Doubtful Debts` missing. Create via `create_account(accountType: 'Current Asset')`. |
-| Q3 | YTD accrual mismatches monthly recipe expectations | Likely a manual journal posted directly to Bonus Liability (not via recipe). Audit `generate_general_ledger(accountResourceId: <Bonus Liability>, period_start: <FY-start>, period_end: <today>)`. |
+| Q2 ECL recipe | 422 `account_not_found` | `Allowance for Doubtful Debts` missing. Create via `create_account(name: 'Allowance for Doubtful Debts', code: <unused account code>, accountType: 'Current Asset')`. |
+| Q3 | YTD accrual mismatches monthly recipe expectations | Likely a manual journal posted directly to Bonus Liability (not via recipe). Audit `generate_general_ledger(accountResourceIds: [<Bonus Liability>], startDate: <FY-start>, endDate: <today>)`. |
 | Q4 IC recon | Entity A IC Receivable ≠ Entity B IC Payable (sign-flipped) | See the `intercompany` recipe error table. Common causes: timing, FX confusion, posting skipped in one entity. |
 | Q5 | Provision DRAFTs missing for the quarter | Recipe wasn't executed at provision setup. Re-run the `provision` recipe with current inputs; the engine emits the unwinding schedule for the remaining periods. |
 

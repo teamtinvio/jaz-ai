@@ -15,8 +15,8 @@
 - **`search_capsules(filter: {title: {eq: <capsule.name>}})`** — step 0 idempotency check. Each declared dividend gets its own capsule; duplicate setup means double-declaration.
 - **`search_accounts(filter: {name: {in: ['Retained Earnings', 'Dividends Payable', 'Withholding Tax Payable']}})`** — step 3.
 - **`search_contacts(filter: {name: {eq: <shareholder>}})`** — step 3 (the payee — typically a shareholder or a holding entity).
-- **`generate_balance_sheet(period_end: <date>)`** — step 5 verification: Retained Earnings reduced; Dividends Payable nil after payment.
-- **`generate_equity_movement(period_start, period_end)`** — step 5: dividends appear as a distinct line item in equity movement, separate from net profit.
+- **`generate_balance_sheet(snapshotDate: <date>)`** — step 5 verification: Retained Earnings reduced; Dividends Payable nil after payment.
+- **`generate_equity_movement(primarySnapshotStartDate, primarySnapshotEndDate)`** — step 5: dividends appear as a distinct line item in equity movement, separate from net profit.
 
 ### Cross-references
 - Operational context: invoked during year-end close (Y3 in `year-end-close.md`) for the FY-end final dividend; ad-hoc during month-end close when an interim dividend is declared mid-year.
@@ -54,20 +54,13 @@ clio calc dividend --amount 200000 --withholding-rate 10 --currency PHP --json
 
 ```
 plan_recipe(
-  // Note: gl*, capsuleType, capsuleName, bankAccountResourceId, vendor, customer below are illustrative — auto-resolved at execute time from CoA, not real plan_recipe params.
+  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
   recipe: 'dividend',
   amount: 200000,
   withholdingRate: 0,
   declarationDate: '2025-12-31',
   paymentDate: '2026-03-15',
-  currency: 'SGD',
-  glRetainedEarnings: <resourceId of 'Retained Earnings' account>,
-  glDividendsPayable: <resourceId of 'Dividends Payable' account>,
-  glWithholdingPayable: <resourceId of 'Withholding Tax Payable' account>,
-  bankAccountResourceId: <bank account resourceId>,
-  shareholder: 'TIN Holdings Pte Ltd',
-  capsuleType: 'Dividends',
-  capsuleName: 'FY2025 Final Dividend'
+  currency: 'SGD'
 )
 ```
 
@@ -81,7 +74,7 @@ Returns `RecipePlan` with `requiredAccounts: ['Retained Earnings', 'Dividends Pa
 For each account in `requiredAccounts`:
 - `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Retained Earnings` → `Shareholders Equity`; `Dividends Payable` → `Current Liability`; `Withholding Tax Payable` → `Current Liability`.
 
-If `Dividends Payable` doesn't exist: `create_account(name: 'Dividends Payable', accountType: 'Current Liability', currency: <base currency>)` first. This is a common gap in CoAs that haven't paid dividends before.
+If `Dividends Payable` doesn't exist: `create_account(name: 'Dividends Payable', code: <unused account code>, accountType: 'Current Liability', currencyCode: <base currency>)` first. This is a common gap in CoAs that haven't paid dividends before.
 
 Bank account: resolve `bankAccountResourceId` via `list_bank_accounts()` if the bank account resourceId isn't already known.
 
@@ -103,17 +96,17 @@ Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, r
 ### Step 5 — Verify (after the declaration is finalized and the payment is posted)
 
 After declaration finalized (Dec 31, 2025):
-- `generate_balance_sheet(period_end: '2025-12-31')`.
+- `generate_balance_sheet(snapshotDate: '2025-12-31')`.
 - Assert: `balance['Retained Earnings']` reduced by 200,000.
 - Assert: `balance['Dividends Payable']` increased by 200,000.
 
 After payment posted (Mar 15, 2026):
-- `generate_balance_sheet(period_end: '2026-03-15')`.
+- `generate_balance_sheet(snapshotDate: '2026-03-15')`.
 - Assert: `balance['Dividends Payable']` is now 0.
 - Assert: `balance['Cash']` reduced by 200,000 (or 180,000 if withholding).
 - Assert (with withholding): `balance['Withholding Tax Payable']` increased by 20,000 — pending separate remittance to tax authority.
 
-`generate_equity_movement(period_start: '2025-01-01', period_end: '2025-12-31')` should show "Dividends declared: 200,000" as a distinct line below "Net Profit", reducing closing equity.
+`generate_equity_movement(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')` should show "Dividends declared: 200,000" as a distinct line below "Net Profit", reducing closing equity.
 
 After payment AND WHT remittance:
 - `balance['Withholding Tax Payable']` back to 0.
@@ -131,7 +124,7 @@ After payment AND WHT remittance:
 | `execute_recipe` | 422 `negative_retained_earnings` | The dividend would push Retained Earnings negative. SG ITA s403(2) — companies cannot declare dividends out of capital (must be from accumulated profits). Halt and surface to practitioner: "Declaration would result in dividend out of capital. Verify available retained earnings via `generate_balance_sheet`." |
 | `execute_recipe` | 422 `currency_mismatch_bank_account` | Dividend currency ≠ bank account currency. Pass `currency` matching the disbursement bank, or model as FX cash-out (different `paymentAmount` and `transactionAmount`). |
 | Step 5 verification | Net Profit affected by dividend | Should NEVER happen via recipe (engine debits Retained Earnings, not P&L). If TB shows P&L impact: practitioner posted a manual journal mis-mapping. Reverse and re-run via recipe. |
-| Withholding tax remitted but `Withholding Tax Payable` still nonzero | (process gap) | Practitioner forgot to post the WHT remittance to authority. Post `create_cash_out_entry` with line: Dr Withholding Tax Payable / Cr Cash for the WHT amount. |
+| Withholding tax remitted but `Withholding Tax Payable` still nonzero | (process gap) | Practitioner forgot to post the WHT remittance to authority. Post `create_cash_out` with line: Dr Withholding Tax Payable / Cr Cash for the WHT amount. |
 | Interim dividend declared after final dividend already in capsule | (process) | Use a NEW capsule name (e.g., `Q1 2026 Interim Dividend` if it's the next FY's interim). Idempotency check protects against duplicate same-name. |
 
 ---
