@@ -414,7 +414,7 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 
 | Field | Valid Values |
 |-------|-------------|
-| `status` | `DRAFT`, `CREATED`, `ACCEPTED`, `CONFIRMED`, `VOID` |
+| `status` | `DRAFT`, `PENDING`, `CREATED`, `ACCEPTED`, `CONFIRMED`, `VOID` |
 | `currencyCode` | ISO 4217 (see above) |
 | `terms` | `0`, `7`, `15`, `30`, `45`, `60` (integer — payment terms in days) |
 
@@ -422,7 +422,7 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`
 **Link field**: `saleQuoteResourceId` (on Sale Orders — the source quote)
 
-> The `status` enum is the union across both sale documents: a **Sale Quote** moves `DRAFT → CREATED → ACCEPTED` (then `VOID`); a **Sale Order** is created as `CREATED → CONFIRMED` (then `VOID`). Fulfillment is reported on the parent quote via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_INVOICED`) — an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
+> The `status` enum is the union across both sale documents: a **Sale Quote** moves `DRAFT → CREATED → ACCEPTED` (then `VOID`); a **Sale Order** is created as `CREATED → CONFIRMED` (then `VOID`). An order made by Jaz Magic starts `PENDING` until `update_sale_order` with `isPendingToActiveSaleOrder: true` takes it live. Fulfillment is reported on the parent quote via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_INVOICED`) — an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
 
 ---
 
@@ -430,7 +430,7 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 
 | Field | Valid Values |
 |-------|-------------|
-| `status` | `DRAFT`, `ACTIVE`, `ACCEPTED`, `CONFIRMED`, `VOID` |
+| `status` | `DRAFT`, `PENDING`, `ACTIVE`, `ACCEPTED`, `CONFIRMED`, `VOID` |
 | `currencyCode` | ISO 4217 |
 | `terms` | `0`, `7`, `15`, `30`, `45`, `60` |
 
@@ -438,7 +438,7 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`
 **Link field**: `purchaseRequestResourceId` (on Purchase Orders — the source request)
 
-> The `status` enum is the union across both purchase documents: a **Purchase Request** moves `DRAFT → ACTIVE → ACCEPTED` (then `VOID`); a **Purchase Order** moves `DRAFT → ACTIVE → CONFIRMED` (then `VOID`). Fulfillment is reported on the parent request via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_BILLED`) — an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
+> The `status` enum is the union across both purchase documents: a **Purchase Request** moves `DRAFT → ACTIVE → ACCEPTED` (then `VOID`); a **Purchase Order** moves `DRAFT → ACTIVE → CONFIRMED` (then `VOID`). An order made by Jaz Magic starts `PENDING` until `update_purchase_order` with `isPendingToActivePurchaseOrder: true` takes it live. Fulfillment is reported on the parent request via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_BILLED`) — an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
 
 ---
 

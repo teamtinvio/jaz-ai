@@ -85,9 +85,9 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 |--------|------|-------------|
 | GET | `/{entity}` | List |
 | GET | `/{entity}/:resourceId` | Get single |
-| POST | `/{entity}` | Create. Sale Order links via `saleQuoteResourceId`; Purchase Order via `purchaseRequestResourceId` (parent must be issued — saveAsDraft:false — not a draft). |
+| POST | `/{entity}` | Create. Optional `currency { sourceCurrency, exchangeRate? }`. Sale Order links via `saleQuoteResourceId`; Purchase Order via `purchaseRequestResourceId` (parent must be issued, not a DRAFT/VOID, and in the same currency). |
 | POST | `/{entity}/search` | Advanced search with filters |
-| PUT | `/{entity}/:resourceId` | Update |
+| PUT | `/{entity}/:resourceId` | Update. `lineItems` edits by line `resourceId` (`deleted: true` removes; a line without one is ADDED): send every stored line once any names a resourceId. `isDraftToActiveSaleQuote` / `isDraftToActivePurchaseRequest` issue a DRAFT; `isPendingToActiveSaleOrder` / `isPendingToActivePurchaseOrder` take a PENDING order live. |
 | DELETE | `/{entity}/:resourceId` | Delete (DRAFT only — else use void) |
 | POST | `/{entity}/:resourceId/void` | Void (cancel) |
 | POST | `/sale-quotes\|purchase-requests/:resourceId/accept` | Accept (→ ACCEPTED) |

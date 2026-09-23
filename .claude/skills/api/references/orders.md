@@ -19,8 +19,10 @@ Two MCP namespaces wrap these: **`sale_orders`** (Sale Quotes + Sale Orders) and
 | `PURCHASE_ORDER` | DRAFT (default) / ACTIVE (saveAsDraft:false) | **confirm** → CONFIRMED | VOID | yes (default true) |
 
 - **Quotes & Requests use `accept`. Orders use `confirm`.** (`transition_*` enforces this via a documentType × action matrix.)
-- **`accept` works on the ISSUED state, not DRAFT** — a Sale Quote must be CREATED, a Purchase Request must be ACTIVE. Accepting a DRAFT returns `422 Invalid status` (verified live). There is no exposed DRAFT→issued verb: **issue a document by creating it with `saveAsDraft:false`** (update with `saveAsDraft:false` does NOT issue an existing DRAFT — verified live).
-- **Sale Orders have no draft state** — `saveAsDraft` is ignored; created directly as `CREATED`.
+- **`accept` works on the ISSUED state, not DRAFT**: a Sale Quote must be CREATED, a Purchase Request must be ACTIVE. Accepting a DRAFT returns `422 Invalid status` (verified live). **Issue an existing DRAFT in place** with the update tool's flag: `update_sale_order` `isDraftToActiveSaleQuote: true` (→ CREATED), `update_purchase_order` `isDraftToActivePurchaseRequest: true` (→ ACTIVE). Send every stored line with its `resourceId` in the SAME update: a flag-only update is refused with `422 SALE_LINE_ITEMS_REQUIRED` (verified live 2026-09-23 on a sale quote). It keeps the document's number and line ids (verified live: DRAFT → CREATED, same reference, same line `resourceId`; a line without an account issued fine), so never create a second quote/request to issue one. (Update with `saveAsDraft:false` does NOT issue a DRAFT, verified live.) To create one already issued, pass `saveAsDraft:false` on create.
+- **Sale Orders have no draft state**: `saveAsDraft` is ignored; created directly as `CREATED`.
+- **PENDING orders.** Jaz Magic creates Sale Orders and Purchase Orders as `PENDING`. Take one live with `update_sale_order` `isPendingToActiveSaleOrder: true` / `update_purchase_order` `isPendingToActivePurchaseOrder: true`. Search accepts `status: PENDING`.
+- **Each activation flag belongs to one documentType** (`isDraftToActiveSaleQuote` → SALE_QUOTE, `isPendingToActiveSaleOrder` → SALE_ORDER, `isDraftToActivePurchaseRequest` → PURCHASE_REQUEST, `isPendingToActivePurchaseOrder` → PURCHASE_ORDER). The update tools refuse a flag sent for the other type.
 - Statuses verified live: SQ create → `DRAFT` (or `CREATED` with `saveAsDraft:false`); SQ accept (from CREATED) → `ACCEPTED`; SO create → `CREATED`; SO confirm → `CONFIRMED`; PR create → `DRAFT` (or `ACTIVE` with `saveAsDraft:false`); PR accept (from ACTIVE) → `ACCEPTED`; PO `saveAsDraft:false` → `ACTIVE`; PO confirm → `CONFIRMED`.
 
 ## Linking (quote → order, request → PO)
@@ -30,7 +32,9 @@ Quote→Order / Request→PO linking is a **create-time reference field**:
 - **Quote → Order**: pass `saleQuoteResourceId` on `create_sale_order` (documentType `SALE_ORDER`).
 - **Request → PO**: pass `purchaseRequestResourceId` on `create_purchase_order` (documentType `PURCHASE_ORDER`).
 
-**The parent must be ISSUED (not DRAFT/VOID).** A CREATED/ACCEPTED quote (or ACTIVE/ACCEPTED request) is linkable — accept is **optional** (CREATED already links). Linking to a `DRAFT`/`VOID` parent returns `SALE_QUOTE_STATUS_INVALID_FOR_ORDER_CONVERSION` ("must not be in VOID or DRAFT status to create sale order"). The `create_*` tools pre-flight this: for a DRAFT parent the `repair` hint says to issue it (create with `saveAsDraft:false`) — **not** to accept it (accept fails on DRAFT). So: to order from a quote/request, create the quote/request with `saveAsDraft:false`.
+**The parent must be ISSUED (not DRAFT/VOID).** A CREATED/ACCEPTED quote (or ACTIVE/ACCEPTED request) is linkable — accept is **optional** (CREATED already links). Linking to a `DRAFT`/`VOID` parent returns `SALE_QUOTE_STATUS_INVALID_FOR_ORDER_CONVERSION` ("must not be in VOID or DRAFT status to create sale order"). The `create_*` tools pre-flight this: for a DRAFT parent the `repair` hint points at issuing THAT document in place (`update_sale_order` `isDraftToActiveSaleQuote: true` / `update_purchase_order` `isDraftToActivePurchaseRequest: true`), **not** at accepting it (accept fails on DRAFT) and not at creating a duplicate.
+
+**Currency.** A linked order must use the same currency as its quote/request: a linked order in a different currency is refused.
 
 Creating and confirming an order from an issued quote rolls the parent quote's `orderState` up to reflect downstream progress (arap order-status rollup, 2026-06): a confirmed order **not yet invoiced** shows `PARTIALLY_ORDERED` (verified live); the terminal `FULLY_INVOICED` is reached only once every linked order is fully invoiced. Purchase requests mirror this with `FULLY_BILLED`. `orderState` is a **response field**, not a search filter — values: `NOT_ORDERED` / `PARTIALLY_ORDERED` / `FULLY_INVOICED` (quotes) / `FULLY_BILLED` (requests). The older `FULLY_ORDERED` value was retired by this rollup.
 
@@ -49,11 +53,33 @@ Body: `valueDate` + `dueDate` required; `reference` is required unless you set `
 
 ## Fields (create)
 
-Required: `valueDate`. Recommended: `reference` (omit it to take the next number from your org's own series — must be unique per org), `contactResourceId`, `lineItems`.
+Required: `valueDate`, and `reference` unless you set `autoReference: true` (takes the next number from your org's own series). Omitting both is refused: omitting `reference` does NOT auto-number. `reference` must be unique per org. Recommended: `contactResourceId`, `lineItems`.
+
+- `currency: { sourceCurrency, exchangeRate?, rateDirection? }` (all four documents). Omit for the org's base currency; the currency must be enabled on the org. A linked order must name the same currency as its quote/request. Currency is fixed at create: the update body has no currency field. CLI: `--currency <code>` (+ `--exchange-rate`, `--rate-direction`), same as invoices.
 
 - Line items reuse the standard shape: `{ name, quantity, unitPrice, accountResourceId?, taxProfileResourceId?, … }`. `accountResourceId` is **required on each line when the document is not a draft** (i.e. always for Sale Orders; for quotes/requests/POs when `saveAsDraft:false`). The `create_*` tools pre-flight this.
 - Notes field differs by side: **sales** use `invoiceNotes`, **purchases** use `purchaseNotes`. The `notes` tool param maps to the right one automatically.
 - Other optional fields: `dueDate`, `terms` (0/7/15/30/45/60), `tag`, `customFields`, `billTo`, `billFrom`, `capsuleResourceId`, `expectedTotal`.
+
+## Editing line items (update)
+
+`lineItems` on `update_sale_order` / `update_purchase_order` **edits lines, it does not replace them.** The API pairs each sent line with a stored line by its `resourceId`:
+
+| Sent line | Effect |
+|-----------|--------|
+| has the `resourceId` of a stored line | that line is edited in place |
+| has a stored `resourceId` + `deleted: true` | that line is removed |
+| has no `resourceId` | a NEW line is added |
+| stored line not sent (when any line names a resourceId) | whole update refused: `422 lineItems must include every line item on this … when any line names a resourceId; N not sent` |
+
+Measured live (2026-09-23, one-line sale quote): resending the lines without ids answered **200 and left 2 lines** (the "replace" reading duplicates every line); naming some ids but not all → 422; every id sent (+ `deleted: true` on one) → edited in place.
+
+To change lines:
+1. `get_sale_order` / `get_purchase_order` and copy every `lineItems[].resourceId`.
+2. Send EVERY stored line with its `resourceId`, in display order: edit fields in place, `deleted: true` to remove, and add new lines without a `resourceId`.
+3. An edited line keeps only what you send: resend every stored field you want kept (tax profile, `taxVatAdjustment`, `withholdingTax`, `discount`, `unit`, `itemResourceId`). Dropping a stored tax profile or a non-zero `taxVatAdjustment` is refused; dropping `withholdingTax` (or the others) is NOT refused, it is silently lost. A GET returns the account as `organizationAccountResourceId`; send it back as `accountResourceId`.
+
+The update tools (and `clio … update --lines`) pre-flight this against the stored document: lines with no `resourceId` at all on a document that already has lines are refused locally (nothing is written) unless `appendLines: true` (CLI `--append-lines`) says adding is the intent; naming some stored lines but not all is refused locally with the missing ids.
 
 ## Delete vs Void
 
@@ -82,12 +108,13 @@ clio supplier-credit-notes download <id>     # supplier CN PDF
 
 ```bash
 # 1. Issue the quote (--finalize → saveAsDraft:false → status CREATED). A plain
-#    draft (no --finalize) stays DRAFT and cannot be linked or accepted.
-clio sale-orders create -t quote --finalize --contact <id> --lines '[{"name":"Widget","quantity":2,"unitPrice":50,"accountResourceId":"<acct>"}]' --date 2026-05-30 --json
+#    draft (no --finalize) stays DRAFT and cannot be linked or accepted until issued
+#    in place: clio sale-orders update <quoteId> -t quote --activate --lines '[{"resourceId":"<lineId>",…}]'
+clio sale-orders create -t quote --finalize --ref Q-1001 --contact <id> --lines '[{"name":"Widget","quantity":2,"unitPrice":50,"accountResourceId":"<acct>"}]' --date 2026-05-30 --json
 # 2. (Optional) accept it (CREATED → ACCEPTED). A CREATED quote is already linkable.
 clio sale-orders accept <quoteId> --json
 # 3. Create the order linked to the issued quote (created as CREATED)
-clio sale-orders create -t order --quote <quoteId> --contact <id> --lines '[…]' --date 2026-05-30 --json
+clio sale-orders create -t order --auto-ref --quote <quoteId> --contact <id> --lines '[…]' --date 2026-05-30 --json
 # 4. Confirm the order (CREATED → CONFIRMED)
 clio sale-orders confirm <orderId> --json
 # 5. The parent quote now rolls up to orderState = PARTIALLY_ORDERED (confirmed order, not yet invoiced)
@@ -100,7 +127,7 @@ Purchase side is symmetric: `create -t request --finalize` (→ ACTIVE) → (opt
 
 ## Search
 
-`search_sale_orders` / `search_purchase_orders` take `documentType` plus the standard filter set (reference, status, contact, contactResourceId, currencyCode, date range, amount range, tag). The `status` enum is the per-side union (sales: DRAFT/CREATED/ACCEPTED/CONFIRMED/VOID; purchases: DRAFT/ACTIVE/ACCEPTED/CONFIRMED/VOID). For advanced/nested queries (e.g. filter by `saleQuoteResourceId`), pass the raw `filter` object. See `search-reference.md` §24–25 and `search-enums.md` §25–26.
+`search_sale_orders` / `search_purchase_orders` take `documentType` plus the standard filter set (reference, status, contact, contactResourceId, currencyCode, date range, amount range, tag). The `status` enum is the per-side union (sales: DRAFT/PENDING/CREATED/ACCEPTED/CONFIRMED/VOID; purchases: DRAFT/PENDING/ACTIVE/ACCEPTED/CONFIRMED/VOID). For advanced/nested queries (e.g. filter by `saleQuoteResourceId`), pass the raw `filter` object. See `search-reference.md` §24–25 and `search-enums.md` §25–26.
 
 Search behaves exactly like the other entities: `sortBy` is an array, `order` is `ASC`/`DESC`, and an `offset` must be paired with a sort. Duplicate `sortBy` values are rejected (`422 — must contain unique values`).
 

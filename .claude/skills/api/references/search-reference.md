@@ -723,7 +723,7 @@ Also covers `POST /api/v1/sale-quotes/search` — same filter shape (`SaleOrderF
 |-------|------|-------|
 | `resourceId` | StringExpression | |
 | `reference` | StringExpression | Order/quote number |
-| `status` | StringExpression | DRAFT, CREATED, ACCEPTED, CONFIRMED, VOID |
+| `status` | StringExpression | DRAFT, PENDING, CREATED, ACCEPTED, CONFIRMED, VOID |
 | `contactResourceId` | StringExpression | |
 | `contact` | ContactNestedFilter | Nested: name, resourceId, status |
 | `saleQuoteResourceId` | StringExpression | (Sale Orders) source quote link |
@@ -755,7 +755,7 @@ Also covers `POST /api/v1/purchase-requests/search` — same filter shape (`Purc
 |-------|------|-------|
 | `resourceId` | StringExpression | |
 | `reference` | StringExpression | Order/request number |
-| `status` | StringExpression | DRAFT, ACTIVE, ACCEPTED, CONFIRMED, VOID |
+| `status` | StringExpression | DRAFT, PENDING, ACTIVE, ACCEPTED, CONFIRMED, VOID |
 | `contactResourceId` | StringExpression | Supplier |
 | `contact` | ContactNestedFilter | Nested: name, resourceId, status |
 | `purchaseRequestResourceId` | StringExpression | (Purchase Orders) source request link |

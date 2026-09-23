@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.63.0] - 2026-09-23
+
+**Edit quote and order lines in place, and create them in any enabled currency.**
+
+Updating a quote, sale order, purchase request or purchase order now edits its lines in place. Send each stored line with its id to change it, or mark it deleted to remove it. Earlier versions told your assistant to resend the full list, which added a second copy of every line. An update that would still duplicate lines is now refused before anything is sent, unless you explicitly ask to add lines.
+
+Quotes, orders and requests can be created in a foreign currency, with an optional exchange rate. A draft quote or purchase request can be issued in place, and an order that Jaz Magic created as pending can be made active, instead of creating a second document.
+
 ## [5.62.0] - 2026-09-23
 
 **Page and filter the general ledger, and fetch every record exactly once.**
