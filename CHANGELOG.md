@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.67.0] - 2026-09-24
+
+**Record and apply payments you have not matched to an invoice or bill yet.**
+
+Your assistant and `clio unapplied-payments` can now record money received or paid before you know which documents it settles, then apply it to invoices, bills or existing payments, reconcile it against a bank line, or remove it. New records start as drafts until you finalize them. Deleting a reconciled record releases its bank match. Once a record is fully applied it becomes a regular batch payment, and the assistant knows to look for it there.
+
+Writes on these records are sent once. If an answer is lost, you get an "unconfirmed" result that says where to check before trying again.
+
 ## [5.66.0] - 2026-09-24
 
 **Payments and documents are never sent twice, and a brief outage no longer signs you out.**

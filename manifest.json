@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.66.0",
+  "version": "5.67.0",
   "description": "Fastest way to manage money",
-  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 371 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
+  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 379 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
     "name": "Jaz",
     "email": "build.with@jaz.ai",
@@ -1545,6 +1545,38 @@
     {
       "name": "get_currency_effective_rate",
       "description": "The organization effective rate for a currency on a date: its own custom rate when set, else the platform daily rate. Defaults to today."
+    },
+    {
+      "name": "search_unapplied_payments",
+      "description": "Unapplied payments (cash not yet applied to documents). The only read path: rows carry hash (every write needs it), unappliedStatus and unappliedBalance. A record whose cash is all applied became a batch payment and no longer appears here."
+    },
+    {
+      "name": "record_unapplied_payment",
+      "description": "Record cash received (SALE) or paid (PURCHASE) before applying it to documents. Draft by default (posts nothing until finalize_unapplied_payment); saveAsDraft:false posts to the ledger now. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_unapplied_payment",
+      "description": "Edit an unapplied payment. New amount, account or date releases its bank match; a move to a foreign-currency account needs amount restated and rateToFunctional. Attribution rows (children): CLI --input. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "finalize_unapplied_payment",
+      "description": "Activate a DRAFT unapplied payment; the ledger posts now. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "apply_unapplied_payment",
+      "description": "Apply unapplied cash: attributions create a payment on each document; paymentResourceId instead groups an existing payment under it. Using up the balance converts it to a batch payment, one-way. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "remove_unapplied_payment_attribution",
+      "description": "Remove one child; its cash returns to the balance. childOrigin ATTRIBUTED deletes that payment, ATTACHED keeps it standalone. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_unapplied_payment",
+      "description": "Delete an unapplied payment. payments DELETE deletes its payments too (documents unpaid again) and releases any bank match: if bankStatementEntryResourceId is set, warn the user and confirm first. RELEASE (unbatch) keeps them standalone and is refused while reconciled. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "reconcile_unapplied_payment",
+      "description": "Record an unapplied payment for a bank record and match both. Direction, account, currency, date and amount come from the record; amount, if sent, must EQUAL it. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "download_journal_pdf",

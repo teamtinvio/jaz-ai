@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 73 command groups. Organized by domain.
+Complete reference for all 74 command groups. Organized by domain.
 
 ---
 
@@ -557,6 +557,22 @@ Types: `INVOICE`, `BILL`, `CUSTOMER_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE`, `JOURN
 | `preview` | `--level` (`TRANSACTIONS`: contact, date, capsule, tags; `LINE_ITEMS`: account, classifiers; required), `--filter <json>`, `--change <json>`, `--input <file>` (`{"filter": …, "change": …}`; the flags replace its keys), `--json` |
 | `apply <previewId>` | `--jot`, `--json`. Runs the preview once, within 30 minutes. Type it as `apply -- <previewId>`: a previewId can start with `-`, which would read as an option. Options go before `--`: `apply --json -- <previewId>`. Exits 1 unless every record changed (PARTIAL, FAILED, UNKNOWN) |
 
+### `clio unapplied-payments` — Cash not yet applied to invoices or bills
+Every write after `record` takes `--hash` (from `search` or the last write). A lost answer prints UNCONFIRMED with the read-back and exits 2 (never re-run it blind).
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `search` | `--id`, `--type` (`AR`/`AP`), `--ref`, `--account`, `--from`, `--to`, `--limit`, `--all`, `--json` |
+| `record` | `--type` (`SALE`/`PURCHASE`), `--account`, `--method`, `--amount`, `--date`, `--currency`, `--rate`, `--contact`, `--reference`, `--notes`, `--draft`, `--input` |
+| `update <id>` | `--hash`, `--reference`, `--notes`, `--method`, `--amount`, `--account`, `--date`, `--input` (for `children`) |
+| `activate <id>` | `--hash`. Posts the draft |
+| `attribute <id>` | `--hash`, `--attributions <json>` |
+| `attach <id>` | `--hash`, `--payment <id>` |
+| `detach <id> <childId>` | `--hash` |
+| `delete <id>` | `--hash`. Deletes its payment records too, and releases a bank match (confirm first when matched) |
+| `unbatch <id>` | `--hash`. Deletes it, keeps its payment records |
+| `reconcile` | `--bank-record`, `--method`, `--contact`, `--reference`, `--amount` (must equal the bank record), `--rate` |
+
 ### `clio capsules` — Transaction grouping
 | Subcommand | Key flags |
 |------------|-----------|
@@ -706,7 +722,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker — any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp` — MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 371 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 379 operations.
 
 ### `clio serve` — HTTP daemon
 Starts the HTTP daemon for ChatKit and email channel integrations.

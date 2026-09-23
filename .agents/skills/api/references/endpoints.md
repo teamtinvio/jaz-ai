@@ -2746,6 +2746,68 @@ Searches rules. Filter fields: `name`, `resourceId`, `actionType`, `appliesToRec
 
 **There is no filter on `searchFilter`**, so "which of my rules have no condition" cannot be asked server-side — list the rules and check the field client-side.
 
+
+## 27. Unapplied Payments
+
+Cash received (or paid) before anyone says what it pays for. Stored as a payment batch, so there is **no GET**: read it back through `POST /api/v1/batch-payments/search` with `"origin": ["UNAPPLIED"]` (a sibling of `filter`; the search defaults to `ALL`, which mixes ordinary batches in). Each row carries `hash`, `unappliedStatus` (`DRAFT` / `UNAPPLIED` / `APPLIED`), `consumedAmount` and `unappliedBalance`.
+
+Rules that hold on every route below:
+- **Every write after the create takes `hash`** (optimistic lock), from the search row or the previous write's response. A stale hash is refused (422 `INVALID_CHECK_SUM`). Writes that return the record return its new hash; delete and unbatch return only `{ resourceId }`.
+- **`totalAmount` is the cash that arrived; attributions consume it** (`unappliedBalance = totalAmount - consumedAmount`). On an ordinary batch the total is the sum of its records instead.
+- **Using up the balance converts the record into an ordinary batch payment, one-way** (attributions or attach). The response cannot say so (it has no `origin`): detect it from `unappliedBalance` reaching 0. Its `origin` becomes `BATCH`, so the `UNAPPLIED` search no longer returns it: a record missing from that search may have become a batch payment, so check the batch-payment search with `origin` `BATCH` or `ALL` before concluding it is gone.
+- `paymentMethod` is the same 11-value enum as payments; lowercase or unknown values are 422.
+- Not idempotent. Clio sends every one of these once and reports a lost answer as UNCONFIRMED with the read-back, never as success.
+
+### POST /api/v1/unapplied-payments
+
+```json
+{ "businessTransactionType": "SALE", "organizationAccountResourceId": "<bank-uuid>", "paymentMethod": "BANK_TRANSFER",
+  "amount": 500, "valueDate": "2026-09-23", "currencyCode": "SGD", "contactResourceId": "<contact-uuid>",
+  "reference": "DEP-1", "saveAsDraft": true }
+```
+
+Required: `businessTransactionType` (`SALE` received / `PURCHASE` paid), `organizationAccountResourceId`, `paymentMethod`, `amount` (> 0), `valueDate`, `currencyCode`. `rateToFunctional` is required for a foreign currency. `contactResourceId` is optional. `saveAsDraft: true` posts nothing until activate. Optional: `functionalCurrencyCode`, `externalReference`, `notes`, `customFields`, `attachments`.
+
+### PUT /api/v1/unapplied-payments/{resourceId}
+
+`hash` plus any of `reference`, `externalReference`, `notes`, `paymentMethod`, `amount`, `organizationAccountResourceId`, `valueDate`, `rateToFunctional`, `customFields`, `attachments`, `children`. Changing `amount`, the account or the date releases an existing bank match. There is no `currencyCode`: the currency follows the account, and a move to an account in another currency needs `amount` restated in the new currency (or it is refused `CONTAINER_CURRENCY_CHANGE_INCOMPLETE`) and `rateToFunctional` when that currency is not the organization's own. The agent tool does not expose `children`; send them with `clio unapplied-payments update <id> --hash <hash> --input body.json`. `children` is a replacement list where a row LEFT OUT is KEPT: send `{ "resourceId": "<payment>", "deleted": true }` to remove one.
+
+### DELETE /api/v1/unapplied-payments/{resourceId}
+
+Body `{ "hash": "..." }` (a DELETE with a body). Deletes the record AND every payment record under it, so each document it settled is unpaid again, and reverses its unapplied remainder. **A reconciled record is not refused: its bank match is released and the delete proceeds**, leaving the bank record unreconciled. When `bankStatementEntryResourceId` is set, warn the user and confirm before deleting. Returns `{ resourceId }`.
+
+### POST /api/v1/unapplied-payments/{resourceId}/activate
+
+Body `{ "hash": "..." }`. Draft to active; the ledger entry posts here.
+
+### POST /api/v1/unapplied-payments/{resourceId}/attributions
+
+```json
+{ "hash": "...", "attributions": [ { "businessTransactionResourceId": "<invoice-uuid>", "businessTransactionType": "SALE", "amount": 200 } ] }
+```
+
+1-500 entries; `businessTransactionType` is `SALE`, `PURCHASE`, `SALE_CREDIT_NOTE` or `PURCHASE_CREDIT_NOTE`. Each creates a payment record on that document. Optional per entry: `transactionAmount` (document currency), `transactionFee`, `transactionFeeCollected`. **The fee shape differs from a payment record's fee**: `{ feeValue, feeType: "AMOUNT" | "PERCENTAGE", feeOrganizationAccountResourceId, taxVatProfileResourceId?, feeTaxVatApplicable?, feeDescription? }` (not `FLAT`, not `feeAccountResourceId`).
+
+### POST /api/v1/unapplied-payments/{resourceId}/payments
+
+Body `{ "hash": "...", "paymentResourceId": "<payment-uuid>" }`. Groups an EXISTING standalone payment under this record: the payment keeps its document, the balance falls, the total stays.
+
+### DELETE /api/v1/unapplied-payments/{resourceId}/children/{childResourceId}
+
+Body `{ "hash": "..." }`. Removes one child; its cash returns to the balance. The child's `childOrigin` decides the rest: `ATTRIBUTED` (created here) is deleted, `ATTACHED` (existed before) survives as a standalone payment.
+
+### POST /api/v1/unapplied-payments/{resourceId}/unbatch
+
+Body `{ "hash": "..." }`. Deletes the record but RELEASES its payment records as standalone payments, each keeping its document, and reverses its unapplied remainder. Refused while reconciled: unmatch first. Returns `{ resourceId }`.
+
+### POST /api/v1/reconciliations/unapplied-payment
+
+```json
+{ "bankStatementEntryResourceId": "<bse-uuid>", "unappliedPaymentDetails": { "paymentMethod": "BANK_TRANSFER", "contactResourceId": "<contact-uuid>" } }
+```
+
+Records an unapplied payment for the bank record and matches the two. Direction, account, currency, date and amount come from the bank record. `amount` is optional and, when sent, must EQUAL the bank record's amount (`TOTAL_RECONCILIATION_AMOUNT_MISMATCHED_WITH_STATEMENT_ENTRY_AMOUNT` otherwise); there is no partial match. `rateToFunctional` is required for a foreign-currency account. `amount` belongs INSIDE `unappliedPaymentDetails`: at the top level it is silently dropped. Returns `{ bankStatementEntryResourceId, status, reference, valueDate, unappliedPaymentResourceId }`.
+
 ---
 
-*Last updated: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 — added Jots judgment journal, section 25. Previous: 2026-04-09 — Added: Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13 — Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*
+*Last updated: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 — added Bank Rules CRUD, section 26. Previous: 2026-07-11 — added Jots judgment journal, section 25. Previous: 2026-04-09 — Added: Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13 — Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*

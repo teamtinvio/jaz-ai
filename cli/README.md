@@ -3,13 +3,13 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/v/jaz-clio?style=for-the-badge&logo=npm" alt="npm"></a>
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/dm/jaz-clio?style=for-the-badge&label=downloads" alt="npm downloads"></a>
-  <img src="https://img.shields.io/badge/tools-371-blue?style=for-the-badge" alt="371 tools">
+  <img src="https://img.shields.io/badge/tools-379-blue?style=for-the-badge" alt="379 tools">
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
 <p align="center"><b>Jaz accounting on the command line, and inside any AI agent.</b></p>
 
-371 tools · 73 command groups · 7 skills · 13 calculators · 12 close playbooks · 159 field-tested API rules.
+379 tools · 74 command groups · 7 skills · 13 calculators · 12 close playbooks · 159 field-tested API rules.
 
 ```bash
 npm install -g jaz-clio
@@ -51,7 +51,7 @@ clio invoices search --query 'status:unpaid AND $500+' # structured per-entity s
 clio ledger-find-fix preview --level TRANSACTIONS --input recode.json  # find & fix (recode) across record types
 ```
 
-73 command groups, 16 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
+74 command groups, 16 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
 
 ### Foreign currency
 
@@ -78,7 +78,7 @@ that ends up in a journal.
 
 ## MCP server
 
-371 tools for any AI agent that speaks MCP. Runs locally: no cloud, no ports.
+379 tools for any AI agent that speaks MCP. Runs locally: no cloud, no ports.
 
 > **No install at all?** Claude.ai, ChatGPT, Cowork, and Microsoft Copilot Studio can use Jaz through the hosted connector. Add `https://mcp.jaz.ai/mcp` as a custom connector and sign in with OAuth, no key. The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
 

@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.66.0+8d586424",
+  "contentVersion": "5.67.0+dfae74ba",
   "counts": {
-    "tools": 371,
-    "namespaces": 45,
+    "tools": 379,
+    "namespaces": 46,
     "calculators": 13,
     "recipes": 13,
     "jobs": 12,
     "skills": 7,
-    "commands": 73,
+    "commands": 74,
     "apiRules": 159
   },
   "namespaces": [
@@ -62,7 +62,7 @@
     },
     {
       "name": "reconciliations",
-      "description": "Apply a reconciliation decision to a bank statement entry — write side. Match bank records to EXISTING open bills/invoices/payments (reconcile_with_payments — the primary path, creates the payment for you), or to journals, cash entries, or transfers, or CREATE new bills/invoices (invoice_receipt/bill_receipt). Distinct from bank_accounts/bank_rules (which configure auto-reconciliation) and view_auto_reconciliation (which queries suggestions). Twelve endpoints: quick_reconcile + apply_bank_rule + magic_match (bulk), undo_reconciliations (bulk reverse), and direct_cash_entry / cash_journal / manual_journal / cash_transfer / invoice_receipt / bill_receipt / with_payments / learned_prediction (per-entry). Match-to-existing is preferred over create-new to avoid duplicates. Most fields prefill from the bank entry when omitted; FX is resolved server-side. To reverse a reconciliation use undo_reconciliations, which unlinks the entry but does NOT delete a record a reconcile call created — it returns linkedRecords so you can delete that record too."
+      "description": "Apply a reconciliation decision to a bank statement entry — write side. Match bank records to EXISTING open bills/invoices/payments (reconcile_with_payments — the primary path, creates the payment for you), or to journals, cash entries, or transfers, or CREATE new bills/invoices (invoice_receipt/bill_receipt). Distinct from bank_accounts/bank_rules (which configure auto-reconciliation) and view_auto_reconciliation (which queries suggestions). Thirteen endpoints: quick_reconcile + apply_bank_rule + magic_match (bulk), undo_reconciliations (bulk reverse), and direct_cash_entry / cash_journal / manual_journal / cash_transfer / invoice_receipt / bill_receipt / with_payments / learned_prediction / unapplied_payment (per-entry). Match-to-existing is preferred over create-new to avoid duplicates. Most fields prefill from the bank entry when omitted; FX is resolved server-side. To reverse a reconciliation use undo_reconciliations, which unlinks the entry but does NOT delete a record a reconcile call created — it returns linkedRecords so you can delete that record too."
     },
     {
       "name": "financial_reports",
@@ -155,6 +155,10 @@
     {
       "name": "payments_and_search",
       "description": "Payment records: get, update, delete individual payments. List payments/credits on invoices and bills. Reverse credit applications. Cashflow transaction search. Universal cross-entity search. Also: payment run, batch payment, payment matching, void payment, payment history, credit note applications, transaction summary."
+    },
+    {
+      "name": "unapplied_payments",
+      "description": "Cash received or paid before it is applied to invoices or bills: record (or draft and finalize), search, apply to documents, attach existing payments, remove an application, edit, delete. Also: unallocated receipts, customer deposits, advances, prepayments, payments on account. To record one straight from a bank record, use reconcile_unapplied_payment in reconciliations."
     },
     {
       "name": "versions",
@@ -2785,6 +2789,62 @@
       "destructive": false
     },
     {
+      "name": "search_unapplied_payments",
+      "namespace": "unapplied_payments",
+      "description": "Unapplied payments (cash not yet applied to documents). The only read path: rows carry hash (every write needs it), unappliedStatus and unappliedBalance. A record whose cash is all applied became a batch payment and no longer appears here.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "record_unapplied_payment",
+      "namespace": "unapplied_payments",
+      "description": "Record cash received (SALE) or paid (PURCHASE) before applying it to documents. Draft by default (posts nothing until finalize_unapplied_payment); saveAsDraft:false posts to the ledger now. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_unapplied_payment",
+      "namespace": "unapplied_payments",
+      "description": "Edit an unapplied payment. New amount, account or date releases its bank match; a move to a foreign-currency account needs amount restated and rateToFunctional. Attribution rows (children): CLI --input. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "finalize_unapplied_payment",
+      "namespace": "unapplied_payments",
+      "description": "Activate a DRAFT unapplied payment; the ledger posts now. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "apply_unapplied_payment",
+      "namespace": "unapplied_payments",
+      "description": "Apply unapplied cash: attributions create a payment on each document; paymentResourceId instead groups an existing payment under it. Using up the balance converts it to a batch payment, one-way. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "remove_unapplied_payment_attribution",
+      "namespace": "unapplied_payments",
+      "description": "Remove one child; its cash returns to the balance. childOrigin ATTRIBUTED deletes that payment, ATTACHED keeps it standalone. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_unapplied_payment",
+      "namespace": "unapplied_payments",
+      "description": "Delete an unapplied payment. payments DELETE deletes its payments too (documents unpaid again) and releases any bank match: if bankStatementEntryResourceId is set, warn the user and confirm first. RELEASE (unbatch) keeps them standalone and is refused while reconciled. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "reconcile_unapplied_payment",
+      "namespace": "reconciliations",
+      "description": "Record an unapplied payment for a bank record and match both. Direction, account, currency, date and amount come from the record; amount, if sent, must EQUAL it. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
       "name": "download_journal_pdf",
       "namespace": "journals",
       "description": "Download a journal as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered).",
@@ -2863,6 +2923,7 @@
     "supplier-credit-notes",
     "tags",
     "tax-profiles",
+    "unapplied-payments",
     "update",
     "version",
     "versions"
