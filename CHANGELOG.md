@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.68.0] - 2026-09-24
+
+**Jaz Magic reads quotes, sales orders, purchase requests and purchase orders.**
+
+Upload a quote, sales order, purchase request or purchase order and Jaz Magic drafts it for you. Quotes and purchase requests arrive as drafts, and orders arrive pending; your assistant tells you how to issue or activate each one. Document collection recognises folders named for these documents, while folders such as "Purchase Order Invoices" still become bills.
+
+You can add internal notes when uploading a document. Files are checked against the 10 MB upload limit before sending, and document collection skips an oversize file, or a merged PDF of a type Magic cannot split, with the reason stated instead of failing partway. The claim upload limit now matches at 10 MB.
+
 ## [5.67.0] - 2026-09-24
 
 **Record and apply payments you have not matched to an invoice or bill yet.**

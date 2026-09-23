@@ -7,7 +7,7 @@
 ### Platform tools
 - **`mcp magic create --file <pdf>` / `create_bt_from_attachment(businessTransactionType: 'BILL'|'INVOICE'|'CUSTOMER_CREDIT_NOTE'|'SUPPLIER_CREDIT_NOTE', sourceUrl)`** — step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction.
 - **`finalize_bill(...)` / `finalize_invoice(...)` / `finalize_customer_credit_note(...)`** — step 5: finalize practitioner-reviewed Magic-extracted DRAFTs.
-- **`import_bank_statement(accountResourceId, sourceUrl | attachmentId)`** — step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
+- **`import_bank_statement(accountResourceId, sourceUrl | attached file)`**: step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
 - **`search_background_jobs(filter: {resourceId: {eq: <jobId>}})`** — step 7: poll Magic / bank-import async jobs to terminal status.
 
 ### CLI tools (jaz-cli — offline)
@@ -133,7 +133,7 @@ Match by name + currency to the statement (typically the bank logo + account num
 ```
 import_bank_statement(
   accountResourceId: <bank id>,
-  sourceUrl: <statement file URL>   // or attachmentId
+  sourceUrl: <statement file URL>   // or a file attached to the call (max 10 MB)
 )
 ```
 

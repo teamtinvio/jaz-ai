@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.67.0",
+  "version": "5.68.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 379 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -772,7 +772,7 @@
     },
     {
       "name": "import_bank_statement",
-      "description": "Import a bank statement from URL or attachment ID. Processing is async — check magic workflows for status. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Import a bank statement from a URL or an attached file (max 10 MB). Processing is async; check magic workflows for status. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "add_bank_records",
@@ -780,7 +780,7 @@
     },
     {
       "name": "create_bt_from_attachment",
-      "description": "Create a business transaction (invoice/bill/credit note) from a SINGLE file, a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. When the host conversation provides a file with the call, omit all source arguments — the file is used automatically. For a FOLDER, a .zip, a Dropbox/Drive/OneDrive folder share link, or several/mixed documents at once, use classify_documents (then extract_documents) instead — do not call this per-file. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a business transaction (invoice/bill/credit note/quote/order/purchase request) from a SINGLE file (max 10 MB), a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. Quotes/orders land DRAFT/PENDING: relay the result `next`. When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. For a FOLDER, a .zip, a Dropbox/Drive/OneDrive folder share link, or several/mixed documents at once, use classify_documents (then extract_documents) instead, not this per-file. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_magic_workflow_status",
@@ -796,11 +796,11 @@
     },
     {
       "name": "classify_documents",
-      "description": "Use this when the user points at a FOLDER, a .zip, a Dropbox / Google Drive / OneDrive folder share link, or a pile/batch of mixed documents. Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Returns a manifest (per-file type + confidence + counts) plus a collectionId. If nothing is extractable it returns `hint` (why + what to do) and `summary.skippedExtensions` — relay it, do NOT call extract_documents; review it, then call extract_documents with that collectionId to create the drafts. The source is FETCHED BY THE JAZ SERVER: a direct .zip/file link, or a Dropbox / Google Drive / OneDrive share link. A local path works only when this tool runs on your own machine. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Use this when the user points at a FOLDER, a .zip, a Dropbox / Google Drive / OneDrive folder share link, or a pile/batch of mixed documents. Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / quote / order / purchase request / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Returns a manifest (per-file type + confidence + counts) plus a collectionId. If nothing is extractable it returns `hint` (why + what to do) and `summary.skippedExtensions`: relay it, do NOT call extract_documents; review it, then call extract_documents with that collectionId to create the drafts. The source is FETCHED BY THE JAZ SERVER: a direct .zip/file link, or a Dropbox / Google Drive / OneDrive share link. A local path works only when this tool runs on your own machine. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "extract_documents",
-      "description": "Create draft transactions from a classified document collection (see classify_documents). Uploads each file to the right AI-extraction endpoint — invoices/bills/credit notes via business-transaction extraction, bank statements via statement import — de-duplicates identical files, and returns the workflow ids to poll with wait_for_magic_workflows. Processing is async; drafts appear once the workflows reach a terminal state. Pass the collectionId from classify_documents. Returns `whereToSee[]`: the screen each landed type appears on + its uploaded/failed split — relay those links (no `navigate`) and say drafts are still arriving. An unbuildable link is omitted, named in `partialFailures`. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create draft transactions from a classified document collection (see classify_documents). Uploads each file to the right AI-extraction endpoint (invoices/bills/credit notes via business-transaction extraction, bank statements via statement import), de-duplicates identical files, and returns the workflow ids to poll with wait_for_magic_workflows. Processing is async; drafts appear once the workflows reach a terminal state. Pass the collectionId from classify_documents. Returns `whereToSee[]`: the screen each landed type appears on + its uploaded/failed split (+ `next` for quotes/orders): relay those links (no `navigate`) and say drafts are still arriving. An unbuildable link is omitted, named in `partialFailures`. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_attachments",

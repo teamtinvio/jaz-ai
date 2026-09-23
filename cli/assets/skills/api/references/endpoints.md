@@ -1141,6 +1141,14 @@ Processing is **asynchronous** — the API response confirms file upload immedia
 - `BILL` → creates a draft purchase (response type: `PURCHASE`)
 - `CUSTOMER_CREDIT_NOTE` → creates a draft customer CN (response type: `SALE_CREDIT_NOTE`)
 - `SUPPLIER_CREDIT_NOTE` → creates a draft supplier CN (response type: `PURCHASE_CREDIT_NOTE`)
+- `SALE_QUOTE` → creates a DRAFT sale quote (response type: `SALE_QUOTE`); issue it with `isDraftToActiveSaleQuote`
+- `SALE_ORDER` → creates a PENDING sale order (response type: `SALE_ORDER`); take it live with `isPendingToActiveSaleOrder`
+- `PURCHASE_REQUEST` → creates a DRAFT purchase request (response type: `PURCHASE_REQUEST`); issue it with `isDraftToActivePurchaseRequest`
+- `PURCHASE_ORDER` → creates a PENDING purchase order (response type: `PURCHASE_ORDER`); take it live with `isPendingToActivePurchaseOrder`
+
+A PENDING order is on the dashboard's For Review tab, not in the live order lists. Activate it with the order update (`PUT /sale-orders/:id` / `PUT /purchase-orders/:id`); if that call sends `lineItems`, send every stored line with its `resourceId`.
+
+Optional `internalNotes` (max 3000 characters) is set on the created record, e.g. a tag to find an automated upload again. Optional `uploadMode: "MERGED"` splits one PDF into several documents; it is refused (`MAGIC_MERGED_UPLOAD_NOT_SUPPORTED`) for the four quote/order/request types.
 
 **Three modes** — content type depends on `sourceType`:
 
@@ -1152,8 +1160,9 @@ Content-Type: multipart/form-data
 
 Fields:
   - sourceFile: PDF or JPG file blob (NOT "file")
-  - businessTransactionType: "INVOICE", "BILL", "CUSTOMER_CREDIT_NOTE", or "SUPPLIER_CREDIT_NOTE"
+  - businessTransactionType: "INVOICE", "BILL", "CUSTOMER_CREDIT_NOTE", "SUPPLIER_CREDIT_NOTE", "SALE_QUOTE", "SALE_ORDER", "PURCHASE_REQUEST", or "PURCHASE_ORDER"
   - sourceType: "FILE"
+  - internalNotes: optional, max 3000 characters
 ```
 
 ```json
@@ -1230,13 +1239,14 @@ Content-Type: application/json
 
 **Key gotchas:**
 - `sourceFile` is the field name (NOT `file`) — same pattern as bank statement endpoint
-- `EXPENSE` returns 422 — use one of the 4 valid types above
-- Response maps types: `INVOICE` → `SALE`, `BILL` → `PURCHASE`, `CUSTOMER_CREDIT_NOTE` → `SALE_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE` → `PURCHASE_CREDIT_NOTE`
+- `EXPENSE` returns 422: use one of the 8 valid types above
+- Response maps types: `INVOICE` → `SALE`, `BILL` → `PURCHASE`, `CUSTOMER_CREDIT_NOTE` → `SALE_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE` → `PURCHASE_CREDIT_NOTE`; the four quote/order/request types keep their names
+- There is no attachment-id source: the sources are `sourceFile`, `sourceURL` and `html` only
 - JSON body with `sourceType: "FILE"` always fails (400) — MUST use multipart
 - `workflowResourceId` in `validFiles[]` is for tracking via `POST /magic/workflows/search`
 - `subscriptionFBPath` is the Firebase path for real-time status updates
 - All three fields (the source — `sourceFile`/`sourceURL`/`html` — plus `businessTransactionType` and `sourceType`) are required — omitting any returns 422
-- File types confirmed: PDF, JPG/JPEG, PNG, HEIC, XLS, XLSX, EML (max 1 MB). HTML mode (`sourceType: "HTML"`) takes the raw HTML body instead of a file (max 5 MB); an `.eml` file is still FILE mode, not HTML mode.
+- File types confirmed: PDF, JPG/JPEG, PNG, HEIC, XLS, XLSX, EML (max 10 MB). HTML mode (`sourceType: "HTML"`) takes the raw HTML body instead of a file (max 5 MB); an `.eml` file is still FILE mode, not HTML mode.
 
 ---
 
@@ -1287,7 +1297,7 @@ Content-Type: application/json
 
 **Filter fields:**
 - `resourceId`: StringExpression (eq, contains) — workflow ID from magic create response
-- `documentType`: Array — SALE, PURCHASE, SALE_CREDIT_NOTE, PURCHASE_CREDIT_NOTE, BANK_STATEMENT
+- `documentType`: Array: SALE, PURCHASE, SALE_CREDIT_NOTE, PURCHASE_CREDIT_NOTE, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER, BANK_STATEMENT
 - `status`: Array — SUBMITTED, PROCESSING, COMPLETED, FAILED
 - `fileName`: StringExpression — original uploaded filename
 - `fileType`: Array — PDF, PNG, JPEG, JPG, HEIC, CSV, XLS, XLSX, EML
@@ -1297,7 +1307,7 @@ Content-Type: application/json
 1. Upload via `POST /magic/createBusinessTransactionFromAttachment` → get `workflowResourceId`
 2. Search with `filter.resourceId.eq` → check `status`
 3. When `COMPLETED` → read `businessTransactionDetails.businessTransactionResourceId`
-4. Use the BT resource ID with `GET /invoices/:id`, `GET /bills/:id`, `GET /customer-credit-notes/:id`, or `GET /supplier-credit-notes/:id`
+4. Use the BT resource ID with `GET /invoices/:id`, `GET /bills/:id`, `GET /customer-credit-notes/:id`, `GET /supplier-credit-notes/:id`, or the matching quote/order/request GET
 
 
 ---
@@ -1318,6 +1328,8 @@ Fields:
   - businessTransactionType: "BANK_STATEMENT"
   - sourceType: "FILE" (valid values: URL, FILE)
 ```
+
+Max 10 MB per file. There is no attachment-id source.
 
 CSV format: `Date,Description,Debit,Credit` — maps to Date, Description, Cash-out, Cash-in.
 
