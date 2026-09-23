@@ -24,7 +24,7 @@ All search endpoints share this identical structure:
 | `filter` | object | No | Per-endpoint fields (see tables below) |
 | `sort` | object | **Yes if `offset` is present** | `sortBy`: array of field names; `order`: `"ASC"` or `"DESC"` |
 | `limit` | int | No | Default: 100, min: 1, max: 1000 |
-| `offset` | int | No | **Page number** (0-indexed, not row-skip). Default: 0, min: 0, max: 65536 |
+| `offset` | int | No | **Page number** (0-indexed, not row-skip). Default: 0, min: 0, max: 65536. Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`. |
 
 **Response shape**: `{ totalElements, totalPages, data: [...] }` — all search/list endpoints return this flat structure directly (no outer `data` wrapper).
 

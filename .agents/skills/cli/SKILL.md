@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.61.3
+version: 5.62.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -400,7 +400,7 @@ See `references/common-workflows.md` for end-to-end multi-command patterns.
 1. **Create returns only {resourceId}.** Always `get` afterward for full data.
 2. **Line-item accounts don't fuzzy-resolve.** Use UUID or exact name.
 3. **Cash entries finalize immediately.** Unlike invoices which default to draft.
-4. **--offset is page number (0-indexed), not row count.**
+4. **--offset is page number (0-indexed), not row count.** Exceptions, where `--offset` is a ROW offset (next page = offset + limit): `purchase-items list/search`, `currency-rates list`, `claims payouts` and `reports generate general-ledger`. Each command's `--offset` help says which it is, and `--all` pages both kinds correctly.
 5. **Explicit organization selection wins.** `--org` uses the selected OAuth organization or saved key profile even when `JAZ_API_KEY` is set.
 
 See [references/agent-gotchas.md](./references/agent-gotchas.md) for the full list of 19 critical gotchas. See [references/output-shapes.md](./references/output-shapes.md) for `--json` output structures. See [references/error-recovery.md](./references/error-recovery.md) for 30+ error patterns with fixes.

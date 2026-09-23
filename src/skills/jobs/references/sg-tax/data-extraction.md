@@ -186,9 +186,14 @@ POST /api/v1/generate-reports/general-ledger
 {
   "startDate": "2025-01-01",
   "endDate": "2025-12-31",
-  "groupBy": "ACCOUNT"
+  "groupBy": "ACCOUNT",
+  "filter": { "account": { "resourceId": { "in": ["<accountResourceId>", "..."] } } },
+  "limit": 1000,
+  "offset": 0
 }
 ```
+
+`filter.account.resourceId.in` (max 100 ids) keeps the pull to the accounts identified in Phase 2.
 
 **Target these account categories:**
 
@@ -205,7 +210,7 @@ POST /api/v1/generate-reports/general-ledger
 | "Unrealized", "FX", "Foreign Exchange" | `unrealizedFxLoss` / `deductions.unrealizedFxGain` | Separate gains from losses |
 | "Dividend Income" | `exemptDividends` | SG one-tier dividends only |
 
-**Tip:** For large GLs, you may need to paginate. Check the response for pagination metadata and follow up with offset/limit parameters.
+**Paging:** the GL reads `offset` as a **ROW offset**, unlike the search endpoints below. Read `data.searchGeneralLedgersReport.totalElements`; while rows remain, request `offset + limit` next (0, 1000, 2000, ...). Omitting `limit` returns the whole report in one response.
 
 ### Step 10: Search for capital items on P&L
 
@@ -294,8 +299,9 @@ All search endpoints support pagination. The standard pattern:
 ```
 
 **Check the response metadata:**
-- `offset` is a **page number** (0-indexed), NOT a row-skip count. Increment `offset` by 1 for each subsequent page.
+- On the search endpoints, `offset` is a **page number** (0-indexed), NOT a row-skip count. Increment `offset` by 1 for each subsequent page.
 - Example: `offset=0` returns items 0–999, `offset=1` returns items 1000–1999, etc.
+- **The general ledger is the exception**: its `offset` is a ROW offset, so the second page of 1000 is `offset=1000` (see Phase 5).
 - Always aggregate totals across all pages before mapping to input fields
 - Do not assume a single page contains all results
 

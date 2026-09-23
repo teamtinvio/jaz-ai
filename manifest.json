@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.61.3",
+  "version": "5.62.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 371 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -312,7 +312,7 @@
     },
     {
       "name": "generate_general_ledger",
-      "description": "Generate a general ledger report."
+      "description": "General ledger report, 50 rows per call; if _paging is present, call again with offset = _paging.nextOffset."
     },
     {
       "name": "list_bank_accounts",
@@ -484,7 +484,7 @@
     },
     {
       "name": "list_currency_rates",
-      "description": "List exchange rates for a specific currency. IMPORTANT: You MUST call list_currencies first to discover which currencies the org has enabled — never guess or assume currency codes."
+      "description": "List exchange rates for one currency. Call list_currencies first for the org's enabled codes; never guess one."
     },
     {
       "name": "add_currency_rate",

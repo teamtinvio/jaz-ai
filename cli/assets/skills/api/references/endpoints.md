@@ -35,6 +35,10 @@ All GET list endpoints and POST `/search` endpoints use **`limit`/`offset` pagin
 
 **IMPORTANT: `offset` is a page number (0-indexed), NOT a row-skip count.** `offset=0` returns the first page, `offset=1` returns the second page, etc. Example: `offset=2, limit=50` returns items 100–149.
 
+**Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit):** `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`. There, `offset=2, limit=50` returns items 2-51.
+
+Paging one of these by page number reads overlapping windows: duplicates in, the rest never reached, while `totalElements` still looks right.
+
 | Property | Value |
 |----------|-------|
 | **GET list endpoints** | `?limit=100&offset=0` (query params) |
@@ -1486,10 +1490,15 @@ Both `primarySnapshotDate` and `secondarySnapshotDate` required. NOT `startDate`
 
 ```json
 // Request:
-{ "startDate": "2026-01-01", "endDate": "2026-02-28", "groupBy": "ACCOUNT" }
+{ "startDate": "2026-01-01", "endDate": "2026-02-28", "groupBy": "ACCOUNT", "limit": 200, "offset": 0,
+  "filter": { "account": { "resourceId": { "in": ["<accountResourceId>"] } } } }
 ```
 
-`groupBy` is required. Valid values: `"ACCOUNT"`. Uses `startDate`/`endDate` like trial balance.
+`groupBy` is required. Valid values: `"ACCOUNT"`, `"CONTACT"`, `"TRANSACTION"`, `"RELATIONSHIP"`, `"CAPSULE"`. Uses `startDate`/`endDate` like trial balance.
+
+**Paging**: `limit` 1-1000; **omit it and the whole report comes back in one response** (630 rows is ~628KB). `offset` is a 0-indexed **ROW** offset, not a page number: the next page is `offset + limit`. Max offset 65536; past that, narrow the dates. Rows sit under `data.searchGeneralLedgersReport.data`, with `totalElements` and `totalPages` beside them.
+
+**Filter**: `filter.account.resourceId` (StringExpression, e.g. `{ "in": [...] }`, max 100) narrows to accounts; `filter.account.accountType`, `contactResourceId.name`, `businessTransactionType`, `businessTransactionReference`, `description`, `tags` and the amount expressions are also accepted.
 
 ### POST /api/v1/generate-reports/cashflow
 
@@ -1718,7 +1727,7 @@ POST /api/v1/invoices/search
 
 ### Pagination
 - `limit`: max 1000 per page (default 100)
-- `offset`: page number, 0-indexed (max 65536)
+- `offset`: page number, 0-indexed (max 65536); a ROW offset on the exceptions listed under "Pagination (All List Endpoints)"
 - `sort`: **REQUIRED when `offset` is present** (even `offset: 0`)
 - Response includes `totalElements` and `totalPages`
 

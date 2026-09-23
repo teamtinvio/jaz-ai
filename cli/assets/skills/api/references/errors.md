@@ -765,7 +765,7 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 ### "limit must be 1000 or less" (422)
 **Cause**: Sending `?limit=1001` or higher on a GET endpoint.
-**Fix**: Maximum limit is 1000. To fetch all records, paginate with `limit=1000&offset=0`, then `limit=1000&offset=1` (offset is a page number, not row-skip), etc.
+**Fix**: Maximum limit is 1000. To fetch all records, paginate with `limit=1000&offset=0`, then `limit=1000&offset=1` (offset is a page number, not row-skip), etc. On the row-offset endpoints the second page is `offset=1000` instead. Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`.
 
 ### "offset must be 65536 or less" (422)
 **Cause**: Offset exceeds maximum.

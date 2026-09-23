@@ -20,7 +20,7 @@ No API key needed: `describe_capabilities`, `plan_recipe`, `search_help_center` 
 2. **Transaction dates are `valueDate`** (YYYY-MM-DD) — never `issueDate` / `invoiceDate` / `date`.
 3. **Line item text field is `name`** — never `description`.
 4. **`saveAsDraft` defaults `false`** at the API; CLI/MCP create-tools default `true`. Set explicitly when the user says "finalize".
-5. **Pagination uses `limit` / `offset`** — `offset` is a 0-indexed page number (offset=1 = second page), not a row-skip. Sort is required when `offset` is set.
+5. **Pagination uses `limit` / `offset`**: `offset` is a 0-indexed page number (offset=1 = second page), not a row-skip. Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): the general ledger (and templated), the AR/AP details reports (and templated), purchase items (list and search), currency rates, and employee payouts search. Sort is required when `offset` is set.
 6. **Create responses return `{ resourceId }` only** — re-GET to load the full entity.
 
 ## Transactions — never hand-construct journals for IFRS

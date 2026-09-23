@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.62.0] - 2026-09-23
+
+**Page and filter the general ledger, and fetch every record exactly once.**
+
+The general ledger report now pages: ask for a number of rows (50 by default for AI assistants) and continue from the offset the result gives you. Filter it to one or more accounts, and group it by capsule. `clio reports generate general-ledger` gains `--limit`, `--offset`, `--all`, `--max-rows` and `--account`; with no paging flags it still returns the whole report.
+
+Fetching everything now returns each record once for purchase items, currency rates and employee payouts. These lists count their offset in rows, and earlier versions stepped through them as pages, which repeated some records and skipped others.
+
+A payment run now reviews every outstanding bill instead of stopping at the first 1,000.
+
 ## [5.61.3] - 2026-09-23
 
 Internal test automation update. No user-facing changes since v5.61.2.

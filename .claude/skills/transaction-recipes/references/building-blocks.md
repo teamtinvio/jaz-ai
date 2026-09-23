@@ -63,7 +63,7 @@ The recipe engine uses capsules automatically. But capsules also enable advanced
 
 2. **Use Capsule Types as the search axis, not Capsule Name.** Capsule names are unique per instance ("FY2025 Office Insurance"); types are reusable ("Prepaid Expenses"). `search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable — see `jobs/references/building-blocks.md` § Filter limits)` returns ALL prepaid capsules across history.
 
-3. **Tie capsule entries back for the auditor.** `generate_general_ledger` does NOT group by capsule -- `groupBy` is ACCOUNT, CONTACT, TRANSACTION or RELATIONSHIP, and `CAPSULE` returns 422 (verified live 2026-09-01). Auditor sample-test: pick 3 capsules per type, read each with `get_capsule` to get its transaction resource ids, then pull those documents (bills, invoices, journals) directly. Same evidence, one more hop.
+3. **Tie capsule entries back for the auditor.** `generate_general_ledger(groupBy: 'CAPSULE')` groups the period's GL rows by capsule, so each capsule's full lifecycle reads as one block. Auditor sample-test: pick 3 capsules per type from that report and pull the underlying documents (bills, invoices, journals) by their resource ids.
 
 **MCP tool shape:**
 
@@ -91,7 +91,7 @@ search_capsules(filter: {status: {eq: 'ACTIVE'}})  # capsule type is not filtera
   # All open loan capsules — feed into year-end-close.md Y6 reclassification
 **STOP — not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count — measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
   # Full GL for one capsule — the auditor's view
-get_capsule(resourceId)   # returns the capsule's transactions; GL cannot group by capsule
+generate_general_ledger(startDate, endDate, groupBy: 'CAPSULE')   # GL rows grouped by capsule
   # Period activity grouped by capsule — the practitioner's view
 ```
 
@@ -241,7 +241,7 @@ Apply enrichments to recipe transactions for richer reporting and record-keeping
    }
    ```
 4. **Supported transaction types**: invoices, bills, credit notes, journals, cash entries
-5. **Reports**: General Ledger cannot group by capsule (`groupBy` accepts ACCOUNT, CONTACT, TRANSACTION, RELATIONSHIP only). Read the capsule with `get_capsule` and pull its transactions.
+5. **Reports**: `generate_general_ledger` groups by ACCOUNT, CONTACT, TRANSACTION, RELATIONSHIP or CAPSULE.
 
 ---
 

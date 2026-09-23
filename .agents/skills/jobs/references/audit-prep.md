@@ -40,7 +40,7 @@
 - Runs after year-end-close; it's the bridge between year-end close and statutory filing.
 - Org inputs this job needs (confirm with the user when not already on file): whether a statutory audit is required, the tax jurisdiction (`SG` | `PH`), and the FY-end — these scope the deliverables.
 - Sibling jobs: `year-end-close.md` (must complete BEFORE this job — audit-prep assumes books are closed), plus the SG Form C-S / PH ITR statutory filing that consumes the pack this job produces (see step 13).
-- API rules: `jaz-api/SKILL.md` rule 36 (`endDate` not `startDate` for AR/AP point-in-time reports), rule 38 (pagination for `general-ledger`), rule 52 (response dates are epoch ms).
+- API rules: `jaz-api/SKILL.md` rule 36 (`endDate` not `startDate` for AR/AP point-in-time reports), rule 38 (`general-ledger` pages by ROW offset, not page number), rule 52 (response dates are epoch ms).
 
 ---
 
@@ -96,7 +96,7 @@ Cashflow classifies into Operating / Investing / Financing per IAS 7. Equity Mov
 generate_general_ledger(period_start: '2025-01-01', period_end: '2025-12-31', groupBy: 'ACCOUNT')
 ```
 
-Per `jaz-api/SKILL.md` rule 38, paginate via `offset` if `totalElements > <page-size>`. Keep the full GL for the pack — the auditor will sample-test from this.
+The tool returns 50 rows per call by default. Page it at `limit` 50-100: a GL row is about 1KB, so larger pages get cut to the tool's result cap and come back with `_truncated`. The offset is a ROW offset (`jaz-api/SKILL.md` rule 38): step it by the rows the call actually returned, which is what `_paging.nextOffset` holds, and stop when a result carries no `_paging`. Keep the full GL for the pack, since the auditor will sample-test from it. From the CLI, `clio reports generate general-ledger --all` pages it for you.
 
 ## Step 6 — AR / AP aging
 

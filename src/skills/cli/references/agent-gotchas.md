@@ -11,7 +11,7 @@
 
 3. **Create responses are minimal.** All create commands return only `{ "resourceId": "uuid" }`. To get the full entity (status, amounts, line items), run `clio <entity> get <id> --json` afterward.
 
-4. **--offset is page number (0-indexed), not row skip count.** `--offset 0 --limit 100` = rows 1-100. `--offset 1 --limit 100` = rows 101-200. This is not the same as SQL OFFSET.
+4. **--offset is page number (0-indexed), not row skip count.** `--offset 0 --limit 100` = rows 1-100. `--offset 1 --limit 100` = rows 101-200. This is not the same as SQL OFFSET. Exceptions, where `--offset` is a ROW offset (next page = offset + limit): `purchase-items list/search`, `currency-rates list`, `claims payouts` and `reports generate general-ledger`. Each command's `--offset` help says which it is, and `--all` pages both kinds correctly.
 
 5. **--all caps at 1,000 rows by default** (lowered from 10,000 in 2026-04). For large orgs, pass `--max-rows 50000` explicitly. The CLI auto-paginates with concurrent requests and **stops fetching once `--max-rows` is reached** (early-stop, not slice-after — the previous behavior would pull every page and discard the excess, causing minute-long hangs on busy sandboxes).
 

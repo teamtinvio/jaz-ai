@@ -645,7 +645,7 @@ All 28 `POST /*/search` endpoints accept this filter structure in the POST body:
 
 ### Pagination
 
-See `endpoints.md` § "Pagination (All List Endpoints)" for the full spec (limit/offset semantics, defaults, constraints, sort requirement, examples). Key points: `offset` is a 0-indexed page number (not row-skip), default limit=100, max 1000, sort required on POST /search when offset is present. Exception: `GET organization-report-template` returns rows under a `reportTemplates` key with no counts (its /search is conventional); the tools normalize it to the standard envelope.
+See `endpoints.md` § "Pagination (All List Endpoints)" for the full spec (limit/offset semantics, defaults, constraints, sort requirement, examples). Key points: `offset` is a 0-indexed page number (not row-skip); Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`. Default limit=100, max 1000, sort required on POST /search when offset is present. Exception: `GET organization-report-template` returns rows under a `reportTemplates` key with no counts (its /search is conventional); the tools normalize it to the standard envelope.
 
 ### Date Format Asymmetry (CRITICAL)
 

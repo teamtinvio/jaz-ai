@@ -515,8 +515,11 @@ Types: `trial-balance`, `balance-sheet`, `profit-loss`, `cashflow`, `aged-ar`, `
 | `--from` | Start date (P&L, cashflow, equity, recon) |
 | `--to` | End/snapshot date |
 | `--currency` | Currency code override |
-| `--group-by` | GL: ACCOUNT, CONTACT, TRANSACTION, RELATIONSHIP · FA summary: ACCOUNT, TYPE, CATEGORY, STATUS |
+| `--group-by` | GL: ACCOUNT, CONTACT, TRANSACTION, RELATIONSHIP, CAPSULE · FA summary: ACCOUNT, TYPE, CATEGORY, STATUS |
 | `--bank-account` | Bank account ID (for bank-recon-*) |
+| `--limit` / `--offset` | GL only: rows per response (1-1000; omitted = whole report) and a ROW offset (next page = offset + limit) |
+| `--all` / `--max-rows` | GL only: fetch every row in row-offset pages of `--limit` (default 1000), optionally stopping at `--max-rows` |
+| `--account <id...>` | GL only: only these accounts (repeatable, max 100) |
 
 Also: `clio reports pdf` — generate PDF from a message/document.
 

@@ -581,9 +581,9 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `size` | NOT SUPPORTED | Silently ignored — use `limit`/`offset` |
 | `pageSize` | NOT SUPPORTED | Use `limit` |
 | `per_page` | NOT SUPPORTED | Use `limit` |
-| `page_number` | `offset` | **offset IS the page number (0-indexed)**, not a row-skip count. `offset=0` = page 1, `offset=1` = page 2. |
+| `page_number` / (page number) | `offset` (default: 0) | **offset IS the page number (0-indexed)**, not a row-skip count. `offset=0` = page 1, `offset=1` = page 2; `offset=2, limit=50` returns items 100–149. |
 | (default page size) | `limit` (default: 100) | Query param for GET, JSON body for POST /search |
-| (page number) | `offset` (default: 0) | 0-indexed page number. `offset=2, limit=50` returns items 100–149. |
+| (row offset) | `offset` on the exceptions only | Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`. |
 
 **GET list endpoints**: `?limit=100&offset=0` (query params)
 **POST /search endpoints**: `{ "limit": 100, "offset": 0 }` (JSON body)

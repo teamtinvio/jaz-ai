@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.61.3+8abb3e37",
+  "contentVersion": "5.62.0+c4a3db4b",
   "counts": {
     "tools": 371,
     "namespaces": 45,
@@ -624,7 +624,7 @@
     {
       "name": "generate_general_ledger",
       "namespace": "financial_reports",
-      "description": "Generate a general ledger report.",
+      "description": "General ledger report, 50 rows per call; if _paging is present, call again with offset = _paging.nextOffset.",
       "readOnly": true,
       "destructive": false
     },
@@ -925,7 +925,7 @@
     {
       "name": "list_currency_rates",
       "namespace": "currencies",
-      "description": "List exchange rates for a specific currency. IMPORTANT: You MUST call list_currencies first to discover which currencies the org has enabled — never guess or assume currency codes.",
+      "description": "List exchange rates for one currency. Call list_currencies first for the org's enabled codes; never guess one.",
       "readOnly": true,
       "destructive": false
     },

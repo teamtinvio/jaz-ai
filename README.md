@@ -72,7 +72,7 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.61.3", "mcp"]
+      "args": ["-y", "jaz-clio@5.62.0", "mcp"]
     }
   }
 }
@@ -85,13 +85,13 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.61.3", "mcp"]
+      "args": ["-y", "jaz-clio@5.62.0", "mcp"]
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.61.3` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: OAuth supports accessible organizations with explicit `org_id` selection. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Pin `jaz-clio@5.62.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: OAuth supports accessible organizations with explicit `org_id` selection. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -467,7 +467,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.61.3", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@5.62.0", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 
