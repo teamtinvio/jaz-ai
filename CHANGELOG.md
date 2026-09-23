@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.65.0] - 2026-09-23
+
+Internal hosted-agent model update. No user-facing changes since v5.64.0.
+
 ## [5.64.0] - 2026-09-23
 
 **Updating an employee no longer erases details you did not mean to change.**
