@@ -1,5 +1,5 @@
 ---
-description: "What Jaz can do — the full operation map"
+description: "What Jaz can do: the full operation map"
 argument-hint: "[namespace or keyword]"
 ---
 

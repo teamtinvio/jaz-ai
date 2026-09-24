@@ -104,7 +104,7 @@ Supported currency symbols: `$` `€` `£` `¥` `₱` `₹` `₩` `฿` `₫` `�
 
 Also works with ISO codes: `SGD500`, `PHP1000`, `EUR200-500`
 
-A bare number like `500` — and any keyless expression like `100-500`, `>500`, or `5k` — searches all text fields (reference, ID, etc.). Add `$` or use `amount:` to search amounts specifically.
+A bare number like `500` (and any keyless expression like `100-500`, `>500`, or `5k`) searches all text fields (reference, ID, etc.). Add `$` or use `amount:` to search amounts specifically.
 
 ---
 
@@ -467,7 +467,7 @@ Aliases: `reference:` = `ref:`, `customer:` / `supplier:` / `payee:` = `contact:
 
 ### Scheduled Journals
 `contact` `customer` `supplier` `ref` `reference` `status` `tag` `tags` `interval` `id` `date` `start` `startdate` (→ startDate) `end` `enddate` `last` `lastdate`
-NOTE: No amount fields — JournalSchedulerFilter has no BigDecimalExpression fields.
+NOTE: No amount fields; JournalSchedulerFilter has no BigDecimalExpression fields.
 
 Interval values: `daily` `weekly` `monthly` `quarterly` `yearly` `onetime`
 

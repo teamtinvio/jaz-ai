@@ -1,5 +1,5 @@
 ---
-description: "Migrate accounting data to Jaz from Xero, QuickBooks, Sage, MYOB, or Excel — guided multi-step conversion workflow"
+description: "Migrate accounting data to Jaz from Xero, QuickBooks, Sage, MYOB, or Excel: guided multi-step conversion workflow"
 argument-hint: "<source system> [file path]"
 ---
 
@@ -24,14 +24,14 @@ Supported sources: **Xero**, **QuickBooks Online**, **QuickBooks Desktop**, **Sa
 ### 2. Load the conversion skill
 
 The jaz-conversion skill (`/jaz-conversion`) contains detailed mapping guides for each source system. Load it for the full reference:
-- `references/xero.md` — Xero export format and field mapping
-- `references/quickbooks.md` — QBO/QBD export format and field mapping
-- `references/sage.md` — Sage export format
-- `references/excel.md` — Generic Excel/CSV mapping template
+- `references/xero.md`: Xero export format and field mapping
+- `references/quickbooks.md`: QBO/QBD export format and field mapping
+- `references/sage.md`: Sage export format
+- `references/excel.md`: Generic Excel/CSV mapping template
 
 ### 3. Follow the 3-phase workflow
 
-**Phase 1 — Config conversion** (setup):
+**Phase 1: Config conversion** (setup):
 - Chart of accounts mapping (source account types → Jaz classification types)
 - Contact mapping (customers + suppliers)
 - Tax profile mapping (source tax codes → Jaz tax profiles)
@@ -49,7 +49,7 @@ clio contacts create --name "Acme Corp" --customer --json
 clio currencies add --code USD --json
 ```
 
-**Phase 2 — Quick conversion** (balances only):
+**Phase 2: Quick conversion** (balances only):
 - Opening balances via trial balance journal
 - Opening AR/AP via individual invoices/bills at conversion date
 
@@ -58,7 +58,7 @@ clio currencies add --code USD --json
 clio journals create --date "2025-01-01" --ref "OB-001" --entries '[...]' --finalize --json
 ```
 
-**Phase 3 — Full conversion** (historical transactions):
+**Phase 3: Full conversion** (historical transactions):
 - Historical invoices, bills, payments, journals
 - Bank transactions and reconciliation status
 
@@ -72,9 +72,9 @@ Compare Jaz TB against source system TB. They should match.
 
 ## Key Rules
 
-- Always map Chart of Accounts FIRST — everything else depends on account resourceIds
+- Always map Chart of Accounts FIRST; everything else depends on account resourceIds
 - Opening balances: use a single journal dated on conversion date (Day 1 in Jaz)
 - Opening AR: create individual invoices (not journal entries) so they appear in AR aging
 - Opening AP: create individual bills for the same reason
-- Tax profiles are pre-existing in Jaz — map source tax codes to Jaz tax profiles, never create new ones
+- Tax profiles are pre-existing in Jaz; map source tax codes to Jaz tax profiles, never create new ones
 - The conversion skill has detailed field mapping tables for each source system

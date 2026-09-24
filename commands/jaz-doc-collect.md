@@ -1,5 +1,5 @@
 ---
-description: "Scan and classify client documents for upload to Jaz — local files and cloud links (Dropbox, Drive, OneDrive)"
+description: "Scan and classify client documents for upload to Jaz: local files and cloud links (Dropbox, Drive, OneDrive)"
 argument-hint: "<directory or cloud link>"
 ---
 
@@ -41,9 +41,9 @@ For invoices and bills, use Jaz Magic (server-side OCR + autofill). The Magic en
 
 - **Endpoint:** `POST /api/v1/magic/createBusinessTransactionFromAttachment`
 - **Fields:** `sourceFile` (PDF/JPG), `businessTransactionType` (`"BILL"` or `"INVOICE"`), `sourceType` (`"FILE"` or `"URL"`)
-- **Auth:** Uses the same API key from `clio auth` — clio handles auth automatically
+- **Auth:** Uses the same API key from `clio auth`; clio handles auth automatically
 
-Magic extraction is async — the upload returns immediately, OCR runs in background. Use `clio bills search` or `clio invoices search` to verify the extracted documents.
+Magic extraction is async: the upload returns immediately, OCR runs in background. Use `clio bills search` or `clio invoices search` to verify the extracted documents.
 
 For bank statements:
 
@@ -62,7 +62,7 @@ clio invoices search --from 2025-01-01 --to 2025-01-31 --json
 
 ## Key Rules
 
-- Jaz Magic accepts PDF and JPG/JPEG — use `businessTransactionType: "BILL"` or `"INVOICE"` (not `"EXPENSE"`)
+- Jaz Magic accepts PDF and JPG/JPEG; use `businessTransactionType: "BILL"` or `"INVOICE"` (not `"EXPENSE"`)
 - Multipart field names are camelCase: `sourceFile`, `businessTransactionType`, `sourceType`
-- Magic extraction is async — the upload returns immediately, OCR runs in background
+- Magic extraction is async: the upload returns immediately, OCR runs in background
 - Cloud links (Dropbox, Drive, OneDrive) can use `sourceType: "URL"` with `sourceURL` instead of file upload

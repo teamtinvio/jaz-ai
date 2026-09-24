@@ -1,5 +1,5 @@
 ---
-description: "Run Singapore Form C-S / C-S Lite corporate income tax computation using Jaz data — pull P&L, classify add-backs, compute capital allowances, apply exemptions"
+description: "Run Singapore Form C-S / C-S Lite corporate income tax computation using Jaz data: pull P&L, classify add-backs, compute capital allowances, apply exemptions"
 argument-hint: "<YA year> [--revenue amount] [--profit amount]"
 ---
 

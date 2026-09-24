@@ -1,6 +1,6 @@
-# Jaz API — Endpoint Catalog
+# Jaz API: Endpoint Catalog
 
-> **The endpoints clio wraps — the REST surface is larger.** This file catalogues roughly 200
+> **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
 > carries 466 spec paths and 594 spec operations and is the authoritative list; check it before concluding
@@ -55,8 +55,8 @@
 | GET | `/invoices/:resourceId/attachments` | List attachments |
 | POST | `/invoices/:resourceId/attachments` | Upload attachment |
 | DELETE | `/invoices/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| POST | `/invoices/bulk-upsert` | Bulk create/update invoices (max 500) — **async**, returns `{ jobId }`. Natural key: `invoiceReference`. ISO 8601 dates only. |
-| POST | `/invoices/line-items/bulk-upsert` | Bulk create/update invoices with nested line items (max 500) — **async**, returns `{ jobId }`. |
+| POST | `/invoices/bulk-upsert` | Bulk create/update invoices (max 500); **async**, returns `{ jobId }`. Natural key: `invoiceReference`. ISO 8601 dates only. |
+| POST | `/invoices/line-items/bulk-upsert` | Bulk create/update invoices with nested line items (max 500); **async**, returns `{ jobId }`. |
 
 ### Bills
 | Method | Path | Description |
@@ -75,8 +75,8 @@
 | GET | `/bills/:resourceId/attachments` | List attachments |
 | POST | `/bills/:resourceId/attachments` | Upload attachment |
 | DELETE | `/bills/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| POST | `/bills/bulk-upsert` | Bulk create/update bills (max 500) — **async**, returns `{ jobId }`. Natural key: `billReference`. ISO 8601 dates only. |
-| POST | `/bills/line-items/bulk-upsert` | Bulk create/update bills with nested line items (max 500) — **async**, returns `{ jobId }`. |
+| POST | `/bills/bulk-upsert` | Bulk create/update bills (max 500); **async**, returns `{ jobId }`. Natural key: `billReference`. ISO 8601 dates only. |
+| POST | `/bills/line-items/bulk-upsert` | Bulk create/update bills with nested line items (max 500); **async**, returns `{ jobId }`. |
 
 ### Orders (Sale Quotes, Sale Orders, Purchase Requests, Purchase Orders)
 Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-orders`, `purchase-requests`, or `purchase-orders`. Quotes/requests use `accept`; orders use `confirm`. See `references/orders.md`.
@@ -88,7 +88,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | POST | `/{entity}` | Create. Optional `currency { sourceCurrency, exchangeRate? }`. Sale Order links via `saleQuoteResourceId`; Purchase Order via `purchaseRequestResourceId` (parent must be issued, not a DRAFT/VOID, and in the same currency). |
 | POST | `/{entity}/search` | Advanced search with filters |
 | PUT | `/{entity}/:resourceId` | Update. `lineItems` edits by line `resourceId` (`deleted: true` removes; a line without one is ADDED): send every stored line once any names a resourceId. `isDraftToActiveSaleQuote` / `isDraftToActivePurchaseRequest` issue a DRAFT; `isPendingToActiveSaleOrder` / `isPendingToActivePurchaseOrder` take a PENDING order live. |
-| DELETE | `/{entity}/:resourceId` | Delete (DRAFT only — else use void) |
+| DELETE | `/{entity}/:resourceId` | Delete (DRAFT only; else use void) |
 | POST | `/{entity}/:resourceId/void` | Void (cancel) |
 | POST | `/sale-quotes\|purchase-requests/:resourceId/accept` | Accept (→ ACCEPTED) |
 | POST | `/sale-orders\|purchase-orders/:resourceId/confirm` | Confirm (→ CONFIRMED) |
@@ -111,7 +111,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | GET | `/customer-credit-notes/:resourceId/download` | Download PDF |
 | POST | `/customer-credit-notes/:resourceId/refunds` | Record refund(s) |
 | GET | `/customer-credit-notes/:resourceId/refunds` | List refunds |
-| POST | `/customer-credit-notes/bulk-upsert` | Bulk create/update (max 500) — **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. |
+| POST | `/customer-credit-notes/bulk-upsert` | Bulk create/update (max 500); **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. |
 
 ### Supplier Credit Notes
 | Method | Path | Description |
@@ -124,7 +124,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | DELETE | `/supplier-credit-notes/:resourceId` | Delete |
 | POST | `/supplier-credit-notes/:resourceId/refunds` | Record refund(s) |
 | GET | `/supplier-credit-notes/:resourceId/refunds` | List refunds |
-| POST | `/supplier-credit-notes/bulk-upsert` | Bulk create/update (max 500) — **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. |
+| POST | `/supplier-credit-notes/bulk-upsert` | Bulk create/update (max 500); **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. |
 
 ### Journals
 | Method | Path | Description |
@@ -138,7 +138,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | GET | `/journals/:resourceId/attachments` | List attachments |
 | POST | `/journals/:resourceId/attachments` | Upload attachment |
 | DELETE | `/journals/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| POST | `/journals/bulk-upsert` | Bulk create/update manual journals (max 500) — **async**, returns `{ jobId }`. Natural key: `journalReference` (NOT `reference`). Legs are `journalEntries[]`, each `organizationAccountResourceId` + exactly one of `debitAmount`/`creditAmount`. ISO 8601 dates only. |
+| POST | `/journals/bulk-upsert` | Bulk create/update manual journals (max 500); **async**, returns `{ jobId }`. Natural key: `journalReference` (NOT `reference`). Legs are `journalEntries[]`, each `organizationAccountResourceId` + exactly one of `debitAmount`/`creditAmount`. ISO 8601 dates only. |
 
 ### Cash Entries
 | Method | Path | Description |
@@ -165,8 +165,8 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 ### Payments (Generic)
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | `/payments/:resourceId` | Get payment record — returns `{data: PaymentRecord}` |
-| PUT | `/payments/:resourceId` | Update payment — returns `{data: PaymentRecord}` |
+| GET | `/payments/:resourceId` | Get payment record; returns `{data: PaymentRecord}` |
+| PUT | `/payments/:resourceId` | Update payment; returns `{data: PaymentRecord}` |
 | DELETE | `/payments/:resourceId` | Delete/void payment |
 
 **Note**: Payment resourceIds come from parent documents (`GET /invoices/:id` → `paymentRecords[].resourceId`). Cashflow transaction IDs from `POST /cashflow-transactions/search` are NOT the same.
@@ -206,12 +206,12 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | POST | `/reconciliations/bank-rule` | **Async**, returns `{ jobId }`. Apply a bank rule to a batch of entries (max 500). |
 | POST | `/reconciliations/direct-cash-entry` | **Sync**. Reconcile a bank entry with a single cash-in/cash-out line. Direction inferred from entry sign. |
 | POST | `/reconciliations/cash-journal` | **Sync**. Multi-line cashflow journal (max 200 lines). |
-| POST | `/reconciliations/manual-journal` | **Sync**. Double-entry manual journal — bank-side leg auto-added by API. |
+| POST | `/reconciliations/manual-journal` | **Sync**. Double-entry manual journal; bank-side leg auto-added by API. |
 | POST | `/reconciliations/cash-transfer` | **Sync**. Inter-account transfer. `amount` required only for cross-currency transfers. |
 | POST | `/reconciliations/invoice-receipt` | **Sync (AR)**. Creates an invoice and auto-reconciles to the bank entry. |
 | POST | `/reconciliations/bill-receipt` | **Sync (AP)**. Creates a bill and auto-reconciles to the bank entry. |
 
-The 6 sync endpoints are NOT idempotent on the same `bankStatementEntryResourceId` — confirm reconciled state before retrying. Most fields prefill from the bank entry when omitted.
+The 6 sync endpoints are NOT idempotent on the same `bankStatementEntryResourceId`; confirm reconciled state before retrying. Most fields prefill from the bank entry when omitted.
 
 ### Drafts (server-side bulk lifecycle)
 **One batch can mix any combination** of `SALE` (invoice), `PURCHASE` (bill), `SALE_CREDIT_NOTE`, `PURCHASE_CREDIT_NOTE`. No per-type endpoints. Max 500 items per call. Journals are NOT in the enum (separate approval flow).
@@ -237,7 +237,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/contacts/search` | Advanced search |
 | PUT | `/contacts/:resourceId` | Update |
 | DELETE | `/contacts/:resourceId` | Delete |
-| POST | `/contacts/bulk-upsert` | Bulk create/update contacts (max 500) — **async**, returns `{ jobId }`. Poll `/background-jobs/search` with `filter.resourceId`. |
+| POST | `/contacts/bulk-upsert` | Bulk create/update contacts (max 500); **async**, returns `{ jobId }`. Poll `/background-jobs/search` with `filter.resourceId`. |
 
 ### Contact Groups
 | Method | Path | Description |
@@ -246,7 +246,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | GET | `/contact-groups/:resourceId` | Get by ID |
 | POST | `/contact-groups` | Create |
 | POST | `/contact-groups/search` | Advanced search |
-| PUT | `/contact-groups/:resourceId` | Update — membership field is `associatedContactResourceIds`, not `contactResourceIds` |
+| PUT | `/contact-groups/:resourceId` | Update: membership field is `associatedContactResourceIds`, not `contactResourceIds` |
 | DELETE | `/contact-groups/:resourceId` | Delete |
 
 ### Items
@@ -293,7 +293,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | GET | `/custom-fields/:resourceId` | Get by ID |
 | POST | `/custom-fields` | Create |
 | POST | `/custom-fields/search` | Advanced search |
-| PUT | `/custom-fields/:resourceId` | Update — full replace of `appliesTo`+`printOnDocuments`; omitting either resets it |
+| PUT | `/custom-fields/:resourceId` | Update: full replace of `appliesTo`+`printOnDocuments`; omitting either resets it |
 | DELETE | `/custom-fields/:resourceId` | Delete |
 
 ---
@@ -477,7 +477,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/capsuleTypes/search` | Search |
 | PUT | `/capsuleTypes/:resourceId` | Update |
 | DELETE | `/capsuleTypes/:resourceId` | Delete |
-| — | `/capsule-types/*` | Kebab-case aliases for all above (same handlers) |
+| n/a | `/capsule-types/*` | Kebab-case aliases for all above (same handlers) |
 
 ### Fixed Assets
 | Method | Path | Description |
@@ -492,7 +492,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/undo-disposal/fixed-assets/:resourceId` | Undo disposal |
 | POST | `/discard-fixed-assets/:resourceId` | Discard |
 | POST | `/transfer-fixed-assets` | Transfer between entities |
-| POST | `/fixed-assets/bulk-upsert` | Bulk create/update fixed assets (max 500) — **async**, returns `{ jobId }`. Natural key: `reference`. Each row needs `registrationType` (NEW \| TRANSFER) + `typeCode`. |
+| POST | `/fixed-assets/bulk-upsert` | Bulk create/update fixed assets (max 500); **async**, returns `{ jobId }`. Natural key: `reference`. Each row needs `registrationType` (NEW \| TRANSFER) + `typeCode`. |
 
 ### Fixed Asset Types
 | Method | Path | Description |
@@ -507,9 +507,9 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 ### Nano Classifiers (Tracking Categories)
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/nano-classifiers` | Create — `classes: string[]`, `printable: boolean` (default `false`) |
+| POST | `/nano-classifiers` | Create: `classes: string[]`, `printable: boolean` (default `false`) |
 | GET | `/nano-classifiers` | List |
-| GET | `/nano-classifiers/:resourceId` | Get by ID — **double-wrapped**: `{data: {data: [...], totalElements, totalPages}}` |
+| GET | `/nano-classifiers/:resourceId` | Get by ID, **double-wrapped**: `{data: {data: [...], totalElements, totalPages}}` |
 | PUT | `/nano-classifiers/:resourceId` | Update |
 | DELETE | `/nano-classifiers/:resourceId` | Delete |
 | POST | `/nano-classifiers/search` | Search |
@@ -596,7 +596,7 @@ All 28 `POST /*/search` endpoints accept this filter structure in the POST body:
 { "filter": { "valueDate": { "between": ["2026-01-01", "2026-03-31"] } } }
 ```
 
-### DateTime Filters (RFC3339 format — for createdAt, updatedAt, approvedAt, submittedAt)
+### DateTime Filters (RFC3339 format, for createdAt, updatedAt, approvedAt, submittedAt)
 ```json
 { "filter": { "createdAt": { "gte": "2026-01-01T00:00:00Z" } } }
 ```
@@ -658,7 +658,7 @@ See `endpoints.md` § "Pagination (All List Endpoints)" for the full spec (limit
 
 Convert response dates: `new Date(epochMs).toISOString().slice(0,10)` → `"2026-02-14"`
 
-**Timezone convention**: All business dates (`valueDate`, `dueDate`, etc.) are in the **organization's timezone** — both in requests and responses. The DB stores epoch ms representing the org-local date (no timezone conversion is ever performed). Only audit timestamps (`createdAt`, `updatedAt`) are UTC.
+**Timezone convention**: All business dates (`valueDate`, `dueDate`, etc.) are in the **organization's timezone**, both in requests and responses. The DB stores epoch ms representing the org-local date (no timezone conversion is ever performed). Only audit timestamps (`createdAt`, `updatedAt`) are UTC.
 
 ---
 
@@ -751,7 +751,7 @@ Universal async tracking layer. Any operation returning a `jobId` can be polled 
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/background-jobs/search` | Search/poll jobs — filter by `resourceId` (the jobId value), `status`, `jobType`, `createdAt` |
+| POST | `/background-jobs/search` | Search/poll jobs; filter by `resourceId` (the jobId value), `status`, `jobType`, `createdAt` |
 
 **CRITICAL**: filter uses `resourceId` path, NOT `jobId`. `filter.jobId.eq` is silently ignored. Known jobTypes: `UPSERT_CONTACTS`, `UPSERT_ITEMS`, `PROCESS_BANK_STATEMENT_FILES`, `MAGIC_TRANSACTION_*`.
 
@@ -761,7 +761,7 @@ Universal async tracking layer. Any operation returning a `jobId` can be polled 
 |--------|------|-------------|
 | GET | `/export-records/columns/:entityType` | List exportable columns for an entity type |
 | POST | `/export-records/preview` | Preview: returns `totalRecords`, `previewRows`, `resolvedColumns`, `filterDescription` |
-| POST | `/export-records` | Generate XLSX export — returns `fileUrl` (pre-signed S3, ~5 min TTL), `fileName`, `totalRecords` |
+| POST | `/export-records` | Generate XLSX export; returns `fileUrl` (pre-signed S3, ~5 min TTL), `fileName`, `totalRecords` |
 
 `outputFormat: "XLSX"` is required. Pass `query` OR `filter`, never both (server enforces). Entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, SALE_PAYMENT, PURCHASE_PAYMENT, BATCH_PAYMENT, CONTACT, ITEM, CAPSULE, SCHEDULED_TRANSACTION, JOURNAL, BANK_RECORD, CASHFLOW_TRANSACTION, FIXED_ASSET, CHART_OF_ACCOUNT, TAX_PROFILE.
 
@@ -782,7 +782,7 @@ See endpoints.md section 25 for request/response shapes and the `refs` grammar (
 Live routes added after the tables above were last regenerated. Unless a subsection names its
 wrapper, it has no `clio` subcommand or MCP tool: call it with a raw request.
 
-### Request changes (18) — 2026-08-06
+### Request changes (18): 2026-08-06
 
 `POST /{entity}/:resourceId/request-changes` and `POST /{entity}/bulk-request-changes` for
 `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `purchase-orders`,
@@ -791,7 +791,7 @@ wrapper, it has no `clio` subcommand or MCP tool: call it with a raw request.
 Bodies and per-record outcome semantics: endpoints.md section 19c. Wrapped by
 `request_document_changes` / `bulk_request_document_changes` and `clio approvals`.
 
-### Payments, bulk and batch (9) — 2026-08-13
+### Payments, bulk and batch (9): 2026-08-13
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -805,7 +805,7 @@ Bodies and per-record outcome semantics: endpoints.md section 19c. Wrapped by
 | POST | `/batch-payments/search` | Search payment batches |
 | POST | `/batch-payments/bulk-delete` | Delete many payment batches |
 
-### Cash entries and transfers, bulk (3) — 2026-08-13
+### Cash entries and transfers, bulk (3): 2026-08-13
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -814,11 +814,11 @@ Bodies and per-record outcome semantics: endpoints.md section 19c. Wrapped by
 | POST | `/cash-transfers/bulk-upsert` | Bulk create/update cash transfers |
 
 Neither bulk cash route applies the `issueDate`/`date` → `valueDate` aliases their
-single-create siblings do — the alias middleware rewrites the top-level body only, and on
+single-create siblings do; the alias middleware rewrites the top-level body only, and on
 these routes the aliased keys sit inside the `cashEntries[]` / `cashTransfers[]` rows. Send
 `valueDate` on bulk rows.
 
-### Record-list option pickers (4) — NOT WRAPPED
+### Record-list option pickers (4): NOT WRAPPED
 
 These four exist in the REST API but this client has **no wrapper for them and no
 tool exposes them**, so they cannot be called from here. They are listed only so
@@ -832,14 +832,14 @@ incomplete. Reaching them needs a raw HTTP call.
 | GET | `/custom-fields/:resourceId/options` | Options for a custom field |
 | GET | `/nano-classifiers/:resourceId/options` | Options for a nano-classifier |
 
-### Bank-record archive (2) — 2026-08-15
+### Bank-record archive (2): 2026-08-15
 
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/bank-records/:accountResourceId/archive` | Archive bank records |
 | POST | `/bank-records/:accountResourceId/unarchive` | Unarchive bank records |
 
-### Withholding (1) — 2026-07-31
+### Withholding (1): 2026-07-31
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -847,7 +847,7 @@ incomplete. Reaching them needs a raw HTTP call.
 
 ---
 
-*Last updated: 2026-08-16 (added the "Additions since 2026-07-11" section: request-changes ×18, payments bulk/batch ×9, cash bulk ×3, record-list option pickers ×4, bank-record archive ×2, withholding ×1; dropped the "every endpoint" claim — the tables above cover the endpoints clio wraps, not the whole surface). Previous: 2026-07-11 (added Jots judgment journal: 3 endpoints). 2026-04-29 — Added 3 drafts lifecycle endpoints (validate, convert-to-active, submit-for-approval) — bulk-friendly, mixed-type batches up to 500. Same day: 8 reconciliation action endpoints; 8 bulk-upsert endpoints. 2026-04-09 — Background Jobs, Export Records, contacts bulk-upsert.*
+*Last updated: 2026-08-16 (added the "Additions since 2026-07-11" section: request-changes ×18, payments bulk/batch ×9, cash bulk ×3, record-list option pickers ×4, bank-record archive ×2, withholding ×1; dropped the "every endpoint" claim: the tables above cover the endpoints clio wraps, not the whole surface). Previous: 2026-07-11 (added Jots judgment journal: 3 endpoints). 2026-04-29: Added 3 drafts lifecycle endpoints (validate, convert-to-active, submit-for-approval), bulk-friendly, mixed-type batches up to 500. Same day: 8 reconciliation action endpoints; 8 bulk-upsert endpoints. 2026-04-09: Background Jobs, Export Records, contacts bulk-upsert.*
 
 **Regeneration note**: this file is hand-maintained and NOT covered by the drift gate (whose
 `docsPaths` lists `endpoints.md` alone, and which only reads `### METHOD /api/v1/...` headers).

@@ -174,7 +174,7 @@ ORDER BY i.balance DESC
 LIMIT 25
 ```
 
-If a particular JOIN shape fails validation, the error message names the column/table that's outside the curated set — adjust the query and retry.
+If a particular JOIN shape fails validation, the error message names the column/table that's outside the curated set; adjust the query and retry.
 
 ---
 

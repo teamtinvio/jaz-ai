@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.73.3] - 2026-09-24
+
+**Cleaner wording in guides and tool descriptions.**
+
+The skills, prompts, tool descriptions and READMEs now use plain punctuation, and a check keeps it that way. Tool descriptions are slightly shorter as a result. No change to how any tool behaves.
+
 ## [5.73.2] - 2026-09-24
 
 **Corrected guidance for your assistant.**

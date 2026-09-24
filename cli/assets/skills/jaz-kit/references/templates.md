@@ -1,11 +1,11 @@
 # Scaffolds
 
-Copy these when creating files. Replace every `<…>`. Omit rows that do not apply rather than writing "N/A" — an absent row reads as "not relevant", a filled one as "confirmed".
+Copy these when creating files. Replace every `<…>`. Omit rows that do not apply rather than writing "N/A"; an absent row reads as "not relevant", a filled one as "confirmed".
 
 ## KIT.md
 
 ```markdown
-# Jaz Kit — <operator name>
+# Jaz Kit: <operator name>
 
 Mode: <own-books | client-books | both>
 Created: <YYYY-MM-DD>
@@ -39,7 +39,7 @@ Applied to new organizations unless overridden.
 
 ## Filing
 
-All from the user — never derived from country.
+All from the user, never derived from country.
 
 - Registered: <yes | no>
 - Form: <what they call the return>
@@ -55,7 +55,7 @@ All from the user — never derived from country.
 | <name> | <SGD> | <id> |
 
 ### Materiality
-<amount> — <basis and reasoning>
+<amount>: <basis and reasoning>
 
 ### Recurring accruals
 | Description | Account | Estimation |
@@ -95,7 +95,7 @@ Most recent first.
 ## CLOSE.md
 
 ```markdown
-# Close — <period>
+# Close: <period>
 
 - Range: <YYYY-MM-DD> to <YYYY-MM-DD>
 - Playbook: <month-end | quarter-end | year-end>
@@ -116,7 +116,7 @@ Most recent first.
 
 ## Decisions
 
-### <YYYY-MM-DD> — <account or topic>
+### <YYYY-MM-DD>: <account or topic>
 <what was decided, and why. Jot: recorded.>
 
 ## Residuals
@@ -126,7 +126,7 @@ Most recent first.
 
 ## Starter rules
 
-Written to `rules/` at init. These govern **how the agent behaves** — they are the harness's own safety defaults, not accounting advice. Everything about how the books are actually kept comes from the operator and lands in `policies/`.
+Written to `rules/` at init. These govern **how the agent behaves**: they are the harness's own safety defaults, not accounting advice. Everything about how the books are actually kept comes from the operator and lands in `policies/`.
 
 **`rules/draft-first.md`**
 ```markdown
@@ -171,7 +171,7 @@ item.
 
 ## Starter policy
 
-Create the file empty apart from its heading. **Do not seed it with suggestions** — policies are the operator's working practice, and a pre-filled list gets accepted unread, which turns our guesses into their file. It fills up through `/jk-policy` and `/jk-teach` as they say how they work.
+Create the file empty apart from its heading. **Do not seed it with suggestions**: policies are the operator's working practice, and a pre-filled list gets accepted unread, which turns our guesses into their file. It fills up through `/jk-policy` and `/jk-teach` as they say how they work.
 
 **`policies/close-routine.md`**
 ```markdown

@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.73.2",
+  "version": "5.73.3",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 381 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -68,7 +68,7 @@
   "tools": [
     {
       "name": "get_next_reference",
-      "description": "Next document number in the org's own series. Same number the web app prefills. Reading does NOT reserve it — two callers reading at once get the same value. Date embedded is always today. Never invent a reference; use this."
+      "description": "Next document number in the org's own series. Same number the web app prefills. Reading does NOT reserve it; two callers reading at once get the same value. Date embedded is always today. Never invent a reference; use this."
     },
     {
       "name": "get_organization",
@@ -76,11 +76,11 @@
     },
     {
       "name": "get_my_context",
-      "description": "Resolve the CALLER's own context — identity, the employee bound to their login (if any), and per-module access (moduleRoles). Use to route a receipt (bill if PURCHASES access, expense claim if EMPLOYEE_CLAIMS access). A service api-key usually has no bound employee. Magic claim drafts auto-bind the uploader server-side — no need to read employee.resourceId to bind one."
+      "description": "Resolve the CALLER's own context: identity, the employee bound to their login (if any), and per-module access (moduleRoles). Use to route a receipt (bill if PURCHASES access, expense claim if EMPLOYEE_CLAIMS access). A service api-key usually has no bound employee. Magic claim drafts auto-bind the uploader server-side; no need to read employee.resourceId to bind one."
     },
     {
       "name": "list_accounts",
-      "description": "List chart of accounts. Returns account name, code, type, class, status. Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List chart of accounts. Returns account name, code, type, class, status. Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_accounts",
@@ -88,19 +88,19 @@
     },
     {
       "name": "create_account",
-      "description": "Create a new chart of accounts entry. Auto-checks for duplicates by name — returns existing account if found. Code must be unique. Account class is inferred from accountType. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new chart of accounts entry. Auto-checks for duplicates by name; returns existing account if found. Code must be unique. Account class is inferred from accountType. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_account",
-      "description": "Update a chart of accounts entry — rename, re-code, set its period lock date, or remove an existing lock date. Setting lockDate (YYYY-MM-DD) is how an individual ledger account is locked for a period: it blocks recording or editing any transaction on that account dated on or before the lock date. Pass clearLockDate to remove (unlock) an existing lock. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a chart of accounts entry: rename, re-code, set its period lock date, or remove an existing lock date. Setting lockDate (YYYY-MM-DD) is how an individual ledger account is locked for a period: it blocks recording or editing any transaction on that account dated on or before the lock date. Pass clearLockDate to remove (unlock) an existing lock. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_chart_of_accounts",
-      "description": "Bulk create/update CoA entries (max 500). SYNC: returns { resourceIds, failedRows: [{rowIndex, columnName, columnValue, errorCode, errorMessage}], failedCount } — no jobId polling. PARTIAL_SUCCESS: failed rows surface in failedRows[]; others still succeed.\n\nresourceId per row → update; omit → create. Note: dedup is by NAME (not code) — duplicate name surfaces ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED per row. Accepts all 23 accountType values (see create_account); common variants normalized via normalizeAccountType.\n\nUse for CoA imports / IFRS 18 migration / template seeding. For one-off creates with dedup, use create_account. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk create/update CoA entries (max 500). SYNC: returns { resourceIds, failedRows: [{rowIndex, columnName, columnValue, errorCode, errorMessage}], failedCount }; no jobId polling. PARTIAL_SUCCESS: failed rows surface in failedRows[]; others still succeed.\n\nresourceId per row → update; omit → create. Note: dedup is by NAME (not code); duplicate name surfaces ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED per row. Accepts all 23 accountType values (see create_account); common variants normalized via normalizeAccountType.\n\nUse for CoA imports / IFRS 18 migration / template seeding. For one-off creates with dedup, use create_account. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_contacts",
-      "description": "List contacts (customers/suppliers). Returns billingName, name, emails, status. Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List contacts (customers/suppliers). Returns billingName, name, emails, status. Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_contacts",
@@ -112,11 +112,11 @@
     },
     {
       "name": "get_contact_signals",
-      "description": "Read-only contact pattern intelligence (cadence, outliers, divergences, severity). USE THIS for stand-alone history lookup before drafting (e.g. \"what does this supplier normally look like?\"). Use validate_drafts instead when you have a specific draft to score.\n\nReturns null when the contact has no qualifying history yet (sampleSize < 5) or the freshness layer is unavailable. Per-pair cache (contactId × btType) — duplicate calls for the same pair return the same result.\n\nThree response slices (severitySummary, outlierFlags, revealedDivergences) populate ONLY on the validate_drafts path — empty/null here."
+      "description": "Read-only contact pattern intelligence (cadence, outliers, divergences, severity). USE THIS for stand-alone history lookup before drafting (e.g. \"what does this supplier normally look like?\"). Use validate_drafts instead when you have a specific draft to score.\n\nReturns null when the contact has no qualifying history yet (sampleSize < 5) or the freshness layer is unavailable. Per-pair cache (contactId × btType); duplicate calls for the same pair return the same result.\n\nThree response slices (severitySummary, outlierFlags, revealedDivergences) populate ONLY on the validate_drafts path; empty/null here."
     },
     {
       "name": "create_contact",
-      "description": "Create a new contact. Auto-checks for duplicates by name — returns existing contact if found instead of creating a duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new contact. Auto-checks for duplicates by name; returns existing contact if found instead of creating a duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_contact",
@@ -124,7 +124,7 @@
     },
     {
       "name": "list_invoices",
-      "description": "List invoices. Returns reference, date, status, contact, totalAmount. Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List invoices. Returns reference, date, status, contact, totalAmount. Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_invoices",
@@ -136,11 +136,11 @@
     },
     {
       "name": "create_invoice",
-      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true — false only on \"finalize\".\n\naccountResourceId per lineItem required only when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\" }` — see the exchangeRate param for rate direction. Dates YYYY-MM-DD.\n\nreference MUST be unique per org. Never invent one — set autoReference:true to take the organization's next number. Omitting both is an error. Duplicate → 422.\n\nOptional capsuleRecipe (SALE base only — DEFERRED_REVENUE). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create invoice. lineItem text field = `name` (not \"description\"). saveAsDraft defaults true; false only on \"finalize\".\n\naccountResourceId per lineItem required only when finalizing. lineItem minimum: `{ name, unitPrice, quantity, accountResourceId }`. Currency: `{ sourceCurrency: \"USD\" }`; see the exchangeRate param for rate direction. Dates YYYY-MM-DD.\n\nreference MUST be unique per org. Never invent one; set autoReference:true to take the organization's next number. Omitting both is an error. Duplicate → 422.\n\nOptional capsuleRecipe (SALE base only: DEFERRED_REVENUE). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_invoice",
-      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced; pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_invoice",
@@ -148,7 +148,7 @@
     },
     {
       "name": "pay_invoice",
-      "description": "Record a payment against an invoice. Invoice must be UNPAID/PARTIALLY_PAID before payment — draft or voided invoices cannot be paid. If the invoice is still a DRAFT, call finalize_invoice first. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record a payment against an invoice. Invoice must be UNPAID/PARTIALLY_PAID before payment; draft or voided invoices cannot be paid. If the invoice is still a DRAFT, call finalize_invoice first. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "finalize_invoice",
@@ -156,7 +156,7 @@
     },
     {
       "name": "apply_credits_to_invoice",
-      "description": "Apply customer credit note(s) to an invoice. You MUST call this tool to actually apply credits — do not just describe the steps.\nSteps: 1) search_customer_credit_notes with status UNAPPLIED for the same contact. 2) If CN is still DRAFT, call finalize_customer_credit_note first. 3) Call this tool with creditNoteResourceId and amountApplied for each CN. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Apply customer credit note(s) to an invoice. You MUST call this tool to actually apply credits; do not just describe the steps.\nSteps: 1) search_customer_credit_notes with status UNAPPLIED for the same contact. 2) If CN is still DRAFT, call finalize_customer_credit_note first. 3) Call this tool with creditNoteResourceId and amountApplied for each CN. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "download_invoice_pdf",
@@ -164,7 +164,7 @@
     },
     {
       "name": "list_bills",
-      "description": "List bills (purchase invoices). Returns reference, date, status, contact, amounts. Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List bills (purchase invoices). Returns reference, date, status, contact, amounts. Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_bills",
@@ -176,11 +176,11 @@
     },
     {
       "name": "create_bill",
-      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\" — sales-only profiles cause 422. reference MUST be unique — use the SUPPLIER'S OWN invoice number. If the document genuinely has none, set autoReference:true for the org's next number. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating — show it, retry with allowDuplicate only once the user confirms it is separate. Optional capsuleRecipe (PURCHASE base only — PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\"; sales-only profiles cause 422. reference MUST be unique; use the SUPPLIER'S OWN invoice number. If the document genuinely has none, set autoReference:true for the org's next number. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating; show it, retry with allowDuplicate only once the user confirms it is separate. Optional capsuleRecipe (PURCHASE base only: PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_bill",
-      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced — pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced; pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_bill",
@@ -192,7 +192,7 @@
     },
     {
       "name": "pay_bill",
-      "description": "Record a payment against a bill. Bill must be UNPAID/PARTIALLY_PAID before payment — draft or voided bills cannot be paid. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record a payment against a bill. Bill must be UNPAID/PARTIALLY_PAID before payment; draft or voided bills cannot be paid. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "finalize_bill",
@@ -220,7 +220,7 @@
     },
     {
       "name": "transition_sale_order",
-      "description": "Advance or cancel a Sale Quote / Sale Order lifecycle. action:\n- ACCEPT: Sale Quote only (CREATED → ACCEPTED). The quote must already be issued; a DRAFT can't be accepted (issue it first with update_sale_order isDraftToActiveSaleQuote:true). A CREATED quote is already linkable, so accept is optional.\n- CONFIRM — Sale Order only (CREATED → CONFIRMED).\n- VOID — either, when not a draft (cancels the document).\n- DELETE — DRAFT only; for anything non-draft use VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Advance or cancel a Sale Quote / Sale Order lifecycle. action:\n- ACCEPT: Sale Quote only (CREATED → ACCEPTED). The quote must already be issued; a DRAFT can't be accepted (issue it first with update_sale_order isDraftToActiveSaleQuote:true). A CREATED quote is already linkable, so accept is optional.\n- CONFIRM: Sale Order only (CREATED → CONFIRMED).\n- VOID: either, when not a draft (cancels the document).\n- DELETE: DRAFT only; for anything non-draft use VOID. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "create_purchase_order",
@@ -240,15 +240,15 @@
     },
     {
       "name": "transition_purchase_order",
-      "description": "Advance or cancel a Purchase Request / Purchase Order lifecycle. action:\n- ACCEPT: Purchase Request only (ACTIVE → ACCEPTED). The request must already be issued; a DRAFT can't be accepted (issue it first with update_purchase_order isDraftToActivePurchaseRequest:true). An ACTIVE request is already linkable, so accept is optional.\n- CONFIRM — Purchase Order only (ACTIVE → CONFIRMED).\n- VOID — either, when not a draft (cancels the document).\n- DELETE — DRAFT only; for anything non-draft use VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Advance or cancel a Purchase Request / Purchase Order lifecycle. action:\n- ACCEPT: Purchase Request only (ACTIVE → ACCEPTED). The request must already be issued; a DRAFT can't be accepted (issue it first with update_purchase_order isDraftToActivePurchaseRequest:true). An ACTIVE request is already linkable, so accept is optional.\n- CONFIRM: Purchase Order only (ACTIVE → CONFIRMED).\n- VOID: either, when not a draft (cancels the document).\n- DELETE: DRAFT only; for anything non-draft use VOID. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "convert_sale_order_to_invoice",
-      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice — NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry — search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice; NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry; search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "convert_purchase_order_to_bill",
-      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill — NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry — search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill; NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry; search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_sale_order_line_items",
@@ -260,7 +260,7 @@
     },
     {
       "name": "list_journals",
-      "description": "List journal entries. Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List journal entries. Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "get_journal",
@@ -272,11 +272,11 @@
     },
     {
       "name": "create_journal",
-      "description": "Create a journal entry. IMPORTANT:\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount.\n- Total debits MUST equal total credits — the API rejects unbalanced journals.\n- Search accounts first to get the correct resourceIds.\n- Foreign currency: pass the currency object and enter every amount in that currency, NOT the org base.\n- Double-check your math: sum all DEBIT amounts and all CREDIT amounts — they must be equal.\n\nOptional capsuleRecipe (JOURNAL_MANUAL base — ACCRUAL_REVERSAL, IFRS16_LEASE, LOAN_AMORTIZATION). DEFERRED_REVENUE/PREPAID_AMORTIZATION silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a journal entry. IMPORTANT:\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount.\n- Total debits MUST equal total credits; the API rejects unbalanced journals.\n- Search accounts first to get the correct resourceIds.\n- Foreign currency: pass the currency object and enter every amount in that currency, NOT the org base.\n- Double-check your math: sum all DEBIT amounts and all CREDIT amounts; they must be equal.\n\nOptional capsuleRecipe (JOURNAL_MANUAL base: ACCRUAL_REVERSAL, IFRS16_LEASE, LOAN_AMORTIZATION). DEFERRED_REVENUE/PREPAID_AMORTIZATION silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "create_transfer_trial_balance",
-      "description": "Create opening balance entries (Transfer Trial Balance). Used to set up initial account balances when migrating to a new accounting system.\n- Always created as ACTIVE — no draft mode.\n- Reference is auto-generated (\"Transfer Trial Balance\") — do NOT send a reference.\n- Minimum 1 entry (unlike regular journals which require 2).\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount (must be > 0).\n- Skips lock date validation (opening balances are special).\n- Uses journalEntries (NOT lines — this is a journal type). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create opening balance entries (Transfer Trial Balance). Used to set up initial account balances when migrating to a new accounting system.\n- Always created as ACTIVE; no draft mode.\n- Reference is auto-generated (\"Transfer Trial Balance\"); do NOT send a reference.\n- Minimum 1 entry (unlike regular journals which require 2).\n- Each entry needs accountResourceId, type (DEBIT or CREDIT), and amount (must be > 0).\n- Skips lock date validation (opening balances are special).\n- Uses journalEntries (NOT lines; this is a journal type). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_journal",
@@ -308,7 +308,7 @@
     },
     {
       "name": "generate_cash_balance",
-      "description": "Generate a cash balance report showing cash position at a specific date. PREFERRED for cash position questions — use this (NOT balance sheet) when asked about total cash, cash on hand, available cash, or cash position across all bank accounts."
+      "description": "Generate a cash balance report showing cash position at a specific date. PREFERRED for cash position questions: use this (NOT balance sheet) when asked about total cash, cash on hand, available cash, or cash position across all bank accounts."
     },
     {
       "name": "generate_general_ledger",
@@ -320,7 +320,7 @@
     },
     {
       "name": "list_items",
-      "description": "List items (products & services). Returns internalName, itemCode, appliesToSale/Purchase. Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List items (products & services). Returns internalName, itemCode, appliesToSale/Purchase. Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_items",
@@ -332,11 +332,11 @@
     },
     {
       "name": "create_item",
-      "description": "Create a new item. Auto-checks for duplicates by itemCode — returns existing item if found.\n- saleItemName/purchaseItemName are auto-set from internalName if not provided.\n- Set appliesToSale and/or appliesToPurchase to control where the item can be used. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new item. Auto-checks for duplicates by itemCode; returns existing item if found.\n- saleItemName/purchaseItemName are auto-set from internalName if not provided.\n- Set appliesToSale and/or appliesToPurchase to control where the item can be used. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_item",
-      "description": "Update an existing item. Only send fields you want to change — required fields are auto-merged from current state. To change status use bulk_upsert_items, which queues a job you poll — PUT /items drops it silently. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing item. Only send fields you want to change; required fields are auto-merged from current state. To change status use bulk_upsert_items, which queues a job you poll; PUT /items drops it silently. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_item",
@@ -344,11 +344,11 @@
     },
     {
       "name": "bulk_upsert_items",
-      "description": "Max 500 items per call. Provide resourceId per item to update (partial — only changed fields needed, server preserves existing values). Omit resourceId to create (defaults: status=ACTIVE, itemCategory=NON_INVENTORY). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Max 500 items per call. Provide resourceId per item to update (partial: only changed fields needed, server preserves existing values). Omit resourceId to create (defaults: status=ACTIVE, itemCategory=NON_INVENTORY). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_tags",
-      "description": "List tags used for transaction categorization. Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List tags used for transaction categorization. Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_tags",
@@ -376,7 +376,7 @@
     },
     {
       "name": "list_capsules",
-      "description": "List capsules (transaction groupings for amortization, deferred revenue, etc.). Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List capsules (transaction groupings for amortization, deferred revenue, etc.). Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_capsules",
@@ -388,7 +388,7 @@
     },
     {
       "name": "create_capsule",
-      "description": "Create a new (legacy) capsule. List capsule types first to get the capsuleTypeResourceId. `title` is required and must be non-empty (blank/empty rejected with 422). For IFRS recipe-driven capsules (PREPAID_AMORTIZATION, LOAN_AMORTIZATION, etc.), use `preview_capsule_recipe` + `capsuleRecipe` payload on a trigger mutation instead — those create the capsule + scheduler atoms in one shot. This tool is for manually-grouped legacy capsules. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new (legacy) capsule. List capsule types first to get the capsuleTypeResourceId. `title` is required and must be non-empty (blank/empty rejected with 422). For IFRS recipe-driven capsules (PREPAID_AMORTIZATION, LOAN_AMORTIZATION, etc.), use `preview_capsule_recipe` + `capsuleRecipe` payload on a trigger mutation instead; those create the capsule + scheduler atoms in one shot. This tool is for manually-grouped legacy capsules. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_capsule",
@@ -400,7 +400,7 @@
     },
     {
       "name": "list_customer_credit_notes",
-      "description": "List customer credit notes (AR adjustments/refunds). Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List customer credit notes (AR adjustments/refunds). Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_customer_credit_notes",
@@ -412,7 +412,7 @@
     },
     {
       "name": "create_customer_credit_note",
-      "description": "Create a customer credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- reference MUST be unique. Never invent one — set autoReference:true to take the org's next number. Omitting both is an error. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a customer credit note. Saves as draft by default.\n- Status when finalized is UNAPPLIED (not APPROVED).\n- Line items use \"name\" for item description.\n- reference MUST be unique. Never invent one; set autoReference:true to take the org's next number. Omitting both is an error. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_customer_credit_note",
@@ -436,7 +436,7 @@
     },
     {
       "name": "list_supplier_credit_notes",
-      "description": "List supplier credit notes (AP adjustments/refunds). Paginated — response includes totalElements. Use limit/offset to page."
+      "description": "List supplier credit notes (AP adjustments/refunds). Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_supplier_credit_notes",
@@ -488,7 +488,7 @@
     },
     {
       "name": "add_currency_rate",
-      "description": "Add or set an exchange rate for a currency. ALWAYS use this tool even when the user says \"update rate\" — it handles both new and existing rates. Rate direction is base→source (1 org-base unit = N of this currency); see the rate param before sending. Call list_currencies first to get valid currency codes. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Add or set an exchange rate for a currency. ALWAYS use this tool even when the user says \"update rate\"; it handles both new and existing rates. Rate direction is base→source (1 org-base unit = N of this currency); see the rate param before sending. Call list_currencies first to get valid currency codes. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_currency_rate",
@@ -496,7 +496,7 @@
     },
     {
       "name": "bulk_upsert_currency_rates",
-      "description": "Max 500 exchange rates per call. Auto-enables currencies not yet enabled in the org — no need to call add_currency first. Requires rateDirection per rate. Response surfaces per-row failures: `failedRows[]` (each with rowIndex, columnName, columnValue, errorCode, errorMessage) + `failedCount` alongside `resourceIds[]` for successful inserts. Omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (no temporal gap). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Max 500 exchange rates per call. Auto-enables currencies not yet enabled in the org; no need to call add_currency first. Requires rateDirection per rate. Response surfaces per-row failures: `failedRows[]` (each with rowIndex, columnName, columnValue, errorCode, errorMessage) + `failedCount` alongside `resourceIds[]` for successful inserts. Omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (no temporal gap). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_tax_profiles",
@@ -548,7 +548,7 @@
     },
     {
       "name": "update_catalog",
-      "description": "Update a catalog. FULL REPLACEMENT — GET first, merge, then send the complete body; omitting items or contactGroupResourceIds DROPS them. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a catalog. FULL REPLACEMENT: GET first, merge, then send the complete body; omitting items or contactGroupResourceIds DROPS them. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_catalog",
@@ -572,7 +572,7 @@
     },
     {
       "name": "create_tax_profile",
-      "description": "Create a new tax profile. List tax types first to get the taxTypeCode. Automatically checks for duplicates by name — returns existing profile if found. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new tax profile. List tax types first to get the taxTypeCode. Automatically checks for duplicates by name; returns existing profile if found. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_cash_in",
@@ -580,7 +580,7 @@
     },
     {
       "name": "create_cash_in",
-      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts) — any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, amount }. NO 'type' field — cash-in credits every offset line, decided by the endpoint. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability) — NOT bank/cash and NOT controlled accounts (AR/AP).\n\nOptional capsuleRecipe (JOURNAL_DIRECT_CASH_IN base — LOAN_AMORTIZATION: cash-in = loan disbursement, recipe builds repayment schedule). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record money received INTO a bank account from an EXTERNAL source (customer payment, refund received, deposit). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts); any other type fails. Cannot appear in lines (API enforces separation).\n\nlines = offsetting entries: { accountResourceId, amount }. NO 'type' field; cash-in credits every offset line, decided by the endpoint. Offset accounts must be regular P&L or balance-sheet accounts (revenue, expense, asset, liability), NOT bank/cash and NOT controlled accounts (AR/AP).\n\nOptional capsuleRecipe (JOURNAL_DIRECT_CASH_IN base; LOAN_AMORTIZATION: cash-in = loan disbursement, recipe builds repayment schedule). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_cash_out",
@@ -588,7 +588,7 @@
     },
     {
       "name": "create_cash_out",
-      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, amount > 0 }. NO 'type' field — cash-out debits every offset line, decided by the endpoint. Offset accounts must be regular P&L or balance-sheet accounts — NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", amount: 100 }.\n\nOptional capsuleRecipe — no v1 recipe lists JOURNAL_DIRECT_CASH_OUT; passing capsuleRecipe here silently nulls. Use create_cash_in or create_journal for LOAN_AMORTIZATION. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record money paid OUT FROM a bank account to an EXTERNAL party (expense, supplier payment, reimbursement, withdrawal). For inter-account moves use create_cash_transfer.\n\naccountResourceId MUST be a Bank/Cash account (from list_bank_accounts). Cannot appear in lines (API enforces separation; error: \"CashOut journal account cannot be in CashIn Entries\").\n\nlines = offsetting entries: { accountResourceId, amount > 0 }. NO 'type' field; cash-out debits every offset line, decided by the endpoint. Offset accounts must be regular P&L or balance-sheet accounts, NOT bank/cash and NOT controlled accounts (AR/AP). Example: { accountResourceId: \"<expense-acct>\", amount: 100 }.\n\nOptional capsuleRecipe: no v1 recipe lists JOURNAL_DIRECT_CASH_OUT; passing capsuleRecipe here silently nulls. Use create_cash_in or create_journal for LOAN_AMORTIZATION. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_cash_in",
@@ -612,7 +612,7 @@
     },
     {
       "name": "create_cash_transfer",
-      "description": "Move money between TWO OF YOUR OWN bank/cash accounts (petty-cash top-up, inter-account, FX between own accounts).\n\nNOT for external parties — use create_cash_in (receiving) / create_cash_out (paying).\n\ncashOut = source, cashIn = destination. Each side needs accountResourceId + amount. reference auto-generated if omitted. Do NOT send currency/exchangeRate (derived server-side).\n\nPosts ACTIVE, not a draft. Refuses locally (`_guard: invalid_transfer`, nothing written) when both sides name the same account, or the leg amounts differ — re-read direction and amount with the user, do not retry. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Move money between TWO OF YOUR OWN bank/cash accounts (petty-cash top-up, inter-account, FX between own accounts).\n\nNOT for external parties; use create_cash_in (receiving) / create_cash_out (paying).\n\ncashOut = source, cashIn = destination. Each side needs accountResourceId + amount. reference auto-generated if omitted. Do NOT send currency/exchangeRate (derived server-side).\n\nPosts ACTIVE, not a draft. Refuses locally (`_guard: invalid_transfer`, nothing written) when both sides name the same account, or the leg amounts differ; re-read direction and amount with the user, do not retry. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_cash_in",
@@ -676,11 +676,11 @@
     },
     {
       "name": "invite_org_user",
-      "description": "Invite a new user to the organization.\n\nuserType drives access:\n- ADMIN: full access to every module — moduleRoles is ignored.\n- CUSTOM_USER: per-module access — supply moduleRoles for each module the user should reach.\n\nModules (8): ORGANIZATION, USER_MANAGEMENT, BILLING, ACCOUNTING, SALES, PURCHASES, REPORTS, FIXED_ASSET. Any module omitted for a CUSTOM_USER defaults to no access. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Invite a new user to the organization.\n\nuserType drives access:\n- ADMIN: full access to every module; moduleRoles is ignored.\n- CUSTOM_USER: per-module access; supply moduleRoles for each module the user should reach.\n\nModules (8): ORGANIZATION, USER_MANAGEMENT, BILLING, ACCOUNTING, SALES, PURCHASES, REPORTS, FIXED_ASSET. Any module omitted for a CUSTOM_USER defaults to no access. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_org_user",
-      "description": "Update an organization user's access. Provide userType to change their access tier, moduleRoles to change per-module access, or both.\n\nmoduleRoles behaves as a PARTIAL MERGE: modules you do not include keep their existing role on the user. To revoke access for a specific module, send it with roleCode NO_ACCESS — do NOT just omit it. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an organization user's access. Provide userType to change their access tier, moduleRoles to change per-module access, or both.\n\nmoduleRoles behaves as a PARTIAL MERGE: modules you do not include keep their existing role on the user. To revoke access for a specific module, send it with roleCode NO_ACCESS; do NOT just omit it. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "remove_org_user",
@@ -700,59 +700,59 @@
     },
     {
       "name": "preview_pseudo_sql",
-      "description": "Run a read-only pseudo-SQL SELECT against the curated reporting schema. SYNC — returns up to 100 rows + typed columns. For canonical reports (anomaly/audit/aging/P&L/BS/GL/statement-of-account) use download_export instead. DELETE/UPDATE/INSERT and multi-statement input are rejected (PSEUDOSQL_PARSE_ERROR). Query max 16384 chars (over → 422 validation_error). `truncated:true` means \"more rows matched than were returned\" — NOT \"you hit the cap\"; inspect rowCount vs preview cap or your LIMIT. Curated tables include invoices, bills, journals, payments, contacts, accounts and more — see jaz-pseudo-sql skill for full inventory + query patterns."
+      "description": "Run a read-only pseudo-SQL SELECT against the curated reporting schema. SYNC: returns up to 100 rows + typed columns. For canonical reports (anomaly/audit/aging/P&L/BS/GL/statement-of-account) use download_export instead. DELETE/UPDATE/INSERT and multi-statement input are rejected (PSEUDOSQL_PARSE_ERROR). Query max 16384 chars (over → 422 validation_error). `truncated:true` means \"more rows matched than were returned\", NOT \"you hit the cap\"; inspect rowCount vs preview cap or your LIMIT. Curated tables include invoices, bills, journals, payments, contacts, accounts and more; see jaz-pseudo-sql skill for full inventory + query patterns."
     },
     {
       "name": "export_pseudo_sql",
-      "description": "Kick off an async CSV export of a pseudo-SQL SELECT against the curated reporting schema. Returns { jobId, status }. Same DSL constraints as preview_pseudo_sql (SELECT-only, ≤16384 chars, single statement). Poll status via get_pseudo_sql_export — terminal states are COMPLETED (downloadUrl present, ~15min S3 expiry), FAILED, or EXPIRED. For one-shot \"give me the CSV\" use run_pseudo_sql_and_download instead. Supply idempotencyKey to dedupe across retries; same key + DIFFERENT query returns the prior job's result (server-side primary)."
+      "description": "Kick off an async CSV export of a pseudo-SQL SELECT against the curated reporting schema. Returns { jobId, status }. Same DSL constraints as preview_pseudo_sql (SELECT-only, ≤16384 chars, single statement). Poll status via get_pseudo_sql_export; terminal states are COMPLETED (downloadUrl present, ~15min S3 expiry), FAILED, or EXPIRED. For one-shot \"give me the CSV\" use run_pseudo_sql_and_download instead. Supply idempotencyKey to dedupe across retries; same key + DIFFERENT query returns the prior job's result (server-side primary)."
     },
     {
       "name": "get_pseudo_sql_export",
-      "description": "Poll a pseudo-SQL export job. Returns { jobId, status, rowCount?, truncated?, downloadUrl?, error? }. Terminal states: COMPLETED, FAILED, EXPIRED. `downloadUrl` is S3 pre-signed with ~15min expiry — fetch immediately. If a fetch returns 403 (expired), call this tool again for a fresh URL."
+      "description": "Poll a pseudo-SQL export job. Returns { jobId, status, rowCount?, truncated?, downloadUrl?, error? }. Terminal states: COMPLETED, FAILED, EXPIRED. `downloadUrl` is S3 pre-signed with ~15min expiry; fetch immediately. If a fetch returns 403 (expired), call this tool again for a fresh URL."
     },
     {
       "name": "run_pseudo_sql_and_download",
-      "description": "One-shot composite: kickoff async export → poll every 2s → return { jobId, status, downloadUrl, buffer? | localPath? }. Default 25s timeout (safe under typical 30s MCP provider timeout, configurable up to 90s). Idempotency-Key auto-set to sha256(query).slice(0,16) so same-query repeats dedupe. Default returns CSV buffer; pass downloadToFile=true to write to ~/Downloads/pseudo-sql-<jobId>.csv. On TIMED_OUT returns { status:'TIMED_OUT', jobId } — caller can retry via get_pseudo_sql_export. Use for \"run this query and give me the CSV\" flows; use export_pseudo_sql + get_pseudo_sql_export for fine-grained control."
+      "description": "One-shot composite: kickoff async export → poll every 2s → return { jobId, status, downloadUrl, buffer? | localPath? }. Default 25s timeout (safe under typical 30s MCP provider timeout, configurable up to 90s). Idempotency-Key auto-set to sha256(query).slice(0,16) so same-query repeats dedupe. Default returns CSV buffer; pass downloadToFile=true to write to ~/Downloads/pseudo-sql-<jobId>.csv. On TIMED_OUT returns { status:'TIMED_OUT', jobId }; caller can retry via get_pseudo_sql_export. Use for \"run this query and give me the CSV\" flows; use export_pseudo_sql + get_pseudo_sql_export for fine-grained control."
     },
     {
       "name": "get_pseudo_sql_schema",
-      "description": "Live pseudo-SQL catalog: tables/columns, joins, functions. Pass `table` to scope to one table and its joins. Syntax rules are a separate call — get_pseudo_sql_syntax — so a query against two tables does not pay for the whole guide. `version` is a stable cache key."
+      "description": "Live pseudo-SQL catalog: tables/columns, joins, functions. Pass `table` to scope to one table and its joins. Syntax rules are a separate call (get_pseudo_sql_syntax), so a query against two tables does not pay for the whole guide. `version` is a stable cache key."
     },
     {
       "name": "get_pseudo_sql_syntax",
-      "description": "The pseudo-SQL syntax guide (canonical jaz-pseudo-sql.md). Static — identical for every organization — so fetch it once and cache on `version`. Skip it entirely if the jaz-pseudo-sql skill is already loaded. Table and column names come from get_pseudo_sql_schema."
+      "description": "The pseudo-SQL syntax guide (canonical jaz-pseudo-sql.md). Static (identical for every organization), so fetch it once and cache on `version`. Skip it entirely if the jaz-pseudo-sql skill is already loaded. Table and column names come from get_pseudo_sql_schema."
     },
     {
       "name": "plan_recipe",
-      "description": "Offline. Plan an IFRS transaction (schedule + journals) WITHOUT posting. Returns RecipePlan: capsuleType, capsuleName, requiredAccounts, needsContact, steps (journal|bill|invoice|cash-in|cash-out), calculator output.\n\nSupported (13): loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nUSE FOR: depreciation (sl/ddb/150db), amortization, ECL, lease (IFRS 16), hire purchase, loan, IAS 37 provisions, deferred revenue, fixed deposits, asset disposal, accrued expenses, leave-accrual, dividends. Never hand-construct.\n\nALTERNATIVE — server-side: 5 of these (loan/lease/prepaid-expense/deferred-revenue/accrued-expense) also available via capsuleRecipe payload on create_bill/create_invoice/create_journal/create_cash_in (creates capsule + scheduler atoms in one shot). Offline = plan, post manually; server-side = commit now.\n\nfx-reval EXCEPTION: Jaz auto-handles period-end IAS 21.23 FX translation. fx-reval is VERIFICATION ONLY — do NOT execute_recipe(recipe: 'fx-reval'), it double-posts.\n\nNEXT STEP: execute_recipe + startDate (offline) OR preview_capsule_recipe + capsuleRecipe payload on trigger mutation (server-side).\n\nALIASES (file→engine): prepaid-amortization→prepaid-expense, bank-loan→loan, ifrs16-lease→lease, bad-debt-provision→ecl, accrued-expenses→accrued-expense, fx-revaluation→fx-reval, declining-balance→depreciation. Pass the engine name."
+      "description": "Offline. Plan an IFRS transaction (schedule + journals) WITHOUT posting. Returns RecipePlan: capsuleType, capsuleName, requiredAccounts, needsContact, steps (journal|bill|invoice|cash-in|cash-out), calculator output.\n\nSupported (13): loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nUSE FOR: depreciation (sl/ddb/150db), amortization, ECL, lease (IFRS 16), hire purchase, loan, IAS 37 provisions, deferred revenue, fixed deposits, asset disposal, accrued expenses, leave-accrual, dividends. Never hand-construct.\n\nALTERNATIVE (server-side): 5 of these (loan/lease/prepaid-expense/deferred-revenue/accrued-expense) also available via capsuleRecipe payload on create_bill/create_invoice/create_journal/create_cash_in (creates capsule + scheduler atoms in one shot). Offline = plan, post manually; server-side = commit now.\n\nfx-reval EXCEPTION: Jaz auto-handles period-end IAS 21.23 FX translation. fx-reval is VERIFICATION ONLY; do NOT execute_recipe(recipe: 'fx-reval'), it double-posts.\n\nNEXT STEP: execute_recipe + startDate (offline) OR preview_capsule_recipe + capsuleRecipe payload on trigger mutation (server-side).\n\nALIASES (file→engine): prepaid-amortization→prepaid-expense, bank-loan→loan, ifrs16-lease→lease, bad-debt-provision→ecl, accrued-expenses→accrued-expense, fx-revaluation→fx-reval, declining-balance→depreciation. Pass the engine name."
     },
     {
       "name": "execute_recipe",
-      "description": "Execute a recipe end-to-end — calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).\n\nSupported: loan, lease, depreciation, prepaid-expense, deferred-revenue, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nALTERNATIVE — for 5 recipes (loan, lease, prepaid-expense, deferred-revenue, accrued-expense) server-side capsule-recipe engine is also available via capsuleRecipe payload on create_bill/create_invoice/create_journal/create_cash_in.\n\nRequires startDate. Auto-resolves accounts from CoA. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Execute a recipe end-to-end: calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).\n\nSupported: loan, lease, depreciation, prepaid-expense, deferred-revenue, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.\n\nALTERNATIVE: for 5 recipes (loan, lease, prepaid-expense, deferred-revenue, accrued-expense) server-side capsule-recipe engine is also available via capsuleRecipe payload on create_bill/create_invoice/create_journal/create_cash_in.\n\nRequires startDate. Auto-resolves accounts from CoA. Provide bankAccountName for recipes with cash-in/cash-out steps, contactName for recipes with invoice/bill steps. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_capsule_recipes",
-      "description": "Server-side recipe lifecycle (NOT the offline calculator — for offline planning use plan_recipe + execute_recipe). List all registered IFRS capsule recipes with per-version JSON Schemas. Source of truth for recipeName values used in capsuleRecipe payloads on trigger mutations (create_bill, create_journal, create_cash_in, etc.) — DON'T hard-code the 5 enum values. Each descriptor carries displayName, capsuleType, requiresBaseTransaction, allowedBaseTransactionTypes[], expectedAtomTypes[], and versions[] with inputSchema (JSON Schema Draft 7) per version."
+      "description": "Server-side recipe lifecycle (NOT the offline calculator; for offline planning use plan_recipe + execute_recipe). List all registered IFRS capsule recipes with per-version JSON Schemas. Source of truth for recipeName values used in capsuleRecipe payloads on trigger mutations (create_bill, create_journal, create_cash_in, etc.); DON'T hard-code the 5 enum values. Each descriptor carries displayName, capsuleType, requiresBaseTransaction, allowedBaseTransactionTypes[], expectedAtomTypes[], and versions[] with inputSchema (JSON Schema Draft 7) per version."
     },
     {
       "name": "get_capsule_recipe",
-      "description": "Get one capsule recipe descriptor by enum name. inputSchema at `data.versions[0].inputSchema` (NOT top-level). Carries `allowedBaseTransactionTypes`, `x-accountClass` per *AccountResourceId slot, `x-baseTrxBinding` for auto-fills, and `versions[].templateSlots[]` — the slotKeys + supportedVariables you can pass to capsuleRecipe.templateOverrides (Customize Recipe). Use list_capsule_recipes for available names."
+      "description": "Get one capsule recipe descriptor by enum name. inputSchema at `data.versions[0].inputSchema` (NOT top-level). Carries `allowedBaseTransactionTypes`, `x-accountClass` per *AccountResourceId slot, `x-baseTrxBinding` for auto-fills, and `versions[].templateSlots[]`, the slotKeys + supportedVariables you can pass to capsuleRecipe.templateOverrides (Customize Recipe). Use list_capsule_recipes for available names."
     },
     {
       "name": "preview_capsule_recipe",
-      "description": "Compute the blueprint a recipe would build, WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. **Pre-flight gate** before sending capsuleRecipe payloads — trigger mutations silently null on publish failure but preview surfaces every problem as a clean 422 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH, RECIPE_INVALID_BASE_TRANSACTION_TYPE, ERR_RECIPE_OVERRIDE_* — Rule 143). Also the gate for templateOverrides: invalid slotKeys/variables come back as ERR_RECIPE_OVERRIDE_* here. The base-trx triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing — supply all three to auto-fill totalAmount/currency/anchor dates, OR omit all three for a pure compute preview."
+      "description": "Compute the blueprint a recipe would build, WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. **Pre-flight gate** before sending capsuleRecipe payloads; trigger mutations silently null on publish failure but preview surfaces every problem as a clean 422 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH, RECIPE_INVALID_BASE_TRANSACTION_TYPE, ERR_RECIPE_OVERRIDE_*; Rule 143). Also the gate for templateOverrides: invalid slotKeys/variables come back as ERR_RECIPE_OVERRIDE_* here. The base-trx triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing: supply all three to auto-fill totalAmount/currency/anchor dates, OR omit all three for a pure compute preview."
     },
     {
       "name": "resume_capsule_recipe",
-      "description": "Server-side recipe lifecycle. Resume a FAILED recipe job from the leg that failed. NOT idempotent — each call counts toward the 3-attempt limit. After 3 same-leg failures the job is terminally BLOCKED_AFTER_3_RESUME_ATTEMPTS and only rollback_capsule_recipe remains. Returns the updated CapsuleRecipeJob handle with status, resumeAttempts, terminalReason. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Server-side recipe lifecycle. Resume a FAILED recipe job from the leg that failed. NOT idempotent; each call counts toward the 3-attempt limit. After 3 same-leg failures the job is terminally BLOCKED_AFTER_3_RESUME_ATTEMPTS and only rollback_capsule_recipe remains. Returns the updated CapsuleRecipeJob handle with status, resumeAttempts, terminalReason. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "rollback_capsule_recipe",
-      "description": "Server-side recipe lifecycle. Delete every scheduler atom posted by this capsule's recipe. dryRun=true returns the would-delete list without deleting (idempotent, safe to call repeatedly). dryRun=false performs the delete. Status enum: SUCCESS | BLOCKED | PARTIAL_ROLLBACK | DRY_RUN. PARTIAL_ROLLBACK with blockedAtomResourceIds[] means some atoms are referenced downstream — retry idempotent; escalate if persistent. Capsules NOT created via the recipe engine return 422 RECIPE_ROLLBACK_JOB_NOT_FOUND (\"nothing to roll back\"). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Server-side recipe lifecycle. Delete every scheduler atom posted by this capsule's recipe. dryRun=true returns the would-delete list without deleting (idempotent, safe to call repeatedly). dryRun=false performs the delete. Status enum: SUCCESS | BLOCKED | PARTIAL_ROLLBACK | DRY_RUN. PARTIAL_ROLLBACK with blockedAtomResourceIds[] means some atoms are referenced downstream. Retry idempotent; escalate if persistent. Capsules NOT created via the recipe engine return 422 RECIPE_ROLLBACK_JOB_NOT_FOUND (\"nothing to roll back\"). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "create_scheduled_journal",
-      "description": "Recurring journal. Use `schedulerEntries` (NOT journalEntries) — each needs accountResourceId, amount, type (DEBIT|CREDIT), description. Use `repeat` (NOT frequency/interval): ONE_TIME|DAILY|WEEKLY|MONTHLY|YEARLY. Debits must equal credits. Flat structure — reference, valueDate, saveAsDraft at top level.\n\nDynamic strings (reference): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Recurring journal. Use `schedulerEntries` (NOT journalEntries); each needs accountResourceId, amount, type (DEBIT|CREDIT), description. Use `repeat` (NOT frequency/interval): ONE_TIME|DAILY|WEEKLY|MONTHLY|YEARLY. Debits must equal credits. Flat structure: reference, valueDate, saveAsDraft at top level.\n\nDynamic strings (reference): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "create_scheduled_invoice",
@@ -760,7 +760,7 @@
     },
     {
       "name": "create_scheduled_bill",
-      "description": "Create a scheduled (recurring) bill. CRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_PURCHASE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — relative to transaction date. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a scheduled (recurring) bill. CRITICAL:\n- saveAsDraft MUST be false (API rejects INVALID_PURCHASE_STATUS otherwise).\n- Use repeat (NOT frequency/interval): ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY.\n- Each lineItem needs name, unitPrice, quantity, accountResourceId.\nDynamic strings (reference/name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}, relative to transaction date. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_journal",
@@ -768,7 +768,7 @@
     },
     {
       "name": "bulk_update_journals",
-      "description": "Bulk-update journals — most common use is bulk-finalize (saveAsDraft: false on each row). Sync; per-row sequential execution; max 500 per call (a read + a write per row, ~2-4 min for a full 500).\n\nbulk_finalize_drafts only handles invoices/bills/credit-notes — journals need this. Common monthly-close pattern: search_journals(filter:{capsuleResourceId:{eq:<id>}, status:{eq:'DRAFT'}}) → map to {resourceId, saveAsDraft: false} → bulk_update_journals.\n\nEach row carries the same fields as update_journal (resourceId required + any of reference, valueDate, notes, tags, saveAsDraft). Omitted fields preserve existing.\n\nResponse: { updated: [{resourceId}], failed: [{resourceId, error, errorCode, status}], updatedCount, failedCount }. Per-row execution — partial results are normal; retry only failed[].resourceId. errorCode + status come from the underlying JazApiError when available. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-update journals; most common use is bulk-finalize (saveAsDraft: false on each row). Sync; per-row sequential execution; max 500 per call (a read + a write per row, ~2-4 min for a full 500).\n\nbulk_finalize_drafts only handles invoices/bills/credit-notes; journals need this. Common monthly-close pattern: search_journals(filter:{capsuleResourceId:{eq:<id>}, status:{eq:'DRAFT'}}) → map to {resourceId, saveAsDraft: false} → bulk_update_journals.\n\nEach row carries the same fields as update_journal (resourceId required + any of reference, valueDate, notes, tags, saveAsDraft). Omitted fields preserve existing.\n\nResponse: { updated: [{resourceId}], failed: [{resourceId, error, errorCode, status}], updatedCount, failedCount }. Per-row execution: partial results are normal; retry only failed[].resourceId. errorCode + status come from the underlying JazApiError when available. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "import_bank_statement",
@@ -788,11 +788,11 @@
     },
     {
       "name": "wait_for_magic_workflows",
-      "description": "Poll magic extraction workflow(s) until each reaches a terminal state — transaction created (a draft is ready), OCR succeeded/failed, or errored — or until the wait budget elapses. Use after create_bt_from_attachment / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll."
+      "description": "Poll magic extraction workflow(s) until each reaches a terminal state (transaction created (a draft is ready), OCR succeeded/failed, or errored) or until the wait budget elapses. Use after create_bt_from_attachment / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll."
     },
     {
       "name": "create_claim_from_attachment",
-      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction — from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments — the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. The draft is born BOUND to the uploader's own employee automatically; to file for someone else pass employeeResourceId (server requires a claims Manager/Admin). Optional contact, claim profile, currency, value date. Returns a workflow handle; the claim appears in Drafts asynchronously (no manual bind step). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction: from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. The draft is born BOUND to the uploader's own employee automatically; to file for someone else pass employeeResourceId (server requires a claims Manager/Admin). Optional contact, claim profile, currency, value date. Returns a workflow handle; the claim appears in Drafts asynchronously (no manual bind step). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "classify_documents",
@@ -808,7 +808,7 @@
     },
     {
       "name": "add_attachment",
-      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY — attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY; attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_attachment",
@@ -816,7 +816,7 @@
     },
     {
       "name": "read_spreadsheet_rows",
-      "description": "Parse rows from a CSV/Excel URL. Returns rows as JSON objects keyed by header (max 500/call, paginatable via offset/limit). Excel response includes availableSheets[] — re-call with sheetIndex if the first sheet is Instructions. Use BEFORE bulk_upsert_* when the user attaches a tabular file."
+      "description": "Parse rows from a CSV/Excel URL. Returns rows as JSON objects keyed by header (max 500/call, paginatable via offset/limit). Excel response includes availableSheets[]; re-call with sheetIndex if the first sheet is Instructions. Use BEFORE bulk_upsert_* when the user attaches a tabular file."
     },
     {
       "name": "validate_invoice_draft",
@@ -848,11 +848,11 @@
     },
     {
       "name": "create_bank_rule",
-      "description": "Bank reconciliation rule — auto-matches bank records. Use directly on request; don't just list existing.\n\nRequired: name, appliesToReconciliationAccount (bank account UUID, no \"ResourceId\" suffix), configuration.\n\nconfiguration MUST nest under reconcileWithDirectCashEntry: reference (REQUIRED), amountAllocationType (\"PERCENTAGE\" | \"FIXED\" — don't send \"FIXED_AND_PERCENTAGE\"), percentageAllocation[] / fixedAllocation[] of { organizationAccountResourceId, amount }. Advanced: column-value mapping — amountSourceColumnKey + the *Map fields drive amount/account/tax/classifier/contact/tags from a bank column (amount XOR amountSourceColumnKey).\n\nsearchFilter = the WHEN side; without it the rule is never suggested.\n\nOptional fields, the minimum payload, the mapping shape and the condition grammar: jaz-api skill (bank rules, 90d). Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bank reconciliation rule: auto-matches bank records. Use directly on request; don't just list existing.\n\nRequired: name, appliesToReconciliationAccount (bank account UUID, no \"ResourceId\" suffix), configuration.\n\nconfiguration MUST nest under reconcileWithDirectCashEntry: reference (REQUIRED), amountAllocationType (\"PERCENTAGE\" | \"FIXED\"; don't send \"FIXED_AND_PERCENTAGE\"), percentageAllocation[] / fixedAllocation[] of { organizationAccountResourceId, amount }. Advanced: column-value mapping; amountSourceColumnKey + the *Map fields drive amount/account/tax/classifier/contact/tags from a bank column (amount XOR amountSourceColumnKey).\n\nsearchFilter = the WHEN side; without it the rule is never suggested.\n\nOptional fields, the minimum payload, the mapping shape and the condition grammar: jaz-api skill (bank rules, 90d). Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_bank_rule",
-      "description": "Update an existing bank reconciliation rule. FULL REPLACEMENT — the API replaces the entire rule on update. You MUST provide the complete configuration, appliesToReconciliationAccount, and name every time. Use get_bank_rule first to read the current state, merge your changes, then call this tool with the full payload. searchFilter is the ONE exception: omit keeps it, null removes it. Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing bank reconciliation rule. FULL REPLACEMENT: the API replaces the entire rule on update. You MUST provide the complete configuration, appliesToReconciliationAccount, and name every time. Use get_bank_rule first to read the current state, merge your changes, then call this tool with the full payload. searchFilter is the ONE exception: omit keeps it, null removes it. Dynamic strings: {{bankReference}}, {{bankPayee}}, {{bankDescription}}. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_bank_rule",
@@ -860,7 +860,7 @@
     },
     {
       "name": "view_auto_reconciliation",
-      "description": "Generate auto-reconciliation suggestions for specific bank statement entries (no account-wide mode). READ-ONLY — does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args — merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation — pass `includeReviewDetails:true` to also get `review[]` (the not-auto lines enriched with the bank line + the matched bill/invoice) for a side-by-side \"does this match?\" card. Pass `includeRaw:true` to also get the unmapped payload. Cost tracks entries passed — batch large backlogs. On a 500 the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher. A line whose bank line could not be read omits `bankLine`; the reason is in `partialFailures` — read it before concluding a line has none."
+      "description": "Generate auto-reconciliation suggestions for specific bank statement entries (no account-wide mode). READ-ONLY; does NOT write. Returns execution-ready `suggestions[]`: each carries `recommendedTool` (the commit tool to call), `execute` (ready-to-pass args; merge bankAccountResourceId for reconcile_magic_match), `confidenceTier` (high/medium/low), and `autoCommitEligible` (true ⇒ safe to commit without review). Drive the flow: for each suggestion, if `autoCommitEligible` call its `recommendedTool` with `execute`; otherwise surface for confirmation; pass `includeReviewDetails:true` to also get `review[]` (the not-auto lines enriched with the bank line + the matched bill/invoice) for a side-by-side \"does this match?\" card. Pass `includeRaw:true` to also get the unmapped payload. Cost tracks entries passed; batch large backlogs. On a 500 the tool returns `{degraded:true}`; recover via the `clio jobs bank-recon match` cascade matcher. A line whose bank line could not be read omits `bankLine`; the reason is in `partialFailures`. Read it before concluding a line has none."
     },
     {
       "name": "list_fixed_assets",
@@ -876,11 +876,11 @@
     },
     {
       "name": "create_fixed_asset",
-      "description": "Register a fixed asset linked to an existing purchase transaction (bill or journal).\n- saveAsDraft defaults to true. Set to false to activate — requires ALL fields below.\n- ACTIVE assets require: purchaseBusinessTransactionType + purchaseBusinessTransactionResourceId\n  (the purchase LINE ITEM on that bill/journal, NOT the document resourceId — see the param).\n- For standalone asset entry (no linked transaction), use transfer_fixed_asset instead. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Register a fixed asset linked to an existing purchase transaction (bill or journal).\n- saveAsDraft defaults to true. Set to false to activate; requires ALL fields below.\n- ACTIVE assets require: purchaseBusinessTransactionType + purchaseBusinessTransactionResourceId\n  (the purchase LINE ITEM on that bill/journal, NOT the document resourceId; see the param).\n- For standalone asset entry (no linked transaction), use transfer_fixed_asset instead. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_fixed_asset",
-      "description": "Update a fixed asset (draft or active). Send only what changes — the stored asset is merged in first, so omitted fields are preserved, not wiped. isDraftToActive: true activates a draft. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a fixed asset (draft or active). Send only what changes; the stored asset is merged in first, so omitted fields are preserved, not wiped. isDraftToActive: true activates a draft. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_fixed_asset",
@@ -892,11 +892,11 @@
     },
     {
       "name": "mark_fixed_asset_sold",
-      "description": "Mark a fixed asset as sold. Links to the sale transaction and records gain/loss. When the user asks to sell an asset, use this tool directly — retrieve the asset first with list_fixed_assets or search_fixed_assets to get the resourceId. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Mark a fixed asset as sold. Links to the sale transaction and records gain/loss. When the user asks to sell an asset, use this tool directly; retrieve the asset first with list_fixed_assets or search_fixed_assets to get the resourceId. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "transfer_fixed_asset",
-      "description": "Register a previously purchased fixed asset with accumulated depreciation.\nUse when the asset was acquired before using Jaz, imported from a legacy system, or purchased outside the system.\nNo linked purchase transaction needed — unlike create_fixed_asset which requires a bill/journal reference.\n- bookValueAccumulatedDepreciationAmount: depreciation already incurred before registration\n- All depreciation/account fields same as create_fixed_asset If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Register a previously purchased fixed asset with accumulated depreciation.\nUse when the asset was acquired before using Jaz, imported from a legacy system, or purchased outside the system.\nNo linked purchase transaction needed, unlike create_fixed_asset which requires a bill/journal reference.\n- bookValueAccumulatedDepreciationAmount: depreciation already incurred before registration\n- All depreciation/account fields same as create_fixed_asset If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "undo_fixed_asset_disposal",
@@ -912,7 +912,7 @@
     },
     {
       "name": "create_subscription",
-      "description": "Subscription — auto-generates invoices on schedule WITH proration. DIFFERENT from scheduled_invoice: subscriptions prorate partial periods (credit notes for mid-period changes), but currency/tax/account are immutable after creation. Use for software licenses, retainers, recurring SaaS. Invoices only (no bills).\n\naccountResourceId + taxProfileResourceId apply to ALL line items (immutable). interval: WEEKLY | MONTHLY | QUARTERLY | YEARLY. reference REQUIRED. proratedConfig (optional) tunes the first period; response carries bundledPeriodEndDate + bundledAmount when includeNextPeriod=true.\n\nDynamic strings (reference/lineItem name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}} — relative to transaction date. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Subscription: auto-generates invoices on schedule WITH proration. DIFFERENT from scheduled_invoice: subscriptions prorate partial periods (credit notes for mid-period changes), but currency/tax/account are immutable after creation. Use for software licenses, retainers, recurring SaaS. Invoices only (no bills).\n\naccountResourceId + taxProfileResourceId apply to ALL line items (immutable). interval: WEEKLY | MONTHLY | QUARTERLY | YEARLY. reference REQUIRED. proratedConfig (optional) tunes the first period; response carries bundledPeriodEndDate + bundledAmount when includeNextPeriod=true.\n\nDynamic strings (reference/lineItem name/notes): {{Day}}, {{Date}}, {{Date+X}}, {{DateRange:X}}, {{Month}}, {{Month+X}}, {{MonthRange:X}}, {{Year}}, {{Year+X}}, relative to transaction date. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_subscription",
@@ -924,7 +924,7 @@
     },
     {
       "name": "cancel_subscription",
-      "description": "Cancel an active subscription. Prorates remaining period and stops future billing. Safe to call — subscriptions can be reactivated after cancellation. Always use this tool when the user asks to cancel a subscription. Must cancel before delete. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Cancel an active subscription. Prorates remaining period and stops future billing. Safe to call; subscriptions can be reactivated after cancellation. Always use this tool when the user asks to cancel a subscription. Must cancel before delete. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_scheduled_transactions",
@@ -940,11 +940,11 @@
     },
     {
       "name": "generate_bank_balance_summary",
-      "description": "Generate bank balance summary report — snapshot of all bank account balances at a point in time."
+      "description": "Generate bank balance summary report: snapshot of all bank account balances at a point in time."
     },
     {
       "name": "generate_bank_recon_summary",
-      "description": "Generate bank reconciliation summary for a specific bank account. Essential for month-end close — call this for each in-scope bank account for the current entity and reporting period. Use for bank recon status, unreconciled items count, or reconciliation summaries."
+      "description": "Generate bank reconciliation summary for a specific bank account. Essential for month-end close; call this for each in-scope bank account for the current entity and reporting period. Use for bank recon status, unreconciled items count, or reconciliation summaries."
     },
     {
       "name": "generate_bank_recon_details",
@@ -956,15 +956,15 @@
     },
     {
       "name": "generate_fa_recon_summary",
-      "description": "Generate fixed assets reconciliation summary — reconciles asset register with general ledger."
+      "description": "Generate fixed assets reconciliation summary: reconciles asset register with general ledger."
     },
     {
       "name": "generate_ar_report",
-      "description": "Generate accounts receivable aging report. Shows outstanding invoices grouped by aging buckets. Use this when discussing customer payment allocation, credit control, or AR status — generate the report to show the full picture."
+      "description": "Generate accounts receivable aging report. Shows outstanding invoices grouped by aging buckets. Use this when discussing customer payment allocation, credit control, or AR status; generate the report to show the full picture."
     },
     {
       "name": "get_ledger_highlights",
-      "description": "Get ledger highlights — summary metadata about the org general ledger: transaction counts by type, date range, active accounts, active currencies, and cross-currency detection. No parameters needed."
+      "description": "Get ledger highlights, summary metadata about the org general ledger: transaction counts by type, date range, active accounts, active currencies, and cross-currency detection. No parameters needed."
     },
     {
       "name": "list_contact_groups",
@@ -1108,7 +1108,7 @@
     },
     {
       "name": "search_claims",
-      "description": "Search/list employee-expense claims. Status: DRAFT|SUBMITTED|APPROVED|CONVERTED|REJECTED|CANCELLED (CONVERTED = \"Processed\"). Claims are born via create_claim, attachment, or conversion (no bare list — use search)."
+      "description": "Search/list employee-expense claims. Status: DRAFT|SUBMITTED|APPROVED|CONVERTED|REJECTED|CANCELLED (CONVERTED = \"Processed\"). Claims are born via create_claim, attachment, or conversion (no bare list; use search)."
     },
     {
       "name": "get_claim",
@@ -1116,11 +1116,11 @@
     },
     {
       "name": "create_claim",
-      "description": "Create an employee-expense claim directly (bare create, no attachment). Vendor is EITHER contactResourceId OR vendorName, never both. saveAsDraft defaults to true (lands DRAFT with relaxed line validation); set false to validate + submit in one call (lands SUBMITTED). reference is REQUIRED when submitting (saveAsDraft=false) — omitting it returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT; a DRAFT saves without one. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create an employee-expense claim directly (bare create, no attachment). Vendor is EITHER contactResourceId OR vendorName, never both. saveAsDraft defaults to true (lands DRAFT with relaxed line validation); set false to validate + submit in one call (lands SUBMITTED). reference is REQUIRED when submitting (saveAsDraft=false): omitting it returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT; a DRAFT saves without one. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_claim",
-      "description": "Update a DRAFT claim (partial — omitted fields unchanged). claimItems non-empty REPLACES all lines, [] clears. Set saveAsDraft=false to validate + submit in one call — reference is REQUIRED at submit (else 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT); a DRAFT save needs none. Only DRAFT claims are editable. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a DRAFT claim (partial: omitted fields unchanged). claimItems non-empty REPLACES all lines, [] clears. Set saveAsDraft=false to validate + submit in one call: reference is REQUIRED at submit (else 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT); a DRAFT save needs none. Only DRAFT claims are editable. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_claim",
@@ -1132,7 +1132,7 @@
     },
     {
       "name": "submit_claim",
-      "description": "Submit a DRAFT claim for approval (DRAFT → SUBMITTED). Server enforces the transition. The claim must carry a reference — a referenceless DRAFT returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (set it via update_claim first). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Submit a DRAFT claim for approval (DRAFT → SUBMITTED). Server enforces the transition. The claim must carry a reference; a referenceless DRAFT returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (set it via update_claim first). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "approve_claim",
@@ -1152,7 +1152,7 @@
     },
     {
       "name": "bulk_submit_claims",
-      "description": "Bulk-submit DRAFT claims (ASYNC). Returns a job handle {jobId,...}; poll search_background_jobs by jobId for per-item results. Max 500 ids. Each claim must have a reference — referenceless claims fail per-item with CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (check the job result). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-submit DRAFT claims (ASYNC). Returns a job handle {jobId,...}; poll search_background_jobs by jobId for per-item results. Max 500 ids. Each claim must have a reference; referenceless claims fail per-item with CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (check the job result). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_approve_claims",
@@ -1180,15 +1180,15 @@
     },
     {
       "name": "preview_claims_conversion",
-      "description": "Preview the journals an APPROVED claim batch would produce at conversion — no write. Returns expenseSubTotal, previewJournals, and reimbursement DCE counts; non-APPROVED claims come back under erroredClaims (check it is empty before converting). Needs a default posting rule or an explicit postingRuleResourceId."
+      "description": "Preview the journals an APPROVED claim batch would produce at conversion, no write. Returns expenseSubTotal, previewJournals, and reimbursement DCE counts; non-APPROVED claims come back under erroredClaims (check it is empty before converting). Needs a default posting rule or an explicit postingRuleResourceId."
     },
     {
       "name": "convert_claims_to_journal",
-      "description": "Convert an APPROVED claim batch into journals (atomic write). valueDate (YYYY-MM-DD) required. Preview first and confirm erroredClaims is empty. idempotencyKey is auto-generated for safe retries (pass your own to dedup across calls). includeReimbursementPayout adds a books-only reimbursement DCE — real-money disburse is intentionally not exposed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Convert an APPROVED claim batch into journals (atomic write). valueDate (YYYY-MM-DD) required. Preview first and confirm erroredClaims is empty. idempotencyKey is auto-generated for safe retries (pass your own to dedup across calls). includeReimbursementPayout adds a books-only reimbursement DCE; real-money disburse is intentionally not exposed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "record_employee_payout",
-      "description": "Record a books-only employee payout (reimbursement or advance) — a DCE, no real-money transfer. amount, paymentAccountResourceId and valueDate are required; reference auto-generated if omitted. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record a books-only employee payout (reimbursement or advance): a DCE, no real-money transfer. amount, paymentAccountResourceId and valueDate are required; reference auto-generated if omitted. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_employee_payouts",
@@ -1224,7 +1224,7 @@
     },
     {
       "name": "preprocess_employees_file",
-      "description": "Preprocess an uploaded employee import sheet (CSV/XLSX) — returns a parsed row preview to review before import_employees. Provide the sheet fileUrl."
+      "description": "Preprocess an uploaded employee import sheet (CSV/XLSX); returns a parsed row preview to review before import_employees. Provide the sheet fileUrl."
     },
     {
       "name": "import_employees",
@@ -1236,7 +1236,7 @@
     },
     {
       "name": "get_inventory_balance",
-      "description": "Get current inventory balance for a specific item — quantity on hand, average cost, base unit."
+      "description": "Get current inventory balance for a specific item: quantity on hand, average cost, base unit."
     },
     {
       "name": "list_inventory_balances",
@@ -1264,7 +1264,7 @@
     },
     {
       "name": "get_transaction_summary",
-      "description": "Get a complete summary of any transaction — fetches the transaction, its attachments, and payment history in one call.\nWorks for invoices, bills, customer credit notes, supplier credit notes, and journals. Invoices and bills carry payments, credit notes refunds, journals neither. A failed leg omits its keys and is named in 'partialFailures'."
+      "description": "Get a complete summary of any transaction: fetches the transaction, its attachments, and payment history in one call.\nWorks for invoices, bills, customer credit notes, supplier credit notes, and journals. Invoices and bills carry payments, credit notes refunds, journals neither. A failed leg omits its keys and is named in 'partialFailures'."
     },
     {
       "name": "bulk_finalize_drafts",
@@ -1348,7 +1348,7 @@
     },
     {
       "name": "update_scheduled_invoice",
-      "description": "Update a scheduled invoice — change schedule settings and/or the invoice template. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a scheduled invoice: change schedule settings and/or the invoice template. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_scheduled_invoice",
@@ -1360,7 +1360,7 @@
     },
     {
       "name": "update_scheduled_bill",
-      "description": "Update a scheduled bill — change schedule settings and/or the bill template. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a scheduled bill: change schedule settings and/or the bill template. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_scheduled_bill",
@@ -1384,7 +1384,7 @@
     },
     {
       "name": "update_payment",
-      "description": "Update a payment record — correct amount, reference, date, method, or account. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a payment record: correct amount, reference, date, method, or account. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_payment",
@@ -1400,19 +1400,19 @@
     },
     {
       "name": "export_records",
-      "description": "Raw entity-row XLSX export for one entity type (invoices/bills/contacts/items/journals/bank records/cashflow/fixed assets — one row per record, with column selection). Returns pre-signed download URL (~5 min), fileName, totalCount. Pass query OR filter, never both. Use preview_export_records first to confirm scope.\n\nDO NOT use this for analytical / audit reports, financial statements, aging, summary reports, or statement-of-account — those go through download_export."
+      "description": "Raw entity-row XLSX export for one entity type (invoices/bills/contacts/items/journals/bank records/cashflow/fixed assets; one row per record, with column selection). Returns pre-signed download URL (~5 min), fileName, totalCount. Pass query OR filter, never both. Use preview_export_records first to confirm scope.\n\nDO NOT use this for analytical / audit reports, financial statements, aging, summary reports, or statement-of-account; those go through download_export."
     },
     {
       "name": "search_background_jobs",
-      "description": "Search and poll background jobs. ANY operation that returns a jobId (bulk_upsert_contacts, bulk_upsert_items, bank statement import, magic file processing, etc.) can be tracked here. Filter by resourceId (the jobId value) to poll a specific job. Poll until status is SUCCESS, FAILED, or PARTIAL_SUCCESS. Use processedCount/failedCount/totalRecords for progress. IMPORTANT: filter by resourceId field, NOT jobId — they differ."
+      "description": "Search and poll background jobs. ANY operation that returns a jobId (bulk_upsert_contacts, bulk_upsert_items, bank statement import, magic file processing, etc.) can be tracked here. Filter by resourceId (the jobId value) to poll a specific job. Poll until status is SUCCESS, FAILED, or PARTIAL_SUCCESS. Use processedCount/failedCount/totalRecords for progress. IMPORTANT: filter by resourceId field, NOT jobId; they differ."
     },
     {
       "name": "bulk_upsert_contacts",
-      "description": "Bulk create/update contacts (max 500). resourceId per row → update (partial; omitted fields preserve existing). Omit resourceId → create. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Per-row failures in errorDetails (NOT failedRows — that's the sync pattern). On PARTIAL_SUCCESS: succeeded rows are committed; re-submit only failed rowIndex entries.\n\nWhole-batch 422 (validate before submit): (1) each contact must have at least one of customer:true OR supplier:true (after defaults + backfill); (2) emails unique within a contact (case-insensitive after trim); (3) customerPaymentTerms / supplierPaymentTerms {name, value?}: CUSTOM needs value (positive whole days); a term is stored only for a side the contact is on; (4) no duplicate names within batch (after whitespace+case normalize); (5) billingAddress / shippingAddress: address AND country both required when an address object is provided. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk create/update contacts (max 500). resourceId per row → update (partial; omitted fields preserve existing). Omit resourceId → create. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Per-row failures in errorDetails (NOT failedRows; that's the sync pattern). On PARTIAL_SUCCESS: succeeded rows are committed; re-submit only failed rowIndex entries.\n\nWhole-batch 422 (validate before submit): (1) each contact must have at least one of customer:true OR supplier:true (after defaults + backfill); (2) emails unique within a contact (case-insensitive after trim); (3) customerPaymentTerms / supplierPaymentTerms {name, value?}: CUSTOM needs value (positive whole days); a term is stored only for a side the contact is on; (4) no duplicate names within batch (after whitespace+case normalize); (5) billingAddress / shippingAddress: address AND country both required when an address object is provided. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_invoices",
-      "description": "Max 500 invoices per call. FLAT shape — ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED — last wins). resourceId does NOT update by id here — it is ignored and you get a duplicate.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); PARTIAL_SUCCESS → data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Max 500 invoices per call. FLAT shape: ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED; last wins). resourceId does NOT update by id here; it is ignored and you get a duplicate.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); PARTIAL_SUCCESS → data[0].errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_invoice_line_items",
@@ -1420,7 +1420,7 @@
     },
     {
       "name": "bulk_upsert_bills",
-      "description": "Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead — that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED — last wins). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only — dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead; that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED; last wins). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_bill_line_items",
@@ -1436,11 +1436,11 @@
     },
     {
       "name": "bulk_upsert_journals",
-      "description": "Max 500 manual journals per call. NATURAL KEY: `journalReference` (NOT `reference` — every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]` — different from `clio journals create` which uses entries). A leg is `organizationAccountResourceId` + EXACTLY ONE of `debitAmount` / `creditAmount` — omit the unused side, do not send 0, and do NOT use the `accountResourceId`+`amount`+`type` shape `create_journal` takes. Debits must equal credits per journal. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only — dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Max 500 manual journals per call. NATURAL KEY: `journalReference` (NOT `reference`; every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]`; different from `clio journals create` which uses entries). A leg is `organizationAccountResourceId` + EXACTLY ONE of `debitAmount` / `creditAmount`; omit the unused side, do not send 0, and do NOT use the `accountResourceId`+`amount`+`type` shape `create_journal` takes. Debits must equal credits per journal. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_fixed_assets",
-      "description": "Bulk create/update fixed assets (max 500). Natural key: reference.\n\n⚠️ DATES ARE EPOCH MILLISECONDS here — purchaseDate and depreciationStartDate are numbers (e.g. 1745107200000), NOT the YYYY-MM-DD every other bulk-upsert takes. A date string → cryptic 400 \"Invalid request body\".\n\nRequired per row: reference, registrationType. NEW also needs purchaseBusinessTransactionType + purchaseBusinessTransactionResourceId (the purchase LINE ITEM, not the bill/journal id); TRANSFER takes accumulatedDepreciationAtTransferDate + bookValueAtTransferDate. Recommended: typeCode, typeName, category, purchaseAmount, purchaseDate, effectiveLife, depreciationMethod + the three account UUIDv4s.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); on PARTIAL_SUCCESS read data[0].errorDetails. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk create/update fixed assets (max 500). Natural key: reference.\n\n⚠️ DATES ARE EPOCH MILLISECONDS here: purchaseDate and depreciationStartDate are numbers (e.g. 1745107200000), NOT the YYYY-MM-DD every other bulk-upsert takes. A date string → cryptic 400 \"Invalid request body\".\n\nRequired per row: reference, registrationType. NEW also needs purchaseBusinessTransactionType + purchaseBusinessTransactionResourceId (the purchase LINE ITEM, not the bill/journal id); TRANSFER takes accumulatedDepreciationAtTransferDate + bookValueAtTransferDate. Recommended: typeCode, typeName, category, purchaseAmount, purchaseDate, effectiveLife, depreciationMethod + the three account UUIDv4s.\n\nASYNC: returns jobId → poll search_background_jobs(filter:{resourceId:{eq:jobId}}); on PARTIAL_SUCCESS read data[0].errorDetails. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "quick_reconcile",
@@ -1448,59 +1448,59 @@
     },
     {
       "name": "apply_bank_rule",
-      "description": "Apply a pre-configured bank rule (action shortcut) to a batch of bank statement entries (max 500). Async — returns a jobId. Poll search_background_jobs filtered by resourceId. The rule executes its configured action (e.g. RECONCILE_WITH_DIRECT_CASH_ENTRY) on each entry. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Apply a pre-configured bank rule (action shortcut) to a batch of bank statement entries (max 500). Async: returns a jobId. Poll search_background_jobs filtered by resourceId. The rule executes its configured action (e.g. RECONCILE_WITH_DIRECT_CASH_ENTRY) on each entry. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_direct_cash_entry",
-      "description": "Reconcile a bank statement entry with a single cash-in / cash-out line. Direction (cash-in vs cash-out) is INFERRED from the bank entry sign. Sync — returns the reconciled entry status. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Reconcile a bank statement entry with a single cash-in / cash-out line. Direction (cash-in vs cash-out) is INFERRED from the bank entry sign. Sync: returns the reconciled entry status. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_cash_journal",
-      "description": "Reconcile a bank statement entry with a multi-line cashflow journal (multiple cash splits, max 200 lines). Sync — returns the reconciled entry status. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Reconcile a bank statement entry with a multi-line cashflow journal (multiple cash splits, max 200 lines). Sync: returns the reconciled entry status. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_manual_journal",
-      "description": "⚠️ CALLER PROVIDES ONLY THE OFFSET LEG(S) — backend AUTO-ADDS the bank-side leg from the statement entry. Sending both debit AND credit legs → 422 \"sum of debit and credit amounts are not equal\" (your sides duplicate after the auto-add). Reconcile a bank statement entry with a double-entry manual journal. Sync — returns the reconciled entry status. valueDate prefills from bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "⚠️ CALLER PROVIDES ONLY THE OFFSET LEG(S); backend AUTO-ADDS the bank-side leg from the statement entry. Sending both debit AND credit legs → 422 \"sum of debit and credit amounts are not equal\" (your sides duplicate after the auto-add). Reconcile a bank statement entry with a double-entry manual journal. Sync: returns the reconciled entry status. valueDate prefills from bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_cash_transfer",
-      "description": "Reconcile a bank statement entry with an inter-account transfer. Sync — returns the reconciled entry status. amount is required only when the counterparty account is in a non-functional currency. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Reconcile a bank statement entry with an inter-account transfer. Sync: returns the reconciled entry status. amount is required only when the counterparty account is in a non-functional currency. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_invoice_receipt",
-      "description": "CREATES A NEW invoice and auto-reconciles it to a bank statement entry (AR). To match an EXISTING open invoice instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYIN` (money in — AR). Produce via `bank add-records` with a POSITIVE amount (creates `credit_amount > 0` → PAYIN). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "CREATES A NEW invoice and auto-reconciles it to a bank statement entry (AR). To match an EXISTING open invoice instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYIN` (money in, AR). Produce via `bank add-records` with a POSITIVE amount (creates `credit_amount > 0` → PAYIN). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named; the actual gate is direction, not entry type. Sync: returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_bill_receipt",
-      "description": "CREATES A NEW bill and auto-reconciles it to a bank statement entry (AP). To match an EXISTING open bill instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYOUT` (money out — AP). Produce via `bank add-records` with a NEGATIVE amount (creates `debit_amount > 0` → PAYOUT). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named — the actual gate is direction, not entry type. Sync — returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "CREATES A NEW bill and auto-reconciles it to a bank statement entry (AP). To match an EXISTING open bill instead, use reconcile_with_payments (do not create a duplicate). ⚠️ BSE must have `paymentDirection: PAYOUT` (money out, AP). Produce via `bank add-records` with a NEGATIVE amount (creates `debit_amount > 0` → PAYOUT). Statement-imported BSEs from `bank import` also work. The error code \"Invalid business transaction type\" (422) is misleadingly named; the actual gate is direction, not entry type. Sync: returns the reconciled entry status. valueDate / dueDate / payment amount prefill from the bank entry if omitted. Retrying a RECONCILED entry 422s (Invalid bank statement entry status); it does not duplicate. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_with_payments",
-      "description": "USE THIS to match a bank statement entry to an EXISTING open bill / invoice / payment (NOT reconcile_bill_receipt or reconcile_invoice_receipt, which CREATE a new bill/invoice). Pass the open transaction's cashflowTransactionResourceId (from search_cashflow_transactions or a view_auto_reconciliation suggestion) in businessTransactionPayments[] — this CREATES the payment AND reconciles in one call; no pay_bill / pay_invoice first. FX is resolved server-side — pass NO rate for the common case (only supply paymentAmount + currencySettings for the rare bill-currency ≠ bank-currency case). Sync — returns the reconciled entry status. NOT idempotent: a blind retry double-creates a payment; confirm reconciled-state via search_bank_records(status: RECONCILED) before retrying. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "USE THIS to match a bank statement entry to an EXISTING open bill / invoice / payment (NOT reconcile_bill_receipt or reconcile_invoice_receipt, which CREATE a new bill/invoice). Pass the open transaction's cashflowTransactionResourceId (from search_cashflow_transactions or a view_auto_reconciliation suggestion) in businessTransactionPayments[]: this CREATES the payment AND reconciles in one call; no pay_bill / pay_invoice first. FX is resolved server-side; pass NO rate for the common case (only supply paymentAmount + currencySettings for the rare bill-currency ≠ bank-currency case). Sync: returns the reconciled entry status. NOT idempotent: a blind retry double-creates a payment; confirm reconciled-state via search_bank_records(status: RECONCILED) before retrying. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_magic_match",
-      "description": "Bulk-accept MAGIC_MATCH suggestions: reconcile many bank entries against EXISTING open business transactions and/or payments in one call (max 500 entries). Feed entries from view_auto_reconciliation suggestions. Returns a per-entry split { reconciled[], failed[] } — a 200 with a non-empty failed[] is a PARTIAL success; surface failed entries (with their errorCode) and loop. Entry-level idempotency-keyed server-side. Use reconcile_with_payments for a single precise match; use this to accept a batch of suggestions at once. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-accept MAGIC_MATCH suggestions: reconcile many bank entries against EXISTING open business transactions and/or payments in one call (max 500 entries). Feed entries from view_auto_reconciliation suggestions. Returns a per-entry split { reconciled[], failed[] }: a 200 with a non-empty failed[] is a PARTIAL success; surface failed entries (with their errorCode) and loop. Entry-level idempotency-keyed server-side. Use reconcile_with_payments for a single precise match; use this to accept a batch of suggestions at once. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_learned_prediction",
-      "description": "Accept an ML learned-prediction suggestion to reconcile a bank entry. predictedPayload + predictedPayloadSchemaVersion are passed through VERBATIM from a view_auto_reconciliation suggestion (recommendationType MAGIC_RECONCILE_WITH_CASH_IN_OUT) — do not construct them by hand. Pass retryToken to force a fresh journal on an edit-then-retry; omit it for an idempotent replay. Sync — returns the reconciled entry status. On failure (stale/invalid payload), fall back to reconcile_with_payments — do NOT retry the same opaque payload. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Accept an ML learned-prediction suggestion to reconcile a bank entry. predictedPayload + predictedPayloadSchemaVersion are passed through VERBATIM from a view_auto_reconciliation suggestion (recommendationType MAGIC_RECONCILE_WITH_CASH_IN_OUT); do not construct them by hand. Pass retryToken to force a fresh journal on an edit-then-retry; omit it for an idempotent replay. Sync: returns the reconciled entry status. On failure (stale/invalid payload), fall back to reconcile_with_payments; do NOT retry the same opaque payload. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "undo_reconciliations",
-      "description": "Unlink bank entries from what they were reconciled against, returning each to UNRECONCILED. Re-running reports already-unreconciled/archived entries as per-entry FAILED (INVALID_BANK_STATEMENT_ENTRY_STATUS); it never double-applies. On a non-200 nothing was applied, the batch rolls back. Ids that do not resolve are OMITTED from resetReconciliationResponse, so compare returned ids against what you sent. Does NOT delete the record it was matched to; reconcile_* tools that CREATE one leave it on the books as a bank-rec discrepancy, and re-reconciling without deleting it duplicates the record. Delete via linkedRecords by businessTransactionType: SALE=delete_invoice, PURCHASE=delete_bill, SALE_CREDIT_NOTE=delete_customer_credit_note, PURCHASE_CREDIT_NOTE=delete_supplier_credit_note, PAYMENT_*=delete_payment, JOURNAL_MANUAL=delete_journal (voids an ACTIVE) — all using businessTransactionResourceId. JOURNAL_DIRECT_CASH_IN/OUT and JOURNAL_CASH_TRANSFER use delete_cash_in/out/transfer with parentEntityResourceId instead. Any other type has no delete tool: locate it with search_cashflow_transactions first. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Unlink bank entries from what they were reconciled against, returning each to UNRECONCILED. Re-running reports already-unreconciled/archived entries as per-entry FAILED (INVALID_BANK_STATEMENT_ENTRY_STATUS); it never double-applies. On a non-200 nothing was applied, the batch rolls back. Ids that do not resolve are OMITTED from resetReconciliationResponse, so compare returned ids against what you sent. Does NOT delete the record it was matched to; reconcile_* tools that CREATE one leave it on the books as a bank-rec discrepancy, and re-reconciling without deleting it duplicates the record. Delete via linkedRecords by businessTransactionType: SALE=delete_invoice, PURCHASE=delete_bill, SALE_CREDIT_NOTE=delete_customer_credit_note, PURCHASE_CREDIT_NOTE=delete_supplier_credit_note, PAYMENT_*=delete_payment, JOURNAL_MANUAL=delete_journal (voids an ACTIVE); all using businessTransactionResourceId. JOURNAL_DIRECT_CASH_IN/OUT and JOURNAL_CASH_TRANSFER use delete_cash_in/out/transfer with parentEntityResourceId instead. Any other type has no delete tool: locate it with search_cashflow_transactions first. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "validate_drafts",
-      "description": "BULK validate up to 500 draft business transactions in ONE call, mixing any btType. SYNC — returns per-item errors + display data; no state change. Run before convert_drafts_to_active.\n\nbtType enum: SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE = customer CN, PURCHASE_CREDIT_NOTE = supplier CN. Journals NOT in this enum.\n\nEach result carries contactSignals (Mid-7: cadence, outliers, severity, divergences from contact's modal pattern; null if no contact / no history) and breakdown (Balance-panel payload: line items + subtotal/tax/total/balance/exchange rate). Top-level contactSignalsMeta.unavailable=true → freshness layer offline for whole batch.\n\nUSE THIS to score a specific draft against contact history. For stand-alone \"what does this contact normally look like?\" without a draft → use get_contact_signals."
+      "description": "BULK validate up to 500 draft business transactions in ONE call, mixing any btType. SYNC: returns per-item errors + display data; no state change. Run before convert_drafts_to_active.\n\nbtType enum: SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE = customer CN, PURCHASE_CREDIT_NOTE = supplier CN. Journals NOT in this enum.\n\nEach result carries contactSignals (Mid-7: cadence, outliers, severity, divergences from contact's modal pattern; null if no contact / no history) and breakdown (Balance-panel payload: line items + subtotal/tax/total/balance/exchange rate). Top-level contactSignalsMeta.unavailable=true → freshness layer offline for whole batch.\n\nUSE THIS to score a specific draft against contact history. For stand-alone \"what does this contact normally look like?\" without a draft → use get_contact_signals."
     },
     {
       "name": "convert_drafts_to_active",
-      "description": "BULK promote — finalize up to 500 draft business transactions to ACTIVE in ONE call, mixing any combination of invoices, bills, and credit notes (no per-type tools needed). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent: a second call on already-promoted drafts returns 422. Filter the draft list by status: DRAFT before submitting. Pair with validate_drafts for a pre-flight check on large batches. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "BULK promote: finalize up to 500 draft business transactions to ACTIVE in ONE call, mixing any combination of invoices, bills, and credit notes (no per-type tools needed). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent: a second call on already-promoted drafts returns 422. Filter the draft list by status: DRAFT before submitting. Pair with validate_drafts for a pre-flight check on large batches. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "submit_drafts_for_approval",
-      "description": "BULK submit — route up to 500 draft business transactions into the approval workflow in ONE call, mixing any combination of invoices, bills, and credit notes. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent on drafts that already have an in-flight approval request. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "BULK submit: route up to 500 draft business transactions into the approval workflow in ONE call, mixing any combination of invoices, bills, and credit notes. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent on drafts that already have an in-flight approval request. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_help_center",
@@ -1520,7 +1520,7 @@
     },
     {
       "name": "navigate",
-      "description": "Dashboard navigation: discover destinations, then build deep links. Without `destination`: lists valid destinations as { key, label, kind } — filter with `query` (substring over key + label), `resource` (e.g. \"sales\"), or `kind` (\"screen\" | \"modal\"); results are capped, narrow if `truncated`. With `destination`: builds the URL to hand the user — a screen (e.g. \"reports.profit-and-loss\") or a record modal (e.g. \"sales.modal.view-sale\"); pass `resourceId` only for a record-specific modal (view/edit one record), never for screens or create/\"new\" modals. Returns { url, kind, label }; the link opens in the user's current org. Never write dashboard URLs or destination keys from memory — call with no destination to discover keys first."
+      "description": "Dashboard navigation: discover destinations, then build deep links. Without `destination`: lists valid destinations as { key, label, kind }; filter with `query` (substring over key + label), `resource` (e.g. \"sales\"), or `kind` (\"screen\" | \"modal\"); results are capped, narrow if `truncated`. With `destination`: builds the URL to hand the user, a screen (e.g. \"reports.profit-and-loss\") or a record modal (e.g. \"sales.modal.view-sale\"); pass `resourceId` only for a record-specific modal (view/edit one record), never for screens or create/\"new\" modals. Returns { url, kind, label }; the link opens in the user's current org. Never write dashboard URLs or destination keys from memory; call with no destination to discover keys first."
     },
     {
       "name": "approve_documents",
@@ -1536,7 +1536,7 @@
     },
     {
       "name": "bulk_request_document_changes",
-      "description": "Send up to 500 documents back for changes with one message. Async — returns a jobId; poll search_background_jobs. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Send up to 500 documents back for changes with one message. Async: returns a jobId; poll search_background_jobs. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_document_version_history",

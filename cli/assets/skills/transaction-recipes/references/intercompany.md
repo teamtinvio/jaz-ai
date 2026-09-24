@@ -1,53 +1,53 @@
-# Recipe: Intercompany Transactions (manual — no engine)
+# Recipe: Intercompany Transactions (manual, no engine)
 
-> Cross-org charge + settlement pattern between two related entities (parent ↔ subsidiary, sister entities). NO recipe engine — built from primitive `create_invoice` + `create_bill` + cross-org capsule per entity. Each leg posts in its own org via separate Jaz API key.
+> Cross-org charge + settlement pattern between two related entities (parent ↔ subsidiary, sister entities). NO recipe engine: built from primitive `create_invoice` + `create_bill` + cross-org capsule per entity. Each leg posts in its own org via separate Jaz API key.
 
 ## Why no engine
 
-Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity A invoices Entity B; Entity B records Entity A's invoice as a bill). The recipe engine operates within a single org context. Multi-org coordination is the caller's responsibility — each entity has its own Jaz org and API key, and the agent must switch the active credentials between legs (see Multi-org auth below).
+Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity A invoices Entity B; Entity B records Entity A's invoice as a bill). The recipe engine operates within a single org context. Multi-org coordination is the caller's responsibility; each entity has its own Jaz org and API key, and the agent must switch the active credentials between legs (see Multi-org auth below).
 
 ## Tools, recipes, calculators this recipe uses
 
 ### Primitive MCP tools (no engine wrapper)
-- **`create_invoice(...)`** — Entity A side: post the management-fee invoice to Entity B (the customer in Entity A's org).
-- **`create_bill(...)`** — Entity B side: post the same management-fee as a bill from Entity A (the supplier in Entity B's org).
-- **`create_capsule(capsuleTypeResourceId: <id of 'Intercompany' from list_capsule_types>, ...)`** — one capsule per entity, both with matching reference (e.g., `IC-MGMT-2025-Q1`).
-- **`pay_invoice(...)` / `pay_bill(...)`** — settlement legs in each entity's org.
-- **`apply_credits_to_invoice(...)` / `apply_credits_to_bill(...)`** — netting if both entities owe each other (one entity's invoice clears against the other's bill via credit note).
+- **`create_invoice(...)`** (Entity A side): post the management-fee invoice to Entity B (the customer in Entity A's org).
+- **`create_bill(...)`** (Entity B side): post the same management-fee as a bill from Entity A (the supplier in Entity B's org).
+- **`create_capsule(capsuleTypeResourceId: <id of 'Intercompany' from list_capsule_types>, ...)`**: one capsule per entity, both with matching reference (e.g., `IC-MGMT-2025-Q1`).
+- **`pay_invoice(...)` / `pay_bill(...)`**: settlement legs in each entity's org.
+- **`apply_credits_to_invoice(...)` / `apply_credits_to_bill(...)`**: netting if both entities owe each other (one entity's invoice clears against the other's bill via credit note).
 
 ### Search tools for reconciliation
 - **`search_invoices(contactId: <Entity B in A's org>, startDate, endDate)`**: pull all Entity A intercompany invoices (invoices cannot be filtered by capsule).
 - **`search_bills(contactId: <Entity A in B's org>, startDate, endDate)`**: pull all Entity B intercompany bills.
-- **`generate_general_ledger(accountResourceIds: [<Intercompany Receivable>], startDate: <period-start>, endDate: <date>)` / same for Intercompany Payable** — eliminate at consolidation.
+- **`generate_general_ledger(accountResourceIds: [<Intercompany Receivable>], startDate: <period-start>, endDate: <date>)` / same for Intercompany Payable**: eliminate at consolidation.
 
 ### Multi-org targeting (CRITICAL)
-Each entity is a separate Jaz org. Pin the org **explicitly per call** with `org_id` (from `list_organizations`). NEVER rely on ambient session, `--org` alias, or `JAZ_API_KEY` env state — a wrong "active" org silently posts to the wrong tenant and corrupts both entities' books.
+Each entity is a separate Jaz org. Pin the org **explicitly per call** with `org_id` (from `list_organizations`). NEVER rely on ambient session, `--org` alias, or `JAZ_API_KEY` env state; a wrong "active" org silently posts to the wrong tenant and corrupts both entities' books.
   1. Verify, then post Entity A: confirm `get_organization(org_id: <Entity A org>)` returns Entity A's legal entity, then create the Entity A invoice with `org_id: <Entity A org>`.
   2. Verify, then post Entity B: confirm `get_organization(org_id: <Entity B org>)` returns Entity B's legal entity, then create the Entity B bill with `org_id: <Entity B org>`.
-  3. Every leg carries its own explicit `org_id` — never depend on which org was targeted last.
+  3. Every leg carries its own explicit `org_id`; never depend on which org was targeted last.
 
 ### Cross-references
 - Operational context: invoked during month-end close (intercompany leg of the close, only for entities with active intercompany arrangements).
-- Sibling: `dividend.md` (cross-entity equity distribution — also requires multi-org coordination).
+- Sibling: `dividend.md` (cross-entity equity distribution; also requires multi-org coordination).
 - IFRS / accounting context: IAS 24 (related-party disclosure); intercompany balances ELIMINATE at consolidation per IFRS 10.B86 (consolidation procedures).
 
 ---
 
 ## Step-by-step (per intercompany transaction)
 
-### Step 0 — Identify the arrangement
+### Step 0: Identify the arrangement
 
 Confirm the intercompany arrangement from BOTH entities' records (cross-validation: Entity A's outbound charges should match Entity B's inbound charges). Each arrangement has: `name`, `from_entity`, `to_entity`, `amount`, `frequency`, `gl_revenue` (Entity A side), `gl_expense` (Entity B side), `transfer_pricing_basis`.
 
-If the two entities' arrangements don't match: halt and surface it — likely a setup gap or one side wasn't updated when terms changed.
+If the two entities' arrangements don't match: halt and surface it (likely a setup gap or one side wasn't updated when terms changed).
 
-### Step 1 — Capsules (one per entity)
+### Step 1: Capsules (one per entity)
 
 In Entity A's org:
 ```
 create_capsule(
   capsuleTypeResourceId: <Intercompany capsule type id>,
-  title: 'IC Mgmt Fee — to Entity B — Q1 2025',
+  title: 'IC Mgmt Fee to Entity B, Q1 2025',
   description: 'Monthly management services Jan-Mar 2025 per IC arrangement IC-MGMT-2025'
 )
 ```
@@ -56,14 +56,14 @@ In Entity B's org (separately, using Entity B's API key):
 ```
 create_capsule(
   capsuleTypeResourceId: <Intercompany capsule type id>,
-  title: 'IC Mgmt Fee — from Entity A — Q1 2025',
+  title: 'IC Mgmt Fee from Entity A, Q1 2025',
   description: 'Monthly management services Jan-Mar 2025 per IC arrangement IC-MGMT-2025'
 )
 ```
 
 Both capsules carry the same logical reference (IC-MGMT-2025-Q1) so the practitioner can reconcile across the two orgs.
 
-### Step 2 — Entity A: post the invoice
+### Step 2 (Entity A): post the invoice
 
 In Entity A's org (Entity A API key resolved):
 ```
@@ -72,7 +72,7 @@ create_invoice(
   reference: 'IC-MGMT-2025-Q1-JAN',
   valueDate: '2025-01-31',
   lineItems: [{
-    name: 'Management services — January 2025',
+    name: 'Management services, January 2025',
     accountResourceId: <Entity A's 'Intercompany Revenue' GL>,
     quantity: 1,
     unitPrice: 15000
@@ -84,7 +84,7 @@ create_invoice(
 
 Per `jaz-api/SKILL.md` rule 9: `name` (not `description`) for line items. Per rule 7: invoice creates AR + Revenue split.
 
-### Step 3 — Entity B: post the mirrored bill
+### Step 3 (Entity B): post the mirrored bill
 
 In Entity B's org (Entity B API key resolved):
 ```
@@ -93,7 +93,7 @@ create_bill(
   reference: 'IC-MGMT-2025-Q1-JAN',
   valueDate: '2025-01-31',
   lineItems: [{
-    name: 'Management services — January 2025',
+    name: 'Management services, January 2025',
     accountResourceId: <Entity B's 'Intercompany Expense' or 'Management Fee Expense' GL>,
     quantity: 1,
     unitPrice: 15000
@@ -105,7 +105,7 @@ create_bill(
 
 The amount, valueDate, and reference MUST match Entity A's invoice exactly. Reconciliation downstream (step 5) compares these; mismatches mean either the wrong amount got posted or one side hasn't been recorded yet.
 
-### Step 4 — Settlement (varies by arrangement)
+### Step 4: Settlement (varies by arrangement)
 
 **Settlement option A: Cash settlement**
 
@@ -149,7 +149,7 @@ Less cash-flow-intensive: net off intercompany charges across both directions. R
 
 Long-term IC balances: instead of settling, keep as a loan. Same as `bank-loan.md` recipe but with the intercompany counterparty as the lender/borrower.
 
-### Step 5 — Monthly reconciliation
+### Step 5: Monthly reconciliation
 
 In each entity:
 ```
@@ -157,10 +157,10 @@ generate_general_ledger(accountResourceIds: [<IC Receivable in A | IC Payable in
 ```
 
 Cross-entity reconcile:
-- Entity A's `Intercompany Receivable` balance == Entity B's `Intercompany Payable` balance (with sign flipped — receivable in A is debit, payable in B is credit)
+- Entity A's `Intercompany Receivable` balance == Entity B's `Intercompany Payable` balance (with sign flipped: receivable in A is debit, payable in B is credit)
 - Differences indicate timing (one side posted, other hasn't) or amount errors.
 
-For consolidation (if the practitioner manages a group): the matched IC balances ELIMINATE — `Intercompany Receivable` (Entity A) net against `Intercompany Payable` (Entity B), and `Intercompany Revenue` (Entity A) net against `Intercompany Expense` (Entity B). Per IFRS 10.B86. Consolidation typically happens in a separate consolidation worksheet, not in either entity's books.
+For consolidation (if the practitioner manages a group): the matched IC balances ELIMINATE; `Intercompany Receivable` (Entity A) net against `Intercompany Payable` (Entity B), and `Intercompany Revenue` (Entity A) net against `Intercompany Expense` (Entity B). Per IFRS 10.B86. Consolidation typically happens in a separate consolidation worksheet, not in either entity's books.
 
 ---
 
@@ -168,11 +168,11 @@ For consolidation (if the practitioner manages a group): the matched IC balances
 
 | Source | Error | Recovery |
 |--------|-------|----------|
-| Step 2 / 3 | Wrong-org posting — Entity A's invoice posted to Entity B's org | DELETE the wrongly-posted entry immediately. Re-post with the correct explicit `org_id`, after confirming it via `get_organization(org_id: <entity>)`. THIS IS THE #1 IC ERROR — pass and verify `org_id` on every leg; never rely on which org was active last. |
-| Step 5 | IC Receivable in A ≠ IC Payable in B | Investigate per-transaction: pull both `search_invoices(contactId: <B in A's org>, startDate, endDate)` and `search_bills(contactId: <A in B's org>, startDate, endDate)` (neither search filters by capsule), line-by-line compare amounts, valueDates, references. Common: one side posted Jan 31, other posted Feb 1 — timing diff that should resolve next period. Or one side posted USD-denominated and the other SGD — currency confusion. |
-| Cross-FX intercompany | Entity A in SGD, Entity B in USD — IC Receivable in A doesn't match USD-equivalent in B | Both sides should agree on the transaction-currency amount (e.g., USD 15,000). Translation to base currency happens at each entity's books separately. Reconciliation at the SOURCE currency level, not base. |
-| Transfer-pricing dispute (IRAS audit) | (process — separate from posting) | IC charges must satisfy arm's-length principle (SG: ITA s34D / OECD TPG). Maintain a transfer-pricing study and keep the supporting documentation on file. |
-| Both entities forget to post | (audit risk) | Year-end audit-prep step — auditor reconciles IC balances. Build a quarterly review into the close routine. |
+| Step 2 / 3 | Wrong-org posting: Entity A's invoice posted to Entity B's org | DELETE the wrongly-posted entry immediately. Re-post with the correct explicit `org_id`, after confirming it via `get_organization(org_id: <entity>)`. THIS IS THE #1 IC ERROR; pass and verify `org_id` on every leg; never rely on which org was active last. |
+| Step 5 | IC Receivable in A ≠ IC Payable in B | Investigate per-transaction: pull both `search_invoices(contactId: <B in A's org>, startDate, endDate)` and `search_bills(contactId: <A in B's org>, startDate, endDate)` (neither search filters by capsule), line-by-line compare amounts, valueDates, references. Common: one side posted Jan 31, other posted Feb 1: timing diff that should resolve next period. Or one side posted USD-denominated and the other SGD: currency confusion. |
+| Cross-FX intercompany | Entity A in SGD, Entity B in USD; IC Receivable in A doesn't match USD-equivalent in B | Both sides should agree on the transaction-currency amount (e.g., USD 15,000). Translation to base currency happens at each entity's books separately. Reconciliation at the SOURCE currency level, not base. |
+| Transfer-pricing dispute (IRAS audit) | (process, separate from posting) | IC charges must satisfy arm's-length principle (SG: ITA s34D / OECD TPG). Maintain a transfer-pricing study and keep the supporting documentation on file. |
+| Both entities forget to post | (audit risk) | Year-end audit-prep step; auditor reconciles IC balances. Build a quarterly review into the close routine. |
 | Settlement reference mismatch | Bank-recon doesn't match IC payment to bill payment | Use a consistent `IC-PAY-YYYY-MM-XX` reference convention. Document the convention in your working notes. |
 
 ---
@@ -189,8 +189,8 @@ For consolidation (if the practitioner manages a group): the matched IC balances
 
 ## Cross-references
 
-- Month-end close — invoked monthly per active IC arrangement. Orchestrates multi-org context switching (select entity A → post → select entity B → post → reconcile).
-- Year-end close — full FY IC reconciliation; auditor sample-tests.
-- `audit-prep.md` step 8 — IC balances supporting schedule; auditor independently confirms with the counter-entity.
-- Sibling `dividend.md` — cross-entity equity distribution; same multi-org coordination pattern.
-- Data migration — multi-org setup: one Jaz org and API key per entity.
+- Month-end close: invoked monthly per active IC arrangement. Orchestrates multi-org context switching (select entity A → post → select entity B → post → reconcile).
+- Year-end close: full FY IC reconciliation; auditor sample-tests.
+- `audit-prep.md` step 8: IC balances supporting schedule; auditor independently confirms with the counter-entity.
+- Sibling `dividend.md`: cross-entity equity distribution; same multi-org coordination pattern.
+- Data migration (multi-org setup): one Jaz org and API key per entity.

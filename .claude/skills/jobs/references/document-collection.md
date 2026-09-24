@@ -5,18 +5,18 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools
-- **`mcp magic create --file <pdf>` / `create_bt_from_attachment(businessTransactionType: 'BILL'|'INVOICE'|'CUSTOMER_CREDIT_NOTE'|'SUPPLIER_CREDIT_NOTE', sourceUrl)`** — step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction.
-- **`finalize_bill(...)` / `finalize_invoice(...)` / `finalize_customer_credit_note(...)`** — step 5: finalize practitioner-reviewed Magic-extracted DRAFTs.
+- **`mcp magic create --file <pdf>` / `create_bt_from_attachment(businessTransactionType: 'BILL'|'INVOICE'|'CUSTOMER_CREDIT_NOTE'|'SUPPLIER_CREDIT_NOTE', sourceUrl)`**: step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction.
+- **`finalize_bill(...)` / `finalize_invoice(...)` / `finalize_customer_credit_note(...)`**: step 5: finalize practitioner-reviewed Magic-extracted DRAFTs.
 - **`import_bank_statement(accountResourceId, sourceUrl | attached file)`**: step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
-- **`search_background_jobs(filter: {resourceId: {eq: <jobId>}})`** — step 7: poll Magic / bank-import async jobs to terminal status.
+- **`search_background_jobs(filter: {resourceId: {eq: <jobId>}})`**: step 7: poll Magic / bank-import async jobs to terminal status.
 
-### CLI tools (jaz-cli — offline)
-- **`clio jobs document-collection ingest --source <local-dir> --json`** — step 2 ingest local: scan a local directory, classify per file-type heuristics, output JSON with per-file metadata (`{path, classifiedAs, confidence, encrypted, suggestedAction}`).
-- **`clio jobs document-collection ingest --source 'https://www.dropbox.com/scl/fo/...' --json`** — step 2 ingest cloud: same flow over a Dropbox / Google Drive / OneDrive shared link. Recursive folder traversal. Files downloaded to a temp dir.
-- **step 3 decryption is AUTOMATIC — there is no flag.** The same `ingest` call detects password-protected PDFs and decrypts via `qpdf`. Per memory rule: if `__pw__<password>` is in the filename, the ingest tool extracts and uses the password automatically.
+### CLI tools (jaz-cli, offline)
+- **`clio jobs document-collection ingest --source <local-dir> --json`**: step 2 ingest local: scan a local directory, classify per file-type heuristics, output JSON with per-file metadata (`{path, classifiedAs, confidence, encrypted, suggestedAction}`).
+- **`clio jobs document-collection ingest --source 'https://www.dropbox.com/scl/fo/...' --json`**: step 2 ingest cloud: same flow over a Dropbox / Google Drive / OneDrive shared link. Recursive folder traversal. Files downloaded to a temp dir.
+- **step 3 decryption is AUTOMATIC; there is no flag.** The same `ingest` call detects password-protected PDFs and decrypts via `qpdf`. Per memory rule: if `__pw__<password>` is in the filename, the ingest tool extracts and uses the password automatically.
 
 ### External dependencies
-- **`qpdf`** binary — required for encrypted PDF decryption. Document-collection ingest detects encryption + invokes qpdf transparently. If qpdf missing: surface install instruction (`brew install qpdf` on macOS, `apt-get install qpdf` on Linux).
+- **`qpdf`** binary: required for encrypted PDF decryption. Document-collection ingest detects encryption + invokes qpdf transparently. If qpdf missing: surface install instruction (`brew install qpdf` on macOS, `apt-get install qpdf` on Linux).
 
 ### Cross-references
 - Run at the start of the month-end close (collecting late-arriving bills) and during initial client setup (first doc collection from prior firm + first month).
@@ -29,7 +29,7 @@
 
 Walk steps 1-8 below. (Local CLI: `clio jobs document-collection --period 2025-01` prints the same phased checklist.)
 
-## Step 1 — Identify the source
+## Step 1: Identify the source
 
 Source can be:
 - Local directory: `./client-docs/2025-01/` (most common, after practitioner downloads from email)
@@ -39,7 +39,7 @@ Source can be:
 
 Use the org's preferred source if the user has one in mind; otherwise ask.
 
-## Step 2 — Ingest
+## Step 2: Ingest
 
 ```
 clio jobs document-collection ingest --source <source> --json
@@ -62,11 +62,11 @@ Classification heuristics:
 - Filename contains `inv` / `bill` / `purchase` → SALES_INVOICE / BILL
 - Filename contains `cn` / `credit` → CREDIT_NOTE
 - Filename contains `statement` / `stmt` / `bank` → BANK_STATEMENT
-- Per-file content sniff for PDFs (header parsing) — confidence boost when filename is ambiguous
+- Per-file content sniff for PDFs (header parsing): confidence boost when filename is ambiguous
 
 Keep the ingest result for the period.
 
-## Step 3 — Decrypt encrypted PDFs (if any)
+## Step 3: Decrypt encrypted PDFs (if any)
 
 For files where `encrypted: true`:
 
@@ -81,7 +81,7 @@ Decryption flow:
 
 Decrypted files replace the original in the ingest manifest; original kept for audit trail.
 
-## Step 4 — Upload via Jaz Magic
+## Step 4: Upload via Jaz Magic
 
 For each file with `suggestedAction: 'magic-create-bill' | 'magic-create-invoice' | 'magic-create-credit-note'`:
 
@@ -102,7 +102,7 @@ Per `jaz-api/SKILL.md` rules 57-63:
 - On `SUCCESS`: returns the resourceId of the DRAFT bill / invoice / credit note created
 - Magic does: OCR + line-item extraction + contact matching (creates new contact if no match) + CoA mapping suggestion + tax-profile suggestion
 
-## Step 5 — Practitioner review + finalize
+## Step 5: Practitioner review + finalize
 
 For each Magic-extracted DRAFT:
 
@@ -119,7 +119,7 @@ finalize_bill(resourceId: <id>)
 bulk_finalize_drafts(items: [{type: 'bill', resourceId: <id>}, ...])
 ```
 
-## Step 6 — Bank statement import
+## Step 6: Bank statement import
 
 For files with `suggestedAction: 'import-bank-statement'`:
 
@@ -139,9 +139,9 @@ import_bank_statement(
 
 Returns `{ jobId }`. Poll via `search_background_jobs`. On terminal: returns count of bank records imported.
 
-Imported bank records are PENDING reconciliation — feed into `bank-recon.md` job for matching.
+Imported bank records are PENDING reconciliation; feed into `bank-recon.md` job for matching.
 
-## Step 7 — Async polling
+## Step 7: Async polling
 
 For all `jobId`s from steps 4 + 6:
 
@@ -153,7 +153,7 @@ Per `jaz-api/SKILL.md` rules 92-96: filter by `resourceId` (NOT `jobId`); poll u
 
 For `FAILED` Magic jobs: file may be unreadable (corrupted PDF, image-only without OCR support, password issue post-decryption). Surface to practitioner; manual posting required for that file.
 
-## Step 8 — Save audit trail
+## Step 8: Save audit trail
 
 Per file processed: capture `{originalPath, classifiedAs, magicJobId, resultingResourceId, finalizedTimestamp}` in a per-period audit record.
 
@@ -166,7 +166,7 @@ Auditor sample-test traces from a posted bill back to the source PDF. Audit trai
 | Source | Error | Recovery |
 |--------|-------|----------|
 | Step 2 ingest | Cloud link returns 404 / shared-link expired | Practitioner re-shares link; re-run ingest. |
-| Step 2 ingest | Local directory empty | Confirm the staging directory with the user — the path may be wrong. |
+| Step 2 ingest | Local directory empty | Confirm the staging directory with the user; the path may be wrong. |
 | Step 3 decryption | `qpdf` binary missing | `brew install qpdf` (macOS) / `apt-get install qpdf` (Linux). Re-run with `--decrypt`. |
 | Step 3 decryption | Password wrong (file remains encrypted) | Surface to practitioner with the file path. Manual decryption + re-ingest. |
 | Step 4 Magic | 422 `unsupported_file_type` | Convert to PDF / JPG first. Excel / Word formats not supported by Magic OCR. |
@@ -191,7 +191,7 @@ Auditor sample-test traces from a posted bill back to the source PDF. Audit trai
 
 ## Cross-references
 
-- `month-end-close.md` step 2 — run at the start of the monthly close to capture late-arriving bills.
-- Initial client setup — run during onboarding; the first batch is often large (prior-firm export + current month).
-- `bank-recon.md` — consumes the step 6 bank-statement imports.
-- `audit-prep.md` step 13 — XLSX exports plus the per-file audit record give the auditor full traceability.
+- `month-end-close.md` step 2: run at the start of the monthly close to capture late-arriving bills.
+- Initial client setup: run during onboarding; the first batch is often large (prior-firm export + current month).
+- `bank-recon.md`: consumes the step 6 bank-statement imports.
+- `audit-prep.md` step 13: XLSX exports plus the per-file audit record give the auditor full traceability.

@@ -5,26 +5,26 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools
-- **`search_contacts(filter: {supplier: true, name: {eq: <supplier>}})`** — step 1: resolve the supplier resourceId. Use fuzzy match if exact fails.
-- **`get_contact(resourceId: <supplier id>)`** — step 1 detail: pull the supplier's payment terms, contact info.
-- **`search_bills(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}}, limit: 200)`** — step 2: pull all bills from this supplier in the period. Paginate.
-- **`search_payments(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}, direction: {eq: 'PAYOUT'}})`** — step 3: pull all payments to this supplier.
-- **`search_supplier_credit_notes(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}})`** — step 4: pull credit notes that may have been applied.
+- **`search_contacts(filter: {supplier: true, name: {eq: <supplier>}})`** (step 1): resolve the supplier resourceId. Use fuzzy match if exact fails.
+- **`get_contact(resourceId: <supplier id>)`** (step 1 detail): pull the supplier's payment terms, contact info.
+- **`search_bills(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}}, limit: 200)`** (step 2): pull all bills from this supplier in the period. Paginate.
+- **`search_payments(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}, direction: {eq: 'PAYOUT'}})`** (step 3): pull all payments to this supplier.
+- **`search_supplier_credit_notes(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}})`** (step 4): pull credit notes that may have been applied.
 
   > **A filter value must be an OBJECT, not a bare scalar.** This is the trap these lines fell into:
   > `filter: {contactResourceId: <supplier id>}` was rejected with a bare `Invalid request body` that
-  > named nothing, and the obvious reading — "the field does not exist" — is wrong. `contactResourceId`
+  > named nothing, and the obvious reading ("the field does not exist") is wrong. `contactResourceId`
   > **is** declared on bills, supplier credit notes and invoices; it is typed `StringExpression`, so it
   > needs an operator: `{eq: <id>}`. Measured 2026-09-07: the bare form 400s on both, `{eq: …}` returns
   > 200 on both. The nested `contact: {resourceId: {eq: <id>}}` form used above also works and is what
   > `search_payments` requires, because `TransactionsFilter` is the one of the four that genuinely does
-  > **not** declare `contactResourceId` — there, and only there, the field really is absent.
+  > **not** declare `contactResourceId`; there, and only there, the field really is absent.
   >
   > The amount filter differs by endpoint: `totalAmount` is accepted on bills and on
   > cashflow-transactions but **rejected on supplier credit notes**, and no `paymentAmount` filter
-  > exists anywhere — it is a response field on a payment, not a filter key.
-- **`generate_aged_ap(endDate: <date>)`** — step 5: per-supplier outstanding balance.
-- **`create_bill(...)`** / **`apply_credits_to_bill(...)`** / **`create_supplier_credit_note(...)`** — step 6: post any missing items identified during recon.
+  > exists anywhere; it is a response field on a payment, not a filter key.
+- **`generate_aged_ap(endDate: <date>)`** (step 5): per-supplier outstanding balance.
+- **`create_bill(...)`** / **`apply_credits_to_bill(...)`** / **`create_supplier_credit_note(...)`** (step 6): post any missing items identified during recon.
 
 ### Cross-references
 - Run ad-hoc per major supplier, and at year-end as a mandatory recon for major suppliers (feeds `audit-prep.md` AP confirmations).
@@ -36,7 +36,7 @@
 
 Walk steps 1-8 below. (Local CLI: `clio jobs supplier-recon --supplier "<name>" --period 2025-01` prints the same phased checklist.)
 
-## Step 1 — Resolve supplier
+## Step 1: Resolve supplier
 
 ```
 search_contacts(filter: {supplier: true, name: {eq: 'Acme Corp Pte Ltd'}})
@@ -50,7 +50,7 @@ get_contact(resourceId: <supplier id>)
 
 Pull `paymentTerms`, `bankAccountNumber`, `taxId`, `paymentMethod` for narrative + cross-check vs the supplier's statement header.
 
-## Step 2 — Pull Jaz-side bills
+## Step 2: Pull Jaz-side bills
 
 ```
 search_bills(
@@ -60,11 +60,11 @@ search_bills(
 )
 ```
 
-Per bill: `{resourceId, reference, valueDate, currency, originalAmount, paymentRecords, status, dueDate}`. `balanceAmount` is a FILTER key only — the API accepts it in a filter but never returns it on a bill or invoice. Reading it back yields undefined. Derive outstanding instead: `totalAmount - sum(paymentRecords[].transactionAmount) - sum(creditsApplied[].amountApplied)`, and fetch with `view: 'full'` because a lean row omits `paymentRecords` entirely. Keep the Jaz-side bill list for the recon pack.
+Per bill: `{resourceId, reference, valueDate, currency, originalAmount, paymentRecords, status, dueDate}`. `balanceAmount` is a FILTER key only; the API accepts it in a filter but never returns it on a bill or invoice. Reading it back yields undefined. Derive outstanding instead: `totalAmount - sum(paymentRecords[].transactionAmount) - sum(creditsApplied[].amountApplied)`, and fetch with `view: 'full'` because a lean row omits `paymentRecords` entirely. Keep the Jaz-side bill list for the recon pack.
 
 For an opening-balance recon: also pull the supplier's pre-period balance via `generate_aged_ap(endDate: <period-start - 1 day>)` and filter to this supplier.
 
-## Step 3 — Pull payments
+## Step 3: Pull payments
 
 ```
 search_payments(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: ['2025-01-01', '2025-01-31']}, direction: {eq: 'PAYOUT'}})
@@ -72,7 +72,7 @@ search_payments(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: 
 
 Per payment: `{resourceId, reference, valueDate, paymentAmount, transactionAmount, paymentMethod, billResourceId}`. Save.
 
-## Step 4 — Pull credit notes
+## Step 4: Pull credit notes
 
 ```
 search_supplier_credit_notes(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}})
@@ -80,7 +80,7 @@ search_supplier_credit_notes(filter: {contact: {resourceId: {eq: <supplier id>}}
 
 Save. Each credit note may have been applied to one or more bills; the application reduces the bill balance.
 
-## Step 5 — Compute Jaz-side closing balance
+## Step 5: Compute Jaz-side closing balance
 
 ```
 generate_aged_ap(endDate: '2025-01-31')
@@ -88,7 +88,7 @@ generate_aged_ap(endDate: '2025-01-31')
 
 Filter to this supplier. Compute: opening balance + new bills (step 2) - payments (step 3) - applied credit notes (step 4) = closing balance per Jaz.
 
-## Step 6 — Compare against supplier statement
+## Step 6: Compare against supplier statement
 
 Practitioner provides the supplier's statement (PDF, email, paper). Per-line-item match against Jaz data:
 
@@ -102,7 +102,7 @@ Practitioner provides the supplier's statement (PDF, email, paper). Per-line-ite
 | Supplier credit note not in Jaz | Missed credit | `create_supplier_credit_note(...)` per supplier statement. Then `apply_credits_to_bill(...)` to the offsetting bill. |
 | Currency mismatch | FX bills with different rates | Confirm Jaz used the right rate per `jaz-api/SKILL.md` rule 25; the supplier statement may use spot rate, Jaz uses recorded rate. Document the FX gap. |
 
-## Step 7 — Post corrections + verify
+## Step 7: Post corrections + verify
 
 For each missing bill / credit note: post via `create_bill` / `create_supplier_credit_note`. For each duplicate payment: post correcting journal. Document the audit trail (per-correction narrative) for the recon pack.
 
@@ -111,14 +111,14 @@ After corrections:
 generate_aged_ap(endDate: '2025-01-31')
 ```
 
-Filter to supplier. New closing balance should match the supplier statement closing balance within tolerance (typically zero — pricing rounding on long-running accounts can leave cents).
+Filter to supplier. New closing balance should match the supplier statement closing balance within tolerance (typically zero; pricing rounding on long-running accounts can leave cents).
 
-## Step 8 — Save reconciliation pack
+## Step 8: Save reconciliation pack
 
 Keep, per supplier:
 - the supplier statement (received from supplier)
 - the Jaz-side bills + payments + credit notes
-- a recon summary — per-discrepancy analysis + corrections posted
+- a recon summary: per-discrepancy analysis + corrections posted
 - The auditor will request these for major suppliers.
 
 ---
@@ -129,9 +129,9 @@ Keep, per supplier:
 |--------|-------|----------|
 | Step 1 | Supplier name doesn't fuzzy-match | Practitioner-side spelling difference. Surface candidates; let practitioner pick. |
 | Step 2 | Bill count > page limit | Paginate via `offset`. |
-| Step 6 | Currency mismatch on supplier statement | Standard FX handling — supplier records in the supplier's base currency, Jaz records in the org's base currency. Compare in the supplier's currency for the parity check; FX gap goes to FX gain/loss separately. |
-| Step 7 | `create_bill` 422 `valueDate_in_locked_period` | The missing bill belongs to a locked period. Lift lock via `update_account` lockDate, post, re-lock. Surface to practitioner — auditor will see late posting. |
-| Step 7 | `apply_credits_to_bill` 422 `credit_exceeds_balance` | Trying to apply more credit than the bill has remaining. Practitioner judgment — split the credit across multiple bills OR carry forward. |
+| Step 6 | Currency mismatch on supplier statement | Standard FX handling: supplier records in the supplier's base currency, Jaz records in the org's base currency. Compare in the supplier's currency for the parity check; FX gap goes to FX gain/loss separately. |
+| Step 7 | `create_bill` 422 `valueDate_in_locked_period` | The missing bill belongs to a locked period. Lift lock via `update_account` lockDate, post, re-lock. Surface to practitioner; auditor will see late posting. |
+| Step 7 | `apply_credits_to_bill` 422 `credit_exceeds_balance` | Trying to apply more credit than the bill has remaining. Practitioner judgment: split the credit across multiple bills OR carry forward. |
 
 ---
 
@@ -139,14 +139,14 @@ Keep, per supplier:
 
 - **Run for major suppliers only.** Top 10 suppliers by total spend cover 80% of AP risk. Mid + tail suppliers: skip or batch annually.
 - **Quarterly cadence** for major suppliers; **annual** for tier-2.
-- **Statement format varies wildly.** PDF / Excel / paper. `mcp magic create` works on most PDFs but not all — fallback to manual.
+- **Statement format varies wildly.** PDF / Excel / paper. `mcp magic create` works on most PDFs but not all; fallback to manual.
 - **Pre-payment-run check.** Run supplier-recon BEFORE `payment-run.md` to capture any disputed bills (don't pay) and missing bills (post + pay this run).
 
 ---
 
 ## Cross-references
 
-- `month-end-close.md` — run ad-hoc per major supplier inside the period close.
-- `year-end-close.md` / `audit-prep.md` — mandatory year-end recon for major suppliers; output feeds the audit pack.
-- `payment-run.md` — typically run after supplier-recon (pay any newly-identified bills, defer disputed).
-- `audit-prep.md` step 6 — AP aging year-end requires supplier confirmations for major balances; supplier-recon files are the supporting evidence.
+- `month-end-close.md`: run ad-hoc per major supplier inside the period close.
+- `year-end-close.md` / `audit-prep.md`: mandatory year-end recon for major suppliers; output feeds the audit pack.
+- `payment-run.md`: typically run after supplier-recon (pay any newly-identified bills, defer disputed).
+- `audit-prep.md` step 6: AP aging year-end requires supplier confirmations for major balances; supplier-recon files are the supporting evidence.

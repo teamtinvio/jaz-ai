@@ -1,4 +1,4 @@
-# Full Conversion (Option 1) — Complete Transaction History
+# Full Conversion (Option 1): Complete Transaction History
 
 > Full Conversion follows this process. For automated execution, use the jaz-conversions pipeline. For agent-driven execution, follow these phases via the API.
 
@@ -11,17 +11,17 @@ The Full Conversion transfers **all transaction details** for FY and FY-1 (typic
 ## Required Input Files
 
 **No date range (reference data):**
-1. Chart of Accounts — full CoA list
+1. Chart of Accounts: full CoA list
 2. Contact list (customers + suppliers) with details
 3. Item list (products/services)
 4. Tax profile list
 5. Exchange rate table (rates for the conversion period)
 
 **As-on date (FYE or start date):**
-6. Trial Balance — opening balances at conversion start
-7. AR Aging — outstanding receivables at conversion start
-8. AP Aging — outstanding payables at conversion start
-9. Fixed Asset Register — assets with accumulated depreciation
+6. Trial Balance: opening balances at conversion start
+7. AR Aging: outstanding receivables at conversion start
+8. AP Aging: outstanding payables at conversion start
+9. Fixed Asset Register: assets with accumulated depreciation
 
 **Conversion period range:**
 10. Detailed invoice listing (with line items)
@@ -111,7 +111,7 @@ Transfer existing assets with accumulated depreciation:
 ```
 POST /api/v1/transfer-fixed-assets
 ```
-This preserves the asset's cost basis and accumulated depreciation — do NOT use the "new asset" endpoint which would reset depreciation.
+This preserves the asset's cost basis and accumulated depreciation; do NOT use the "new asset" endpoint which would reset depreciation.
 
 ### Phase 6: Verify
 Pull TB from Jaz at multiple dates (conversion start, mid-period, period end) and compare against source.
@@ -121,16 +121,16 @@ Pull TB from Jaz at multiple dates (conversion start, mid-period, period end) an
 The TTB journal is constructed differently in Full vs Quick, and the reason is accounting logic:
 
 - **Quick**: TTB routes AR/AP balances through clearing accounts. Why? Because conversion invoices/bills already created the real AR/AP balances. Posting to AR/AP directly would double them.
-- **Full**: TTB posts opening balances directly to all accounts (including AR/AP). Why? Because the actual invoices, bills, and payments follow as detailed transactions — they'll create the real sub-ledger entries. The TTB is just the starting point before the FY's transaction history is replayed.
+- **Full**: TTB posts opening balances directly to all accounts (including AR/AP). Why? Because the actual invoices, bills, and payments follow as detailed transactions; they'll create the real sub-ledger entries. The TTB is just the starting point before the FY's transaction history is replayed.
 - **Full TTB date**: Day before the FY range start (opening balance), not the FYE date. This ensures the opening balance is cleanly separated from the FY's transactions.
 
 ## Monthly Batching Strategy
 
-Full conversion processes transactions month-by-month in chronological order. This isn't just organizational — it matters for:
+Full conversion processes transactions month-by-month in chronological order. This isn't just organizational; it matters for:
 
-- **Correct FX rate application** — exchange rates change monthly; processing in order ensures each transaction picks up the right period's rate
-- **Audit trail clarity** — the GL can be reviewed per period, matching how accountants think about the ledger
-- **Error isolation** — if a batch fails, you know which month to investigate without re-checking the entire FY
+- **Correct FX rate application**: exchange rates change monthly; processing in order ensures each transaction picks up the right period's rate
+- **Audit trail clarity**: the GL can be reviewed per period, matching how accountants think about the ledger
+- **Error isolation**: if a batch fails, you know which month to investigate without re-checking the entire FY
 
 Group all transaction types (invoices, bills, credit notes, journals) into the same monthly batch so the ledger stays balanced at each month-end.
 
@@ -156,7 +156,7 @@ Group all transaction types (invoices, bills, credit notes, journals) into the s
 A single payment may cover multiple invoices. Create separate payment records for each invoice, splitting the amount.
 
 ### Void/Deleted Transactions
-Skip voided transactions — they don't affect balances. If the source shows a void + reversal, only the reversal matters.
+Skip voided transactions; they don't affect balances. If the source shows a void + reversal, only the reversal matters.
 
 ### Inter-Company Transactions
 If the source has inter-company entries, these must map to the correct contact + accounts on each side.

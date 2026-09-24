@@ -34,7 +34,7 @@ Common `error_type` values:
 
 ### "Account Classification Type not found" (400)
 **Cause**: `classificationType` value doesn't match one of the 23 valid values.
-**Wrong values we tried**: `"Revenue"`, `"REVENUE"`, `"revenue"`, `"INCOME"`, `"OPERATING_REVENUE"`, `"Sales"`, `"Asset"`, `"ASSET"`, `"Operating Expenses"` (plural), `"Cost of Goods Sold"` (an account NAME — the type is `"Direct Costs"`)
+**Wrong values we tried**: `"Revenue"`, `"REVENUE"`, `"revenue"`, `"INCOME"`, `"OPERATING_REVENUE"`, `"Sales"`, `"Asset"`, `"ASSET"`, `"Operating Expenses"` (plural), `"Cost of Goods Sold"` (an account NAME; the type is `"Direct Costs"`)
 **Fix**: Use the exact `accountType` values from GET response:
 ```
 "Bank Accounts", "Cash", "Current Asset", "Non-current Asset", "Fixed Asset",
@@ -44,12 +44,12 @@ Common `error_type` values:
 "Direct Costs", "Operating Expense", "Other Expense", "Finance Cost",
 "Investing Expense", "Income Tax Expense", "Discontinued Expense"
 ```
-Or call `list_account_classifications` — authoritative for that organisation.
+Or call `list_account_classifications`, authoritative for that organisation.
 **Key insight**: `classificationType` in POST uses the same values as `accountType` from GET. NOT `accountClass` values (which are broader: Asset, Liability, Equity, Revenue, Expense).
 
 ### "ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED" (400)
 **Cause**: Sending an account `name` that already exists in the org.
-**Fix**: Fetch existing accounts first (`GET /chart-of-accounts`), skip names already present. Upsert matches by name — if you want to update an existing account, the name match handles it automatically.
+**Fix**: Fetch existing accounts first (`GET /chart-of-accounts`), skip names already present. Upsert matches by name; if you want to update an existing account, the name match handles it automatically.
 
 ### Wrong wrapper field
 **Cause**: Using `{ chartOfAccounts: [...] }` instead of `{ accounts: [...] }`.
@@ -66,7 +66,7 @@ Or call `list_account_classifications` — authoritative for that organisation.
 ### "phone must be a valid E.164 formatted phone number" (422)
 **Cause**: Phone number has spaces, dashes, or wrong digit count.
 **Wrong**: `"+65 6234 5678"`, `"+63 2 8876 5432"`, `"6591234567"` (no +)
-**Fix**: Strict E.164 — no spaces, no dashes, starts with `+`:
+**Fix**: Strict E.164: no spaces, no dashes, starts with `+`:
 - SG landlines: `+65` + 8 digits → `"+6562345678"`
 - SG mobile: `+65` + 8 digits → `"+6591234567"`
 - PH mobile: `+63` + 10 digits → `"+639171234567"`
@@ -76,7 +76,7 @@ Or call `list_account_classifications` — authoritative for that organisation.
 
 ### "billingName is a required field" (422)
 **Cause**: Missing `billingName` field in POST body.
-**Fix**: Always include `billingName` — set it to same value as `name`.
+**Fix**: Always include `billingName`; set it to same value as `name`.
 
 ---
 
@@ -90,7 +90,7 @@ Or call `list_account_classifications` — authoritative for that organisation.
 
 ## Custom Field Errors
 
-### "printOnDocuments is a required field" (422) — missing printOnDocuments
+### "printOnDocuments is a required field" (422): missing printOnDocuments
 **Cause**: Missing the required `printOnDocuments` field. It is not defaulted server-side.
 **Fix**: Always include `printOnDocuments: false` (or `true`) in POST body. `create_custom_field` now sends `false` when you omit it, so this only bites a direct API caller.
 **Note**: recorded here as a 400 "Invalid request body" until 2026-09-02, when a live probe returned `422 validation_error` with the field named. Either the API tightened or the original entry generalised from a different malformed body; the 422 is what it returns today.
@@ -98,9 +98,9 @@ Or call `list_account_classifications` — authoritative for that organisation.
 { "name": "PO Number", "printOnDocuments": false, "appliesTo": { "invoices": true } }
 ```
 
-### WITHDRAWN — "do not send appliesTo" on custom fields
+### WITHDRAWN: "do not send appliesTo" on custom fields
 This entry said `appliesTo` caused "Invalid request body" and told callers to send `type` and `options` instead. Re-probed live 2026-09-02: the opposite is true.
-- `appliesTo` as an OBJECT works — `{ "invoices": true, "bills": true }` returns 200 and sets `applyToSales`/`applyToPurchase` to `SHOW`. **Omitting it leaves every `applyTo*` at `NULL`, so the field appears on nothing.** The old entry's example sent an ARRAY (`["INVOICE"]`), which is the likely source of the original 400.
+- `appliesTo` as an OBJECT works: `{ "invoices": true, "bills": true }` returns 200 and sets `applyToSales`/`applyToPurchase` to `SHOW`. **Omitting it leaves every `applyTo*` at `NULL`, so the field appears on nothing.** The old entry's example sent an ARRAY (`["INVOICE"]`), which is the likely source of the original 400.
 - `type`, `fieldType`, `entityType`, `datatypeCode` and `options` are all silently dropped: sent with a value they return 200 and the field is created as plain TEXT. There is no NUMBER/DATE/DROPDOWN custom field.
 - `format` is the real control: `CUSTOM` (default) = free text, `ALL_*` = a picklist of that population.
 ```json
@@ -115,7 +115,7 @@ This entry said `appliesTo` caused "Invalid request body" and told callers to se
 ### "lineItems[0].accountResourceId is required if [saveAsDraft] is false" (422)
 **Cause**: `saveAsDraft` defaults to `false`. If omitted or explicitly `false`, line items must have `accountResourceId`.
 **Fix**: Either:
-1. Include `accountResourceId` on every line item (preferred — needs CoA resolved first)
+1. Include `accountResourceId` on every line item (preferred; needs CoA resolved first)
 2. Use `saveAsDraft: true` to create a draft (user finalizes)
 
 ### "contactResourceId is a required field" (422)
@@ -131,14 +131,14 @@ This entry said `appliesTo` caused "Invalid request body" and told callers to se
 
 ## Payment Errors
 
-### Bill payments standalone endpoint — FIXED (PR #112)
+### Bill payments standalone endpoint: FIXED (PR #112)
 **Was**: `POST /bills/{id}/payments` always returned 500 regardless of payload correctness.
-**Root cause**: Nil pointer dereference in the API backend `mappings/bills.go` — the `TaxCurrency` nil check was outside the `TransactionFee != nil` guard. Any payment without transaction fees caused a panic.
+**Root cause**: Nil pointer dereference in the API backend `mappings/bills.go`: the `TaxCurrency` nil check was outside the `TransactionFee != nil` guard. Any payment without transaction fees caused a panic.
 **Fix**: Backend PR #112 moved the TaxCurrency check inside the nil guard, matching the working pattern in `invoices.go`.
 **Status**: Standalone bill payments now work for basic payments. Embed-in-creation pattern remains a valid alternative.
 **Note**: `TransactionFeeCollected` is NOT supported on bill payments (model field missing). Only invoice payments support collected fees.
 
-### Various field errors (422) — payments require 6 specific fields
+### Various field errors (422): payments require 6 specific fields
 **Cause**: Using wrong field names. Common mistakes:
 - `amount` instead of `paymentAmount`
 - `paymentDate` instead of `valueDate`
@@ -157,28 +157,28 @@ This entry said `appliesTo` caused "Invalid request body" and told callers to se
 }] }
 ```
 
-**Cross-currency**: `paymentAmount` = bank account currency (actual cash), `transactionAmount` = transaction document currency (invoice/bill/credit note — applied to balance). For same-currency, both equal. For FX (e.g., USD invoice, SGD bank at 1.35): `paymentAmount: 1350`, `transactionAmount: 1000`.
+**Cross-currency**: `paymentAmount` = bank account currency (actual cash), `transactionAmount` = transaction document currency (invoice/bill/credit note; applied to balance). For same-currency, both equal. For FX (e.g., USD invoice, SGD bank at 1.35): `paymentAmount: 1350`, `transactionAmount: 1000`.
 
-### INSUFFICIENT_BALANCE_ON_SALE (422) — FX payment field swap
+### INSUFFICIENT_BALANCE_ON_SALE (422): FX payment field swap
 **Cause**: Swapping `paymentAmount` and `transactionAmount` in cross-currency payments. If `transactionAmount` exceeds the invoice balance, this error is thrown.
-**Fix**: `transactionAmount` = transaction document currency amount (invoice/bill/credit note — must not exceed balance). `paymentAmount` = bank currency amount (the cash).
+**Fix**: `transactionAmount` = transaction document currency amount (invoice/bill/credit note; must not exceed balance). `paymentAmount` = bank currency amount (the cash).
 ```json
-// WRONG — transactionAmount (1350) exceeds USD invoice balance (1000):
+// WRONG; transactionAmount (1350) exceeds USD invoice balance (1000):
 { "paymentAmount": 1000, "transactionAmount": 1350, ... }
 
-// CORRECT — transactionAmount (1000) matches USD invoice, paymentAmount (1350) is SGD cash:
+// CORRECT; transactionAmount (1000) matches USD invoice, paymentAmount (1350) is SGD cash:
 { "paymentAmount": 1350, "transactionAmount": 1000, ... }
 ```
 
 ### Missing array wrapper
 **Cause**: Sending flat payment object instead of wrapped in `payments` array.
-**Fix**: Always wrap: `{ "payments": [{ ... }] }` — even for a single payment.
+**Fix**: Always wrap: `{ "payments": [{ ... }] }`, even for a single payment.
 
 ---
 
 ## Currency Errors
 
-### 404 on rate endpoints — MALFORMED PATH (common mistake)
+### 404 on rate endpoints: MALFORMED PATH (common mistake)
 **Cause**: Omitting the currency code, or using singular `rate` instead of `rates`.
 **Endpoints that 404 (wrong paths)**:
 - `/api/v1/organization/currencies/rates` → 404 (no currency code)
@@ -186,7 +186,7 @@ This entry said `appliesTo` caused "Invalid request body" and told callers to se
 - `/api/v1/organization/currencies/{id}/rate` → 404 (singular)
 **Fix**: Rate endpoints live under the nested `/organization/currencies` family. The older
 hyphenated `/organization-currencies/...` rate paths still resolve but are
-**superseded** — use the nested form.
+**superseded**; use the nested form.
 
 ### "Cannot set rate for organization base currency" (400)
 **Cause**: Trying to POST/PUT a rate for the org's base currency (e.g., SGD for a Singapore org).
@@ -206,41 +206,41 @@ hyphenated `/organization-currencies/...` rate paths still resolve but are
 
 ### Rates appear inverted (wrong direction)
 **Cause**: POSTing a sourceToFunctional rate (1 foreign = X base) as the `rate` field, which expects functionalToSource (1 base = X foreign). You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`), which the rate-table endpoints accept natively. Omitting it means `FUNCTIONAL_TO_SOURCE`. See SKILL.md Rule 49.
-**Symptom**: UI shows "1 SGD = 0.0088 JPY" instead of "1 SGD ≈ 111 JPY" — the reciprocal of what you intended.
-**Fix**: Either declare the direction and send your figure as-is (`rate: 0.009, rateDirection: "SOURCE_TO_FUNCTIONAL"`), or invert before POSTing: if your data says "1 JPY = 0.009 SGD", POST `rate: 111.11` bare. Declaring is preferred — a wrong inversion is silent and wrong by rate².
+**Symptom**: UI shows "1 SGD = 0.0088 JPY" instead of "1 SGD ≈ 111 JPY", the reciprocal of what you intended.
+**Fix**: Either declare the direction and send your figure as-is (`rate: 0.009, rateDirection: "SOURCE_TO_FUNCTIONAL"`), or invert before POSTing: if your data says "1 JPY = 0.009 SGD", POST `rate: 111.11` bare. Declaring is preferred; a wrong inversion is silent and wrong by rate².
 
 ### Wrong body format for enabling
 **Cause**: Using `{ currencyCode: "USD" }` instead of array format.
-**Fix**: `{ "currencies": ["USD", "EUR"] }` — array of ISO code strings.
+**Fix**: `{ "currencies": ["USD", "EUR"] }` (array of ISO code strings).
 
 ---
 
 ## FX (Foreign Currency) Errors
 
-### `currencyCode` string silently ignored (NO ERROR — major gotcha)
+### `currencyCode` string silently ignored (NO ERROR, major gotcha)
 **Cause**: Using `currencyCode: "MYR"` (string) on invoice/bill creation for a foreign currency transaction.
 **Behavior**: The API returns 201 (success!) but **silently ignores** the `currencyCode` field. The invoice is created in the org's base currency (e.g., SGD) with rate 1:1. No error is returned.
 **Fix**: MUST use the `currency` OBJECT form:
 ```json
-// WRONG — silently ignored, invoice created in base currency (SGD):
+// WRONG; silently ignored, invoice created in base currency (SGD):
 { "contactResourceId": "uuid", "currencyCode": "MYR", "lineItems": [...] }
 
-// WRONG — string causes "Invalid request body" (400):
+// WRONG; string causes "Invalid request body" (400):
 { "contactResourceId": "uuid", "currency": "MYR", "lineItems": [...] }
 
-// CORRECT — object form, platform auto-fetches ECB rate:
+// CORRECT; object form, platform auto-fetches ECB rate:
 { "contactResourceId": "uuid", "currency": { "sourceCurrency": "MYR" }, "lineItems": [...] }
 
-// CORRECT — object form with custom rate:
+// CORRECT (object form with custom rate):
 { "contactResourceId": "uuid", "currency": { "sourceCurrency": "MYR", "exchangeRate": 3.15 }, "lineItems": [...] }
 ```
 
 **Rate sources in response** (inspect `currencyExchange.rateSource`):
-- `rateSource: "EXTERNAL"`, `providerName: "FRANKFURTER"` — auto-fetched from ECB
-- `rateSource: "INTERNAL_TRANSACTION"`, `providerName: "CUSTOM"` — user-specified `exchangeRate`
-- `rateSource: "INTERNAL_ORG"` — org-level rate (set via `/organization/currencies/:code/rates`)
+- `rateSource: "EXTERNAL"`, `providerName: "FRANKFURTER"`: auto-fetched from ECB
+- `rateSource: "INTERNAL_TRANSACTION"`, `providerName: "CUSTOM"`: user-specified `exchangeRate`
+- `rateSource: "INTERNAL_ORG"`: org-level rate (set via `/organization/currencies/:code/rates`)
 
-### "Invalid request body" (400) — `currency` as string
+### "Invalid request body" (400): `currency` as string
 **Cause**: Using `currency: "USD"` (string) instead of object form.
 **Fix**: Use object form `currency: { sourceCurrency: "USD" }` or `currency: { sourceCurrency: "USD", exchangeRate: 0.74 }`.
 
@@ -248,7 +248,7 @@ hyphenated `/organization-currencies/...` rate paths still resolve but are
 
 ## Date Format Errors
 
-### "does not match 2006-01-02 format" (422) — wrong date format on bill payments
+### "does not match 2006-01-02 format" (422): wrong date format on bill payments
 **Cause**: Sending ISO datetime (e.g., `"2026-02-08T00:00:00Z"`) or epoch milliseconds instead of `YYYY-MM-DD`.
 **Fix**: All dates must be `YYYY-MM-DD` strings (e.g., `"2026-02-08"`).
 ```json
@@ -296,7 +296,7 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 **Cause**: Scheduled invoice/bill has `saveAsDraft: true` on the wrapped document.
 **Fix**: Scheduled transactions MUST use `saveAsDraft: false`. This means every line item needs `accountResourceId`.
 ```json
-// WRONG — causes INVALID_SALE_STATUS:
+// WRONG (causes INVALID_SALE_STATUS):
 { "repeat": "MONTHLY", "invoice": { "saveAsDraft": true, ... } }
 
 // CORRECT:
@@ -307,11 +307,11 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 **Cause**: Using `frequency` or `interval` instead of `repeat` for the recurrence field.
 **Fix**: The creation field is `repeat` (NOT `frequency` or `interval`). Both `frequency` and `interval` are silently ignored, defaulting to ONE_TIME.
 ```json
-// WRONG — creates ONE_TIME schedule:
+// WRONG (creates ONE_TIME schedule):
 { "frequency": "MONTHLY", ... }
 { "interval": "MONTHLY", ... }
 
-// CORRECT — creates MONTHLY schedule:
+// CORRECT (creates MONTHLY schedule):
 { "repeat": "MONTHLY", ... }
 ```
 
@@ -344,63 +344,63 @@ Fields:
 
 ## Report Errors
 
-### "endDate is a required field" (422) — trial balance
+### "endDate is a required field" (422): trial balance
 **Cause**: Missing `endDate` in trial balance request.
 **Fix**: Always include both `startDate` and `endDate`:
 ```json
 { "startDate": "2025-11-10", "endDate": "2026-02-08" }
 ```
 
-### "primarySnapshotDate is a required field" (422) — balance sheet
+### "primarySnapshotDate is a required field" (422): balance sheet
 **Cause**: Using `endDate` instead of `primarySnapshotDate` for balance sheet.
 **Fix**: Balance sheet uses `primarySnapshotDate`:
 ```json
 { "primarySnapshotDate": "2026-02-28" }
 ```
 
-### "primarySnapshotDate / secondarySnapshotDate is a required field" (422) — P&L
+### "primarySnapshotDate / secondarySnapshotDate is a required field" (422): P&L
 **Cause**: Using `startDate`/`endDate` instead of snapshot dates for profit & loss.
 **Fix**: P&L uses `primarySnapshotDate` and `secondarySnapshotDate`:
 ```json
 { "primarySnapshotDate": "2026-02-28", "secondarySnapshotDate": "2026-01-01" }
 ```
 
-### "groupBy is a required field" (422) — general ledger
+### "groupBy is a required field" (422): general ledger
 **Cause**: Missing required `groupBy` field.
 **Fix**: Include `groupBy: "ACCOUNT"` along with date fields:
 ```json
 { "startDate": "2026-01-01", "endDate": "2026-02-28", "groupBy": "ACCOUNT" }
 ```
 
-### "primaryStartDate / primaryEndDate is a required field" (422) — cashflow
+### "primaryStartDate / primaryEndDate is a required field" (422): cashflow
 **Cause**: Using `primarySnapshotDate` or `startDate`/`endDate` for cashflow report.
 **Fix**: Cashflow uses `primaryStartDate`/`primaryEndDate`:
 ```json
 { "primaryStartDate": "2026-01-01", "primaryEndDate": "2026-02-28" }
 ```
 
-### "reportDate is a required field" (422) — cash-balance
+### "reportDate is a required field" (422): cash-balance
 **Cause**: Using `startDate`/`endDate` for cash-balance report.
 **Fix**: Cash-balance uses single `reportDate` field:
 ```json
 { "reportDate": "2026-02-28" }
 ```
 
-### "endDate is a required field" (422) — ar-report / ap-report
+### "endDate is a required field" (422): ar-report / ap-report
 **Cause**: Using `primarySnapshotDate` for AR/AP reports.
 **Fix**: AR/AP reports use `endDate`:
 ```json
 { "endDate": "2026-02-28" }
 ```
 
-### "startDate is a required field" (422) — ar-summary / ap-summary
+### "startDate is a required field" (422): ar-summary / ap-summary
 **Cause**: Missing `startDate` for summary reports.
 **Fix**: AR/AP summary reports use `startDate` + `endDate`:
 ```json
 { "startDate": "2026-01-01", "endDate": "2026-02-28" }
 ```
 
-### "primarySnapshotStartDate / primarySnapshotEndDate is a required field" (422) — equity-movement
+### "primarySnapshotStartDate / primarySnapshotEndDate is a required field" (422): equity-movement
 **Cause**: Using other date field names for equity movement report.
 **Fix**: Equity movement uses `primarySnapshotStartDate`/`primarySnapshotEndDate`:
 ```json
@@ -419,7 +419,7 @@ Fields:
 **Cause**: Missing `appliesToSale: true` when sale-related fields are set.
 **Fix**: When creating items with sale fields, MUST include `appliesToSale: true` AND `saleItemName`.
 ```json
-// WRONG — missing appliesToSale and saleItemName:
+// WRONG (missing appliesToSale and saleItemName):
 { "internalName": "Widget", "salePrice": 25.00, "saleAccountResourceId": "uuid" }
 
 // CORRECT:
@@ -431,7 +431,7 @@ Same pattern for purchase side: `appliesToPurchase: true` + `purchaseItemName` r
 **Cause**: Missing `itemCode` in item creation.
 **Fix**: `itemCode` is always required. It's the unique SKU/code for the item.
 
-### POST /items/search — now available
+### POST /items/search: now available
 `POST /items/search` is now available with the standard search filter syntax. Previously returned 404.
 
 ### "CoA ref 'XXXX' not found"
@@ -459,7 +459,7 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 **Fix**: For inventory items, `purchaseAccountResourceId` MUST point to a CoA account with `accountType: "Inventory"` (NOT Direct Costs). Check CoA accounts via `GET /chart-of-accounts` and find one with `accountType: "Inventory"`.
 
 ### INVALID_COST_PRICE (422)
-**Cause**: Using `costingMethod: "FIXED"` — the FIXED method requires a valid cost price but the exact field name is not documented.
+**Cause**: Using `costingMethod: "FIXED"`; the FIXED method requires a valid cost price but the exact field name is not documented.
 **Fix**: Use `costingMethod: "WAC"` (Weighted Average Cost) which works without specifying a cost price upfront.
 
 ---
@@ -539,7 +539,7 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 ## Custom Field PUT Errors
 
 ### 500 Internal Server Error on PUT (known bug)
-**Cause**: Validation requires `appliesTo.invoices`, `appliesTo.bills`, `appliesTo.customerCredits`, `appliesTo.supplierCredits`, `appliesTo.payments` — but the endpoint 500s even with correct payload.
+**Cause**: Validation requires `appliesTo.invoices`, `appliesTo.bills`, `appliesTo.customerCredits`, `appliesTo.supplierCredits`, `appliesTo.payments`, but the endpoint 500s even with correct payload.
 **Workaround**: Cannot update custom fields via API. Delete and recreate instead.
 
 ---
@@ -585,7 +585,7 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 **Cause**: `PUT /scheduled/subscriptions/:id` with no `status` turned an INACTIVE subscription ACTIVE (measured 2026-09-24). An ACTIVE subscription generates invoices.
 **Fix**: Always send `status`. `update_subscription` / `clio subscriptions update` read and restate the stored status when you omit it, and refuse the update if that read fails.
 
-### 422 on cancel — wrong method or missing fields
+### 422 on cancel: wrong method or missing fields
 **Cause**: Cancel endpoint is **PUT** `/scheduled/cancel-subscriptions/:id` (not POST). Requires body: `{ cancelDateType, proratedAdjustmentLineText, resourceId }`. Empty `{}` returns 422.
 **Fix**: Use PUT with required fields. `cancelDateType`: `END_OF_CURRENT_PERIOD` (default), `END_OF_LAST_PERIOD`, `CUSTOM_DATE`.
 
@@ -597,22 +597,22 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 
 ## Deposits Errors
 
-### 404 on `POST /deposits` — CORRECT and expected
+### 404 on `POST /deposits`: CORRECT and expected
 **Cause**: There is no deposits entity, by design. `POST /deposits` 404s, and so do
 `/customer-deposits`, `/supplier-deposits`, `/cash-in` and `/cash-out`. Nothing is broken and
-nothing is missing — a deposit is not a document.
+nothing is missing: a deposit is not a document.
 **Fix**: Post against a **deposit-flagged Chart of Accounts account** instead. The account
 carries `depositContactType` = `CUSTOMER` or `SUPPLIER`; a deposit is then an ordinary
 transaction on it.
-- Top up: `POST /journals`, `POST /cash-in-entries`, `POST /cash-out-entries` — one leg on the flagged account.
+- Top up: `POST /journals`, `POST /cash-in-entries`, `POST /cash-out-entries` (one leg on the flagged account).
 - Draw down against an invoice or bill: `POST /invoices/:resourceId/payments` or `POST /bills/:resourceId/payments` with `accountResourceId` = the flagged account.
 - Read movements: `POST /cashflow-transactions/search` on that account.
 
-**Setting the flag is a web-app action** — `depositContactType` is not on any
+**Setting the flag is a web-app action**: `depositContactType` is not on any
 chart-of-accounts model in this API, so `POST /chart-of-accounts` cannot create a deposit
 account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-glossary.md` → Deposits.
 
-**`/cash-entries` is NOT a 404 path** — an earlier version of this note listed it. A bare
+**`/cash-entries` is NOT a 404 path**; an earlier version of this note listed it. A bare
 `POST /cash-entries` has no handler, but the prefix is live:
 `DELETE /cash-entries/:resourceId`, `POST /cash-entries/bulk-upsert` and
 `POST /cash-entries/bulk-delete` all exist. Single cash entries are created at
@@ -622,8 +622,8 @@ account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-gl
 
 ## Inventory Adjustments Errors
 
-### 404 — Endpoint does not exist
-**Cause**: `POST /inventory/adjustments` returns 404. Also tested: `/inventory-adjustments`, `/inventory-items/:id/adjustments`, `/items/:id/inventory-adjustments` — all 404. None of the four is registered; there is no stock-adjustment write path at any spelling.
+### 404: Endpoint does not exist
+**Cause**: `POST /inventory/adjustments` returns 404. Also tested: `/inventory-adjustments`, `/inventory-items/:id/adjustments`, `/items/:id/inventory-adjustments`; all 404. None of the four is registered; there is no stock-adjustment write path at any spelling.
 **Note**: The whole inventory surface is `POST|GET /inventory-items`, `GET /inventory-item-balance/:resourceId` and `GET /inventory-balances/:balanceStatus` (balances across items: `ALL`, `AVAILABLE` or `FULLY_DRAWN`, Rule 97). Inventory items can be created, and stock moves as a side effect of a transaction carrying the item, but quantity cannot be written directly. See `endpoints.md` → Inventory.
 
 ---
@@ -639,13 +639,13 @@ account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-gl
 ## Jaz Magic / Document-Source Errors
 
 ### A local path silently fails at every spelling
-**Cause**: Treating `sourceURL` (or an MCP `file.download_url`, or `classify_documents`'s `source`) as somewhere to put a path on the calling machine — `/mnt/user-data/uploads/Archive.zip`, `/tmp/invoice.pdf`, `C:\Users\...`. The server FETCHES the source; it does not receive bytes through these fields. A path visible only to the caller is not a URL the server can open, so it fails no matter how it is written.
-**Note**: This is the same class as the inventory-adjustment endpoints — the thing being reached for does not exist at any spelling, so re-spelling never helps. Four consecutive re-tries of the same path in different shapes is the signature.
+**Cause**: Treating `sourceURL` (or an MCP `file.download_url`, or `classify_documents`'s `source`) as somewhere to put a path on the calling machine: `/mnt/user-data/uploads/Archive.zip`, `/tmp/invoice.pdf`, `C:\Users\...`. The server FETCHES the source; it does not receive bytes through these fields. A path visible only to the caller is not a URL the server can open, so it fails no matter how it is written.
+**Note**: This is the same class as the inventory-adjustment endpoints; the thing being reached for does not exist at any spelling, so re-spelling never helps. Four consecutive re-tries of the same path in different shapes is the signature.
 **Fix**: Pick a route that actually delivers the bytes or a reachable address:
-- **FILE mode** — send the bytes yourself: `sourceType: "FILE"` with a `sourceFile` multipart blob (see Rule 58/59).
-- **Share link** — Dropbox / Google Drive / OneDrive, or any public https URL.
-- **Attach it to the conversation** — on MCP surfaces the host then populates `file` itself. Never author that object by hand.
-- **Local folder or `.zip`** — valid for `classify_documents` ONLY when the client is running on the caller's own machine, not on a hosted server.
+- **FILE mode**: send the bytes yourself: `sourceType: "FILE"` with a `sourceFile` multipart blob (see Rule 58/59).
+- **Share link**: Dropbox / Google Drive / OneDrive, or any public https URL.
+- **Attach it to the conversation**: on MCP surfaces the host then populates `file` itself. Never author that object by hand.
+- **Local folder or `.zip`**: valid for `classify_documents` ONLY when the client is running on the caller's own machine, not on a hosted server.
 
 ### "The file reference has no fetchable https download_url"
 **Cause**: A `file` object was constructed by the caller rather than supplied by the host, usually with a sandbox path in `download_url`.
@@ -655,8 +655,8 @@ account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-gl
 
 ## Journal Errors
 
-### Multi-currency journals — `currency` object
-Journals support a top-level `currency` object to create entries in a foreign currency — **same format as invoices/bills**: `{ "sourceCurrency": "USD" }` (auto-fetch platform rate) or `{ "sourceCurrency": "USD", "exchangeRate": 0.74 }` (custom rate). The currency must be enabled for the org. Omit the field for base currency journals.
+### Multi-currency journals: `currency` object
+Journals support a top-level `currency` object to create entries in a foreign currency, **same format as invoices/bills**: `{ "sourceCurrency": "USD" }` (auto-fetch platform rate) or `{ "sourceCurrency": "USD", "exchangeRate": 0.74 }` (custom rate). The currency must be enabled for the org. Omit the field for base currency journals.
 
 ```json
 // Base currency journal (omit currency):
@@ -670,9 +670,9 @@ Journals support a top-level `currency` object to create entries in a foreign cu
 ```
 
 **Three restrictions apply to foreign currency journals:**
-1. **No controlled accounts** — accounts with `controlFlag` (AR, AP) cannot be used. Use invoices/bills for AR/AP entries instead.
-2. **No FX accounts** — FX Unrealized Gain/Loss/Rounding accounts are system-managed and cannot be posted to directly.
-3. **Bank accounts must match currency** — a USD journal can only post to USD-denominated bank accounts, not SGD bank accounts. All other non-controlled accounts (expenses, revenue, assets, liabilities) are available regardless of journal currency.
+1. **No controlled accounts**: accounts with `controlFlag` (AR, AP) cannot be used. Use invoices/bills for AR/AP entries instead.
+2. **No FX accounts**: FX Unrealized Gain/Loss/Rounding accounts are system-managed and cannot be posted to directly.
+3. **Bank accounts must match currency**: a USD journal can only post to USD-denominated bank accounts, not SGD bank accounts. All other non-controlled accounts (expenses, revenue, assets, liabilities) are available regardless of journal currency.
 
 ### Journal entry field format
 **Cause**: Using `debit`/`credit` as separate number fields on journal entries.
@@ -702,7 +702,7 @@ Cash transfers are always recorded as active and cannot be saved as a draft
 ```
 The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` returns 422 `Journal is not draft`, because the stored entry never is one.
 
-### Wrong structure — flat fields vs lines
+### Wrong structure: flat fields vs lines
 **Cause**: Using flat structure with `amount`, `bankAccountResourceId`, `description` fields.
 **Fix**: Cash entries use `accountResourceId` at top level (the BANK account) + `lines` array for offset entries (`journalEntries` accepted as alias).
 ```json
@@ -720,7 +720,7 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 ## Credit Application Errors
 
-### Wrong structure — flat vs credits array
+### Wrong structure: flat vs credits array
 **Cause**: Sending a flat object `{ creditNoteResourceId, amount }` instead of wrapped in `credits` array.
 **Fix**: Wrap in `credits` array and use `amountApplied` (NOT `amount`).
 ```json
@@ -749,7 +749,7 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 **Request**: POST /api/v1/bills with `withholdingTax` on line items
 **Error**: `"WITHHOLDING_CODE_NOT_FOUND"` or similar withholding-related error
 **Cause**: The organization does not have withholding tax enabled, or the code is invalid for this region.
-**Fix**: Remove the `withholdingTax` field from ALL line items and retry. This is a common pattern for cross-region compatibility — Singapore orgs typically don't use withholding tax, but Philippines orgs do.
+**Fix**: Remove the `withholdingTax` field from ALL line items and retry. This is a common pattern for cross-region compatibility: Singapore orgs typically don't use withholding tax, but Philippines orgs do.
 
 **Retry pattern** (from production):
 1. Submit bill/credit note with `withholdingTax` fields
@@ -763,7 +763,7 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 ### `page`/`size` silently ignored (GOTCHA)
 **Cause**: Sending `?page=0&size=100` or `?page=1&size=50` to any GET list endpoint.
-**Behavior**: These params are silently ignored — API returns default results (limit=100, offset=0). No error is returned, making this bug hard to detect.
+**Behavior**: These params are silently ignored; API returns default results (limit=100, offset=0). No error is returned, making this bug hard to detect.
 **Fix**: Use `?limit=100&offset=0` instead. Never use `page` or `size`.
 
 ### "limit must be 1 or greater" (422)
@@ -786,14 +786,14 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 **Cause**: Using `offset` in search without providing `sort`.
 **Fix**: When paginating with `offset`, MUST include `sort` as an object:
 ```json
-// WRONG — missing sort or using top-level sortBy:
+// WRONG (missing sort or using top-level sortBy):
 { "limit": 10, "offset": 0, "sortBy": ["valueDate"], "order": "DESC" }
 
-// CORRECT — sort is an object with sortBy array:
+// CORRECT (sort is an object with sortBy array):
 { "limit": 10, "offset": 0, "sort": { "sortBy": ["valueDate"], "order": "DESC" } }
 ```
 
-### "Invalid request body" (400) — wrong sort format
+### "Invalid request body" (400): wrong sort format
 **Cause**: `sort` is a string instead of an object, or `sortBy` is a string instead of array.
 **Fix**: `sort` must be `{ sortBy: ["field1"], order: "ASC"|"DESC" }`. `sortBy` must be an array.
 
@@ -817,11 +817,11 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 ## Tax Profiles
 
-### "Tax profile name already exists" (422) — duplicate name
+### "Tax profile name already exists" (422): duplicate name
 **Cause**: Creating a tax profile with a name that already exists in the org.
 **Fix**: Search first with `POST /tax-profiles/search` using `filter.name.eq`. Agent tools auto-guard.
 
-### Tax profile wrong scope — `appliesToSale`/`appliesToPurchase` mismatch
+### Tax profile wrong scope: `appliesToSale`/`appliesToPurchase` mismatch
 **Cause**: Using a sales-only tax profile on a bill (purchase), or vice versa.
 **Fix**: Use `POST /tax-profiles/search` with `filter.appliesToPurchase.eq: true` for bills, `filter.appliesToSale.eq: true` for invoices.
 
@@ -829,19 +829,19 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 ## Cash Entries
 
-### "accountEntryResourceId is a required field" (422) — legacy validation
+### "accountEntryResourceId is a required field" (422): legacy validation
 **Cause**: Older API versions require `accountEntryResourceId` on cash entry PUT. Now auto-populated server-side if omitted.
 **Fix**: If encountered, the value is the cashflow-transaction `resourceId` from LIST (NOT the `parentEntityResourceId` from CREATE).
 
-### Internal Server Error (500) on cash entry PUT — missing `accountResourceId`
-**Cause**: `accountResourceId` (bank account) omitted from PUT body. Unlike `accountEntryResourceId` (auto-populated), `accountResourceId` is **required** — omitting causes 500.
+### Internal Server Error (500) on cash entry PUT: missing `accountResourceId`
+**Cause**: `accountResourceId` (bank account) omitted from PUT body. Unlike `accountEntryResourceId` (auto-populated), `accountResourceId` is **required**; omitting causes 500.
 **Fix**: Always include `accountResourceId` in PUT body. Get it from the original create response or bank accounts list.
 
 ---
 
 ## Contacts
 
-### "Invalid request body" (400) on contact PUT — `emails` vs `email`
+### "Invalid request body" (400) on contact PUT: `emails` vs `email`
 **Cause**: Sending `emails` (array from GET response) in PUT body. PUT accepts `email` (string), not `emails` (array).
 **Fix**: Use `email: "user@example.com"` (string) in PUT body, not `emails: [{email, label}]` (array from GET).
 
@@ -849,7 +849,7 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 ## Journals
 
-### "Unbalanced journal" (422) — debit/credit mismatch
+### "Unbalanced journal" (422): debit/credit mismatch
 **Cause**: Sum of DEBIT amounts ≠ sum of CREDIT amounts in journal entries.
 **Fix**: Verify math before POSTing. Agent tools pre-flight check catches this.
 
@@ -857,7 +857,7 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 ## Invoices / Bills
 
-### "Sale Reference already exists" (422) — duplicate reference
+### "Sale Reference already exists" (422): duplicate reference
 **Cause**: Creating an invoice, customer credit note, quote or order with a `reference` that already exists in the org.
 **Fix**: Do not invent a number. For anything the organization issues, set `autoReference: true` (or call `get_next_reference` first) to take the next number from its own series. Bills, supplier credit notes and manual journals never return this error: they accept a duplicate reference silently and book a second document, so search by reference before re-creating one after an uncertain result. For a bill or supplier credit note use the supplier's own document number.
 
@@ -865,45 +865,45 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 ### Quick Fix Errors
 
-**207 Multi-Status** — Not an error. The API returns 207 when one or more items in the batch failed. Response body is the same shape as 200: `{ updated: [...], failed: [{ resourceId, error, errorCode }] }`. Always check `failed.length` — on partial failure, some items succeeded (`updated`) while others failed (`failed`). Retry pattern: only retry the `failed` resourceIds, not the whole batch.
+**207 Multi-Status**: Not an error. The API returns 207 when one or more items in the batch failed. Response body is the same shape as 200: `{ updated: [...], failed: [{ resourceId, error, errorCode }] }`. Always check `failed.length`: on partial failure, some items succeeded (`updated`) while others failed (`failed`). Retry pattern: only retry the `failed` resourceIds, not the whole batch.
 
-**"INACTIVE_OR_DELETED_ACCOUNT"** — The account referenced in the update is deleted or inactive. Verify the account UUID is valid and active.
+**"INACTIVE_OR_DELETED_ACCOUNT"**: The account referenced in the update is deleted or inactive. Verify the account UUID is valid and active.
 
 **"Cannot update ACTIVE entry"**: a per-record quick-fix failure. Do NOT void and recreate; edit the record with its own update tool: `update_invoice` / `update_bill` / `update_cash_in` / `update_cash_out` / `update_journal`.
 
-**"TRANSACTION_LOCKED"** — Transaction is in a locked period. Cannot update.
+**"TRANSACTION_LOCKED"**: Transaction is in a locked period. Cannot update.
 
-**"Item name is required to bulk update purchase item details"** — Line-item quick-fix for purchase entities requires `name` in attributes.
+**"Item name is required to bulk update purchase item details"**: Line-item quick-fix for purchase entities requires `name` in attributes.
 
 ---
 
 ### Nano-Classifier Errors
 
-**"classes must be an array"** or **400 Invalid request body** — Sending `classNames` or `[{className: "..."}]` instead of `classes: ["..."]`. CREATE expects `classes` as a flat `string[]`.
+**"classes must be an array"** or **400 Invalid request body**: Sending `classNames` or `[{className: "..."}]` instead of `classes: ["..."]`. CREATE expects `classes` as a flat `string[]`.
 
-**`printable` field missing** — `printable: boolean` is required on CREATE. Omitting it defaults to `false` on the API side, but explicitly sending `false` or `true` is recommended.
+**`printable` field missing**: `printable: boolean` is required on CREATE. Omitting it defaults to `false` on the API side, but explicitly sending `false` or `true` is recommended.
 
-**GET returns `undefined` / empty** — GET single nano-classifier is double-wrapped: `{data: {data: [...], totalElements, totalPages}}`. If you read `res.data` directly expecting a single classifier, you get the inner paginated object. Extract `res.data.data[0]`.
+**GET returns `undefined` / empty**: GET single nano-classifier is double-wrapped: `{data: {data: [...], totalElements, totalPages}}`. If you read `res.data` directly expecting a single classifier, you get the inner paginated object. Extract `res.data.data[0]`.
 
 ---
 
 ### Payment Record Errors
 
-**404 on payment GET** — Using a cashflow transaction ID (`POST /cashflow-transactions/search` returns these) instead of a payment ID. Payment resourceIds come from the parent document: `GET /invoices/:id` → `paymentRecords[].resourceId`.
+**404 on payment GET**: Using a cashflow transaction ID (`POST /cashflow-transactions/search` returns these) instead of a payment ID. Payment resourceIds come from the parent document: `GET /invoices/:id` → `paymentRecords[].resourceId`.
 
-**Cashflow transaction ID ≠ payment ID** — These are different entities. Cashflow transactions are a ledger view; payment records are the actual payment objects attached to invoices/bills.
+**Cashflow transaction ID ≠ payment ID**: These are different entities. Cashflow transactions are a ledger view; payment records are the actual payment objects attached to invoices/bills.
 
 #### Payment adjustment errors (422)
 
-The `adjustment` object on a payment is validated server-side. The API returns the code as `error_type` with a human message. Do NOT pre-validate any of these — surface the 422.
+The `adjustment` object on a payment is validated server-side. The API returns the code as `error_type` with a human message. Do NOT pre-validate any of these; surface the 422.
 
 Two of the seven never reach you through this path: a zero `adjustmentValue` and a missing `adjustmentAccountResourceId` are caught by the API layer's own field validation first and come back as a `validation_error`, not as the code below. `INVALID_PAYMENT_ADJUSTMENT_AMOUNT` still reaches you via the decimal-scale rule.
 
 | `error_type` | Cause | Fix |
 |---|---|---|
-| `INVALID_PAYMENT_ADJUSTMENT_AMOUNT` | `adjustmentValue` is zero, or has more than 2 decimal places | Send a non-zero value rounded to 2dp. Zero is the absence of an adjustment, not an adjustment of nothing — omit the object instead |
+| `INVALID_PAYMENT_ADJUSTMENT_AMOUNT` | `adjustmentValue` is zero, or has more than 2 decimal places | Send a non-zero value rounded to 2dp. Zero is the absence of an adjustment, not an adjustment of nothing; omit the object instead |
 | `PAYMENT_ADJUSTMENT_ACCOUNT_REQUIRED` | No `adjustmentAccountResourceId` | Supply one |
-| `INVALID_PAYMENT_ADJUSTMENT_ACCOUNT` | Account is a control account (AR, AP, the VAT pair, the FX accounts, Retained Earnings, withholding tax), a bank or cash account, deposit-linked, missing, or deleted | Pick an ordinary postable account. Most seeded accounts qualify — Rounding, Other Income, Bank Charges |
+| `INVALID_PAYMENT_ADJUSTMENT_ACCOUNT` | Account is a control account (AR, AP, the VAT pair, the FX accounts, Retained Earnings, withholding tax), a bank or cash account, deposit-linked, missing, or deleted | Pick an ordinary postable account. Most seeded accounts qualify: Rounding, Other Income, Bank Charges |
 | `PAYMENT_ADJUSTMENT_MAKES_NET_CASH_INVALID` | Net cash would not remain above zero | Reduce the magnitude of a negative adjustment |
 | `PAYMENT_ADJUSTMENT_NOT_APPLICABLE_FOR_PAYMENT_METHOD` | Method is `DEBT_WRITE_OFF`, `CLEARING_SETTLEMENT`, `INTER_COMPANY` or `WITHHOLDING_TAX_CERTIFICATE` | Those record a settlement, not a bank movement, so there is no cash leg to adjust. Drop the adjustment |
 | `PAYMENT_ADJUSTMENT_CANNOT_CHANGE_WHEN_RECONCILED` | The payment is matched to a bank statement entry and the request would change its adjustment | **Reachable.** The update path reads the caller's adjustment, and since arap v10.7.21 the comparison covers amount, account AND description, so an account-only or description-only move trips it too. Un-reconcile the payment first, or resend the adjustment unchanged. Resending all three values unchanged, or omitting the field, is not a change. See rule 160 |
@@ -921,27 +921,27 @@ Two of the seven never reach you through this path: a zero `adjustmentValue` and
 ## Claims Errors
 
 ### "CLAIM_REFERENCE_REQUIRED_AT_SUBMIT" (422)
-**Cause**: A claim was submitted without a `reference` — via `create_claim`/`update_claim` with `saveAsDraft: false`, `submit_claim`, or `bulk_submit_claims`. A DRAFT can be saved without one, but submitting requires it.
-**Fix**: Set `reference` (e.g. `update_claim`), then submit. Don't pre-validate — surface the 422.
+**Cause**: A claim was submitted without a `reference` (via `create_claim`/`update_claim` with `saveAsDraft: false`, `submit_claim`, or `bulk_submit_claims`). A DRAFT can be saved without one, but submitting requires it.
+**Fix**: Set `reference` (e.g. `update_claim`), then submit. Don't pre-validate; surface the 422.
 
 ### "CLAIM_NOT_SUBMITTABLE" (422)
 **Cause**: A lifecycle transition was attempted from an illegal status, e.g. submitting a non-DRAFT claim ("Only DRAFT claims can be submitted (current status: APPROVED)").
-**Fix**: Check the current status (`get_claim`) and use the legal transition. Don't pre-check — surface the error.
+**Fix**: Check the current status (`get_claim`) and use the legal transition. Don't pre-check; surface the error.
 
 ### "CLAIM_SUBMIT_TAX_REQUIRED_INCLUSIVE" (422)
 **Cause**: A claim was submitted under a claim profile whose `taxMode` is `INCLUSIVE`, but a line carries no tax ("The claim profile is INCLUSIVE — the claim must be tax-inclusive and every line item must carry a tax profile"). Lines inherit tax from their **claim type's** `taxProfileResourceId`; a claim type created without one yields tax-less lines that can't submit under an INCLUSIVE profile. (A `NO_TAX` profile has no such requirement.)
-**Fix**: Give the claim type a `taxProfileResourceId` (e.g. a Standard-Rated Purchases profile — find one via `search_tax_profiles`) so its lines inherit tax, or set tax on the line, then resubmit. The draft saves fine without tax — this only fires at submit.
+**Fix**: Give the claim type a `taxProfileResourceId` (e.g. a Standard-Rated Purchases profile; find one via `search_tax_profiles`) so its lines inherit tax, or set tax on the line, then resubmit. The draft saves fine without tax; this only fires at submit.
 
 ### "CLAIM_TYPE_EXPENSE_ACCOUNT_REQUIRED" (422)
 **Cause**: `create_claim_type` was called without `expenseAccountResourceId` ("ClaimType expenseAccountResourceId is required"). The field reads as optional in the schema but the server requires it on create.
-**Fix**: Find an expense GL account via `search_accounts` — `accountType` is a **display label** (`"Operating Expense"`, `"Direct Costs"`), NOT an enum like `"EXPENSE"` (which returns zero rows) — then pass its `resourceId` as `expenseAccountResourceId`.
+**Fix**: Find an expense GL account via `search_accounts`; `accountType` is a **display label** (`"Operating Expense"`, `"Direct Costs"`), NOT an enum like `"EXPENSE"` (which returns zero rows); then pass its `resourceId` as `expenseAccountResourceId`.
 
 ### "EMPLOYEE_USER_NOT_FOUND" (422)
 **Cause**: `add_employee` / `update_employee` / `bind_employee_user` was given a `userResourceId` that isn't a user ("User not found for userResourceId …"). The usual mistake: passing an org-user record's own `resourceId` instead of its `userResourceId`.
 **Fix**: Use `search_org_users` and read the member's **`userResourceId`** field (not the org-user record's `resourceId`), then retry. Each user links to at most one employee per org. To move a link, relink with `update_employee` `userResourceId` or unlink with `clearFields: ["userResourceId"]`.
 
 ### "EMPLOYEE_CLAIM_PROFILE_REQUIRED" (422)
-**Cause**: `add_employee` was called without `claimProfileResourceId` ("A claim profile is required for an employee — it carries the employee balance account used to convert and pay claims"). The claim profile is **server-required** — the org default is NOT auto-applied for employees (unlike claims), even when a default profile exists.
+**Cause**: `add_employee` was called without `claimProfileResourceId` ("A claim profile is required for an employee — it carries the employee balance account used to convert and pay claims"). The claim profile is **server-required**; the org default is NOT auto-applied for employees (unlike claims), even when a default profile exists.
 **Fix**: Pick a profile via `search_claim_profiles` and pass its `resourceId` as `claimProfileResourceId`. The profile is locked while the employee has unsettled claims.
 
 ---
@@ -957,7 +957,7 @@ When a Jaz tool call fails, the MCP `execute_tool` response (and the daemon-side
   "error": "lineItems[0].accountResourceId is required if [saveAsDraft] is false",
   "status": 422,
   "endpoint": "/api/v1/invoices",
-  "hint": "Validation error — check field values against the tool description.",
+  "hint": "Validation error: check field values against the tool description.",
   "repair": {
     "tool": "search_accounts",
     "arguments": {},
@@ -984,7 +984,7 @@ The `repair` field is OMITTED entirely when no high-confidence pattern matches. 
 | `status === 422` + `duplicate` / `already exists` on `create_*` | `search_<entity>s` filtered by `reference` | `reference` (string) |
 | `status === 422` + tax-profile direction mismatch | `search_tax_profiles` | (no input requirement) |
 
-Non-API errors (validation, schema, network) do NOT carry a repair suggestion — pattern-matching free-text is too brittle. The existing `hint` field covers those cases.
+Non-API errors (validation, schema, network) do NOT carry a repair suggestion: pattern-matching free-text is too brittle. The existing `hint` field covers those cases.
 
 ### Recommended agent consumption
 
@@ -993,7 +993,7 @@ Non-API errors (validation, schema, network) do NOT carry a repair suggestion �
 2. Call execute_tool(repair.tool, repair.arguments).
 3. Use the search result to construct a corrected payload.
 4. Retry the original tool ONCE with the corrected payload.
-5. If it still fails, do NOT loop — surface the error to the user.
+5. If it still fails, do NOT loop; surface the error to the user.
 ```
 
 Repair suggestions are advisory, not authoritative. The agent may ignore them when context (recent tool calls, user intent) suggests a different approach is better.

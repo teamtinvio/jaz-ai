@@ -1,4 +1,4 @@
-# Verification — TB Comparison and Checklist Generation
+# Verification: TB Comparison and Checklist Generation
 
 ## Post-Execution Verification Flow
 
@@ -14,7 +14,7 @@ POST /api/v1/generate-reports/trial-balance
 }
 ```
 
-This returns all account balances for the specified period. The response may be wrapped as `{ data: [...] }` or `{ data: { data: [...] } }` — handle both formats.
+This returns all account balances for the specified period. The response may be wrapped as `{ data: [...] }` or `{ data: { data: [...] } }`; handle both formats.
 
 **Note:** This is a POST to `/generate-reports/trial-balance` (NOT a GET to `/reports/trial-balance`).
 
@@ -29,9 +29,9 @@ From the parsed input files, extract the source TB with:
 ### Step 3: Compare
 
 For each account, match source to Jaz:
-1. **By code first** — skip blank or placeholder codes (e.g., "-")
-2. **By name (case-insensitive)** — fallback if code doesn't match
-3. **Clearing account mapping** — for Quick conversions, source "Accounts Receivable" maps to "AR Conversion Clearing" in Jaz (and "Accounts Payable" → "AP Conversion Clearing"), since the real AR/AP comes from conversion invoices, not the TTB
+1. **By code first**: skip blank or placeholder codes (e.g., "-")
+2. **By name (case-insensitive)**: fallback if code doesn't match
+3. **Clearing account mapping**: for Quick conversions, source "Accounts Receivable" maps to "AR Conversion Clearing" in Jaz (and "Accounts Payable" → "AP Conversion Clearing"), since the real AR/AP comes from conversion invoices, not the TTB
 
 Then calculate:
 ```
@@ -40,7 +40,7 @@ Difference = Jaz balance - Source balance
 
 **Balance extraction from Jaz TB:** The response may use different field names. Look for `closingBalance` first, then `balance`, then calculate from `debit - credit`.
 
-**Tolerance:** $0.00 — there should be NO difference. Even $0.01 must be investigated and resolved.
+**Tolerance:** $0.00; there should be NO difference. Even $0.01 must be investigated and resolved.
 
 ### Step 4: Categorize Differences
 
@@ -108,7 +108,7 @@ Conversion Bills (AP)       XX
 TTB Journal                 1
 Lock Date Set               <FYE date>
 
-FX RATES APPLIED (functionalToSource — 1 base unit = N foreign)
+FX RATES APPLIED (functionalToSource: 1 base unit = N foreign)
 --------------------------------------------
 USD                         0.7407
 EUR                         0.6897
@@ -116,7 +116,7 @@ JPY                       108.6957
 
 ERRORS (if any)
 --------------------------------------------
-- [<phase>] <type> "<reference>" — <error description>
+- [<phase>] <type> "<reference>": <error description>
 
 NOTES
 --------------------------------------------
@@ -147,18 +147,18 @@ This is the definitive proof that the conversion is accurate. Every account must
 
 ## Quick Conversion Specific Checks
 
-1. **Clearing accounts net to zero** — both AR and AP clearing
-2. **Open AR on Jaz = AR Aging from source** — check total and per-customer
-3. **Open AP on Jaz = AP Aging from source** — check total and per-supplier
-4. **TB on Jaz = TB from source** — every account
-5. **Lock date is set** — prevents accidental edits to historical data
-6. **FX rates match** — Jaz closing rates = source closing rates at FYE
+1. **Clearing accounts net to zero**: both AR and AP clearing
+2. **Open AR on Jaz = AR Aging from source**: check total and per-customer
+3. **Open AP on Jaz = AP Aging from source**: check total and per-supplier
+4. **TB on Jaz = TB from source**: every account
+5. **Lock date is set**: prevents accidental edits to historical data
+6. **FX rates match**: Jaz closing rates = source closing rates at FYE
 
 ## Full Conversion Specific Checks
 
 All Quick checks plus:
-1. **TB matches at multiple dates** — not just FYE, also mid-period spot checks
-2. **Invoice count matches** — total invoices created = total in source
-3. **Payment count matches** — total payments applied = total in source
-4. **GL detail spot check** — pick 5-10 random transactions, verify amounts and accounts
-5. **Bank reconciliation** — bank records imported match bank statement
+1. **TB matches at multiple dates**: not just FYE, also mid-period spot checks
+2. **Invoice count matches**: total invoices created = total in source
+3. **Payment count matches**: total payments applied = total in source
+4. **GL detail spot check**: pick 5-10 random transactions, verify amounts and accounts
+5. **Bank reconciliation**: bank records imported match bank statement

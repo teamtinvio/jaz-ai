@@ -1,6 +1,6 @@
 # IFRS 16 Lease Reversal for SG Tax
 
-One of the most misunderstood adjustments in Singapore corporate tax. Under IFRS 16 (effective 1 Jan 2019), lessees no longer distinguish between operating and finance leases on the balance sheet. All leases (except short-term and low-value) are recognized as a right-of-use (ROU) asset and a lease liability. This changes what appears on the P&L — and the tax treatment must reverse it.
+One of the most misunderstood adjustments in Singapore corporate tax. Under IFRS 16 (effective 1 Jan 2019), lessees no longer distinguish between operating and finance leases on the balance sheet. All leases (except short-term and low-value) are recognized as a right-of-use (ROU) asset and a lease liability. This changes what appears on the P&L, and the tax treatment must reverse it.
 
 ---
 
@@ -11,9 +11,9 @@ Under IFRS 16, the P&L shows two expenses for what used to be a single "rental e
 | IFRS 16 P&L line | Nature |
 |-------------------|--------|
 | **ROU asset depreciation** | Straight-line over the lease term (or useful life if shorter) |
-| **Interest on lease liability** | Front-loaded — higher in early years, declining over the lease term |
+| **Interest on lease liability** | Front-loaded: higher in early years, declining over the lease term |
 
-**Neither of these is tax-deductible in Singapore.** IRAS does not follow IFRS 16 for tax purposes. Instead, the **actual operating lease payments** remain the deductible expense — exactly as they were before IFRS 16 existed.
+**Neither of these is tax-deductible in Singapore.** IRAS does not follow IFRS 16 for tax purposes. Instead, the **actual operating lease payments** remain the deductible expense, exactly as they were before IFRS 16 existed.
 
 This means for every operating lease accounted under IFRS 16, you need three tax adjustments:
 
@@ -31,7 +31,7 @@ Find the total ROU asset depreciation charged to the P&L during the basis period
 
 **How to find it:**
 - Scan the trial balance for accounts containing "Right-of-Use", "ROU", or "Lease Asset"
-- The depreciation charge will be in an expense account, often under "Depreciation — ROU Assets" or similar
+- The depreciation charge will be in an expense account, often under "Depreciation (ROU Assets)" or similar
 - Cross-reference to the fixed asset summary if ROU assets are tracked there
 
 **Maps to:** `addBacks.rouDepreciation`
@@ -43,7 +43,7 @@ Find the total interest expense on lease liabilities charged to the P&L.
 **How to find it:**
 - Scan for accounts containing "Lease Interest", "Lease Liability Interest", or "IFRS 16 Interest"
 - This is separate from bank loan interest (which IS deductible)
-- May be grouped under "Finance Costs" on the P&L — drill into the GL to isolate lease interest from other interest
+- May be grouped under "Finance Costs" on the P&L; drill into the GL to isolate lease interest from other interest
 
 **Maps to:** `addBacks.leaseInterest`
 
@@ -53,7 +53,7 @@ Find the total cash payments made to lessors during the basis period.
 
 **How to find it:**
 - Scan bank/cash transactions for payments to the lessor
-- Or look at the lease liability account movement — the cash payment portion reduces the liability
+- Or look at the lease liability account movement: the cash payment portion reduces the liability
 - Under IFRS 16 accounting, the payment is split: part reduces the lease liability (principal), part is interest expense. For tax, you deduct the **total payment** (principal + interest combined)
 
 ```
@@ -90,7 +90,7 @@ Net adjustment = (ROU depreciation + Lease interest) - Actual lease payments
 
 ## Worked Example
 
-**Scenario:** Office lease — $5,000/month, 36 months, 5% incremental borrowing rate (IBR).
+**Scenario:** Office lease, $5,000/month, 36 months, 5% incremental borrowing rate (IBR).
 
 ### IFRS 16 initial measurement
 
@@ -152,7 +152,7 @@ PV of lease payments: $167,234.69 (this becomes both the ROU asset and lease lia
 | Actual payments | 60,000.00 | 60,000.00 | 60,000.00 | 180,000.00 |
 | Net adjustment | +3,051.64 | +364.93 | -2,434.35 | +982.22 |
 
-The small residual ($982.22) is the interest cost difference — total lease payments of $180,000 vs PV of $167,234.69 means $12,765.31 total interest, which nets against $13,747.53 calculated interest (rounding across 36 periods). Over the full term the economic effect is equivalent.
+The small residual ($982.22) is the interest cost difference: total lease payments of $180,000 vs PV of $167,234.69 means $12,765.31 total interest, which nets against $13,747.53 calculated interest (rounding across 36 periods). Over the full term the economic effect is equivalent.
 
 ---
 
@@ -176,8 +176,8 @@ IFRS 16 provides two optional exemptions where lessees can continue to recognize
 
 | Exemption | Threshold | Tax effect |
 |-----------|-----------|------------|
-| **Short-term leases** | Lease term <= 12 months (no purchase option) | No IFRS 16 adjustment needed — the P&L expense IS the actual payment |
-| **Low-value leases** | Underlying asset value <= ~US$5,000 when new | Same — no adjustment needed |
+| **Short-term leases** | Lease term <= 12 months (no purchase option) | No IFRS 16 adjustment needed; the P&L expense IS the actual payment |
+| **Low-value leases** | Underlying asset value <= ~US$5,000 when new | Same: no adjustment needed |
 
 If the company has elected these exemptions for any leases, those leases do NOT need the three-step reversal. Only leases recognized under IFRS 16 (ROU asset + lease liability on balance sheet) need the adjustment.
 
@@ -185,10 +185,10 @@ If the company has elected these exemptions for any leases, those leases do NOT 
 
 ## Common Mistakes
 
-1. **Adding back ROU depreciation but forgetting to deduct actual payments.** This overstates taxable income by the full lease payment amount. The three adjustments work as a set — never apply only one or two.
+1. **Adding back ROU depreciation but forgetting to deduct actual payments.** This overstates taxable income by the full lease payment amount. The three adjustments work as a set; never apply only one or two.
 
 2. **Including IFRS 16 lease interest in the general "depreciation" add-back.** Lease interest is a separate line item. It goes in `addBacks.leaseInterest`, not `addBacks.depreciation`.
 
-3. **Double-deducting lease payments.** If the company accounts for short-term/low-value leases as P&L expenses (not IFRS 16), those payments are already deducted in accounting profit. Do NOT add them to `deductions.actualLeasePayments` — that field is ONLY for IFRS 16 leases where the actual payment is not on the P&L.
+3. **Double-deducting lease payments.** If the company accounts for short-term/low-value leases as P&L expenses (not IFRS 16), those payments are already deducted in accounting profit. Do NOT add them to `deductions.actualLeasePayments`; that field is ONLY for IFRS 16 leases where the actual payment is not on the P&L.
 
-4. **Confusing ROU depreciation with regular fixed asset depreciation.** ROU assets are depreciated separately. Regular FA depreciation goes in `addBacks.depreciation`; ROU depreciation goes in `addBacks.rouDepreciation`. They are claimed differently — FA depreciation is replaced by capital allowances; ROU depreciation is replaced by actual lease payments.
+4. **Confusing ROU depreciation with regular fixed asset depreciation.** ROU assets are depreciated separately. Regular FA depreciation goes in `addBacks.depreciation`; ROU depreciation goes in `addBacks.rouDepreciation`. They are claimed differently: FA depreciation is replaced by capital allowances; ROU depreciation is replaced by actual lease payments.

@@ -1,4 +1,4 @@
-# Edge Cases — FX, Clearing Accounts, Rounding, and More
+# Edge Cases: FX, Clearing Accounts, Rounding, and More
 
 ## Foreign Exchange (FX)
 
@@ -13,11 +13,11 @@ POST /api/v1/organization/currencies/USD/rates  // Set FYE rate
 { "rate": 0.74, "rateApplicableFrom": "2024-12-31" }
 ```
 
-**Rate direction:** Jaz uses `functionalToSource` — how many SOURCE (foreign) units per 1 FUNCTIONAL (base) unit. If base = SGD and the quote is "1 USD = 1.35 SGD", that quote is the inverse: `rate = 1 / 1.35 = 0.74`. Invert only when the quote is written foreign-first; a USD-base org quoting "1 USD = 56.5 PHP" already has the right direction and sends `56.5`. Rather than deciding, set `rateDirection` and pass the figure verbatim (SKILL.md Rule 49).
+**Rate direction:** Jaz uses `functionalToSource`: how many SOURCE (foreign) units per 1 FUNCTIONAL (base) unit. If base = SGD and the quote is "1 USD = 1.35 SGD", that quote is the inverse: `rate = 1 / 1.35 = 0.74`. Invert only when the quote is written foreign-first; a USD-base org quoting "1 USD = 56.5 PHP" already has the right direction and sends `56.5`. Rather than deciding, set `rateDirection` and pass the figure verbatim (SKILL.md Rule 49).
 
-**CRITICAL:** `currencyCode: "USD"` (string) is **silently ignored** by the API — it creates the transaction in base currency. You MUST use the `currency` object form.
+**CRITICAL:** `currencyCode: "USD"` (string) is **silently ignored** by the API; it creates the transaction in base currency. You MUST use the `currency` object form.
 
-### Quick Conversion — Explicit FYE Rate on Transactions
+### Quick Conversion: Explicit FYE Rate on Transactions
 
 FX conversion transactions use **original dates** (for aging) but an **explicit FYE exchange rate** (for zero UGL):
 
@@ -34,11 +34,11 @@ FX conversion transactions use **original dates** (for aging) but an **explicit 
 
 The `exchangeRate` field overrides Jaz's rate auto-fetch. This is essential because:
 
-1. **Prior UGL is in the TTB:** The old platform already computed unrealized FX gains/losses up to FYE. That UGL sits in the TTB journal (Unrealized FX Gain/Loss account balance). If conversion invoices used a different rate, Jaz would compute additional UGL — doubling up.
+1. **Prior UGL is in the TTB:** The old platform already computed unrealized FX gains/losses up to FYE. That UGL sits in the TTB journal (Unrealized FX Gain/Loss account balance). If conversion invoices used a different rate, Jaz would compute additional UGL, doubling up.
 
 2. **Zero UGL on day 1:** FYE rate = transferred transaction rate → Jaz sees zero unrealized gain/loss from these conversion invoices/bills.
 
-3. **Correct future RGL:** When a payment is recorded against a conversion invoice, Jaz computes realized gain/loss against the FYE rate — which is correct. The balance was already marked-to-market at FYE by the prior platform.
+3. **Correct future RGL:** When a payment is recorded against a conversion invoice, Jaz computes realized gain/loss against the FYE rate, which is correct. The balance was already marked-to-market at FYE by the prior platform.
 
 4. **Correct aging:** Original dates preserve the aging schedule (30/60/90/120+ buckets) so the AR/AP aging report in Jaz matches the source.
 
@@ -46,13 +46,13 @@ The `exchangeRate` field overrides Jaz's rate auto-fetch. This is essential beca
 
 If no explicit rate is available for a currency, omit `exchangeRate` from the `currency` object. Jaz will auto-fetch ECB rates via the Frankfurter provider based on `valueDate`. This is acceptable for Full conversion (original rates per transaction), but for Quick conversion you should always provide an explicit FYE rate to ensure zero UGL.
 
-FX rates must be positive — a zero or negative rate is always an error in the source data. Validate before using.
+FX rates must be positive; a zero or negative rate is always an error in the source data. Validate before using.
 
-### Full Conversion — Original Transaction Rates
+### Full Conversion: Original Transaction Rates
 
 Full conversion uses the **original exchange rate** from each transaction (the rate at the time the invoice/bill was created). If the source provides per-transaction rates, pass them via `exchangeRate`. If not, Jaz auto-fetches ECB rates via the Frankfurter provider based on `valueDate`.
 
-### Unrealized FX Gains/Losses — Quick vs. Full
+### Unrealized FX Gains/Losses: Quick vs. Full
 
 **Quick Conversion:** UGL from the prior platform is captured in the TTB journal. Conversion invoices/bills are recorded at FYE rate with explicit `exchangeRate`, producing zero UGL in Jaz. No separate UGL journals are needed.
 
@@ -60,13 +60,13 @@ Full conversion uses the **original exchange rate** from each transaction (the r
 
 ### Date Reasonableness
 
-Flag invoice/bill dates that are more than 2 years before FYE as suspicious. These usually indicate a data error in the source aging report (e.g., a subtotal row parsed as a date, or a test transaction) — not a genuinely ancient outstanding invoice. Warn but don't block; the accountant should confirm.
+Flag invoice/bill dates that are more than 2 years before FYE as suspicious. These usually indicate a data error in the source aging report (e.g., a subtotal row parsed as a date, or a test transaction), not a genuinely ancient outstanding invoice. Warn but don't block; the accountant should confirm.
 
 ## Clearing Account Mechanics
 
 ### Pre-Check Before Execution
 
-Before running a conversion, check if clearing accounts already exist with non-zero balances. This indicates a prior partial conversion that wasn't fully cleaned up. A non-zero clearing account means conversion invoices/bills and the TTB journal are out of sync. Warn and investigate before proceeding — either clean up the prior conversion's resources first, or adjust the new conversion to account for existing balances.
+Before running a conversion, check if clearing accounts already exist with non-zero balances. This indicates a prior partial conversion that wasn't fully cleaned up. A non-zero clearing account means conversion invoices/bills and the TTB journal are out of sync. Warn and investigate before proceeding: either clean up the prior conversion's resources first, or adjust the new conversion to account for existing balances.
 
 ### How Clearing Accounts Work
 
@@ -91,15 +91,15 @@ AR Clearing balance = (TTB AR debit) - (sum of all conversion invoice amounts)
 Same logic applies for AP Clearing.
 
 ### Common Causes
-1. **Rounding in FX conversions** — functional currency amounts may differ by $0.01-0.02
-2. **AR aging doesn't match TB** — some aging reports exclude credit balances or include disputed amounts
-3. **Missing invoices/bills** — some entries in the aging report were missed during creation
-4. **Different FX rates** — invoice created with a different rate than TTB (should not happen if explicit `exchangeRate` is used on FX transactions)
+1. **Rounding in FX conversions**: functional currency amounts may differ by $0.01-0.02
+2. **AR aging doesn't match TB**: some aging reports exclude credit balances or include disputed amounts
+3. **Missing invoices/bills**: some entries in the aging report were missed during creation
+4. **Different FX rates**: invoice created with a different rate than TTB (should not happen if explicit `exchangeRate` is used on FX transactions)
 
 ### Fix
-Create a small adjustment journal to bring the clearing account to zero. Document the reason (e.g., "FX rounding adjustment — $0.02").
+Create a small adjustment journal to bring the clearing account to zero. Document the reason (e.g., "FX rounding adjustment: $0.02").
 
-## Idempotency — Stale Conversion Cleanup
+## Idempotency: Stale Conversion Cleanup
 
 The pipeline is safe to re-run. Before creating Phase 2 transactions, it searches for and deletes any existing resources with conversion reference patterns:
 - Invoices matching `CONV-INV-*`
@@ -126,7 +126,7 @@ If calling manually, either:
 Accounting systems often produce rounding differences when converting between currencies. A source TB may show $1,234.57 but the sum of individual conversion invoices totals $1,234.56.
 
 **Rules:**
-1. Always use the source's exact amounts — never round or truncate
+1. Always use the source's exact amounts; never round or truncate
 2. If the source has amounts to more than 2 decimal places, use them as-is (Jaz supports up to 6 decimals on unit prices)
 3. If a rounding difference exists after all transactions are created, add a small adjustment journal
 
@@ -136,7 +136,7 @@ If the source calculates tax differently from Jaz (e.g., tax per line item vs ta
 ## Partial Payments in AR/AP Aging
 
 ### Quick Conversion
-The AR/AP Aging report shows **outstanding amounts only**. Partial payments are already factored in — the aging shows what's still owed.
+The AR/AP Aging report shows **outstanding amounts only**. Partial payments are already factored in: the aging shows what's still owed.
 
 Create conversion invoices/bills for the outstanding amount, not the original amount. Historical payments are not relevant.
 
@@ -162,17 +162,17 @@ If the AR Aging shows a negative amount for a customer, they have a credit balan
 3. Include in the TTB journal as a credit to AR
 
 ### Negative AP (Supplier Credit Balance)
-Same logic — create a supplier credit note or include in TTB.
+Same logic: create a supplier credit note or include in TTB.
 
 ## System-Generated Accounts
 
 When doing a CoA wipe-and-replace on a fresh org:
 
 ### Accounts That Cannot Be Deleted
-- **Retained Earnings** — system-controlled, used for year-end close
-- **Unrealized Currency Gain/Loss** — system auto-creates for FX revaluation
-- **Rounding** — system account for rounding adjustments
-- **Bank accounts linked to payment methods** — must unlink first
+- **Retained Earnings**: system-controlled, used for year-end close
+- **Unrealized Currency Gain/Loss**: system auto-creates for FX revaluation
+- **Rounding**: system account for rounding adjustments
+- **Bank accounts linked to payment methods**: must unlink first
 
 ### Discovery
 ```
@@ -191,29 +191,29 @@ Check for `isSystemGenerated: true` flag. These must be preserved.
 If a conversion goes wrong mid-execution:
 
 ### For Invoices/Bills
-- `DELETE /api/v1/invoices/<id>` — deletes the invoice (conversion invoices can be deleted directly)
-- `DELETE /api/v1/bills/<id>` — deletes the bill
-- `DELETE /api/v1/customer-credit-notes/<id>` — deletes customer CN
-- `DELETE /api/v1/supplier-credit-notes/<id>` — deletes supplier CN
+- `DELETE /api/v1/invoices/<id>`: deletes the invoice (conversion invoices can be deleted directly)
+- `DELETE /api/v1/bills/<id>`: deletes the bill
+- `DELETE /api/v1/customer-credit-notes/<id>`: deletes customer CN
+- `DELETE /api/v1/supplier-credit-notes/<id>`: deletes supplier CN
 
 ### For Journals
-- `DELETE /api/v1/journals/<id>` — deletes the journal entry
+- `DELETE /api/v1/journals/<id>`: deletes the journal entry
 
 ### For Contacts/Items
-- `DELETE /api/v1/contacts/<id>` — only if no transactions reference them
-- `DELETE /api/v1/items/<id>` — only if no transactions reference them
+- `DELETE /api/v1/contacts/<id>`: only if no transactions reference them
+- `DELETE /api/v1/items/<id>`: only if no transactions reference them
 
 ### For CoA
-- `DELETE /api/v1/chart-of-accounts/<id>` — only if no transactions reference them
+- `DELETE /api/v1/chart-of-accounts/<id>`: only if no transactions reference them
 
 ### Automatic Rollback (Pipeline)
 The automated pipeline has built-in rollback:
 - **Phase 2 failure:** If any conversion invoice/bill/credit note fails, ALL successfully created Phase 2 resources are automatically deleted, and Phases 3-4 are skipped.
 - **Phase 3 failure:** If the TTB journal fails, ALL Phase 2 resources are automatically rolled back.
-- This ensures the org is left clean — no partial conversions with unbalanced clearing accounts.
+- This ensures the org is left clean: no partial conversions with unbalanced clearing accounts.
 
 ### Manual Rollback Strategy
 If rolling back manually:
 1. Delete in reverse order: journal → credit notes → bills → invoices → contacts → CoA
 2. Some entities may be undeletable if they have dependencies
-3. Clearing accounts MUST net to zero — never leave a partial conversion in place
+3. Clearing accounts MUST net to zero; never leave a partial conversion in place

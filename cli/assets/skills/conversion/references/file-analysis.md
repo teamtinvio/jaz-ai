@@ -3,12 +3,12 @@
 ## The Challenge
 
 Accounting exports from Xero, QuickBooks, Sage, and generic Excel are messy:
-- **Merged cells** — headers span multiple columns, category labels span rows
-- **Grouped sections** — rows grouped by account type, customer, date range
-- **Subtotals everywhere** — per group, per page, grand totals
-- **Metadata rows** — company name, report title, date range, print date (not data)
-- **Multiple data frames** — some sheets have AR and AP in different sections
-- **Inconsistent formatting** — bold totals, blank separator rows, indented sub-accounts
+- **Merged cells**: headers span multiple columns, category labels span rows
+- **Grouped sections**: rows grouped by account type, customer, date range
+- **Subtotals everywhere**: per group, per page, grand totals
+- **Metadata rows**: company name, report title, date range, print date (not data)
+- **Multiple data frames**: some sheets have AR and AP in different sections
+- **Inconsistent formatting**: bold totals, blank separator rows, indented sub-accounts
 
 The parser library handles raw cell extraction and merged cell propagation. **You** do the intelligent work of understanding the structure.
 
@@ -67,7 +67,7 @@ Quick reference for the most common types:
 | **General Ledger Detail** | Dates + account + source module + description + debit/credit per transaction. Grouped by account. |
 | **Contact List** | Names + addresses/phones/emails. No financial data. |
 | **GL Subledger** | Single control account detail (AR/AP/Intercompany). Sheet within multi-report workbook. |
-| **Platform Export (Jaz)** | CSV with UUIDs, `resource_id`, `jaz.ai` emails. **SKIP — not source data.** |
+| **Platform Export (Jaz)** | CSV with UUIDs, `resource_id`, `jaz.ai` emails. **SKIP: not source data.** |
 
 ## Common Source System Patterns
 
@@ -100,12 +100,12 @@ Quick reference for the most common types:
 ## Amount Parsing
 
 Accounting exports use various number formats:
-- `1,234.56` — standard with comma grouping
-- `(1,234.56)` — parentheses = negative (accounting convention)
-- `-1,234.56` — negative sign
-- `1234.56` — no grouping
-- `$1,234.56` — with currency symbol (strip the symbol)
-- Blank or `-` — zero / no value
+- `1,234.56`: standard with comma grouping
+- `(1,234.56)`: parentheses = negative (accounting convention)
+- `-1,234.56`: negative sign
+- `1234.56`: no grouping
+- `$1,234.56`: with currency symbol (strip the symbol)
+- Blank or `-`: zero / no value
 
 The CSV parser handles these automatically. For Excel files, SheetJS provides the numeric value directly.
 
@@ -114,7 +114,7 @@ The CSV parser handles these automatically. For Excel files, SheetJS provides th
 When analyzing a sheet, assign confidence:
 
 - **High (>80%):** Headers clearly match a known type, data structure is consistent
-- **Medium (50-80%):** Partial match — some expected columns present, some missing or renamed
-- **Low (<50%):** Ambiguous — could be multiple types, or unknown format
+- **Medium (50-80%):** Partial match (some expected columns present, some missing or renamed)
+- **Low (<50%):** Ambiguous (could be multiple types, or unknown format)
 
 Flag medium and low confidence for human review before proceeding.

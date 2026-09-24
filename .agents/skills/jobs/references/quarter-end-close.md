@@ -5,22 +5,22 @@
 ## Tools, recipes, calculators this job uses
 
 ### Orchestration
-- **`month-end-close.md`** — invoked 3× in standalone mode (months 1, 2, 3 of the quarter) before quarterly extras.
+- **`month-end-close.md`**: invoked 3× in standalone mode (months 1, 2, 3 of the quarter) before quarterly extras.
 
-### Platform tools — quarterly extras
-- **`generate_vat_ledger(startDate: <Q-start>, endDate: <Q-end>)`** — Q1 GST/VAT filing prep: full quarterly tax ledger.
-- **`generate_aged_ar(endDate: <Q-end>)`** — Q2 ECL formal review input.
-- **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`** — Q2 ECL top-up if material.
-- **`search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: {between: [<Q-start>, <Q-end>]}})`** — Q3 bonus YTD pull.
-- **`create_journal(...)`** — Q3 bonus true-up adjustment (manual one-off).
-- **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits)** — Q4 IC reconciliation per pair of entities (multi-org coordination — see the `intercompany` recipe).
-- **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable — see `building-blocks.md` § Filter limits) + `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** — Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
-- **`generate_trial_balance(endDate: <Q-end>)`** — verification.
-- **`update_account(resourceId: <CoA root>, lockDate: <Q-end>)`** — final lock.
+### Platform tools: quarterly extras
+- **`generate_vat_ledger(startDate: <Q-start>, endDate: <Q-end>)`**, Q1 GST/VAT filing prep: full quarterly tax ledger.
+- **`generate_aged_ar(endDate: <Q-end>)`**: Q2 ECL formal review input.
+- **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`**: Q2 ECL top-up if material.
+- **`search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: {between: [<Q-start>, <Q-end>]}})`**: Q3 bonus YTD pull.
+- **`create_journal(...)`**: Q3 bonus true-up adjustment (manual one-off).
+- **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable; see `building-blocks.md` § Filter limits)**: Q4 IC reconciliation per pair of entities (multi-org coordination; see the `intercompany` recipe).
+- **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable; see `building-blocks.md` § Filter limits) + `bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`**: Q5 finalize each provision capsule's quarter-end DRAFT unwinding journals.
+- **`generate_trial_balance(endDate: <Q-end>)`**: verification.
+- **`update_account(resourceId: <CoA root>, lockDate: <Q-end>)`**: final lock.
 
 ### Calculators (cross-check, no API key needed)
-- **`clio calc ecl --current --30d --60d --90d --120d --rates --json`** — Q2 ECL.
-- **`clio calc provision`** — Q5 provision recompute (verification).
+- **`clio calc ecl --current --30d --60d --90d --120d --rates --json`**: Q2 ECL.
+- **`clio calc provision`**: Q5 provision recompute (verification).
 
 ### Cross-references
 - Org inputs this job needs (confirm with the user when not already on file): the GST scheme (`quarterly` | `monthly` | `not-registered`), the materiality threshold, any intercompany arrangements, the bonus policy, and the ECL loss-rate matrix.
@@ -31,7 +31,7 @@
 
 ## Standalone vs Incremental
 
-- **Standalone (default):** Generates full plan — all month-end steps for months 1-3, then quarterly extras. Use when months haven't been closed yet.
+- **Standalone (default):** Generates full plan: all month-end steps for months 1-3, then quarterly extras. Use when months haven't been closed yet.
 - **Incremental** (`--incremental`): Quarterly extras only. Use when all 3 months are already closed and locked.
 
 Months MUST be closed in order. Month 1 locked → Month 2 close → Month 2 locked → Month 3 close. Quarterly extras assume the 3 monthly closes are complete and current.
@@ -40,13 +40,13 @@ Months MUST be closed in order. Month 1 locked → Month 2 close → Month 2 loc
 
 Standalone: run all month-end steps for months 1-3 (Phase 1-5), then the quarterly extras (Phase 6), then quarterly verification + lock (Phase 7-8). Incremental (`--incremental` on the local CLI): quarterly extras only. (Local CLI: `clio jobs quarter-end --period 2025-Q1` prints the same phased checklist.)
 
-## Phase 1-5 — Monthly closes (×3) — IF standalone
+## Phase 1-5: Monthly closes (×3), IF standalone
 
 Invoke `month-end-close.md` job for each of months 1, 2, 3 of the quarter. By end of phase 5: all 3 months individually closed + locked.
 
-## Phase 6 — Quarterly extras
+## Phase 6: Quarterly extras
 
-### Q1 — GST/VAT filing preparation
+### Q1: GST/VAT filing preparation
 
 ```
 generate_vat_ledger(startDate: '2025-01-01', endDate: '2025-03-31')
@@ -59,13 +59,13 @@ Save the quarter's VAT ledger. Verify:
 For SG: file F5 via myTax Portal within 1 month of Q-end. Box mappings:
 - Box 1 (Total Sales): total revenue including zero-rated and exempt
 - Box 6 (Output Tax): tax-ledger output total
-- Box 7 (Input Tax): tax-ledger input total (net of blocked input tax — see `gst-vat-filing.md` step 4)
+- Box 7 (Input Tax): tax-ledger input total (net of blocked input tax; see `gst-vat-filing.md` step 4)
 
 For PH: file BIR Form 2550Q within 25 days of Q-end. Quarterly total = sum of the 3 monthly Form 2550M filings.
 
 Full step-by-step in `gst-vat-filing.md`.
 
-### Q2 — ECL formal review
+### Q2: ECL formal review
 
 ```
 generate_aged_ar(endDate: '2025-03-31')
@@ -80,9 +80,9 @@ execute_recipe(...)
 update_journal(resourceId: <ecl journal>, saveAsDraft: false)
 ```
 
-Save the ECL analysis for the quarter — the auditor will request it each quarter.
+Save the ECL analysis for the quarter; the auditor will request it each quarter.
 
-### Q3 — Bonus accrual true-up
+### Q3: Bonus accrual true-up
 
 If the org has a bonus policy with an estimation method:
 
@@ -92,19 +92,19 @@ search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: {between: ['202
 
 Sum YTD accruals. Re-estimate full-year bonus per current performance data. If revised quarterly estimate ≠ already-accrued amount: post manual `create_journal` true-up against `Bonus Expense` / `Bonus Payable` for the delta.
 
-### Q4 — Intercompany reconciliation
+### Q4: Intercompany reconciliation
 
 If the org has intercompany arrangements:
 
 For each arrangement (per pair of entities):
-1. Per-entity TB pull: `generate_trial_balance(endDate: '2025-03-31')` under EACH entity's org credentials (multi-org work — see the `intercompany` recipe).
+1. Per-entity TB pull: `generate_trial_balance(endDate: '2025-03-31')` under EACH entity's org credentials (multi-org work; see the `intercompany` recipe).
 2. Verify `Entity A's IC Receivable balance == Entity B's IC Payable balance` (sign flipped).
 3. Investigate discrepancies (timing, FX, missing posting).
 4. If settling balances: post `create_cash_out` in payer org + `create_cash_in` (or invoice payment) in payee org.
 
 Full pattern in the `intercompany` recipe.
 
-### Q5 — Provision unwinding finalize
+### Q5: Provision unwinding finalize
 
 For each active IAS 37 provision capsule:
 
@@ -114,10 +114,10 @@ search_capsules(filter: {status: {eq: 'ACTIVE'}})
 
 Per capsule: this period's quarter-end unwinding DRAFT journals (3 monthly DRAFTs from `provision` recipe execution) should already be in the capsule. Verify and finalize:
 
-> **STOP — this step cannot be scoped, and must not be automated.** Narrowing journals to one
+> **STOP: this step cannot be scoped, and must not be automated.** Narrowing journals to one
 > capsule is not possible: `JournalFilter` declares no `capsuleResourceId`, a journal row carries no
 > capsule link even at `view: 'full'` or on `GET /journals/{id}`, and `GET /capsules/{id}` returns
-> only `totalTransactions` — a count (all measured 2026-09-07). A search by date and status alone
+> only `totalTransactions`, a count (all measured 2026-09-07). A search by date and status alone
 > returns **every** matching DRAFT in the org, including drafts a practitioner deliberately parked,
 > so feeding it to `bulk_update_journals(items: [{resourceId, saveAsDraft: false}])` or `delete_journal` would finalize or
 > destroy unrelated work. Surface the capsule and its expected journal count to the practitioner and
@@ -125,7 +125,7 @@ Per capsule: this period's quarter-end unwinding DRAFT journals (3 monthly DRAFT
 
 If the user determines remeasurement is needed (cash-flow estimate changed, discount rate moved): recompute, post the adjustment, reverse the remaining DRAFT unwinding journals, and re-execute the `provision` recipe with the new inputs.
 
-## Phase 7 — Quarterly verification
+## Phase 7: Quarterly verification
 
 ```
 generate_trial_balance(endDate: '2025-03-31')
@@ -140,7 +140,7 @@ Save the quarter's reports. Quarterly-specific assertions:
 - `Bonus Liability` reasonable vs YTD accrual + true-ups.
 - IC balances net to zero across paired entities (Q4 verification).
 
-## Phase 8 — Lock the quarter
+## Phase 8: Lock the quarter
 
 Run completeness gates (drafts must be zero) per `month-end-close.md` step 17 pattern, then:
 
@@ -165,6 +165,6 @@ update_account(resourceId: <CoA root>, lockDate: '2025-03-31')
 
 ## Cross-references
 
-- `month-end-close.md` — Phase 1-5 invokes it 3×.
-- `gst-vat-filing.md` — the Q1 detail.
-- `year-end-close.md` — invokes this job 4× (one per quarter) in standalone annual close.
+- `month-end-close.md`: Phase 1-5 invokes it 3×.
+- `gst-vat-filing.md`: the Q1 detail.
+- `year-end-close.md`: invokes this job 4× (one per quarter) in standalone annual close.

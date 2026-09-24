@@ -6,7 +6,7 @@ Complete reference for all 76 command groups. Organized by domain.
 
 ## Transactions
 
-### `clio invoices` — Sales invoices
+### `clio invoices`: Sales invoices
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -17,13 +17,13 @@ Complete reference for all 76 command groups. Organized by domain.
 | `delete <id>` | |
 | `pay <id>` | `--amount`, `--transaction-amount`, `--account`, `--method`, `--ref`, `--date` |
 | `apply-credits <id>` | `--credit-note`, `--amount` |
-| `download <id>` | `--json` — returns the PDF URL; writes no file |
-| `draft list` | `--max-rows N`, `--ids`, `--json` — ⚠️ fans out 1 attachment lookup per draft (5 in flight); pass `--max-rows 10` for spot checks |
+| `download <id>` | `--json`: returns the PDF URL; writes no file |
+| `draft list` | `--max-rows N`, `--ids`, `--json`: ⚠️ fans out 1 attachment lookup per draft (5 in flight); pass `--max-rows 10` for spot checks |
 | `draft finalize <id>` | `--account`, `--input` |
-| `bulk-upsert` | `--input <file>`, `--json` — **FLAT** shape (one line per row via `itemDescription`+`totalAmount`+`invoiceAccountResourceId`). Async → jobId. `currencyCode` REQUIRED |
-| `bulk-upsert-line-items` | `--input <file>`, `--json` — **NESTED** shape (multi-line per row via `lineItems[]`). Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert` | `--input <file>`, `--json`: **FLAT** shape (one line per row via `itemDescription`+`totalAmount`+`invoiceAccountResourceId`). Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert-line-items` | `--input <file>`, `--json`: **NESTED** shape (multi-line per row via `lineItems[]`). Async → jobId. `currencyCode` REQUIRED |
 
-### `clio bills` — Purchase bills
+### `clio bills`: Purchase bills
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -34,12 +34,12 @@ Complete reference for all 76 command groups. Organized by domain.
 | `delete <id>` | |
 | `pay <id>` | `--amount`, `--transaction-amount`, `--account`, `--method`, `--ref`, `--date` |
 | `apply-credits <id>` | `--credit-note`, `--amount` |
-| `draft list` | `--max-rows N`, `--ids`, `--json` — same attachment fan-out warning as invoices |
+| `draft list` | `--max-rows N`, `--ids`, `--json`: same attachment fan-out warning as invoices |
 | `draft finalize <id>` | `--account`, `--input` |
-| `bulk-upsert` | `--input <file>`, `--json` — **FLAT** shape. Async → jobId. `currencyCode` REQUIRED |
-| `bulk-upsert-line-items` | `--input <file>`, `--json` — **NESTED** shape. Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert` | `--input <file>`, `--json`: **FLAT** shape. Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert-line-items` | `--input <file>`, `--json`: **NESTED** shape. Async → jobId. `currencyCode` REQUIRED |
 
-### `clio customer-credit-notes` — Customer credit notes
+### `clio customer-credit-notes`: Customer credit notes
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -50,11 +50,11 @@ Complete reference for all 76 command groups. Organized by domain.
 | `delete <id>` | |
 | `refund <id>` | `--amount`, `--account`, `--method`, `--ref`, `--date` |
 | `refunds <id>` | List refunds for a credit note |
-| `download <id>` | `--json` — returns the PDF URL; writes no file |
+| `download <id>` | `--json`: returns the PDF URL; writes no file |
 | `draft list` | `--max-rows N`, `--ids`, `--json` |
-| `bulk-upsert` | `--input <file>`, `--json` — Nested `lineItems[]`. Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert` | `--input <file>`, `--json`: Nested `lineItems[]`. Async → jobId. `currencyCode` REQUIRED |
 
-### `clio supplier-credit-notes` — Supplier credit notes
+### `clio supplier-credit-notes`: Supplier credit notes
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -66,9 +66,9 @@ Complete reference for all 76 command groups. Organized by domain.
 | `refund <id>` | `--amount`, `--account`, `--method`, `--ref`, `--date` |
 | `refunds <id>` | List refunds for a credit note |
 | `draft list` | `--max-rows N`, `--ids`, `--json` |
-| `bulk-upsert` | `--input <file>`, `--json` — Nested `lineItems[]`. Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert` | `--input <file>`, `--json`: Nested `lineItems[]`. Async → jobId. `currencyCode` REQUIRED |
 
-### `clio journals` — Journal entries
+### `clio journals`: Journal entries
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -79,9 +79,9 @@ Complete reference for all 76 command groups. Organized by domain.
 | `delete <id>` | |
 | `transfer-trial-balance` (alias: `ttb`) | `--date`, `--entries`, `--input`, `--currency`, `--exchange-rate`, `--rate-direction` |
 | `draft list` | `--max-rows N`, `--ids`, `--json` |
-| `bulk-upsert` | `--input <file>`, `--json` — ⚠️ Natural key is `journalReference` (NOT `reference`); legs use `journalEntries[]` (NOT `entries[]`); each leg is `organizationAccountResourceId` (NOT `accountResourceId`) + exactly one of `debitAmount`/`creditAmount` (NOT `amount`+`type`), omitting the unused side. No `currencyCode` on journal rows. Async → jobId |
+| `bulk-upsert` | `--input <file>`, `--json`: ⚠️ Natural key is `journalReference` (NOT `reference`); legs use `journalEntries[]` (NOT `entries[]`); each leg is `organizationAccountResourceId` (NOT `accountResourceId`) + exactly one of `debitAmount`/`creditAmount` (NOT `amount`+`type`), omitting the unused side. No `currencyCode` on journal rows. Async → jobId |
 
-### `clio cash-in` — Direct cash-in entries
+### `clio cash-in`: Direct cash-in entries
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -91,10 +91,10 @@ Complete reference for all 76 command groups. Organized by domain.
 | `update <id>` | `--date`, `--ref`, `--entries`, `--input` |
 | `delete <id>` | |
 
-### `clio cash-out` — Direct cash-out entries
+### `clio cash-out`: Direct cash-out entries
 Same subcommands and flags as `cash-in`.
 
-### `clio cash-transfer` — Cash transfers between accounts
+### `clio cash-transfer`: Cash transfers between accounts
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -103,7 +103,7 @@ Same subcommands and flags as `cash-in`.
 | `create` | `--from-account`, `--to-account`, `--amount`, `--date`, `--ref` (generated when omitted), `--input` |
 | `delete <id>` | |
 
-### `clio payments` — Cashflow transactions (read-only)
+### `clio payments`: Cashflow transactions (read-only)
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -112,7 +112,7 @@ Same subcommands and flags as `cash-in`.
 | `update <id>` | `--date`, `--reference`, `--input` |
 | `delete <id>` | |
 
-### `clio cashflow` — Cashflow search
+### `clio cashflow`: Cashflow search
 | Subcommand | Key flags |
 |------------|-----------|
 | `search` | `--from`, `--to`, `--type`, `--direction`, `--ref`, `--sort`, `--order`, `--limit`, `--offset`, `--all` |
@@ -121,7 +121,7 @@ Same subcommands and flags as `cash-in`.
 
 ## Contacts & Configuration
 
-### `clio contacts` — Customers and suppliers
+### `clio contacts`: Customers and suppliers
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -130,9 +130,9 @@ Same subcommands and flags as `cash-in`.
 | `create` | `--name`, `--customer`, `--supplier`, `--email`, `--phone`, `--input` |
 | `update <id>` | `--name`, `--email`, `--phone`, `--input` |
 | `delete <id>` | |
-| `bulk-upsert` | `--input <file>`, `--json` — async, returns jobId; poll `clio background-jobs get <jobId>` |
+| `bulk-upsert` | `--input <file>`, `--json`: async, returns jobId; poll `clio background-jobs get <jobId>` |
 
-### `clio contact-groups` — Contact grouping
+### `clio contact-groups`: Contact grouping
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -142,7 +142,7 @@ Same subcommands and flags as `cash-in`.
 | `update <id>` | `--name` |
 | `delete <id>` | |
 
-### `clio accounts` — Chart of accounts
+### `clio accounts`: Chart of accounts
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -151,7 +151,7 @@ Same subcommands and flags as `cash-in`.
 | `create` | `--name`, `--code`, `--type`, `--currency`, `--status`, `--input` |
 | `delete <id>` | |
 
-### `clio items` — Products and services
+### `clio items`: Products and services
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -161,7 +161,7 @@ Same subcommands and flags as `cash-in`.
 | `update <id>` | Same as create flags |
 | `delete <id>` | |
 
-### `clio tags` — Transaction tags
+### `clio tags`: Transaction tags
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -171,13 +171,13 @@ Same subcommands and flags as `cash-in`.
 | `update <id>` | `--name` |
 | `delete <id>` | |
 
-### `clio currencies` — Organization currencies
+### `clio currencies`: Organization currencies
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--format`, `--json` |
 | `add <codes...>` | e.g., `clio currencies add EUR GBP` |
 
-### `clio currency-rates` — Exchange rates
+### `clio currency-rates`: Exchange rates
 | Subcommand | Key flags |
 |------------|-----------|
 | `list <code>` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -185,7 +185,7 @@ Same subcommands and flags as `cash-in`.
 | `update <code> <rateId>` | `--rate`, `--rate-direction`, `--from`, `--to` |
 | `bulk-upsert` | `--input <file>` (max 500 rates; requires `rateDirection` per rate) |
 
-### `clio tax-profiles` — Tax profiles and tax types
+### `clio tax-profiles`: Tax profiles and tax types
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -196,12 +196,12 @@ Same subcommands and flags as `cash-in`.
 | `types` | List available tax type codes |
 | `wht-codes` | List withholding tax codes |
 
-### `clio filing-submissions` — Tax return filings (read-only, 1 tool)
+### `clio filing-submissions`: Tax return filings (read-only, 1 tool)
 | Subcommand | Key flags |
 |------------|-----------|
 | `search` | `--form-type`, `--lifecycle-status`, `--period-year`, `--due-from`, `--due-to`, `--filter` (any other filing filter field, e.g. `{"periodType":{"eq":"QUARTERLY"}}`), `--sort`, `--order`, `--limit`, `--offset`, `--all` |
 
-### `clio custom-fields` — Custom field definitions
+### `clio custom-fields`: Custom field definitions
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -211,9 +211,9 @@ Same subcommands and flags as `cash-in`.
 | `update <id>` | `--name` |
 | `delete <id>` | |
 
-`--field-format` picks the kind of field: `CUSTOM` (default) is free text; `ALL_CUSTOMERS` / `ALL_SUPPLIERS` / `ALL_CONTACTS` / `ALL_EMPLOYEES` / `ALL_USERS` make it a picklist of that population. The datatype is derived from it, not chosen — there is no NUMBER or DATE field. Send at least one applicability flag or the field appears on nothing.
+`--field-format` picks the kind of field: `CUSTOM` (default) is free text; `ALL_CUSTOMERS` / `ALL_SUPPLIERS` / `ALL_CONTACTS` / `ALL_EMPLOYEES` / `ALL_USERS` make it a picklist of that population. The datatype is derived from it, not chosen; there is no NUMBER or DATE field. Send at least one applicability flag or the field appears on nothing.
 
-### `clio catalogs` — Price catalogs
+### `clio catalogs`: Price catalogs
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -225,7 +225,7 @@ Same subcommands and flags as `cash-in`.
 
 `update` is a FULL REPLACEMENT: pass `--input` with the complete body (get it first), because omitting `items` or `contactGroupResourceIds` drops them. `create` rejects a body with no items.
 
-### `clio bookmarks` — Organization bookmarks
+### `clio bookmarks`: Organization bookmarks
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -233,7 +233,7 @@ Same subcommands and flags as `cash-in`.
 | `create` | `--name`, `--category`, `--value`, `--input` |
 | `update <id>` | `--name`, `--value` |
 
-### `clio nano-classifiers` — Tracking categories
+### `clio nano-classifiers`: Tracking categories
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -247,7 +247,7 @@ Same subcommands and flags as `cash-in`.
 
 ## Employee Claims & Settings
 
-### `clio claims` — Employee-expense claims
+### `clio claims`: Employee-expense claims
 | Subcommand | Key flags |
 |------------|-----------|
 | `search` | `--status`, `--employee-resource-id`, `--contact-resource-id`, `--reference`, `--from`, `--to`, `--sort`, `--order` |
@@ -256,18 +256,18 @@ Same subcommands and flags as `cash-in`.
 | `update <id>` | partial; `--items` non-empty REPLACES all lines, `--submit` |
 | `submit` / `approve` / `unpost <id>` | lifecycle (server-enforced transitions) |
 | `reject` / `cancel <id>` | `--reason` (1-1000), required |
-| `bulk-submit` / `bulk-approve` / `bulk-delete` | `--ids <csv>` (1-500) — async, returns jobId |
-| `bulk-reject` / `bulk-cancel` | `--ids <csv>`, `--reason` — async, returns jobId |
+| `bulk-submit` / `bulk-approve` / `bulk-delete` | `--ids <csv>` (1-500): async, returns jobId |
+| `bulk-reject` / `bulk-cancel` | `--ids <csv>`, `--reason`: async, returns jobId |
 | `delete <id>` | DRAFT / REJECTED / CANCELLED only |
 | `delete-attachment <id> <attId>` | remove one receipt |
-| `from-attachment` | `--file` / `--source-url` / `--html` (inline or `@path`) — OCR a receipt into a DRAFT claim (async) |
+| `from-attachment` | `--file` / `--source-url` / `--html` (inline or `@path`): OCR a receipt into a DRAFT claim (async) |
 | `preview-conversion` | `--ids`, `--posting-rule`, `--payout-flow` |
 | `convert` | `--ids`, `--value-date`*, `--posting-rule`, `--include-payout`, `--idempotency-key` |
 | `record-payout` | `--employee`, `--amount`, `--payment-account`, `--payout-for` (REIMBURSEMENT / ADVANCE) |
 | `payouts` | `--employee-resource-id`, `--employee-name`, `--reference`, `--payout-status`, `--payout-type` |
 | `tracking-tags` / `custom-field-values` | picker arrays |
 
-### `clio employees` — Claim members
+### `clio employees`: Claim members
 | Subcommand | Key flags |
 |------------|-----------|
 | `search` | `--name`, `--email`, `--active`, `--claim-profile-resource-id`, `--sort`, `--order` |
@@ -277,26 +277,26 @@ Same subcommands and flags as `cash-in`.
 | `update <id>` | `--name`, `--email`, `--phone`, `--manager`, `--claim-profile`, `--employment-type`, `--user` (link/relink), `--archive` / `--activate`, `--clear-email`, `--clear-phone`, `--clear-manager`, `--clear-employment-type`, `--unlink-user` |
 | `bind-user <id> <userId>` | bind a login user to an offline employee (no user yet); relink or unlink via `update` |
 | `delete <id>` | only if settled (no outstanding balance) |
-| `preprocess <fileUrl>` | `--file-type` (CSV / XLS / XLSX) — preview rows before import |
-| `import` | `--create` / `--update` / `--delete` (JSON arrays) — async, returns jobId |
+| `preprocess <fileUrl>` | `--file-type` (CSV / XLS / XLSX): preview rows before import |
+| `import` | `--create` / `--update` / `--delete` (JSON arrays): async, returns jobId |
 
 EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPORARY` · `CONSULTANT`
 
-### `clio claim-types` — Expense categories (master data)
+### `clio claim-types`: Expense categories (master data)
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` / `get <id>` / `search` | `--limit`, `--offset`, `--all`, `--json` |
 | `create` | `--name`, `--expense-account <id>`, `--tax-profile <id>` |
 | `update <id>` / `delete <id>` | partial update; default-protected delete |
 
-### `clio claim-profiles` — Per-employee spend policies (master data)
+### `clio claim-profiles`: Per-employee spend policies (master data)
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` / `get <id>` / `search` | `--limit`, `--offset`, `--all`, `--json` |
 | `create` | `--name` (+ approval / limit / account options) |
 | `update <id>` / `delete <id>` | partial update; cannot delete the org default |
 
-### `clio posting-rules` — Claim→journal grouping (master data)
+### `clio posting-rules`: Claim→journal grouping (master data)
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` / `get <id>` / `search` | `--limit`, `--offset`, `--all`, `--json` |
@@ -309,7 +309,7 @@ EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPO
 
 ## Bank & Reconciliation
 
-### `clio bank` — Bank accounts and records
+### `clio bank`: Bank accounts and records
 | Subcommand | Key flags |
 |------------|-----------|
 | `accounts` | `--limit`, `--json` |
@@ -319,7 +319,7 @@ EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPO
 | `import <accountId> <file>` | `--file`, `--account`, Supports CSV, OFX, XLS, XLSX |
 | `auto-recon` | `--type`, `--entries`, READ-ONLY reconciliation suggestions. `--type <workflow>` and `--entries <id,...>` are both REQUIRED (per-entry; no account-wide mode). `--account` optional. |
 
-### `clio bank-rules` — Bank reconciliation rules
+### `clio bank-rules`: Bank reconciliation rules
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -331,13 +331,13 @@ EmploymentType: `FULL_TIME` · `PART_TIME` · `CONTRACTOR` · `INTERN` · `TEMPO
 
 Dynamic strings in rules: `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescription}}`
 
-**A rule without a condition is never suggested.** `--search-filter` is the rule's WHEN side; auto-reconciliation only considers rules whose stored condition is non-null, so a rule created without one exists, lists and applies by hand but is never offered. On `update` the condition is the one field a full-replacement PUT need not resend: **omit `--search-filter` and the stored condition is kept**, pass `--clear-search-filter` to remove it. Shape: `{"version":1,"raw":"description:grab","parsed":{"description":{"contains":"grab"}}}` — `raw` may be blank.
+**A rule without a condition is never suggested.** `--search-filter` is the rule's WHEN side; auto-reconciliation only considers rules whose stored condition is non-null, so a rule created without one exists, lists and applies by hand but is never offered. On `update` the condition is the one field a full-replacement PUT need not resend: **omit `--search-filter` and the stored condition is kept**, pass `--clear-search-filter` to remove it. Shape: `{"version":1,"raw":"description:grab","parsed":{"description":{"contains":"grab"}}}`; `raw` may be blank.
 
 ---
 
 ## Fixed Assets & Inventory
 
-### `clio fixed-assets` (alias: `fa`) — Fixed asset management
+### `clio fixed-assets` (alias: `fa`): Fixed asset management
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -350,63 +350,63 @@ Dynamic strings in rules: `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescripti
 | `sell <id>` | `--id`, `--depreciation-end-date`, `--sale-type`, `--gain-loss-account` |
 | `transfer <id>` | `--date`, `--type` |
 | `undo-disposal <id>` | Reverse a discard or sale |
-| `bulk-upsert` | `--input <file>`, `--json` — ⚠️ Date field is `valueDate` (NOT `purchaseDate` — that's the GET response field; bulk request uses `valueDate`). `cost`/`purchaseAmount` synonyms accepted. `effectiveLife`/`usefulLifeMonths` synonyms accepted. Required: `reference`, `registrationType` ("NEW" or "TRANSFER"). Async → jobId |
+| `bulk-upsert` | `--input <file>`, `--json`: ⚠️ Date field is `valueDate` (NOT `purchaseDate`: that's the GET response field; bulk request uses `valueDate`). `cost`/`purchaseAmount` synonyms accepted. `effectiveLife`/`usefulLifeMonths` synonyms accepted. Required: `reference`, `registrationType` ("NEW" or "TRANSFER"). Async → jobId |
 
-### `clio reconciliations` (alias: `recon`) — Bank reconciliation actions (8 tools)
-2 async + 6 sync. Sync endpoints are NOT idempotent — re-running creates duplicate journals.
+### `clio reconciliations` (alias: `recon`): Bank reconciliation actions (8 tools)
+2 async + 6 sync. Sync endpoints are NOT idempotent: re-running creates duplicate journals.
 
 | Subcommand | Type | Key flags |
 |------------|------|-----------|
-| `quick-reconcile` | async | `--input <file>` — bulk match BSEs to journals (max 500) |
-| `bank-rule` | async | `--input <file>` — apply bank rule action to BSEs (max 500) |
-| `direct-cash-entry` | sync | `--input <file>` — single cash-in/out line; direction inferred from BSE sign |
-| `cash-journal` | sync | `--input <file>` — multi-line cashflow journal (max 200 lines) |
-| `manual-journal` | sync | `--input <file>` — ⚠️ caller provides ONLY offset side; backend auto-adds bank-side leg. Sending both → 422 unbalanced |
-| `cash-transfer` | sync | `--input <file>` — inter-account transfer; `accountResourceId` is counterparty |
-| `invoice-receipt` | sync | `--input <file>` — ⚠️ requires BSE from `bank import` (BANK_STATEMENT_ENTRY type). `bank add-records` BSEs (BANK_RECORD type) → 422 "Invalid business transaction type" |
-| `bill-receipt` | sync | `--input <file>` — same BSE-type warning as invoice-receipt |
+| `quick-reconcile` | async | `--input <file>`: bulk match BSEs to journals (max 500) |
+| `bank-rule` | async | `--input <file>`: apply bank rule action to BSEs (max 500) |
+| `direct-cash-entry` | sync | `--input <file>`: single cash-in/out line; direction inferred from BSE sign |
+| `cash-journal` | sync | `--input <file>`: multi-line cashflow journal (max 200 lines) |
+| `manual-journal` | sync | `--input <file>`: ⚠️ caller provides ONLY offset side; backend auto-adds bank-side leg. Sending both → 422 unbalanced |
+| `cash-transfer` | sync | `--input <file>`: inter-account transfer; `accountResourceId` is counterparty |
+| `invoice-receipt` | sync | `--input <file>`: ⚠️ requires BSE from `bank import` (BANK_STATEMENT_ENTRY type). `bank add-records` BSEs (BANK_RECORD type) → 422 "Invalid business transaction type" |
+| `bill-receipt` | sync | `--input <file>`: same BSE-type warning as invoice-receipt |
 
-### `clio drafts` — Server-side draft lifecycle (3 tools)
+### `clio drafts`: Server-side draft lifecycle (3 tools)
 Bulk-friendly: one call accepts mixed btTypes (max 500). NOT idempotent on already-promoted drafts (422).
 
 | Subcommand | Type | Key flags |
 |------------|------|-----------|
-| `validate` | sync | `--input <file>` — pre-flight; returns per-item errors. Idempotent. |
-| `convert-to-active` | async | `--input <file>` — promote DRAFT → ACTIVE. Async → jobId |
-| `submit-for-approval` | async | `--input <file>` — route into approval workflow. Async → jobId |
+| `validate` | sync | `--input <file>`: pre-flight; returns per-item errors. Idempotent. |
+| `convert-to-active` | async | `--input <file>`: promote DRAFT → ACTIVE. Async → jobId |
+| `submit-for-approval` | async | `--input <file>`: route into approval workflow. Async → jobId |
 
 Body shape (all 3): `{ items: [{ btResourceId, btType }] }` with `btType ∈ {SALE | PURCHASE | SALE_CREDIT_NOTE | PURCHASE_CREDIT_NOTE}`.
 
-### `clio approvals` — Approve, or send back for changes (4 tools)
+### `clio approvals`: Approve, or send back for changes (4 tools)
 The other end of `drafts submit-for-approval`. Approving POSTS THE LEDGER and is one-shot; there is nothing to undo.
 
 | Subcommand | Type | Key flags |
 |------------|------|-----------|
-| `approve <id>` | sync | `-e/--entity` — invoices, bills, customer-credit-notes, supplier-credit-notes |
+| `approve <id>` | sync | `-e/--entity`: invoices, bills, customer-credit-notes, supplier-credit-notes |
 | `bulk-approve` | async | `-e/--entity`, `--ids a,b,c` (1-100, no duplicates). Async → jobId |
-| `request-changes <id>` | sync | `-e/--entity` (wider set), `-m/--message` REQUIRED — opens the thread, only record of the reason |
+| `request-changes <id>` | sync | `-e/--entity` (wider set), `-m/--message` REQUIRED: opens the thread, only record of the reason |
 | `bulk-request-changes` | async | `-e/--entity`, `--ids` (1-500), `-m/--message`. Async → jobId |
 
 `request-changes` accepts more families than `approve`: also `purchase-orders`, `purchase-requests`, `sale-orders`, `sale-quotes`, `claims`.
 
-**Exit codes carry the outcome, because a refusal is not always an error.** Credit notes refuse with HTTP 200, `isSuccess:false`, and an `approvalStatus` that still reads `APPROVED` — the document's state, not the call's. `0` = approved · `1` = refused, UNCONFIRMED, **or your input was rejected before anything was sent** · `2` = API error. Never read HTTP 200 or `approvalStatus` as success.
+**Exit codes carry the outcome, because a refusal is not always an error.** Credit notes refuse with HTTP 200, `isSuccess:false`, and an `approvalStatus` that still reads `APPROVED` (the document's state, not the call's). `0` = approved · `1` = refused, UNCONFIRMED, **or your input was rejected before anything was sent** · `2` = API error. Never read HTTP 200 or `approvalStatus` as success.
 
 Exit 1 carries three meanings here, so **read the JSON, not the number**: a refusal or UNCONFIRMED writes an outcome to **stdout** (`{"approved": false}` / `null`), while a rejected input writes `{"error":{"code":"VALIDATION_ERROR"}}` to **stderr** and nothing to stdout. Only the first two mean the request reached the API.
 
 Claims approve via `clio claims approve` (a different endpoint), not through this group.
 
-### `clio purchase-items` — Purchase-side catalog (read-only, 3 tools)
+### `clio purchase-items`: Purchase-side catalog (read-only, 3 tools)
 What the organization can be billed for. No create/update/delete upstream; maintain via `clio items`.
 
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--max-rows` |
-| `get <resourceId>` | — |
-| `search` | `--name`, `--reference`, `--currency-code` — all EXACT plain-string matches |
+| `get <resourceId>` | none |
+| `search` | `--name`, `--reference`, `--currency-code`: all EXACT plain-string matches |
 
-No free-text `--query`: the endpoint rejects it (`The query field is not supported for this entity`). Filters here are **plain strings, not expression objects** — `PurchaseItemFilter` declares them as bare `string`, so there is no `contains`. `purchaseResourceId` and `resourceId` also exist upstream and are reachable via `--filter`.
+No free-text `--query`: the endpoint rejects it (`The query field is not supported for this entity`). Filters here are **plain strings, not expression objects**: `PurchaseItemFilter` declares them as bare `string`, so there is no `contains`. `purchaseResourceId` and `resourceId` also exist upstream and are reachable via `--filter`.
 
-### `clio navigate` (alias: `nav`) — Dashboard deep links (offline, 1 tool)
+### `clio navigate` (alias: `nav`): Dashboard deep links (offline, 1 tool)
 ```
 clio navigate                                    # discover: all destinations, capped
 clio navigate --query invoice --kind modal      # discover: narrow the search
@@ -414,7 +414,7 @@ clio navigate reports.profit-and-loss            # build: a screen link
 clio navigate sales.modal.view-sale --resource-id <id>   # build: focus one record
 clio navigate reports.profit-and-loss --org-id <orgResourceId>
 ```
-**Offline** — no API key, no request. The route manifest is generated in the dashboard and committed here.
+**Offline**: no API key, no request. The route manifest is generated in the dashboard and committed here.
 
 Omit the destination to SEARCH; give one to BUILD a link. Discovery caps its output and reports the true total, so narrow with `--query`, `--resource` or `--kind` when it says it truncated.
 
@@ -422,53 +422,53 @@ The `--query` search bridges accounting vocabulary to dashboard vocabulary: `inv
 
 `--resource-id` attaches a record and is valid only on a record-modal destination (`<resource>.modal.view-*`); a screen rejects it rather than silently dropping it. An unknown key comes back with near-matches.
 
-The URL is the only thing on stdout — the label goes to stderr — so `clio nav <key> | pbcopy` copies a link and nothing else. Links carry no `&org=` unless you pass `--org-id`; without it the link opens in whichever organization the reader is already viewing.
+The URL is the only thing on stdout (the label goes to stderr), so `clio nav <key> | pbcopy` copies a link and nothing else. Links carry no `&org=` unless you pass `--org-id`; without it the link opens in whichever organization the reader is already viewing.
 
-### `clio modules` — Which features are enabled for the organization (read-only, 2 tools)
+### `clio modules`: Which features are enabled for the organization (read-only, 2 tools)
 Provisioned upstream; no create/update/delete exists.
 
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--max-rows` |
-| `get <resourceId>` | — |
+| `get <resourceId>` | none |
 
 `roleCodes` is the column that matters: a module can be enabled and still deny the caller, because access is per role. "The module is on" and "I can use it" are different questions.
 
-### `clio report-templates` — Saved report layouts (read-only, 3 tools)
+### `clio report-templates`: Saved report layouts (read-only, 3 tools)
 Authored in the dashboard; no create/update/delete exists.
 
 | Subcommand | Key flags |
 |------------|-----------|
-| `list` | `--json`, `--format` — **no paging flags, deliberately** |
-| `get <resourceId>` | — |
-| `search` | `--report-type`, `--report-category`, `--default`, `--filter`, `--sort`, `--order` — **no paging flags** |
+| `list` | `--json`, `--format`: **no paging flags, deliberately** |
+| `get <resourceId>` | none |
+| `search` | `--report-type`, `--report-category`, `--default`, `--filter`, `--sort`, `--order`: **no paging flags** |
 
 Neither `list` nor `search` declares `--limit`/`--offset`/`--all`/`--max-rows`: both ignore them upstream, returning the full set in one response regardless. The flags are omitted rather than accepted-and-ignored.
 
 Two of the three search filters 500 upstream today (measured 2026-09-07): `--report-category` fails alone but works when `--report-type` is also supplied, and `--default` fails. `--report-type` alone is reliable.
 
-`templateConfiguration` is a JSON **string**, not an object — read it with `--json`.
+`templateConfiguration` is a JSON **string**, not an object; read it with `--json`.
 
-### `clio pseudo-sql` (alias: `sql`) — Read-only SQL over the curated reporting tables (6 tools)
-A restricted SQL subset against Jaz's curated reporting schema, **not** the customer's database. SELECT only, single statement, 16384-char cap — the engine rejects DML, so there is no write verb.
+### `clio pseudo-sql` (alias: `sql`): Read-only SQL over the curated reporting tables (6 tools)
+A restricted SQL subset against Jaz's curated reporting schema, **not** the customer's database. SELECT only, single statement, 16384-char cap; the engine rejects DML, so there is no write verb.
 
 | Subcommand | Key flags |
 |------------|-----------|
 | `preview [query]` | `--input <file>` |
 | `export [query]` | `--input <file>`, `--out <abs-path>`, `--download`, `--no-wait`, `--timeout <s>` |
-| `export-status <jobId>` | — |
-| `schema [table]` | — |
-| `syntax` | — |
+| `export-status <jobId>` | none |
+| `schema [table]` | none |
+| `syntax` | none |
 
-The query comes from a positional argument, `--input <file>`, or stdin (`cat q.sql | clio sql preview`) — pick one; passing two is refused.
+The query comes from a positional argument, `--input <file>`, or stdin (`cat q.sql | clio sql preview`). Pick one; passing two is refused.
 
 `preview` caps at 100 rows upstream and renders at most 8 columns (use `--json` for all). Its `truncated` flag means MORE ROWS MATCH, not that the returned rows were cut.
 
 `export` waits for the job by default and prints a pre-signed URL that expires in ~15 minutes; `--out` (absolute paths only) or `--download` writes the CSV instead. `--no-wait` returns the jobId for `export-status` and cannot be combined with `--out`/`--download`/`--timeout`, which it would otherwise ignore. Anything other than a delivered file exits non-zero, including a COMPLETED job whose download failed.
 
-`schema <table>` scopes the catalog to one table plus the joins touching it, and recomputes its counts. Table and column names come from here, syntax rules from `syntax` — both served by one endpoint.
+`schema <table>` scopes the catalog to one table plus the joins touching it, and recomputes its counts. Table and column names come from here, syntax rules from `syntax` (both served by one endpoint).
 
-### `clio inventory` (alias: `inv`) — Inventory tracking
+### `clio inventory` (alias: `inv`): Inventory tracking
 | Subcommand | Key flags |
 |------------|-----------|
 | `items` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -481,7 +481,7 @@ All seven of `--item-code`, `--name`, `--unit`, `--costing-method`, `--cogs-acco
 
 ## Subscriptions & Schedulers
 
-### `clio subscriptions` (alias: `subs`) — Recurring subscriptions
+### `clio subscriptions` (alias: `subs`): Recurring subscriptions
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -492,7 +492,7 @@ All seven of `--item-code`, `--name`, `--unit`, `--costing-method`, `--cogs-acco
 | `cancel <id>` | |
 | `search-scheduled` | `--limit`, `--offset`, `--all` |
 
-### `clio schedulers` — Scheduled (recurring) transactions
+### `clio schedulers`: Scheduled (recurring) transactions
 | Subcommand | Key flags |
 |------------|-----------|
 | `list-invoices` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -508,7 +508,7 @@ Dynamic strings in schedulers: `{{Day}}`, `{{Date}}`, `{{Date+X}}`, `{{DateRange
 
 ## Reports & Exports
 
-### `clio reports` — Generate financial reports
+### `clio reports`: Generate financial reports
 ```
 clio reports generate <type> [flags]
 ```
@@ -526,9 +526,9 @@ Types: `trial-balance`, `balance-sheet`, `profit-loss`, `cashflow`, `aged-ar`, `
 | `--all` / `--max-rows` | GL only: fetch every row in row-offset pages of `--limit` (default 1000), optionally stopping at `--max-rows` |
 | `--account <id...>` | GL only: only these accounts (repeatable, max 100) |
 
-Also: `clio reports pdf` — generate PDF from a message/document.
+Also: `clio reports pdf` (generate PDF from a message/document).
 
-### `clio exports` — Data export downloads
+### `clio exports`: Data export downloads
 | Subcommand | Key flags |
 |------------|-----------|
 | `download` | `--type`, `--start-date`, `--end-date`, `--currency`, `--tags`, `--contact` |
@@ -537,13 +537,13 @@ Also: `clio reports pdf` — generate PDF from a message/document.
 
 ## AI & Automation
 
-### `clio magic` — AI document extraction
+### `clio magic`: AI document extraction
 | Subcommand | Key flags |
 |------------|-----------|
 | `create` | one of `--file <path>` / `--url <url>` / `--html <string\|@file>`; `--type` (invoice, bill, credit-note-customer, credit-note-supplier, sale-quote, sale-order, purchase-request, purchase-order); `--merged` (split a multi-doc PDF; not for quotes/orders/requests); `--internal-notes` (max 3000). Max 10 MB per file. `--html` takes raw HTML (e.g. an email body), rendered to a PDF server-side. Encrypted PDFs: `name__pw__password.pdf`. |
 | `status <workflowIds>` | Comma-separated workflow IDs |
 
-### `clio quick-fix <entity>` — Bulk-update transactions
+### `clio quick-fix <entity>`: Bulk-update transactions
 Entities: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `journals`, `cash-entries`, `sale-schedules`, `purchase-schedules`, `subscription-schedules`, `journal-schedules`, and with `--line-items` only: `sale-orders`, `sale-quotes`, `purchase-orders`, `purchase-requests`
 
 | Flag | Purpose |
@@ -554,7 +554,7 @@ Entities: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`,
 | `--date`, `--due`, `--tag`, `--contact`, `--account`, `--tax-profile` | Shorthand flags |
 | `--input <file>` | Full request body from file |
 
-### `clio ledger-find-fix` — Find & fix (recode) records across types, preview one change, apply it once
+### `clio ledger-find-fix`: Find & fix (recode) records across types, preview one change, apply it once
 Types: `INVOICE`, `BILL`, `CUSTOMER_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE`, `JOURNAL`, `CASH_ENTRY`
 
 | Subcommand | Key flags |
@@ -562,7 +562,7 @@ Types: `INVOICE`, `BILL`, `CUSTOMER_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE`, `JOURN
 | `preview` | `--level` (`TRANSACTIONS`: contact, date, capsule, tags; `LINE_ITEMS`: account, classifiers; required), `--filter <json>`, `--change <json>`, `--input <file>` (`{"filter": …, "change": …}`; the flags replace its keys), `--json` |
 | `apply <previewId>` | `--jot`, `--json`. Runs the preview once, within 30 minutes. Type it as `apply -- <previewId>`: a previewId can start with `-`, which would read as an option. Options go before `--`: `apply --json -- <previewId>`. Exits 1 unless every record changed (PARTIAL, FAILED, UNKNOWN) |
 
-### `clio unapplied-payments` — Cash not yet applied to invoices or bills
+### `clio unapplied-payments`: Cash not yet applied to invoices or bills
 Every write after `record` takes `--hash` (from `search` or the last write). A lost answer prints UNCONFIRMED with the read-back and exits 2 (never re-run it blind).
 
 | Subcommand | Key flags |
@@ -578,7 +578,7 @@ Every write after `record` takes `--hash` (from `search` or the last write). A l
 | `unbatch <id>` | `--hash`. Deletes it, keeps its payment records |
 | `reconcile` | `--bank-record`, `--method`, `--contact`, `--reference`, `--amount` (must equal the bank record), `--rate` |
 
-### `clio capsules` — Transaction grouping
+### `clio capsules`: Transaction grouping
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -588,7 +588,7 @@ Every write after `record` takes `--hash` (from `search` or the last write). A l
 | `update <id>` | `--title`, `--input` |
 | `delete <id>` | |
 
-### `clio capsule-transaction` (alias: `ct`) — Transaction recipes
+### `clio capsule-transaction` (alias: `ct`): Transaction recipes
 13 IFRS-compliant recipe subcommands. Each runs a calculator, creates a capsule, and posts all transactions.
 
 Subcommands: `loan`, `lease`, `depreciation`, `prepaid-expense`, `deferred-revenue`, `fx-reval`, `ecl`, `provision`, `fixed-deposit`, `asset-disposal`, `accrued-expense`, `leave-accrual`, `dividend`
@@ -601,7 +601,7 @@ Each subcommand has calculator-specific required options (e.g., `--principal`, `
 
 ## Calculators (Offline)
 
-### `clio calc` — 13 financial calculators
+### `clio calc`: 13 financial calculators
 All calculators work offline (no auth). Use `--json` for structured output.
 
 | Subcommand | Required flags |
@@ -626,7 +626,7 @@ Common optional flags: `--start-date`, `--currency`, `--json`
 
 ## Jobs (Offline Blueprints + Online Tools)
 
-### `clio jobs` — 12 job blueprints + tools
+### `clio jobs`: 12 job blueprints + tools
 Blueprints are offline (no auth). Tools require auth.
 
 | Subcommand | Type | Key flags |
@@ -666,17 +666,17 @@ Batch create via `--input` file or stdin (`{ "entries": [...] }`, 1-100 per call
 
 ## Organization
 
-### `clio org` — Organization info
+### `clio org`: Organization info
 | Subcommand | Key flags |
 |------------|-----------|
 | `info` | `--json` (shows name, ID, currency, country, lock date, fiscal year) |
 
-### `clio references` — Document numbering series
+### `clio references`: Document numbering series
 | Subcommand | Key flags |
 |------------|-----------|
 | `next` | `--type` (SALE, SALE_CREDIT_NOTE, PURCHASE, PURCHASE_CREDIT_NOTE, FIXED_ASSET, JOURNAL_MANUAL, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER, CLAIM), `--json`. Reading does not reserve the number; to number a create, pass the create command its own auto-ref flag |
 
-### `clio org-users` — User management
+### `clio org-users`: User management
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
@@ -685,63 +685,63 @@ Batch create via `--input` file or stdin (`{ "entries": [...] }`, 1-100 per call
 | `update <id>` | `--role`, `--input` |
 | `remove <id>` | |
 
-### `clio auth` — Authentication
+### `clio auth`: Authentication
 See SKILL.md Auth Precedence section for full details.
 
 ---
 
 ## Utilities
 
-### `clio attachments` — Transaction attachments
+### `clio attachments`: Transaction attachments
 | Subcommand | Key flags |
 |------------|-----------|
 | `list` | `--type` (invoices, bills, journals, etc.), `--id` |
 | `add` | `--type`, `--id`, `<file>` |
 | `delete <attachmentId>` | `--type`, `--id` (the transaction; the attachment id is positional) |
 
-`list` renders the tabular view — pass `--format table` (the default) or `--format csv`.
+`list` renders the tabular view: pass `--format table` (the default) or `--format csv`.
 
-### `clio help-center` (alias: `hc`) — Help center search
+### `clio help-center` (alias: `hc`): Help center search
 ```
 clio hc <query>          # Hybrid search (embeddings + keyword)
 clio hc "bank recon" --section settings --limit 3
 ```
 
-### `clio context` — Agent reference data
+### `clio context`: Agent reference data
 ```
 clio context                        # All reference data
 clio context --workflow sales       # Sales workflow only
 clio context -w purchases --json   # JSON output
 ```
 
-### `clio export-records` — Export to XLSX
+### `clio export-records`: Export to XLSX
 | Subcommand | Key flags |
 |------------|-----------|
-| `columns <entityType>` | `--json` — list exportable columns with paths and types |
+| `columns <entityType>` | `--json`: list exportable columns with paths and types |
 | `preview <entityType>` | `--query`, `--filter`, `--columns`, `--sort-field`, `--sort-dir`, `--json` |
 | `download <entityType>` | `--query`, `--filter`, `--columns`, `--sort-field`, `--sort-dir`, `--json` |
 
 Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, SALE_PAYMENT, PURCHASE_PAYMENT, BATCH_PAYMENT, CONTACT, ITEM, CAPSULE, SCHEDULED_TRANSACTION, JOURNAL, BANK_RECORD, CASHFLOW_TRANSACTION, FIXED_ASSET, CHART_OF_ACCOUNT, TAX_PROFILE. `--query` and `--filter` are mutually exclusive. Returns pre-signed URL (expires ~5 min).
 
-### `clio background-jobs` — Background job tracking
+### `clio background-jobs`: Background job tracking
 | Subcommand | Key flags |
 |------------|-----------|
 | `search` | `--status`, `--type`, `--from`, `--to`, `--limit`, `--offset`, `--json` |
-| `get <jobId>` | `--json` — poll a specific job by ID |
+| `get <jobId>` | `--json`: poll a specific job by ID |
 
-Universal async tracker — any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
+Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
-### `clio mcp` — MCP stdio server
+### `clio mcp`: MCP stdio server
 Starts an MCP server for Claude Code / AI tool integration. Exposes all 381 operations.
 
-### `clio serve` — HTTP daemon
+### `clio serve`: HTTP daemon
 Starts the HTTP daemon for ChatKit and email channel integrations.
 
-### `clio init` — Skill installer
+### `clio init`: Skill installer
 Installs AI agent skills into your project.
 
-### `clio versions` — Version info
+### `clio versions`: Version info
 Shows CLI version, Node.js version, and platform info.
 
-### `clio update` — Self-update
+### `clio update`: Self-update
 Updates to the latest version via npm.

@@ -4,9 +4,9 @@ A bank rule's `reconcileWithDirectCashEntry` shortcut can resolve fields **per r
 
 ## Background: Bank Fields
 
-The columns referenced by `columnKey` are **Bank Fields** — typed custom columns (`DATE` / `STRING` / `AMOUNT`) defined per bank account and captured when a statement is imported. They make any statement column (branch code, bank charge, cost centre, settlement ref) first-class: usable in a rule's **conditions** (matching) and in its **outputs** (the maps below). `AMOUNT` fields keep their sign; `amountSourceColumnKey` uses the **absolute** value.
+The columns referenced by `columnKey` are **Bank Fields**: typed custom columns (`DATE` / `STRING` / `AMOUNT`) defined per bank account and captured when a statement is imported. They make any statement column (branch code, bank charge, cost centre, settlement ref) first-class: usable in a rule's **conditions** (matching) and in its **outputs** (the maps below). `AMOUNT` fields keep their sign; `amountSourceColumnKey` uses the **absolute** value.
 
-Scope note: the maps here are the rule **outputs** (what `create_bank_rule` / `update_bank_rule` set via `configuration`). The rule **conditions** (which statement lines the rule matches) are a separate field, `searchFilter`, which those same tools now set directly — `{ version: 1, raw, parsed }`, and a rule without one is never suggested by magic reconciliation. See jaz-api skill rule 90d for the condition grammar. The older linked-search-shortcut path (`relatedSearchShortcutResourceIds`) was retired upstream and is not exposed by this API.
+Scope note: the maps here are the rule **outputs** (what `create_bank_rule` / `update_bank_rule` set via `configuration`). The rule **conditions** (which statement lines the rule matches) are a separate field, `searchFilter`, which those same tools now set directly: `{ version: 1, raw, parsed }`, and a rule without one is never suggested by magic reconciliation. See jaz-api skill rule 90d for the condition grammar. The older linked-search-shortcut path (`relatedSearchShortcutResourceIds`) was retired upstream and is not exposed by this API.
 
 ## ColumnValueMapConfig shape
 
@@ -19,13 +19,13 @@ Every `*Map` field below takes the same shape:
     { "matchType": "EXACT",       "matchValue": "RENT",  "targetResourceId": "<uuid-or-tag-name>" },
     { "matchType": "CONTAINS",    "matchValue": "uber",  "targetResourceId": "<uuid>" },
     { "matchType": "STARTS_WITH", "matchValue": "INV-",  "targetResourceId": "<uuid>" },
-    { "targetResourceId": "<uuid>" }                       // catch-all default (no matchValue) — put LAST
+    { "targetResourceId": "<uuid>" }                       // catch-all default (no matchValue); put LAST
   ]
 }
 ```
 
 - `matchType`: `EXACT` | `CONTAINS` | `STARTS_WITH`, compared **case-insensitively**. Omit `matchType`/`matchValue` for a catch-all default row.
-- `mappings` are **ordered — the first matching row wins**. Always place the catch-all (blank `matchValue`) last.
+- `mappings` are **ordered: the first matching row wins**. Always place the catch-all (blank `matchValue`) last.
 - `targetResourceId` is a **resource UUID** for account/tax/classifier/contact maps, or the **tag NAME** (not a UUID) for `tagsMap`.
 
 ## Where each map field nests
@@ -33,20 +33,20 @@ Every `*Map` field below takes the same shape:
 Inside `configuration.reconcileWithDirectCashEntry`:
 
 - On the shortcut itself:
-  - `contactResourceIdMap` — "Set Contact by" (overrides `contactResourceId` when it resolves).
-  - `tagsMap` — "Set Tag by" (appends a tag, target = tag NAME, in addition to static `tags`).
+  - `contactResourceIdMap`: "Set Contact by" (overrides `contactResourceId` when it resolves).
+  - `tagsMap`: "Set Tag by" (appends a tag, target = tag NAME, in addition to static `tags`).
 - On each `fixedAllocation[]` line:
-  - `amountSourceColumnKey` — "Set amount by": take the line's amount from the **absolute value** of a custom AMOUNT column. **Mutually exclusive with `amount`** — omit `amount` when this is set (sending both is rejected).
-  - `organizationAccountResourceIdMap` — "Set Account by" (in lieu of a static `organizationAccountResourceId`).
-  - `taxProfileResourceIdMap` — "Set Tax by".
-  - `classifierConfigMap` — "Set Classifier by" (target = nano-classifier / classifier class UUID; see `list_nano_classifiers`).
+  - `amountSourceColumnKey`, "Set amount by": take the line's amount from the **absolute value** of a custom AMOUNT column. **Mutually exclusive with `amount`**; omit `amount` when this is set (sending both is rejected).
+  - `organizationAccountResourceIdMap`: "Set Account by" (in lieu of a static `organizationAccountResourceId`).
+  - `taxProfileResourceIdMap`: "Set Tax by".
+  - `classifierConfigMap`: "Set Classifier by" (target = nano-classifier / classifier class UUID; see `list_nano_classifiers`).
 
 ## Reference-string column tokens
 
 `reference` (and `name`) also support custom-column tokens beyond `{{bankReference}}`/`{{bankPayee}}`/`{{bankDescription}}`:
 
-- `{{column:<key>}}` — the column value, signed.
-- `{{column_abs:<key>}}` — the absolute value (use for AMOUNT columns).
+- `{{column:<key>}}`: the column value, signed.
+- `{{column_abs:<key>}}`: the absolute value (use for AMOUNT columns).
 
 ## Example
 
@@ -72,4 +72,4 @@ Inside `configuration.reconcileWithDirectCashEntry`:
 }
 ```
 
-Types live in `src/core/api/bank-rules.ts` (`ColumnValueMapConfig`, `ColumnValueMapEntry`). `configuration` is sent in full on every create/update (full replacement — see Rule 90b).
+Types live in `src/core/api/bank-rules.ts` (`ColumnValueMapConfig`, `ColumnValueMapEntry`). `configuration` is sent in full on every create/update (full replacement; see Rule 90b).

@@ -38,7 +38,7 @@
 **Pattern**: Transaction documents AND payments use `valueDate`. Bank records use `transactionDate`. Reports use `startDate`/`endDate`.
 **CORRECTION**: Payments use `valueDate` (NOT `paymentDate` as previously documented).
 **FORMAT**: All dates MUST be `YYYY-MM-DD` strings (e.g., `"2026-02-08"`). ISO datetime and epoch ms are rejected. OAS may declare `integer/int64` but strings work.
-**TIMEZONE**: All business dates (`valueDate`, `dueDate`, `startDate`, `endDate`, etc.) are in the **organization's timezone** — both in requests and responses. No timezone conversion is ever needed. Only audit timestamps (`createdAt`, `updatedAt`) are UTC.
+**TIMEZONE**: All business dates (`valueDate`, `dueDate`, `startDate`, `endDate`, etc.) are in the **organization's timezone**, both in requests and responses. No timezone conversion is ever needed. Only audit timestamps (`createdAt`, `updatedAt`) are UTC.
 
 ### Date Format Matrix (Request vs Response)
 
@@ -49,7 +49,7 @@
 | Search filter datetimes (`DateTimeExpression`) | Inbound | RFC3339 string | `{ "createdAt": { "gte": "2026-01-01T00:00:00Z" } }` |
 | **ALL response dates** | **Outbound** | **`int64` epoch milliseconds** | `"valueDate": 1707868800000` |
 
-**CRITICAL**: ALL dates in API responses are `int64` epoch milliseconds — including `valueDate`, `createdAt`, `updatedAt`, `approvedAt`, `submittedAt`, `matchDate`, `startDate`, `endDate`, `lastScheduleDate`, `nextScheduleDate`. To convert: `new Date(epochMs).toISOString().slice(0, 10)` → `"2026-02-14"`. Business dates are stored as org-timezone epoch (no conversion needed) — only `createdAt`/`updatedAt` are UTC.
+**CRITICAL**: ALL dates in API responses are `int64` epoch milliseconds, including `valueDate`, `createdAt`, `updatedAt`, `approvedAt`, `submittedAt`, `matchDate`, `startDate`, `endDate`, `lastScheduleDate`, `nextScheduleDate`. To convert: `new Date(epochMs).toISOString().slice(0, 10)` → `"2026-02-14"`. Business dates are stored as org-timezone epoch (no conversion needed); only `createdAt`/`updatedAt` are UTC.
 
 **Which fields use DateExpression (YYYY-MM-DD) vs DateTimeExpression (RFC3339)**:
 - `DateExpression`: `valueDate`, `dueDate`, `startDate`, `endDate`, `purchaseDate`, `matchDate`, `approvedAt`, `submittedAt`, `depreciationStartDate`, `depreciationEndDate`, `disposalValueDate`, `proratedStartDate`, `lastScheduleDate`, `nextScheduleDate`
@@ -83,7 +83,7 @@ These aliases are applied by middleware on POST/PUT endpoints. The alias is only
 | `apiKey` header | `x-jk-api-key` | API-key route only; OAuth uses Authorization: Bearer |
 | `org.id` | `data[0].resourceId` | Org endpoint returns a LIST |
 | `org.baseCurrency` | `data[0].currency` | Not `baseCurrency` |
-| `org.country` | `data[0].country` | ISO 2-letter code. NOT `countryCode` — that name is a deprecated alias, is optional, and may be absent from the response |
+| `org.country` | `data[0].country` | ISO 2-letter code. NOT `countryCode`; that name is a deprecated alias, is optional, and may be absent from the response |
 
 ---
 
@@ -93,10 +93,10 @@ These aliases are applied by middleware on POST/PUT endpoints. The alias is only
 |------------------|-------------------|---------|
 | `chartOfAccounts` (upsert body) | `accounts` | POST bulk-upsert wrapper |
 | `currencyCode` (in POST) | `currency` | POST body (GET returns `currencyCode`!) |
-| `accountClass` or `accountType` | `classificationType` | POST body — uses `accountType` values |
+| `accountClass` or `accountType` | `classificationType` | POST body, uses `accountType` values |
 | `type` | `accountType` | GET response field |
 | `class` | `accountClass` | GET response field |
-| `accountNumber` | `code` | String, can be null. **Codes differ between orgs — match by name, not code** |
+| `accountNumber` | `code` | String, can be null. **Codes differ between orgs; match by name, not code** |
 
 ### classificationType → accountType Mapping
 
@@ -128,20 +128,20 @@ When POSTing, `classificationType` must be one of these exact strings (same as `
 | `"Income Tax Expense"` | Expense |
 | `"Discontinued Expense"` | Expense |
 
-COGS maps to `"Direct Costs"` — "Cost of Goods Sold" is the default account name shipped in the CoA template, not a type.
+COGS maps to `"Direct Costs"`; "Cost of Goods Sold" is the default account name shipped in the CoA template, not a type.
 
 ### Account Create (POST /chart-of-accounts) Fields
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `accountType` | `classificationType` | **Alias `accountType` accepted** — resolved to `classificationType` |
+| `accountType` | `classificationType` | **Alias `accountType` accepted**, resolved to `classificationType` |
 | `currencyCode` | `currency` | POST body uses `currency` (NOT `currencyCode`). **GET response returns `currencyCode`!** Asymmetric. |
-| `accountName` | `name` | Account display name — must be unique within org (409 on duplicate) |
+| `accountName` | `name` | Account display name, must be unique within org (409 on duplicate) |
 | `accountNumber` | `code` | Optional string. System may auto-assign if omitted. |
 
 **Foreign-currency accounts**: Pass `currency: "USD"` (or any enabled currency code) to create a foreign-currency account. Omit `currency` to default to org base currency. Useful for creating foreign-currency bank accounts (e.g., `classificationType: "Bank Accounts"` + `currency: "USD"`).
 
-**Bank account creation shortcut**: `classificationType: "Bank Accounts"` makes the account immediately appear in the bank accounts list and usable for payments, cash entries, and bank record imports. No separate "bank account" endpoint — it's all CoA.
+**Bank account creation shortcut**: `classificationType: "Bank Accounts"` makes the account immediately appear in the bank accounts list and usable for payments, cash entries, and bank record imports. No separate "bank account" endpoint; it's all CoA.
 
 ---
 
@@ -149,8 +149,8 @@ COGS maps to `"Direct Costs"` — "Cost of Goods Sold" is the default account na
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `isCustomer` | `customer` | Plain boolean — NOT `isCustomer` |
-| `isSupplier` | `supplier` | Plain boolean — NOT `isSupplier` |
+| `isCustomer` | `customer` | Plain boolean, NOT `isCustomer` |
+| `isSupplier` | `supplier` | Plain boolean, NOT `isSupplier` |
 | `contactType: "customer"` | `customer: true` | Boolean, not enum |
 | `contactType: "supplier"` | `supplier: true` | Boolean, not enum |
 | `defaultCurrencyCode` | `currency` | ISO code string |
@@ -196,9 +196,9 @@ COGS maps to `"Direct Costs"` — "Cost of Goods Sold" is the default account na
 | `qty` (line item) | `quantity` | Count |
 | `taxId` (line item) | `taxProfileResourceId` | Tax profile UUID |
 | `accountId` (line item) | `accountResourceId` | CoA UUID (required if !saveAsDraft) |
-| `isDraft` | `saveAsDraft` | Boolean — defaults to `false`. Omitting creates a finalized transaction. |
+| `isDraft` | `saveAsDraft` | Boolean, defaults to `false`. Omitting creates a finalized transaction. |
 | `currencyCode: "USD"` (string for FX) | SILENTLY IGNORED | Creates invoice in base currency! No error returned |
-| `currency: "USD"` (string for FX) | CAUSES 400 ERROR | "Invalid request body" — string form rejected |
+| `currency: "USD"` (string for FX) | CAUSES 400 ERROR | "Invalid request body"; string form rejected |
 | `currency` (object form) | `currency: { sourceCurrency, exchangeRate }` | **ONLY working form** for FX transactions |
 
 ---
@@ -226,28 +226,28 @@ COGS maps to `"Direct Costs"` — "Cost of Goods Sold" is the default account na
 | `lines` | `journalEntries` | Same |
 | `entries` | `journalEntries` | Same |
 | `debit` / `credit` (entry) | `amount` + `type` | `amount`: number, `type`: `"DEBIT"` or `"CREDIT"` (UPPERCASE) |
-| `currency: "USD"` (string) | `currency: { sourceCurrency: "USD" }` | **Object form** — same as invoices/bills. Auto-fetches platform rate. Add `exchangeRate: 0.74` for custom rate. Omit for base currency. |
+| `currency: "USD"` (string) | `currency: { sourceCurrency: "USD" }` | **Object form**, same as invoices/bills. Auto-fetches platform rate. Add `exchangeRate: 0.74` for custom rate. Omit for base currency. |
 
 ### Bulk upsert (`POST /journals/bulk-upsert`)
 
-DIFFERENT shape from single create — easier to confuse.
+DIFFERENT shape from single create, easier to confuse.
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `reference` | `journalReference` | Natural key — bulk uses `journalReference` (asymmetric vs other entities which use `<entity>Reference`) |
-| `entries` | `journalEntries` | Array of legs — same name as single create |
+| `reference` | `journalReference` | Natural key; bulk uses `journalReference` (asymmetric vs other entities which use `<entity>Reference`) |
+| `entries` | `journalEntries` | Array of legs, same name as single create |
 | `accountResourceId` (leg) | `organizationAccountResourceId` | **The leg account field is NOT `accountResourceId`.** Single create uses `accountResourceId`; bulk uses `organizationAccountResourceId`. Sending the single-create name is silently dropped and the row fails `INVALID_ACCOUNT_TO_IMPORT_JOURNAL` with `columnValue: null`. |
-| `amount` + `type: "DEBIT"` | `debitAmount` / `creditAmount` (separate fields per leg) | Split numeric fields, NOT amount+type. **Send exactly one side and OMIT the other** — do not set the unused side to 0. Both present → `BOTH_CREDIT_AND_DEBIT_ON_A_JOURNAL_ENTRY_LINE_IS_NOT_ALLOWED`; both zero or `<= 0` → rejected too. Neither present → `INVALID_CREDIT_AND_DEBIT_AMOUNT`. |
+| `amount` + `type: "DEBIT"` | `debitAmount` / `creditAmount` (separate fields per leg) | Split numeric fields, NOT amount+type. **Send exactly one side and OMIT the other**; do not set the unused side to 0. Both present → `BOTH_CREDIT_AND_DEBIT_ON_A_JOURNAL_ENTRY_LINE_IS_NOT_ALLOWED`; both zero or `<= 0` → rejected too. Neither present → `INVALID_CREDIT_AND_DEBIT_AMOUNT`. |
 | `rowIndex` on the row | `rowIndex` on the **leg** | 1-based, caller-supplied, echoed back in per-row `errorDetails`. It is a leg field for journals, not a row field. |
-| `currency: { ... }` (object) | *(no currency field)* | **Journals are the exception to the `currencyCode` rule** — the bulk journal row has no currency field at all and any `currencyCode` sent is discarded. The public request model exposes no per-leg currency field either, so how a bulk journal carries a non-base currency is not expressible through this endpoint; verify against the spec before advising on it. |
+| `currency: { ... }` (object) | *(no currency field)* | **Journals are the exception to the `currencyCode` rule**: the bulk journal row has no currency field at all and any `currencyCode` sent is discarded. The public request model exposes no per-leg currency field either, so how a bulk journal carries a non-base currency is not expressible through this endpoint; verify against the spec before advising on it. |
 
 ---
 
 ## Fixed Assets
 
-### Bulk upsert (`POST /fixed-assets/bulk-upsert`) — REQUEST shape
+### Bulk upsert (`POST /fixed-assets/bulk-upsert`): REQUEST shape
 
-⚠️ **Both dates are EPOCH MILLISECONDS, not `YYYY-MM-DD`.** `purchaseDate` and `depreciationStartDate` are integers on this endpoint (every other bulk-upsert takes `YYYY-MM-DD`). A date string returns a generic 400 "Invalid request body" with no detail. There is no `valueDate`, `cost`, `usefulLifeMonths`, `currencyCode`, `tags` or `resourceId` field here — they are silently discarded.
+⚠️ **Both dates are EPOCH MILLISECONDS, not `YYYY-MM-DD`.** `purchaseDate` and `depreciationStartDate` are integers on this endpoint (every other bulk-upsert takes `YYYY-MM-DD`). A date string returns a generic 400 "Invalid request body" with no detail. There is no `valueDate`, `cost`, `usefulLifeMonths`, `currencyCode`, `tags` or `resourceId` field here; they are silently discarded.
 
 | Field | Required? | Notes |
 |-------|-----------|-------|
@@ -272,7 +272,7 @@ DIFFERENT shape from single create — easier to confuse.
 
 ### Single create (`POST /fixed-assets`)
 
-Uses `purchaseAmount` + `purchaseDate` + `effectiveLife` + `purchaseAssetAccountResourceId` + `depreciationExpenseAccountResourceId`. CLI command `clio fixed-assets create` mirrors this. Same field names as bulk-upsert, but dates here are `YYYY-MM-DD` strings — see warning above.
+Uses `purchaseAmount` + `purchaseDate` + `effectiveLife` + `purchaseAssetAccountResourceId` + `depreciationExpenseAccountResourceId`. CLI command `clio fixed-assets create` mirrors this. Same field names as bulk-upsert, but dates here are `YYYY-MM-DD` strings; see warning above.
 
 ---
 
@@ -280,38 +280,38 @@ Uses `purchaseAmount` + `purchaseDate` + `effectiveLife` + `purchaseAssetAccount
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `bankAccountResourceId` | `accountResourceId` (top level) | The BANK account UUID — NOT `bankAccountResourceId` |
+| `bankAccountResourceId` | `accountResourceId` (top level) | The BANK account UUID, NOT `bankAccountResourceId` |
 | `amount` (flat) | `lines[].amount` | Cash entries use `lines` array (canonical). `journalEntries` is accepted as alias. |
 | `description` | NOT USED | Cash entries do not have a flat `description` field |
 | `bankAccount` | `accountResourceId` (top level) | Same as above |
 | offset account | `lines[].accountResourceId` | The offsetting account goes in `lines` |
-| (omit saveAsDraft) | `saveAsDraft` | Send `false` or omit. `true` is refused with a 422 — cash entries have no draft state |
+| (omit saveAsDraft) | `saveAsDraft` | Send `false` or omit. `true` is refused with a 422; cash entries have no draft state |
 
-## Cash Entries (LIST/GET response shape — DIFFERENT from CREATE!)
+## Cash Entries (LIST/GET response shape, DIFFERENT from CREATE!)
 
 Cash-in/out/transfer LIST and GET return **cashflow-transaction objects**, NOT journal objects:
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `resourceId` | `resourceId` | **Cashflow-transaction ID** — use for GET by ID. NOT the same as CREATE response! |
-| `reference` | `transactionReference` | NOT `reference` — different field name than journals |
+| `resourceId` | `resourceId` | **Cashflow-transaction ID**; use for GET by ID. NOT the same as CREATE response! |
+| `reference` | `transactionReference` | NOT `reference`, different field name than journals |
 | `status` | `transactionStatus` | NOT `status`. Values: `ACTIVE`, `VOID` (not `DRAFT`/`APPROVED`) |
 | `valueDate` (string) | `valueDate` (epoch ms) | **Number, NOT string!** Convert: `new Date(epochMs).toISOString().slice(0,10)` |
-| `lines` / `journalEntries` | NOT PRESENT | Cash GET responses do NOT include offset entries — only `totalAmount` |
+| `lines` / `journalEntries` | NOT PRESENT | Cash GET responses do NOT include offset entries, only `totalAmount` |
 | `amount` | `totalAmount` | The total amount of the cash entry |
 | `accountName` | `account.name` | Nested object: `{ name, resourceId, accountType, accountClass }` |
 | `bankAccountId` | `organizationAccountResourceId` | Bank account resource ID (flat field) |
 | `type` | `businessTransactionType` | `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT`, `JOURNAL_CASH_TRANSFER` |
 | `direction` | `direction` | `PAYIN` or `PAYOUT` |
-| (from CREATE) | `parentEntityResourceId` | The CREATE-returned resourceId appears here — use for DELETE |
+| (from CREATE) | `parentEntityResourceId` | The CREATE-returned resourceId appears here; use for DELETE |
 
 ## Cash Entries (UPDATE/PUT request shape)
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `bankAccount` | `accountResourceId` | **Required** — bank account resourceId. Omitting causes 500. |
-| (not needed) | `accountEntryResourceId` | Optional — auto-populated by API from existing journal entry. |
-| (not needed) | `resourceId` | Required in body — same as URL path param (`parentEntityResourceId` from CREATE). |
+| `bankAccount` | `accountResourceId` | **Required**: bank account resourceId. Omitting causes 500. |
+| (not needed) | `accountEntryResourceId` | Optional: auto-populated by API from existing journal entry. |
+| (not needed) | `resourceId` | Required in body; same as URL path param (`parentEntityResourceId` from CREATE). |
 
 PUT URL: `/cash-in-entries/:parentEntityResourceId` (or `/cash-out-entries/:id`)
 
@@ -320,8 +320,8 @@ PUT URL: `/cash-in-entries/:parentEntityResourceId` (or `/cash-out-entries/:id`)
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
 | `emails` (array) | `email` (string) | PUT accepts `email: "user@example.com"` (string). GET returns `emails: [{email, label}]` (array). Sending `emails` array → 400. |
-| `isCustomer` | `customer` | Boolean — required on PUT. |
-| `isSupplier` | `supplier` | Boolean — required on PUT. |
+| `isCustomer` | `customer` | Boolean, required on PUT. |
+| `isSupplier` | `supplier` | Boolean, required on PUT. |
 
 ### ID Mapping (CRITICAL)
 
@@ -331,7 +331,7 @@ LIST   → { resourceId: "B",          ← This is the cashflow-transaction ID (
             businessTransactionResourceId: "C",   ← underlying journal ID (don't use)
             parentEntityResourceId: "A" }          ← matches CREATE response
 GET    → accepts "B" (cashflow-transaction ID) or "A" (parentEntityResourceId)
-PUT    → expects "A" (parentEntityResourceId) — body needs resourceId: "A"
+PUT    → expects "A" (parentEntityResourceId); body needs resourceId: "A"
 DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 ```
 
@@ -341,8 +341,8 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `amount` | `paymentAmount` | **Bank account currency** — actual cash moved. NOT `amount`. |
-| (none) | `transactionAmount` | **Transaction document currency (invoice/bill/credit note)** — amount applied to balance. Equal to `paymentAmount` for same-currency. For FX: differs (e.g., USD invoice paid from SGD bank at 1.35 → `paymentAmount: 1350`, `transactionAmount: 1000`). |
+| `amount` | `paymentAmount` | **Bank account currency**: actual cash moved. NOT `amount`. |
+| (none) | `transactionAmount` | **Transaction document currency (invoice/bill/credit note)**: amount applied to balance. Equal to `paymentAmount` for same-currency. For FX: differs (e.g., USD invoice paid from SGD bank at 1.35 → `paymentAmount: 1350`, `transactionAmount: 1000`). |
 | `bankAccountResourceId` | `accountResourceId` | Canonical is `accountResourceId`. **Alias `bankAccountResourceId` now accepted on POST.** |
 | (none) | `paymentMethod` | Default: `"BANK_TRANSFER"`. Full enum: `CASH`, `BANK_TRANSFER`, `CREDIT_CARD`, `CHEQUE`, `E_WALLET`, `WITHHOLDING_TAX_CERTIFICATE`, `CLEARING_SETTLEMENT`, `DEBT_WRITE_OFF`, `INTER_COMPANY`, `OTHER`, `PAYMENT_GATEWAY` |
 | (none) | `reference` | Required: payment reference string |
@@ -350,7 +350,7 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | (flat object) | `{ payments: [...] }` | Must be wrapped in array |
 
 **Cross-currency payments**: `paymentAmount` is the bank account currency amount (actual cash moved), `transactionAmount` is the invoice/bill currency amount (applied to balance). Verified via live FX testing: USD invoice ($1000) paid from SGD bank at 1.35 rate → `paymentAmount: 1350` (SGD), `transactionAmount: 1000` (USD).
-**Bill payments**: Standalone `POST /bills/{id}/payments` was broken (nil pointer dereference) — fixed in backend PR #112. Embed-in-creation pattern is still a valid alternative.
+**Bill payments**: Standalone `POST /bills/{id}/payments` was broken (nil pointer dereference), fixed in backend PR #112. Embed-in-creation pattern is still a valid alternative.
 **Invoice payments**: Standalone `POST /invoices/{id}/payments` works fine.
 **TransactionFeeCollected**: NOT supported on bill payments (model field missing). Only invoice payments support collected fees.
 
@@ -383,8 +383,8 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `name` (in GET response) | `customFieldName` | GET returns both `customFieldName` and `name` alias. |
 | `name` (in POST body) | `name` | POST accepts `name`. |
 | `showOnPdf` | `printOnDocuments` | Required boolean |
-| `appliesTo` | `appliesTo` (OBJECT) | `{invoices,bills,customerCredits,supplierCredits,payments,contacts,employeeClaims,fixedAssets,items,purchaseOrders,saleOrders}`. SEND IT — omit it and the field appears on nothing. An ARRAY 400s, which is what the old "do not send" note measured |
-| `type` / `fieldType` / `entityType` | — (silently dropped) | Use `format`: CUSTOM = free text, ALL_* = a picklist. `datatypeCode` is derived (TEXT or LIST); there is no NUMBER/DATE/DROPDOWN field |
+| `appliesTo` | `appliesTo` (OBJECT) | `{invoices,bills,customerCredits,supplierCredits,payments,contacts,employeeClaims,fixedAssets,items,purchaseOrders,saleOrders}`. SEND IT; omit it and the field appears on nothing. An ARRAY 400s, which is what the old "do not send" note measured |
+| `type` / `fieldType` / `entityType` | none (silently dropped) | Use `format`: CUSTOM = free text, ALL_* = a picklist. `datatypeCode` is derived (TEXT or LIST); there is no NUMBER/DATE/DROPDOWN field |
 
 ### Custom Field Values on Transactions
 
@@ -406,17 +406,17 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 
 ---
 
-## Jaz Magic — Extraction & Autofill
+## Jaz Magic: Extraction & Autofill
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `file` | `sourceFile` | Multipart blob — same pattern as bank statement |
+| `file` | `sourceFile` | Multipart blob, same pattern as bank statement |
 | `type: "BILL"` | `businessTransactionType: "BILL"` | Request accepts `INVOICE` or `BILL` only |
 | Response `"BILL"` | Response `"PURCHASE"` | Response maps: `BILL` → `PURCHASE`, `INVOICE` → `SALE` |
-| JSON body | multipart/form-data | FILE mode requires multipart — JSON returns 400 |
+| JSON body | multipart/form-data | FILE mode requires multipart; JSON returns 400 |
 | Sync response | Async extraction | Response = upload confirmation; extraction & autofill run async |
 | `status` field | `subscriptionFBPath` | Firebase path for tracking extraction progress |
-| email body → save to file first | `html` + `sourceType: "HTML"` | Raw email/document HTML, rendered to PDF server-side — no file step |
+| email body → save to file first | `html` + `sourceType: "HTML"` | Raw email/document HTML, rendered to PDF server-side, no file step |
 
 **Content-Type depends on sourceType:**
 - `sourceType: "FILE"` → `Content-Type: multipart/form-data` (MUST use multipart)
@@ -453,7 +453,7 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `frequency` | `repeat` | Creation field. `"ONE_TIME"`, `"DAILY"`, `"WEEKLY"`, `"MONTHLY"`, `"YEARLY"` (`"QUARTERLY"` rejected, 422). NOT `frequency` or `interval` |
 | `interval` (response) | `interval` | Response field. Shows the recurrence after creation. Different name from creation! |
 | (flat payload) | `{ invoice: {...} }` or `{ bill: {...} }` | Document wrapped in type key |
-| `saveAsDraft: true` | `saveAsDraft: false` | MUST be false — true causes INVALID_SALE_STATUS / INVALID_PURCHASE_STATUS |
+| `saveAsDraft: true` | `saveAsDraft: false` | MUST be false; true causes INVALID_SALE_STATUS / INVALID_PURCHASE_STATUS |
 
 ---
 
@@ -461,16 +461,16 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `code` | `currencyCode` | **NOT `code`** — full field name is `currencyCode` |
-| `name` | `currencyName` | **NOT `name`** — full field name is `currencyName` |
-| `symbol` | `currencySymbol` | **NOT `symbol`** — full field name is `currencySymbol` |
-| `isBase` | `baseCurrency` | Boolean — `true` only for org's base currency |
+| `code` | `currencyCode` | **NOT `code`**; full field name is `currencyCode` |
+| `name` | `currencyName` | **NOT `name`**; full field name is `currencyName` |
+| `symbol` | `currencySymbol` | **NOT `symbol`**; full field name is `currencySymbol` |
+| `isBase` | `baseCurrency` | Boolean, `true` only for org's base currency |
 | `rateCount` | `customRateCount` | Number of org-level custom rates set for this currency |
-| `{ currencyCode: "USD" }` | `{ currencies: ["USD"] }` | Enable endpoint — array of ISO codes, NOT object form |
+| `{ currencyCode: "USD" }` | `{ currencies: ["USD"] }` | Enable endpoint: array of ISO codes, NOT object form |
 
 **CRITICAL**: The `currencyCode` field in the Currency response is NOT the same as a generic `code` field. Destructuring `{ code, name, symbol }` from a currency object gives `undefined` for all three. Always use `currencyCode`, `currencyName`, `currencySymbol`.
 
-**Enable (POST) gotchas**: Returns 400 if currency already enabled. Cannot remove currencies — one-way operation.
+**Enable (POST) gotchas**: Returns 400 if currency already enabled. Cannot remove currencies: one-way operation.
 
 ---
 
@@ -486,11 +486,11 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 | `inverseRate` | `rateSourceToFunctional` | Source→base rate in GET response |
 | `currency` (GET response) | `sourceCurrencyCode` | The foreign currency code in rate response |
 | `baseCurrency` (GET response) | `functionalCurrencyCode` | The org's base currency code in rate response |
-| `notes` (GET response) | `notes: { date, name }` | Metadata object — `date` is the creation date, `name` is the creator |
+| `notes` (GET response) | `notes: { date, name }` | Metadata object: `date` is the creation date, `name` is the creator |
 
-> **Rate direction cheat-sheet**: POST `rate` = GET `rateFunctionalToSource` = "1 base → X foreign". If your data is "1 foreign → X base", **invert before POSTing** — or set `rateDirection: "SOURCE_TO_FUNCTIONAL"` and send your figure as-is, which the endpoint applies server-side (Rule 49).
+> **Rate direction cheat-sheet**: POST `rate` = GET `rateFunctionalToSource` = "1 base → X foreign". If your data is "1 foreign → X base", **invert before POSTing**, or set `rateDirection: "SOURCE_TO_FUNCTIONAL"` and send your figure as-is, which the endpoint applies server-side (Rule 49).
 
-**Rate POST response gotcha**: `POST /organization/currencies/:code/rates` returns `{ "data": "Rate added successfully" }` — a **plain string**, NOT a CurrencyRate object. No `resourceId` is returned. To get the rate's `resourceId` for later PUT/DELETE, follow up with GET and match by `rateApplicableFrom`.
+**Rate POST response gotcha**: `POST /organization/currencies/:code/rates` returns `{ "data": "Rate added successfully" }`, a **plain string**, NOT a CurrencyRate object. No `resourceId` is returned. To get the rate's `resourceId` for later PUT/DELETE, follow up with GET and match by `rateApplicableFrom`.
 
 ---
 
@@ -577,18 +577,18 @@ DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `page` | NOT SUPPORTED | Silently ignored — use `limit`/`offset` |
-| `size` | NOT SUPPORTED | Silently ignored — use `limit`/`offset` |
+| `page` | NOT SUPPORTED | Silently ignored; use `limit`/`offset` |
+| `size` | NOT SUPPORTED | Silently ignored; use `limit`/`offset` |
 | `pageSize` | NOT SUPPORTED | Use `limit` |
 | `per_page` | NOT SUPPORTED | Use `limit` |
-| `page_number` / (page number) | `offset` (default: 0) | **offset IS the page number (0-indexed)**, not a row-skip count. `offset=0` = page 1, `offset=1` = page 2; `offset=2, limit=50` returns items 100–149. |
+| `page_number` / (page number) | `offset` (default: 0) | **offset IS the page number (0-indexed)**, not a row-skip count. `offset=0` = page 1, `offset=1` = page 2; `offset=2, limit=50` returns items 100 to 149. |
 | (default page size) | `limit` (default: 100) | Query param for GET, JSON body for POST /search |
 | (row offset) | `offset` on the exceptions only | Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`. |
 
 **GET list endpoints**: `?limit=100&offset=0` (query params)
 **POST /search endpoints**: `{ "limit": 100, "offset": 0 }` (JSON body)
-**Min/max**: limit 1–1000, offset 0–65536
-**Response**: `{ totalPages, totalElements, data: [...] }` — consistent across all endpoints
+**Min/max**: limit 1 to 1000, offset 0 to 65536
+**Response**: `{ totalPages, totalElements, data: [...] }`, consistent across all endpoints
 
 ---
 
@@ -649,7 +649,7 @@ Battle-tested patterns from production Jaz API clients:
 | `amount` | `paymentAmount` | Bank account currency amount (actual cash moved) |
 | `appliedAmount` | `transactionAmount` | Document currency amount (applied to invoice/bill balance) |
 | `paymentId` | `resourceId` | From parent document: `GET /invoices/:id` → `paymentRecords[].resourceId` |
-| `cashflowId` | ≠ `resourceId` | Cashflow transaction IDs are NOT payment IDs — different entities |
+| `cashflowId` | ≠ `resourceId` | Cashflow transaction IDs are NOT payment IDs, different entities |
 | `bankAccountId` | `accountResourceId` | Bank account for the payment |
 | `fee` | `feeAmount` (response) / `transactionFee` (update) | Response field is `feeAmount`, update field is `transactionFee` |
 | `adjustment` (cash-leg over/underpayment) | `adjustment: { adjustmentValue, adjustmentAccountResourceId, adjustmentDescription }` | Write nested; READ back flat as `adjustmentAmount` + `adjustmentOrganizationAccountResourceId`. Bank leg only |
@@ -662,7 +662,7 @@ Battle-tested patterns from production Jaz API clients:
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-------------------|-------|
-| `frequency` | `repeat` (request) / `interval` (response) | POST/PUT uses `repeat`, GET returns `interval` — same values |
+| `frequency` | `repeat` (request) / `interval` (response) | POST/PUT uses `repeat`, GET returns `interval`, same values |
 | `nextDate` | `nextScheduleDate` | Next scheduled execution date |
 | `type` | `businessTransactionType` | `SALE`, `PURCHASE`, etc. |
 | `schedule` (update) | full template | PUT accepts the full transaction template (`invoice`/`bill`/flat journal), not just schedule metadata |
@@ -675,7 +675,7 @@ Battle-tested patterns from production Jaz API clients:
 |------------------|-------------------|-------|
 | `classNames` | `classes` | CREATE: `string[]`. GET response: `[{className, resourceId}]` (objects) |
 | `name` | `type` | The classifier name/label is `type`, not `name` |
-| `isPrintable` | `printable` | Boolean, no `is` prefix. Default `false` — most classifiers are not printable |
+| `isPrintable` | `printable` | Boolean, no `is` prefix. Default `false`; most classifiers are not printable |
 | `categories` | `classes` | The "categories" or "options" are called `classes` |
 
 ## Background Jobs
@@ -684,17 +684,17 @@ Battle-tested patterns from production Jaz API clients:
 
 | What You'd Use | Actual API Field | Notes |
 |----------------|-----------------|-------|
-| `jobId` (filter) | `resourceId` | **CRITICAL**: `filter.jobId.eq` is silently ignored — returns ALL jobs. Must use `filter.resourceId.eq`. The RESPONSE field is `jobId` but the FILTER path is `resourceId`. |
-| `startedAt` (filter) | `createdAt` | `startedAt` filter is silently broken — returns null totalElements. Use `createdAt` for date range filtering. |
+| `jobId` (filter) | `resourceId` | **CRITICAL**: `filter.jobId.eq` is silently ignored, returns ALL jobs. Must use `filter.resourceId.eq`. The RESPONSE field is `jobId` but the FILTER path is `resourceId`. |
+| `startedAt` (filter) | `createdAt` | `startedAt` filter is silently broken, returns null totalElements. Use `createdAt` for date range filtering. |
 
 ## Export Records
 
 | What You'd Guess | Actual API Field | Notes |
 |------------------|-----------------|-------|
-| `url` / `downloadUrl` | `fileUrl` | Pre-signed S3 URL in export response. Expires ~5 min — download immediately. |
+| `url` / `downloadUrl` | `fileUrl` | Pre-signed S3 URL in export response. Expires ~5 min; download immediately. |
 | `description` | `filterDescription` | Human-readable summary in preview response: `"2580 records \| Status in: UNPAID"` |
 | Column name in `previewRows` | Column header string | `previewRows` keys are column **headers** (e.g., `"Invoice Ref #"`), not paths. Use `resolvedColumns` to map headers → paths. |
 
 ---
 
-*Hand-maintained and not regenerated; nothing detects it going stale — provenance and precedence rules: `search-enums.md` → Provenance and staleness. Last updated: 2026-04-09 — Added: Background Jobs (resourceId vs jobId critical trap, startedAt broken), Export Records (fileUrl, filterDescription, previewRows keying). Previous: 2026-03-13 — Payment record fields, scheduler field asymmetry, nano-classifier fields.*
+*Hand-maintained and not regenerated; nothing detects it going stale; provenance and precedence rules: `search-enums.md` → Provenance and staleness. Last updated: 2026-04-09. Added: Background Jobs (resourceId vs jobId critical trap, startedAt broken), Export Records (fileUrl, filterDescription, previewRows keying). Previous: 2026-03-13. Payment record fields, scheduler field asymmetry, nano-classifier fields.*

@@ -33,7 +33,7 @@ clio invoices pay "$INVOICE_ID" \
   --ref "PAY-042" \
   --date 2026-03-20
 
-# Verify — invoice should now show status PAID
+# Verify: invoice should now show status PAID
 clio invoices get "$INVOICE_ID" --json | jq '{status, totalAmount, amountPaid}'
 ```
 
@@ -50,7 +50,7 @@ BANK_ID="<bank-account-resourceId>"
 # Import statement file (CSV, OFX, XLS, or XLSX)
 clio bank import "$BANK_ID" ./march-2026-statement.csv
 
-# Reconciliation suggestions (READ-ONLY, per-entry — --type and --entries are required)
+# Reconciliation suggestions (READ-ONLY, per-entry; --type and --entries are required)
 ENTRY_IDS=$(clio bank records "$BANK_ID" --status UNRECONCILED --limit 20 --json | jq -r '[.data[].resourceId] | join(",")')
 clio bank auto-recon --account "$BANK_ID" --type MAGIC_MATCH --entries "$ENTRY_IDS"
 
@@ -95,7 +95,7 @@ clio reports generate aged-ap --to 2026-03-31 --json > aged-ap-mar.json
 Handle a foreign currency invoice from start to finish.
 
 ```bash
-# Add USD currency to the org (idempotent — safe to re-run)
+# Add USD currency to the org (idempotent, safe to re-run)
 clio currencies add USD
 
 # Set the exchange rate for the period.
@@ -145,7 +145,7 @@ clio fixed-assets create \
   --date 2026-01-01 \
   --input '{"depreciationMethod":"STRAIGHT_LINE","usefulLifeMonths":36,"salvageValue":0}'
 
-# Preview the depreciation schedule (offline — no auth)
+# Preview the depreciation schedule (offline, no auth)
 clio calc depreciation \
   --cost 3600 \
   --salvage 0 \
@@ -250,7 +250,7 @@ clio jobs document-collection --json
 # Or extract a single document (file, URL, or raw HTML)
 clio magic create --file ./invoice-from-supplier.pdf --type bill --json
 
-# From raw HTML — e.g. an email body (rendered to a PDF, then extracted)
+# From raw HTML, e.g. an email body (rendered to a PDF, then extracted)
 clio magic create --html @./email-body.html --type invoice --json
 
 # Check workflow status
@@ -259,6 +259,6 @@ clio magic status "wf-id-1,wf-id-2,wf-id-3" --json
 # Search past magic workflows
 clio magic status <workflowIds> --json   # comma-separated ids from `magic create`
 
-# For encrypted PDFs — embed the password in the filename via __pw__
+# For encrypted PDFs: embed the password in the filename via __pw__
 clio magic create --file ./encrypted-file__pw__secret123.pdf --type invoice --json
 ```

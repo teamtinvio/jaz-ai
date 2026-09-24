@@ -1,5 +1,5 @@
 ---
-description: "Run credit control workflow in Jaz — review aged receivables, generate overdue chase list, assess bad debts"
+description: "Run credit control workflow in Jaz: review aged receivables, generate overdue chase list, assess bad debts"
 argument-hint: "[--overdue-days 30]"
 ---
 
@@ -62,4 +62,4 @@ Review the plan output, then re-run without `--plan` to post. Entries are create
 - `--overdue-days` sets the threshold for the chase list (default: 30)
 - AR aging report uses `aged-ar` report type
 - ECL provisioning uses IFRS 9 simplified approach (5-bucket matrix)
-- No `amountDue` field on invoices — check `paymentRecords` to determine remaining balance
+- No `amountDue` field on invoices; check `paymentRecords` to determine remaining balance

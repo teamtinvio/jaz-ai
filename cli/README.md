@@ -86,7 +86,7 @@ Command groups by area:
 
 Rates read **base→source**: `1` unit of your organization's base currency `= N` units of the
 foreign one. Whether that matches how the rate was quoted to you depends on which side your base
-currency is on — an SGD-base org quoting "1 USD = 1.35 SGD" has it backwards and needs `0.74`, while
+currency is on: an SGD-base org quoting "1 USD = 1.35 SGD" has it backwards and needs `0.74`, while
 a USD-base org quoting "1 USD = 56.5 PHP" already has it right and sends `56.5` unchanged.
 
 You do not have to flip it. Pass the number as you have it and say which way it reads:
@@ -101,7 +101,7 @@ clio invoices create --currency USD --exchange-rate 0.74 ...
 ```
 
 Omit `--exchange-rate` entirely to use the organization's stored rate, or the platform daily rate
-when none is set. `clio calc fx-reval` requires `--rate-direction` explicitly — that calculator
+when none is set. `clio calc fx-reval` requires `--rate-direction` explicitly; that calculator
 takes rates in the opposite direction to the API, and guessing would silently change a number
 that ends up in a journal.
 

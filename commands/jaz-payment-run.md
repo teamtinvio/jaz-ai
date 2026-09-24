@@ -1,5 +1,5 @@
 ---
-description: "Run a batch payment processing workflow in Jaz — select outstanding bills by due date, process payments in bulk"
+description: "Run a batch payment processing workflow in Jaz: select outstanding bills by due date, process payments in bulk"
 argument-hint: "[--due-before YYYY-MM-DD]"
 ---
 

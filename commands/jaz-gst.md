@@ -1,5 +1,5 @@
 ---
-description: "Prepare GST/VAT filing in Jaz — review tax ledger, identify discrepancies, generate filing summary"
+description: "Prepare GST/VAT filing in Jaz: review tax ledger, identify discrepancies, generate filing summary"
 argument-hint: "<period YYYY-QN>"
 ---
 
@@ -50,7 +50,7 @@ The actual filing is done outside Jaz (IRAS myTax Portal for Singapore, etc.). T
 ## Key Rules
 
 - Period format: `YYYY-QN` (Q1 = Jan-Mar for standard FY)
-- GST/VAT only applies to tax-enabled transactions — `isTaxVatApplicable: true`
+- GST/VAT only applies to tax-enabled transactions (`isTaxVatApplicable: true`)
 - Output tax = collected on sales, Input tax = paid on purchases
 - Net GST payable = output tax - input tax
 - Singapore-specific: 9% GST, quarterly filing, due 1 month after quarter-end

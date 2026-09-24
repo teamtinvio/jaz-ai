@@ -20,20 +20,20 @@ Content-Type: application/json
 
 **All dates must be `YYYY-MM-DD` strings** (e.g., `"2026-02-08"`).
 
-- ISO datetime strings (e.g., `"2026-02-08T00:00:00Z"`) are REJECTED — bill payment validation returns "does not match 2006-01-02 format"
+- ISO datetime strings (e.g., `"2026-02-08T00:00:00Z"`) are REJECTED; bill payment validation returns "does not match 2006-01-02 format"
 - Epoch milliseconds are REJECTED
 - The OAS may declare some date fields as `integer/int64` (e.g., cash journals) but `YYYY-MM-DD` strings work in practice
 - Production clients send all dates as `YYYY-MM-DD` via Python `date` type
 
-**Timezone convention**: All business dates (`valueDate`, `dueDate`, `startDate`, `endDate`, etc.) are in the **organization's timezone** — no timezone conversion is needed, in either requests or responses. The DB stores epoch ms representing the org-local date. Only audit timestamps (`createdAt`, `updatedAt`, `action_at`) are UTC.
+**Timezone convention**: All business dates (`valueDate`, `dueDate`, `startDate`, `endDate`, etc.) are in the **organization's timezone**; no timezone conversion is needed, in either requests or responses. The DB stores epoch ms representing the org-local date. Only audit timestamps (`createdAt`, `updatedAt`, `action_at`) are UTC.
 
 ---
 
 ## Pagination (All List Endpoints)
 
-All GET list endpoints and POST `/search` endpoints use **`limit`/`offset` pagination** — NOT `page`/`size`.
+All GET list endpoints and POST `/search` endpoints use **`limit`/`offset` pagination**, NOT `page`/`size`.
 
-**IMPORTANT: `offset` is a page number (0-indexed), NOT a row-skip count.** `offset=0` returns the first page, `offset=1` returns the second page, etc. Example: `offset=2, limit=50` returns items 100–149.
+**IMPORTANT: `offset` is a page number (0-indexed), NOT a row-skip count.** `offset=0` returns the first page, `offset=1` returns the second page, etc. Example: `offset=2, limit=50` returns items 100 to 149.
 
 **Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit):** `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`. There, `offset=2, limit=50` returns items 2-51.
 
@@ -50,7 +50,7 @@ Paging one of these by page number reads overlapping windows: duplicates in, the
 | **Max offset** | 65536 |
 | **Response shape** | `{ totalPages, totalElements, data: [...] }` |
 
-**`page`/`size` are NOT supported** — sending `?page=0&size=100` is silently ignored (API returns default 100 items as if no params were sent). Always use `limit`/`offset`.
+**`page`/`size` are NOT supported**: sending `?page=0&size=100` is silently ignored (API returns default 100 items as if no params were sent). Always use `limit`/`offset`.
 
 **POST /search sort requirement**: When `offset` is present in the body (even `offset: 0`), `sort` is required:
 ```json
@@ -61,18 +61,18 @@ Paging one of these by page number reads overlapping windows: duplicates in, the
 
 ## Success Status Codes (All Endpoints)
 
-**Never branch on the exact 2xx — check `response.ok` (or `status < 300`) and read the body.** Every success carries the same `{ data: ... }` envelope regardless of code.
+**Never branch on the exact 2xx; check `response.ok` (or `status < 300`) and read the body.** Every success carries the same `{ data: ... }` envelope regardless of code.
 
 | Shape | Code |
 |---|---|
-| `POST` that creates a NEW record — `/invoices`, `/bills`, `/journals`, `/contacts`, `/items`, `/chart-of-accounts`, `/tags`, `/tax-profiles`, `/capsules`, `/bookmarks`, `/bank-records/:acct`, `/:type/:id/payments`, `/:type/:id/refunds`, `/organization[-]currencies/:code/rates`, `/scheduled/*`, `/magic/*`, `/sale-orders/:id/convert-to-invoice` (and the other `convert-to-*`), the fixed-asset disposal actions (`/discard-fixed-assets/:id`, `/mark-as-sold/fixed-assets`, `/transfer-fixed-assets`) | **201** |
-| `PUT` (update) — all 40 of them, no exceptions | **200** |
+| `POST` that creates a NEW record: `/invoices`, `/bills`, `/journals`, `/contacts`, `/items`, `/chart-of-accounts`, `/tags`, `/tax-profiles`, `/capsules`, `/bookmarks`, `/bank-records/:acct`, `/:type/:id/payments`, `/:type/:id/refunds`, `/organization[-]currencies/:code/rates`, `/scheduled/*`, `/magic/*`, `/sale-orders/:id/convert-to-invoice` (and the other `convert-to-*`), the fixed-asset disposal actions (`/discard-fixed-assets/:id`, `/mark-as-sold/fixed-assets`, `/transfer-fixed-assets`) | **201** |
+| `PUT` (update), all 40 of them, no exceptions | **200** |
 | `GET` (all), `DELETE` (all) | **200** |
 | `POST /search`, `POST /bulk-upsert`, and action POSTs that mutate an EXISTING record (`/:id/request-changes`, `/:id/credits`, `/:id/attachments`) | **200** |
 | Async batch kickoff (`/bulk-request-changes`, claims `bulk/*`) | **202** |
-| Quick Fix / bulk partial failure | **207** (body shape identical to 200 — check `failed[]`) |
+| Quick Fix / bulk partial failure | **207** (body shape identical to 200; check `failed[]`) |
 
-**Changed 2026-08-10**: seven `PUT` endpoints moved 201 → 200 — `/bills/{id}`, `/contacts/{id}`, `/nano-classifiers/{id}`, `/items/{id}`, `/journals/{id}`, `/scheduled/journals/{id}`, `/organization/currencies/{code}/rates/{id}`. Request shapes and response bodies are byte-identical; only the status changed. The same release corrected 114 published success codes that disagreed with what the endpoints actually returned, so the API reference now matches runtime everywhere. A client that asserted `status === 201` on an update breaks; one that checks `response.ok` does not.
+**Changed 2026-08-10**: seven `PUT` endpoints moved 201 → 200: `/bills/{id}`, `/contacts/{id}`, `/nano-classifiers/{id}`, `/items/{id}`, `/journals/{id}`, `/scheduled/journals/{id}`, `/organization/currencies/{code}/rates/{id}`. Request shapes and response bodies are byte-identical; only the status changed. The same release corrected 114 published success codes that disagreed with what the endpoints actually returned, so the API reference now matches runtime everywhere. A client that asserted `status === 201` on an update breaks; one that checks `response.ok` does not.
 
 ---
 
@@ -94,7 +94,7 @@ Paging one of these by page number reads overlapping windows: duplicates in, the
 }
 ```
 
-Access org via `data` directly (single object). The API previously returned an array but now returns a single object. Use `Array.isArray(data) ? data[0] : data` to handle both formats. Check `lockDate` — don't seed transactions before it.
+Access org via `data` directly (single object). The API previously returned an array but now returns a single object. Use `Array.isArray(data) ? data[0] : data` to handle both formats. Check `lockDate`; don't seed transactions before it.
 
 ---
 
@@ -146,11 +146,11 @@ Access org via `data` directly (single object). The API previously returned an a
 { "data": { "resourceIds": ["uuid1", "uuid2"] } }
 ```
 
-Upsert matches by name — existing accounts updated, new ones created.
+Upsert matches by name: existing accounts updated, new ones created.
 
 **Important**: The bulk-upsert endpoint does NOT return individual resourceIds for created/updated accounts. After a successful bulk-upsert, you MUST re-fetch the full CoA via `GET /api/v1/chart-of-accounts` to collect the new resourceIds.
 
-**CRITICAL: CoA code mapping — match by NAME, not code**:
+**CRITICAL: CoA code mapping (match by NAME, not code)**:
 - Pre-existing accounts may have different codes than your templates
 - Example: "Cost of Goods Sold" = code 310 in the API, but code 5000 in template
 - "Accounts Receivable" can have `code: null` in the API
@@ -177,13 +177,13 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 { "data": { "resourceId": "uuid" } }
 ```
 
-Creates a single account. Unlike bulk-upsert, this returns the `resourceId` directly — no need to re-fetch.
+Creates a single account. Unlike bulk-upsert, this returns the `resourceId` directly, no need to re-fetch.
 
 **Key behaviors**:
 - `classificationType` determines the account type (see mapping table below bulk-upsert). Using `"Bank Accounts"` creates an account that appears in the bank accounts list and can be used as `accountResourceId` in payments and cash entries.
-- `currency` is optional. If omitted, defaults to the org's base currency. Pass a foreign currency code (e.g., `"USD"`) to create a **foreign-currency account** — useful for foreign-currency bank accounts.
+- `currency` is optional. If omitted, defaults to the org's base currency. Pass a foreign currency code (e.g., `"USD"`) to create a **foreign-currency account**, useful for foreign-currency bank accounts.
 - `code` is optional. If omitted, the system may auto-assign one (behavior varies).
-- `name` must be unique within the organization — duplicate names return 409.
+- `name` must be unique within the organization; duplicate names return 409.
 - **Alias**: `accountType` is accepted as an alias for `classificationType` (same as bulk-upsert).
 
 **Creating a bank account**: Set `classificationType: "Bank Accounts"` and the account immediately becomes available as a bank account across the platform (payments, cash entries, bank records, reports).
@@ -198,9 +198,9 @@ Creates a single account. Unlike bulk-upsert, this returns the `resourceId` dire
 Deletes an account by `resourceId`. Returns 200 on success.
 
 **Restrictions**:
-- Cannot delete accounts with `controlFlag: true` (system accounts like Accounts Receivable, Accounts Payable) — returns 400.
-- Cannot delete accounts that have been used in transactions — returns 400 with `"Account has transactions"`.
-- Cannot delete locked accounts (`locked: true`) — returns 400.
+- Cannot delete accounts with `controlFlag: true` (system accounts like Accounts Receivable, Accounts Payable); returns 400.
+- Cannot delete accounts that have been used in transactions; returns 400 with `"Account has transactions"`.
+- Cannot delete locked accounts (`locked: true`); returns 400.
 
 ---
 
@@ -239,7 +239,7 @@ Name must be unique (422 if duplicate). Agent tools auto-guard with search-befor
 ### POST /api/v1/tax-profiles/search
 
 ```json
-// Request — filter by appliesTo for transaction type scoping:
+// Request: filter by appliesTo for transaction type scoping:
 {
   "filter": {
     "name": { "contains": "GST" },
@@ -276,13 +276,13 @@ Tax return filings (PH BIR forms such as 2550Q, SG GST F5): period, due date, ta
 ### PUT /api/v1/cash-in-entries/:parentEntityResourceId
 
 ```json
-// Request — resourceId required in body, accountEntryResourceId auto-populated:
+// Request: resourceId required in body, accountEntryResourceId auto-populated:
 { "resourceId": "<parentEntityResourceId>", "reference": "UPDATED-REF" }
 // Response:
 { "data": { "resourceId": "..." } }
 ```
 
-Same pattern for `PUT /cash-out-entries/:id`. URL uses `parentEntityResourceId` (from CREATE response). `accountEntryResourceId` is optional — API auto-populates from existing journal entry.
+Same pattern for `PUT /cash-out-entries/:id`. URL uses `parentEntityResourceId` (from CREATE response). `accountEntryResourceId` is optional; API auto-populates from existing journal entry.
 
 Measured 2026-09-24 (Global SG Demo): a reference-only PUT succeeds and keeps a taxed entry's tax. Any PUT carrying `internalNotes` returns **500**, on taxed and untaxed entries alike, and any PUT carrying `lines` on a taxed entry (or adding a tax profile to an untaxed one) returns **500**, with or without `saveAsDraft: false` / `taxInclusion`. A `lines` PUT on an untaxed entry succeeds. So a taxed cash entry's lines cannot currently be edited through the API: void it and create a new one.
 
@@ -313,10 +313,10 @@ Measured 2026-09-24 (Global SG Demo): a reference-only PUT succeeds and keeps a 
 }
 ```
 
-**CRITICAL field names**: Response uses `currencyCode`, `currencyName`, `currencySymbol`, `baseCurrency`, `customRateCount` — NOT `code`/`name`/`symbol`. If you destructure with `{ code, name, symbol }` you get `undefined`. Always use the full prefixed names.
+**CRITICAL field names**: Response uses `currencyCode`, `currencyName`, `currencySymbol`, `baseCurrency`, `customRateCount`, NOT `code`/`name`/`symbol`. If you destructure with `{ code, name, symbol }` you get `undefined`. Always use the full prefixed names.
 
-- `customRateCount` — number of org-level custom rates set for this currency (0 if none)
-- `baseCurrency` — boolean, `true` for the org's base currency only
+- `customRateCount`: number of org-level custom rates set for this currency (0 if none)
+- `baseCurrency`: boolean, `true` for the org's base currency only
 
 ### POST /api/v1/organization/currencies
 
@@ -331,11 +331,11 @@ Measured 2026-09-24 (Global SG Demo): a reference-only PUT succeeds and keeps a 
 Enable currencies first, then set rates via the **separate** rate endpoints below.
 
 **Gotchas**:
-- Returns **400** if a currency is already enabled — `"Currency already exists"`. You cannot un-enable currencies from an org; this is a one-way operation.
+- Returns **400** if a currency is already enabled: `"Currency already exists"`. You cannot un-enable currencies from an org; this is a one-way operation.
 - To check before enabling: `GET /organization/currencies` and check if the code is already in the list.
 - Sending an empty array `{ "currencies": [] }` returns 400.
 
-### Currency Rates — `/organization/currencies/:code/rates`
+### Currency Rates: `/organization/currencies/:code/rates`
 
 **Path note**: both enable and rates live under the nested `/organization/currencies` family. The older hyphenated `/organization-currencies/...` rate paths still resolve but are **superseded**. Use the nested form; do not rely on the hyphenated one being documented.
 
@@ -350,14 +350,14 @@ Enable currencies first, then set rates via the **separate** rate endpoints belo
 // HTTP 201
 ```
 
-**CRITICAL**: Response `data` is a **plain string** `"Rate added successfully"` — NOT a CurrencyRate object. You do NOT get back a `resourceId`. If you need the rate's `resourceId` (e.g., for later PUT/DELETE), you must follow up with `GET /organization/currencies/:code/rates` and match by `rateApplicableFrom` date.
+**CRITICAL**: Response `data` is a **plain string** `"Rate added successfully"`, NOT a CurrencyRate object. You do NOT get back a `resourceId`. If you need the rate's `resourceId` (e.g., for later PUT/DELETE), you must follow up with `GET /organization/currencies/:code/rates` and match by `rateApplicableFrom` date.
 
 **Required fields**:
-- `rate` — positive number (must be > 0). Direction is **functionalToSource** (1 base = X foreign). Example for SGD org setting USD rate: `rate: 0.74` means 1 SGD = 0.74 USD. **If your data is sourceToFunctional (1 USD = 1.35 SGD), invert: `rate = 1 / yourRate`.** You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`), which this endpoint accepts natively and applies server-side. Omitting it means `FUNCTIONAL_TO_SOURCE`. See SKILL.md Rule 49.
-- `rateApplicableFrom` — `YYYY-MM-DD` string (NOT ISO datetime — `"2026-02-10T00:00:00Z"` is rejected with "does not match 2006-01-02 format")
+- `rate`: positive number (must be > 0). Direction is **functionalToSource** (1 base = X foreign). Example for SGD org setting USD rate: `rate: 0.74` means 1 SGD = 0.74 USD. **If your data is sourceToFunctional (1 USD = 1.35 SGD), invert: `rate = 1 / yourRate`.** You do not have to do this by hand: pass your figure as-is with `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL`), which this endpoint accepts natively and applies server-side. Omitting it means `FUNCTIONAL_TO_SOURCE`. See SKILL.md Rule 49.
+- `rateApplicableFrom`: `YYYY-MM-DD` string (NOT ISO datetime; `"2026-02-10T00:00:00Z"` is rejected with "does not match 2006-01-02 format")
 
 **Optional fields**:
-- `rateApplicableTo` — `YYYY-MM-DD` string. Must be after `rateApplicableFrom` (422 `INVALID_DATE_RANGE` otherwise).
+- `rateApplicableTo`: `YYYY-MM-DD` string. Must be after `rateApplicableFrom` (422 `INVALID_DATE_RANGE` otherwise).
 
 #### GET /api/v1/organization/currencies/:currencyCode/rates
 
@@ -436,7 +436,7 @@ Create exchange rates in bulk (max 500). **Auto-enables currencies not yet enabl
 { "data": { "resourceId": null, "resourceIds": ["uuid1", "uuid2"] } }
 ```
 
-`rateDirection` (SGD-base org, USD source): `FUNCTIONAL_TO_SOURCE` means the value is source-per-base — 1 SGD = 0.74 USD → send `0.74`. `SOURCE_TO_FUNCTIONAL` means base-per-source — 1 USD = 1.35 SGD → send `1.35` as-is, no inversion. All three rate endpoints (single add, single edit, bulk-upsert) accept the everyday quote this way; the difference here is that `rateDirection` is **required** on bulk-upsert and optional on the single-rate pair, where omitting it means `FUNCTIONAL_TO_SOURCE`. Unlike the single-rate POST endpoint, this returns `resourceIds` directly.
+`rateDirection` (SGD-base org, USD source): `FUNCTIONAL_TO_SOURCE` means the value is source-per-base: 1 SGD = 0.74 USD → send `0.74`. `SOURCE_TO_FUNCTIONAL` means base-per-source: 1 USD = 1.35 SGD → send `1.35` as-is, no inversion. All three rate endpoints (single add, single edit, bulk-upsert) accept the everyday quote this way; the difference here is that `rateDirection` is **required** on bulk-upsert and optional on the single-rate pair, where omitting it means `FUNCTIONAL_TO_SOURCE`. Unlike the single-rate POST endpoint, this returns `resourceIds` directly.
 
 ---
 
@@ -529,7 +529,7 @@ Create exchange rates in bulk (max 500). **Auto-enables currencies not yet enabl
 
 ### POST /api/v1/items/bulk-upsert
 
-Create or update items in bulk (max 500). Provide `resourceId` to update (partial — server merges with existing). Omit to create.
+Create or update items in bulk (max 500). Provide `resourceId` to update (partial: server merges with existing). Omit to create.
 
 ```json
 // Request:
@@ -584,20 +584,20 @@ Create defaults: `status=ACTIVE`, `itemCategory=NON_INVENTORY`. Update: only sen
 { "data": { "resourceId": "uuid", "reference": "INV-001" } }
 ```
 
-**saveAsDraft**: Defaults to `false` — omitting it creates a finalized transaction. Sending `saveAsDraft: true` creates a draft.
+**saveAsDraft**: Defaults to `false`; omitting it creates a finalized transaction. Sending `saveAsDraft: true` creates a draft.
 
 **GET response note**: When fetching invoices via GET, line items use `organizationAccountResourceId` (not `accountResourceId`). POST uses `accountResourceId`. Request-side aliases resolve `issueDate` → `valueDate`, `bankAccountResourceId` → `accountResourceId`, etc.
 
 **FX (foreign currency) invoices**: For invoices in a non-base currency, use the `currency` OBJECT form:
-- **`currency: { sourceCurrency: "MYR" }`** — platform auto-fetches rate from ECB (FRANKFURTER). Response shows `rateSource: "EXTERNAL"`, `providerName: "FRANKFURTER"`.
-- **`currency: { sourceCurrency: "MYR", exchangeRate: 3.15 }`** — custom rate. Response shows `rateSource: "INTERNAL_TRANSACTION"`, `providerName: "CUSTOM"`.
-- **`currencyCode: "MYR"` (string) is SILENTLY IGNORED** — the invoice is created in the org's base currency (e.g., SGD) with rate 1:1. No error returned. This is a major gotcha.
+- **`currency: { sourceCurrency: "MYR" }`**: platform auto-fetches rate from ECB (FRANKFURTER). Response shows `rateSource: "EXTERNAL"`, `providerName: "FRANKFURTER"`.
+- **`currency: { sourceCurrency: "MYR", exchangeRate: 3.15 }`**: custom rate. Response shows `rateSource: "INTERNAL_TRANSACTION"`, `providerName: "CUSTOM"`.
+- **`currencyCode: "MYR"` (string) is SILENTLY IGNORED**: the invoice is created in the org's base currency (e.g., SGD) with rate 1:1. No error returned. This is a major gotcha.
 - **`currency: "USD"` (string)** causes "Invalid request body" error (400).
 
 **Rate hierarchy** (when using `currency: { sourceCurrency }` without `exchangeRate`):
-1. Org-level rate (set via `/organization/currencies/:code/rates`) — auto-filled if exists
-2. Platform rate (ECB via FRANKFURTER) — auto-fetched if no org rate
-3. Transaction-level rate (via `exchangeRate` in the `currency` object) — overrides all
+1. Org-level rate (set via `/organization/currencies/:code/rates`), auto-filled if exists
+2. Platform rate (ECB via FRANKFURTER), auto-fetched if no org rate
+3. Transaction-level rate (via `exchangeRate` in the `currency` object), overrides all
 
 **Invoice payments**: `POST /invoices/{invoiceResourceId}/payments` works reliably as a standalone endpoint.
 
@@ -607,12 +607,12 @@ Create defaults: `status=ACTIVE`, `itemCategory=NON_INVENTORY`. Update: only sen
 
 ### POST /api/v1/bills
 
-Same structure as invoices. All field names identical. FX currency rules also apply — use `currency` object form (see Section 7 FX notes).
+Same structure as invoices. All field names identical. FX currency rules also apply; use `currency` object form (see Section 7 FX notes).
 
-**Bill payments**: The standalone `POST /bills/{id}/payments` endpoint was broken (nil pointer dereference in the API backend) — **fixed in backend PR #112**. Both standalone and embedded payment approaches now work. The embed-in-creation pattern remains a valid alternative:
+**Bill payments**: The standalone `POST /bills/{id}/payments` endpoint was broken (nil pointer dereference in the API backend), **fixed in backend PR #112**. Both standalone and embedded payment approaches now work. The embed-in-creation pattern remains a valid alternative:
 
 ```json
-// Request — Bill with embedded payment:
+// Request: Bill with embedded payment:
 {
   "contactResourceId": "uuid",
   "saveAsDraft": false,
@@ -687,7 +687,7 @@ Bills and supplier credit notes support withholding tax per line item:
 
 **CRITICAL corrections from live testing**:
 - Each entry uses `amount` (number) + `type`: `"DEBIT"` or `"CREDIT"` (UPPERCASE strings)
-- Do NOT use `debit`/`credit` as separate number fields — that is WRONG
+- Do NOT use `debit`/`credit` as separate number fields; that is WRONG
 - Top-level `currency: { sourceCurrency, exchangeRate? }` IS accepted: it makes a foreign-currency journal
   whose amounts are in `sourceCurrency` (verified 2026-09-24: `{sourceCurrency: "USD", exchangeRate: 0.75}`
   created a draft reading back `currencyExchange.sourceCurrencyCode: USD`, `baseToSourceRate: 0.75`).
@@ -720,7 +720,7 @@ Bills and supplier credit notes support withholding tax per line item:
 ### POST /api/v1/cash-out-entries
 
 ```json
-// Request — Cash-In example:
+// Request (Cash-In example):
 {
   "saveAsDraft": false,
   "reference": "CI-001",
@@ -731,7 +731,7 @@ Bills and supplier credit notes support withholding tax per line item:
   ]
 }
 
-// Request — Cash-Out example:
+// Request (Cash-Out example):
 {
   "saveAsDraft": false,
   "reference": "CO-001",
@@ -747,10 +747,10 @@ Bills and supplier credit notes support withholding tax per line item:
 ```
 
 **CRITICAL corrections from live testing**:
-- `saveAsDraft` is REQUIRED — omitting it causes validation failure
+- `saveAsDraft` is REQUIRED; omitting it causes validation failure
 - `accountResourceId` at top level = the BANK account (NOT `bankAccountResourceId`)
-- `lines` array for the offset entries — same `amount` + `type` format as regular journals. (`journalEntries` is accepted as an alias but `lines` is now canonical for cash entries.)
-- Do NOT use a flat structure with `amount`, `bankAccountResourceId`, `description` — that is WRONG
+- `lines` array for the offset entries, same `amount` + `type` format as regular journals. (`journalEntries` is accepted as an alias but `lines` is now canonical for cash entries.)
+- Do NOT use a flat structure with `amount`, `bankAccountResourceId`, `description`; that is WRONG
 - The system auto-creates the bank-side entry; you only specify the offset entries in `lines`
 - For cash-in: offset entries are typically CREDIT (revenue/liability)
 - For cash-out: offset entries are typically DEBIT (expense/asset)
@@ -803,7 +803,7 @@ Shared delete endpoint for ALL cash entry types (cash-in, cash-out, cash-transfe
 - LIST returns `resourceId = B` (cashflow-transaction ID), `parentEntityResourceId = A`
 - GET accepts `B` (cashflow-transaction ID) or `A` (parentEntityResourceId; a transfer's two rows share one `A`, so GET by `A` returns the first)
 - DELETE expects `A` (parentEntityResourceId, via `/cash-entries/A`)
-- `businessTransactionResourceId = C` (underlying journal ID) — do NOT use for any CRUD operation
+- `businessTransactionResourceId = C` (underlying journal ID); do NOT use for any CRUD operation
 
 ---
 
@@ -829,17 +829,17 @@ Shared delete endpoint for ALL cash entry types (cash-in, cash-out, cash-transfe
 { "data": { "resourceIds": ["uuid"] } }
 ```
 
-**CRITICAL corrections from live testing** — payments require 6 fields:
-- `paymentAmount` — NOT `amount`. The **bank account currency** amount (actual cash moved from bank).
-- `transactionAmount` — The **transaction document currency (invoice/bill/credit note)** amount (applied to the balance). Equal to `paymentAmount` for same-currency. For cross-currency (e.g., USD invoice paid from SGD bank at 1.35): `paymentAmount: 1350` (SGD), `transactionAmount: 1000` (USD).
-- `accountResourceId` — NOT `bankAccountResourceId`. This IS the bank account UUID.
-- `paymentMethod` — required string: `"BANK_TRANSFER"` (other values may exist but this works universally)
-- `reference` — payment reference string (required)
-- `valueDate` — NOT `paymentDate`. ISO date string.
+**CRITICAL corrections from live testing**. Payments require 6 fields:
+- `paymentAmount`: NOT `amount`. The **bank account currency** amount (actual cash moved from bank).
+- `transactionAmount`: The **transaction document currency (invoice/bill/credit note)** amount (applied to the balance). Equal to `paymentAmount` for same-currency. For cross-currency (e.g., USD invoice paid from SGD bank at 1.35): `paymentAmount: 1350` (SGD), `transactionAmount: 1000` (USD).
+- `accountResourceId`: NOT `bankAccountResourceId`. This IS the bank account UUID.
+- `paymentMethod`: required string: `"BANK_TRANSFER"` (other values may exist but this works universally)
+- `reference`: payment reference string (required)
+- `valueDate`: NOT `paymentDate`. ISO date string.
 
 Always wrap in `{ payments: [...] }` even for single payment.
 
-**Bill payments standalone endpoint**: Was broken (nil pointer dereference) — **fixed in backend PR #112**. Now works for basic payments. Embed-in-creation pattern also remains valid (see Section 8). production clients uses embedded payments for bills.
+**Bill payments standalone endpoint**: Was broken (nil pointer dereference), **fixed in backend PR #112**. Now works for basic payments. Embed-in-creation pattern also remains valid (see Section 8). production clients uses embedded payments for bills.
 
 **TransactionFeeCollected**: NOT supported on bill payments (model field missing in the API backend). Only invoice payments support collected transaction fees.
 
@@ -922,13 +922,13 @@ Always wrap in `{ payments: [...] }` even for single payment.
 { "data": { "customFieldName": "PO Number", "name": "PO Number", "status": "ACTIVE", "resourceId": "uuid" } }
 ```
 
-**CRITICAL notes — re-probed live 2026-09-02, correcting several earlier entries**:
-- **PUT works.** The 500 this file and SKILL.md rule 46 recorded is gone: a PUT returned 200 and applied the change. But it is a FULL REPLACE of `appliesTo` + `printOnDocuments`, and the GET returns `printOnDocuments` as null — the truth is in the `applyTo*` enum, where `PRINT` means it prints and `SHOW` means it does not. `updateCustomField` hydrates from that enum; a raw caller that omits `printOnDocuments` will silently turn printing off.
+**CRITICAL notes (re-probed live 2026-09-02, correcting several earlier entries)**:
+- **PUT works.** The 500 this file and SKILL.md rule 46 recorded is gone: a PUT returned 200 and applied the change. But it is a FULL REPLACE of `appliesTo` + `printOnDocuments`, and the GET returns `printOnDocuments` as null; the truth is in the `applyTo*` enum, where `PRINT` means it prints and `SHOW` means it does not. `updateCustomField` hydrates from that enum; a raw caller that omits `printOnDocuments` will silently turn printing off.
 - POST uses `name`, GET returns both `customFieldName` and `name`
-- `printOnDocuments` is REQUIRED and is not defaulted server-side — omitting it returns 422 `printOnDocuments is a required field` (recorded as a 400 before that). `create_custom_field` sends `false` when you omit it.
+- `printOnDocuments` is REQUIRED and is not defaulted server-side; omitting it returns 422 `printOnDocuments is a required field` (recorded as a 400 before that). `create_custom_field` sends `false` when you omit it.
 - **`appliesTo` WORKS and you should send it.** `{ invoices, bills, customerCredits, supplierCredits, payments }` sets the matching `applyTo*` response fields to `SHOW`. Omit it and every one stays `NULL`, i.e. the field appears on nothing. The previous "do NOT send appliesTo, causes Invalid request body" entry is wrong.
 - **`format` is the only control over the KIND of field**, and the datatype is derived from it, not chosen: `CUSTOM` (default) yields `datatypeCode: TEXT`; any `ALL_*` value (`ALL_CUSTOMERS`, `ALL_SUPPLIERS`, `ALL_CONTACTS`, `ALL_EMPLOYEES`, `ALL_USERS`) yields `datatypeCode: LIST`, a picklist of that population.
-- **There is no NUMBER, DATE or DROPDOWN custom field, and `type`/`fieldType`/`entityType`/`datatypeCode`/`options` are all silently dropped** — sent with a value, they return 200 and the field is created as plain TEXT. Verified by readback across five spellings; `datatypeCode: 12345` also returns 200, so the DTO does not declare it. `datatypeCode` on the response is derived and read-only; `format` is settable on POST **and** PUT (both verified 2026-09-02).
+- **There is no NUMBER, DATE or DROPDOWN custom field, and `type`/`fieldType`/`entityType`/`datatypeCode`/`options` are all silently dropped**: sent with a value, they return 200 and the field is created as plain TEXT. Verified by readback across five spellings; `datatypeCode: 12345` also returns 200, so the DTO does not declare it. `datatypeCode` on the response is derived and read-only; `format` is settable on POST **and** PUT (both verified 2026-09-02).
 
 ### GET /api/v1/custom-fields/:resourceId
 
@@ -944,7 +944,7 @@ Returns full custom field definition including `applyToSales`, `applyToPurchase`
 ### Setting Custom Field Values on Transactions
 
 ```json
-// On invoice/bill/CN create or update — add at transaction level (NOT line item level):
+// On invoice/bill/CN create or update: add at transaction level (NOT line item level):
 {
   "valueDate": "2026-03-06",
   "contactResourceId": "...",
@@ -961,7 +961,7 @@ Returns full custom field definition including `applyToSales`, `applyToPurchase`
 ### Nano Classifiers on Line Items
 
 ```json
-// On invoice/bill/CN line items — add classifierConfig per line item:
+// On invoice/bill/CN line items: add classifierConfig per line item:
 {
   "lineItems": [
     {
@@ -1016,14 +1016,14 @@ Returns full custom field definition including `applyToSales`, `applyToPurchase`
 
 **CRITICAL notes from live testing**:
 - Send `name`, not `internalName`. The endpoint declares no `name` property and marks `internalName` required, but the API populates `internalName` from the `name` you send (verified by readback 2026-09-02)
-- `unit` is REQUIRED (e.g., `"pcs"`, `"box"`, `"kg"`) — omitting causes ITEM_UNIT_EMPTY_ERROR
-- `blockInsufficientDeductions` is REQUIRED and is NOT defaulted server-side — omitting it fails with "blockInsufficientDeductions is a required field"
+- `unit` is REQUIRED (e.g., `"pcs"`, `"box"`, `"kg"`); omitting causes ITEM_UNIT_EMPTY_ERROR
+- `blockInsufficientDeductions` is REQUIRED and is NOT defaulted server-side; omitting it fails with "blockInsufficientDeductions is a required field"
 - `costingMethod` must be `"FIXED"` or `"WAC"` (NOT `"FIXED_COST"`)
-- `cogsResourceId` is required, and MUST point to a Direct Costs account — wrong type causes INVALID_ACCOUNT_TYPE_DIRECT_COST
-- `purchaseAccountResourceId` MUST point to an Inventory-type CoA account (NOT Direct Costs) — wrong type causes INVALID_ACCOUNT_TYPE_INVENTORY. An inventory purchase debits the asset; COGS is recognised on sale
-- Because `cogsResourceId` is always required, so are `purchaseAccountResourceId`, `saleAccountResourceId`, `appliesToSale` and `appliesToPurchase` — the API reports them as "required if [cogsResourceId] is present", but that condition always holds
+- `cogsResourceId` is required, and MUST point to a Direct Costs account; wrong type causes INVALID_ACCOUNT_TYPE_DIRECT_COST
+- `purchaseAccountResourceId` MUST point to an Inventory-type CoA account (NOT Direct Costs); wrong type causes INVALID_ACCOUNT_TYPE_INVENTORY. An inventory purchase debits the asset; COGS is recognised on sale
+- Because `cogsResourceId` is always required, so are `purchaseAccountResourceId`, `saleAccountResourceId`, `appliesToSale` and `appliesToPurchase`; the API reports them as "required if [cogsResourceId] is present", but that condition always holds
 - `appliesToSale` and `appliesToPurchase` must both be `true`, not merely present: `false` returns APPLIES_TO_SALE_ERROR / APPLIES_TO_PURCHASE_ERROR, "must be true when cogs selected". An inventory-tracked item with COGS is necessarily both sale- and purchase-applicable
-- There is no `inventoryAccountResourceId` — it appears in no request schema and a create succeeds without it
+- There is no `inventoryAccountResourceId`; it appears in no request schema and a create succeeds without it
 - Delete inventory items via `DELETE /items/:id` (NOT `/inventory-items/:id`)
 - `GET /inventory-item-balance/:id` returns balance per item
 - `GET /inventory-balances/:balanceStatus` lists balances across items; `balanceStatus` is `ALL`, `AVAILABLE` or `FULLY_DRAWN` (else 422). An empty result is a 404, which `list_inventory_balances` returns as `data: []`
@@ -1048,7 +1048,7 @@ Returns full custom field definition including `applyToSales`, `applyToPurchase`
 { "data": { "resourceId": "uuid" } }
 ```
 
-**CRITICAL**: Uses `cashOut`/`cashIn` sub-objects — NOT `fromAccountResourceId`/`toAccountResourceId`/`amount` flat fields. Each sub-object has `accountResourceId` and `amount`. Must use TWO DIFFERENT bank accounts — same account for both fails.
+**CRITICAL**: Uses `cashOut`/`cashIn` sub-objects, NOT `fromAccountResourceId`/`toAccountResourceId`/`amount` flat fields. Each sub-object has `accountResourceId` and `amount`. Must use TWO DIFFERENT bank accounts; same account for both fails.
 
 ### GET /api/v1/cash-transfers (LIST)
 
@@ -1085,7 +1085,7 @@ DELETE uses shared `/cash-entries/:id` with the CREATE-returned resourceId (= `p
 { "data": { "resourceIds": ["uuid"] } }
 ```
 
-**CRITICAL**: Uses `refunds` wrapper with `refundAmount`/`refundMethod` — NOT `payments` wrapper with `paymentAmount`/`paymentMethod`.
+**CRITICAL**: Uses `refunds` wrapper with `refundAmount`/`refundMethod`, NOT `payments` wrapper with `paymentAmount`/`paymentMethod`.
 
 ---
 
@@ -1169,13 +1169,13 @@ DELETE /api/v1/invoices/fe7a92fa-.../attachments/a2f1aa45-...
 
 ---
 
-## 14h. Jaz Magic — Extraction & Autofill
+## 14h. Jaz Magic: Extraction & Autofill
 
 ### POST /api/v1/magic/createBusinessTransactionFromAttachment
 
-**When the user starts from an attachment (PDF, JPG, document image), this is the endpoint to use.** Do not manually parse files to construct `POST /invoices` or `POST /bills` — Jaz Magic handles the full extraction-and-autofill pipeline server-side: OCR, line item detection, contact matching, and CoA auto-mapping via ML learning. Creates a complete draft transaction with all fields pre-filled. Use `POST /invoices` or `POST /bills` only when building from structured data where the fields are already known.
+**When the user starts from an attachment (PDF, JPG, document image), this is the endpoint to use.** Do not manually parse files to construct `POST /invoices` or `POST /bills`; Jaz Magic handles the full extraction-and-autofill pipeline server-side: OCR, line item detection, contact matching, and CoA auto-mapping via ML learning. Creates a complete draft transaction with all fields pre-filled. Use `POST /invoices` or `POST /bills` only when building from structured data where the fields are already known.
 
-Processing is **asynchronous** — the API response confirms file upload immediately. The extraction pipeline runs server-side and pushes status updates via Firebase Realtime Database.
+Processing is **asynchronous**: the API response confirms file upload immediately. The extraction pipeline runs server-side and pushes status updates via Firebase Realtime Database.
 
 **Supported document types:**
 - `INVOICE` → creates a draft sale (response type: `SALE`)
@@ -1191,9 +1191,9 @@ A PENDING order is on the dashboard's For Review tab, not in the live order list
 
 Optional `internalNotes` (max 3000 characters) is set on the created record, e.g. a tag to find an automated upload again. Optional `uploadMode: "MERGED"` splits one PDF into several documents; it is refused (`MAGIC_MERGED_UPLOAD_NOT_SUPPORTED`) for the four quote/order/request types.
 
-**Three modes** — content type depends on `sourceType`:
+**Three modes** (content type depends on `sourceType`):
 
-#### FILE mode (multipart/form-data) — most common
+#### FILE mode (multipart/form-data), most common
 
 ```
 POST /api/v1/magic/createBusinessTransactionFromAttachment
@@ -1229,7 +1229,7 @@ Fields:
 }
 ```
 
-#### URL mode (application/json) — for remote files
+#### URL mode (application/json), for remote files
 
 ```json
 / Request:
@@ -1279,14 +1279,14 @@ Content-Type: application/json
 - If no password in filename, CLI prompts interactively (or errors in `--json` mode with actionable rename instructions)
 
 **Key gotchas:**
-- `sourceFile` is the field name (NOT `file`) — same pattern as bank statement endpoint
+- `sourceFile` is the field name (NOT `file`), same pattern as bank statement endpoint
 - `EXPENSE` returns 422: use one of the 8 valid types above
 - Response maps types: `INVOICE` → `SALE`, `BILL` → `PURCHASE`, `CUSTOMER_CREDIT_NOTE` → `SALE_CREDIT_NOTE`, `SUPPLIER_CREDIT_NOTE` → `PURCHASE_CREDIT_NOTE`; the four quote/order/request types keep their names
 - There is no attachment-id source: the sources are `sourceFile`, `sourceURL` and `html` only
-- JSON body with `sourceType: "FILE"` always fails (400) — MUST use multipart
+- JSON body with `sourceType: "FILE"` always fails (400); MUST use multipart
 - `workflowResourceId` in `validFiles[]` is for tracking via `POST /magic/workflows/search`
 - `subscriptionFBPath` is the Firebase path for real-time status updates
-- All three fields (the source — `sourceFile`/`sourceURL`/`html` — plus `businessTransactionType` and `sourceType`) are required — omitting any returns 422
+- All three fields (the source, `sourceFile`/`sourceURL`/`html`, plus `businessTransactionType` and `sourceType`) are required; omitting any returns 422
 - File types confirmed: PDF, JPG/JPEG, PNG, HEIC, XLS, XLSX, EML (max 10 MB). HTML mode (`sourceType: "HTML"`) takes the raw HTML body instead of a file (max 5 MB); an `.eml` file is still FILE mode, not HTML mode.
 
 ---
@@ -1337,12 +1337,12 @@ Content-Type: application/json
 ```
 
 **Filter fields:**
-- `resourceId`: StringExpression (eq, contains) — workflow ID from magic create response
+- `resourceId`: StringExpression (eq, contains), workflow ID from magic create response
 - `documentType`: Array: SALE, PURCHASE, SALE_CREDIT_NOTE, PURCHASE_CREDIT_NOTE, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER, BANK_STATEMENT
-- `status`: Array — SUBMITTED, PROCESSING, COMPLETED, FAILED
-- `fileName`: StringExpression — original uploaded filename
-- `fileType`: Array — PDF, PNG, JPEG, JPG, HEIC, CSV, XLS, XLSX, EML
-- `createdAt`: DateExpression (eq, gte, lte) — workflow creation date
+- `status`: Array (SUBMITTED, PROCESSING, COMPLETED, FAILED)
+- `fileName`: StringExpression, original uploaded filename
+- `fileType`: Array (PDF, PNG, JPEG, JPG, HEIC, CSV, XLS, XLSX, EML)
+- `createdAt`: DateExpression (eq, gte, lte), workflow creation date
 
 **Workflow for agents:**
 1. Upload via `POST /magic/createBusinessTransactionFromAttachment` → get `workflowResourceId`
@@ -1372,7 +1372,7 @@ Fields:
 
 Max 10 MB per file. There is no attachment-id source.
 
-CSV format: `Date,Description,Debit,Credit` — maps to Date, Description, Cash-out, Cash-in.
+CSV format: `Date,Description,Debit,Credit` (maps to Date, Description, Cash-out, Cash-in).
 
 Multipart import is the more reliable method. Use it when JSON POST returns errors.
 
@@ -1412,7 +1412,7 @@ Same but with `"bill"` wrapper instead of `"invoice"`.
 ### POST /api/v1/scheduled/journals
 
 ```json
-// Request (FLAT structure — NOT nested in "journal" wrapper):
+// Request (FLAT structure, NOT nested in "journal" wrapper):
 {
   "reference": "SCHED-JNL-001",
   "valueDate": "2026-03-01",
@@ -1430,10 +1430,10 @@ Same but with `"bill"` wrapper instead of `"invoice"`.
 { "data": { "resourceId": "uuid" } }
 ```
 
-**CRITICAL**: Scheduled journals use FLAT structure with `schedulerEntries` — NOT a nested `journal` wrapper like scheduled invoices/bills use `invoice`/`bill` wrapper. `reference`, `valueDate`, `saveAsDraft` are at top level alongside `repeat`/`startDate`/`endDate`.
+**CRITICAL**: Scheduled journals use FLAT structure with `schedulerEntries`, NOT a nested `journal` wrapper like scheduled invoices/bills use `invoice`/`bill` wrapper. `reference`, `valueDate`, `saveAsDraft` are at top level alongside `repeat`/`startDate`/`endDate`.
 
 **CRITICAL notes from live testing**:
-- Recurrence field is `repeat` — NOT `frequency` or `interval`. Using `frequency` or `interval` silently defaults to ONE_TIME.
+- Recurrence field is `repeat`, NOT `frequency` or `interval`. Using `frequency` or `interval` silently defaults to ONE_TIME.
 - Valid `repeat` values: `"ONE_TIME"`, `"DAILY"`, `"WEEKLY"`, `"MONTHLY"`, `"YEARLY"` (`"QUARTERLY"` is rejected with 422)
 - `saveAsDraft: false` is REQUIRED on the wrapped invoice/bill. Using `saveAsDraft: true` causes `INVALID_SALE_STATUS` (invoices) or `INVALID_PURCHASE_STATUS` (bills).
 - Since `saveAsDraft: false`, every line item MUST have `accountResourceId`.
@@ -1447,7 +1447,7 @@ Same but with `"bill"` wrapper instead of `"invoice"`.
 
 ## 16b. Subscriptions (Recurring Invoices with Auto-Proration)
 
-Subscriptions auto-generate invoices on schedule with proration support. **Different from scheduled invoices**: subscriptions auto-prorate partial periods (generate credit notes for mid-period changes), but currency/tax/account are immutable after creation. Invoices only — no bills.
+Subscriptions auto-generate invoices on schedule with proration support. **Different from scheduled invoices**: subscriptions auto-prorate partial periods (generate credit notes for mid-period changes), but currency/tax/account are immutable after creation. Invoices only, no bills.
 
 ### POST /api/v1/scheduled/subscriptions
 
@@ -1478,8 +1478,8 @@ Subscriptions auto-generate invoices on schedule with proration support. **Diffe
 
 **CRITICAL notes**:
 - `proratedConfig` is **REQUIRED** on create, update, and cancel. Omitting it causes 500 (server null pointer).
-- `businessTransactionType` is NOT in the OAS — the API ignores it. Don't send it.
-- Uses `repeat` + `invoice` wrapper — same structure as scheduled invoices (`POST /scheduled/invoices`).
+- `businessTransactionType` is NOT in the OAS; the API ignores it. Don't send it.
+- Uses `repeat` + `invoice` wrapper, same structure as scheduled invoices (`POST /scheduled/invoices`).
 - `repeat`: `"ONE_TIME"`, `"DAILY"`, `"WEEKLY"`, `"MONTHLY"`, `"YEARLY"` (`"QUARTERLY"` is rejected with 422).
 - `saveAsDraft: false` is REQUIRED inside the `invoice` wrapper.
 - Currency, tax, and account details are the SAME for all items and CANNOT be changed after creation.
@@ -1487,7 +1487,7 @@ Subscriptions auto-generate invoices on schedule with proration support. **Diffe
 
 ### PUT /api/v1/scheduled/cancel-subscriptions/:id
 
-Cancel is **PUT** (not POST). Requires body fields — empty `{}` returns 422.
+Cancel is **PUT** (not POST). Requires body fields; empty `{}` returns 422.
 
 ```json
 // Request:
@@ -1503,14 +1503,14 @@ Cancel is **PUT** (not POST). Requires body fields — empty `{}` returns 422.
 
 `cancelDateType` values: `END_OF_CURRENT_PERIOD` (default), `END_OF_LAST_PERIOD`, `CUSTOM_DATE` (requires `endDate: "YYYY-MM-DD"`).
 
-Note the different path pattern from CRUD: cancel is at `/scheduled/cancel-subscriptions/:id`, not `/scheduled/subscriptions/:id/cancel`. Must cancel before delete — cannot delete ACTIVE subscriptions.
+Note the different path pattern from CRUD: cancel is at `/scheduled/cancel-subscriptions/:id`, not `/scheduled/subscriptions/:id/cancel`. Must cancel before delete; cannot delete ACTIVE subscriptions.
 
 ### Other subscription endpoints
 
-- `GET /api/v1/scheduled/subscriptions` — List all subscriptions
-- `GET /api/v1/scheduled/subscriptions/:id` — Get subscription details
-- `PUT /api/v1/scheduled/subscriptions/:id` — Update subscription. The `invoice` template is required on every update (create shape; without it every update is a 422 `GENERAL_ERROR`, even endDate-only). `startDate` and `repeat` are kept when omitted. `status` is NOT: an update without it made an INACTIVE subscription ACTIVE (measured 2026-09-24), so Clio restates the stored status when you omit it.
-- `DELETE /api/v1/scheduled/subscriptions/:id` — Delete subscription (must be cancelled first)
+- `GET /api/v1/scheduled/subscriptions`: List all subscriptions
+- `GET /api/v1/scheduled/subscriptions/:id`: Get subscription details
+- `PUT /api/v1/scheduled/subscriptions/:id`: Update subscription. The `invoice` template is required on every update (create shape; without it every update is a 422 `GENERAL_ERROR`, even endDate-only). `startDate` and `repeat` are kept when omitted. `status` is NOT: an update without it made an INACTIVE subscription ACTIVE (measured 2026-09-24), so Clio restates the stored status when you omit it.
+- `DELETE /api/v1/scheduled/subscriptions/:id`: Delete subscription (must be cancelled first)
 
 ---
 
@@ -1532,7 +1532,7 @@ Both dates required.
 { "primarySnapshotDate": "2026-02-28" }
 ```
 
-Uses `primarySnapshotDate` — NOT `endDate`. Optional: `secondarySnapshotDates` array for comparison periods.
+Uses `primarySnapshotDate`, NOT `endDate`. Optional: `secondarySnapshotDates` array for comparison periods.
 
 ### POST /api/v1/generate-reports/profit-and-loss
 
@@ -1563,7 +1563,7 @@ Both `primarySnapshotDate` and `secondarySnapshotDate` required. NOT `startDate`
 { "primaryStartDate": "2026-01-01", "primaryEndDate": "2026-02-28" }
 ```
 
-Uses `primaryStartDate`/`primaryEndDate` — NOT `primarySnapshotDate`.
+Uses `primaryStartDate`/`primaryEndDate`, NOT `primarySnapshotDate`.
 
 ### POST /api/v1/generate-reports/cash-balance
 
@@ -1603,7 +1603,7 @@ Both `startDate` and `endDate` required.
 { "primarySnapshotStartDate": "2026-01-01", "primarySnapshotEndDate": "2026-02-28" }
 ```
 
-Uses `primarySnapshotStartDate`/`primarySnapshotEndDate` — yet another pair of field names.
+Uses `primarySnapshotStartDate`/`primarySnapshotEndDate`, yet another pair of field names.
 
 ### Data Exports
 
@@ -1681,7 +1681,7 @@ For full filter/sort field reference, see `references/search-reference.md` secti
 
 ### POST /api/v1/bank-records/:accountResourceId/search
 
-Searches bank statement entries for a specific bank account. The `accountResourceId` path parameter is the UUID of a bank-type CoA account — find it via `POST /chart-of-accounts/search` with `{ "filter": { "accountType": { "eq": "Bank Accounts" } } }`.
+Searches bank statement entries for a specific bank account. The `accountResourceId` path parameter is the UUID of a bank-type CoA account; find it via `POST /chart-of-accounts/search` with `{ "filter": { "accountType": { "eq": "Bank Accounts" } } }`.
 
 ```json
 // Request:
@@ -1717,7 +1717,7 @@ For full filter/sort field reference, see `references/search-reference.md` secti
 
 ---
 
-## 20. Bank Records — JSON POST (Alternative)
+## 20. Bank Records: JSON POST (Alternative)
 
 ### POST /api/v1/bank-records/:accountResourceId
 
@@ -1792,7 +1792,7 @@ POST /api/v1/invoices/search
 
 ## Catalogs (Experimental)
 
-> Endpoint availability varies by organization. Use try/catch — if all requests fail, the endpoint may not be enabled.
+> Endpoint availability varies by organization. Use try/catch; if all requests fail, the endpoint may not be enabled.
 
 ### Create Catalog
 POST /api/v1/catalogs
@@ -1811,25 +1811,25 @@ POST /api/v1/catalogs
 
 ---
 
-## Deposits (no endpoint — by design)
+## Deposits (no endpoint, by design)
 
 > **There is no deposits entity.** No `/deposits` route exists at any spelling and none is
 > planned. A deposit is a *flag on a Chart of Accounts account*, not a document. See
 > `feature-glossary.md` → Deposits for the business model, `errors.md` → Deposits Errors for
 > the 404.
 
-**The flag**: a CoA account carries `depositContactType` — `CUSTOMER` (customer deposit /
+**The flag**: a CoA account carries `depositContactType`, which is `CUSTOMER` (customer deposit /
 advance received, a liability), `SUPPLIER` (supplier deposit / advance paid, an asset), or
 `NULL` (an ordinary account).
 
 **The movement**: once an account is flagged, a deposit is an *ordinary transaction posted
 against that account*. Nothing about the call is deposit-specific. The transaction types that
-land on a deposit account are the normal ones — `SALE`, `PURCHASE`, `PAYMENT_SALE`,
+land on a deposit account are the normal ones: `SALE`, `PURCHASE`, `PAYMENT_SALE`,
 `PAYMENT_PURCHASE`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT`, `JOURNAL_MANUAL`.
 
 | Movement | Call |
 |----------|------|
-| Top up (advance received or paid) | `POST /api/v1/journals`, or `POST /api/v1/cash-in-entries` / `POST /api/v1/cash-out-entries` — one leg on the flagged account |
+| Top up (advance received or paid) | `POST /api/v1/journals`, or `POST /api/v1/cash-in-entries` / `POST /api/v1/cash-out-entries`; one leg on the flagged account |
 | Draw down against an invoice | `POST /api/v1/invoices/:resourceId/payments` with `accountResourceId` = the flagged account **and `paymentMethod: "OTHER"`** |
 | Draw down against a bill | `POST /api/v1/bills/:resourceId/payments` with `accountResourceId` = the flagged account **and `paymentMethod: "OTHER"`** |
 | Read deposit movements | `POST /api/v1/cashflow-transactions/search` filtered on the flagged account's `organizationAccountResourceId` |
@@ -1838,7 +1838,7 @@ land on a deposit account are the normal ones — `SALE`, `PURCHASE`, `PAYMENT_S
 > account's TYPE on the method: `BANK_TRANSFER`, `CASH` and `CHEQUE` require a Bank
 > Accounts or Cash account and reject anything else with
 > `INVALID_ACCOUNT_FOR_BUSINESS_TRANSACTION_FOUND`. A deposit account is a Liability or
-> Asset by construction, so it is only reachable under another method — `OTHER` is the
+> Asset by construction, so it is only reachable under another method; `OTHER` is the
 > plain choice. The tools default `paymentMethod` to `BANK_TRANSFER`, so a drawdown that
 > does not set it explicitly will 422. See SKILL.md Rule 80.
 
@@ -1872,13 +1872,13 @@ POST /api/v1/fixed-assets
 }
 ```
 
-- `purchaseDate` and `depreciationStartDate`: YYYY-MM-DD (both required — omitting returns 422)
+- `purchaseDate` and `depreciationStartDate`: YYYY-MM-DD (both required; omitting returns 422)
 - `purchaseAmount`: Purchase cost (required)
 - `purchaseAssetAccountResourceId`: Asset account (required)
 - `depreciationMethod`: `"STRAIGHT_LINE"` or `"NO_DEPRECIATION"`
 - `effectiveLife`: Integer (months)
 - `category`: `"TANGIBLE"` or `"INTANGIBLE"`
-- `saveAsDraft`: Defaults to `true`. Set `false` to activate — requires `purchaseBusinessTransactionType` (`PURCHASE`, `SALE`, `JOURNAL_MANUAL`, `JOURNAL_CASHFLOW`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT` or `JOURNAL_CASH_TRANSFER`) + `purchaseBusinessTransactionResourceId`
+- `saveAsDraft`: Defaults to `true`. Set `false` to activate; requires `purchaseBusinessTransactionType` (`PURCHASE`, `SALE`, `JOURNAL_MANUAL`, `JOURNAL_CASHFLOW`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT` or `JOURNAL_CASH_TRANSFER`) + `purchaseBusinessTransactionResourceId`
 - Optional string fields (`purchaseBusinessTransactionResourceId`, `capsuleResourceId`) can be safely omitted for drafts
 
 ### Response
@@ -1912,16 +1912,16 @@ Register an asset purchased before using Jaz, with accumulated depreciation.
 ```
 
 - `bookValueAccumulatedDepreciationAmount`: depreciation already incurred before registration (Book Value at Start = purchaseAmount - this value)
-- No `purchaseBusinessTransactionType`/`purchaseBusinessTransactionResourceId` — unlike Create, no linked transaction
+- No `purchaseBusinessTransactionType`/`purchaseBusinessTransactionResourceId` (unlike Create, no linked transaction)
 - All other fields same as Create
 
 ---
 
-## Inventory (read-only balances — no adjustment write path)
+## Inventory (read-only balances, no adjustment write path)
 
 > **There is no stock-adjustment endpoint at any spelling.** `POST /inventory/adjustments`,
 > `/inventory-adjustments`, `/inventory-items/:id/adjustments` and
-> `/items/:id/inventory-adjustments` all 404 — none is registered. See `errors.md` →
+> `/items/:id/inventory-adjustments` all 404; none is registered. See `errors.md` →
 > Inventory Adjustments Errors.
 
 The complete inventory surface is three routes plus the item create/list pair:
@@ -1942,7 +1942,7 @@ credit note). There is no direct quantity write.
 
 ## Field Aliases (Create/Update Endpoints)
 
-Middleware on create and update endpoints transparently maps alias field names to canonical names. Both forms are accepted — the alias is only applied if the canonical field is absent.
+Middleware on create and update endpoints transparently maps alias field names to canonical names. Both forms are accepted; the alias is only applied if the canonical field is absent.
 
 | Alias | Canonical | Endpoints |
 |-------|-----------|-----------|
@@ -2060,7 +2060,7 @@ POST /api/v1/quick-fix/sale-schedules/line-items
 
 ### Updatable Fields
 
-Only included fields are changed — omitted fields are left unchanged.
+Only included fields are changed; omitted fields are left unchanged.
 
 **Transaction-level by entity**:
 - **Invoices**: valueDate, dueDate, invoiceNotes, templateResourceId, contactResourceId, billFrom, billTo, currencySettings, taxCurrencySettings, tags, customFields, capsuleResourceId
@@ -2084,11 +2084,11 @@ Only included fields are changed — omitted fields are left unchanged.
 
 **Line item `classifierConfig`** (every line-item route): each entry sets or removes ONE classifier; classifiers the request does not name are left as they are, and `[]` changes nothing. Set: `{ resourceId, type, printable, selectedClasses }` with at least one class. Remove: `{ resourceId, deleted: true }` (type, printable and selectedClasses not needed). Each selected class needs `className` plus `resourceId`, or `entityResourceId` instead when the classifier draws its options from customers, suppliers, contacts, employees or users.
 
-**Line items — journal/cash-entry (Pattern B)**: organizationAccountResourceId, amount, description, taxProfileResourceId, classifierConfig.
+**Line items (journal/cash-entry, Pattern B)**: organizationAccountResourceId, amount, description, taxProfileResourceId, classifierConfig.
 
-**Line items — schedulers (Pattern C, arrayIndex)**: name, description, sku, unit, unitPrice, quantity, discount, taxProfileResourceId, organizationAccountResourceId, classifierConfig, itemResourceId, withholdingTax (purchase only).
+**Line items (schedulers, Pattern C, arrayIndex)**: name, description, sku, unit, unitPrice, quantity, discount, taxProfileResourceId, organizationAccountResourceId, classifierConfig, itemResourceId, withholdingTax (purchase only).
 
-**Line items — journal-schedules (Pattern D, lineItemResourceId)**: amount, description, organizationAccountResourceId, taxProfileResourceId, classifierConfig, itemResourceId, unit, quantity, pricePerUnit.
+**Line items (journal-schedules, Pattern D, lineItemResourceId)**: amount, description, organizationAccountResourceId, taxProfileResourceId, classifierConfig, itemResourceId, unit, quantity, pricePerUnit.
 
 ### Pattern D Example (Journal Schedule Line Items)
 
@@ -2246,7 +2246,7 @@ Any other 5xx, or a timeout, on apply: the outcome is unknown. If the connection
 
 ### POST /api/v1/transfer-trial-balance
 
-Create opening balance entries for an organization. Used during onboarding to transfer balances from a prior accounting system. Entries are always created as ACTIVE (no draft state). The reference is auto-generated by the server — do not send one.
+Create opening balance entries for an organization. Used during onboarding to transfer balances from a prior accounting system. Entries are always created as ACTIVE (no draft state). The reference is auto-generated by the server; do not send one.
 
 ```json
 // Request:
@@ -2263,9 +2263,9 @@ Create opening balance entries for an organization. Used during onboarding to tr
 ```
 
 **Key behaviors**:
-- Always ACTIVE — no `saveAsDraft` field (ignored if sent)
-- Reference is auto-generated — do not include `reference` in the request body
-- Uses `journalEntries` (NOT `lines`) — same as regular journals
+- Always ACTIVE; no `saveAsDraft` field (ignored if sent)
+- Reference is auto-generated; do not include `reference` in the request body
+- Uses `journalEntries` (NOT `lines`), same as regular journals
 - Debit/credit must balance (same as regular journals)
 - Per-line `exchangeRate` works as on `POST /journals` (line account currency to base, foreign-currency account lines only)
 - Creates a non-editable transfer journal visible in the general ledger
@@ -2300,7 +2300,7 @@ Get a single payment record by its payment resourceId (NOT cashflow transaction 
 
 ### PUT /api/v1/payments/{resourceId}
 
-Update an existing payment record. All fields optional — only included fields are changed.
+Update an existing payment record. All fields optional; only included fields are changed.
 
 ```json
 // Request:
@@ -2394,18 +2394,18 @@ Nine entities, each with a single-record and a bulk form:
 | Sale quotes | `POST /api/v1/sale-quotes/:resourceId/request-changes` | `POST /api/v1/sale-quotes/bulk-request-changes` |
 | Claims | `POST /api/v1/claims/:resourceId/request-changes` | `POST /api/v1/claims/bulk/request-changes` |
 
-**Claims breaks the bulk path pattern** — `/claims/bulk/request-changes`, not
+**Claims breaks the bulk path pattern**: `/claims/bulk/request-changes`, not
 `/claims/bulk-request-changes`. The other eight are all `bulk-request-changes`.
 
-### Single — request body (200)
+### Single: request body (200)
 ```json
 { "message": "Please attach the signed delivery note before resubmitting." }
 ```
-`message` is required and `minLength: 1` — a blank value is rejected. It is the only place the
+`message` is required and `minLength: 1`; a blank value is rejected. It is the only place the
 reason is recorded.
 
 ```json
-// Response — 200 (per-record outcome; a skipped record does NOT fail the call)
+// Response: 200 (per-record outcome; a skipped record does NOT fail the call)
 {
   "data": {
     "records": [
@@ -2422,23 +2422,23 @@ reason is recorded.
   }
 }
 ```
-**Check `isSuccess` per record** — a record in the wrong state comes back with
+**Check `isSuccess` per record**: a record in the wrong state comes back with
 `isSuccess: false` + `errorCode`/`failureReason`, inside a 200.
 
-### Bulk — request body (202)
+### Bulk: request body (202)
 ```json
 {
   "message": "Please attach the signed delivery note before resubmitting.",
   "resourceIds": ["b7a2c3d4-e5f6-7890-abcd-ef1234567890"]
 }
 ```
-`resourceIds`: 1–500 per call. `message` applies to every record in the batch.
+`resourceIds`: 1 to 500 per call. `message` applies to every record in the batch.
 
 ```json
-// Response — 202 (async job handle, NOT the outcome)
+// Response: 202 (async job handle, NOT the outcome)
 { "data": { "jobId": "...", "status": "...", "totalRecords": 12, "totalChunks": 1, "subscriptionFBPath": "..." } }
 ```
-Poll the result with `POST /api/v1/background-jobs/search` (section 23) — the 202 only means
+Poll the result with `POST /api/v1/background-jobs/search` (section 23); the 202 only means
 the job was accepted.
 
 ---
@@ -2473,7 +2473,7 @@ MCP tools `approve_documents` / `bulk_approve_documents`, CLI `clio approvals ap
 
 ## 20. Nano-Classifier CRUD
 
-### POST /api/v1/nano-classifiers — Create
+### POST /api/v1/nano-classifiers: Create
 
 ```json
 // Request:
@@ -2487,9 +2487,9 @@ MCP tools `approve_documents` / `bulk_approve_documents`, CLI `clio approvals ap
 { "data": { "resourceId": "uuid" } }
 ```
 
-**CRITICAL**: `classes` is a `string[]` (NOT `classNames`, NOT `[{className}]`). `printable` is required — defaults to `false`.
+**CRITICAL**: `classes` is a `string[]` (NOT `classNames`, NOT `[{className}]`). `printable` is required, defaults to `false`.
 
-### GET /api/v1/nano-classifiers/{resourceId} — Double-wrapped response
+### GET /api/v1/nano-classifiers/{resourceId}: Double-wrapped response
 
 ```json
 // Response (DOUBLE-WRAPPED):
@@ -2512,7 +2512,7 @@ MCP tools `approve_documents` / `bulk_approve_documents`, CLI `clio approvals ap
 }
 ```
 
-**CRITICAL**: GET single is double-wrapped — `{data: {data: [...], totalElements, totalPages}}`. Extract `res.data.data[0]` to get the classifier. Classes in response are objects (`{className, resourceId}`), not strings.
+**CRITICAL**: GET single is double-wrapped: `{data: {data: [...], totalElements, totalPages}}`. Extract `res.data.data[0]` to get the classifier. Classes in response are objects (`{className, resourceId}`), not strings.
 
 ---
 
@@ -2521,7 +2521,7 @@ MCP tools `approve_documents` / `bulk_approve_documents`, CLI `clio approvals ap
 ### GET /api/v1/scheduled/invoices/{resourceId}
 
 ```json
-// Response — uses `interval`, NOT `repeat`:
+// Response (uses `interval`, NOT `repeat`):
 {
   "data": {
     "resourceId": "uuid",
@@ -2564,7 +2564,7 @@ Same pattern for `PUT /scheduled/bills/:id` (uses `bill` wrapper) and `PUT /sche
 
 ### POST /api/v1/contacts/bulk-upsert
 
-**ASYNC** — returns a `jobId`. Poll `/background-jobs/search` with `filter.resourceId.eq` until terminal status.
+**ASYNC**: returns a `jobId`. Poll `/background-jobs/search` with `filter.resourceId.eq` until terminal status.
 
 ```json
 // Request
@@ -2605,13 +2605,13 @@ Poll: `POST /background-jobs/search` body: `{ "filter": { "resourceId": { "eq": 
 🚨 **CRITICAL**: Filter by `resourceId` (NOT `jobId`). `filter.jobId.eq` is silently ignored.
 
 ```json
-// Request — look up a specific job
+// Request: look up a specific job
 {
   "filter": { "resourceId": { "eq": "job-uuid-abc-123" } },
   "limit": 1
 }
 
-// Request — find all failed jobs from today
+// Request: find all failed jobs from today
 {
   "filter": {
     "status": { "in": ["FAILED", "PARTIAL_SUCCESS"] },
@@ -2736,17 +2736,17 @@ Batch-record judgment entries (1-100 per call). Per-entry independent: acks come
 { "data": { "records": [{ "resourceId": "...", "replayed": false, "duplicateCount": 0 }] } }
 ```
 
-`kind`: CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION, NOTE (the neutral fallback for a judgment logged without a declared type; a missing or blank `kind` defaults to NOTE and is flagged, not rejected — never declare NOTE deliberately). `tier`: LOW, MEDIUM, HIGH, CRITICAL. `refs` entries are OBJECTS: the string grammar `TYPE:resourceId[#field][:RELATION]` travels in `raw` (an unparseable ref is stored with `parsed: false`, never bounced). Optional fields: `ruledOut`, `frame`, `confidence`, `citedRule`, `workflowLabel`, `agentLabel`. `idempotencyKey` makes retries safe: a replay returns the existing entry with `replayed: true`.
+`kind`: CLASSIFICATION, MATCH, SCOPE, ASSUMPTION, RISK, METHOD, RECOVERY, DEVIATION, NOTE (the neutral fallback for a judgment logged without a declared type; a missing or blank `kind` defaults to NOTE and is flagged, not rejected; never declare NOTE deliberately). `tier`: LOW, MEDIUM, HIGH, CRITICAL. `refs` entries are OBJECTS: the string grammar `TYPE:resourceId[#field][:RELATION]` travels in `raw` (an unparseable ref is stored with `parsed: false`, never bounced). Optional fields: `ruledOut`, `frame`, `confidence`, `citedRule`, `workflowLabel`, `agentLabel`. `idempotencyKey` makes retries safe: a replay returns the existing entry with `replayed: true`.
 
-**Jot doctrine (fill fields consistently — the server re-scores tier from kind + refs, and declared-vs-computed agreement is a review signal):**
+**Jot doctrine (fill fields consistently; the server re-scores tier from kind + refs, and declared-vs-computed agreement is a review signal):**
 
 - **When**: log a judgment when you chose among real alternatives and a write followed, or when you deliberately decided NOT to write. Skip mechanical actions. Jot AFTER the write succeeds; carry the written record's resourceId in `refs`.
-- **Tier anchors** (mirror the server's rules): CRITICAL = money leaves (`PAY` ref), data destroyed (`DELETE` ref), external send or period lock (`FINALIZE` ref), or a RECOVERY that still drove a write. HIGH = the withheld write (RECOVERY with no mutation ref — it pins via withheld-write, not tier), or RISK/MATCH backed by a write. LOW = a DEVIATION detached from any write. MEDIUM = everything else.
+- **Tier anchors** (mirror the server's rules): CRITICAL = money leaves (`PAY` ref), data destroyed (`DELETE` ref), external send or period lock (`FINALIZE` ref), or a RECOVERY that still drove a write. HIGH = the withheld write (RECOVERY with no mutation ref; it pins via withheld-write, not tier), or RISK/MATCH backed by a write. LOW = a DEVIATION detached from any write. MEDIUM = everything else.
 - **Kind boundaries**: where a value LANDS (account, tax code) = CLASSIFICATION; how it is COMPUTED = METHOD. Filling one missing fact = ASSUMPTION; drawing a set boundary = SCOPE (carry `frame`). A decided omission after failure = RECOVERY, never DEVIATION.
 - **Refs relation** is load-bearing: state what the write did (CREATE/UPDATE/DELETE/FINALIZE/PAY/RECONCILE/TRIGGER); SUBJECT only for no-write entries. PAY/DELETE/FINALIZE pin the jot regardless of declared tier.
 - **confidence**: HIGH = clear rule or precedent; MEDIUM = pattern inference; LOW = a guess a reviewer should check.
 - **workflowLabel**: use a canonical job name when one fits (`month-end-close`, `quarter-end-close`, `year-end-close`, `bank-recon`, `gst-vat-filing`, `payment-run`, `credit-control`, `supplier-recon`, `audit-prep`, `fa-review`, `document-collection`, `statutory-filing`), else short kebab-case.
-- **Style**: tight, factual, plain punctuation; one line per field; never repeat content across fields; a call without a `why` is half a record. `duplicateCount > 0` on the ack = already recorded — do not re-jot; search first on repeated workflows.
+- **Style**: tight, factual, plain punctuation; one line per field; never repeat content across fields; a call without a `why` is half a record. `duplicateCount > 0` on the ack = already recorded; do not re-jot; search first on repeated workflows.
 
 ### POST /api/v1/jots/search
 
@@ -2772,7 +2772,7 @@ Append one review verb to a jot (append-only: annotates, never mutates).
 
 ## 26. Bank Rules CRUD
 
-A bank rule has two halves: the **WHEN** (`searchFilter`, the condition deciding which statement lines it applies to) and the **THEN** (`configuration.reconcileWithDirectCashEntry`, the allocation). **A rule with no `searchFilter` is never suggested** — auto-reconciliation only considers rules whose stored condition is non-null, so it exists, lists, and can be applied by hand, but is never offered. See jaz-api rules 90a-90d for the full payload.
+A bank rule has two halves: the **WHEN** (`searchFilter`, the condition deciding which statement lines it applies to) and the **THEN** (`configuration.reconcileWithDirectCashEntry`, the allocation). **A rule with no `searchFilter` is never suggested**: auto-reconciliation only considers rules whose stored condition is non-null, so it exists, lists, and can be applied by hand, but is never offered. See jaz-api rules 90a-90d for the full payload.
 
 ### GET /api/v1/bank-rules
 
@@ -2824,13 +2824,13 @@ Creates a rule. `searchFilter` is optional on the wire and effectively required 
 }
 ```
 
-`searchFilter` rules: `version` must be `1`; `raw` must be PRESENT but **may be the empty string** (the app itself saves conditions that way); `parsed` must be a non-empty object. Condition fields are `description`, `extReference`, `extContactName`, `netAmount`, `valueDate`, plus the account's active custom Bank Fields. An unsupported field path does NOT error — the rule saves and then never fires.
+`searchFilter` rules: `version` must be `1`; `raw` must be PRESENT but **may be the empty string** (the app itself saves conditions that way); `parsed` must be a non-empty object. Condition fields are `description`, `extReference`, `extContactName`, `netAmount`, `valueDate`, plus the account's active custom Bank Fields. An unsupported field path does NOT error; the rule saves and then never fires.
 
 ### PUT /api/v1/bank-rules/:resourceId
 
 Full replacement: send `resourceId`, `appliesToReconciliationAccount` and the whole `configuration` every time.
 
-**`searchFilter` is the one exception to full replacement.** Omit the key and the stored condition is KEPT; send `null` to remove it; send an object to replace it. This matters because the obvious read-modify-write (GET, change the name, PUT) drops the condition unless you carry it across — which silently stops the rule ever being suggested again.
+**`searchFilter` is the one exception to full replacement.** Omit the key and the stored condition is KEPT; send `null` to remove it; send an object to replace it. This matters because the obvious read-modify-write (GET, change the name, PUT) drops the condition unless you carry it across, which silently stops the rule ever being suggested again.
 
 ### DELETE /api/v1/bank-rules/:resourceId
 
@@ -2844,7 +2844,7 @@ Searches rules. Filter fields: `name`, `resourceId`, `actionType`, `appliesToRec
 { "filter": { "name": { "contains": "grab" } }, "sort": { "sortBy": ["name"], "order": "ASC" }, "limit": 100 }
 ```
 
-**There is no filter on `searchFilter`**, so "which of my rules have no condition" cannot be asked server-side — list the rules and check the field client-side.
+**There is no filter on `searchFilter`**, so "which of my rules have no condition" cannot be asked server-side; list the rules and check the field client-side.
 
 
 ## 27. Unapplied Payments
@@ -2910,4 +2910,4 @@ Records an unapplied payment for the bank record and matches the two. Direction,
 
 ---
 
-*Last updated: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 — added Bank Rules CRUD, section 26. Previous: 2026-07-11 — added Jots judgment journal, section 25. Previous: 2026-04-09 — Added: Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13 — Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*
+*Last updated: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09, added Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13: Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*

@@ -2,9 +2,9 @@
 
 ## Scenario
 
-Your company has 150 unreconciled bank records and 400 cashflow transactions in the books. Manually matching them by amount, date, and description takes hours. The bank-match calculator automates this — it runs a 5-phase cascade algorithm that finds 1:1, N:1, 1:N, and N:M matches with confidence scores, leaving only genuinely unmatched items for manual review.
+Your company has 150 unreconciled bank records and 400 cashflow transactions in the books. Manually matching them by amount, date, and description takes hours. The bank-match calculator automates this: it runs a 5-phase cascade algorithm that finds 1:1, N:1, 1:N, and N:M matches with confidence scores, leaving only genuinely unmatched items for manual review.
 
-**Pattern:** Utility calculator — produces match proposals for the bank reconciliation job
+**Pattern:** Utility calculator (produces match proposals for the bank reconciliation job)
 
 **When to use this calculator:**
 - Bank reconciliation catch-up with a large backlog of unreconciled items
@@ -13,9 +13,9 @@ Your company has 150 unreconciled bank records and 400 cashflow transactions in 
 - Investigating potential matches before committing them in Jaz
 
 **When NOT to use this calculator:**
-- Already reconciled — no unreconciled items to match
-- Single-item matching — just search by amount and date manually
-- Cross-entity matching — this operates within a single bank account
+- Already reconciled: no unreconciled items to match
+- Single-item matching: just search by amount and date manually
+- Cross-entity matching: this operates within a single bank account
 
 ---
 
@@ -29,7 +29,7 @@ Converts all amounts to integer cents (eliminates floating-point issues), comput
 
 ### Phase 1: Exact 1:1 Hash Join
 
-Finds perfect matches — same amount (to the cent), same contact name, same date. These are matched with `exact` confidence. Uses hash-based lookup for O(n) performance.
+Finds perfect matches: same amount (to the cent), same contact name, same date. These are matched with `exact` confidence. Uses hash-based lookup for O(n) performance.
 
 ### Phase 2: Fuzzy 1:1 Greedy Assignment
 
@@ -39,15 +39,15 @@ For remaining items, scores every bank record against every candidate transactio
 |--------|--------|-------------|
 | **Text** | 0.55 | Cross-field similarity between contact/reference/description fields |
 | **Date** | 0.30 | Exponential decay with 5-day half-life (14-day window default) |
-| **Type** | 0.15 | Occam's razor — prefers simpler match types (1:1 over N:1) |
+| **Type** | 0.15 | Occam's razor: prefers simpler match types (1:1 over N:1) |
 
-Amount must be within tolerance (default: $0.01). Pairs are assigned greedily (best score first) with a regret check — if a candidate is significantly better for another bank record, it skips and lets the better pairing win. Threshold: score >= 0.70 for strong 1:1 match.
+Amount must be within tolerance (default: $0.01). Pairs are assigned greedily (best score first) with a regret check: if a candidate is significantly better for another bank record, it skips and lets the better pairing win. Threshold: score >= 0.70 for strong 1:1 match.
 
 **Confidence mapping:**
-- `exact` — perfect amount + contact + date (Phase 1 only)
-- `high` — score >= 0.70
-- `medium` — score >= 0.40
-- `low` — score < 0.40
+- `exact`: perfect amount + contact + date (Phase 1 only)
+- `high`: score >= 0.70
+- `medium`: score >= 0.40
+- `low`: score < 0.40
 
 ### Phase 3: N:1 Subset-Sum (Multiple Transactions → One Bank Record)
 
@@ -59,7 +59,7 @@ A single bank record might represent several transactions batched together (e.g.
 
 ### Phase 4: 1:N Reverse Subset-Sum (Multiple Bank Records → One Transaction)
 
-The reverse case — a single transaction might correspond to multiple bank records (e.g., a payment was split across bank entries). Same DFS algorithm, reversed: finds subsets of bank records that sum to a transaction amount.
+The reverse case: a single transaction might correspond to multiple bank records (e.g., a payment was split across bank entries). Same DFS algorithm, reversed: finds subsets of bank records that sum to a transaction amount.
 
 ### Phase 5: N:M Two-Set Matching (Within Contact Groups)
 
@@ -79,7 +79,7 @@ cat bank-data.json | clio jobs bank-recon match --json
 # With options
 clio jobs bank-recon match --input data.json --tolerance 0.05 --date-window 7 --max-group 3 --currency SGD --json
 
-# Analysis mode — all possible matches per record
+# Analysis mode: all possible matches per record
 clio jobs bank-recon match --input data.json --find-all --json
 ```
 
@@ -149,7 +149,7 @@ clio jobs bank-recon match --input data.json --find-all --json
 |-------|----------|-------------|
 | `id` | Yes | Unique identifier (cashflow transaction resourceId) |
 | `direction` | Yes | `PAYIN` (cash-in) or `PAYOUT` (cash-out) |
-| `amount` | Yes | Absolute amount (always positive — direction indicates sign) |
+| `amount` | Yes | Absolute amount (always positive; direction indicates sign) |
 | `date` | Yes | Value date (YYYY-MM-DD) |
 | `contact` | No | Contact name from Jaz |
 | `reference` | No | Document reference (e.g., INV-001) |
@@ -225,12 +225,12 @@ clio jobs bank-recon match --input data.json --find-all --json
 
 ### Committing a match → route to the right reconcile tool
 
-The matcher finds matches against transactions the org **already has** — so commit via the MATCH-EXISTING path, not create-new:
+The matcher finds matches against transactions the org **already has**, so commit via the MATCH-EXISTING path, not create-new:
 
-- A 1:1 (or N:1) match to an **existing open bill/invoice** at `exact` / `fuzzy-high` (≥0.85) confidence → **`reconcile_with_payments`** (pass the matched transaction's `cashflowTransactionResourceId` in `businessTransactionPayments[]`). Do NOT use `reconcile_invoice_receipt`/`reconcile_bill_receipt` — those CREATE a duplicate.
+- A 1:1 (or N:1) match to an **existing open bill/invoice** at `exact` / `fuzzy-high` (≥0.85) confidence → **`reconcile_with_payments`** (pass the matched transaction's `cashflowTransactionResourceId` in `businessTransactionPayments[]`). Do NOT use `reconcile_invoice_receipt`/`reconcile_bill_receipt`; those CREATE a duplicate.
 - A batch of high-confidence matches → **`reconcile_magic_match`** in one call.
 - Only when the matcher finds NO existing transaction → create one (`reconcile_invoice_receipt`/`reconcile_bill_receipt` or `create_cash_*`).
-- `fuzzy-medium` (0.70–0.85) / `nm-confident` → surface for confirmation before committing (checkpoint), don't auto-commit.
+- `fuzzy-medium` (0.70 to 0.85) / `nm-confident` → surface for confirmation before committing (checkpoint), don't auto-commit.
 
 See `bank-recon.md` Step 4a for the full auto-commit-vs-checkpoint decision gate.
 
@@ -241,7 +241,7 @@ See `bank-recon.md` Step 4a for the full auto-commit-vs-checkpoint decision gate
 **Setup:** A Singapore company reconciling their DBS Current account for January 2025. They have 5 unreconciled bank records and 8 cashflow transactions.
 
 **Input (bank records):**
-- BR-001: +$2,500.00 on Jan 15, "Acme Corp — TRF"
+- BR-001: +$2,500.00 on Jan 15, "Acme Corp TRF"
 - BR-002: -$800.00 on Jan 18, "Office Supplies"
 - BR-003: +$5,200.00 on Jan 20, "CustomerX batch payment"
 - BR-004: -$25.00 on Jan 31, "Monthly service charge"
@@ -263,7 +263,7 @@ See `bank-recon.md` Step 4a for the full auto-commit-vs-checkpoint decision gate
 | 3 | N:1 | high | BR-003 ($5,200) | TXN-003 + TXN-004 ($2,200 + $3,000) | Batch deposit: 2 invoices = 1 bank entry |
 | 4 | 1:1 | high | BR-005 ($3,000) | TXN-005 ($3,000) | Amount + contact match |
 
-**Unmatched:** BR-004 ($25 service charge) — no transaction in books. Create a cash-out journal for bank fees.
+**Unmatched:** BR-004 ($25 service charge): no transaction in books. Create a cash-out journal for bank fees.
 
 **Match rate:** 80% of records matched (4/5), 80% of matched amount.
 

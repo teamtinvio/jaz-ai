@@ -1,4 +1,4 @@
-# Mapping Rules — CoA, Contacts, Tax, Currencies
+# Mapping Rules: CoA, Contacts, Tax, Currencies
 
 ## Chart of Accounts Mapping
 
@@ -6,10 +6,10 @@
 
 When the Jaz org has only default system-generated accounts:
 
-1. **Discover system accounts:** `GET /api/v1/chart-of-accounts/search` — system-generated accounts have `isSystemGenerated: true`. These cannot be deleted.
+1. **Discover system accounts:** `GET /api/v1/chart-of-accounts/search`; system-generated accounts have `isSystemGenerated: true`. These cannot be deleted.
 2. **Skip accounts that already exist** (matched by name or code from probe)
 3. **Bulk-upsert source accounts** using `POST /api/v1/chart-of-accounts/bulk-upsert` with `{ accounts: [...] }` wrapper
-4. **Match by code first, then name** — if a system account has the same code as a source account, map to it
+4. **Match by code first, then name**: if a system account has the same code as a source account, map to it
 
 ### Existing Org Strategy (Match)
 
@@ -17,9 +17,9 @@ When the Jaz org has user-customized accounts:
 
 1. **GET all existing accounts** from Jaz
 2. **3-tier fuzzy matching** (reuse seeder's proven approach):
-   - **Tier 1 — Exact name match:** Case-insensitive exact match on account name
-   - **Tier 2 — Fuzzy match (Jaro-Winkler):** JW distance > 0.85 between names
-   - **Tier 3 — Token overlap:** Split names into tokens, overlap > 60%
+   - **Tier 1. Exact name match:** Case-insensitive exact match on account name
+   - **Tier 2. Fuzzy match (Jaro-Winkler):** JW distance > 0.85 between names
+   - **Tier 3. Token overlap:** Split names into tokens, overlap > 60%
 3. **Code as tiebreaker:** If multiple name matches, prefer the one with matching account code
 4. **Create missing accounts** for any unmatched source accounts
 
@@ -47,7 +47,7 @@ Source systems use different classification names. Map to Jaz types:
 
 **Valid `classificationType` values (exactly 23):** Bank Accounts, Cash, Current Asset, Non-current Asset, Fixed Asset, Inventory, Investment, Goodwill, Current Liability, Non-current Liability, Shareholders Equity, Operating Revenue, Other Revenue, Discontinued Income, Financing Income, Investing Income, Direct Costs, Operating Expense, Other Expense, Finance Cost, Investing Expense, Income Tax Expense, Discontinued Expense
 
-The set is GLOBAL (identical for every org). Confirm with `list_account_classifications` using `limit: 100` — its default page size is 20 and there are 23 types.
+The set is GLOBAL (identical for every org). Confirm with `list_account_classifications` using `limit: 100`; its default page size is 20 and there are 23 types.
 
 ### Clearing Account Creation
 
@@ -60,13 +60,13 @@ For Quick Conversion, create two clearing accounts:
       "name": "AR Conversion Clearing",
       "code": "1299",
       "classificationType": "Current Asset",
-      "description": "Contra account for conversion AR balances — should net to zero"
+      "description": "Contra account for conversion AR balances, should net to zero"
     },
     {
       "name": "AP Conversion Clearing",
       "code": "2199",
       "classificationType": "Current Liability",
-      "description": "Contra account for conversion AP balances — should net to zero"
+      "description": "Contra account for conversion AP balances, should net to zero"
     }
   ]
 }
@@ -76,7 +76,7 @@ Choose codes that don't conflict with existing accounts. Adjust `1299`/`2199` if
 
 ### Identifying AR and AP Accounts in the Trial Balance
 
-The TTB journal must know which TB accounts are Accounts Receivable vs Accounts Payable — because in Quick conversion, those balances get routed through clearing accounts instead of posted directly (to avoid doubling with the conversion invoices/bills).
+The TTB journal must know which TB accounts are Accounts Receivable vs Accounts Payable, because in Quick conversion, those balances get routed through clearing accounts instead of posted directly (to avoid doubling with the conversion invoices/bills).
 
 Identify AR/AP control accounts by name (case-insensitive):
 - **AR:** "Accounts Receivable", "Trade Debtors", "Trade Receivables"
@@ -88,20 +88,20 @@ If the source CoA uses different names (e.g., "Debtors Control", "Sundry Credito
 
 ### Matching Rules
 1. **Exact name match** (case-insensitive)
-2. **Fuzzy name match** (Jaro-Winkler > 0.85) — handles minor variations like "Pte Ltd" vs "Pte. Ltd."
+2. **Fuzzy name match** (Jaro-Winkler > 0.85): handles minor variations like "Pte Ltd" vs "Pte. Ltd."
 3. **If no match → create new contact**
 
 ### Filtering Noise from Aging Reports
 
 AR/AP aging reports from source systems mix real contact names with garbage rows. Before creating contacts from an aging report, reject any string that is:
 
-- **A date** — `YYYY-MM-DD`, `DD/MM/YYYY`, day names ("Monday"), or phrases like "as at", "as of"
-- **A total label** — "Total", "Sub-total", "Grand Total", "Percentage", or anything ending in "Total"
-- **A report or column header** — "aging", "current", "91+ days", "doc. date", "balance", "amount"
-- **Purely numeric** — strings with no letters at all (e.g., "1,234.56", "$100", "0.00")
-- **Shorter than 2 characters** — single letters or empty strings
+- **A date**: `YYYY-MM-DD`, `DD/MM/YYYY`, day names ("Monday"), or phrases like "as at", "as of"
+- **A total label**: "Total", "Sub-total", "Grand Total", "Percentage", or anything ending in "Total"
+- **A report or column header**: "aging", "current", "91+ days", "doc. date", "balance", "amount"
+- **Purely numeric**: strings with no letters at all (e.g., "1,234.56", "$100", "0.00")
+- **Shorter than 2 characters**: single letters or empty strings
 
-Every aging report has these noise rows — subtotal lines, aging bucket headers, report metadata. Creating contacts from them produces junk data that must be manually cleaned up.
+Every aging report has these noise rows: subtotal lines, aging bucket headers, report metadata. Creating contacts from them produces junk data that must be manually cleaned up.
 
 ### Contact Types
 Jaz uses boolean flags, NOT an enum:
@@ -110,15 +110,15 @@ Jaz uses boolean flags, NOT an enum:
 - If both (customer AND supplier) → `customer: true, supplier: true`
 
 ### Required Fields
-- `name` — the contact's business name
-- `billingName` — what shows on invoices/bills (often same as name)
-- `customer` — boolean (true if the contact is a customer)
-- `supplier` — boolean (true if the contact is a supplier)
+- `name`: the contact's business name
+- `billingName`: what shows on invoices/bills (often same as name)
+- `customer`: boolean (true if the contact is a customer)
+- `supplier`: boolean (true if the contact is a supplier)
 
 ### Optional but Recommended
-- `email` — for payment reminders
-- `phone` — **MUST be E.164** if provided (`+65XXXXXXXX` for SG, `+63XXXXXXXXXX` for PH)
-- `currency` — default currency for this contact (for FX contacts)
+- `email`: for payment reminders
+- `phone`: **MUST be E.164** if provided (`+65XXXXXXXX` for SG, `+63XXXXXXXXXX` for PH)
+- `currency`: default currency for this contact (for FX contacts)
 
 ### Contact API Example
 ```json
@@ -138,8 +138,8 @@ POST /api/v1/contacts
 The items extractor detects columns for: name, code, description, type (PRODUCT/SERVICE), sale price, sale account, sale tax profile, purchase price, purchase account, purchase tax profile.
 
 ### Item Types
-- `PRODUCT` — physical goods (default if type column not present)
-- `SERVICE` — services
+- `PRODUCT`: physical goods (default if type column not present)
+- `SERVICE`: services
 
 ### Payload Shape
 ```json
@@ -162,7 +162,7 @@ POST /api/v1/items
 ```
 
 ### Key Rules
-- Items have **two independent sides** — sale and purchase. Each side has its own account and tax profile.
+- Items have **two independent sides**: sale and purchase. Each side has its own account and tax profile.
 - Set `appliesToSale: true` if the item has sale pricing/account. Set `appliesToPurchase: true` if it has purchase pricing/account.
 - Account and tax profile references use template strings (`{{account:Revenue}}`, `{{taxProfile:SR}}`) resolved at execution time via the probe.
 - If the source doesn't distinguish sale vs purchase accounts, use the same account for both.
@@ -204,7 +204,7 @@ Jaz has separate exempt tax profiles for sales and purchases. Use the correct on
 The probe discovers both: `exemptSalesTaxProfileId` and `exemptPurchaseTaxProfileId`. Using the wrong one may cause validation errors.
 
 ### Handling "No Tax" / Tax-Free Items
-If a source line item has no tax, omit `taxProfileResourceId` from the line item payload entirely — do NOT set it to a zero-rate profile unless the source explicitly used one.
+If a source line item has no tax, omit `taxProfileResourceId` from the line item payload entirely; do NOT set it to a zero-rate profile unless the source explicitly used one.
 
 ## Currency Mapping
 
@@ -231,7 +231,7 @@ POST /api/v1/organization/currencies/<code>/rates
 }
 ```
 
-**Rate direction:** `functionalToSource` — how many units of SOURCE (foreign) currency = 1 unit of FUNCTIONAL (base) currency. Example: base SGD, 1 SGD = 0.74 USD → rate = 0.74. A quote written foreign-first ("1 USD = 1.35 SGD") is the inverse — send 1/1.35 = 0.74, or send 1.35 with `rateDirection: "SOURCE_TO_FUNCTIONAL"` and let the endpoint apply it. Omitting `rateDirection` means `FUNCTIONAL_TO_SOURCE`.
+**Rate direction:** `functionalToSource`, how many units of SOURCE (foreign) currency = 1 unit of FUNCTIONAL (base) currency. Example: base SGD, 1 SGD = 0.74 USD → rate = 0.74. A quote written foreign-first ("1 USD = 1.35 SGD") is the inverse: send 1/1.35 = 0.74, or send 1.35 with `rateDirection: "SOURCE_TO_FUNCTIONAL"` and let the endpoint apply it. Omitting `rateDirection` means `FUNCTIONAL_TO_SOURCE`.
 
 **Note:** Rate endpoints and enable/disable both live under the nested `/organization/currencies` family. The older hyphenated `/organization-currencies/...` rate paths still resolve but are **superseded**; use the nested form.
 

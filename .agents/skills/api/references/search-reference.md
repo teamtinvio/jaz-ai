@@ -1,8 +1,8 @@
-# Jaz API — Search Endpoint Reference
+# Jaz API: Search Endpoint Reference
 
 > Single source of truth for all `POST /*/search` endpoints. Every filter field,
 > sort field, and operator is extracted from the API backend Go structs and validated
-> against the live production API. **Do not guess — look up the exact fields here.**
+> against the live production API. **Do not guess; look up the exact fields here.**
 
 ---
 
@@ -26,9 +26,9 @@ All search endpoints share this identical structure:
 | `limit` | int | No | Default: 100, min: 1, max: 1000 |
 | `offset` | int | No | **Page number** (0-indexed, not row-skip). Default: 0, min: 0, max: 65536. Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`. |
 
-**Response shape**: `{ totalElements, totalPages, data: [...] }` — all search/list endpoints return this flat structure directly (no outer `data` wrapper).
+**Response shape**: `{ totalElements, totalPages, data: [...] }`; all search/list endpoints return this flat structure directly (no outer `data` wrapper).
 
-> **Exception**: the two halves of this family answer differently upstream. `POST /organization-report-template/search` returns a **bare array** with no envelope; `GET /organization-report-template` returns its rows under a **`reportTemplates`** key with no counts. Measured 2026-09-07 — the two halves disagree with each other and with the house style. The tools normalize the list, so you always read `.data`.
+> **Exception**: the two halves of this family answer differently upstream. `POST /organization-report-template/search` returns a **bare array** with no envelope; `GET /organization-report-template` returns its rows under a **`reportTemplates`** key with no counts. Measured 2026-09-07: the two halves disagree with each other and with the house style. The tools normalize the list, so you always read `.data`.
 
 ---
 
@@ -42,7 +42,7 @@ All search endpoints share this identical structure:
 
 ### Query Syntax
 
-For the full syntax spec — amounts, dates, fields, negation, wildcards, regex, absolute value, blank checks, entity field lists, and examples — see **[search-syntax.md](./search-syntax.md)**.
+For the full syntax spec (amounts, dates, fields, negation, wildcards, regex, absolute value, blank checks, entity field lists, and examples), see **[search-syntax.md](./search-syntax.md)**.
 
 Quick examples:
 ```
@@ -73,7 +73,7 @@ When both are present, merged at filter level. Explicit `filter` keys win on con
 | `query_not_supported` | 400 | Endpoint not in supported list |
 | `query_not_understood` | 400 | Unknown field name or unparseable syntax |
 | `query_parse_error` | 502 | Parser service temporarily unavailable |
-| *(no error)* | 200 | Bad enum value — returns empty results silently |
+| *(no error)* | 200 | Bad enum value, returns empty results silently |
 
 ---
 
@@ -113,7 +113,7 @@ When both are present, merged at filter level. Explicit `filter` keys win on con
 
 Same as numeric minus `neq`: `eq`, `gt`, `gte`, `lt`, `lte`, `in`, `inRange`, `notInRange` (used by `terms` field on invoices/bills).
 
-### Date Operators (`DateExpression`) — format: `YYYY-MM-DD`
+### Date Operators (`DateExpression`), format: `YYYY-MM-DD`
 
 | Operator | Type | Example |
 |----------|------|---------|
@@ -126,9 +126,9 @@ Same as numeric minus `neq`: `eq`, `gt`, `gte`, `lt`, `lte`, `in`, `inRange`, `n
 | `notBetween` | string[2] | `{ "valueDate": { "notBetween": ["2026-01-01", "2026-03-31"] } }` |
 | `isNull` / `isNotNull` | string | `{ "dueDate": { "isNull": "0001-01-01" } }` | takes the placeholder DATE, not "true" |
 
-**CRITICAL**: `between`, `notBetween`, `inRange` and `notInRange` require EXACTLY 2 values, low then high. Date `isNull`/`isNotNull` take the placeholder date `"0001-01-01"` — unlike the string ones, which take `"true"`/`"false"`. All date strings must be `YYYY-MM-DD`.
+**CRITICAL**: `between`, `notBetween`, `inRange` and `notInRange` require EXACTLY 2 values, low then high. Date `isNull`/`isNotNull` take the placeholder date `"0001-01-01"`, unlike the string ones, which take `"true"`/`"false"`. All date strings must be `YYYY-MM-DD`.
 
-### DateTime Operators (`DateTimeExpression`) — format: RFC3339
+### DateTime Operators (`DateTimeExpression`), format: RFC3339
 
 Same operators as DateExpression but accepts RFC3339 strings (e.g., `"2026-01-15T00:00:00Z"`).
 Used by `createdAt` and `updatedAt` fields. Internally converted to epoch milliseconds.
@@ -204,7 +204,7 @@ Some fields accept nested object filters:
 
 To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `YYYY-MM-DD`
 
-**Timezone convention**: All business dates (`valueDate`, `dueDate`, etc.) are in the **organization's timezone** — both in requests and responses. The DB stores epoch ms representing the org-local date (no timezone conversion is ever performed). Only audit timestamps (`createdAt`, `updatedAt`) are UTC.
+**Timezone convention**: All business dates (`valueDate`, `dueDate`, etc.) are in the **organization's timezone**, both in requests and responses. The DB stores epoch ms representing the org-local date (no timezone conversion is ever performed). Only audit timestamps (`createdAt`, `updatedAt`) are UTC.
 
 ---
 
@@ -217,7 +217,7 @@ To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `Y
 |-------|------|-------|
 | `resourceId` | StringExpression | |
 | `contactResourceId` | StringExpression | |
-| `status` | StringExpression | DRAFT, UNPAID, PAID, ACTIVE, VOID, etc. (per type — Rule 67) |
+| `status` | StringExpression | DRAFT, UNPAID, PAID, ACTIVE, VOID, etc. (per type, Rule 67) |
 | `reference` | StringExpression | Invoice number |
 | `terms` | IntExpression | Payment terms (days) |
 | `contact` | ContactNestedFilter | Nested: name, resourceId, status, taxId |
@@ -387,7 +387,7 @@ To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `Y
 
 **Sort fields** (max 10): `resourceId`, `internalName`, `itemCode`, `itemCategory`, `status`, `updatedAt`, `createdAt`
 
-> **Note**: Filter uses `itemCategory` but sort uses `internalName` and `itemCode` — these are sort-only fields not available as filters.
+> **Note**: Filter uses `itemCategory` but sort uses `internalName` and `itemCode`; these are sort-only fields not available as filters.
 
 ---
 
@@ -460,7 +460,7 @@ To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `Y
 
 ### 11. POST /api/v1/bank-records/:accountResourceId/search
 
-**Path parameter**: `accountResourceId` (UUID of a bank-type CoA account — required)
+**Path parameter**: `accountResourceId` (UUID of a bank-type CoA account, required)
 
 **Filter fields** (`BankStatementEntryFilter`):
 | Field | Type | Notes |
@@ -688,7 +688,7 @@ To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `Y
 
 **Sort fields** (max 9): `resourceId`, `status`, `userResourceId`, `userType`, `user.FirstName`, `user.LastName`, `user.Email`, `user.PhoneRegistered`, `user.Status`
 
-There is no top-level `name` or `role` on this filter, and the nested sort keys are capitalised while the nested filter keys are not — `user.firstName` filters, `user.FirstName` sorts. Anything else in `sort.sortBy` is a 422. `query` is rejected on this endpoint; use the filter.
+There is no top-level `name` or `role` on this filter, and the nested sort keys are capitalised while the nested filter keys are not: `user.firstName` filters, `user.FirstName` sorts. Anything else in `sort.sortBy` is a 422. `query` is rejected on this endpoint; use the filter.
 
 Standard pattern with limit/offset/filter/sort. Rarely used in conversions.
 
@@ -706,7 +706,7 @@ Standard pattern with limit/offset/filter/sort. Used for managing bank reconcili
 
 ### 23. POST /api/v1/purchase-items/search
 
-**Filter fields** (`PurchaseItemFilter`): `currencyCode`, `name`, `purchaseResourceId`, `resourceId`, `reference` (plain strings — NOT expression objects. Operators like `contains`, `in` are not supported on this endpoint).
+**Filter fields** (`PurchaseItemFilter`): `currencyCode`, `name`, `purchaseResourceId`, `resourceId`, `reference` (plain strings, NOT expression objects. Operators like `contains`, `in` are not supported on this endpoint).
 
 **Sort fields** (max 13): `resourceId`, `name`, `reference`, `currencyCode`, `status`, `valueDate`, `totalItemAmount`, `description`
 
@@ -716,7 +716,7 @@ Standard pattern with limit/offset/filter/sort. Used for managing bank reconcili
 
 ### 24. POST /api/v1/sale-orders/search
 
-Also covers `POST /api/v1/sale-quotes/search` — same filter shape (`SaleOrderFilter` / `SaleQuoteFilter`).
+Also covers `POST /api/v1/sale-quotes/search`, same filter shape (`SaleOrderFilter` / `SaleQuoteFilter`).
 
 **Filter fields** (`SaleOrderFilter`):
 | Field | Type | Notes |
@@ -742,13 +742,13 @@ Also covers `POST /api/v1/sale-quotes/search` — same filter shape (`SaleOrderF
 
 **Sort fields**: `resourceId`, `reference`, `status`, `contactResourceId`, `valueDate`, `dueDate`, `terms`, `currencyCode`, `totalAmount`, `createdAt`, `updatedAt`
 
-> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_INVOICED for quotes, FULLY_BILLED for requests — an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired) appears on responses but is **not** a filter field.
+> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_INVOICED for quotes, FULLY_BILLED for requests; an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired) appears on responses but is **not** a filter field.
 
 ---
 
 ### 25. POST /api/v1/purchase-orders/search
 
-Also covers `POST /api/v1/purchase-requests/search` — same filter shape (`PurchaseOrderFilter` / `PurchaseRequestFilter`).
+Also covers `POST /api/v1/purchase-requests/search`, same filter shape (`PurchaseOrderFilter` / `PurchaseRequestFilter`).
 
 **Filter fields** (`PurchaseOrderFilter`):
 | Field | Type | Notes |
@@ -774,7 +774,7 @@ Also covers `POST /api/v1/purchase-requests/search` — same filter shape (`Purc
 
 **Sort fields**: `resourceId`, `reference`, `status`, `contactResourceId`, `valueDate`, `dueDate`, `terms`, `currencyCode`, `totalAmount`, `createdAt`, `updatedAt`
 
-> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_BILLED for requests — an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired) appears on responses but is **not** a filter field.
+> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_BILLED for requests; an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired) appears on responses but is **not** a filter field.
 
 ---
 
@@ -844,4 +844,4 @@ POST /api/v1/cashflow-transactions/search
 
 ---
 
-*Derived from Go structs in the API backend (`models/*.go`) — filter/sort fields extracted from struct validation tags and verified against the live production API. **Hand-maintained and not regenerated; nothing detects it going stale** — provenance and precedence rules: `search-enums.md` → Provenance and staleness. Last re-derived: 2026-02-14 — All search/list responses standardized to flat shape. Capsules/capsuleTypes sort now array. Purchase-items sort fields corrected. Tax-profiles max fixed. Catalogs search returns paginated response.*
+*Derived from Go structs in the API backend (`models/*.go`); filter/sort fields extracted from struct validation tags and verified against the live production API. **Hand-maintained and not regenerated; nothing detects it going stale**; provenance and precedence rules: `search-enums.md` → Provenance and staleness. Last re-derived: 2026-02-14. All search/list responses standardized to flat shape. Capsules/capsuleTypes sort now array. Purchase-items sort fields corrected. Tax-profiles max fixed. Catalogs search returns paginated response.*

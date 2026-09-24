@@ -1,5 +1,5 @@
 ---
-description: "Run bank reconciliation in Jaz — match bank records to transactions, categorize unmatched items, resolve discrepancies"
+description: "Run bank reconciliation in Jaz: match bank records to transactions, categorize unmatched items, resolve discrepancies"
 argument-hint: "[bank account] [period YYYY-MM]"
 ---
 
@@ -28,7 +28,7 @@ clio jobs bank-recon --account "DBS Current" --period 2025-01 --json
 clio bank import --account "DBS Current" --file statement.csv --json
 ```
 
-Or for OFX/QIF files, same command — format auto-detected.
+Or for OFX/QIF files, same command (format auto-detected).
 
 ### 3. Run automated matching
 
@@ -42,7 +42,7 @@ The matcher uses a 5-phase cascade: 1:1 exact, N:1 group, 1:N split, N:M complex
 
 The blueprint lists unmatched bank records and book entries. For each:
 - **Bank record with no book entry**: Create the missing transaction (invoice, bill, cash entry, journal)
-- **Book entry with no bank record**: Verify timing — may match next period's statement
+- **Book entry with no bank record**: Verify timing (may match next period's statement)
 - **Partial matches**: Confirm and adjust
 
 ### 5. Verify
@@ -57,5 +57,5 @@ Compare closing balance per books vs bank statement.
 
 - `--account` accepts bank account name (fuzzy matched)
 - Bank records are imported via `clio bank import` (CSV, OFX, QIF)
-- The matcher runs offline — it suggests matches but doesn't auto-confirm
+- The matcher runs offline; it suggests matches but doesn't auto-confirm
 - Bank statement balance vs book balance difference = unreconciled items

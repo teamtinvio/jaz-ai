@@ -5,7 +5,7 @@ argument-hint: ""
 
 # Status across all organizations
 
-Follow the **status** flow in the `jaz-kit` skill (`references/flows.md`). Deadlines are computed from the filing fields the user recorded in ORG.md — see `references/workspace.md`.
+Follow the **status** flow in the `jaz-kit` skill (`references/flows.md`). Deadlines are computed from the filing fields the user recorded in ORG.md (see `references/workspace.md`).
 
 ## Usage
 

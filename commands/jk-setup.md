@@ -10,7 +10,7 @@ Follow the **setup** flow in the `jaz-kit` skill (`references/flows.md`). Onboar
 ## Usage
 
 ```
-/jk-setup                 first run — creates the kit and connects a company
+/jk-setup                 first run: creates the kit and connects a company
 /jk-setup Acme Pte Ltd    add another company
 ```
 

@@ -1,4 +1,4 @@
-# Orders — Sale Quotes, Sale Orders, Purchase Requests, Purchase Orders
+# Orders: Sale Quotes, Sale Orders, Purchase Requests, Purchase Orders
 
 Pre-invoice / pre-bill documents in the sales and purchase pipelines.
 
@@ -32,11 +32,11 @@ Quote→Order / Request→PO linking is a **create-time reference field**:
 - **Quote → Order**: pass `saleQuoteResourceId` on `create_sale_order` (documentType `SALE_ORDER`).
 - **Request → PO**: pass `purchaseRequestResourceId` on `create_purchase_order` (documentType `PURCHASE_ORDER`).
 
-**The parent must be ISSUED (not DRAFT/VOID).** A CREATED/ACCEPTED quote (or ACTIVE/ACCEPTED request) is linkable — accept is **optional** (CREATED already links). Linking to a `DRAFT`/`VOID` parent returns `SALE_QUOTE_STATUS_INVALID_FOR_ORDER_CONVERSION` ("must not be in VOID or DRAFT status to create sale order"). The `create_*` tools pre-flight this: for a DRAFT parent the `repair` hint points at issuing THAT document in place (`update_sale_order` `isDraftToActiveSaleQuote: true` / `update_purchase_order` `isDraftToActivePurchaseRequest: true`), **not** at accepting it (accept fails on DRAFT) and not at creating a duplicate.
+**The parent must be ISSUED (not DRAFT/VOID).** A CREATED/ACCEPTED quote (or ACTIVE/ACCEPTED request) is linkable; accept is **optional** (CREATED already links). Linking to a `DRAFT`/`VOID` parent returns `SALE_QUOTE_STATUS_INVALID_FOR_ORDER_CONVERSION` ("must not be in VOID or DRAFT status to create sale order"). The `create_*` tools pre-flight this: for a DRAFT parent the `repair` hint points at issuing THAT document in place (`update_sale_order` `isDraftToActiveSaleQuote: true` / `update_purchase_order` `isDraftToActivePurchaseRequest: true`), **not** at accepting it (accept fails on DRAFT) and not at creating a duplicate.
 
 **Currency.** A linked order must use the same currency as its quote/request: a linked order in a different currency is refused.
 
-Creating and confirming an order from an issued quote rolls the parent quote's `orderState` up to reflect downstream progress (arap order-status rollup, 2026-06): a confirmed order **not yet invoiced** shows `PARTIALLY_ORDERED` (verified live); the terminal `FULLY_INVOICED` is reached only once every linked order is fully invoiced. Purchase requests mirror this with `FULLY_BILLED`. `orderState` is a **response field**, not a search filter — values: `NOT_ORDERED` / `PARTIALLY_ORDERED` / `FULLY_INVOICED` (quotes) / `FULLY_BILLED` (requests). The older `FULLY_ORDERED` value was retired by this rollup.
+Creating and confirming an order from an issued quote rolls the parent quote's `orderState` up to reflect downstream progress (arap order-status rollup, 2026-06): a confirmed order **not yet invoiced** shows `PARTIALLY_ORDERED` (verified live); the terminal `FULLY_INVOICED` is reached only once every linked order is fully invoiced. Purchase requests mirror this with `FULLY_BILLED`. `orderState` is a **response field**, not a search filter; values: `NOT_ORDERED` / `PARTIALLY_ORDERED` / `FULLY_INVOICED` (quotes) / `FULLY_BILLED` (requests). The older `FULLY_ORDERED` value was retired by this rollup.
 
 ## Conversion: Order → Invoice / Order → Bill
 
@@ -47,7 +47,7 @@ Both directions are now first-class endpoints:
 
 Body: `valueDate` + `dueDate` required; `reference` is required unless you set `autoReference: true`, which takes the next number from your org's own numbering series; omitting both is an error. Optional `terms`, `notes` (sales → `invoiceNotes`), `internalNotes`, `tag`, `saveAsDraft` (defaults true → the new document lands as a DRAFT; pass false to post immediately).
 
-- **NON-IDEMPOTENT.** Each call creates ANOTHER invoice/bill. On a timeout or uncertain result, do NOT blind-retry — search for one already linked to this order (via the linkage fields below) first.
+- **NON-IDEMPOTENT.** Each call creates ANOTHER invoice/bill. On a timeout or uncertain result, do NOT blind-retry; search for one already linked to this order (via the linkage fields below) first.
 - **Source must not be VOID.** The convert tools pre-flight this and return a `repair` hint instead of a bare 422.
 - The reverse link is also exposed as create-time fields: `create_invoice` accepts `saleOrderResourceId` / `saleQuoteResourceId`; `create_bill` accepts `purchaseOrderResourceId` / `purchaseRequestResourceId`. Use these when you build the invoice/bill yourself instead of converting.
 
@@ -93,7 +93,7 @@ To change a few fields on some lines without resending the document, use `quick_
 `sale_orders`: `create_sale_order`, `get_sale_order`, `search_sale_orders`, `search_sale_order_line_items`, `update_sale_order`, `transition_sale_order` (action: ACCEPT | CONFIRM | VOID | DELETE), `convert_sale_order_to_invoice`.
 `purchase_orders`: `create_purchase_order`, `get_purchase_order`, `search_purchase_orders`, `search_purchase_order_line_items`, `update_purchase_order`, `transition_purchase_order`, `convert_purchase_order_to_bill`.
 
-PDF downloads for the documents these convert into: `download_bill_pdf` (`bills`), `download_supplier_credit_note_pdf` (`supplier_credit_notes`) — alongside the existing `download_invoice_pdf` / `download_credit_note_pdf`.
+PDF downloads for the documents these convert into: `download_bill_pdf` (`bills`), `download_supplier_credit_note_pdf` (`supplier_credit_notes`), alongside the existing `download_invoice_pdf` / `download_credit_note_pdf`.
 
 ## CLI (full surface incl. long-tail)
 
@@ -106,7 +106,7 @@ clio bills download <id>                     # bill PDF
 clio supplier-credit-notes download <id>     # supplier CN PDF
 ```
 
-## Worked example — issued quote → accept → linked order → confirmed
+## Worked example: issued quote → accept → linked order → confirmed
 
 ```bash
 # 1. Issue the quote (--finalize → saveAsDraft:false → status CREATED). A plain
@@ -129,8 +129,8 @@ Purchase side is symmetric: `create -t request --finalize` (→ ACTIVE) → (opt
 
 ## Search
 
-`search_sale_orders` / `search_purchase_orders` take `documentType` plus the standard filter set (reference, status, contact, contactResourceId, currencyCode, date range, amount range, tag). The `status` enum is the per-side union (sales: DRAFT/PENDING/CREATED/ACCEPTED/CONFIRMED/VOID; purchases: DRAFT/PENDING/ACTIVE/ACCEPTED/CONFIRMED/VOID). For advanced/nested queries (e.g. filter by `saleQuoteResourceId`), pass the raw `filter` object. See `search-reference.md` §24–25 and `search-enums.md` §25–26.
+`search_sale_orders` / `search_purchase_orders` take `documentType` plus the standard filter set (reference, status, contact, contactResourceId, currencyCode, date range, amount range, tag). The `status` enum is the per-side union (sales: DRAFT/PENDING/CREATED/ACCEPTED/CONFIRMED/VOID; purchases: DRAFT/PENDING/ACTIVE/ACCEPTED/CONFIRMED/VOID). For advanced/nested queries (e.g. filter by `saleQuoteResourceId`), pass the raw `filter` object. See `search-reference.md` §24-25 and `search-enums.md` §25-26.
 
-Search behaves exactly like the other entities: `sortBy` is an array, `order` is `ASC`/`DESC`, and an `offset` must be paired with a sort. Duplicate `sortBy` values are rejected (`422 — must contain unique values`).
+Search behaves exactly like the other entities: `sortBy` is an array, `order` is `ASC`/`DESC`, and an `offset` must be paired with a sort. Duplicate `sortBy` values are rejected (`422: must contain unique values`).
 
-**Line-item-level search** — `search_sale_order_line_items` / `search_purchase_order_line_items` (CLI: `search-line-items -t …`) search the individual lines rather than the document headers. Filter by line text (`name`), parent order (`orderId` → `btResourceId`), contact, account, tax profile, amount range, open state (`isOpen`), and date. Use this for questions like "every order line still open for contact X over $500". A default sort is always applied, so paginating with `offset` is safe.
+**Line-item-level search**: `search_sale_order_line_items` / `search_purchase_order_line_items` (CLI: `search-line-items -t …`) search the individual lines rather than the document headers. Filter by line text (`name`), parent order (`orderId` → `btResourceId`), contact, account, tax profile, amount range, open state (`isOpen`), and date. Use this for questions like "every order line still open for contact X over $500". A default sort is always applied, so paginating with `offset` is safe.

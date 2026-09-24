@@ -23,7 +23,7 @@ Surfaces when the SQL parser can read the input but it violates a DSL constraint
 
 ## `PSEUDOSQL_VALIDATION_ERROR` (SQL semantic validator)
 
-Surfaces when the query is syntactically valid but semantically rejected — wrong verb, unknown table, no FROM, etc.
+Surfaces when the query is syntactically valid but semantically rejected: wrong verb, unknown table, no FROM, etc.
 
 | Message | Trigger | Recovery |
 |---|---|---|
@@ -49,7 +49,7 @@ So **a table appearing in the catalog is not evidence you can query it.** Confir
 before querying is a reasonable habit and it will not detect this state. The only signal is the
 error itself.
 
-This is not an organization setting and not a plan entitlement — it is a platform deployment
+This is not an organization setting and not a plan entitlement; it is a platform deployment
 change, so neither you, the user, nor an organization admin can turn it on. Retrying later is only
 worth it if someone has said the engine is being re-enabled.
 
@@ -63,14 +63,14 @@ The `export_pseudo_sql` + `get_pseudo_sql_export` flow uses status enums (NOT er
 | `FAILED` | Job errored mid-run; `error` field populated | Inspect `error`; rebuild the query and retry. |
 | `EXPIRED` | Job result expired before fetch | Re-run via `export_pseudo_sql` with a fresh query. |
 
-The pre-terminal states are `PENDING` and `RUNNING` — these are normal during polling.
+The pre-terminal states are `PENDING` and `RUNNING`; these are normal during polling.
 
 ## Edge cases
 
-- **`truncated:true` is NOT an error.** It means "more rows match than were returned in this preview" — inspect `rowCount` vs your `LIMIT` to interpret. To get every row, switch to `export_pseudo_sql`.
+- **`truncated:true` is NOT an error.** It means "more rows match than were returned in this preview"; inspect `rowCount` vs your `LIMIT` to interpret. To get every row, switch to `export_pseudo_sql`.
 - **`downloadUrl` 403 on fetch.** S3 pre-signed URL expired (~15min limit). Call `get_pseudo_sql_export(jobId)` again for a fresh URL.
-- **Idempotency-Key reuse with different query.** Server returns the prior job's result — does NOT cross-check the new query body. If you're calling `export_pseudo_sql` directly with manual keys, treat the key as a per-intent token. `run_pseudo_sql_and_download` auto-keys from `sha256(query).slice(0,16)`, so dedup is query-tied.
-- **TIMED_OUT from `run_pseudo_sql_and_download`.** Default timeout is 25s; the job is still alive. Retry via `get_pseudo_sql_export(jobId)` — the composite returns `jobId` so you can hand off.
+- **Idempotency-Key reuse with different query.** Server returns the prior job's result; does NOT cross-check the new query body. If you're calling `export_pseudo_sql` directly with manual keys, treat the key as a per-intent token. `run_pseudo_sql_and_download` auto-keys from `sha256(query).slice(0,16)`, so dedup is query-tied.
+- **TIMED_OUT from `run_pseudo_sql_and_download`.** Default timeout is 25s; the job is still alive. Retry via `get_pseudo_sql_export(jobId)`; the composite returns `jobId` so you can hand off.
 
 ## When to fall back to a different tool
 

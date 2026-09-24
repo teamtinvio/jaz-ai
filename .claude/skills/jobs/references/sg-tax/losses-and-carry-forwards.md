@@ -1,6 +1,6 @@
 # Loss Relief and Carry-Forwards for SG Corporate Tax
 
-When a company's deductions and allowances exceed its income, the excess creates carry-forward amounts that can reduce tax in future years. IRAS prescribes a strict set-off order — items must be applied in sequence, and chargeable income cannot go below zero at any step.
+When a company's deductions and allowances exceed its income, the excess creates carry-forward amounts that can reduce tax in future years. IRAS prescribes a strict set-off order: items must be applied in sequence, and chargeable income cannot go below zero at any step.
 
 ---
 
@@ -10,12 +10,12 @@ The computation engine applies reliefs in this exact sequence. At each step, the
 
 | Order | Relief | Source | Carry-forward if excess? |
 |-------|--------|--------|--------------------------|
-| 1 | **Current year capital allowances (CA)** | `capitalAllowances.currentYearClaim` | Yes — becomes unabsorbed CA |
-| 2 | **Enhanced deductions** | R&D, IP, S14Q (uplift portions) | Limited — varies by scheme |
-| 3 | **Unabsorbed CA from prior years** | `capitalAllowances.balanceBroughtForward` | Yes — rolls forward again |
-| 4 | **Unabsorbed trade losses from prior years** | `losses.broughtForward` | Yes — rolls forward (indefinite) |
-| 5 | **Current year donations (250%)** | `enhancedDeductions.donations250Base` x 2.5 | Yes — up to 5 years |
-| 6 | **Unabsorbed donations from prior years** | `donationsCarryForward.broughtForward` | Yes — remaining 5-year window |
+| 1 | **Current year capital allowances (CA)** | `capitalAllowances.currentYearClaim` | Yes, becomes unabsorbed CA |
+| 2 | **Enhanced deductions** | R&D, IP, S14Q (uplift portions) | Limited, varies by scheme |
+| 3 | **Unabsorbed CA from prior years** | `capitalAllowances.balanceBroughtForward` | Yes, rolls forward again |
+| 4 | **Unabsorbed trade losses from prior years** | `losses.broughtForward` | Yes, rolls forward (indefinite) |
+| 5 | **Current year donations (250%)** | `enhancedDeductions.donations250Base` x 2.5 | Yes, up to 5 years |
+| 6 | **Unabsorbed donations from prior years** | `donationsCarryForward.broughtForward` | Yes, remaining 5-year window |
 
 **After all reliefs:** the result is **chargeable income**. If it is zero, no tax is payable but the company still files Form C-S.
 
@@ -42,7 +42,7 @@ Remaining = Adjusted profit
 
 ### Current year loss
 
-If adjusted profit is **negative** (i.e., the company made a tax-adjusted loss), this is a **current year trade loss**. No further reliefs can be applied — CA, enhanced deductions, and donation claims are all zero because there is no positive income to offset them against.
+If adjusted profit is **negative** (i.e., the company made a tax-adjusted loss), this is a **current year trade loss**. No further reliefs can be applied: CA, enhanced deductions, and donation claims are all zero because there is no positive income to offset them against.
 
 The current year loss is added to the carry-forward pool:
 
@@ -50,18 +50,18 @@ The current year loss is added to the carry-forward pool:
 Unabsorbed losses c/f = Prior year unabsorbed losses + Current year loss
 ```
 
-**Input:** A current year loss is detected automatically by the computation engine when adjusted profit < 0. No separate input field is needed — it is calculated from `accountingProfit` + add-backs - deductions.
+**Input:** A current year loss is detected automatically by the computation engine when adjusted profit < 0. No separate input field is needed; it is calculated from `accountingProfit` + add-backs - deductions.
 
 ### Carry-forward of trade losses
 
 | Rule | Detail |
 |------|--------|
-| **Duration** | Indefinite — no time limit |
+| **Duration** | Indefinite, no time limit |
 | **Condition** | Shareholding test (see below) |
 | **Set-off order** | Applied AFTER CA and enhanced deductions, BEFORE donations |
 | **Cap** | Limited to chargeable income before losses (cannot create or increase a loss) |
 
-**Input:** `losses.broughtForward` — the total unabsorbed trade losses from all prior YAs.
+**Input:** `losses.broughtForward`, the total unabsorbed trade losses from all prior YAs.
 
 ### Carry-back of trade losses (optional)
 
@@ -95,11 +95,11 @@ Applied after enhanced deductions, capped at remaining chargeable income.
 
 | Rule | Detail |
 |------|--------|
-| **Duration** | Indefinite — no time limit |
+| **Duration** | Indefinite, no time limit |
 | **Condition** | Shareholding test |
 | **Set-off order** | Applied AFTER enhanced deductions, BEFORE trade losses |
 
-**Input:** `capitalAllowances.balanceBroughtForward` — total unabsorbed CA from all prior YAs.
+**Input:** `capitalAllowances.balanceBroughtForward`, total unabsorbed CA from all prior YAs.
 
 ### Combined CA carry-forward
 
@@ -124,11 +124,11 @@ If the 250% deduction exceeds remaining chargeable income, the excess carries fo
 | Rule | Detail |
 |------|--------|
 | **Duration** | **5 years only** (not indefinite) |
-| **Basis** | FIFO — oldest donations used first |
+| **Basis** | FIFO: oldest donations used first |
 | **Condition** | Shareholding test |
 | **Set-off order** | Applied AFTER trade losses |
 
-**Input:** `donationsCarryForward.broughtForward` — total unabsorbed donations from prior YAs (max 5 years old).
+**Input:** `donationsCarryForward.broughtForward`, total unabsorbed donations from prior YAs (max 5 years old).
 
 **FIFO example:**
 
@@ -162,7 +162,7 @@ If a majority ownership change occurred between those dates, the carry-forward i
 ### Exceptions
 
 - **Listed companies** are exempt from the shareholding test (publicly traded companies have frequent shareholder changes)
-- **Shareholders can be traced through** — if the ultimate beneficial owners are the same even though the intermediate holding company changed, IRAS may accept the claim on appeal
+- **Shareholders can be traced through**: if the ultimate beneficial owners are the same even though the intermediate holding company changed, IRAS may accept the claim on appeal
 
 ---
 
@@ -207,13 +207,13 @@ Adjusted profit/(loss):          ($23,000)   ← negative = current year loss
 ```
 Adjusted profit:                  $180,000
 
-Step 1 — Current year CA:       ($45,000)    Remaining: $135,000
-Step 2 — Enhanced deductions:     ($8,000)    Remaining: $127,000
-Step 3 — Unabsorbed CA b/f:     ($35,000)    Remaining:  $92,000
+Step 1.  Current year CA:       ($45,000)    Remaining: $135,000
+Step 2.  Enhanced deductions:     ($8,000)    Remaining: $127,000
+Step 3.  Unabsorbed CA b/f:     ($35,000)    Remaining:  $92,000
          Chargeable income before losses:      $92,000
-Step 4 — Trade losses b/f:      ($63,000)    Remaining:  $29,000
-Step 5 — Current year donations: ($12,500)    Remaining:  $16,500
-Step 6 — Prior year donations:    ($5,000)    Remaining:  $11,500
+Step 4.  Trade losses b/f:      ($63,000)    Remaining:  $29,000
+Step 5.  Current year donations: ($12,500)    Remaining:  $16,500
+Step 6.  Prior year donations:    ($5,000)    Remaining:  $11,500
 
 Chargeable income:                 $11,500
 ```

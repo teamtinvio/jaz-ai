@@ -12,7 +12,7 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 **The rule:** An expense is deductible only if it is (a) wholly and exclusively incurred in the production of income, (b) not capital in nature, and (c) not specifically prohibited by the Income Tax Act.
 
-**Important:** Add-backs increase the adjusted profit and therefore increase the tax payable. Getting them right matters — over-adding inflates the tax bill, under-adding risks IRAS penalties.
+**Important:** Add-backs increase the adjusted profit and therefore increase the tax payable. Getting them right matters: over-adding inflates the tax bill, under-adding risks IRAS penalties.
 
 ---
 
@@ -68,7 +68,7 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 **What it is:** Depreciation of right-of-use assets recognized under IFRS 16 for operating leases (office leases, equipment leases, vehicle leases).
 
-**Why non-deductible:** IFRS 16 changed lease accounting — operating leases are now capitalized on the balance sheet as ROU assets and depreciated. For tax purposes, IRAS still follows the pre-IFRS 16 treatment: the actual lease payments are the deductible expense, not the ROU depreciation. The ROU depreciation is added back, and the actual lease payments are deducted.
+**Why non-deductible:** IFRS 16 changed lease accounting: operating leases are now capitalized on the balance sheet as ROU assets and depreciated. For tax purposes, IRAS still follows the pre-IFRS 16 treatment: the actual lease payments are the deductible expense, not the ROU depreciation. The ROU depreciation is added back, and the actual lease payments are deducted.
 
 **GL keywords:** "Right-of-Use", "ROU", "Lease Depreciation", "Operating Lease Depreciation"
 
@@ -79,7 +79,7 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 **Questions to ask:** "Do you account for operating leases under IFRS 16? If so, what are the actual cash lease payments for the year?"
 
-**Tip:** The net tax effect of IFRS 16 reversal is usually small (add back ROU dep + lease interest, deduct actual payments). But you must do the reversal — simply ignoring it is technically non-compliant.
+**Tip:** The net tax effect of IFRS 16 reversal is usually small (add back ROU dep + lease interest, deduct actual payments). But you must do the reversal; simply ignoring it is technically non-compliant.
 
 ---
 
@@ -87,9 +87,9 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 **Input field:** `addBacks.leaseInterest`
 
-**What it is:** Interest expense on the lease liability recognized under IFRS 16. This is the "unwinding" of the discount on the lease liability — a finance cost in the P&L that represents the time value of money component of the lease.
+**What it is:** Interest expense on the lease liability recognized under IFRS 16. This is the "unwinding" of the discount on the lease liability, a finance cost in the P&L that represents the time value of money component of the lease.
 
-**Why non-deductible:** Same as Category 3 — IRAS does not recognize IFRS 16 lease accounting for tax. The finance cost is added back; the actual lease payments are the deductible amount.
+**Why non-deductible:** Same as Category 3: IRAS does not recognize IFRS 16 lease accounting for tax. The finance cost is added back; the actual lease payments are the deductible amount.
 
 **GL keywords:** "Lease Interest", "Lease Liability Interest", "Finance Cost - Leases", "Interest on Lease Liabilities"
 
@@ -118,7 +118,7 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 4. Is this a warranty provision? --> If general (estimated % of sales), add back. If specific (known warranty claim settled), deductible.
 5. Is this a restructuring provision? --> If costs are not yet incurred, add back. If settlement amounts are confirmed and paid, deductible.
 
-**Questions to ask:** "For each provision on the P&L, is this a general estimate or a specific identified amount? For bad debts specifically — are these actual write-offs of named receivables, or ECL model adjustments?"
+**Questions to ask:** "For each provision on the P&L, is this a general estimate or a specific identified amount? For bad debts specifically, are these actual write-offs of named receivables, or ECL model adjustments?"
 
 **Common mistake:** Adding back ALL bad debt expense. Only general provisions are added back. Specific write-offs of identified uncollectible amounts are deductible.
 
@@ -141,7 +141,7 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 **Questions to ask:** "Were these donations made to approved IPCs (Institutions of a Public Character)? Do you have the IPC tax deduction receipts?"
 
-**Tip:** The IRAS website maintains a list of approved IPCs. If the user is unsure, they can check the receipt — IPC receipts state the tax deduction amount and the IPC registration number.
+**Tip:** The IRAS website maintains a list of approved IPCs. If the user is unsure, they can check the receipt; IPC receipts state the tax deduction amount and the IPC registration number.
 
 ---
 
@@ -159,10 +159,10 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 | Entertainment Type | Deductible? | Action |
 |-------------------|------------|--------|
-| Client entertainment (business meal with client) | Yes, if documented | Deductible — do not add back |
-| Staff entertainment (team dinner, D&D) | Generally yes | Deductible — do not add back |
+| Client entertainment (business meal with client) | Yes, if documented | Deductible; do not add back |
+| Staff entertainment (team dinner, D&D) | Generally yes | Deductible; do not add back |
 | Personal entertainment disguised as business | No | Add back |
-| Gifts to clients (> $50/item) | Partial — case by case | Ask the user |
+| Gifts to clients (> $50/item) | Partial, case by case | Ask the user |
 | Club membership fees | No | Add back |
 
 **Decision tree:**
@@ -200,9 +200,9 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 **Input field:** `addBacks.privateCar`
 
-**What it is:** Expenses related to S-plated (private) motor vehicles — lease payments, fuel, insurance, repairs, parking, ERP charges.
+**What it is:** Expenses related to S-plated (private) motor vehicles: lease payments, fuel, insurance, repairs, parking, ERP charges.
 
-**Why non-deductible:** Under Section 15(1)(o) of the Income Tax Act, no deduction is allowed for expenses relating to a private passenger car (one that is not a Q-plated, goods vehicle, or excursion bus). This is a blanket prohibition — even if the car is used 100% for business.
+**Why non-deductible:** Under Section 15(1)(o) of the Income Tax Act, no deduction is allowed for expenses relating to a private passenger car (one that is not a Q-plated, goods vehicle, or excursion bus). This is a blanket prohibition, even if the car is used 100% for business.
 
 **GL keywords:** "Motor Vehicle", "Car", "Vehicle Expense", "Fuel", "Petrol", "Parking", "ERP", "Road Tax", "Vehicle Insurance", "Car Lease"
 
@@ -210,7 +210,7 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 1. Does the company own or lease motor vehicles? --> If yes, determine the plate type.
 2. Is the vehicle S-plated (private registration)? --> ALL expenses are non-deductible. Add back everything.
 3. Is the vehicle Q-plated (commercial) or a goods vehicle? --> Expenses are deductible. Do NOT add back.
-4. Is the vehicle an employee-benefit car (not company-owned)? --> Different treatment — may be a taxable benefit. Consult a tax agent.
+4. Is the vehicle an employee-benefit car (not company-owned)? --> Different treatment: may be a taxable benefit. Consult a tax agent.
 
 **Questions to ask:** "Does the company have any motor vehicles? If so, are they S-plated (private) or Q-plated (commercial)? Please list all vehicle-related expenses."
 
@@ -246,7 +246,7 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 **What it is:** Foreign exchange losses on the revaluation of foreign currency assets and liabilities at the balance sheet date that have not been settled (crystallized) in cash.
 
-**Why non-deductible:** An unrealized FX loss is a paper loss — the underlying transaction has not been settled, so the loss has not been "incurred" in the IRAS sense. Only realized FX losses (from actual settlement of foreign currency transactions) are deductible.
+**Why non-deductible:** An unrealized FX loss is a paper loss: the underlying transaction has not been settled, so the loss has not been "incurred" in the IRAS sense. Only realized FX losses (from actual settlement of foreign currency transactions) are deductible.
 
 **GL keywords:** "Unrealized", "Unrealised", "FX Loss", "Foreign Exchange Loss", "Exchange Difference", "Currency Revaluation"
 
@@ -258,7 +258,7 @@ Add-backs are expenses recorded in the P&L that are **not deductible for tax pur
 
 **Questions to ask:** "Does your FX loss account combine realized and unrealized amounts? Can you confirm the split? If you ran FX revaluation at year-end, the revaluation journal amount is the unrealized portion."
 
-**Corresponding deduction:** Unrealized FX gains (`deductions.unrealizedFxGain`) are deducted for the same reason — not yet crystallized, not taxable.
+**Corresponding deduction:** Unrealized FX gains (`deductions.unrealizedFxGain`) are deducted for the same reason: not yet crystallized, not taxable.
 
 ---
 
@@ -343,12 +343,12 @@ When certain items are added back, a corresponding deduction may apply. The dedu
 
 ## Practitioner Tips
 
-**Work through every category, even if zero.** Set unused add-back fields to `0.00` explicitly. This makes the workpaper complete and auditable — it shows the preparer considered each category and determined it was not applicable.
+**Work through every category, even if zero.** Set unused add-back fields to `0.00` explicitly. This makes the workpaper complete and auditable; it shows the preparer considered each category and determined it was not applicable.
 
-**Depreciation is non-negotiable.** It is always the first and usually the largest add-back. If the P&L shows zero depreciation, verify — the company may not have any fixed assets, or depreciation may not have been posted (which is a bookkeeping error to flag).
+**Depreciation is non-negotiable.** It is always the first and usually the largest add-back. If the P&L shows zero depreciation, verify: the company may not have any fixed assets, or depreciation may not have been posted (which is a bookkeeping error to flag).
 
-**General provisions vs specific write-offs is the most common judgment call.** When in doubt, ask the user to describe the nature of the provision. If they say "we estimated X% of receivables might go bad" — that is a general provision (add back). If they say "ABC Pte Ltd went into liquidation and owes us $15,000" — that is a specific write-off (deductible).
+**General provisions vs specific write-offs is the most common judgment call.** When in doubt, ask the user to describe the nature of the provision. If they say "we estimated X% of receivables might go bad", that is a general provision (add back). If they say "ABC Pte Ltd went into liquidation and owes us $15,000", that is a specific write-off (deductible).
 
-**S-plated car expenses are a frequent IRAS audit target.** IRAS regularly checks that companies are not claiming tax deductions on private car expenses. Ensure the full amount is added back — including fuel, parking, ERP, insurance, and maintenance.
+**S-plated car expenses are a frequent IRAS audit target.** IRAS regularly checks that companies are not claiming tax deductions on private car expenses. Ensure the full amount is added back, including fuel, parking, ERP, insurance, and maintenance.
 
 **Keep workpaper notes.** For each add-back category, record a one-line note explaining the source and reasoning. The `addBacks.otherDescription` field covers the "other" category, but you should also document the rationale in the computation narrative. The CLI `workings` output helps with this.

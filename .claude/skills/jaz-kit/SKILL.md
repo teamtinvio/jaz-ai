@@ -1,9 +1,9 @@
 ---
 name: jaz-kit
-version: 5.73.2
+version: 5.73.3
 description: >-
   Use this skill when an accountant, bookkeeper, or owner is running real books
-  in Jaz across one or more organizations from the terminal — setting up a
+  in Jaz across one or more organizations from the terminal: setting up a
   workspace, switching between clients, running a month/quarter/year close that
   survives across sessions, or clearing a queue of drafts for review. Triggers
   on "open <org>", "close the books for June", "what needs my review",
@@ -42,7 +42,7 @@ ORG.md's `organization_id` identifies the company's ledger. Use OAuth by default
 
 ## Operations
 
-Every flow is specified in `references/flows.md` — that file is the procedure, and Claude Code's `/jk-*` commands are thin pointers into it. In agents without slash commands, the trigger phrases below reach the same flows.
+Every flow is specified in `references/flows.md`; that file is the procedure, and Claude Code's `/jk-*` commands are thin pointers into it. In agents without slash commands, the trigger phrases below reach the same flows.
 
 | Intent | Flow | Command |
 |---|---|---|
@@ -60,11 +60,11 @@ Every flow is specified in `references/flows.md` — that file is the procedure,
 
 ## Rules that hold across every flow
 
-Six ground rules govern every operation — one organization per session, draft first, verify before retrying a write, never print a key, record judgment not activity, and locking is the user's call. They are stated once, with their reasoning, at the top of [references/flows.md](./references/flows.md). Read them before the first write of any session.
+Six ground rules govern every operation: one organization per session, draft first, verify before retrying a write, never print a key, record judgment not activity, and locking is the user's call. They are stated once, with their reasoning, at the top of [references/flows.md](./references/flows.md). Read them before the first write of any session.
 
 ## This is a harness, not a rulebook
 
-Jaz Kit supplies structure: memory between sessions, sequencing, safety rails, and an audit trail. **The accountant supplies the domain truth** — their materiality, their filing dates, their accounting policies, their sign-off model, their procedures.
+Jaz Kit supplies structure: memory between sessions, sequencing, safety rails, and an audit trail. **The accountant supplies the domain truth**: their materiality, their filing dates, their accounting policies, their sign-off model, their procedures.
 
 So: never assert a statutory deadline, a reporting standard, or a "best practice" from memory, and never offer a jurisdiction default for the user to correct. A confident wrong answer costs them more than an open question. When a fact is missing from ORG.md, ask for it and record it. When they tell you how they do something, write it to `policies/` or `rules/` and follow it thereafter.
 
@@ -76,8 +76,8 @@ It does not perform accounting. Close playbooks live in **jaz-jobs**, transactio
 
 ## Supporting files
 
-- **[references/flows.md](./references/flows.md)** — the ground rules and the canonical procedure for every operation
-- **[references/workspace.md](./references/workspace.md)** — KIT.md, ORG.md, and `.env` schemas; the auth model; sharing a kit across a team
-- **[references/close-state.md](./references/close-state.md)** — CLOSE.md schema, the resume protocol, review-pack and close-summary formats
-- **[references/org-interview.md](./references/org-interview.md)** — what to read automatically, and the four questions worth asking
-- **[references/templates.md](./references/templates.md)** — copy-paste scaffolds for every file the kit creates
+- **[references/flows.md](./references/flows.md)**: the ground rules and the canonical procedure for every operation
+- **[references/workspace.md](./references/workspace.md)**: KIT.md, ORG.md, and `.env` schemas; the auth model; sharing a kit across a team
+- **[references/close-state.md](./references/close-state.md)**: CLOSE.md schema, the resume protocol, review-pack and close-summary formats
+- **[references/org-interview.md](./references/org-interview.md)**: what to read automatically, and the four questions worth asking
+- **[references/templates.md](./references/templates.md)**: copy-paste scaffolds for every file the kit creates

@@ -18,7 +18,7 @@ For newly incorporated companies in their first 3 Years of Assessment.
 
 ### How the bands work
 
-Bands fill in order — Band 1 must be fully consumed before Band 2 applies.
+Bands fill in order: Band 1 must be fully consumed before Band 2 applies.
 
 | Chargeable income | Band 1 exempt (75% of first $100K) | Band 2 exempt (50% of next $100K) | Total exempt | Taxable | Tax at 17% | Effective rate |
 |-------------------|------------------------------------|------------------------------------|-------------|---------|------------|---------------|
@@ -29,7 +29,7 @@ Bands fill in order — Band 1 must be fully consumed before Band 2 applies.
 | $300,000 | $75,000 | $50,000 | $125,000 | $175,000 | $29,750 | 9.92% |
 | $500,000 | $75,000 | $50,000 | $125,000 | $375,000 | $63,750 | 12.75% |
 
-**Benchmark:** A company with $200,000 chargeable income under SUTE pays an effective rate of **6.375%** — less than half the headline 17%.
+**Benchmark:** A company with $200,000 chargeable income under SUTE pays an effective rate of **6.375%**, less than half the headline 17%.
 
 ### Input mapping
 
@@ -41,8 +41,8 @@ exemptionType: 'sute'
 
 Both conditions must be met throughout the basis period:
 
-1. **<= 20 shareholders** — all shareholders are individuals, OR a mix of individuals and corporate shareholders with at least one individual holding >= 10%
-2. **>= 1 individual holding >= 10%** — at least one natural person holds 10% or more of the issued ordinary shares
+1. **<= 20 shareholders**: all shareholders are individuals, OR a mix of individuals and corporate shareholders with at least one individual holding >= 10%
+2. **>= 1 individual holding >= 10%**: at least one natural person holds 10% or more of the issued ordinary shares
 
 Companies that are **investment holding companies** or **property development companies** are specifically excluded from SUTE, regardless of their incorporation date or shareholder structure.
 
@@ -50,12 +50,12 @@ Companies that are **investment holding companies** or **property development co
 
 ## 2. Partial Tax Exemption (PTE)
 
-For all companies not on SUTE — the default exemption from Year 4 onwards.
+For all companies not on SUTE, the default exemption from Year 4 onwards.
 
 | Item | Detail |
 |------|--------|
 | **Eligibility** | All Singapore tax-resident companies not claiming SUTE |
-| **Conditions** | None — automatic |
+| **Conditions** | None, automatic |
 | **Band 1** | 75% exemption on first $10,000 of chargeable income |
 | **Band 2** | 50% exemption on next $190,000 of chargeable income |
 | **Maximum exemption** | $7,500 + $95,000 = **$102,500** per YA |
@@ -71,7 +71,7 @@ For all companies not on SUTE — the default exemption from Year 4 onwards.
 | $500,000 | $7,500 | $95,000 | $102,500 | $397,500 | $67,575 | 13.52% |
 | $1,000,000 | $7,500 | $95,000 | $102,500 | $897,500 | $152,575 | 15.26% |
 
-**Benchmark:** A company with $200,000 chargeable income under PTE pays an effective rate of **8.29%** — roughly half the headline rate.
+**Benchmark:** A company with $200,000 chargeable income under PTE pays an effective rate of **8.29%**, roughly half the headline rate.
 
 ### Input mapping
 
@@ -110,15 +110,15 @@ After applying the exemption and computing gross tax at 17%, a CIT rebate may fu
 | 2021 | 0% | $0 | No CIT rebate (separate COVID relief measures) |
 | 2022 | 0% | $0 | No CIT rebate |
 | 2023 | 0% | $0 | No CIT rebate |
-| 2024 | 50% | $40,000 | Budget 2024 — Enterprise Support Package |
-| 2025 | 50% | $40,000 | Budget 2024 — extended |
+| 2024 | 50% | $40,000 | Budget 2024: Enterprise Support Package |
+| 2025 | 50% | $40,000 | Budget 2024, extended |
 | 2026 | 40% | $40,000 | Budget 2025 |
 
 ### How the rebate works
 
 The rebate is applied AFTER computing gross tax (chargeable income minus exemption, times 17%).
 
-**Example — YA 2026, PTE, $200,000 chargeable income:**
+**Example (YA 2026, PTE, $200,000 chargeable income):**
 
 ```
 Chargeable income:      $200,000
@@ -167,7 +167,7 @@ Use this sequence during Phase 1 (Step 3) of the wizard workflow to determine th
 | 2024 | 31 Dec 2026 | 2027 | Year 3 | Yes |
 | 2024 | 31 Dec 2027 | 2028 | Year 4 | No -> PTE |
 
-**Edge case — mid-year incorporation:** If a company was incorporated on 1 Jul 2024 with a Dec year-end, its first YA (2025) covers only 6 months (Jul-Dec 2024). The SUTE still applies for 3 YAs: 2025, 2026, 2027.
+**Edge case (mid-year incorporation):** If a company was incorporated on 1 Jul 2024 with a Dec year-end, its first YA (2025) covers only 6 months (Jul-Dec 2024). The SUTE still applies for 3 YAs: 2025, 2026, 2027.
 
 ---
 
@@ -190,7 +190,7 @@ The absolute tax saving of SUTE over PTE is always **$3,825** regardless of inco
 
 2. **Counting YAs wrong.** The YA is the year after the FY end, not the FY year itself. A company incorporated in 2024 with FY ending Dec 2024 has its first YA in 2025.
 
-3. **Forgetting SUTE shareholder conditions.** SUTE is not automatic for new companies — the shareholding conditions must be met. A startup with a single corporate shareholder (e.g., a wholly-owned subsidiary of a holding company with no individual shareholder) does not qualify.
+3. **Forgetting SUTE shareholder conditions.** SUTE is not automatic for new companies; the shareholding conditions must be met. A startup with a single corporate shareholder (e.g., a wholly-owned subsidiary of a holding company with no individual shareholder) does not qualify.
 
 4. **Ignoring the CIT rebate.** For YA 2024-2026, the rebate is significant (40-50%, capped at $40K). On $200K chargeable income with PTE, the YA 2026 rebate saves $6,630 additional tax.
 

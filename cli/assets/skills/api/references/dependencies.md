@@ -47,14 +47,14 @@ Resources MUST be created in this order. Steps at the same level can run in para
 - `POST /tags` → create tags
 - `POST /custom-fields` → create custom fields
 
-**Tax profiles are READ-ONLY** — discovered in Level 0, never created.
+**Tax profiles are READ-ONLY**: discovered in Level 0, never created.
 
 ### Level 2: Entities (parallel)
 - `POST /contacts` → create customers and suppliers
 - `POST /items` → create items (needs CoA + tax profile IDs from Levels 0-1)
 
 ### Level 3: Transactions (parallel)
-- `POST /magic/createBusinessTransactionFromAttachment` → **starting from an attachment (PDF/JPG)?** Use Jaz Magic — extraction & autofill creates a draft invoice or bill with all fields pre-filled. See SKILL.md Rules 57-62.
+- `POST /magic/createBusinessTransactionFromAttachment` → **starting from an attachment (PDF/JPG)?** Use Jaz Magic: extraction & autofill creates a draft invoice or bill with all fields pre-filled. See SKILL.md Rules 57-62.
 - `POST /invoices` → create invoices from structured data (needs contacts + CoA + tax profiles)
 - `POST /bills` → create bills from structured data (same deps, can embed payments)
 - `POST /journals` → create journal entries (needs CoA)
@@ -76,11 +76,11 @@ Resources MUST be created in this order. Steps at the same level can run in para
 ### Level 5b: Optional/Experimental (Parallel)
 - `POST /api/v1/catalogs` (needs Items from Level 2)
 - `POST /api/v1/fixed-assets` (needs CoA from Level 0-1)
-- **Deposit movements** — `POST /api/v1/journals` or `POST /api/v1/invoices/:id/payments` / `POST /api/v1/bills/:id/payments` against a deposit-flagged CoA account with `paymentMethod: OTHER` (BANK_TRANSFER/CASH/CHEQUE force a bank account — Rule 80) (needs Contacts + a CoA account someone has already flagged `depositContactType` in the web app; the flag cannot be set over the API). There is no `POST /api/v1/deposits` — SKILL.md Rule 47a.
+- **Deposit movements**: `POST /api/v1/journals` or `POST /api/v1/invoices/:id/payments` / `POST /api/v1/bills/:id/payments` against a deposit-flagged CoA account with `paymentMethod: OTHER` (BANK_TRANSFER/CASH/CHEQUE force a bank account, Rule 80) (needs Contacts + a CoA account someone has already flagged `depositContactType` in the web app; the flag cannot be set over the API). There is no `POST /api/v1/deposits` (SKILL.md Rule 47a).
 
 These endpoints may not be available on all organizations. Use try/catch with graceful fallback.
 
-**No inventory adjustment step exists at any level** — `POST /api/v1/inventory/adjustments` and its three sibling spellings all 404. Stock moves only as a side effect of a transaction carrying the item. See `errors.md` → Inventory Adjustments Errors.
+**No inventory adjustment step exists at any level**: `POST /api/v1/inventory/adjustments` and its three sibling spellings all 404. Stock moves only as a side effect of a transaction carrying the item. See `errors.md` → Inventory Adjustments Errors.
 
 ### Level 6: Verification
 - `POST /generate-reports/trial-balance` → verify data integrity
@@ -93,7 +93,7 @@ These endpoints may not be available on all organizations. Use try/catch with gr
 |------|--------------|-----|
 | Items | CoA (Level 1) | `saleAccountResourceId`, `purchaseAccountResourceId` |
 | Items | Tax Profiles (Level 0) | `saleTaxProfileResourceId`, `purchaseTaxProfileResourceId` |
-| Contacts | Nothing | Standalone — only name, currency, phone |
+| Contacts | Nothing | Standalone: only name, currency, phone |
 | Invoices | Contacts (Level 2) | `contactResourceId` |
 | Invoices | CoA (Level 1) | `lineItems[].accountResourceId` (if saveAsDraft: false) |
 | Invoices | Tax Profiles (Level 0) | `lineItems[].taxProfileResourceId` |
@@ -138,4 +138,4 @@ Resource IDs are the universal identifier, not codes.
 
 ---
 
-*Last updated: 2026-02-08 — Extracted from chronology.md, stripped of project-specific seeder logic for portability*
+*Last updated: 2026-02-08. Extracted from chronology.md, stripped of project-specific seeder logic for portability*

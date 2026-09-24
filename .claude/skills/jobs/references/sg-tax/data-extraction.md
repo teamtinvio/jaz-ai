@@ -38,7 +38,7 @@ GET /api/v1/organization
 | `data.name` | Display only | Company name for the workpaper header |
 | `data.resourceId` | Internal reference | Needed for subsequent API calls |
 
-**Tip:** If the response `currency` is not SGD, the company may have multi-currency transactions. All tax computation must be in SGD — ensure all amounts are converted before feeding into the CLI.
+**Tip:** If the response `currency` is not SGD, the company may have multi-currency transactions. All tax computation must be in SGD; ensure all amounts are converted before feeding into the CLI.
 
 ### Step 2: Confirm financial year dates
 
@@ -71,15 +71,15 @@ POST /api/v1/generate-reports/profit-and-loss
 
 | P&L Line | Maps To | Notes |
 |----------|---------|-------|
-| Total Revenue / Total Income | `revenue` | Top line — used for C-S eligibility check |
-| Net Profit / (Loss) | `accountingProfit` | Bottom line — starting point for tax computation. Use negative for a loss. |
-| Depreciation Expense | `addBacks.depreciation` | Always add back — first pass estimate before drilling into GL |
+| Total Revenue / Total Income | `revenue` | Top line, used for C-S eligibility check |
+| Net Profit / (Loss) | `accountingProfit` | Bottom line, starting point for tax computation. Use negative for a loss. |
+| Depreciation Expense | `addBacks.depreciation` | Always add back, first pass estimate before drilling into GL |
 | Interest Expense | Review for `addBacks.leaseInterest` | Only the IFRS 16 lease interest portion |
 | Other Expense lines | Scan for add-back candidates | Entertainment, donations, penalties, FX losses |
 | Dividend Income | `addBacks.exemptDividends` | SG one-tier dividends are exempt |
 | Interest Income | Review for taxability | Usually taxable under Section 10(1)(d) |
 
-**Important:** The P&L gives you summary totals. For add-back classification, you need transaction-level detail from the General Ledger (Phase 5). Use the P&L as a roadmap — identify which account lines need drill-down.
+**Important:** The P&L gives you summary totals. For add-back classification, you need transaction-level detail from the General Ledger (Phase 5). Use the P&L as a roadmap: identify which account lines need drill-down.
 
 ### Step 4: Export P&L for records (optional)
 
@@ -118,9 +118,9 @@ POST /api/v1/generate-reports/trial-balance
 | Provision accounts (ECL, warranty, restructuring) | Identify general provisions for add-back |
 | Unrealized FX Gain/Loss | May need to add back unrealized FX loss and deduct unrealized FX gain |
 | Donation accounts | Identify IPC donations for 250% claim |
-| Penalty/Fine accounts | Non-deductible — always add back |
+| Penalty/Fine accounts | Non-deductible, always add back |
 
-**Tip:** Look for balance sheet accounts with P&L impact — provisions that increased during the year indicate a general provision expense that may need to be added back.
+**Tip:** Look for balance sheet accounts with P&L impact: provisions that increased during the year indicate a general provision expense that may need to be added back.
 
 ---
 
@@ -169,7 +169,7 @@ POST /api/v1/fixed-assets/search
 | `purchaseAmount` | `cost` | Original cost |
 | `purchaseDate` | `acquisitionDate` | Date acquired |
 | `typeName` | Used to determine `category` | Map to: computer, automation, low-value, general, ip, renovation |
-| Prior years CA | `priorYearsClaimed` | User must provide — not stored in Jaz |
+| Prior years CA | `priorYearsClaimed` | User must provide, not stored in Jaz |
 
 **Mapping asset types to CA categories:** See `capital-allowances-guide.md` for the full classification guide. The key question for each asset: "Which ITA section applies?"
 
@@ -177,7 +177,7 @@ POST /api/v1/fixed-assets/search
 
 ## Phase 5: General Ledger Drill-Down
 
-The GL provides transaction-level detail for accounts that need add-back classification. Do NOT pull the entire GL — target specific accounts identified in Phase 2.
+The GL provides transaction-level detail for accounts that need add-back classification. Do NOT pull the entire GL; target specific accounts identified in Phase 2.
 
 ### Step 9: Drill into specific accounts
 
@@ -199,10 +199,10 @@ POST /api/v1/generate-reports/general-ledger
 
 | GL Account Keywords | Add-Back Category | What to Look For |
 |--------------------|--------------------|------------------|
-| "Depreciation", "Amortization" | `depreciation`, `amortization` | Full amount — always add back |
+| "Depreciation", "Amortization" | `depreciation`, `amortization` | Full amount, always add back |
 | "Right-of-Use", "ROU" | `rouDepreciation` | IFRS 16 lease depreciation |
 | "Lease Interest", "Lease Liability" | `leaseInterest` | IFRS 16 interest on lease liability |
-| "Provision", "ECL", "Allowance" | `generalProvisions` | Only general (estimated) provisions — not specific write-offs |
+| "Provision", "ECL", "Allowance" | `generalProvisions` | Only general (estimated) provisions, not specific write-offs |
 | "Donation" | `donations` | Confirm if to approved IPC recipients |
 | "Entertainment", "Meals" | `entertainment` | Non-deductible portion only |
 | "Penalty", "Fine", "Surcharge" | `penalties` | Always non-deductible |
@@ -300,7 +300,7 @@ All search endpoints support pagination. The standard pattern:
 
 **Check the response metadata:**
 - On the search endpoints, `offset` is a **page number** (0-indexed), NOT a row-skip count. Increment `offset` by 1 for each subsequent page.
-- Example: `offset=0` returns items 0–999, `offset=1` returns items 1000–1999, etc.
+- Example: `offset=0` returns items 0 to 999, `offset=1` returns items 1000 to 1999, etc.
 - **The general ledger is the exception**: its `offset` is a ROW offset, so the second page of 1000 is `offset=1000` (see Phase 5).
 - Always aggregate totals across all pages before mapping to input fields
 - Do not assume a single page contains all results

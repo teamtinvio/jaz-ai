@@ -5,28 +5,28 @@
 ## Tools, recipes, calculators this job uses
 
 ### Platform tools (jaz-api)
-- **`search_bills(filter: {status: {eq: 'UNPAID'}, balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`** — used in step 2: pull due bills (paginate via `offset` if `>200`).
-- **`generate_aged_ap(endDate: <cutoff>)`** — used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
-- **`generate_bank_balance_summary(primarySnapshotDate: <cutoff>)`** — used in step 5: confirm cash availability before approving the batch.
-- **`get_contact(resourceId: <contactResourceId>)`** — used in step 4 (per supplier): pull payment terms / preferred payment method / bank details (especially `taxId`, `bankAccountNumber`, `bicSwift` for GIRO file generation).
-- **`pay_bill(resourceId: <id>, paymentAmount, transactionAmount, accountResourceId, valueDate, ...)`** — used in step 6: post the payment per bill. NO BATCH PAYMENT ENDPOINT yet — one POST per bill.
-- **`search_payments(filter: {businessTransactionReference: {startWith: <run-prefix>}, valueDate: {eq: <run-date>}})`** — used in step 8: idempotency / verification check (re-running the run won't duplicate-pay if all references match).
+- **`search_bills(filter: {status: {eq: 'UNPAID'}, balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`**, used in step 2: pull due bills (paginate via `offset` if `>200`).
+- **`generate_aged_ap(endDate: <cutoff>)`**, used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
+- **`generate_bank_balance_summary(primarySnapshotDate: <cutoff>)`**, used in step 5: confirm cash availability before approving the batch.
+- **`get_contact(resourceId: <contactResourceId>)`**, used in step 4 (per supplier): pull payment terms / preferred payment method / bank details (especially `taxId`, `bankAccountNumber`, `bicSwift` for GIRO file generation).
+- **`pay_bill(resourceId: <id>, paymentAmount, transactionAmount, accountResourceId, valueDate, ...)`**, used in step 6: post the payment per bill. NO BATCH PAYMENT ENDPOINT yet; one POST per bill.
+- **`search_payments(filter: {businessTransactionReference: {startWith: <run-prefix>}, valueDate: {eq: <run-date>}})`**, used in step 8: idempotency / verification check (re-running the run won't duplicate-pay if all references match).
 
-  > **The field and the operator are both exact.** `search_payments` hits `POST /cashflow-transactions/search` → `TransactionsFilter`, which declares no `additionalProperties`, so an undeclared field is rejected outright rather than ignored. It has **no `reference`** (that is `businessTransactionReference`) and `StringExpression` has **no `startsWith`** — the prefix operator is spelled **`startWith`**, no "s". Until 5.55.3 this line asked for both wrong names, so the idempotency check — the step standing between a re-run and paying every supplier twice — could not return anything. Use `startWith`, not `contains`: measured on the sandbox 2026-09-07, `contains: 'PR-'` matched 3 rows that do **not** start with that prefix, and a looser match here silently widens what the run treats as already-paid.
-- **`finalize_bill(resourceId: <id>)`** — used in step 0 fallback: bills must be `status: APPROVED` (not `DRAFT`) before they accept payments.
+  > **The field and the operator are both exact.** `search_payments` hits `POST /cashflow-transactions/search` → `TransactionsFilter`, which declares no `additionalProperties`, so an undeclared field is rejected outright rather than ignored. It has **no `reference`** (that is `businessTransactionReference`) and `StringExpression` has **no `startsWith`**: the prefix operator is spelled **`startWith`**, no "s". Until 5.55.3 this line asked for both wrong names, so the idempotency check (the step standing between a re-run and paying every supplier twice) could not return anything. Use `startWith`, not `contains`: measured on the sandbox 2026-09-07, `contains: 'PR-'` matched 3 rows that do **not** start with that prefix, and a looser match here silently widens what the run treats as already-paid.
+- **`finalize_bill(resourceId: <id>)`**, used in step 0 fallback: bills must be `status: APPROVED` (not `DRAFT`) before they accept payments.
 
 ### CLI tools (jaz-cli)
-- **`clio jobs payment-run --due-before <YYYY-MM-DD> --json`** — emit blueprint as JSON for downstream agent consumption.
-- **`clio jobs payment-run outstanding --due-before <YYYY-MM-DD> --currency SGD --json`** — fetch outstanding bills grouped by supplier (uses API key; equivalent to step 2 + step 4 grouping in one call).
+- **`clio jobs payment-run --due-before <YYYY-MM-DD> --json`**: emit blueprint as JSON for downstream agent consumption.
+- **`clio jobs payment-run outstanding --due-before <YYYY-MM-DD> --currency SGD --json`**: fetch outstanding bills grouped by supplier (uses API key; equivalent to step 2 + step 4 grouping in one call).
 
 ### Cross-references
 - Run inside the month-end close (between mid-month and month-end, so the close has fewer outstanding payables) and as a final pre-filing run before GST/VAT filing.
 - Sibling jobs: `credit-control.md` (the AR-side mirror), `supplier-recon.md` (run BEFORE payment-run to catch disputed bills that should be excluded).
-- API rules: `jaz-api/SKILL.md` rules 4-8 (payment field names — `paymentAmount` vs `transactionAmount` for FX), rule 24 (`currency` field shape), rule 50a (search `query` DSL). The 6 required payment fields are: `paymentAmount`, `transactionAmount`, `accountResourceId`, `paymentMethod`, `reference`, `valueDate` (jaz-api rule 7).
+- API rules: `jaz-api/SKILL.md` rules 4-8 (payment field names: `paymentAmount` vs `transactionAmount` for FX), rule 24 (`currency` field shape), rule 50a (search `query` DSL). The 6 required payment fields are: `paymentAmount`, `transactionAmount`, `accountResourceId`, `paymentMethod`, `reference`, `valueDate` (jaz-api rule 7).
 
 ---
 
-## Step 0 — Idempotency precheck
+## Step 0: Idempotency precheck
 
 Generate a run prefix: `PAYRUN-<YYYY-MM-DD>-<seq>`. Before proceeding:
 
@@ -34,13 +34,13 @@ Generate a run prefix: `PAYRUN-<YYYY-MM-DD>-<seq>`. Before proceeding:
 search_payments(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}})
 ```
 
-If results: surface "A payment run with prefix `PAYRUN-2025-02-28-*` already executed on this date (`<n>` payments totalling `<amt>`). Confirm intent — re-run will create duplicate payments." Halt unless practitioner confirms.
+If results: surface "A payment run with prefix `PAYRUN-2025-02-28-*` already executed on this date (`<n>` payments totalling `<amt>`). Confirm intent; re-run will create duplicate payments." Halt unless practitioner confirms.
 
-## Step 1 — Set the run window
+## Step 1: Set the run window
 
 Pick the cutoff date for the run (the bills you'll clear are those due on or before it). (Local CLI: `clio jobs payment-run --due-before 2025-02-28` prints the phased checklist for this cutoff.)
 
-## Step 2 — Identify bills
+## Step 2: Identify bills
 
 ```
 search_bills(
@@ -54,21 +54,21 @@ search_bills(
 )
 ```
 
-Paginate via `offset` if `totalElements > 200`. Add a 7-day grace window (`dueDate.lte: <cutoff + 7 days>`) — pay slightly early beats missing day-after.
+Paginate via `offset` if `totalElements > 200`. Add a 7-day grace window (`dueDate.lte: <cutoff + 7 days>`): pay slightly early beats missing day-after.
 
-For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, `paymentRecords`, `creditsApplied`, `dueDate`, `reference`. `balanceAmount` is a FILTER key only — the API accepts it in a filter but never returns it on a bill or invoice. Reading it back yields undefined. Derive outstanding instead: `totalAmount - sum(paymentRecords[].transactionAmount) - sum(creditsApplied[].amountApplied)`, and fetch with `view: 'full'` because a lean row omits `paymentRecords` entirely. Per `jaz-api/SKILL.md` rule 52, `dueDate` arrives as epoch ms — convert with `new Date(ms)` before display.
+For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, `paymentRecords`, `creditsApplied`, `dueDate`, `reference`. `balanceAmount` is a FILTER key only: the API accepts it in a filter but never returns it on a bill or invoice. Reading it back yields undefined. Derive outstanding instead: `totalAmount - sum(paymentRecords[].transactionAmount) - sum(creditsApplied[].amountApplied)`, and fetch with `view: 'full'` because a lean row omits `paymentRecords` entirely. Per `jaz-api/SKILL.md` rule 52, `dueDate` arrives as epoch ms; convert with `new Date(ms)` before display.
 
-## Step 3 — AP aging cross-check
+## Step 3: AP aging cross-check
 
 ```
 generate_aged_ap(endDate: '2025-02-28')
 ```
 
-Verify: `sum(derived outstanding) ≈ generate_aged_ap.totalOutstanding` (within the materiality threshold). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling — surface to the user.
+Verify: `sum(derived outstanding) ≈ generate_aged_ap.totalOutstanding` (within the materiality threshold). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling; surface to the user.
 
-Flag any bill in the 60d+ bucket — these need priority OR dispute resolution. Exclude bills the user has flagged as disputed.
+Flag any bill in the 60d+ bucket; these need priority OR dispute resolution. Exclude bills the user has flagged as disputed.
 
-## Step 4 — Group by supplier
+## Step 4: Group by supplier
 
 For each unique `contactResourceId` from step 2:
 - `get_contact(resourceId: <id>)` to pull `paymentTerms`, `preferredPaymentMethod`, `bankAccountNumber`, `bicSwift`, `taxId`.
@@ -76,7 +76,7 @@ For each unique `contactResourceId` from step 2:
 
 Suppliers prefer one consolidated payment per run. Multi-currency suppliers need separate per-currency payments (Jaz does NOT auto-net cross-currency).
 
-## Step 5 — Cash availability gate
+## Step 5: Cash availability gate
 
 ```
 generate_bank_balance_summary(primarySnapshotDate: '2025-02-28')
@@ -84,13 +84,13 @@ generate_bank_balance_summary(primarySnapshotDate: '2025-02-28')
 
 For each `bankAccountResourceId` you'll pay from: confirm `availableBalance >= sum of payments to be drawn from it`. If insufficient: defer the bottom of the priority stack to the next run; surface the deferred list to practitioner with explanation.
 
-Apply the org's cash-buffer policy (default: 14 days operating expenses) — never drain to zero. Compute buffer-required from last 30 days' opex via `generate_profit_and_loss(startDate: <-30d>, endDate: <today>)`.
+Apply the org's cash-buffer policy (default: 14 days operating expenses); never drain to zero. Compute buffer-required from last 30 days' opex via `generate_profit_and_loss(startDate: <-30d>, endDate: <today>)`.
 
 Record the judgment: `jot(kind: SCOPE)` naming the deferred bills and the cash-buffer rule applied.
 
-## Step 6 — Record payments
+## Step 6: Record payments
 
-For each approved bill (one POST per bill — no batch endpoint):
+For each approved bill (one POST per bill, no batch endpoint):
 
 ```
 pay_bill(
@@ -110,9 +110,9 @@ pay_bill(
 
 **Reference convention:** `PAYRUN-YYYY-MM-DD-NNN` (zero-padded sequence). Bank reconciliation downstream relies on this prefix to auto-match bank statement lines.
 
-**`paymentMethod` enum:** `BANK_TRANSFER` (default — GIRO / FAST / wire), `CHEQUE`, `CASH`, `CREDIT_CARD`, `E_WALLET` (PayNow for business, GrabPay).
+**`paymentMethod` enum:** `BANK_TRANSFER` (default; GIRO / FAST / wire), `CHEQUE`, `CASH`, `CREDIT_CARD`, `E_WALLET` (PayNow for business, GrabPay).
 
-## Step 7 — Verify
+## Step 7: Verify
 
 After all `pay_bill` calls succeed:
 
@@ -130,7 +130,7 @@ Assert:
 generate_bank_balance_summary(primarySnapshotDate: '2025-02-28')
 ```
 
-Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)`. Cross-reference to actual bank statement when it arrives — this is the next-day bank-recon job.
+Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)`. Cross-reference to actual bank statement when it arrives; this is the next-day bank-recon job.
 
 ---
 
@@ -142,23 +142,23 @@ Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)
 | `pay_bill` | 422 `currency_mismatch` | `paymentAmount` currency ≠ bank account currency. Either pay from the matching-currency bank account, or model as FX (different `paymentAmount` and `transactionAmount`). |
 | `pay_bill` | 422 `bill_already_paid` | Bill went `PAID` since step 2. Re-run `search_bills` for fresh state; remove from batch. |
 | `pay_bill` | 422 `lock_date_violated` | `valueDate` is in a locked period. Either lift the lock via `update_account` lock_date OR adjust `valueDate` to the next open period. |
-| `pay_bill` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent — re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. Record the judgment: `jot(kind: RECOVERY)` naming the resume point and the bills already paid. |
+| `pay_bill` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent; re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. Record the judgment: `jot(kind: RECOVERY)` naming the resume point and the bills already paid. |
 | `generate_aged_ap` | Total mismatch with `search_bills` | Likely `PARTIALLY_PAID` bills excluded from `search_bills` filter. Add `status: {in: ['UNPAID', 'PARTIALLY_PAID']}` and retry. |
 
 ---
 
 ## Variations
 
-- **Priority-based payment ordering:** `sortBy: 'dueDate', sortOrder: 'ASC'` covers chronological. For overdue-first there is no sort field — `daysOverdue` is not sortable and the API answers `422 sort.sortBy[0] must be one of [...]`, naming the set (measured 2026-09-07). Sort by `dueDate` ASC, which puts the most overdue first, or compute the age per row after fetching. For supplier-strategic, ask the user which suppliers are priority and process those first.
+- **Priority-based payment ordering:** `sortBy: 'dueDate', sortOrder: 'ASC'` covers chronological. For overdue-first there is no sort field: `daysOverdue` is not sortable and the API answers `422 sort.sortBy[0] must be one of [...]`, naming the set (measured 2026-09-07). Sort by `dueDate` ASC, which puts the most overdue first, or compute the age per row after fetching. For supplier-strategic, ask the user which suppliers are priority and process those first.
 - **Multi-currency runs:** Split the run by currency. SGD bills → SGD bank; USD bills → USD bank or SWIFT-routed. The actual bank disbursement is handled outside Jaz (via the bank's portal); Jaz records the payment after it clears.
-- **Approval workflow (multi-signatory SMBs):** Build the batch in step 5, get out-of-band approval, then execute step 6 only after sign-off. Do NOT post payments before the actual bank transfer is initiated — Jaz payments are not "payment instructions", they record completed payments.
+- **Approval workflow (multi-signatory SMBs):** Build the batch in step 5, get out-of-band approval, then execute step 6 only after sign-off. Do NOT post payments before the actual bank transfer is initiated: Jaz payments are not "payment instructions", they record completed payments.
 - **Early-payment discounts:** If supplier offers `2% 10 Net 30`, computing the equivalent annualized return is `(2% / 98%) × (365 / 20) ≈ 37.2%`. Take it when cash allows. Apply the discount as: pay `transactionAmount = (derived outstanding) × 0.98`, then post a separate journal Dr Bank Charges/Discount Income for the 2% saved (cleaner than partial payment of the original bill).
 
 ---
 
 ## Cross-references
 
-- `month-end-close.md` — run between mid-month and month-end so the close has fewer outstanding payables to defer.
-- `gst-vat-filing.md` — a pre-filing payment-run clears deductible-input-tax bills so they appear in the quarter's filing. Skip bills with `status: DRAFT` (they don't have GST claims yet).
-- `supplier-recon.md` — run BEFORE payment-run to exclude disputed bills and catch missing ones.
-- `credit-control.md` — the AR-side mirror.
+- `month-end-close.md`: run between mid-month and month-end so the close has fewer outstanding payables to defer.
+- `gst-vat-filing.md`: a pre-filing payment-run clears deductible-input-tax bills so they appear in the quarter's filing. Skip bills with `status: DRAFT` (they don't have GST claims yet).
+- `supplier-recon.md`: run BEFORE payment-run to exclude disputed bills and catch missing ones.
+- `credit-control.md`: the AR-side mirror.

@@ -1,6 +1,6 @@
 # Capital Allowances Classification Guide
 
-How to classify fixed assets for Singapore capital allowance claims. Capital allowances (CA) are the tax equivalent of accounting depreciation — they allow the cost of qualifying capital assets to be deducted over time for tax purposes. Accounting depreciation is always added back; CA is claimed separately.
+How to classify fixed assets for Singapore capital allowance claims. Capital allowances (CA) are the tax equivalent of accounting depreciation; they allow the cost of qualifying capital assets to be deducted over time for tax purposes. Accounting depreciation is always added back; CA is claimed separately.
 
 **CLI:** `clio jobs statutory-filing sg-ca --input assets.json --json` (per-asset CA schedule)
 **CLI:** `clio jobs statutory-filing sg-cs --input tax-data.json --json` (full tax computation with CA)
@@ -27,7 +27,7 @@ The difference between depreciation added back and CA claimed creates a permanen
 
 Six categories, each with a different write-off rate and statutory basis. These map directly to the `AssetCategory` type in the CLI.
 
-### Computer Equipment — Section 19A(1)
+### Computer Equipment: Section 19A(1)
 
 | Detail | Value |
 |--------|-------|
@@ -53,7 +53,7 @@ Six categories, each with a different write-off rate and statutory basis. These 
 2. Was software purchased bundled with the hardware? --> If yes, include the full cost under `computer`.
 3. Was software purchased separately as a license? --> Classify under `ip` (S19B).
 
-### Automation Equipment — Section 19A(1)
+### Automation Equipment: Section 19A(1)
 
 | Detail | Value |
 |--------|-------|
@@ -80,7 +80,7 @@ Six categories, each with a different write-off rate and statutory basis. These 
 
 **Tip:** The automation category is less commonly used by SMBs. If in doubt, classify as `general` (S19, 3-year write-off). The only downside is spreading the claim over 3 years instead of 1.
 
-### Low-Value Assets — Section 19A(2)
+### Low-Value Assets: Section 19A(2)
 
 | Detail | Value |
 |--------|-------|
@@ -100,7 +100,7 @@ Six categories, each with a different write-off rate and statutory basis. These 
 
 **What does NOT qualify:**
 - Items costing more than $5,000 each (use `general` or another category)
-- Items that qualify under `computer` or `automation` (use those categories instead for unlimited 100% write-off — they are not subject to the $30K cap)
+- Items that qualify under `computer` or `automation` (use those categories instead for unlimited 100% write-off; they are not subject to the $30K cap)
 
 **Cap mechanics:**
 - The $30,000 cap is per YA, across ALL low-value assets combined
@@ -114,7 +114,7 @@ Six categories, each with a different write-off rate and statutory basis. These 
 
 **Questions to ask:** "What is the total cost of all assets purchased this year that cost $5,000 or less each? Is the total under $30,000?"
 
-### General Plant & Machinery — Section 19
+### General Plant & Machinery: Section 19
 
 | Detail | Value |
 |--------|-------|
@@ -133,8 +133,8 @@ Six categories, each with a different write-off rate and statutory basis. These 
 - Any qualifying capital asset not covered by another specific category
 
 **What does NOT qualify:**
-- S-plated (private) motor vehicles — no CA at all
-- Land and buildings (non-industrial) — no CA
+- S-plated (private) motor vehicles: no CA at all
+- Land and buildings (non-industrial): no CA
 - Non-qualifying assets (paintings, antiques, artwork held for decoration)
 
 **Decision tree:**
@@ -145,7 +145,7 @@ Six categories, each with a different write-off rate and statutory basis. These 
 5. Is it a private (S-plated) motor vehicle? --> NO CA. Not claimable.
 6. Everything else? --> `general` at 33.33% x 3 years.
 
-### Intellectual Property — Section 19B
+### Intellectual Property: Section 19B
 
 | Detail | Value |
 |--------|-------|
@@ -165,7 +165,7 @@ Six categories, each with a different write-off rate and statutory basis. These 
 **What does NOT qualify:**
 - Goodwill (not an IP right under S19B)
 - Customer lists, supplier contracts (not qualifying IP)
-- Domain names (debatable — generally not qualifying unless tied to a registered trademark)
+- Domain names (debatable: generally not qualifying unless tied to a registered trademark)
 
 **Write-off period election:**
 - The taxpayer elects the write-off period: 5, 10, or 15 years
@@ -179,7 +179,7 @@ Six categories, each with a different write-off rate and statutory basis. These 
 
 **Questions to ask:** "Is this a standalone software license or IP right? Over how many years would you like to write it off for tax purposes (5, 10, or 15)?"
 
-### Renovation & Refurbishment — Section 14Q
+### Renovation & Refurbishment: Section 14Q
 
 | Detail | Value |
 |--------|-------|
@@ -276,7 +276,7 @@ For each qualifying asset:
 }
 ```
 
-**`priorYearsClaimed`:** This field tracks how much CA has already been claimed in prior YAs for this asset. The Jaz API does not store tax-specific CA data — you must ask the user or refer to prior-year tax computations.
+**`priorYearsClaimed`:** This field tracks how much CA has already been claimed in prior YAs for this asset. The Jaz API does not store tax-specific CA data; you must ask the user or refer to prior-year tax computations.
 
 - For assets acquired in the current basis period: `priorYearsClaimed = 0`
 - For 100% categories (computer, automation, low-value): if acquired in a prior year, `priorYearsClaimed` should equal `cost` (fully claimed in year 1)
@@ -318,13 +318,13 @@ If the company has unabsorbed (unclaimed) CA from prior YAs, these are carried f
 
 **1. Claiming CA on S-plated motor vehicles.** No CA is available for private motor vehicles (S-plated). The entire cost of the vehicle, plus all running expenses, is non-deductible for tax. Do not include S-plated vehicles in the CA schedule.
 
-**2. Claiming CA on leasehold land.** The cost of land (including leasehold interest) does not qualify for CA. Only the building or improvements on the land qualify — and only if used for industrial purposes (for S19) or if it constitutes qualifying renovation (S14Q).
+**2. Claiming CA on leasehold land.** The cost of land (including leasehold interest) does not qualify for CA. Only the building or improvements on the land qualify, and only if used for industrial purposes (for S19) or if it constitutes qualifying renovation (S14Q).
 
 **3. Exceeding the low-value cap.** The $30,000/YA cap catches many first-time preparers. If a company buys 8 items at $5,000 each ($40,000 total), only $30,000 qualifies for immediate write-off. The remaining $10,000 must be reclassified to `general` (3-year write-off). The CLI handles this automatically.
 
 **4. Forgetting prior-year claims on multi-year assets.** For `general` (3-year) and `ip` (5/10/15-year) assets, the current-year CA depends on how much was claimed in prior years. Failing to set `priorYearsClaimed` correctly results in double-claiming or under-claiming.
 
-**5. Classifying renovation as general P&M.** Renovation qualifies for S14Q (same 3-year rate as S19, but with a $300K cap). If renovation costs are below the cap, there is no practical difference. But if costs exceed $300K, the S14Q cap applies and the excess is non-deductible — unlike general P&M where the full cost qualifies.
+**5. Classifying renovation as general P&M.** Renovation qualifies for S14Q (same 3-year rate as S19, but with a $300K cap). If renovation costs are below the cap, there is no practical difference. But if costs exceed $300K, the S14Q cap applies and the excess is non-deductible, unlike general P&M where the full cost qualifies.
 
 **6. Bundled software classified as IP.** Software purchased pre-installed on hardware (e.g., Windows license with a laptop) should be classified under `computer`, not `ip`. Only standalone software licenses (e.g., Adobe Creative Cloud annual license, purchased separately) go under `ip`.
 

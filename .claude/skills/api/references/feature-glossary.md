@@ -1,6 +1,6 @@
 # Feature Glossary
 
-Business context for Jaz platform features — what they are, when to use them, and which API endpoints correspond. This supplements the API-focused reference files with product knowledge that helps AI agents understand the *purpose* behind API calls.
+Business context for Jaz platform features: what they are, when to use them, and which API endpoints correspond. This supplements the API-focused reference files with product knowledge that helps AI agents understand the *purpose* behind API calls.
 
 For full help center content split by section, see [help-center-mirror/](../help-center-mirror/) or [help.jaz.ai](https://help.jaz.ai). For the complete endpoint catalog (80+), see [full-api-surface.md](./full-api-surface.md).
 
@@ -24,9 +24,9 @@ Auto-generates invoices on a recurring schedule (weekly, monthly, quarterly, yea
 
 **Key differences from scheduled invoices**: Subscriptions auto-prorate (scheduled invoices don't). But currency, tax, and account details must be the same for all line items and cannot be changed after creation (scheduled invoices allow per-occurrence flexibility).
 
-Use subscriptions for: software licenses, retainer services, SaaS billing — any recurring revenue where proration matters. Use scheduled invoices for fixed-amount recurring invoices where you need to change line items, tax, or currency per occurrence.
+Use subscriptions for: software licenses, retainer services, SaaS billing, any recurring revenue where proration matters. Use scheduled invoices for fixed-amount recurring invoices where you need to change line items, tax, or currency per occurrence.
 
-**Invoices only** — no bills. `businessTransactionType` must be `"SALE"`.
+**Invoices only**, no bills. `businessTransactionType` must be `"SALE"`.
 
 **API**: CRUD `GET/POST/PUT/DELETE /scheduled/subscriptions`, cancel `POST /scheduled/cancel-subscriptions/:id`, search `POST /scheduled-transaction/search` (cross-entity).
 
@@ -48,7 +48,7 @@ Transaction fees are added to cash spent (not deducted like invoices), and a pay
 
 Pre-invoice / pre-bill documents. Sales pipeline: **Sale Quote** (estimate/quotation) → **Sale Order** → Invoice. Purchase pipeline: **Purchase Request** (requisition) → **Purchase Order** (PO) → Bill.
 
-Key capabilities: a Sale Order links to its source quote via `saleQuoteResourceId` (and a PO to its request via `purchaseRequestResourceId`) — the parent must be **issued** (CREATED/ACTIVE), not a DRAFT: create it with `saveAsDraft:false`, or issue an existing draft in place with the update tool's `isDraftToActive*` flag. Orders made by Jaz Magic start PENDING until the update tool's `isPendingToActive*` flag takes them live. Order updates edit lines by `resourceId` and add any line without one (see orders.md). Quotes/requests advance with **accept** (from the issued state), orders with **confirm**. Fulfillment is tracked on the parent via `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_INVOICED for quotes, FULLY_BILLED for requests — an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired). Orders convert to invoices/bills via `convert_sale_order_to_invoice` / `convert_purchase_order_to_bill`, and the reverse link is exposed as create-time fields (see orders.md). Delete is draft-only; use void otherwise.
+Key capabilities: a Sale Order links to its source quote via `saleQuoteResourceId` (and a PO to its request via `purchaseRequestResourceId`); the parent must be **issued** (CREATED/ACTIVE), not a DRAFT: create it with `saveAsDraft:false`, or issue an existing draft in place with the update tool's `isDraftToActive*` flag. Orders made by Jaz Magic start PENDING until the update tool's `isPendingToActive*` flag takes them live. Order updates edit lines by `resourceId` and add any line without one (see orders.md). Quotes/requests advance with **accept** (from the issued state), orders with **confirm**. Fulfillment is tracked on the parent via `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_INVOICED for quotes, FULLY_BILLED for requests; an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired). Orders convert to invoices/bills via `convert_sale_order_to_invoice` / `convert_purchase_order_to_bill`, and the reverse link is exposed as create-time fields (see orders.md). Delete is draft-only; use void otherwise.
 
 **API**: per entity (`sale-quotes`, `sale-orders`, `purchase-requests`, `purchase-orders`): CRUD `GET/POST/PUT/DELETE`, `POST /…/search`, `POST /…/:id/{accept|confirm}`, `POST /…/:id/void`, `POST /…/:id/fast-fix`, `POST /…/bulk-{accept|confirm|void|delete}`; orders also `POST /…/line-items/bulk-upsert`. Agent surface: `sale_orders` + `purchase_orders` namespaces (create/get/search/update/transition). See `references/orders.md`.
 
@@ -56,7 +56,7 @@ Key capabilities: a Sale Order links to its source quote via `saleQuoteResourceI
 
 ## Customer Credits
 
-Credit notes that reduce amounts owed by customers — issued for returns, discounts, or corrections. Can be applied to invoices (same currency only) or refunded to customers. Statuses: draft, credit available, fully applied.
+Credit notes that reduce amounts owed by customers, issued for returns, discounts, or corrections. Can be applied to invoices (same currency only) or refunded to customers. Statuses: draft, credit available, fully applied.
 
 Active credits only can be applied to invoices. Application has no additional ledger impact (already accounted at creation). Refunds use `refundAmount` + `refundMethod` (NOT `paymentAmount`/`paymentMethod`). Voiding a credit deletes associated refunds and unapplies from invoices.
 
@@ -66,7 +66,7 @@ Active credits only can be applied to invoices. Application has no additional le
 
 ## Supplier Credits
 
-Credit notes that reduce amounts owed to suppliers — issued by suppliers for returns, discounts, or corrections. Can be applied to bills (same currency only) or refunded from suppliers. Same lifecycle as customer credits.
+Credit notes that reduce amounts owed to suppliers, issued by suppliers for returns, discounts, or corrections. Can be applied to bills (same currency only) or refunded from suppliers. Same lifecycle as customer credits.
 
 Supports withholding tax on credit line items. Supplier credit note PDFs are NOT available for download (internal records only). Import supports credit notes but NOT refunds.
 
@@ -80,11 +80,11 @@ Track advance payments and prepaid balances. Customer deposits are liabilities (
 
 Can block payments if deposit balance is insufficient. View all contacts with deposits and filter by balance status. Managed via dedicated deposit accounts in the Chart of Accounts.
 
-**The mechanism**: an account is marked as a deposit account by `depositContactType` on the chart-of-accounts record — `CUSTOMER` (advance received, a liability), `SUPPLIER` (advance paid, an asset), or `NULL` (an ordinary account). The flag is set by the platform-backend mutation `configureDepositAccounts`. **Neither is exposed on this API**, so flagging an account is a web-app action; over the API you can only read and post against an account someone already flagged. `POST /chart-of-accounts` cannot create one.
+**The mechanism**: an account is marked as a deposit account by `depositContactType` on the chart-of-accounts record: `CUSTOMER` (advance received, a liability), `SUPPLIER` (advance paid, an asset), or `NULL` (an ordinary account). The flag is set by the platform-backend mutation `configureDepositAccounts`. **Neither is exposed on this API**, so flagging an account is a web-app action; over the API you can only read and post against an account someone already flagged. `POST /chart-of-accounts` cannot create one.
 
-There is no dedicated `/deposits` endpoint (returns 404) and none is planned — a deposit is not a document. Once an account is flagged, a deposit movement is an ordinary transaction against it, carrying the ordinary `businessTransactionType` values (`SALE`, `PURCHASE`, `PAYMENT_SALE`, `PAYMENT_PURCHASE`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT`, `JOURNAL_MANUAL`).
+There is no dedicated `/deposits` endpoint (returns 404) and none is planned; a deposit is not a document. Once an account is flagged, a deposit movement is an ordinary transaction against it, carrying the ordinary `businessTransactionType` values (`SALE`, `PURCHASE`, `PAYMENT_SALE`, `PAYMENT_PURCHASE`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT`, `JOURNAL_MANUAL`).
 
-**API**: `POST /journals` / `POST /cash-in-entries` / `POST /cash-out-entries` (top up or draw down — one leg on the flagged account), `POST /invoices/:id/payments` / `POST /bills/:id/payments` (draw the deposit down against a document via `accountResourceId`, with `paymentMethod: OTHER` — BANK_TRANSFER/CASH/CHEQUE force a bank account and 422), `POST /cashflow-transactions/search` (read movements). Authoritative version: SKILL.md Rule 47a.
+**API**: `POST /journals` / `POST /cash-in-entries` / `POST /cash-out-entries` (top up or draw down, one leg on the flagged account), `POST /invoices/:id/payments` / `POST /bills/:id/payments` (draw the deposit down against a document via `accountResourceId`, with `paymentMethod: OTHER`; BANK_TRANSFER/CASH/CHEQUE force a bank account and 422), `POST /cashflow-transactions/search` (read movements). Authoritative version: SKILL.md Rule 47a.
 
 ---
 
@@ -92,11 +92,11 @@ There is no dedicated `/deposits` endpoint (returns 404) and none is planned —
 
 Manual accounting entries for non-payment transactions. Three types: Manual Journals (multi-line debit/credit entries), Cash Journals (2-line cash transfers between bank accounts with cross-currency support), and Transfer Journals (year-end trial balance transfers, non-editable).
 
-Manual journals support multi-currency — the entire journal can be in the org's base currency or any enabled foreign currency. Foreign currency journal restrictions: (1) no controlled accounts (AR/AP — use invoices/bills instead), (2) no FX system accounts (Unrealized Gain/Loss/Rounding), (3) bank accounts must match the journal's currency (e.g., USD journal → USD bank only).
+Manual journals support multi-currency: the entire journal can be in the org's base currency or any enabled foreign currency. Foreign currency journal restrictions: (1) no controlled accounts (AR/AP; use invoices/bills instead), (2) no FX system accounts (Unrealized Gain/Loss/Rounding), (3) bank accounts must match the journal's currency (e.g., USD journal → USD bank only).
 
 Minimum 2 balanced entries required. Cash journals are restricted to exactly 2 lines. Bank/cash/current asset/equity/liability accounts cannot have tax profiles applied. Supports scheduled/recurring journals with dynamic scheduler strings (`{{YEAR}}`, `{{MONTH}}`).
 
-Cash transfer FX logic: currency and exchange rates are derived server-side from bank account currencies — do NOT send `currency` or `exchangeRate` on create. Just provide two different-currency bank accounts with amounts; the server handles FX derivation (4 cases: base-base, FX-base, base-FX, FX-FX). Transfer rate = `Cash-in amount / Cash-out amount`.
+Cash transfer FX logic: currency and exchange rates are derived server-side from bank account currencies; do NOT send `currency` or `exchangeRate` on create. Just provide two different-currency bank accounts with amounts; the server handles FX derivation (4 cases: base-base, FX-base, base-FX, FX-FX). Transfer rate = `Cash-in amount / Cash-out amount`.
 
 **API**: CRUD `GET/POST/PUT/DELETE /journals`, `POST /journals/search`, `POST/GET/DELETE /journals/:id/attachments`, `POST /cash-in-entries`, `POST /cash-out-entries`, `POST /cash-transfers`, `POST /cashflow-transactions/search`, `DELETE /cash-entries/:id`, `POST /scheduled/journals` (CRUD)
 
@@ -106,7 +106,7 @@ Cash transfer FX logic: currency and exchange rates are derived server-side from
 
 Containers that group related transactions for complex accounting scenarios. Use cases: prepaid expenses (annual insurance amortization), deferred revenue, accrued expenses, fixed asset acquisitions (CIP), intercompany transactions, renovation projects.
 
-A capsule links invoices, bills, journals, and schedulers into a single logical unit. If a scheduler belongs to a capsule, every recurring entry it generates is automatically created under that same capsule — this is how prepaid expenses, deferred revenue, and accruals spread entries across periods while keeping them grouped. The ledger can be filtered and grouped by capsule (the only enrichment that supports group-by). Capsule Types are customizable labels. A capsule must be empty before deletion. Transactions can be bulk-attached via Quick Fix or moved between capsules.
+A capsule links invoices, bills, journals, and schedulers into a single logical unit. If a scheduler belongs to a capsule, every recurring entry it generates is automatically created under that same capsule; this is how prepaid expenses, deferred revenue, and accruals spread entries across periods while keeping them grouped. The ledger can be filtered and grouped by capsule (the only enrichment that supports group-by). Capsule Types are customizable labels. A capsule must be empty before deletion. Transactions can be bulk-attached via Quick Fix or moved between capsules.
 
 **API**: CRUD `GET/POST/PUT/DELETE /capsules`, `POST /capsules/search`, `POST /move-transaction-capsules`, CRUD `GET/POST/PUT/DELETE /capsuleTypes`, `POST /capsuleTypes/search` (also available as `/capsule-types/*` kebab-case aliases)
 
@@ -118,7 +118,7 @@ Financial statements and accounting reports for compliance, analysis, and audit.
 
 | Report | What it shows |
 |--------|--------------|
-| **Trial Balance** | Debit/credit verification worksheet — if unbalanced, arithmetic error exists |
+| **Trial Balance** | Debit/credit verification worksheet; if unbalanced, arithmetic error exists |
 | **Balance Sheet** | Assets/liabilities/equity snapshot at a point in time |
 | **Profit & Loss** | Revenue/costs/expenses over a period; supports tracking tag filters |
 | **Cashflow Statement** | Cash inflows/outflows categorized as operating/investing/financing |
@@ -159,17 +159,17 @@ Catalogs group items for bulk application to invoices/credits/scheduled invoices
 
 ## Bank Reconciliations
 
-Match bank statement lines to Jaz transactions to verify cash balances. This is where most day-to-day bookkeeping happens — reconciling what the bank shows vs what Jaz has recorded.
+Match bank statement lines to Jaz transactions to verify cash balances. This is where most day-to-day bookkeeping happens: reconciling what the bank shows vs what Jaz has recorded.
 
-**Auto-Reconciliation**: Runs daily at midnight with configurable rules — Match (existing transactions), Quick Reconcile (create journals), Apply Rule (bank rules), Cash Transfer. Three magic thresholds: Strict, Balanced, Lenient. Can exclude specific records via Saved Search.
+**Auto-Reconciliation**: Runs daily at midnight with configurable rules: Match (existing transactions), Quick Reconcile (create journals), Apply Rule (bank rules), Cash Transfer. Three magic thresholds: Strict, Balanced, Lenient. Can exclude specific records via Saved Search.
 
 **Magic Match**: Auto-suggests transaction matches within 30 days (with contact) or 3 days (payments only), matching by amount + contact name.
 
 **Bank Feeds**: Connect Airwallex, Aspire, Stripe, Wise, or Xendit for automated statement sync (up to 12 months history, daily auto-sync).
 
-**Bank Rules**: Two halves. The WHEN is the inline `searchFilter` condition deciding which statement lines the rule applies to — without one the rule is never suggested under Apply Rule, only applied by hand. The THEN auto-allocates amounts using percentage-only or fixed+percentage splits (max 10 fixed + 10 percentage lines). Support dynamic strings `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescription}}`.
+**Bank Rules**: Two halves. The WHEN is the inline `searchFilter` condition deciding which statement lines the rule applies to; without one the rule is never suggested under Apply Rule, only applied by hand. The THEN auto-allocates amounts using percentage-only or fixed+percentage splits (max 10 fixed + 10 percentage lines). Support dynamic strings `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescription}}`.
 
-Statement amounts are recorded in the bank account's currency — no auto-conversion. Cross-currency transactions prompt for cash received/spent in statement currency. Reconciled transactions become uneditable (must reset to edit).
+Statement amounts are recorded in the bank account's currency, no auto-conversion. Cross-currency transactions prompt for cash received/spent in statement currency. Reconciled transactions become uneditable (must reset to edit).
 
 **API**: `POST /bank-records/:accountResourceId` (JSON import), `POST /bank-records/:accountResourceId/search`, `POST /magic/importBankStatementFromAttachment` (multipart CSV/OFX), CRUD `GET/POST/PUT/DELETE /bank-rules`, `POST /bank-rules/search`, `GET /bank-accounts`, `POST /search-magic-reconciliation`
 
@@ -187,7 +187,7 @@ Workflow for draft invoices and bills requiring admin sign-off before activation
 
 Fixed asset register with straight-line depreciation. Register assets from invoice/bill line items or standalone. Auto-posts monthly depreciation journal entries. Formula: `(Cost - Salvage Value) / Useful Life`.
 
-Fixed assets lock their linked line items — cannot edit account, amounts, or exchange rates on a line item with an active fixed asset. Must delete the asset before modifying the line item. Fixed asset journals can be grouped in capsules for CIP, renovations, and disposals.
+Fixed assets lock their linked line items: cannot edit account, amounts, or exchange rates on a line item with an active fixed asset. Must delete the asset before modifying the line item. Fixed asset journals can be grouped in capsules for CIP, renovations, and disposals.
 
 **API**: CRUD `GET/POST/PUT/DELETE /fixed-assets`, `POST /fixed-assets/search`, `POST /mark-as-sold/fixed-assets`, `POST /undo-disposal/fixed-assets/:id`, `POST /discard-fixed-assets/:id`, `POST /transfer-fixed-assets`, `POST /fixed-assets-types/search`
 
@@ -199,9 +199,9 @@ Fixed assets lock their linked line items — cannot edit account, amounts, or e
 
 **Agent Builder**: Configure custom AI agents in Settings > Agent Builder with name, email (a-z, 0-9, + symbol), and workflow preferences.
 
-**Jaz Magic**: The extraction & autofill engine. When users start from an attachment (PDF, JPG, document image), Jaz Magic is the correct path — it handles OCR, line item detection, contact matching, and CoA auto-mapping via ML learning, producing a complete draft transaction. Contact-level settings control extraction behavior: line items (detailed extraction), summary totals (single amount), or none. Up to 10 images can be merged into a single PDF. **Do not manually parse attachments to construct `POST /invoices` or `POST /bills` — always use Jaz Magic when the input is a file.**
+**Jaz Magic**: The extraction & autofill engine. When users start from an attachment (PDF, JPG, document image), Jaz Magic is the correct path; it handles OCR, line item detection, contact matching, and CoA auto-mapping via ML learning, producing a complete draft transaction. Contact-level settings control extraction behavior: line items (detailed extraction), summary totals (single amount), or none. Up to 10 images can be merged into a single PDF. **Do not manually parse attachments to construct `POST /invoices` or `POST /bills`; always use Jaz Magic when the input is a file.**
 
-**API**: `POST /magic/createBusinessTransactionFromAttachment` (**attachment → draft transaction** — the primary endpoint for file-based creation), `POST /magic/importBankStatementFromAttachment` (bank statements)
+**API**: `POST /magic/createBusinessTransactionFromAttachment` (**attachment → draft transaction**, the primary endpoint for file-based creation), `POST /magic/importBankStatementFromAttachment` (bank statements)
 
 ---
 
@@ -209,11 +209,11 @@ Fixed assets lock their linked line items — cannot edit account, amounts, or e
 
 **Chart of Accounts**: Account codes, names, types (Revenue, Expense, Asset, Liability, Equity), subtypes, lock dates per account. System accounts (AR, AP, FX) are auto-created and cannot be deleted.
 
-**Tax Profiles**: GST/VAT codes with rates, scoped to sales-only, purchases-only, or both. Pre-provisioned per org — discover via GET, never create.
+**Tax Profiles**: GST/VAT codes with rates, scoped to sales-only, purchases-only, or both. Pre-provisioned per org; discover via GET, never create.
 
 **Currencies & FX Rates**: Enable currencies before use. Rate priority: transaction-level custom rate > org-level custom rate > ECB/Frankfurter auto-fetch. Rate direction: `rate` = functionalToSource (1 base = X foreign).
 
-**Transaction Data Enrichments** — four optional metadata layers at different granularities:
+**Transaction Data Enrichments** (four optional metadata layers at different granularities):
 
 | Layer | Scope | Purpose | Reporting | PDF | Scheduler |
 |-------|-------|---------|-----------|-----|-----------|
@@ -222,9 +222,9 @@ Fixed assets lock their linked line items — cannot edit account, amounts, or e
 | **Capsules** | Group of transactions | Workflow container for multi-step accounting | Filter + Group by | No | All entries land in capsule |
 | **Custom Fields** | Transaction | Additional record-keeping | No impact | Yes | No |
 
-- **Tracking Tags**: Like hashtags on transactions — data enrichment for advanced reporting. Transaction-level only (not line items). Can be set on schedulers — generated entries inherit them. Cannot group by tags in reports, only filter.
-- **Nano Classifiers**: Data enrichment with a classification intent — group line items into named classes within a classifier (e.g., Department: Engineering/Sales/Finance). Line-item-level only (not transaction headers). Can be displayed on PDF line items. Can be set on schedulers — generated entries inherit them. Assigning classifiers to items auto-applies them to line items in transactions.
-- **Capsules**: Not a classification — a workflow container that groups related transactions for a specific accounting scenario (prepaid, deferred, accrual, CIP). The only enrichment supporting group-by in reports. See dedicated Capsules section above.
+- **Tracking Tags**: Like hashtags on transactions, data enrichment for advanced reporting. Transaction-level only (not line items). Can be set on schedulers; generated entries inherit them. Cannot group by tags in reports, only filter.
+- **Nano Classifiers**: Data enrichment with a classification intent: group line items into named classes within a classifier (e.g., Department: Engineering/Sales/Finance). Line-item-level only (not transaction headers). Can be displayed on PDF line items. Can be set on schedulers; generated entries inherit them. Assigning classifiers to items auto-applies them to line items in transactions.
+- **Capsules**: Not a classification, a workflow container that groups related transactions for a specific accounting scenario (prepaid, deferred, accrual, CIP). The only enrichment supporting group-by in reports. See dedicated Capsules section above.
 - **Custom Fields**: Text/number/date/dropdown fields for additional record-keeping. Transaction-level, applied to invoices/bills/journals/contacts. Can show on PDFs and be made mandatory. No reporting impact, not available on schedulers.
 
 **Lock Dates**: Prevent edits to transactions before a date (org-wide or per-account). Prevents backdated entries.

@@ -1,6 +1,6 @@
 # Enhanced Deductions for SG Corporate Tax
 
-Enhanced deductions allow companies to claim more than 100% of certain qualifying expenditures as tax deductions. The "base" 100% is already in the P&L (as an expense that reduces accounting profit). The "enhanced" portion is the uplift above 100% — this is the additional tax deduction that must be explicitly claimed.
+Enhanced deductions allow companies to claim more than 100% of certain qualifying expenditures as tax deductions. The "base" 100% is already in the P&L (as an expense that reduces accounting profit). The "enhanced" portion is the uplift above 100%; this is the additional tax deduction that must be explicitly claimed.
 
 **Key concept:** The `enhancedDeductions` fields in `SgFormCsInput` capture only the **uplift portion** (the amount above the base 100%). The base is already reflected in accounting profit.
 
@@ -10,7 +10,7 @@ Enhanced deductions allow companies to claim more than 100% of certain qualifyin
 
 Research and development expenditure qualifies for enhanced deductions under two schemes.
 
-### S14C — Standard R&D deduction (no pre-approval needed)
+### S14C: Standard R&D deduction (no pre-approval needed)
 
 | Item | Detail |
 |------|--------|
@@ -20,13 +20,13 @@ Research and development expenditure qualifies for enhanced deductions under two
 | **Eligible expenditure** | Staff costs, consumables, IP costs for R&D, outsourced R&D (to SG research institutions) |
 | **Cap** | None |
 
-### S14E — Enhanced R&D deduction (requires IRAS pre-approval)
+### S14E: Enhanced R&D deduction (requires IRAS pre-approval)
 
 | Item | Detail |
 |------|--------|
 | **Total deduction** | 400% of qualifying expenditure |
 | **Breakdown** | 100% (already in P&L) + 300% uplift |
-| **Pre-approval** | Required — must be approved by IRAS before the R&D project starts |
+| **Pre-approval** | Required; must be approved by IRAS before the R&D project starts |
 | **Eligible expenditure** | Same categories as S14C, but must meet additional innovation criteria |
 | **Cap** | None (but subject to IRAS approval of the specific project) |
 
@@ -183,9 +183,9 @@ Renovation costs for business premises qualify for a special deduction spread ov
 
 ### How S14Q works in the computation
 
-S14Q renovation costs are primarily claimed through the **capital allowances schedule** — each qualifying renovation cost is entered as a `CaAsset` with `category: 'renovation'`. The CA engine computes the 33.33% annual claim.
+S14Q renovation costs are primarily claimed through the **capital allowances schedule**: each qualifying renovation cost is entered as a `CaAsset` with `category: 'renovation'`. The CA engine computes the 33.33% annual claim.
 
-The `enhancedDeductions.s14qRenovation` field captures only the **net uplift** — the portion of the S14Q deduction that is not already reflected in the CA schedule. In most cases, this is zero because the full deduction flows through the CA schedule.
+The `enhancedDeductions.s14qRenovation` field captures only the **net uplift**: the portion of the S14Q deduction that is not already reflected in the CA schedule. In most cases, this is zero because the full deduction flows through the CA schedule.
 
 Use the uplift field when renovation costs were expensed on the P&L (instead of capitalized) and you need to capture the additional deduction above what the CA schedule provides.
 

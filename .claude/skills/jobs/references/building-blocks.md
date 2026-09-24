@@ -17,9 +17,9 @@ Period derivation:
 - June FY org (FY-end `06-30`): `2025-Q1` = `2024-07-01` to `2024-09-30` (FY2025 starts Jul 2024).
 
 **Period boundaries matter for:**
-- `search_*` filters — `{valueDate: {between: [<period-start>, <period-end>]}}` per `jaz-api/SKILL.md` rule 2.
-- Reports — each tool names its own dates: `endDate` (trial balance, aged AR/AP, cash balance), `snapshotDate` (balance sheet), `startDate` + `endDate` (P&L, cashflow, general ledger, VAT ledger), `primarySnapshotStartDate` + `primarySnapshotEndDate` (FA summary/recon, equity movement, bank recon), `primarySnapshotDate` (bank balance summary).
-- Lock dates — `update_account` lockDate sets the close marker.
+- `search_*` filters: `{valueDate: {between: [<period-start>, <period-end>]}}` per `jaz-api/SKILL.md` rule 2.
+- Reports: each tool names its own dates: `endDate` (trial balance, aged AR/AP, cash balance), `snapshotDate` (balance sheet), `startDate` + `endDate` (P&L, cashflow, general ledger, VAT ledger), `primarySnapshotStartDate` + `primarySnapshotEndDate` (FA summary/recon, equity movement, bank recon), `primarySnapshotDate` (bank balance summary).
+- Lock dates: `update_account` lockDate sets the close marker.
 
 ## Lock dates
 
@@ -50,7 +50,7 @@ Standard assertions:
 
 ## Pre-emitted DRAFT journal pattern
 
-Recipe engine creates ALL future-dated journals upfront as DRAFT (loan: 60 monthly journals; prepaid-expense: 12 monthly journals; lease: termMonths monthly journals; etc.). The recipe engine does NOT use Jaz schedulers — pre-emitted DRAFTs are the canonical pattern.
+Recipe engine creates ALL future-dated journals upfront as DRAFT (loan: 60 monthly journals; prepaid-expense: 12 monthly journals; lease: termMonths monthly journals; etc.). The recipe engine does NOT use Jaz schedulers; pre-emitted DRAFTs are the canonical pattern.
 
 Monthly action per recipe-managed capsule:
 ```
@@ -58,7 +58,7 @@ search_journals(filter: {valueDate: {between: [<period-start>, <period-end>]}, s
 update_journal(resourceId: <this period's pre-emitted journal>, saveAsDraft: false)
 ```
 
-For Jaz-scheduler-driven recurrences (`create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`, subscriptions): scheduler templates auto-fire and create new ACTIVE entries each period. Different primitive — the recipe engine doesn't use these.
+For Jaz-scheduler-driven recurrences (`create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`, subscriptions): scheduler templates auto-fire and create new ACTIVE entries each period. Different primitive; the recipe engine doesn't use these.
 
 ## Capsule conventions
 
@@ -69,21 +69,21 @@ search_capsules(filter: {status: {eq: 'ACTIVE'}})
 ```
 
 Capsule types used by jobs:
-- `Prepaid Expenses` — recipe `prepaid-expense`
-- `Deferred Revenue` — recipe `deferred-revenue`
-- `Accrued Expenses` — recipe `accrued-expense` (also bonus accruals)
-- `Loan Repayment` — recipe `loan`
-- `Lease` — recipe `lease` (incl. hire-purchase)
-- `Depreciation` — recipe `depreciation` (DDB / 150DB; SL goes through Jaz native FA)
-- `Fixed Deposit` — recipe `fixed-deposit`
-- `Asset Disposal` — recipe `asset-disposal`
-- `Provisions` — recipe `provision` (IAS 37)
-- `ECL Provision` — recipe `ecl` (IFRS 9 simplified)
-- `Employee Benefits` — recipes `leave-accrual` + `accrued-expense` (bonus)
-- `Dividends` — recipe `dividend`
-- `Intercompany` — manual (no engine)
-- `Capital Projects` — manual (CWIP-to-FA)
-- `M&A` / `Restructuring` / `Insurance Claim` / `Bad Debt Write-off` / `Investments` — manual (per `transaction-recipes/references/building-blocks.md` § Capsules)
+- `Prepaid Expenses`: recipe `prepaid-expense`
+- `Deferred Revenue`: recipe `deferred-revenue`
+- `Accrued Expenses`: recipe `accrued-expense` (also bonus accruals)
+- `Loan Repayment`: recipe `loan`
+- `Lease`: recipe `lease` (incl. hire-purchase)
+- `Depreciation`: recipe `depreciation` (DDB / 150DB; SL goes through Jaz native FA)
+- `Fixed Deposit`: recipe `fixed-deposit`
+- `Asset Disposal`: recipe `asset-disposal`
+- `Provisions`: recipe `provision` (IAS 37)
+- `ECL Provision`: recipe `ecl` (IFRS 9 simplified)
+- `Employee Benefits`: recipes `leave-accrual` + `accrued-expense` (bonus)
+- `Dividends`: recipe `dividend`
+- `Intercompany`: manual (no engine)
+- `Capital Projects`: manual (CWIP-to-FA)
+- `M&A` / `Restructuring` / `Insurance Claim` / `Bad Debt Write-off` / `Investments`: manual (per `transaction-recipes/references/building-blocks.md` § Capsules)
 
 Group GL by capsule for the auditor:
 ```
@@ -94,7 +94,7 @@ get_capsule(resourceId)   # returns totalTransactions (a COUNT), not the transac
 
 | Tool | Job usage |
 |------|-----------|
-| `generate_trial_balance` | Verification — every job |
+| `generate_trial_balance` | Verification, every job |
 | `generate_balance_sheet` | Verification |
 | `generate_profit_and_loss` | Verification + period analysis |
 | `generate_aged_ar` / `generate_aged_ap` | Aging-aware jobs (credit-control, payment-run, audit-prep) |
@@ -102,7 +102,7 @@ get_capsule(resourceId)   # returns totalTransactions (a COUNT), not the transac
 | `generate_vat_ledger` | GST/VAT, quarter-end Q1 |
 | `generate_general_ledger` | Investigation + audit-prep |
 | `generate_fa_summary` / `generate_fa_recon_summary` | FA review, year-end |
-| `search_journals` / `search_invoices` / `search_bills` | Discovery + filter — every job |
+| `search_journals` / `search_invoices` / `search_bills` | Discovery + filter, every job |
 | `search_capsules` | Recipe-managed lifecycle discovery |
 | `bulk_finalize_drafts` | Monthly-close + every job that finalizes pre-emitted DRAFTs |
 | `update_account` lockDate | Period close |
@@ -113,7 +113,7 @@ Period-close jobs layer on each other; the ad-hoc jobs slot into the period clos
 
 | Job | Builds on / invokes |
 |-----|---------------------|
-| `month-end-close` | foundation — bank-recon (step 3), document-collection (capture late bills), per-recipe finalize (accruals, prepaid, deferred, depreciation, loan) |
+| `month-end-close` | foundation: bank-recon (step 3), document-collection (capture late bills), per-recipe finalize (accruals, prepaid, deferred, depreciation, loan) |
 | `quarter-end-close` | month-end-close ×3 + GST/VAT filing, ECL review, bonus true-up, intercompany recon, provision unwinding |
 | `year-end-close` | quarter-end-close ×4 + FA reconciliation, true-ups, dividends, retained-earnings rollover; hands off to audit-prep |
 | `audit-prep` | runs after year-end-close; consumes fa-review, supplier-recon (majors), bank-recon outputs; feeds statutory-filing |
@@ -129,7 +129,7 @@ Each entity is a separate Jaz org. Multi-org operations (intercompany, consolida
 1. Confirm Entity A via `get_organization(org_id: <Entity A org>)`, then run Entity A's legs with `org_id: <Entity A org>`.
 2. Confirm Entity B via `get_organization(org_id: <Entity B org>)`, then run the mirror legs with `org_id: <Entity B org>`.
 
-Every leg carries its own explicit `org_id` — a wrong "active" org silently posts to the wrong tenant and corrupts both books. See the `intercompany` recipe for the canonical pattern.
+Every leg carries its own explicit `org_id`: a wrong "active" org silently posts to the wrong tenant and corrupts both books. See the `intercompany` recipe for the canonical pattern.
 
 ## Error handling conventions across jobs
 
@@ -140,39 +140,39 @@ Every leg carries its own explicit `org_id` — a wrong "active" org silently po
 | 500 | Retry once with 5s backoff; on second 500 surface "escalate to support with `requestId`" |
 | 404 (resource gone) | Stale resource id (e.g., a cached `bank_account` resourceId). Re-resolve via search; surface |
 | Async PARTIAL_SUCCESS | Read `data[0].errorDetails[]`; loop back to re-execute failed rows only |
-| NOT idempotent on retry | Per `jaz-api/SKILL.md` rule 125 — confirm state via search before retrying |
+| NOT idempotent on retry | Per `jaz-api/SKILL.md` rule 125; confirm state via search before retrying |
 
 ---
 
 ## Cross-references
 
-- `transaction-recipes/references/building-blocks.md` — recipe-side primitives (capsules, schedulers, the engine itself, recipe-name aliases). Pair with this file for full context.
-- `jaz-api/SKILL.md` — endpoint-by-endpoint API rules. Cited per-job for specific gotchas.
+- `transaction-recipes/references/building-blocks.md`: recipe-side primitives (capsules, schedulers, the engine itself, recipe-name aliases). Pair with this file for full context.
+- `jaz-api/SKILL.md`: endpoint-by-endpoint API rules. Cited per-job for specific gotchas.
 
 ### Filter limits on capsules and journals (measured 2026-09-07)
 
 Two things these playbooks used to instruct are **not supported by the search filters**, and an
-undeclared filter field is REJECTED, not ignored — the call returns a 400 rather than a wider result.
+undeclared filter field is REJECTED, not ignored: the call returns a 400 rather than a wider result.
 
 **Capsules cannot be filtered by type.** `CapsuleFilter` declares only `and`, `description`,
 `endDate`, `or`, `resourceId`, `startDate`, `status`, `title`. Fetch with the filters that exist and
 narrow client-side on the row: `type` is the flat string, `capsuleType` is an OBJECT
 (`{name, displayName, resourceId, status, ...}`). Match on `type` or `capsuleType.name`, and expect
-BOTH casings — the same field carries `Prepaid Expenses` on one row and `TAX_PAYMENT` on another, so
+BOTH casings: the same field carries `Prepaid Expenses` on one row and `TAX_PAYMENT` on another, so
 compare case-insensitively with separators normalized rather than testing equality against a label.
 
 **Journals cannot be filtered by capsule or by fixed asset.** `JournalFilter` declares `and`,
 `andGroup`, `contact`, `createdAt`, `creator`, `internalNotes`, `or`, `orGroup`, `reference`,
-`resourceId`, `status`, `tags`, `templateType`, `type`, `updatedAt`, `valueDate` — no
+`resourceId`, `status`, `tags`, `templateType`, `type`, `updatedAt`, `valueDate`; no
 `capsuleResourceId`, no `fixedAssetResourceId`. There is no reverse route either: a capsule exposes
 only `totalTransactions` (a count), and no `/capsules/{id}/journals` endpoint exists. Narrow with
-the declared fields — `valueDate`, `status`, `type`, `templateType`, `tags`, `reference` — and report the capsule
+the declared fields (`valueDate`, `status`, `type`, `templateType`, `tags`, `reference`) and report the capsule
 and its `totalTransactions` count and let the practitioner identify the journals. Do NOT assume the
 recipe left a link to match on: `referencePrefix` is optional with no default (`core/recipe/types.ts`),
 is caller-chosen text unrelated to the capsule id, and the engine sets no tags on anything it creates
 (`core/recipe/engine.ts`). Note `tags` is PLURAL; `tag` is rejected.
 
 **Capsules cannot be filtered by date either.** `startDate` and `endDate` are declared on
-`CapsuleFilter` and pass validation, but every form measured on 2026-09-07 — `{gte}`, `{between}`,
-and `{gte}` paired with `{lte}` — answers `500 Internal Server Error`. Filter on `status`/`title`
+`CapsuleFilter` and pass validation, but every form measured on 2026-09-07 (`{gte}`, `{between}`,
+and `{gte}` paired with `{lte}`) answers `500 Internal Server Error`. Filter on `status`/`title`
 and narrow dates on the rows.

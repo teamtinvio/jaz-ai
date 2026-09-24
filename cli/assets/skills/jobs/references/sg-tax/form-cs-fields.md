@@ -1,4 +1,4 @@
-# Form C-S / C-S Lite — Field Mapping
+# Form C-S / C-S Lite: Field Mapping
 
 Complete mapping of every field on the IRAS Form C-S and Form C-S Lite returns to the `clio jobs statutory-filing sg-cs` CLI output. Use this reference when populating the IRAS myTax Portal or verifying the computation output.
 
@@ -41,7 +41,7 @@ The standard simplified corporate income tax return for companies with revenue o
 
 | Box | IRAS Label | Data Type | CLI Output Field | Source / Formula |
 |-----|-----------|-----------|------------------|------------------|
-| **9** | Donations — Qualifying Amount (250%) | Dollar amount | `donationRelief` | `addBacks.donations x 2.50` (IPC donations at 250%) |
+| **9** | Donations: Qualifying Amount (250%) | Dollar amount | `donationRelief` | `addBacks.donations x 2.50` (IPC donations at 250%) |
 | **10** | Balances of Unabsorbed Donations b/f | Dollar amount | (from input) `donationsCarryForward.broughtForward` | Prior YA carry-forward (max 5 years) |
 | **11** | Balances of Unabsorbed Donations c/f | Dollar amount | `unabsorbedDonations` | `b/f + current year qualifying - amount utilized` |
 
@@ -61,7 +61,7 @@ The standard simplified corporate income tax return for companies with revenue o
 
 ## Form C-S Lite (6 Fields)
 
-The ultra-simplified return for companies with revenue of $200,000 or below. Only 6 fields — no breakdown of CA, losses, or donations.
+The ultra-simplified return for companies with revenue of $200,000 or below. Only 6 fields, no breakdown of CA, losses, or donations.
 
 | Box | IRAS Label | Data Type | CLI Output Field | Source / Formula |
 |-----|-----------|-----------|------------------|------------------|
@@ -72,11 +72,11 @@ The ultra-simplified return for companies with revenue of $200,000 or below. Onl
 | **5** | Tax Payable | Dollar amount | `grossTax` | `(chargeableIncome - exemptAmount) x 17%` |
 | **6** | Net Tax Payable (after rebate) | Dollar amount | `netTaxPayable` | `grossTax - citRebate` |
 
-**C-S Lite simplification:** The taxpayer still performs the full computation (add-backs, CA, losses, donations) to arrive at chargeable income. They just don't need to report the intermediate steps on the form itself. The `clio jobs statutory-filing sg-cs` engine computes everything regardless — the `formType` field in the output indicates which form applies.
+**C-S Lite simplification:** The taxpayer still performs the full computation (add-backs, CA, losses, donations) to arrive at chargeable income. They just don't need to report the intermediate steps on the form itself. The `clio jobs statutory-filing sg-cs` engine computes everything regardless; the `formType` field in the output indicates which form applies.
 
 ---
 
-## CLI Output to IRAS Form — Quick Reference
+## CLI Output to IRAS Form: Quick Reference
 
 ### Form C-S Mapping Table
 
@@ -184,7 +184,7 @@ Understanding which values the engine computes vs which the agent must supply:
 
 **Check `eligible` first.** If `eligible` is `false`, the company must file Form C (full) and should engage a tax agent. The computation is still valid as a working paper, but the simplified form cannot be used.
 
-**Box 1 is NOT accounting profit.** A common mistake is entering the P&L net profit directly into Box 1. Box 1 is the *adjusted* profit — after add-backs and deductions. The CLI computes this correctly; verify with the `workings` output.
+**Box 1 is NOT accounting profit.** A common mistake is entering the P&L net profit directly into Box 1. Box 1 is the *adjusted* profit, after add-backs and deductions. The CLI computes this correctly; verify with the `workings` output.
 
 **Carry-forward balances are the agent's responsibility.** The engine is stateless. It does not know prior-year balances. Always ask the user: "Do you have any unabsorbed losses, capital allowances, or donations carried forward from previous years?"
 

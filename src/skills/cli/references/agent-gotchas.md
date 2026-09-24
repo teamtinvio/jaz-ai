@@ -5,7 +5,7 @@
 
 ---
 
-1. **Cash entries and transfers post ACTIVE and take no `--finalize`.** `clio cash-in`, `clio cash-out` and `clio cash-transfer` have no draft state at all — the API refuses `saveAsDraft: true` with a 422 — so there is no flag to pass and nothing to finalize afterwards. Invoices, bills and journals are the ones the CLI saves as draft and `--finalize` posts.
+1. **Cash entries and transfers post ACTIVE and take no `--finalize`.** `clio cash-in`, `clio cash-out` and `clio cash-transfer` have no draft state at all (the API refuses `saveAsDraft: true` with a 422), so there is no flag to pass and nothing to finalize afterwards. Invoices, bills and journals are the ones the CLI saves as draft and `--finalize` posts.
 
 2. **Line-item account resolution is NOT fuzzy.** The `accountResourceId` field inside `--lines` JSON arrays requires a UUID or exact account name. Fuzzy matching only works for top-level flags (`--contact`, `--account`). Always resolve accounts first: `clio accounts list --json | jq '.data[] | {name, id: .resourceId}'`.
 
@@ -13,7 +13,7 @@
 
 4. **--offset is page number (0-indexed), not row skip count.** `--offset 0 --limit 100` = rows 1-100. `--offset 1 --limit 100` = rows 101-200. This is not the same as SQL OFFSET. Exceptions, where `--offset` is a ROW offset (next page = offset + limit): `purchase-items list/search`, `currency-rates list`, `claims payouts` and `reports generate general-ledger`. Each command's `--offset` help says which it is, and `--all` pages both kinds correctly.
 
-5. **--all caps at 1,000 rows by default** (lowered from 10,000 in 2026-04). For large orgs, pass `--max-rows 50000` explicitly. The CLI auto-paginates with concurrent requests and **stops fetching once `--max-rows` is reached** (early-stop, not slice-after — the previous behavior would pull every page and discard the excess, causing minute-long hangs on busy sandboxes).
+5. **--all caps at 1,000 rows by default** (lowered from 10,000 in 2026-04). For large orgs, pass `--max-rows 50000` explicitly. The CLI auto-paginates with concurrent requests and **stops fetching once `--max-rows` is reached** (early-stop, not slice-after; the previous behavior would pull every page and discard the excess, causing minute-long hangs on busy sandboxes).
 
 6. **Explicit --org wins over JAZ_API_KEY.** Use `--org oauth:<resourceId>` for OAuth or `--org <label>` for a saved key profile. Without `--org`, the environment key remains the default. Never print its value.
 
@@ -39,6 +39,6 @@
 
 17. **Reconciliation `lineItems[]` use `name` + `organizationAccountResourceId`.** The `reconciliations invoice-receipt` and `reconciliations bill-receipt` payloads use a DIFFERENT line-item field naming than `bulk-upsert-line-items`. Recon-create uses `name` (description) + `organizationAccountResourceId` (revenue/expense account). Bulk uses `itemDescription` + `accountResourceId`. Don't copy-paste line-items between the two.
 
-18. **`reconciliations invoice-receipt` / `bill-receipt` gate on `paymentDirection`, not BSE type.** The 422 error code "Invalid business transaction type" is misleadingly named — the actual API check is on the BSE's `paymentDirection`. **`invoice-receipt` requires `PAYIN`** (positive amount via `clio bank add-records` → `credit_amount > 0`). **`bill-receipt` requires `PAYOUT`** (NEGATIVE amount → `debit_amount > 0`). Statement-imported BSEs (`clio bank import`) also work — direction is set from the CSV. For programmatic seeding, `clio bank add-records` with the correct sign is sync, fast, and reliable; no need for the async magic-OCR `bank import` path.
+18. **`reconciliations invoice-receipt` / `bill-receipt` gate on `paymentDirection`, not BSE type.** The 422 error code "Invalid business transaction type" is misleadingly named; the actual API check is on the BSE's `paymentDirection`. **`invoice-receipt` requires `PAYIN`** (positive amount via `clio bank add-records` → `credit_amount > 0`). **`bill-receipt` requires `PAYOUT`** (NEGATIVE amount → `debit_amount > 0`). Statement-imported BSEs (`clio bank import`) also work; direction is set from the CSV. For programmatic seeding, `clio bank add-records` with the correct sign is sync, fast, and reliable; no need for the async magic-OCR `bank import` path.
 
-19. **No universal/cross-entity search.** The previous `clio search <q>` (Typesense-backed grouped search) was removed — it was FE-typeahead infrastructure. For agent/programmatic search use the structured `--query` syntax on per-entity search commands (`clio invoices search --query "..."`, `clio bills search --query "..."`, etc.). See `references/search-syntax.md` (in api skill) for the full DSL: AND/OR/NOT, parentheses, amount ranges (`$500+`, `$100-500`), date ranges (`date:-30d`, `date:jan-mar 2025`), wildcards, and entity-specific fields.
+19. **No universal/cross-entity search.** The previous `clio search <q>` (Typesense-backed grouped search) was removed; it was FE-typeahead infrastructure. For agent/programmatic search use the structured `--query` syntax on per-entity search commands (`clio invoices search --query "..."`, `clio bills search --query "..."`, etc.). See `references/search-syntax.md` (in api skill) for the full DSL: AND/OR/NOT, parentheses, amount ranges (`$500+`, `$100-500`), date ranges (`date:-30d`, `date:jan-mar 2025`), wildcards, and entity-specific fields.

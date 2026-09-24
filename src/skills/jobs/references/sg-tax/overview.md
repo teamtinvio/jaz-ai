@@ -1,4 +1,4 @@
-# Singapore Corporate Income Tax — Overview
+# Singapore Corporate Income Tax: Overview
 
 Foundational context for Singapore corporate income tax (CIT). Read this first before working on any CIT computation, Form C-S preparation, or tax adjustment classification.
 
@@ -14,7 +14,7 @@ Foundational context for Singapore corporate income tax (CIT). Read this first b
 | **Tax authority** | Inland Revenue Authority of Singapore (IRAS) |
 | **Filing portal** | IRAS myTax Portal (https://mytax.iras.gov.sg) |
 | **Who must file** | Every Singapore-incorporated company, including dormant companies and companies with no income |
-| **Accounting standard** | SFRS(I) or SFRS for Small Entities — tax computation starts from accounting profit |
+| **Accounting standard** | SFRS(I) or SFRS for Small Entities; tax computation starts from accounting profit |
 
 ---
 
@@ -35,7 +35,7 @@ Singapore taxes on a **preceding-year basis**. The Year of Assessment (YA) is th
 | 31 Mar 2025 | 1 Apr 2024 - 31 Mar 2025 | 2026 |
 | 30 Jun 2025 | 1 Jul 2024 - 30 Jun 2025 | 2026 |
 
-**Non-standard basis periods:** A company's basis period is usually its financial year. If the FY does not end on 31 December, the YA is the calendar year in which the FY ends plus one. A newly incorporated company with a short first FY still follows this rule — the first YA maps to the calendar year after the first FY end.
+**Non-standard basis periods:** A company's basis period is usually its financial year. If the FY does not end on 31 December, the YA is the calendar year in which the FY ends plus one. A newly incorporated company with a short first FY still follows this rule: the first YA maps to the calendar year after the first FY end.
 
 ---
 
@@ -66,7 +66,7 @@ An even simpler version for micro businesses.
 
 ### Form C (Full)
 
-For companies that do not qualify for C-S or C-S Lite. Requires detailed financial statements, tax computation, and supporting schedules. Not covered by the `clio jobs statutory-filing sg-cs` command — use a tax agent.
+For companies that do not qualify for C-S or C-S Lite. Requires detailed financial statements, tax computation, and supporting schedules. Not covered by the `clio jobs statutory-filing sg-cs` command; use a tax agent.
 
 ---
 
@@ -98,7 +98,7 @@ Singapore taxes income under these categories:
 | **10(1)(f)** | Gains from sale of real property / intellectual property | Not usually relevant for SMBs |
 | **10(1)(g)** | Other gains of an income nature | FX gains, insurance proceeds (if revenue nature) |
 
-**For most SMBs on Form C-S:** All income falls under Section 10(1)(a) — trade/business income. The total from the P&L statement is the starting point.
+**For most SMBs on Form C-S:** All income falls under Section 10(1)(a), trade/business income. The total from the P&L statement is the starting point.
 
 ---
 
@@ -161,7 +161,7 @@ Singapore operates a **one-tier corporate tax system**. Once a company pays tax 
 
 Withholding tax applies to certain payments to non-residents (royalties, interest, technical fees, management fees, rent). For most SMBs filing Form C-S:
 
-- WHT is **not a Form C-S field** — it is remitted separately to IRAS
+- WHT is **not a Form C-S field**; it is remitted separately to IRAS
 - If WHT applies, the company cannot file Form C-S (one of the disqualifying criteria is claiming foreign tax credit)
 - If you encounter WHT obligations, recommend Form C and a tax agent
 
@@ -200,7 +200,7 @@ Accounting Profit (from P&L)
 
 **Ask about SUTE eligibility.** New companies in their first 3 YAs can save up to $21,250/YA with SUTE. Always ask: "Is this company within its first three Years of Assessment?" and "Does it have 20 or fewer individual shareholders?"
 
-**Accounting depreciation is ALWAYS added back.** This is the single most common add-back. Depreciation per the books is non-deductible — capital allowances (tax depreciation) replace it. No exceptions.
+**Accounting depreciation is ALWAYS added back.** This is the single most common add-back. Depreciation per the books is non-deductible; capital allowances (tax depreciation) replace it. No exceptions.
 
 **Keep it stateless.** The `clio jobs statutory-filing sg-cs` engine is a pure computation tool. It does not store or retrieve prior-year data. The agent must provide carry-forward balances (unabsorbed losses, unabsorbed CA, unabsorbed donations) from the user or prior-year workpapers.
 

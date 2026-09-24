@@ -5,7 +5,7 @@ argument-hint: "<period: 2026-06 | 2026-Q2 | FY2026>"
 
 # Run a period close
 
-Follow the **close** flow in the `jaz-kit` skill (`references/flows.md`). State schema and the resume protocol are in `references/close-state.md`. The accounting steps themselves live in the `jaz-jobs` skill — this drives them, it does not replace them.
+Follow the **close** flow in the `jaz-kit` skill (`references/flows.md`). State schema and the resume protocol are in `references/close-state.md`. The accounting steps themselves live in the `jaz-jobs` skill; this drives them, it does not replace them.
 
 ## Usage
 

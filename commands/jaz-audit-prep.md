@@ -1,5 +1,5 @@
 ---
-description: "Compile an audit preparation pack in Jaz — generate reports, schedules, and reconciliations for auditor or tax agent"
+description: "Compile an audit preparation pack in Jaz: generate reports, schedules, and reconciliations for auditor or tax agent"
 argument-hint: "<period YYYY>"
 ---
 
@@ -59,6 +59,6 @@ Organize outputs for the auditor. Flag any items that need user confirmation or 
 
 ## Key Rules
 
-- Report date fields vary: trial-balance uses `endDate`, balance-sheet uses `primarySnapshotDate`, P&L uses `startDate`/`endDate` — the CLI handles this, just use `--from`/`--to`
+- Report date fields vary: trial-balance uses `endDate`, balance-sheet uses `primarySnapshotDate`, P&L uses `startDate`/`endDate`; the CLI handles this, just use `--from`/`--to`
 - Audit prep is typically for a full fiscal year
-- Some schedules come from capsule transaction data — list capsules with `clio capsules list --json`
+- Some schedules come from capsule transaction data; list capsules with `clio capsules list --json`

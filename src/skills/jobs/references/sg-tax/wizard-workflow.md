@@ -1,6 +1,6 @@
-# SG Corporate Income Tax — Wizard Workflow
+# SG Corporate Income Tax: Wizard Workflow
 
-Step-by-step procedure an AI agent follows to produce a complete Form C-S corporate income tax computation for a Singapore company. The wizard collects data through four phases — context, extraction, classification, and compute — ultimately assembling a `SgFormCsInput` JSON and running the computation engine.
+Step-by-step procedure an AI agent follows to produce a complete Form C-S corporate income tax computation for a Singapore company. The wizard collects data through four phases (context, extraction, classification, and compute), ultimately assembling a `SgFormCsInput` JSON and running the computation engine.
 
 **CLI:** `clio jobs statutory-filing sg-cs --json`
 
@@ -24,9 +24,9 @@ GET /api/v1/organization
 **Question to ask:** "Your financial year ends in [month]. I'll prepare the computation for YA [N] (basis period [start] to [end]). Is that correct?"
 
 **Maps to:**
-- `ya` — Year of Assessment
-- `basisPeriodStart` — FY start date (YYYY-MM-DD)
-- `basisPeriodEnd` — FY end date (YYYY-MM-DD)
+- `ya`: Year of Assessment
+- `basisPeriodStart`: FY start date (YYYY-MM-DD)
+- `basisPeriodEnd`: FY end date (YYYY-MM-DD)
 
 ### Step 2: Check Form C-S eligibility
 
@@ -42,7 +42,7 @@ Form C-S is the simplified return for qualifying small companies. A company qual
 
 **Question to ask:** "Does the company have any of the following? (a) Revenue over $5M, (b) Investment income (dividends, rental, interest from investments), (c) Capital gains from asset disposal, (d) Foreign-sourced income. If yes to any, Form C-S may not be applicable."
 
-If revenue <= $200,000: the company may use **Form C-S Lite** (even simpler — 6 fields only).
+If revenue <= $200,000: the company may use **Form C-S Lite** (even simpler: 6 fields only).
 
 **Maps to:** `revenue` (for threshold check); eligibility is validated by the computation engine.
 
@@ -78,9 +78,9 @@ POST /api/v1/generate-reports/profit-and-loss
 ```
 
 **What to extract:**
-- **Total revenue** — top line. Maps to `revenue`.
-- **Total expenses** — for cross-reference.
-- **Net profit/(loss)** — bottom line. Maps to `accountingProfit`.
+- **Total revenue**: top line. Maps to `revenue`.
+- **Total expenses**: for cross-reference.
+- **Net profit/(loss)**: bottom line. Maps to `accountingProfit`.
 - Scan expense categories for accounts that will need add-back review (depreciation, entertainment, donations, penalties, etc.)
 
 **Maps to:** `revenue`, `accountingProfit`
@@ -110,8 +110,8 @@ POST /api/v1/generate-reports/fixed-assets-summary
 ```
 
 **What to extract:**
-- **Total accounting depreciation** for the year — this is always added back. Maps to `addBacks.depreciation`.
-- **Asset list** with cost, accumulated depreciation, NBV — needed for capital allowance classification in Phase 3.
+- **Total accounting depreciation** for the year; this is always added back. Maps to `addBacks.depreciation`.
+- **Asset list** with cost, accumulated depreciation, NBV: needed for capital allowance classification in Phase 3.
 - Note any disposals during the year (proceeds vs NBV = gain/loss, which may need add-back or deduction).
 
 ### Step 7: Pull GL detail for targeted accounts
@@ -133,11 +133,11 @@ POST /api/v1/cashflow-transactions/search
 **When to use this:** When an expense account name is ambiguous (e.g., "Professional Fees" could contain deductible audit fees AND non-deductible fines). You need transaction-level detail to classify correctly.
 
 **Common accounts to drill into:**
-- "Other Expenses" or "Sundry Expenses" — catch-all accounts often contain non-deductible items
-- "Professional Fees" — may include tax penalty payments
-- "Motor Vehicle" — need to split S-plated (non-deductible) from commercial vehicles
-- "Entertainment" — need to identify non-deductible portion
-- "Repairs & Maintenance" — may contain capital expenditure incorrectly expensed
+- "Other Expenses" or "Sundry Expenses": catch-all accounts often contain non-deductible items
+- "Professional Fees": may include tax penalty payments
+- "Motor Vehicle": need to split S-plated (non-deductible) from commercial vehicles
+- "Entertainment": need to identify non-deductible portion
+- "Repairs & Maintenance": may contain capital expenditure incorrectly expensed
 
 ---
 
@@ -151,18 +151,18 @@ This is the core of the tax computation. For each add-back category, scan the da
 
 Work through each add-back category in order. For each one:
 
-1. **Scan** — look at the P&L, TB, and GL data for matching items
-2. **Pattern-match** — use account names, transaction descriptions, and amounts to identify candidates
-3. **Present** — show the user what you found and your proposed classification
-4. **Confirm** — get explicit confirmation before recording the amount
-5. **Map** — record the confirmed amount in the corresponding `addBacks` field
+1. **Scan**: look at the P&L, TB, and GL data for matching items
+2. **Pattern-match**: use account names, transaction descriptions, and amounts to identify candidates
+3. **Present**: show the user what you found and your proposed classification
+4. **Confirm**: get explicit confirmation before recording the amount
+5. **Map**: record the confirmed amount in the corresponding `addBacks` field
 
 | # | Category | What to scan for | Input field |
 |---|----------|-----------------|-------------|
 | 8 | **Depreciation** | FA summary total, "Depreciation" accounts on TB. Always 100% add-back. | `addBacks.depreciation` |
-| 9 | **Amortization** | "Amortization" accounts — intangible assets (goodwill, patents, software). Always add back. | `addBacks.amortization` |
-| 10 | **IFRS 16 — ROU depreciation** | "Right-of-Use" or "ROU" accounts. See `references/sg-tax/ifrs16-tax-adjustment.md`. | `addBacks.rouDepreciation` |
-| 11 | **IFRS 16 — Lease interest** | "Lease Liability Interest" accounts. See IFRS 16 reference. | `addBacks.leaseInterest` |
+| 9 | **Amortization** | "Amortization" accounts: intangible assets (goodwill, patents, software). Always add back. | `addBacks.amortization` |
+| 10 | **IFRS 16: ROU depreciation** | "Right-of-Use" or "ROU" accounts. See `references/sg-tax/ifrs16-tax-adjustment.md`. | `addBacks.rouDepreciation` |
+| 11 | **IFRS 16: Lease interest** | "Lease Liability Interest" accounts. See IFRS 16 reference. | `addBacks.leaseInterest` |
 | 12 | **Provisions** | "Provision", "ECL", "Warranty", "Restructuring" accounts. General provisions are added back; specific provisions (e.g., specific bad debt write-off) may be deductible. | `addBacks.generalProvisions` |
 | 13 | **Donations** | "Donation" accounts. Add back the full amount, then claim 250% as enhanced deduction separately. | `addBacks.donations` |
 | 14 | **Entertainment** | "Entertainment", "Meals", "Client hospitality". Ask: "What portion is non-deductible (e.g., personal, excessive)?" | `addBacks.entertainment` |
@@ -214,7 +214,7 @@ For each asset, record: `description`, `cost`, `acquisitionDate`, `category`, `p
    - Maps to: `enhancedDeductions.ipRegistration`, `enhancedDeductions.ipMultiplier` (2.0 or 4.0)
 
 3. "Were any donations made to approved IPCs (Institutions of a Public Character)?"
-   - This should already be captured in `addBacks.donations` — confirm the same amount.
+   - This should already be captured in `addBacks.donations`; confirm the same amount.
    - Maps to: `enhancedDeductions.donations250Base` (should equal `addBacks.donations`)
 
 4. "Did the company incur renovation/refurbishment costs for business premises?"
@@ -311,9 +311,9 @@ clio jobs statutory-filing sg-cs --json
 Or call `computeFormCs(input)` directly if running programmatically.
 
 **What you get back:** A `SgFormCsResult` containing:
-- `schedule` — the full tax computation schedule (line-by-line workpaper)
-- `formFields` — mapped to Form C-S box numbers
-- `workings` — human-readable text version of the computation
+- `schedule`: the full tax computation schedule (line-by-line workpaper)
+- `formFields`: mapped to Form C-S box numbers
+- `workings`: human-readable text version of the computation
 - Carry-forward amounts for next YA
 
 ### Step 22: Present results
@@ -321,7 +321,7 @@ Or call `computeFormCs(input)` directly if running programmatically.
 Present the results to the user in three sections:
 
 **a) Tax Computation Schedule**
-The `schedule` array rendered as a table — this is the workpaper.
+The `schedule` array rendered as a table; this is the workpaper.
 
 **b) Form C-S Field Mapping**
 Show the `formFields` mapped to the actual form boxes:
@@ -380,7 +380,7 @@ Report amounts to carry forward:
 
 ## Common Mistakes
 
-1. **Forgetting to add back accounting depreciation.** This is the single most common error. Accounting depreciation is ALWAYS added back — the tax deduction comes through capital allowances instead.
+1. **Forgetting to add back accounting depreciation.** This is the single most common error. Accounting depreciation is ALWAYS added back; the tax deduction comes through capital allowances instead.
 
 2. **Double-counting donations.** Donations are added back (Step 13) AND claimed at 250% as an enhanced deduction (Step 18). The add-back removes the P&L expense; the enhanced deduction gives the 250% tax deduction. If you skip the add-back, you get 250% + 100% = 350%.
 

@@ -1,8 +1,8 @@
 ---
 name: jaz-jobs
-version: 5.73.2
+version: 5.73.3
 description: >-
-  Use this skill for recurring accounting workflows — month/quarter/year-end
+  Use this skill for recurring accounting workflows: month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
   supplier recon, audit prep, fixed asset review, and Singapore Form C-S tax
   computation. 12 job playbooks that sequence real platform tools into complete
@@ -14,7 +14,7 @@ compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent t
 
 # Jobs Skill
 
-You are helping an **SMB accountant or bookkeeper** complete recurring accounting tasks in Jaz — period-end closes, bank reconciliation, tax filing, payment processing, and operational reviews. These are the real jobs that keep the books accurate and the business compliant.
+You are helping an **SMB accountant or bookkeeper** complete recurring accounting tasks in Jaz: period-end closes, bank reconciliation, tax filing, payment processing, and operational reviews. These are the real jobs that keep the books accurate and the business compliant.
 
 > **Jaz-native, not generic.** Every job in this skill names specific Jaz tools (`search_invoices`, `quick_reconcile`, `bulk_finalize_drafts`, `reconcile_with_payments`, report tools like `generate_trial_balance`, `download_export`), Jaz reconciliation modes, and Jaz capsule patterns. It is NOT an interchangeable accounting workflow reference; it is the operating manual for running these processes through the Jaz platform tools. When the playbook says "match bank entries", it means call the 5-phase cascade matcher (`clio jobs bank-recon match` for a local CLI run, or follow the cascade logic in `references/bank-match.md` and drive the `reconcile_*` tools directly), not "use any matching algorithm".
 
@@ -24,8 +24,8 @@ You are helping an **SMB accountant or bookkeeper** complete recurring accountin
 
 You orchestrate the **real platform tools directly**, following the phase sequence in the per-job reference:
 
-- **Hosted / MCP agent (no shell):** the per-job reference is your checklist. Walk its phases in order and call the named platform tools — `plan_recipe` / `execute_recipe`, `search_invoices` / `search_bills` / `search_bank_records`, the `generate-reports/*` report tools (`generate_trial_balance`, `generate_aged_ar`, `generate_vat_ledger`, …), `reconcile_*`, `create_journal`, `bulk_finalize_drafts`, `update_account` lockDate, and so on. There is no separate "blueprint tool" to call — the reference IS the plan.
-- **Local CLI convenience:** if you're running `clio` in a terminal (e.g. Claude Code), `clio jobs <type> --json` prints the same phased checklist for the period so a human or script can follow it. This is a convenience, not the main path for a hosted agent — the platform tools above are the path that actually does the work.
+- **Hosted / MCP agent (no shell):** the per-job reference is your checklist. Walk its phases in order and call the named platform tools: `plan_recipe` / `execute_recipe`, `search_invoices` / `search_bills` / `search_bank_records`, the `generate-reports/*` report tools (`generate_trial_balance`, `generate_aged_ar`, `generate_vat_ledger`, …), `reconcile_*`, `create_journal`, `bulk_finalize_drafts`, `update_account` lockDate, and so on. There is no separate "blueprint tool" to call; the reference IS the plan.
+- **Local CLI convenience:** if you're running `clio` in a terminal (e.g. Claude Code), `clio jobs <type> --json` prints the same phased checklist for the period so a human or script can follow it. This is a convenience, not the main path for a hosted agent; the platform tools above are the path that actually does the work.
 
 ## When to Use This Skill
 
@@ -55,7 +55,7 @@ Period-close jobs build on each other. Quarter = month + extras. Year = quarter 
 
 | Job | CLI (local convenience) | Description |
 |-----|-------------------------|-------------|
-| **Bank Recon** | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path — create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate — per-entry, so fetch ids with `search_bank_records` first (auto-commit high-confidence, checkpoint the rest — see `references/bank-recon.md` Step 4a). Cascade matcher: `clio jobs bank-recon match`. |
+| **Bank Recon** | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path; create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate: per-entry, so fetch ids with `search_bank_records` first (auto-commit high-confidence, checkpoint the rest; see `references/bank-recon.md` Step 4a). Cascade matcher: `clio jobs bank-recon match`. |
 | **Document Collection** | `clio jobs document-collection` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for upload via Jaz Magic. Ingest helper: `clio jobs document-collection ingest`. |
 | **GST/VAT Filing** | `clio jobs gst-vat --period YYYY-QN` | Tax ledger review, discrepancy check, filing summary. |
 | **Payment Run** | `clio jobs payment-run` | Select outstanding bills by due date, process payments. |
@@ -69,11 +69,11 @@ Period-close jobs build on each other. Quarter = month + extras. Year = quarter 
 
 Each per-job reference is a **phased checklist** of steps. Each step names:
 
-- **API call** — the exact platform tool + request body to execute the step
-- **Recipe reference** — link to the transaction-recipes skill for complex accounting patterns
-- **Calculator command** — `clio calc` command for independent financial cross-checks
-- **Verification check** — how to confirm the step was completed correctly
-- **Conditional flag** — steps that only apply in certain situations (e.g., "only if multi-currency org")
+- **API call**: the exact platform tool + request body to execute the step
+- **Recipe reference**: link to the transaction-recipes skill for complex accounting patterns
+- **Calculator command**: `clio calc` command for independent financial cross-checks
+- **Verification check**: how to confirm the step was completed correctly
+- **Conditional flag**: steps that only apply in certain situations (e.g., "only if multi-currency org")
 
 Steps that carry real judgment (hold, defer, accept a variance, resume after a failure) also name the jot to record at that moment via the `jot` tool. Mechanical steps never do: a jot marks a choice among real alternatives, not activity.
 
@@ -83,7 +83,7 @@ Steps that carry real judgment (hold, defer, accept a variance, resume after a f
 
 ## CLI Usage (local convenience)
 
-These commands print the phased checklist for a period. They are a terminal convenience — a hosted agent drives the platform tools named in each reference directly.
+These commands print the phased checklist for a period. They are a terminal convenience; a hosted agent drives the platform tools named in each reference directly.
 
 ```bash
 # Period-close (standalone = full plan, --incremental = extras only)
@@ -109,27 +109,27 @@ clio jobs fa-review [--json]
 | **jaz-recipes** | Provides the accounting patterns for complex steps (accruals, FX reval, ECL, etc.) |
 | **jaz-jobs** (this skill) | Combines recipes + platform tools into sequenced, verifiable business processes |
 
-**Load all three skills together** for the complete picture. Jobs reference recipes by name — read the referenced recipe for implementation details.
+**Load all three skills together** for the complete picture. Jobs reference recipes by name; read the referenced recipe for implementation details.
 
 ## Supporting Files
 
-- **[references/building-blocks.md](./references/building-blocks.md)** — Shared concepts: accounting periods, lock dates, period verification, conventions
-- **[references/month-end-close.md](./references/month-end-close.md)** — Month-end close: 5 phases, ~18 steps
-- **[references/quarter-end-close.md](./references/quarter-end-close.md)** — Quarter-end close: monthly + quarterly extras
-- **[references/year-end-close.md](./references/year-end-close.md)** — Year-end close: quarterly + annual extras
-- **[references/bank-recon.md](./references/bank-recon.md)** — Bank reconciliation catch-up
-- **[references/bank-match.md](./references/bank-match.md)** — Bank reconciliation matcher: 5-phase cascade algorithm (1:1, N:1, 1:N, N:M matches)
-- **[references/document-collection.md](./references/document-collection.md)** — Document collection: scan, classify, upload — local + cloud (Dropbox, Drive, OneDrive)
-- **[references/gst-vat-filing.md](./references/gst-vat-filing.md)** — GST/VAT filing preparation
-- **[references/payment-run.md](./references/payment-run.md)** — Payment run (bulk bill payments)
-- **[references/credit-control.md](./references/credit-control.md)** — Credit control / AR chase
-- **[references/supplier-recon.md](./references/supplier-recon.md)** — Supplier statement reconciliation
-- **[references/audit-prep.md](./references/audit-prep.md)** — Audit preparation pack
-- **[references/fa-review.md](./references/fa-review.md)** — Fixed asset register review
+- **[references/building-blocks.md](./references/building-blocks.md)**: Shared concepts: accounting periods, lock dates, period verification, conventions
+- **[references/month-end-close.md](./references/month-end-close.md)**: Month-end close: 5 phases, ~18 steps
+- **[references/quarter-end-close.md](./references/quarter-end-close.md)**: Quarter-end close: monthly + quarterly extras
+- **[references/year-end-close.md](./references/year-end-close.md)**: Year-end close: quarterly + annual extras
+- **[references/bank-recon.md](./references/bank-recon.md)**: Bank reconciliation catch-up
+- **[references/bank-match.md](./references/bank-match.md)**: Bank reconciliation matcher: 5-phase cascade algorithm (1:1, N:1, 1:N, N:M matches)
+- **[references/document-collection.md](./references/document-collection.md)**: Document collection: scan, classify, upload; local + cloud (Dropbox, Drive, OneDrive)
+- **[references/gst-vat-filing.md](./references/gst-vat-filing.md)**: GST/VAT filing preparation
+- **[references/payment-run.md](./references/payment-run.md)**: Payment run (bulk bill payments)
+- **[references/credit-control.md](./references/credit-control.md)**: Credit control / AR chase
+- **[references/supplier-recon.md](./references/supplier-recon.md)**: Supplier statement reconciliation
+- **[references/audit-prep.md](./references/audit-prep.md)**: Audit preparation pack
+- **[references/fa-review.md](./references/fa-review.md)**: Fixed asset register review
 
-## Tax Computation — Singapore Form C-S
+## Tax Computation: Singapore Form C-S
 
-Corporate income tax computation for Singapore-incorporated companies. The AI agent acts as the **tax wizard** — pulling data from Jaz, classifying GL items, asking the user targeted questions, and assembling the input for the CLI computation engine.
+Corporate income tax computation for Singapore-incorporated companies. The AI agent acts as the **tax wizard**, pulling data from Jaz, classifying GL items, asking the user targeted questions, and assembling the input for the CLI computation engine.
 
 **Scope:** Form C-S (revenue ≤ $5M, 18 fields) and Form C-S Lite (revenue ≤ $200K, 6 fields). NOT Form C.
 
@@ -173,13 +173,13 @@ clio jobs statutory-filing sg-ca --ya 2026 --cost 50000 --category general --acq
 
 ### Tax Reference Files
 
-- **[references/sg-tax/overview.md](./references/sg-tax/overview.md)** — SG CIT framework: 17% rate, YA concept, Form C-S eligibility, key deadlines
-- **[references/sg-tax/form-cs-fields.md](./references/sg-tax/form-cs-fields.md)** — All 18 Form C-S + 6 C-S Lite fields with IRAS labels and CLI mapping
-- **[references/sg-tax/wizard-workflow.md](./references/sg-tax/wizard-workflow.md)** — Step-by-step wizard procedure for AI agents (the main playbook)
-- **[references/sg-tax/data-extraction.md](./references/sg-tax/data-extraction.md)** — How to pull P&L, TB, GL, FA data from Jaz API for tax purposes
-- **[references/sg-tax/add-backs-guide.md](./references/sg-tax/add-backs-guide.md)** — Classification guide: which expenses are non-deductible
-- **[references/sg-tax/capital-allowances-guide.md](./references/sg-tax/capital-allowances-guide.md)** — CA rules per asset category with IRAS sections
-- **[references/sg-tax/ifrs16-tax-adjustment.md](./references/sg-tax/ifrs16-tax-adjustment.md)** — IFRS 16 lease reversal procedure
-- **[references/sg-tax/enhanced-deductions.md](./references/sg-tax/enhanced-deductions.md)** — R&D, IP, donations 250%, S14Q renovation
-- **[references/sg-tax/exemptions-and-rebates.md](./references/sg-tax/exemptions-and-rebates.md)** — SUTE, PTE, CIT rebate schedule
-- **[references/sg-tax/losses-and-carry-forwards.md](./references/sg-tax/losses-and-carry-forwards.md)** — Set-off order, loss/CA/donation carry-forward rules
+- **[references/sg-tax/overview.md](./references/sg-tax/overview.md)**: SG CIT framework: 17% rate, YA concept, Form C-S eligibility, key deadlines
+- **[references/sg-tax/form-cs-fields.md](./references/sg-tax/form-cs-fields.md)**: All 18 Form C-S + 6 C-S Lite fields with IRAS labels and CLI mapping
+- **[references/sg-tax/wizard-workflow.md](./references/sg-tax/wizard-workflow.md)**: Step-by-step wizard procedure for AI agents (the main playbook)
+- **[references/sg-tax/data-extraction.md](./references/sg-tax/data-extraction.md)**: How to pull P&L, TB, GL, FA data from Jaz API for tax purposes
+- **[references/sg-tax/add-backs-guide.md](./references/sg-tax/add-backs-guide.md)**: Classification guide: which expenses are non-deductible
+- **[references/sg-tax/capital-allowances-guide.md](./references/sg-tax/capital-allowances-guide.md)**: CA rules per asset category with IRAS sections
+- **[references/sg-tax/ifrs16-tax-adjustment.md](./references/sg-tax/ifrs16-tax-adjustment.md)**: IFRS 16 lease reversal procedure
+- **[references/sg-tax/enhanced-deductions.md](./references/sg-tax/enhanced-deductions.md)**: R&D, IP, donations 250%, S14Q renovation
+- **[references/sg-tax/exemptions-and-rebates.md](./references/sg-tax/exemptions-and-rebates.md)**: SUTE, PTE, CIT rebate schedule
+- **[references/sg-tax/losses-and-carry-forwards.md](./references/sg-tax/losses-and-carry-forwards.md)**: Set-off order, loss/CA/donation carry-forward rules

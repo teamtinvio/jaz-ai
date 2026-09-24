@@ -1,5 +1,5 @@
 ---
-description: "Review the fixed asset register in Jaz — check depreciation, identify disposals and write-offs needed"
+description: "Review the fixed asset register in Jaz: check depreciation, identify disposals and write-offs needed"
 argument-hint: ""
 ---
 

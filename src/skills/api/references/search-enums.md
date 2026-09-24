@@ -1,4 +1,4 @@
-# Jaz API — Search Enum Values & Field Reference
+# Jaz API: Search Enum Values & Field Reference
 
 > Valid enum values for every searchable field, organized by entity.
 > For filter syntax and operators, see [search-reference.md](./search-reference.md).
@@ -56,8 +56,8 @@ Used by: invoices, bills, credit notes, journals, items, scheduled transactions,
 ### accountType (Chart of Accounts)
 
 23 values. Source: `GET /api/v1/account-classifications` (`list_account_classifications`),
-which is authoritative. The set is GLOBAL — the same 23 for every organisation
-(the classifications table has no org column) — so this is a stable list, not a
+which is authoritative. The set is GLOBAL: the same 23 for every organisation
+(the classifications table has no org column), so this is a stable list, not a
 per-tenant one. This table mirrors the CLI's canonical
 account-type list and is kept in step with it by an automated drift check.
 
@@ -65,7 +65,7 @@ account-type list and is kept in step with it by an automated drift check.
 pluralized inventions (`Current Assets`, `Operating Expenses`, `Other Expenses`)
 plus `Cost of Goods Sold`, which is an account NAME whose type is `Direct Costs`.
 A wrong value returns **zero rows with no error**, which reads exactly like "the
-org has no such account". `search_accounts` does not normalise — only
+org has no such account". `search_accounts` does not normalise; only
 `create_account` does.
 
 | Value | accountClass |
@@ -105,7 +105,7 @@ org has no such account". `search_accounts` does not normalise — only
 | `status` | `DRAFT`, `UNPAID`, `PARTIALLY_PAID`, `PAID`, `VOID` |
 | `approvalStatus` | `PENDING`, `APPROVED` |
 | `currencyCode` | ISO 4217 (see above) |
-| `terms` | `0`, `7`, `15`, `30`, `45`, `60` (integer — payment terms in days) |
+| `terms` | `0`, `7`, `15`, `30`, `45`, `60` (integer, payment terms in days) |
 
 **Amount fields**: `totalAmount`, `balanceAmount`, `reconciledAmount`, `paymentRecordedAmount`, `creditAppliedAmount`
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
@@ -140,7 +140,7 @@ org has no such account". `search_accounts` does not normalise — only
 
 **Date fields**: `valueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
 
-> **No amount filter fields** — use `totalAmount` only via sort. To find available credits, filter `status IN [UNAPPLIED, PARTIALLY_APPLIED]`.
+> **No amount filter fields**: use `totalAmount` only via sort. To find available credits, filter `status IN [UNAPPLIED, PARTIALLY_APPLIED]`.
 
 ---
 
@@ -199,7 +199,7 @@ org has no such account". `search_accounts` does not normalise — only
 
 **String fields**: `resourceId`, `saleAccountResourceId`, `purchaseAccountResourceId`
 
-> **Gotcha**: Sort uses `internalName` and `itemCode` — these are sort-only fields, NOT available as filter fields.
+> **Gotcha**: Sort uses `internalName` and `itemCode`; these are sort-only fields, NOT available as filter fields.
 
 ---
 
@@ -229,7 +229,7 @@ org has no such account". `search_accounts` does not normalise — only
 **String fields**: `description`, `extAccountNumber`, `extContactName`, `extReference`
 **Nested**: `reconciledBy` (UserNestedFilter)
 
-> **Gotcha**: Requires `accountResourceId` as a **path parameter** (UUID of a bank-type CoA account). This is NOT a filter field — it's in the URL.
+> **Gotcha**: Requires `accountResourceId` as a **path parameter** (UUID of a bank-type CoA account). This is NOT a filter field; it's in the URL.
 
 ---
 
@@ -246,7 +246,7 @@ org has no such account". `search_accounts` does not normalise — only
 **String fields**: `businessTransactionReference`, `organizationAccountResourceId`, `bankStatementEntryResourceId`
 **Nested**: `contact` (ContactNestedFilter), `account` (OrganizationAccountNestedFilter)
 
-> **Gotcha**: `businessTransactionStatus` values vary by transaction type — invoices use UNPAID/PAID, credit notes use UNAPPLIED/APPLIED, journals use ACTIVE.
+> **Gotcha**: `businessTransactionStatus` values vary by transaction type: invoices use UNPAID/PAID, credit notes use UNAPPLIED/APPLIED, journals use ACTIVE.
 
 ---
 
@@ -277,7 +277,7 @@ org has no such account". `search_accounts` does not normalise — only
 | `disposalType` | `SOLD`, `DISCARDED` |
 | `registrationType` | `NEW`, `TRANSFER` |
 
-**Two status enums**: the 8 values above are the VIEW status, which is what the search filter resolves against. A fixed asset RECORD's own `status` field only ever holds `DRAFT`, `ACTIVE`, `DISPOSED`, or `CLOSED_OUT` — so `ONGOING`, `COMPLETED`, `SOLD`, and `DISCARDED` narrow the search but never come back in a record's `status`.
+**Two status enums**: the 8 values above are the VIEW status, which is what the search filter resolves against. A fixed asset RECORD's own `status` field only ever holds `DRAFT`, `ACTIVE`, `DISPOSED`, or `CLOSED_OUT`, so `ONGOING`, `COMPLETED`, `SOLD`, and `DISCARDED` narrow the search but never come back in a record's `status`.
 
 **Amount fields**: `purchaseAmount`, `bookValueAmount`, `netBookAtDisposalAmount`, `assetDisposalGainLossAmount`
 **Date fields**: `purchaseDate`, `disposalValueDate`, `depreciationStartDate`, `depreciationEndDate`
@@ -391,7 +391,7 @@ No documented enum values for `actionType` or `businessTransactionType` in the f
 
 No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `purchaseResourceId`, `resourceId`, `reference`.
 
-> **Gotcha**: This endpoint uses **plain string matching** — filter values are NOT expression objects. `{ "name": "Widget" }` instead of `{ "name": { "contains": "Widget" } }`.
+> **Gotcha**: This endpoint uses **plain string matching**; filter values are NOT expression objects. `{ "name": "Widget" }` instead of `{ "name": { "contains": "Widget" } }`.
 
 ### 24. Background Jobs (`POST /api/v1/background-jobs/search`)
 
@@ -404,7 +404,7 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 | `PROCESSING` | Job actively running |
 | `SUCCESS` | Completed successfully |
 | `FAILED` | Failed entirely |
-| `PARTIAL_SUCCESS` | Completed with some errors — check `errorDetails` |
+| `PARTIAL_SUCCESS` | Completed with some errors; check `errorDetails` |
 
 > **Filter path**: Use `filter.resourceId.eq` (not `filter.jobId.eq`) to look up a specific job by its ID. Filter by `status` to find all jobs in a given state.
 
@@ -416,13 +416,13 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 |-------|-------------|
 | `status` | `DRAFT`, `PENDING`, `CREATED`, `ACCEPTED`, `CONFIRMED`, `VOID` |
 | `currencyCode` | ISO 4217 (see above) |
-| `terms` | `0`, `7`, `15`, `30`, `45`, `60` (integer — payment terms in days) |
+| `terms` | `0`, `7`, `15`, `30`, `45`, `60` (integer, payment terms in days) |
 
 **Amount fields**: `totalAmount`, `expectedTotal`
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`
-**Link field**: `saleQuoteResourceId` (on Sale Orders — the source quote)
+**Link field**: `saleQuoteResourceId` (on Sale Orders, the source quote)
 
-> The `status` enum is the union across both sale documents: a **Sale Quote** moves `DRAFT → CREATED → ACCEPTED` (then `VOID`); a **Sale Order** is created as `CREATED → CONFIRMED` (then `VOID`). An order made by Jaz Magic starts `PENDING` until `update_sale_order` with `isPendingToActiveSaleOrder: true` takes it live. Fulfillment is reported on the parent quote via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_INVOICED`) — an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
+> The `status` enum is the union across both sale documents: a **Sale Quote** moves `DRAFT → CREATED → ACCEPTED` (then `VOID`); a **Sale Order** is created as `CREATED → CONFIRMED` (then `VOID`). An order made by Jaz Magic starts `PENDING` until `update_sale_order` with `isPendingToActiveSaleOrder: true` takes it live. Fulfillment is reported on the parent quote via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_INVOICED`), an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
 
 ---
 
@@ -436,9 +436,9 @@ No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `pu
 
 **Amount fields**: `totalAmount`, `expectedTotal`
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`
-**Link field**: `purchaseRequestResourceId` (on Purchase Orders — the source request)
+**Link field**: `purchaseRequestResourceId` (on Purchase Orders, the source request)
 
-> The `status` enum is the union across both purchase documents: a **Purchase Request** moves `DRAFT → ACTIVE → ACCEPTED` (then `VOID`); a **Purchase Order** moves `DRAFT → ACTIVE → CONFIRMED` (then `VOID`). An order made by Jaz Magic starts `PENDING` until `update_purchase_order` with `isPendingToActivePurchaseOrder: true` takes it live. Fulfillment is reported on the parent request via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_BILLED`) — an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
+> The `status` enum is the union across both purchase documents: a **Purchase Request** moves `DRAFT → ACTIVE → ACCEPTED` (then `VOID`); a **Purchase Order** moves `DRAFT → ACTIVE → CONFIRMED` (then `VOID`). An order made by Jaz Magic starts `PENDING` until `update_purchase_order` with `isPendingToActivePurchaseOrder: true` takes it live. Fulfillment is reported on the parent request via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_BILLED`), an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
 
 ---
 
@@ -508,7 +508,7 @@ Uses `jsonIn` / `jsonNotIn` operators with key-value pairs:
 
 ### creator (UserNestedFilter)
 
-Available on: journals only (not `createdBy` — journals use `creator`).
+Available on: journals only (not `createdBy`; journals use `creator`).
 
 | Nested Field | Type |
 |-------------|------|
@@ -548,14 +548,14 @@ All search endpoints return:
 }
 ```
 
-**Exception**: `GET /organization-report-template` returns its rows under a `reportTemplates` key, not `data` (measured 2026-09-06). Its `/search` sibling returns a **bare array** with no envelope (measured 2026-09-07). The tools normalize the list — read `.data` on both.
+**Exception**: `GET /organization-report-template` returns its rows under a `reportTemplates` key, not `data` (measured 2026-09-06). Its `/search` sibling returns a **bare array** with no envelope (measured 2026-09-07). The tools normalize the list; read `.data` on both.
 
 ---
 
 ## Provenance and staleness (applies to the search reference files)
 
 **This file is derived, not authoritative.** The enum values live in exactly one place in
-code — `src/core/search/enums.ts` — which is what the entity configs, the MCP tool schemas
+code (`src/core/search/enums.ts`), which is what the entity configs, the MCP tool schemas
 and the CLI flag choices all import. Upstream of that sits the committed `spec/openapi.yaml`.
 Precedence on any disagreement:
 
@@ -564,7 +564,7 @@ spec/openapi.yaml  →  src/core/search/enums.ts  →  this file (and search-ref
                                                    field-map.md, full-api-surface.md)
 ```
 
-If a value here disagrees with `enums.ts`, **this file is wrong** — fix it here and do not
+If a value here disagrees with `enums.ts`, **this file is wrong**; fix it here and do not
 "fix" the code to match. If `enums.ts` disagrees with the spec, the spec wins and both need
 updating.
 
@@ -572,11 +572,11 @@ updating.
 gate reads `endpoints.md` alone, and only its `### METHOD /api/v1/...` headers, so a stale
 enum table here fails silently and forever. Re-derive them on the same cadence as the spec
 refresh. When adding a NEW enum, add it to `enums.ts` first and reference it here rather than
-restating the values — the same enum is currently written out in up to five places, and every
+restating the values; the same enum is currently written out in up to five places, and every
 one of them has to be touched for a single upstream change.
 
 ---
 
 *Derived from `src/core/search/enums.ts` + the committed OpenAPI specification. Enum tables
-above last re-derived: 2026-03-31 — treat any value not confirmed against `enums.ts` as
+above last re-derived: 2026-03-31; treat any value not confirmed against `enums.ts` as
 unverified.*

@@ -1,5 +1,5 @@
 ---
-description: "Reconcile supplier statements against AP ledger in Jaz — identify mismatches, missing bills, timing differences"
+description: "Reconcile supplier statements against AP ledger in Jaz: identify mismatches, missing bills, timing differences"
 argument-hint: "[--supplier <name>] [--period YYYY-MM]"
 ---
 
@@ -51,5 +51,5 @@ clio reports generate aged-ap --to 2025-01-31 --json
 ## Key Rules
 
 - `--supplier` accepts supplier name (fuzzy matched)
-- Supplier statements are external documents — user must provide them
+- Supplier statements are external documents; user must provide them
 - Common discrepancies: missing credit notes, FX rate differences, GST/tax differences

@@ -72,7 +72,7 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.73.2", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@5.73.3", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -85,13 +85,13 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.73.2", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@5.73.3", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@5.73.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@5.73.3` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -101,7 +101,7 @@ Bring Jaz into **Claude** (claude.ai, Desktop, mobile, Cowork) and **ChatGPT** w
 2. Enter the URL `https://mcp.jaz.ai/mcp`.
 3. Sign in with your Jaz account (email one-time code or passkey) and **Allow**.
 
-It uses OAuth 2.1 + PKCE: the agent receives a scoped, time-limited token tied to your account, never your password. One sign-in reaches **every organization you belong to**; name the org in your request (e.g. *"in Acme Pte Ltd, list unpaid invoices"*), and access to each is checked on every call. The same operations as the local server, packaged as namespace tools — one `tools/list` entry per accounting area, each routing to the operations inside it — with honest read-only / write / destructive hints. Ask *"what can you do?"* and the connector answers from its own live capability map. Bookkeeping only: it records entries and reads data. It moves no money.
+It uses OAuth 2.1 + PKCE: the agent receives a scoped, time-limited token tied to your account, never your password. One sign-in reaches **every organization you belong to**; name the org in your request (e.g. *"in Acme Pte Ltd, list unpaid invoices"*), and access to each is checked on every call. The same operations as the local server, packaged as namespace tools (one `tools/list` entry per accounting area, each routing to the operations inside it) with honest read-only / write / destructive hints. Ask *"what can you do?"* and the connector answers from its own live capability map. Bookkeeping only: it records entries and reads data. It moves no money.
 
 ### Microsoft 365 Copilot · Copilot Studio
 
@@ -161,7 +161,7 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 
 ## How many tools is it?
 
-One catalog, three packagings. Every install reaches the **same 381 operations** — they are presented differently because hosts have different context budgets.
+One catalog, three packagings. Every install reaches the **same 381 operations**; they are presented differently because hosts have different context budgets.
 
 | Install | `tools/list` shows | Operations reachable | Why |
 |---|---|---|---|
@@ -171,7 +171,7 @@ One catalog, three packagings. Every install reaches the **same 381 operations**
 
 A directory listing that says "381 tools" and a client that shows 3 or 45 are describing the same server. Nothing is missing.
 
-Ask the agent **"what can you do?"** on any of them — it answers from the connector's own live capability map (`describe_capabilities`), never from the length of its tool list.
+Ask the agent **"what can you do?"** on any of them; it answers from the connector's own live capability map (`describe_capabilities`), never from the length of its tool list.
 
 ## What you get
 
@@ -202,7 +202,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 | **CLI** (`jaz-clio`) | A `clio` binary: 76 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
 | **MCP server** (`clio mcp`) | The same binary in MCP mode: 381 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
-Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install). **The same operations either way — packaged differently.** See [How many tools is it?](#how-many-tools-is-it).
+Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install). **The same operations either way, packaged differently.** See [How many tools is it?](#how-many-tools-is-it).
 
 ## Quick start
 
@@ -245,8 +245,8 @@ Built so any model sees the right tool fast and calls it once.
 
 | What | How |
 |------|-----|
-| **MCP delivery — local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of schemas for all 381 operations (~78KB). The agent searches into the catalog only when needed. |
-| **MCP delivery — hosted connector** | 46 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
+| **MCP delivery: local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of schemas for all 381 operations (~78KB). The agent searches into the catalog only when needed. |
+| **MCP delivery: hosted connector** | 46 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
 | **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
 | **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
 | **Discovery ranker** | In-memory, no network round-trip. Scans tool name + description + searchHint + namespace. |
@@ -276,18 +276,18 @@ In Claude Code, ten commands walk the jobs that have real steps to follow:
 
 | Command | What it runs |
 |---------|--------------|
-| `/jaz-recon` | Bank reconciliation — match, categorise, resolve |
-| `/jaz-gst` | GST/VAT return prep — tax ledger review, discrepancies, filing summary |
+| `/jaz-recon` | Bank reconciliation: match, categorise, resolve |
+| `/jaz-gst` | GST/VAT return prep: tax ledger review, discrepancies, filing summary |
 | `/jaz-payment-run` | Batch bill payments by due date |
 | `/jaz-credit-control` | Aged receivables, chase list, bad-debt assessment |
 | `/jaz-supplier-recon` | Supplier statement vs AP ledger |
 | `/jaz-audit-prep` | Reports, schedules and reconciliations for the auditor |
-| `/jaz-fa-review` | Fixed asset register — depreciation, disposals, write-offs |
+| `/jaz-fa-review` | Fixed asset register: depreciation, disposals, write-offs |
 | `/jaz-doc-collect` | Scan and classify client documents for upload |
 | `/jaz-migrate` | Migration from Xero, QuickBooks, Sage, MYOB or Excel |
 | `/jaz-tax-sg` | Singapore Form C-S / C-S Lite computation |
 
-Every one of them also works by just asking — the commands are a shortcut, not a requirement.
+Every one of them also works by just asking; the commands are a shortcut, not a requirement.
 
 ## Jaz Kit · run your practice
 
@@ -296,7 +296,7 @@ A close is not one conversation. Month-end runs eighteen steps over one to three
 ```
 /jk-setup                  set up the kit, connect an organization
 /jk-open acme             load its context, verify the connection
-/jk-close 2026-06         run the close — resumable across sessions
+/jk-close 2026-06         run the close, resumable across sessions
 /jk-review                approve the drafts waiting on you
 /jk-status                every organization, what's due, what's pending
 /jk-exit                  journal the session, sweep scratch
@@ -314,17 +314,17 @@ A close is not one conversation. Month-end runs eighteen steps over one to three
       workpapers/           the permanent audit file
 ```
 
-Work is created as drafts and every record carries a link into Jaz, so you review in the UI and finalize when you're ready — the agent never posts live behind you. Interrupted closes resume where they stopped, and reconciliation steps verify against the ledger before retrying, so a crash never doubles a journal.
+Work is created as drafts and every record carries a link into Jaz, so you review in the UI and finalize when you're ready; the agent never posts live behind you. Interrupted closes resume where they stopped, and reconciliation steps verify against the ledger before retrying, so a crash never doubles a journal.
 
 Each company's folder records its organization ID in ORG.md, and every call pins that ID (`--org oauth:<resourceId>`), so the folder you open decides which books you touch. OAuth sign-in lives outside the kit (`clio auth login`), so a kit shared through a private git repo carries the context and policies but never a credential. Existing workspaces that keep a company `jk-` key in the folder's gitignored `.env` still work as an optional route. (On a default Mac `~/Documents` syncs to iCloud, so such a key syncs too, bounded and revocable; set `JAZ_KIT_HOME` elsewhere to keep it off the cloud.)
 
-**One organization per session, enforced.** Every call names its organization explicitly rather than relying on whichever one happens to be active. If something in your shell would silently override that choice — an exported `JAZ_API_KEY`, or several comma-separated keys — the command stops instead of posting to the wrong company's books.
+**One organization per session, enforced.** Every call names its organization explicitly rather than relying on whichever one happens to be active. If something in your shell would silently override that choice (an exported `JAZ_API_KEY`, or several comma-separated keys), the command stops instead of posting to the wrong company's books.
 
-Multi-organization work needs the CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Windows is supported by design but not yet verified — [tell us](mailto:build.with@jaz.ai) if you hit something.
+Multi-organization work needs the CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Windows is supported by design but not yet verified; [tell us](mailto:build.with@jaz.ai) if you hit something.
 
-Start with `/jk-setup`, or just say "set up Jaz Kit for my company" — the skill triggers the same flows in Codex CLI, Cursor, and Copilot, which have no slash commands.
+Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill triggers the same flows in Codex CLI, Cursor, and Copilot, which have no slash commands.
 
-> Slash commands share one global namespace across installed plugins, so `/jk-*` and `/jaz-*` could collide with another plugin using the same names. If that happens, ask for the flow in words instead ("open acme", "close the books for June") — it triggers on intent, not on the command name.
+> Slash commands share one global namespace across installed plugins, so `/jk-*` and `/jaz-*` could collide with another plugin using the same names. If that happens, ask for the flow in words instead ("open acme", "close the books for June"); it triggers on intent, not on the command name.
 
 ## Reference
 
@@ -476,7 +476,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.73.2", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@5.73.3", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 
