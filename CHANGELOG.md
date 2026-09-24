@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.71.1] - 2026-09-24
+
+**Attachments on scheduled journals work.**
+
+Adding, listing and removing attachments on a scheduled journal used an address the platform does not have, so those calls failed. They now reach the right place. The fixed asset reconciliation summary no longer sends an account filter the platform cannot read, and the equity movement report lists the comparison periods it actually accepts.
+
+The rest of this release tightens internal checks on how Jaz tracks the platform's API and on automated updates. No other user-facing changes since v5.71.0.
+
 ## [5.71.0] - 2026-09-24
 
 **Updates are faster, and a paused subscription stays paused.**
