@@ -12,6 +12,7 @@
 - **`quick_fix_line_items(entity: 'invoices' | 'bills', lineItemResourceIds, attributes)`** — step 5 corrections: re-assign the tax profile on the affected lines if errors are found. The tax profile sits on each line, so the fix is at line level.
 - **`download_export(exportType: 'analysis-exchange-rate-audit', startDate, endDate)`** — step 6 pre-filing check: FX rates outside expected band can shift GST on FX invoices.
 - **`generate_trial_balance(endDate: <period-end>)`** — step 7 GST account reconciliation: `GST Control` / `Input Tax Recoverable` / `Output Tax Payable` accounts.
+- **`search_filing_submissions(periodYear: <year>, sortBy: 'filingDueDate', sortOrder: 'ASC')`**: the filings already on record for the organization (PH BIR forms such as 2550Q, and SG GST F5): period, due date, tax due, lifecycle and payment status. Use it before step 8 to see whether the quarter was already filed or is awaiting the client. Read only; add `formType: '2550Q'` to narrow. CLI: `clio filing-submissions search --period-year <year>`.
 
 ### Cross-references
 - Org inputs this job needs (confirm with the user when not already on file): the GST scheme, the GST registration number, and the country code (`SG` | `PH`).

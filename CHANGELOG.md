@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.73.0] - 2026-09-24
+
+**Editing a taxed journal no longer removes its tax.**
+
+The platform treats a journal update that leaves out the tax switch as "no tax", so editing a posted, taxed journal could silently remove its GST. Updates, bulk updates and draft finalizing now keep the journal's stored tax settings unless you change them. Finalizing a draft journal also keeps each line's tax profile and classifiers. Scheduled journal updates can set the tax switch and whether prices include tax; a taxed update that doesn't say is refused rather than guessed, because the platform cannot report the stored setting.
+
+Cash entry updates that the platform cannot process today (changing notes, or editing the lines of a taxed entry) are refused with the fix: void the entry and create a new one.
+
+Also new: search tax filing submissions with `search_filing_submissions` and `clio filing-submissions search`; get your organization's next document number with `clio references next`, and use `--auto-ref` when creating invoices, bills, credit notes and journals. A journal line in another currency can carry its own exchange rate, and scheduled journals can set their currency. Number filters that cannot be read, such as `FY2026` for a year, are refused instead of silently matching everything.
+
 ## [5.72.0] - 2026-09-24
 
 **Sign-in that recovers on its own, and clearer answers when it cannot.**

@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 74 command groups. Organized by domain.
+Complete reference for all 76 command groups. Organized by domain.
 
 ---
 
@@ -12,7 +12,7 @@ Complete reference for all 74 command groups. Organized by domain.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
-| `create` | `--contact`, `--date`, `--due`, `--ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
+| `create` | `--contact`, `--date`, `--due`, `--ref` or `--auto-ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
 | `update <id>` | `--date`, `--due`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
 | `pay <id>` | `--amount`, `--transaction-amount`, `--account`, `--method`, `--ref`, `--date` |
@@ -29,7 +29,7 @@ Complete reference for all 74 command groups. Organized by domain.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
-| `create` | `--contact`, `--date`, `--due`, `--ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
+| `create` | `--contact`, `--date`, `--due`, `--ref` or `--auto-ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
 | `update <id>` | `--date`, `--due`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
 | `pay <id>` | `--amount`, `--transaction-amount`, `--account`, `--method`, `--ref`, `--date` |
@@ -45,7 +45,7 @@ Complete reference for all 74 command groups. Organized by domain.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
-| `create` | `--contact`, `--date`, `--ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
+| `create` | `--contact`, `--date`, `--ref` or `--auto-ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
 | `update <id>` | `--date`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
 | `refund <id>` | `--amount`, `--account`, `--method`, `--ref`, `--date` |
@@ -60,7 +60,7 @@ Complete reference for all 74 command groups. Organized by domain.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
-| `create` | `--contact`, `--date`, `--ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
+| `create` | `--contact`, `--date`, `--ref` or `--auto-ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
 | `update <id>` | `--date`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
 | `refund <id>` | `--amount`, `--account`, `--method`, `--ref`, `--date` |
@@ -74,7 +74,7 @@ Complete reference for all 74 command groups. Organized by domain.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search` | `--reference`, `--from`, `--to`, `--status`, `--tag`, `--type`, `--sort`, `--order` |
-| `create` | `--date`, `--ref`, `--entries`, `--finalize`, `--input` |
+| `create` | `--date`, `--ref` or `--auto-ref`, `--entries` (a line may carry `exchangeRate`: account currency to base), `--finalize`, `--input` |
 | `update <id>` | `--date`, `--ref`, `--entries`, `--input` |
 | `delete <id>` | |
 | `transfer-trial-balance` (alias: `ttb`) | `--date`, `--entries`, `--input`, `--currency`, `--exchange-rate`, `--rate-direction` |
@@ -87,7 +87,7 @@ Complete reference for all 74 command groups. Organized by domain.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search` | `--ref`, `--from`, `--to`, `--status` |
-| `create` | `--account`, `--date`, `--ref`, `--entries`, `--input` |
+| `create` | `--account`, `--date`, `--ref` (generated when omitted), `--entries`, `--input` |
 | `update <id>` | `--date`, `--ref`, `--entries`, `--input` |
 | `delete <id>` | |
 
@@ -100,7 +100,7 @@ Same subcommands and flags as `cash-in`.
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `search` | `--ref`, `--from`, `--to`, `--status` |
-| `create` | `--from-account`, `--to-account`, `--amount`, `--date`, `--ref`, `--input` |
+| `create` | `--from-account`, `--to-account`, `--amount`, `--date`, `--ref` (generated when omitted), `--input` |
 | `delete <id>` | |
 
 ### `clio payments` — Cashflow transactions (read-only)
@@ -195,6 +195,11 @@ Same subcommands and flags as `cash-in`.
 | `update <id>` | `--name`, `--rate` |
 | `types` | List available tax type codes |
 | `wht-codes` | List withholding tax codes |
+
+### `clio filing-submissions` — Tax return filings (read-only, 1 tool)
+| Subcommand | Key flags |
+|------------|-----------|
+| `search` | `--form-type`, `--lifecycle-status`, `--period-year`, `--due-from`, `--due-to`, `--filter` (any other filing filter field, e.g. `{"periodType":{"eq":"QUARTERLY"}}`), `--sort`, `--order`, `--limit`, `--offset`, `--all` |
 
 ### `clio custom-fields` — Custom field definitions
 | Subcommand | Key flags |
@@ -495,7 +500,7 @@ All seven of `--item-code`, `--name`, `--unit`, `--costing-method`, `--cogs-acco
 | `list-journals` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `create-invoice` | `--contact`, `--reference`, `--repeat`, `--start-date`, `--line-items`, `--input` |
 | `create-bill` | `--contact`, `--reference`, `--repeat`, `--start-date`, `--line-items`, `--input` |
-| `create-journal` | `--reference`, `--repeat`, `--start-date`, `--entries`, `--input` |
+| `create-journal` | `--reference` (generated when omitted), `--repeat`, `--start-date`, `--entries`, `--input` |
 
 Dynamic strings in schedulers: `{{Day}}`, `{{Date}}`, `{{Date+X}}`, `{{DateRange:X}}`, `{{Month}}`, `{{Month+X}}`, `{{MonthRange:X}}`, `{{Year}}`, `{{Year+X}}`
 
@@ -666,6 +671,11 @@ Batch create via `--input` file or stdin (`{ "entries": [...] }`, 1-100 per call
 |------------|-----------|
 | `info` | `--json` (shows name, ID, currency, country, lock date, fiscal year) |
 
+### `clio references` — Document numbering series
+| Subcommand | Key flags |
+|------------|-----------|
+| `next` | `--type` (SALE, SALE_CREDIT_NOTE, PURCHASE, PURCHASE_CREDIT_NOTE, FIXED_ASSET, JOURNAL_MANUAL, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER, CLAIM), `--json`. Reading does not reserve the number; to number a create, pass the create command its own auto-ref flag |
+
 ### `clio org-users` — User management
 | Subcommand | Key flags |
 |------------|-----------|
@@ -722,7 +732,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker — any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp` — MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 380 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 381 operations.
 
 ### `clio serve` — HTTP daemon
 Starts the HTTP daemon for ChatKit and email channel integrations.

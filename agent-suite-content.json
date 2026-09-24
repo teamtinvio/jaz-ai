@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.72.0+3f0b3585",
+  "contentVersion": "5.73.0+c71f403f",
   "counts": {
-    "tools": 380,
+    "tools": 381,
     "namespaces": 46,
     "calculators": 13,
     "recipes": 13,
     "jobs": 12,
     "skills": 7,
-    "commands": 74,
+    "commands": 76,
     "apiRules": 159
   },
   "namespaces": [
@@ -106,7 +106,7 @@
     },
     {
       "name": "tax_profiles",
-      "description": "Tax profiles (GST/VAT/sales tax), withholding tax codes (WHT/ATC). Search, create, update tax profiles. List WHT codes."
+      "description": "Tax profiles (GST/VAT/sales tax), withholding tax codes (WHT/ATC). Search, create, update tax profiles. List WHT codes. Search tax return filings (BIR, GST F5)."
     },
     {
       "name": "claim_settings",
@@ -1125,7 +1125,7 @@
     {
       "name": "update_cash_in",
       "namespace": "cash_entries",
-      "description": "Update an existing cash-in entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-in that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: a cash entry is always ACTIVE and has no draft state; edit it in place here rather than deleting and recreating it. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a cash-in entry: reference, date, tags, untaxed lines. Notes and lines with a tax profile are refused locally (the API update fails on them today): for those, void the entry and create a new one. Otherwise edit here rather than creating a duplicate. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1139,7 +1139,7 @@
     {
       "name": "update_cash_out",
       "namespace": "cash_entries",
-      "description": "Update an existing cash-out entry (change amount, date, reference, notes, tags, or entry lines). Use when the user says \"update\", \"change\", \"fix\", or \"adjust\" a cash-out that was just created or found. Do NOT create a new entry — use this tool instead. NOTE: a cash entry is always ACTIVE and has no draft state; edit it in place here rather than deleting and recreating it. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a cash-out entry: reference, date, tags, untaxed lines. Notes and lines with a tax profile are refused locally (the API update fails on them today): for those, void the entry and create a new one. Otherwise edit here rather than creating a duplicate. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1426,7 +1426,7 @@
     {
       "name": "bulk_update_journals",
       "namespace": "journals",
-      "description": "Bulk-update journals — most common use is bulk-finalize (saveAsDraft: false on each row). Sync; per-row sequential execution; max 500 per call (~1-2 min wall-clock for a full 500).",
+      "description": "Bulk-update journals — most common use is bulk-finalize (saveAsDraft: false on each row). Sync; per-row sequential execution; max 500 per call (a read + a write per row, ~2-4 min for a full 500).",
       "readOnly": false,
       "destructive": false
     },
@@ -1868,6 +1868,13 @@
       "name": "search_tax_profiles",
       "namespace": "tax_profiles",
       "description": "Search tax profiles. Use appliesToSale / appliesToPurchase filters to scope by transaction type.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_filing_submissions",
+      "namespace": "tax_profiles",
+      "description": "Search tax return filings (PH BIR 2550Q, SG GST F5): period, due date, tax due, status.",
       "readOnly": true,
       "destructive": false
     },
@@ -2476,7 +2483,7 @@
     {
       "name": "update_scheduled_journal",
       "namespace": "scheduled_transactions",
-      "description": "Update a scheduled journal — change schedule settings and/or the journal template. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a scheduled journal. Send startDate and the full schedulerEntries every time (422 without). Omitted tax flags reset to off, so a taxed schedule needs taxInclusion. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -2893,6 +2900,7 @@
     "employees",
     "export-records",
     "exports",
+    "filing-submissions",
     "fixed-assets",
     "health",
     "help-center",
@@ -2919,6 +2927,7 @@
     "purchase-orders",
     "quick-fix",
     "reconciliations",
+    "references",
     "report-templates",
     "reports",
     "resolve",

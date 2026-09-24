@@ -251,6 +251,28 @@ Name must be unique (422 if duplicate). Agent tools auto-guard with search-befor
 
 Key filters: `appliesToSale`, `appliesToPurchase`, `appliesToSaleCreditNote`, `appliesToPurchaseCreditNote` (all BooleanExpression). Use to avoid picking a sales-only profile for a bill.
 
+### POST /api/v1/filing-submissions/search
+
+Tax return filings (PH BIR forms such as 2550Q, SG GST F5): period, due date, tax payable, lifecycle and payment status. Read only. Tool: `search_filing_submissions`; CLI: `clio filing-submissions search`.
+
+```json
+// Request:
+{
+  "filter": {
+    "formType": { "eq": "2550Q" },
+    "periodYear": { "eq": 2026 },
+    "lifecycleStatus": { "in": ["READY_TO_FILE", "SENT_TO_CLIENT"] }
+  },
+  "sort": { "sortBy": ["filingDueDate"], "order": "ASC" },
+  "limit": 100, "offset": 0
+}
+```
+
+- Filter fields: `resourceId`, `organizationResourceId`, `formType`, `displayFilingGroupings`, `periodStartDate`, `periodEndDate`, `filingDueDate`, `periodType`, `periodYear`, `periodValue` (month 1-12 or quarter 1-4), `lifecycleStatus`, `paymentStatus`, `taxDueAmount`, `taxForm.categoryCode`, `taxType.categoryCode`, plus `and` / `or` / `andGroup` / `orGroup`. The filter decodes strictly: any other key is a 400.
+- Sort fields: `resourceId`, `createdAt`, `updatedAt`, `formType`, `periodType`, `periodYear`, `periodValue`, `periodStartDate`, `periodEndDate`, `filingDueDate`, `lifecycleStatus`, `taxDueAmount`. Default `createdAt` DESC. Sort is required when `offset` is set.
+- `limit` 1-1000, default 100. `offset` is treated as a 0-indexed PAGE number, the platform norm. Row vs page is NOT measured here: the orgs probed held 0 and 1 filings, and the handler passes `offset` through unchanged, which both page and row endpoints also do.
+- Rows carry `taxForm { formType, formName, categoryCode, ... }`, `periodType`, `periodYear`, `periodStartDate`, `periodEndDate`, `filingDueDate`, `taxDueAmount` (a decimal STRING, e.g. `"-659.11"`), `lifecycleStatus`, `paymentStatus`, `filingMode`.
+
 ### PUT /api/v1/cash-in-entries/:parentEntityResourceId
 
 ```json
@@ -261,6 +283,8 @@ Key filters: `appliesToSale`, `appliesToPurchase`, `appliesToSaleCreditNote`, `a
 ```
 
 Same pattern for `PUT /cash-out-entries/:id`. URL uses `parentEntityResourceId` (from CREATE response). `accountEntryResourceId` is optional — API auto-populates from existing journal entry.
+
+Measured 2026-09-24 (Global SG Demo): a reference-only PUT succeeds and keeps a taxed entry's tax. Any PUT carrying `internalNotes` returns **500**, on taxed and untaxed entries alike, and any PUT carrying `lines` on a taxed entry (or adding a tax profile to an untaxed one) returns **500**, with or without `saveAsDraft: false` / `taxInclusion`. A `lines` PUT on an untaxed entry succeeds. So a taxed cash entry's lines cannot currently be edited through the API: void it and create a new one.
 
 ---
 
@@ -664,12 +688,29 @@ Bills and supplier credit notes support withholding tax per line item:
 **CRITICAL corrections from live testing**:
 - Each entry uses `amount` (number) + `type`: `"DEBIT"` or `"CREDIT"` (UPPERCASE strings)
 - Do NOT use `debit`/`credit` as separate number fields — that is WRONG
-- Do NOT include `currency` at top level — causes "Invalid request body"
+- Top-level `currency: { sourceCurrency, exchangeRate? }` IS accepted: it makes a foreign-currency journal
+  whose amounts are in `sourceCurrency` (verified 2026-09-24: `{sourceCurrency: "USD", exchangeRate: 0.75}`
+  created a draft reading back `currencyExchange.sourceCurrencyCode: USD`, `baseToSourceRate: 0.75`).
+- `PUT /journals/{id}` does NOT keep `taxVatApplicable` or `taxInclusion` when they are omitted:
+  `taxVatApplicable` falls to false, which strips every line's tax profile once lines are sent, and
+  `taxInclusion` is cleared. Measured 2026-09-24: an ACTIVE taxed journal edited with its own lines and a
+  note came back with no tax profile and VAT 0 (HTTP 200). Always restate both from a GET of the journal.
+  The Clio tools and CLI do this for you (`update_journal`, `bulk_update_journals`, `clio journals update`,
+  `clio journals draft finalize`).
 - Total DEBIT amounts MUST equal total CREDIT amounts
 - `contactResourceId` is a TOP-LEVEL field, NOT per entry. Probed 2026-09-02: an entry-level
   `contactResourceId` is silently discarded (an int there is accepted like any unknown key, while an
   int on `description` or `taxProfileResourceId` returns 400), and a real contact id on an entry does
   not appear on the created journal. Put it at the top level, where it does land.
+- Per-line `exchangeRate` (optional, number): the rate from the LINE's account currency to the
+  organization's base currency. This is the OPPOSITE direction to the journal's `currency.exchangeRate`
+  (base to source). Only a line posting to an account held in another currency takes one:
+  `exchangeRate: 0` is a 422, and a rate other than exactly 1 on a base-currency line is a 422. Honoured
+  by `POST /journals`, `POST /transfer-trial-balance` and `POST /reconciliations/manual-journal` (the
+  reconcile path applies it as sent and skips the base-currency check). `PUT /journals/{id}` validates it
+  but does not apply it, so an update cannot change a line's rate. Send the top-level `exchangeRate`
+  only: a nested line `currency: { exchangeRate }` spelling is accepted upstream but unpublished, and
+  sending both with different values is a 422.
 
 ---
 
@@ -1397,6 +1438,10 @@ Same but with `"bill"` wrapper instead of `"invoice"`.
 - `saveAsDraft: false` is REQUIRED on the wrapped invoice/bill. Using `saveAsDraft: true` causes `INVALID_SALE_STATUS` (invoices) or `INVALID_PURCHASE_STATUS` (bills).
 - Since `saveAsDraft: false`, every line item MUST have `accountResourceId`.
 - Response uses `interval` field (not `repeat`): `{ "status": "ACTIVE", "interval": "MONTHLY", ... }`
+
+**`PUT /scheduled/journals/{id}`** (measured 2026-09-24):
+- Every update must send `startDate` (422 `INVALID_VALUE_OF_START_DATE` otherwise) and the full `schedulerEntries` (422 `JOURNAL_SCHEDULER_ENTRIES_MISSING_ERROR` otherwise), even for a status or reference change.
+- `taxVatApplicable` and `taxInclusion` RESET when omitted. A taxed, tax-inclusive schedule updated with its own entries and no flags stored tax off, inclusion off, VAT 0; the same update with both flags kept its VAT. `GET /scheduled/journals/{id}` returns neither flag (nor line tax profiles), so the stored values cannot be read back: state both on every update of a taxed schedule. `update_scheduled_journal` sends `taxVatApplicable: true` when an entry carries a tax profile and refuses without `taxInclusion`.
 
 ---
 
@@ -2222,6 +2267,7 @@ Create opening balance entries for an organization. Used during onboarding to tr
 - Reference is auto-generated — do not include `reference` in the request body
 - Uses `journalEntries` (NOT `lines`) — same as regular journals
 - Debit/credit must balance (same as regular journals)
+- Per-line `exchangeRate` works as on `POST /journals` (line account currency to base, foreign-currency account lines only)
 - Creates a non-editable transfer journal visible in the general ledger
 
 ---
