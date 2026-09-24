@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.70.0",
+  "version": "5.71.0",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 380 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -916,7 +916,7 @@
     },
     {
       "name": "update_subscription",
-      "description": "Update an existing subscription (interval, end date, transaction template, or proratedConfig). When the user asks to update a subscription, use this tool directly. NOTE: accountResourceId and taxProfileResourceId on line items are immutable after creation — to change them, cancel and recreate. proratedConfig fields can be amended on update (proratedStartDate, proratedAdjustmentLineText, itemResourceId, includeNextPeriod). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a subscription (interval, end date, status, template, proratedConfig). `data` is required on every update, even end-date-only: create shape (reference, valueDate, dueDate, contactResourceId, lineItems with accountResourceId), not get_subscription's `data`. Omitted status is kept. Line accounts and tax profiles are immutable: cancel and recreate. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_subscription",

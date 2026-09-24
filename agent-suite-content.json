@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.70.0+36d59616",
+  "contentVersion": "5.71.0+b779c25b",
   "counts": {
     "tools": 380,
     "namespaces": 46,
@@ -1685,7 +1685,7 @@
     {
       "name": "update_subscription",
       "namespace": "subscriptions",
-      "description": "Update an existing subscription (interval, end date, transaction template, or proratedConfig). When the user asks to update a subscription, use this tool directly. NOTE: accountResourceId and taxProfileResourceId on line items are immutable after creation — to change them, cancel and recreate. proratedConfig fields can be amended on update (proratedStartDate, proratedAdjustmentLineText, itemResourceId, includeNextPeriod). If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a subscription (interval, end date, status, template, proratedConfig). `data` is required on every update, even end-date-only: create shape (reference, valueDate, dueDate, contactResourceId, lineItems with accountResourceId), not get_subscription's `data`. Omitted status is kept. Line accounts and tax profiles are immutable: cancel and recreate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },

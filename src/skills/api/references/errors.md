@@ -573,9 +573,17 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 
 ## Subscriptions Errors
 
-### 500 Internal Server Error — missing `proratedConfig`
-**Cause**: `POST /scheduled/subscriptions` and `PUT /scheduled/subscriptions/:id` return 500 when `proratedConfig` is omitted. The server null-pointer dereferences on the missing field. OAS marks it required but the 500 is misleading.
-**Fix**: Always include `proratedConfig: { proratedAdjustmentLineText: "Prorated adjustment" }` in create and update bodies.
+### Create without `proratedConfig`
+**Cause**: `proratedConfig` is required on `POST /scheduled/subscriptions`. It is NOT required on `PUT /scheduled/subscriptions/:id`: measured 2026-09-24, an update carrying `invoice` and no `proratedConfig` succeeded, and adding `proratedConfig` did not rescue an update without `invoice` (see the next entry).
+**Fix**: On create, include `proratedConfig: { proratedAdjustmentLineText: "Prorated adjustment" }` (Clio does this for you). On update, send it only to amend proration.
+
+### 422 GENERAL_ERROR "Internal Server Error" on update: missing `invoice` template
+**Cause**: `PUT /scheduled/subscriptions/:id` without `invoice` fails for every body (endDate alone, endDate + startDate + repeat, repeat alone), with or without `proratedConfig`. Measured on 2026-09-24.
+**Fix**: Send the full `invoice` template in the create shape (reference, valueDate, dueDate as YYYY-MM-DD, contactResourceId, lineItems with accountResourceId). The template GET returns (`data`) is in a different shape (`discount` object, `organizationAccountResourceId`, RFC3339 dates, `billFrom` without `billingAddress`) and is rejected if sent back as is. `update_subscription` / `clio subscriptions update` refuse locally without it.
+
+### Update without `status` activates a paused subscription
+**Cause**: `PUT /scheduled/subscriptions/:id` with no `status` turned an INACTIVE subscription ACTIVE (measured 2026-09-24). An ACTIVE subscription generates invoices.
+**Fix**: Always send `status`. `update_subscription` / `clio subscriptions update` read and restate the stored status when you omit it, and refuse the update if that read fails.
 
 ### 422 on cancel — wrong method or missing fields
 **Cause**: Cancel endpoint is **PUT** `/scheduled/cancel-subscriptions/:id` (not POST). Requires body: `{ cancelDateType, proratedAdjustmentLineText, resourceId }`. Empty `{}` returns 422.

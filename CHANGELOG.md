@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.71.0] - 2026-09-24
+
+**Updates are faster, and a paused subscription stays paused.**
+
+Updating or finalizing an invoice, bill or credit note is now a single request. Jaz keeps the document's stored currency and exchange rate itself, so updates no longer depend on a separate read first.
+
+Updating a subscription no longer switches a paused (inactive) subscription back on. The platform re-activates a subscription when an update leaves out its status, so Jaz now sends the stored status unless you set one. A cancelled subscription is refused with a note to create a new one. Subscription updates need the invoice template, because the platform rejects updates without it; `update_subscription` now asks for it up front.
+
 ## [5.70.0] - 2026-09-24
 
 **Payment terms that stick, and classifier and inventory fixes.**

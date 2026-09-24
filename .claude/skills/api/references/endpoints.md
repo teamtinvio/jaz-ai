@@ -1464,7 +1464,7 @@ Note the different path pattern from CRUD: cancel is at `/scheduled/cancel-subsc
 
 - `GET /api/v1/scheduled/subscriptions` — List all subscriptions
 - `GET /api/v1/scheduled/subscriptions/:id` — Get subscription details
-- `PUT /api/v1/scheduled/subscriptions/:id` — Update subscription (requires `proratedConfig`, `repeat`, `resourceId`)
+- `PUT /api/v1/scheduled/subscriptions/:id` — Update subscription. The `invoice` template is required on every update (create shape; without it every update is a 422 `GENERAL_ERROR`, even endDate-only). `startDate` and `repeat` are kept when omitted. `status` is NOT: an update without it made an INACTIVE subscription ACTIVE (measured 2026-09-24), so Clio restates the stored status when you omit it.
 - `DELETE /api/v1/scheduled/subscriptions/:id` — Delete subscription (must be cancelled first)
 
 ---

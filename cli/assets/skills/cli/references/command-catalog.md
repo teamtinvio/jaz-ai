@@ -482,7 +482,7 @@ All seven of `--item-code`, `--name`, `--unit`, `--costing-method`, `--cogs-acco
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
 | `create` | `--input` (full JSON body) |
-| `update <id>` | `--input` |
+| `update <id>` | `--input` (must include the `invoice` template; `status` kept when omitted) |
 | `delete <id>` | |
 | `cancel <id>` | |
 | `search-scheduled` | `--limit`, `--offset`, `--all` |
