@@ -1,5 +1,15 @@
 # Changelog
 
+## [5.72.0] - 2026-09-24
+
+**Sign-in that recovers on its own, and clearer answers when it cannot.**
+
+When the platform rejects an expired sign-in, Jaz renews it once and carries on. A request that could create or move money is not sent again after a renewal; you get an "unconfirmed" result naming where to check. If someone signs in to Jaz again on the same computer, a running session continues only when the new sign-in is for the same person in the same organization. Otherwise it asks you to restart the connection, so it never quietly starts acting as someone else.
+
+The Desktop extension now shows a sign-in command that works without the CLI installed (`npx -y jaz-clio@latest auth login`). `clio auth clear` also removes the browser sign-in, `clio auth add` warns when the browser sign-in still takes priority, and `clio health` and `whoami` show which sign-in is actually in use. A damaged sign-in file is named clearly, with the command to fix it, instead of silently falling back to a different organization's key. Sign-in errors now use the documented authentication exit code, and a sign-in rate limit says how long to wait.
+
+Large MCP results that fit are returned whole in compact form, so the pseudo-SQL catalog arrives complete. Results that must be shortened now name the tool's own way to narrow them.
+
 ## [5.71.1] - 2026-09-24
 
 **Attachments on scheduled journals work.**

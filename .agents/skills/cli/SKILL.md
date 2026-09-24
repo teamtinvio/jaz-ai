@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.71.1
+version: 5.72.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -70,7 +70,7 @@ clio auth switch <label>     # Set active profile
 clio auth list               # Show all saved profiles
 clio auth whoami             # Show current org + auth source
 clio auth remove <label>     # Delete a profile
-clio auth clear              # Remove all profiles
+clio auth clear              # Remove all profiles and the OAuth sign-in
 clio auth shell-init         # Print shell exports (for eval)
 clio auth unpin              # Unset JAZ_ORG from current shell
 ```
