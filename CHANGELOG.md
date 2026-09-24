@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.73.4] - 2026-09-24
+
+**Slow reports and auto-reconciliation answer clearly instead of timing out.**
+
+Exports and auto-reconciliation suggestions wait as long as the place you run them allows: longer from the command line, shorter in your assistant and the hosted connector. When the platform is too slow, auto-reconciliation says it could not suggest matches this time instead of failing, and a slow report that ends in a server error now shows that error rather than a bare timeout.
+
 ## [5.73.3] - 2026-09-24
 
 **Cleaner wording in guides and tool descriptions.**
