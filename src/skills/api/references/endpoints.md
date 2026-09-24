@@ -787,7 +787,7 @@ Same shape as list items, wrapped in `{ data: {...} }`. Use the `resourceId` fro
 ### PUT /api/v1/cash-in-entries/:resourceId
 ### PUT /api/v1/cash-out-entries/:resourceId
 
-Same request body as POST. Use cashflow-transaction `resourceId` from LIST.
+Same request body as POST. Use the `parentEntityResourceId` (= the CREATE-returned resourceId).
 
 ### DELETE /api/v1/cash-entries/:resourceId
 
@@ -801,7 +801,7 @@ Shared delete endpoint for ALL cash entry types (cash-in, cash-out, cash-transfe
 **CRITICAL ID gotcha (verified via live testing)**:
 - CREATE returns `resourceId = A` (this is `parentEntityResourceId`)
 - LIST returns `resourceId = B` (cashflow-transaction ID), `parentEntityResourceId = A`
-- GET expects `B` (cashflow-transaction ID)
+- GET accepts `B` (cashflow-transaction ID) or `A` (parentEntityResourceId; a transfer's two rows share one `A`, so GET by `A` returns the first)
 - DELETE expects `A` (parentEntityResourceId, via `/cash-entries/A`)
 - `businessTransactionResourceId = C` (underlying journal ID) — do NOT use for any CRUD operation
 
@@ -1056,7 +1056,7 @@ Same cashflow-transaction response shape as cash-in/out list. `businessTransacti
 
 ### GET /api/v1/cash-transfers/:resourceId
 
-Use cashflow-transaction `resourceId` from LIST. Returns same shape wrapped in `{ data: {...} }`.
+Accepts the cashflow-transaction `resourceId` from LIST or the `parentEntityResourceId` from CREATE (both legs share it; GET by it returns the first). Returns same shape wrapped in `{ data: {...} }`.
 
 **Cash transfers have NO update (PUT) endpoint.**
 
@@ -2345,37 +2345,40 @@ Update an existing payment record. All fields optional — only included fields 
 
 ## 19b. Invoice/Bill Sub-Resource Endpoints
 
-### GET /api/v1/invoices/{resourceId}/payments — Raw array response
+### GET /api/v1/invoices/{resourceId}/payments
 
 ```json
-// Response (RAW ARRAY — no {data: [...]} wrapper):
-[
-  {
-    "resourceId": "uuid-payment",
-    "paymentAmount": 2250.00,
-    "transactionAmount": 2250.00,
-    "valueDate": 1709251200000,
-    "paymentMethod": "BANK_TRANSFER",
-    "reference": "PAY-001"
-  }
-]
+// Response ({data: [...]} envelope):
+{
+  "data": [
+    {
+      "resourceId": "uuid-payment",
+      "paymentAmount": 2250.00,
+      "transactionAmount": 2250.00,
+      "valueDate": 1709251200000,
+      "paymentMethod": "BANK_TRANSFER",
+      "reference": "PAY-001"
+    }
+  ]
+}
 ```
 
-Same for `GET /bills/{resourceId}/payments`, `GET /invoices/{resourceId}/credits`, `GET /bills/{resourceId}/credits`.
+Same envelope for `GET /bills/{resourceId}/payments`.
 
-**CRITICAL**: These sub-resource endpoints return raw arrays, NOT `{data: [...]}`. The CLI wraps them into `{data: [...]}` for consistency.
+**CRITICAL**: `GET /invoices/{resourceId}/credits` and `GET /bills/{resourceId}/credits` differ:
+`{ "TotalElements": n, "data": [...] }` when credits are applied, but a BARE `[]` when none
+are (read from the API source; the empty case measured raw 2026-09-24). The CLI and tools normalize both to `{data: [...]}`.
 
 ---
 
-## 19c. Request Changes (REST only — no CLI or MCP wrapper)
+## 19c. Request Changes
 
 Sends a **submitted** record back to its creator for edits: the record returns to draft, its
 approval markers are cleared, and `message` is posted as the first comment on a new
 collaboration thread. Records in any other state are skipped and reported in the response.
 
-> **No wrapper exists.** These 18 routes have no `clio` subcommand, no MCP tool, and no
-> `src/core/api/` client function. Call them with a raw HTTP request — do not go looking for a
-> tool that does not exist.
+> **Wrapped.** MCP tools `request_document_changes` / `bulk_request_document_changes`, CLI
+> `clio approvals request-changes` / `clio approvals bulk-request-changes`.
 
 Nine entities, each with a single-record and a bulk form:
 
@@ -2437,6 +2440,34 @@ reason is recorded.
 ```
 Poll the result with `POST /api/v1/background-jobs/search` (section 23) — the 202 only means
 the job was accepted.
+
+---
+
+## 19d. Approve
+
+Approves a record awaiting approval. **Irreversible**: it posts the ledger (and for invoices and
+bills also confirms a linked order and consumes the document reference). There is nothing to undo, and approving is one-shot
+(a record not awaiting approval, including an already-approved one, is refused).
+MCP tools `approve_documents` / `bulk_approve_documents`, CLI `clio approvals approve` /
+`clio approvals bulk-approve`. Four entities: `invoices`, `bills`, `customer-credit-notes`,
+`supplier-credit-notes` (claims approve through their own claims routes).
+
+| Form | Route | Response |
+|------|-------|----------|
+| Single | `POST /api/v1/{entity}/:resourceId/approve` (no body) | 200, `{ "data": { "records": [ { resourceId, status, approvalStatus, isSuccess, failureReason, errorCode } ] } }` |
+| Bulk | `POST /api/v1/{entity}/bulk-approve` | 202, job handle (same shape as 19c bulk); poll `POST /api/v1/background-jobs/search` |
+
+- Bulk body `{ "resourceIds": [...] }`: 1-100 **unique** UUIDs. Over 100 or a duplicate is 422
+  with nothing written.
+- Single form: an id not found in your organization is 404.
+- An id not found in your organization rejects the **whole** bulk batch with 422 and no job is
+  dispatched: fix the list and retry.
+- Bulk: records not awaiting approval are skipped and reported on the job tasks; only a foreign
+  id fails the batch.
+- Refusal channel differs: invoices/bills return 422 on a refused single approve; credit notes
+  return 200 with `isSuccess: false` while `approvalStatus` still reads the document's state.
+  Check `isSuccess`, never `approvalStatus`.
+- On a timeout or 500, read the record back and check its approval status before retrying.
 
 ---
 

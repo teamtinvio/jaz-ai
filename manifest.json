@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.73.1",
+  "version": "5.73.2",
   "description": "Fastest way to manage money",
   "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 381 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
@@ -592,7 +592,7 @@
     },
     {
       "name": "get_cash_in",
-      "description": "Fetch a cash-in entry by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns."
+      "description": "Fetch a cash-in entry by cashflow-transaction resourceId (search_cashflow_transactions) or the parentEntityResourceId create returns."
     },
     {
       "name": "update_cash_in",
@@ -600,7 +600,7 @@
     },
     {
       "name": "get_cash_out",
-      "description": "Fetch a cash-out entry by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns."
+      "description": "Fetch a cash-out entry by cashflow-transaction resourceId (search_cashflow_transactions) or the parentEntityResourceId create returns."
     },
     {
       "name": "update_cash_out",
@@ -1148,7 +1148,7 @@
     },
     {
       "name": "unpost_claim",
-      "description": "Unpost a CONVERTED claim — reverses the journal conversion back to APPROVED. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Unpost a CONVERTED claim: voids its journal, back to APPROVED. Re-unpost: 200 no-op. Aggregated claims unpost together. Ignores payouts (employee balance can go negative). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_submit_claims",
@@ -1256,7 +1256,7 @@
     },
     {
       "name": "get_cash_transfer",
-      "description": "Get full cash transfer details by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns."
+      "description": "Fetch a cash transfer by cashflow-transaction resourceId (search_cashflow_transactions) or the parentEntityResourceId create returns."
     },
     {
       "name": "download_credit_note_pdf",
@@ -1548,7 +1548,7 @@
     },
     {
       "name": "rollback_document_version",
-      "description": "Restore a document to a stored version. REPLACES current state — read the version first with get_document_version. `CREATED` is NOT a restorable version and is refused: upstream DELETES the document for it and still answers 200. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Restore a document to a stored version. REPLACES current state; read it first with get_document_version. `CREATED` is refused: it would delete the document (the API also 422s it). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_currency_effective_rate",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.73.1+93867d9b",
+  "contentVersion": "5.73.2+684c2fd0",
   "counts": {
     "tools": 381,
     "namespaces": 46,
@@ -34,11 +34,11 @@
     },
     {
       "name": "sale_orders",
-      "description": "Sales order documents: Sale Quotes (estimates/quotations) and Sale Orders. Create, get, search, update, and transition (accept a quote, confirm an order, void, delete). A Sale Order links to its quote via saleQuoteResourceId; the quote must be accepted first. Tracks fulfillment via orderState. Pipeline: quote → order → invoice (raise the invoice separately)."
+      "description": "Sales order documents: Sale Quotes (estimates/quotations) and Sale Orders. Create, get, search, update, and transition (accept a quote, confirm an order, void, delete). A Sale Order links to its quote via saleQuoteResourceId; the quote must be issued (not DRAFT/VOID). Tracks fulfillment via orderState. Pipeline: quote → order → invoice (convert_sale_order_to_invoice)."
     },
     {
       "name": "purchase_orders",
-      "description": "Purchase order documents: Purchase Requests (requisitions) and Purchase Orders (POs). Create, get, search, update, and transition (accept a request, confirm an order, void, delete). A Purchase Order links to its request via purchaseRequestResourceId; the request must be accepted first. Tracks fulfillment via orderState. Pipeline: request → order → bill (raise the bill separately)."
+      "description": "Purchase order documents: Purchase Requests (requisitions) and Purchase Orders (POs). Create, get, search, update, and transition (accept a request, confirm an order, void, delete). A Purchase Order links to its request via purchaseRequestResourceId; the request must be issued (not DRAFT/VOID). Tracks fulfillment via orderState. Pipeline: request → order → bill (convert_purchase_order_to_bill)."
     },
     {
       "name": "journals",
@@ -118,7 +118,7 @@
     },
     {
       "name": "claims",
-      "description": "Employee-expense claims (the Claims area / Employees). Search, get, update DRAFT claims (line items, employee, vendor), and drive the lifecycle: submit, approve, reject, cancel, unpost (reverse conversion), delete. Status flow DRAFT → SUBMITTED → APPROVED → CONVERTED (\"Processed\"), or REJECTED / CANCELLED. Claims are born via document attachment / conversion (no bare create); the server enforces legal transitions."
+      "description": "Employee-expense claims (the Claims area / Employees). Search, get, update DRAFT claims (line items, employee, vendor), and drive the lifecycle: submit, approve, reject, cancel, unpost (reverse conversion), delete. Status flow DRAFT → SUBMITTED → APPROVED → CONVERTED (\"Processed\"), or REJECTED / CANCELLED. Claims are born via create_claim, document attachment or conversion; the server enforces legal transitions."
     },
     {
       "name": "claim_processing",
@@ -166,7 +166,7 @@
     },
     {
       "name": "approvals",
-      "description": "Approve documents awaiting approval, or send them back for changes. Covers invoices, bills, both credit notes, sale/purchase orders, quotes, requests and claims. Approving posts the ledger and is one-shot. Find what is waiting with the approvalStatus filter on the relevant search tool."
+      "description": "Approve invoices, bills and credit notes awaiting approval, or send documents back for changes (also orders, quotes, requests, claims). Approving posts the ledger and is one-shot. Find what is waiting with the approvalStatus filter on the relevant search tool."
     },
     {
       "name": "quick_fix",
@@ -1118,7 +1118,7 @@
     {
       "name": "get_cash_in",
       "namespace": "cash_entries",
-      "description": "Fetch a cash-in entry by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns.",
+      "description": "Fetch a cash-in entry by cashflow-transaction resourceId (search_cashflow_transactions) or the parentEntityResourceId create returns.",
       "readOnly": true,
       "destructive": false
     },
@@ -1132,7 +1132,7 @@
     {
       "name": "get_cash_out",
       "namespace": "cash_entries",
-      "description": "Fetch a cash-out entry by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns.",
+      "description": "Fetch a cash-out entry by cashflow-transaction resourceId (search_cashflow_transactions) or the parentEntityResourceId create returns.",
       "readOnly": true,
       "destructive": false
     },
@@ -2091,7 +2091,7 @@
     {
       "name": "unpost_claim",
       "namespace": "claims",
-      "description": "Unpost a CONVERTED claim — reverses the journal conversion back to APPROVED. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Unpost a CONVERTED claim: voids its journal, back to APPROVED. Re-unpost: 200 no-op. Aggregated claims unpost together. Ignores payouts (employee balance can go negative). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2280,7 +2280,7 @@
     {
       "name": "get_cash_transfer",
       "namespace": "cash_transfers",
-      "description": "Get full cash transfer details by its cashflow-transaction resourceId (from search_cashflow_transactions), NOT the parentEntityResourceId create returns.",
+      "description": "Fetch a cash transfer by cashflow-transaction resourceId (search_cashflow_transactions) or the parentEntityResourceId create returns.",
       "readOnly": true,
       "destructive": false
     },
@@ -2791,7 +2791,7 @@
     {
       "name": "rollback_document_version",
       "namespace": "versions",
-      "description": "Restore a document to a stored version. REPLACES current state — read the version first with get_document_version. `CREATED` is NOT a restorable version and is refused: upstream DELETES the document for it and still answers 200. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Restore a document to a stored version. REPLACES current state; read it first with get_document_version. `CREATED` is refused: it would delete the document (the API also 422s it). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

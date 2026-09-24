@@ -14,7 +14,7 @@ Key capabilities: draft/approval workflows, multi-currency (auto-fetch ECB rates
 
 If payment date equals invoice date, it's recorded as a cash transaction (not AR). Transaction fees are deducted from cash received, and a payment `adjustment` shifts the cash leg further (net cash = paymentAmount - feesCharged + feesCollected +/- adjustmentValue) without touching AR. RGL = `(Invoice payment / Transaction Rate) - (Cash received / Payment Rate)`.
 
-**API**: CRUD `GET/POST/PUT/DELETE /invoices`, `POST /invoices/search`, `POST /invoices/:id/payments`, `GET /invoices/:id/payments`, `POST /invoices/:id/credits`, `GET /invoices/:id/download`, `POST/GET/DELETE /invoices/:id/attachments`, `PUT /invoices/:id/approve`, `POST /scheduled/invoices` (CRUD), `POST /scheduled/subscriptions` (recurring). Generic payment ops: `GET/PUT/DELETE /payments/:id`. **Starting from a PDF/JPG attachment?** Use `POST /magic/createBusinessTransactionFromAttachment` instead — Jaz Magic handles extraction & autofill (see AI Agents section).
+**API**: CRUD `GET/POST/PUT/DELETE /invoices`, `POST /invoices/search`, `POST /invoices/:id/payments`, `GET /invoices/:id/payments`, `POST /invoices/:id/credits`, `GET /invoices/:id/download`, `POST/GET/DELETE /invoices/:id/attachments`, `POST /invoices/:id/approve`, `POST /scheduled/invoices` (CRUD), `POST /scheduled/subscriptions` (recurring). Generic payment ops: `GET/PUT/DELETE /payments/:id`. **Starting from a PDF/JPG attachment?** Use `POST /magic/createBusinessTransactionFromAttachment` instead: Jaz Magic handles extraction & autofill (see AI Agents section).
 
 ---
 
@@ -40,7 +40,7 @@ Key capabilities: bill receipts (short-form template creating bill + payment tog
 
 Transaction fees are added to cash spent (not deducted like invoices), and a payment `adjustment` shifts the cash leg further without touching AP. RGL = `(Cash spent / Payment rate) - (Bill payment / Transaction rate)`.
 
-**API**: CRUD `GET/POST/PUT/DELETE /bills`, `POST /bills/search`, `POST /bills/:id/payments`, `GET /bills/:id/payments`, `POST /bills/:id/credits`, `POST/GET/DELETE /bills/:id/attachments`, `PUT /bills/:id/approve`, `POST /scheduled/bills` (CRUD). Generic payment ops: `GET/PUT/DELETE /payments/:id`. **Starting from a PDF/JPG attachment?** Use `POST /magic/createBusinessTransactionFromAttachment` instead — Jaz Magic handles extraction & autofill (see AI Agents section).
+**API**: CRUD `GET/POST/PUT/DELETE /bills`, `POST /bills/search`, `POST /bills/:id/payments`, `GET /bills/:id/payments`, `POST /bills/:id/credits`, `POST/GET/DELETE /bills/:id/attachments`, `POST /bills/:id/approve`, `POST /scheduled/bills` (CRUD). Generic payment ops: `GET/PUT/DELETE /payments/:id`. **Starting from a PDF/JPG attachment?** Use `POST /magic/createBusinessTransactionFromAttachment` instead: Jaz Magic handles extraction & autofill (see AI Agents section).
 
 ---
 
@@ -179,7 +179,7 @@ Statement amounts are recorded in the bank account's currency — no auto-conver
 
 Workflow for draft invoices and bills requiring admin sign-off before activation. Three user roles: Admins (approve + create active), Preparers (submit drafts for approval), Members (submit own drafts only). Status progression: Draft → For Approval → Approved (active). Approval PDFs capture Submitted By / Approved By audit trail.
 
-**API**: `PUT /invoices/:id/approve`, `PUT /bills/:id/approve`
+**API**: `POST /{invoices|bills|customer-credit-notes|supplier-credit-notes}/:id/approve` and `/bulk-approve` (irreversible: posts the ledger), `POST /{entity}/:id/request-changes` (endpoints.md sections 19c, 19d)
 
 ---
 

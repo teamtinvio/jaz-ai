@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.73.2] - 2026-09-24
+
+**Corrected guidance for your assistant.**
+
+Your assistant's guides now match the platform: a cash entry or transfer can be read back with the id returned when it was created; restoring a document to its created version is refused; approvals are available through the assistant and the CLI, with bulk approval skipping documents that are not awaiting approval; unposting a claim is described accurately; payment and credit lists are read in the right shape. An error about editing an active record now tells the assistant to use that record's own update, never to void and recreate it.
+
 ## [5.73.1] - 2026-09-24
 
 **Up-to-date guides for the command line and your AI tools.**

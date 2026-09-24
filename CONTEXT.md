@@ -15,7 +15,7 @@ Runtime guidance for AI agents using Jaz AI tools (CLI, MCP, or skills).
 
 ## Mutations
 
-6. **Create as draft first, then finalize.** Create transactions with `saveAsDraft: true`, verify the result, then finalize (`clio invoices draft finalize <id>`, or the matching finalize tool). Cash-in, cash-out and cash transfers have no draft state and post on create, so verify their inputs before the call. This prevents accidental postings.
+6. **Create as draft first, then finalize.** Create transactions with `saveAsDraft: true`, verify the result, then finalize (`clio invoices draft finalize <id>`, or the matching finalize tool). Cash-in, cash-out and cash transfers have no draft state and post on create, so verify their inputs before the call. A document sitting in an approval workflow is approved with `approve_documents` instead. This prevents accidental postings.
 7. **Let the API validate.** Don't duplicate business logic — submit the request and handle errors from the response. The API is authoritative.
 8. **Use `--json` on create/update to capture the response.** The response contains the `resourceId` and any server-computed fields.
 

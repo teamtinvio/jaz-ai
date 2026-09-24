@@ -327,10 +327,10 @@ PUT URL: `/cash-in-entries/:parentEntityResourceId` (or `/cash-out-entries/:id`)
 
 ```
 CREATE → { resourceId: "A" }         ← This is parentEntityResourceId
-LIST   → { resourceId: "B",          ← This is the cashflow-transaction ID (use for GET)
+LIST   → { resourceId: "B",          ← This is the cashflow-transaction ID (GET accepts it)
             businessTransactionResourceId: "C",   ← underlying journal ID (don't use)
             parentEntityResourceId: "A" }          ← matches CREATE response
-GET    → expects "B" (cashflow-transaction ID)
+GET    → accepts "B" (cashflow-transaction ID) or "A" (parentEntityResourceId)
 PUT    → expects "A" (parentEntityResourceId) — body needs resourceId: "A"
 DELETE → expects "A" (parentEntityResourceId, via /cash-entries/:id)
 ```

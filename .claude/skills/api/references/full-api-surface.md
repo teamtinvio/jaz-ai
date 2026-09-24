@@ -9,7 +9,7 @@
 >
 > **Paths below are written without the `/api/v1` prefix.** Every one of them is really
 > `/api/v1/<path>`. Recent additions not yet folded into the tables are listed at the end
-> under "2026-08 additions".
+> under "Additions since 2026-07-11".
 
 ---
 
@@ -48,9 +48,9 @@
 | DELETE | `/invoices/:resourceId` | Delete invoice |
 | GET | `/invoices/:resourceId/download` | Download PDF |
 | POST | `/invoices/:resourceId/payments` | Record payment(s) |
-| GET | `/invoices/:resourceId/payments` | List recorded payments — **raw array response** |
+| GET | `/invoices/:resourceId/payments` | List recorded payments (`{data: [...]}`) |
 | POST | `/invoices/:resourceId/credits` | Apply credit note(s) |
-| GET | `/invoices/:resourceId/credits` | List applied credits — **raw array response** |
+| GET | `/invoices/:resourceId/credits` | List applied credits (**bare `[]` when none applied**, else `{TotalElements, data}`) |
 | DELETE | `/invoices/:resourceId/credits/:creditsAppliedResourceId` | Reverse credit |
 | GET | `/invoices/:resourceId/attachments` | List attachments |
 | POST | `/invoices/:resourceId/attachments` | Upload attachment |
@@ -705,7 +705,7 @@ These features exist in the Jaz platform and may affect API responses or cause u
 - Bills and invoices can be submitted for approval workflow
 - Only admin users (AP permission) can approve submitted bills
 - API-created transactions with `saveAsDraft: false` bypass approval workflow
-- Approval records are read-only via API
+- Approve and request-changes are writable via API: `POST /{entity}/:resourceId/approve` + `bulk-approve` (invoices, bills, both credit notes; irreversible) and `request-changes` (endpoints.md sections 19c, 19d)
 
 ### Lock Dates
 - Organizations can set a lock date preventing changes before that cutoff
@@ -779,8 +779,8 @@ See endpoints.md section 25 for request/response shapes and the `refs` grammar (
 
 ## Additions since 2026-07-11
 
-Live routes added after the tables above were last regenerated. None has a `clio` subcommand
-or an MCP tool — call them with a raw request.
+Live routes added after the tables above were last regenerated. Unless a subsection names its
+wrapper, it has no `clio` subcommand or MCP tool: call it with a raw request.
 
 ### Request changes (18) — 2026-08-06
 
@@ -788,7 +788,8 @@ or an MCP tool — call them with a raw request.
 `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `purchase-orders`,
 `purchase-requests`, `sale-orders`, `sale-quotes`. Claims uses a different bulk shape:
 `POST /claims/:resourceId/request-changes` + `POST /claims/bulk/request-changes`.
-Bodies and per-record outcome semantics: endpoints.md section 19c.
+Bodies and per-record outcome semantics: endpoints.md section 19c. Wrapped by
+`request_document_changes` / `bulk_request_document_changes` and `clio approvals`.
 
 ### Payments, bulk and batch (9) — 2026-08-13
 

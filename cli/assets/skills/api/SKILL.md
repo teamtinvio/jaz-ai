@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 5.73.1
+version: 5.73.2
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 159 production gotchas, error
@@ -215,7 +215,7 @@ The rest of this skill — field names, gotchas, error catalog, dependency order
 73. **Capsules PUT requires `resourceId` + `capsuleTypeResourceId`** — Even for partial updates, `PUT /capsules/:id` requires `resourceId` and `capsuleTypeResourceId` in the body. Omitting either causes 422 or "Capsule type not found". Use read-modify-write pattern: GET current capsule, merge updates, PUT full payload. Clio handles this automatically.
 
 ### Cash Entry Response Shape (CRITICAL)
-74. **Cash-in/out/transfer CREATE returns `parentEntityResourceId`** — The resourceId in the POST response (`{ data: { resourceId: "X" } }`) is the journal header's `parentEntityResourceId`. This ID is used for DELETE (`DELETE /cash-entries/X`). But it is **NOT** the same ID used for GET (`GET /cash-in-entries/:id`). GET expects the cashflow-transaction `resourceId` from the LIST response. Three different IDs exist per cash entry: `parentEntityResourceId` (from CREATE + in LIST), `resourceId` (cashflow-transaction ID, from LIST — use for GET), `businessTransactionResourceId` (underlying journal ID — do NOT use for anything).
+74. **Cash-in/out/transfer CREATE returns `parentEntityResourceId`**: the resourceId in the POST response (`{ data: { resourceId: "X" } }`) is the journal header's `parentEntityResourceId`. This ID is used for DELETE (`DELETE /cash-entries/X`) and PUT. GET (`GET /cash-in-entries/:id`) accepts either the cashflow-transaction `resourceId` from the LIST response or this `parentEntityResourceId`. Three different IDs exist per cash entry: `parentEntityResourceId` (from CREATE + in LIST), `resourceId` (cashflow-transaction ID, from LIST, also accepted by GET), `businessTransactionResourceId` (underlying journal ID, do NOT use for anything).
 75. **Cash-in/out/transfer LIST/GET return cashflow-transaction shape** — NOT journal shape. Key field differences from journals: `transactionReference` (NOT `reference`), `transactionStatus` (NOT `status` — values: `ACTIVE`/`VOID`), `valueDate` is epoch ms (NOT ISO string), no `journalEntries` array, has `direction` (`PAYIN`/`PAYOUT`), has nested `account` object with bank name, has `businessTransactionType` (`JOURNAL_DIRECT_CASH_IN`/`JOURNAL_DIRECT_CASH_OUT`/`JOURNAL_CASH_TRANSFER`).
 76. **Cash-in/out/transfer search uses `/cashflow-transactions/search`** — Filter by `businessTransactionType: { eq: "JOURNAL_DIRECT_CASH_IN" }` (or `JOURNAL_DIRECT_CASH_OUT` or `JOURNAL_CASH_TRANSFER`). Other useful filters: `organizationAccountResourceId` (bank account), `businessTransactionReference` (reference), `valueDate` (date range). The search endpoint is shared across all cashflow transaction types.
 77. **DELETE for cash entries uses `/cash-entries/:id`** — NOT the individual resource paths. The ID used is the `parentEntityResourceId` (= the resourceId returned by CREATE). This is a shared endpoint for all cash entry types (cash-in, cash-out, cash-transfer).
@@ -329,7 +329,7 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 94. **Scheduled transaction search does NOT support `createdAt` sort** — `POST /scheduled-transaction/search` sort fields: `startDate`, `nextScheduleDate`, etc. Default to `startDate` DESC. This is a cross-entity search across all scheduled types (invoices, bills, journals, subscriptions). Filter by `businessTransactionType` (SALE, PURCHASE, JOURNAL) and/or `schedulerType` (RECURRING, SUBSCRIPTION) to narrow results.
 
 ### Contact Groups
-96. **Contact groups have `associatedContacts` array** — Each group contains `{ name, resourceId, associatedContacts: [{ name, resourceId }] }`. Search via `POST /contact-groups/search`. Known bug: PUT returns 500 (Rule 46).
+96. **Contact groups have `associatedContacts` array**: each group contains `{ name, resourceId, associatedContacts: [{ name, resourceId }] }`. Search via `POST /contact-groups/search`.
 
 ### Inventory
 97. **Inventory balances: one item or all.** One item: `GET /inventory-item-balance/:itemResourceId` (`get_inventory_balance`) returns `{ itemResourceId, latestAverageCostAmount, baseQty, baseUnit }`; the id is the ITEM resourceId, not an inventory-specific ID. All items: `GET /inventory-balances/:balanceStatus` (`list_inventory_balances`, `clio inventory balances --status`) with `balanceStatus` one of `ALL`, `AVAILABLE`, `FULLY_DRAWN` (anything else is 422); rows carry `itemCode`, `internalName`, `totalQuantity`, `baseUnit`, `averageCostAmount`, `balanceAmount`. The API answers an empty result with 404; the tool and CLI return it as `data: []`. `offset` is a page number here, though the spec says row (probed live 2026-09-23).
@@ -374,7 +374,7 @@ Bills, invoices, and credit notes share identical mandatory field specs. Adding 
 111. **Quick-fix uses `tags` (string array) — e.g., `"tags": ["Q1"]`** — The `attributes` object in quick-fix transaction endpoints accepts `tags` as a string array (e.g., `"tags": ["Q1"]`). `tag` (singular) is silently ignored. This matches the `tags` array format used on create/update for all transaction types. The CLI `--tag` flag auto-wraps to `tags: [name]`.
 
 ### Sub-Resource Response Shapes
-112. **Invoice/bill payment & credit sub-resources return raw arrays** — `GET /invoices/:id/payments` and `GET /bills/:id/payments` return `[{paymentRecord}, ...]` — NOT `{data: [...]}`. Same for `GET /invoices/:id/credits` and `GET /bills/:id/credits`. The CLI wraps these into `{data: [...]}` for consistency. `DELETE /invoices/:id/credits/:creditsAppliedResourceId` reverses a credit application.
+112. **Invoice/bill payment & credit sub-resources: two shapes** (read from the API source; payments and the empty-credits case measured raw 2026-09-24). `GET /invoices/:id/payments` and `GET /bills/:id/payments` return `{ data: [{paymentRecord}, ...] }` (Rule 64). `GET /invoices/:id/credits` and `GET /bills/:id/credits` return `{ TotalElements, data: [...] }` when credits are applied but a BARE `[]` when none are. The CLI and tools normalize all of these to `{data: [...]}`. `DELETE /invoices/:id/credits/:creditsAppliedResourceId` reverses a credit application.
 
 ### Nano-Classifier API
 113. **Nano-classifier API gotchas** — CREATE uses `classes: string[]` (NOT `classNames` or `[{className}]`). `printable: boolean` is required — defaults to `false` (most classifiers are not printable). GET single is double-wrapped: `{data: {data: [...], totalElements, totalPages}}` — extract the first element from the inner paginated response. GET/LIST response returns classes as `[{className, resourceId}]` (objects), while CREATE accepts plain `string[]`.

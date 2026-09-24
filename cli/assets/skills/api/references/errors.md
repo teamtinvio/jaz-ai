@@ -869,7 +869,7 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 
 **"INACTIVE_OR_DELETED_ACCOUNT"** — The account referenced in the update is deleted or inactive. Verify the account UUID is valid and active.
 
-**"Cannot update ACTIVE entry"** — Journal or cash entry is already active. Must void and recreate to change.
+**"Cannot update ACTIVE entry"**: a per-record quick-fix failure. Do NOT void and recreate; edit the record with its own update tool: `update_invoice` / `update_bill` / `update_cash_in` / `update_cash_out` / `update_journal`.
 
 **"TRANSACTION_LOCKED"** — Transaction is in a locked period. Cannot update.
 
@@ -914,7 +914,7 @@ Two of the seven never reach you through this path: a zero `adjustmentValue` and
 
 ### Sub-Resource Response Errors
 
-**`Cannot read property 'data'` / TypeError** — Invoice/bill sub-resource endpoints (`GET /invoices/:id/payments`, `GET /invoices/:id/credits`, etc.) return raw arrays `[{...}]`, NOT `{data: [...]}`. Trying to access `.data` on the response fails. Wrap the raw array yourself.
+**`Cannot read property 'data'` / TypeError**: `GET /invoices/:id/credits` and `GET /bills/:id/credits` return a BARE `[]` when no credits are applied (else `{TotalElements, data}`), so `.data` on the empty case fails. Accept both shapes. The `/payments` sub-resources always answer `{data: [...]}`.
 
 ---
 

@@ -20,7 +20,8 @@ employee** automatically (server resolves it at enqueue) — no `search_claims` 
 don't pre-check). No bound employee on the uploader (a service / shared-key identity) →
 the server leaves it unbound; relay that ("not set up for claims"), don't invent one. The
 OCR'd draft may also carry no `reference` — if a later submit returns
-`CLAIM_REFERENCE_REQUIRED_AT_SUBMIT`, set one via `update_claim`.
+`CLAIM_REFERENCE_REQUIRED_AT_SUBMIT`, read the next number with `get_next_reference` (type
+`CLAIM`) and pass it as `reference` on `update_claim` (it has no autoReference).
 
 ## Claim records (`claims` + `claim_processing` namespaces)
 
