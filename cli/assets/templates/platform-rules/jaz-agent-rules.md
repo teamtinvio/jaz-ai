@@ -4,11 +4,11 @@ Jaz accounting guidance for this workspace. Load the installed Jaz skills for de
 
 ## Discovery
 
-Jaz exposes **381 tools across 46 namespaces**. Your tool list shows **3, 45, or 371** entries depending on packaging — **never infer capability from its length.**
+Jaz exposes **381 tools across 46 namespaces**. Your tool list shows **3, 46, or 381** entries depending on packaging — **never infer capability from its length.**
 
 - **3** — `search_tools(query)` → `describe_tools(names)` → `execute_tool(name, args)`. Empty query returns the namespace map.
-- **45** — namespace routers; call one with `{ operation, arguments }`. Its description lists its operations.
-- **371** — call operations directly by name.
+- **46** — namespace routers; call one with `{ operation, arguments }`. Its description lists its operations.
+- **381** — call operations directly by name.
 
 `describe_capabilities` returns the capability map on all three. **Call it before telling the user Jaz cannot do something.**
 

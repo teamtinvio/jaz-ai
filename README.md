@@ -17,7 +17,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/stargazers"><img src="https://img.shields.io/github/stars/teamtinvio/jaz-ai?style=flat-square&logo=github" alt="GitHub stars"></a>
 </p>
 
-The complete agent surface for [Jaz](https://jaz.ai) accounting. 381 tools, 7 skills, 13 IFRS recipes, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, first-try tool selection, structured errors an agent can recover from.
+The complete agent surface for [Jaz](https://jaz.ai) accounting. 381 tools, 7 skills, 16 recipe playbooks, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, first-try tool selection, structured errors an agent can recover from.
 
 > Also fully compatible with [Juan Accounting](https://juan.ac) (same API surface).
 
@@ -72,7 +72,7 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.73.0", "mcp"]
+      "args": ["-y", "jaz-clio@5.73.1", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -85,13 +85,13 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.73.0", "mcp"]
+      "args": ["-y", "jaz-clio@5.73.1", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Pin `jaz-clio@5.73.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: OAuth supports accessible organizations with explicit `org_id` selection. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@5.73.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -165,9 +165,9 @@ One catalog, three packagings. Every install reaches the **same 381 operations**
 
 | Install | `tools/list` shows | Operations reachable | Why |
 |---|---|---|---|
-| Claude Code plugin, `.mcpb`, Gemini, Cursor / VS Code / Windsurf / Codex | **3** meta-tools | 367 | Lazy: `search_tools` → `describe_tools` → `execute_tool`. ~600 tokens of context instead of ~78KB. |
-| Remote connector (`mcp.jaz.ai`), M365 Copilot, OpenAI Responses | **45** namespace tools | 367 | One tool per accounting area; each routes to its operations, documented in its description. |
-| `JAZ_MCP_FLAT=1` (either transport) | **367** tools | 367 | Every operation listed directly. Heaviest payload; enables per-tool read-only parallelism. |
+| Claude Code plugin, `.mcpb`, Gemini, Cursor / VS Code / Windsurf / Codex | **3** meta-tools | all 381 operations | Lazy: `search_tools` → `describe_tools` → `execute_tool`. ~600 tokens of context instead of ~78KB. |
+| Remote connector (`mcp.jaz.ai`), M365 Copilot, OpenAI Responses | 46 namespace tools | all 381 operations | One tool per accounting area; each routes to its operations, documented in its description. |
+| `JAZ_MCP_FLAT=1` (either transport) | 381 tools | all 381 operations | Every operation listed directly. Heaviest payload; enables per-tool read-only parallelism. |
 
 A directory listing that says "381 tools" and a client that shows 3 or 45 are describing the same server. Nothing is missing.
 
@@ -184,7 +184,7 @@ Ask the agent **"what can you do?"** on any of them — it answers from the conn
 | **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
 | **jaz-conversion** | Xero / QuickBooks / Sage / MYOB / Excel migration, CoA mapping, FX, clearing accounts, TB verification |
 | **jaz-jobs** | 12 close playbooks (month-end / quarter-end / year-end / bank-recon / GST-VAT / payment-run / credit-control / supplier-recon / audit-prep / FA-review / statutory-filing) + Singapore Form C-S |
-| **jaz-recipes** | 13 IFRS recipes (loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal, etc.) + 13 calculators |
+| **jaz-recipes** | 16 recipe playbooks (IFRS: loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal, etc.) + 13 calculators |
 | **jaz-pseudo-sql** | Read-only SQL over the curated reporting schema: ad-hoc questions, joins and aggregates, sync preview or async CSV export |
 | **jaz-kit** | Multi-organization operator workspace: per-org context, resumable period closes, draft review queue, policies and rules |
 
@@ -198,7 +198,7 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 
 | Layer | What it is | Use it alone when |
 |-------|------------|-------------------|
-| **Skills** | Domain knowledge as markdown (159 API rules, 13 recipes, 12 jobs, conversion playbooks). The agent reads these at session start. | Your agent reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
+| **Skills** | Domain knowledge as markdown (159 API rules, 16 recipe playbooks, 12 jobs, conversion playbooks). The agent reads these at session start. | Your agent reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
 | **CLI** (`jaz-clio`) | A `clio` binary: 76 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
 | **MCP server** (`clio mcp`) | The same binary in MCP mode: 381 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
@@ -216,10 +216,19 @@ Then file GST for Q1.
 Or call the CLI directly:
 
 ```bash
+clio auth login                    # once per computer
 clio invoices list --json
 clio calc loan --principal 100000 --rate 6 --term 60 --json
 clio jobs month-end --period 2025-01 --json
+clio approvals approve <resourceId> --entity bills --json
+clio sql preview "SELECT invoice_number, balance FROM invoices WHERE balance > 0 LIMIT 10"
+clio ledger-find-fix preview --level TRANSACTIONS --input recode.json
+clio report-templates list --json
+clio modules list --json
+clio navigate reports.profit-and-loss
 ```
+
+The full command-group list is in [README-cli.md](README-cli.md#cli).
 
 Or via MCP from any agent:
 
@@ -236,7 +245,7 @@ Built so any model sees the right tool fast and calls it once.
 
 | What | How |
 |------|-----|
-| **MCP delivery — local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of 367 operation schemas (~78KB). The agent searches into the catalog only when needed. |
+| **MCP delivery — local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of schemas for all 381 operations (~78KB). The agent searches into the catalog only when needed. |
 | **MCP delivery — hosted connector** | 46 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
 | **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
 | **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
@@ -307,7 +316,7 @@ A close is not one conversation. Month-end runs eighteen steps over one to three
 
 Work is created as drafts and every record carries a link into Jaz, so you review in the UI and finalize when you're ready — the agent never posts live behind you. Interrupted closes resume where they stopped, and reconciliation steps verify against the ledger before retrying, so a crash never doubles a journal.
 
-Each company's key lives in its own folder's `.env`. A `jk-` key is scoped to one company, so the folder you open decides which books you touch — no profiles, no labels, nothing to switch. Keys are gitignored, so a kit shared through a private git repo carries the context and policies but never the keys; each machine pastes its own. (On a default Mac `~/Documents` syncs to iCloud, so keys sync too — bounded and revocable; set `JAZ_KIT_HOME` elsewhere to keep them off the cloud.)
+Each company's folder records its organization ID in ORG.md, and every call pins that ID (`--org oauth:<resourceId>`), so the folder you open decides which books you touch. OAuth sign-in lives outside the kit (`clio auth login`), so a kit shared through a private git repo carries the context and policies but never a credential. Existing workspaces that keep a company `jk-` key in the folder's gitignored `.env` still work as an optional route. (On a default Mac `~/Documents` syncs to iCloud, so such a key syncs too, bounded and revocable; set `JAZ_KIT_HOME` elsewhere to keep it off the cloud.)
 
 **One organization per session, enforced.** Every call names its organization explicitly rather than relying on whichever one happens to be active. If something in your shell would silently override that choice — an exported `JAZ_API_KEY`, or several comma-separated keys — the command stops instead of posting to the wrong company's books.
 
@@ -348,11 +357,11 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company" — the skil
 | `orders.md` | Sale quotes/orders and purchase requests/orders: the pre-invoice/pre-bill pipeline |
 | `bank-rule-column-mapping.md` | Bank-rule column-value mapping: resolve fields per statement row from a custom column |
 
-### jaz-recipes (13 IFRS recipes + 13 calculators)
+### jaz-recipes (16 recipe playbooks + 13 calculators)
 
 | Reference | Content |
 |-----------|---------|
-| `SKILL.md` | 13 recipes in 4 tiers, building blocks, calculator index |
+| `SKILL.md` | 16 recipes in 4 tiers, building blocks, calculator index |
 | `building-blocks.md` | Capsules, schedulers, manual journals, FA, tracking tags, nano classifiers |
 | `prepaid-amortization.md` | Annual insurance/rent paid upfront, monthly scheduler recognition |
 | `deferred-revenue.md` | Upfront customer payment, monthly revenue recognition |
@@ -457,9 +466,9 @@ Jaz Accounting closes a moment after it starts, and turning it off and on or rei
 The config path is wrong, the command is wrong, or the server crashes on startup.
 
 ```bash
-npx jaz-clio mcp                   # Smoke-test the server (Ctrl+C to stop)
+npx jaz-clio mcp --org oauth:<resourceId>   # Smoke-test the server (Ctrl+C to stop)
 claude mcp list                    # Confirm Claude Code sees "jaz"
-claude mcp add jaz -- npx jaz-clio mcp
+claude mcp add jaz -- npx -y jaz-clio@latest mcp --org oauth:<resourceId>
 ```
 
 For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sign in first with `clio auth login`:
@@ -467,7 +476,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.73.0", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@5.73.1", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 
@@ -502,16 +511,16 @@ npm install -g jaz-clio
 
 ### Stale data after org switch
 
-You ran `clio auth switch` but the MCP server still uses the previous org (it cached auth at startup).
+You ran `clio auth switch` or `clio auth select` but the MCP server still uses the previous org (it resolved auth at startup). Pinning `--org` in the MCP config avoids this.
 
 ```bash
 # In Claude Code: remove and re-add
-claude mcp remove jaz && claude mcp add jaz -- npx jaz-clio mcp
+claude mcp remove jaz && claude mcp add jaz -- npx -y jaz-clio@latest mcp --org oauth:<resourceId>
 
 # In Cursor / VS Code: restart the editor or reload MCP servers
 ```
 
-Or use multi-org mode and skip restarts: comma-separated keys (`jk-aaa,jk-bbb`) and switch orgs in conversation.
+Or use multi-org mode and skip restarts: an OAuth session without `--org` (or comma-separated keys, `jk-aaa,jk-bbb`), and name the organization in conversation.
 
 ## Privacy & security
 

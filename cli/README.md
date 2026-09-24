@@ -20,11 +20,11 @@ Node.js 18+. Works with [Jaz](https://jaz.ai) and [Juan Accounting](https://juan
 ## Contents
 
 - [Three ways in](#three-ways-in)
+- [Auth](#auth)
 - [CLI](#cli)
 - [MCP server](#mcp-server)
 - [Skills](#skills)
 - [Jaz Kit · run your practice](#jaz-kit--run-your-practice)
-- [Auth](#auth)
 - [Semantic help-center search](#semantic-help-center-search-optional)
 - [Privacy](#privacy) · [Support](#support) · [License](#license)
 
@@ -38,6 +38,19 @@ Node.js 18+. Works with [Jaz](https://jaz.ai) and [Juan Accounting](https://juan
 
 On top of these, one layer for accountants closing real books across many companies: **[Jaz Kit](#jaz-kit--run-your-practice)**.
 
+## Auth
+
+```bash
+clio auth login           # sign in to Jaz in your browser (OAuth, the default)
+clio auth whoami          # verify
+```
+
+`clio auth login` opens Jaz sign-in. The CLI and local MCP share the session and refresh its tokens automatically. Add `--no-browser` to open the printed link yourself on the same computer. Agents can use `--json`: the sign-in link goes to stderr, and stdout carries only the result and the organization choices.
+
+Use `clio auth organizations --json` to list accessible organizations, `clio auth select <resourceId>` to select one, and `--org oauth:<resourceId>` on every organization-scoped command to pin it. `clio auth logout` removes the local session and keeps any API-key profiles; revoke the grant in Jaz to remove remote access.
+
+API-key profiles, `--api-key`, `JAZ_API_KEY`, and PATs remain supported. Use `--org oauth:<resourceId>` for OAuth or `--org <label>` for a saved key profile (`clio auth add <key>`); either overrides an inherited `JAZ_API_KEY`. Without `--org`, the environment key still takes precedence. Do not combine `--api-key` with `--org`. Do not share OAuth storage or commit it to a workspace. Every command takes `--json` for structured output.
+
 ## CLI
 
 ```bash
@@ -49,9 +62,25 @@ clio jobs month-end --period 2026-03                   # step-by-step close play
 clio magic create --file receipt.pdf                   # AI extracts, drafts the transaction
 clio invoices search --query 'status:unpaid AND $500+' # structured per-entity search
 clio ledger-find-fix preview --level TRANSACTIONS --input recode.json  # find & fix (recode) across record types
+clio approvals approve <resourceId> --entity invoices  # approve a document waiting on you
+clio sql preview "SELECT invoice_number, balance FROM invoices WHERE balance > 0 LIMIT 10"  # read-only pseudo-SQL
+clio report-templates list                             # the organization's saved report layouts
+clio modules list                                      # which features are switched on
+clio navigate reports.profit-and-loss                  # deep link into the Jaz dashboard (offline)
 ```
 
-76 command groups, 16 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
+76 command groups, 17 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
+
+Command groups by area:
+
+- **Sales and purchases**: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `sale-orders`, `purchase-orders`, `payments`, `unapplied-payments`, `approvals`, `drafts`, `schedulers`, `subscriptions`
+- **Ledger and banking**: `journals`, `cash-in`, `cash-out`, `cash-transfer`, `cashflow`, `bank`, `bank-rules`, `reconciliations` (`recon`), `ledger-find-fix`, `quick-fix`, `fixed-assets` (`fa`)
+- **Master data**: `accounts`, `contacts`, `contact-groups`, `items`, `purchase-items`, `catalogs`, `inventory` (`inv`), `tags`, `custom-fields`, `nano-classifiers`, `tax-profiles`, `currencies`, `currency-rates`, `capsules`, `capsule-recipes`
+- **Claims**: `claims`, `claim-types`, `claim-profiles`, `posting-rules`, `employees`
+- **Reports and data**: `reports`, `exports`, `export-records`, `report-templates`, `pseudo-sql` (`sql`), `filing-submissions`, `background-jobs`
+- **Organization**: `org`, `org-users`, `references`, `modules` (`features`), `bookmarks`, `attachments`, `magic`, `jots`, `navigate` (`nav`), `help-center` (`hc`)
+- **Offline**: `calc`, `capsule-transaction` (`ct`), `jobs`
+- **Setup and tooling**: `auth`, `init`, `update`, `versions`, `version`, `health`, `completion`, `context`, `schema`, `resolve`, `mcp`, `mcp-call`, `serve`
 
 ### Foreign currency
 
@@ -82,12 +111,12 @@ that ends up in a journal.
 
 > **No install at all?** Claude.ai, ChatGPT, Cowork, and Microsoft Copilot Studio can use Jaz through the hosted connector. Add `https://mcp.jaz.ai/mcp` as a custom connector and sign in with OAuth, no key. The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
 
-Run `clio auth login` once on this computer before enabling local MCP.
+Run `clio auth login` once on this computer before enabling local MCP, then pin the organization with `--org` (`clio auth organizations` lists the IDs).
 
 **Claude Code**
 
 ```bash
-claude mcp add jaz -- npx jaz-clio mcp
+claude mcp add jaz -- npx -y jaz-clio@latest mcp --org oauth:<resourceId>
 ```
 
 **Cursor · VS Code · Windsurf**
@@ -97,13 +126,13 @@ claude mcp add jaz -- npx jaz-clio mcp
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio", "mcp"]
+      "args": ["-y", "jaz-clio@latest", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-OAuth can reach the organizations granted at sign-in; name the organization on each call. Optional key-based access also supports comma-separated keys or a personal access token.
+OAuth can reach the organizations granted at sign-in; `--org` pins one, and without it name the organization on each call. Optional key-based access also supports comma-separated keys or a personal access token.
 
 ```json
 { "env": { "JAZ_API_KEY": "jk-org1-key,jk-org2-key" } }
@@ -128,7 +157,7 @@ The workspace layer for closing real books, whether that is one company or fifty
 A close is not one conversation. Month-end runs many steps over several days, and an accountant serving eight clients runs it eight times, with eight different sets of bank accounts, materiality thresholds, and recurring entries. Jaz Kit gives each company a folder that remembers all of it, so no session re-asks what it should already know.
 
 ```
-/jk-setup                 create a company workspace, connect its key
+/jk-setup                 create a company workspace, connect it with OAuth
 /jk-open acme             load its context, verify the connection
 /jk-close 2026-06         run the close, resumable across sessions
 /jk-review                approve the drafts waiting on you
@@ -141,15 +170,6 @@ Also `/jk-keys`, `/jk-policy`, `/jk-teach`, `/jk-save`, `/jk-help`. **`/jaz-*` r
 Each company lives under `~/Documents/Jaz Kit/orgs/<company>/`, holding its close config, policies, and organization ID. OAuth credentials stay outside the kit. Pin that ID on every CLI or MCP call and verify it before working. Existing per-company API keys remain optional.
 
 Everything is drafted first, every record carries a link into Jaz for you to review, and an interrupted close resumes exactly where it stopped. Multi-company work needs this CLI, which you already have. Full guide in the [repository README](https://github.com/teamtinvio/jaz-ai#jaz-kit--run-your-practice).
-
-## Auth
-
-```bash
-clio auth login           # Sign in to Jaz in your browser
-clio auth whoami          # verify
-```
-
-Pin an OAuth organization with `--org oauth:<resourceId>`. For optional API-key access, set `JAZ_API_KEY` or register a key using `clio auth add` and pass `--org <label>`. Every command takes `--json` for structured output.
 
 ## Semantic help-center search (optional)
 
@@ -166,11 +186,3 @@ Runs on your machine. Calls go to the Jaz API over HTTPS. No telemetry, no data 
 ## License
 
 [MIT](LICENSE)
-
-## OAuth sign-in (default)
-
-Run `clio auth login` to open Jaz sign-in. CLI and local MCP share the session and refresh tokens automatically. Add `--no-browser` to open the printed link yourself on the same computer. Agents can use `--json`; the sign-in link is printed to stderr, and stdout contains only the result and organization choices.
-
-Use `clio auth organizations --json` to list accessible organizations, `clio auth select <resourceId>` to select one, and `--org oauth:<resourceId>` on every organization-scoped command to pin it. `clio auth logout` removes the local session without deleting API-key profiles; revoke its grant in Jaz to remove remote access.
-
-API-key profiles, `--api-key`, `JAZ_API_KEY`, and PATs remain supported. Use `--org oauth:<resourceId>` for OAuth or `--org <label>` for a saved key profile; either overrides an inherited `JAZ_API_KEY`. Without `--org`, the environment key still takes precedence. Do not combine `--api-key` with `--org`. Do not share OAuth storage or commit it to a workspace.

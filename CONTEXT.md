@@ -5,7 +5,7 @@ Runtime guidance for AI agents using Jaz AI tools (CLI, MCP, or skills).
 ## Before You Start
 
 1. **Bootstrap with context.** Run `clio context --json` to get the org's chart of accounts, currencies, tax profiles, and active settings. This prevents guessing.
-2. **Check what's available.** CLI: `clio --help`. MCP: call `describe_capabilities` (or `search_tools` with an empty query on the meta-tool surface) — **not** `tools/list`. Depending on packaging, `tools/list` returns 3, 45, or 371 entries for the same 381 operations; only the capability map tells you what actually exists.
+2. **Check what's available.** CLI: `clio --help`. MCP: call `describe_capabilities` (or `search_tools` with an empty query on the meta-tool surface) — **not** `tools/list`. Depending on packaging, `tools/list` returns 3, 46, or 381 entries for the same 381 operations; only the capability map tells you what actually exists.
 
 ## Working with Data
 
@@ -15,7 +15,7 @@ Runtime guidance for AI agents using Jaz AI tools (CLI, MCP, or skills).
 
 ## Mutations
 
-6. **Create as draft first, then finalize.** Create transactions with `status: DRAFT`, verify the result, then update to `APPROVED`. This prevents accidental postings.
+6. **Create as draft first, then finalize.** Create transactions with `saveAsDraft: true`, verify the result, then finalize (`clio invoices draft finalize <id>`, or the matching finalize tool). Cash-in, cash-out and cash transfers have no draft state and post on create, so verify their inputs before the call. This prevents accidental postings.
 7. **Let the API validate.** Don't duplicate business logic — submit the request and handle errors from the response. The API is authoritative.
 8. **Use `--json` on create/update to capture the response.** The response contains the `resourceId` and any server-computed fields.
 

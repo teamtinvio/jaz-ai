@@ -1,5 +1,11 @@
 # Changelog
 
+## [5.73.1] - 2026-09-24
+
+**Up-to-date guides for the command line and your AI tools.**
+
+The README and command-line guide list every command group, including approvals, SQL, report templates, navigation, Ledger Find & Fix, filing submissions and references, and put browser sign-in first. Tool, command and recipe counts are now checked automatically so they stay accurate. Earlier releases that shipped without notes now have them.
+
 ## [5.73.0] - 2026-09-24
 
 **Editing a taxed journal no longer removes its tax.**
@@ -1128,6 +1134,92 @@ Subscriptions offer the repeat intervals that work. Quarterly was listed and is
 rejected by the platform; daily and one time were missing and are not. Search
 filters no longer suggest a field format the platform refuses.
 
+## [5.47.17] - 2026-09-04
+
+Large results come back in a size your assistant can use when Jaz runs as an MCP
+server (Claude Code, Claude Desktop, and the hosted connector). Each tool's size
+limit used to apply only inside the Jaz chat assistant, so a long general ledger
+could arrive whole, hundreds of thousands of characters at once. It is now trimmed
+to the tool's limit and says how many rows were left out.
+
+## [5.47.16] - 2026-09-03
+
+Internal test tooling update. No user-facing changes since v5.47.15.
+
+## [5.47.15] - 2026-09-03
+
+Internal test update. No user-facing changes since v5.47.14.
+
+## [5.47.14] - 2026-09-03
+
+Internal release automation update. No user-facing changes since v5.47.13.
+
+## [5.47.13] - 2026-09-03
+
+Editing a foreign-currency invoice, bill or credit note keeps its currency and
+rate. An update that only changed lines or dates used to rewrite the document
+into your organization's base currency at a rate of 1, and finalizing a draft had
+the same fault.
+
+`--org` is accepted before the command as well as after it. `clio auth whoami`
+shows the profile label actually in use, and none when a raw key is in use. The
+local MCP server picks up a key added with `clio auth add` without a restart.
+With `--json`, API errors now include the endpoint and the response body, which
+is where field-level detail appears.
+
+## [5.47.12] - 2026-09-03
+
+Editing a line on a bill, invoice or credit note keeps its account. Sending the
+line back the way it was read used to succeed and drop the account. Restoring the
+earliest (CREATED) version of a document is refused, because it deleted the
+document while reporting success. An update that failed with a non-JSON error is
+no longer re-sent.
+
+The pseudo-SQL catalog and its syntax guide are now two requests
+(`get_pseudo_sql_schema` and `get_pseudo_sql_syntax`), and the catalog can be
+scoped to one table, so asking about the data model costs far less.
+
+## [5.47.11] - 2026-09-03
+
+Search guidance no longer suggests calls the platform rejects. A raw filter on a
+related field uses the nested form (`{"contact": {"name": ...}}`), not a dotted
+key, and the sort field now names each entity's default.
+
+## [5.47.10] - 2026-09-03
+
+On the hosted connector, five accounting areas now mention operations they
+already contained, so requests for your organization context, ledger highlights,
+a transaction summary, a trial balance transfer, or a claim from an attachment
+find the right area.
+
+## [5.47.9] - 2026-09-03
+
+Two required fields are now explained to the assistant: `printable` on nano
+classifiers, and each rate's value and direction when saving exchange rates in
+bulk.
+
+## [5.47.8] - 2026-09-03
+
+Running a recipe now carries the same field guidance as planning one. The inputs
+of the tool that posts recipe entries had lost their descriptions.
+
+## [5.47.7] - 2026-09-03
+
+Internal test update. No user-facing changes since v5.47.6.
+
+## [5.47.6] - 2026-09-03
+
+Subscriptions offer the repeat intervals the platform accepts: daily and one time
+are available, and quarterly, which is always rejected, is gone. Changing a
+subscription's transaction template now reaches the platform instead of being
+discarded.
+
+## [5.47.5] - 2026-09-03
+
+The CLI reference in the jaz-cli skill matches the real CLI. It named 78 flags and
+3 commands (`cashflow delete`, `magic search`, `attachments table`) that do not
+exist, so following it produced "unknown option".
+
 ## [5.47.4] - 2026-09-03
 
 `--format` is gone from the commands that never honoured it. Asking a single
@@ -1301,6 +1393,18 @@ is switched on, the README now documents the one-step workaround: choose
 **Dynamic** instead of **Dynamic discovery** and enter the two sign-in URLs.
 No change for existing connections.
 
+## [5.42.0] - 2026-08-17
+
+Cash-in and cash-out entries no longer ask for a debit/credit type on each line
+(the direction comes from the entry itself), and they accept a contact, which is
+what the Deposits screens group by.
+
+The API skill now describes deposits correctly: a deposit is an ordinary
+transaction posted to an account flagged for deposits, not a document of its own.
+The payment account must be a bank or cash account for bank transfer, cash and
+cheque payments, and the deposit drawdown example uses payment method OTHER.
+Empty scheduled-transaction lists return consistent counts.
+
 ## [5.41.1] - 2026-08-17
 
 Cashflow search by reconciliation status works again. Searching `status:unreconciled`
@@ -1359,6 +1463,13 @@ The exchange-rate confirmation on foreign-currency documents now names which cur
 ## [5.38.0] - 2026-08-03
 
 Personal access tokens now work fully with the local MCP server: `clio mcp` with a `pat-` token discovers all your organizations at startup (previously the organization list stayed empty and organization-scoped tools refused to run), and can recover on demand if the first lookup hits a brief outage. Connecting also got faster and quieter behind the scenes: the hosted connector confirms your token's access in a single check instead of two.
+
+## [5.37.0] - 2026-08-02
+
+Auto-reconciliation suggestions can be requested as `RECOMMENDATIONS`: every
+suggestion type except Magic Match in one faster call. Magic Match, which scans
+open transactions and is much slower, is requested on its own. The existing
+types work as before. CLI: `clio bank auto-recon --type RECOMMENDATIONS`.
 
 ## [5.36.17] - 2026-08-02
 
