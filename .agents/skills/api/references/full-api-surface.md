@@ -3,7 +3,7 @@
 > **The endpoints clio wraps — the REST surface is larger.** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 454 paths / 379 operations and is the authoritative list; check it before concluding
+> carries 454 paths / 380 operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -262,7 +262,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/inventory-items` | Create inventory item (needs `name`, `itemCode`, `unit`, `costingMethod`, `cogsResourceId` (Direct Costs), `purchaseAccountResourceId` (Inventory), `saleAccountResourceId`, `blockInsufficientDeductions`) |
 | GET | `/inventory-items` | List inventory items |
 | GET | `/inventory-item-balance/:resourceId` | Get inventory balance |
-| GET | `/inventory-balances/:balanceStatus` | List by status (**known 500 bug**) |
+| GET | `/inventory-balances/:balanceStatus` | List by status: `ALL`, `AVAILABLE`, `FULLY_DRAWN` (empty = 404) |
 | DELETE | (use `/items/:id`) | Delete inventory items via standard items endpoint |
 
 ### Tax Profiles

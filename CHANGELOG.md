@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.70.0] - 2026-09-24
+
+**Payment terms that stick, and classifier and inventory fixes.**
+
+`clio contacts create` and `update` accept payment terms by name in any case (`net 30`, `NET_45`) or as 0, 7, 15, 30, 45 or 60 days. A term for a side the contact is not on is refused instead of silently dropped, and a one-flag `clio contacts update` no longer fails for missing fields. Bulk contact imports can set payment terms, including custom day counts. A bulk update that leaves terms out now keeps the stored ones instead of the platform turning them into "Custom". Contact status changes are refused because the platform cannot apply them.
+
+Updating a nano classifier no longer needs its classes restated, and record-list classifiers keep their format. The CLI can add and delete classes and turn printing off. Account classifications list in full, and a new inventory balances tool and `clio inventory balances` show stock by status. Fixed-asset commands accept every purchase and sale transaction type.
+
 ## [5.69.0] - 2026-09-24
 
 **Quick fix the lines on quotes, orders and purchase requests.**

@@ -265,7 +265,7 @@ DIFFERENT shape from single create — easier to confuse.
 | `purchaseAssetAccountResourceId` | recommended | Asset account UUIDv4 |
 | `depreciationExpenseAccountResourceId` | recommended | Depreciation expense account UUIDv4 |
 | `accumulatedDepreciationAccountResourceId` | recommended | Accum dep account UUIDv4 |
-| `purchaseBusinessTransactionType` | required for `NEW` | `"PURCHASE"` \| `"SALE"` \| `"JOURNAL_MANUAL"` |
+| `purchaseBusinessTransactionType` | required for `NEW` | `"PURCHASE"` \| `"SALE"` \| `"JOURNAL_MANUAL"` \| `"JOURNAL_CASHFLOW"` \| `"JOURNAL_DIRECT_CASH_IN"` \| `"JOURNAL_DIRECT_CASH_OUT"` \| `"JOURNAL_CASH_TRANSFER"` |
 | `purchaseBusinessTransactionResourceId` | required for `NEW` | Purchase LINE ITEM resourceId, must be UNLINKED |
 | `accumulatedDepreciationAtTransferDate` | `TRANSFER` only | Depreciation already booked in the source system |
 | `bookValueAtTransferDate` | `TRANSFER` only | Remaining undepreciated value |

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.69.0+121d37c8",
+  "contentVersion": "5.70.0+36d59616",
   "counts": {
-    "tools": 379,
+    "tools": 380,
     "namespaces": 46,
     "calculators": 13,
     "recipes": 13,
@@ -985,7 +985,7 @@
     {
       "name": "list_account_classifications",
       "namespace": "chart_of_accounts",
-      "description": "List account classifications (reference list for categorising chart-of-accounts entries).",
+      "description": "List account classifications {resourceId, accountClass, accountType} for categorising chart-of-accounts entries.",
       "readOnly": true,
       "destructive": false
     },
@@ -2243,6 +2243,13 @@
       "destructive": false
     },
     {
+      "name": "list_inventory_balances",
+      "namespace": "items_and_inventory",
+      "description": "List stock on hand, average cost and value per inventory item. One item: get_inventory_balance.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
       "name": "create_inventory_item",
       "namespace": "items_and_inventory",
       "description": "Create a new inventory-tracked item. Requires itemCode, name, unit, costingMethod (FIXED or WAC) and three account links. Use --input for full JSON body. If this action involved a judgment call, record it (jot field or jot tool).",
@@ -2364,7 +2371,7 @@
     {
       "name": "update_nano_classifier",
       "namespace": "nano_classifiers",
-      "description": "Update a nano classifier — change type name, modify classes, or toggle printable. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a nano classifier. Omitted fields are kept; classes is optional. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },

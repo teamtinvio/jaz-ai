@@ -985,7 +985,7 @@ Returns full custom field definition including `applyToSales`, `applyToPurchase`
 - There is no `inventoryAccountResourceId` — it appears in no request schema and a create succeeds without it
 - Delete inventory items via `DELETE /items/:id` (NOT `/inventory-items/:id`)
 - `GET /inventory-item-balance/:id` returns balance per item
-- `GET /inventory-balances/:status` currently returns 500 (known bug)
+- `GET /inventory-balances/:balanceStatus` lists balances across items; `balanceStatus` is `ALL`, `AVAILABLE` or `FULLY_DRAWN` (else 422). An empty result is a 404, which `list_inventory_balances` returns as `data: []`
 
 ---
 
@@ -1833,7 +1833,7 @@ POST /api/v1/fixed-assets
 - `depreciationMethod`: `"STRAIGHT_LINE"` or `"NO_DEPRECIATION"`
 - `effectiveLife`: Integer (months)
 - `category`: `"TANGIBLE"` or `"INTANGIBLE"`
-- `saveAsDraft`: Defaults to `true`. Set `false` to activate — requires `purchaseBusinessTransactionType` (`PURCHASE`/`JOURNAL_MANUAL`) + `purchaseBusinessTransactionResourceId`
+- `saveAsDraft`: Defaults to `true`. Set `false` to activate — requires `purchaseBusinessTransactionType` (`PURCHASE`, `SALE`, `JOURNAL_MANUAL`, `JOURNAL_CASHFLOW`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT` or `JOURNAL_CASH_TRANSFER`) + `purchaseBusinessTransactionResourceId`
 - Optional string fields (`purchaseBusinessTransactionResourceId`, `capsuleResourceId`) can be safely omitted for drafts
 
 ### Response
@@ -1886,7 +1886,7 @@ The complete inventory surface is three routes plus the item create/list pair:
 | POST | `/api/v1/inventory-items` | Create an inventory-tracked item |
 | GET | `/api/v1/inventory-items` | List inventory-tracked items |
 | GET | `/api/v1/inventory-item-balance/:resourceId` | Balance for one item |
-| GET | `/api/v1/inventory-balances/:balanceStatus` | Balances by status — **returns 500**, see SKILL.md Rule 46 |
+| GET | `/api/v1/inventory-balances/:balanceStatus` | Balances across items by status: `ALL`, `AVAILABLE`, `FULLY_DRAWN` (SKILL.md Rule 97) |
 
 Stock moves only as a side effect of a transaction that carries the item (invoice, bill,
 credit note). There is no direct quantity write.

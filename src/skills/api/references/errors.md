@@ -562,12 +562,12 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 
 ## Catalogs POST Errors
 
-### 500 Internal Server Error on POST (known bug)
-**Cause**: `POST /catalogs` returns 500 after passing field validation.
-**Correct field names** (discovered via 422 validation errors):
+### POST works; the response has no resourceId
+`POST /catalogs` returned 201 on a live probe 2026-09-23 (it used to 500). The item `unit` is optional: a null unit means "use the item's own unit".
+**Field names**:
 - `catalogName` (NOT `name`)
 - `items` array with objects: `{ itemResourceId, itemName, price }` (NOT `itemResourceIds` flat array)
-**Workaround**: Create catalogs through the Jaz UI.
+**Response**: `{ createdCatalogs, createdCatalogItems, createContactGroups }` counts, no resourceId. Find the new catalog with `search_catalogs` by `catalogName`.
 
 ---
 
@@ -616,7 +616,7 @@ account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-gl
 
 ### 404 — Endpoint does not exist
 **Cause**: `POST /inventory/adjustments` returns 404. Also tested: `/inventory-adjustments`, `/inventory-items/:id/adjustments`, `/items/:id/inventory-adjustments` — all 404. None of the four is registered; there is no stock-adjustment write path at any spelling.
-**Note**: The whole inventory surface is `POST|GET /inventory-items`, `GET /inventory-item-balance/:resourceId` and `GET /inventory-balances/:balanceStatus` (that last one 500s — Rule 46). Inventory items can be created, and stock moves as a side effect of a transaction carrying the item, but quantity cannot be written directly. See `endpoints.md` → Inventory.
+**Note**: The whole inventory surface is `POST|GET /inventory-items`, `GET /inventory-item-balance/:resourceId` and `GET /inventory-balances/:balanceStatus` (balances across items: `ALL`, `AVAILABLE` or `FULLY_DRAWN`, Rule 97). Inventory items can be created, and stock moves as a side effect of a transaction carrying the item, but quantity cannot be written directly. See `endpoints.md` → Inventory.
 
 ---
 
