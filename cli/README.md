@@ -3,13 +3,13 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/v/jaz-clio?style=for-the-badge&logo=npm" alt="npm"></a>
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/dm/jaz-clio?style=for-the-badge&label=downloads" alt="npm downloads"></a>
-  <img src="https://img.shields.io/badge/tools-381-blue?style=for-the-badge" alt="381 tools">
+  <img src="https://img.shields.io/badge/tools-386-blue?style=for-the-badge" alt="386 tools">
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
 <p align="center"><b>Jaz accounting on the command line, and inside any AI agent.</b></p>
 
-381 tools · 76 command groups · 7 skills · 13 calculators · 12 close playbooks · 159 field-tested API rules.
+386 tools · 76 command groups · 7 skills · 13 calculators · 12 close playbooks · 160 field-tested API rules.
 
 ```bash
 npm install -g jaz-clio
@@ -64,7 +64,8 @@ clio invoices search --query 'status:unpaid AND $500+' # structured per-entity s
 clio ledger-find-fix preview --level TRANSACTIONS --input recode.json  # find & fix (recode) across record types
 clio approvals approve <resourceId> --entity invoices  # approve a document waiting on you
 clio sql preview "SELECT invoice_number, balance FROM invoices WHERE balance > 0 LIMIT 10"  # read-only pseudo-SQL
-clio report-templates list                             # the organization's saved report layouts
+clio report-templates update "Board P&L" --set colorTheme=calm  # customize a report layout
+clio exports download --type profit-and-loss --template "Board P&L" --format PDF --start-date 2026-01-01 --end-date 2026-06-30
 clio modules list                                      # which features are switched on
 clio navigate reports.profit-and-loss                  # deep link into the Jaz dashboard (offline)
 ```
@@ -107,7 +108,7 @@ that ends up in a journal.
 
 ## MCP server
 
-381 tools for any AI agent that speaks MCP. Runs locally: no cloud, no ports.
+386 tools for any AI agent that speaks MCP. Runs locally: no cloud, no ports.
 
 > **No install at all?** Claude.ai, ChatGPT, Cowork, and Microsoft Copilot Studio can use Jaz through the hosted connector. Add `https://mcp.jaz.ai/mcp` as a custom connector and sign in with OAuth, no key. The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
 
@@ -140,7 +141,7 @@ OAuth can reach the organizations granted at sign-in; `--org` pins one, and with
 
 ## Skills
 
-159 API rules from production testing: field-name maps, error-recovery patterns, response-shape quirks, plus 12 job playbooks. Installable into any agent project, no server involved.
+160 API rules from production testing: field-name maps, error-recovery patterns, response-shape quirks, plus 12 job playbooks. Installable into any agent project, no server involved.
 
 ```bash
 clio init                     # auto-detect the agent, install skills + agent-rules

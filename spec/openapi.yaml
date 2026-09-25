@@ -8926,6 +8926,66 @@
       ],
       "type": "object"
     },
+    "CreateOrganizationReportTemplateRequest": {
+      "properties": {
+        "framework": {
+          "description": "Reporting framework, for PROFIT_AND_LOSS, BALANCE_SHEET, CASHFLOW, and EQUITY_MOVEMENT only. Defaults to IAS_1 for those report types. For PROFIT_AND_LOSS and CASHFLOW, also selects which system default layout is used when templateConfiguration is omitted.",
+          "enum": [
+            "IAS_1",
+            "IFRS_18",
+            "GAAP",
+            "IND_AS",
+            "IFRS_SME"
+          ],
+          "example": "IAS_1",
+          "type": "string"
+        },
+        "packTemplates": {
+          "description": "Templates included in the pack, in order. Required for REPORT_PACK, and rejected for every other report type. List the same templates as the TEMPLATE entries in the includedComponents of templateConfiguration: the pack renders from includedComponents, and delete checks read it too.",
+          "items": {
+            "$ref": "#/definitions/PackTemplateRequest"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "reportType": {
+          "description": "Report the template lays out. REPORT_PACK bundles other templates into one document.",
+          "enum": [
+            "PROFIT_AND_LOSS",
+            "BALANCE_SHEET",
+            "CASHFLOW",
+            "EQUITY_MOVEMENT",
+            "TRIAL_BALANCE",
+            "GENERAL_LEDGER",
+            "VAT_LEDGER",
+            "CASH_BALANCE",
+            "AGED_RECEIVABLES_DETAILS",
+            "AGED_RECEIVABLES_SUMMARY",
+            "AGED_PAYABLES_DETAILS",
+            "AGED_PAYABLES_SUMMARY",
+            "REPORT_PACK"
+          ],
+          "example": "PROFIT_AND_LOSS",
+          "type": "string"
+        },
+        "templateConfiguration": {
+          "description": "Template layout, as a JSON-encoded string. When omitted, the template starts from the system default layout for the report type (see Get Default Report Template Configuration). Required for REPORT_PACK.",
+          "type": "string"
+        },
+        "templateName": {
+          "description": "Display name of the template. Must be unique among the organization's templates of the same report type.",
+          "example": "Monthly Profit and Loss",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "reportType",
+        "templateName"
+      ],
+      "type": "object"
+    },
     "CreatePostingRuleRequest": {
       "properties": {
         "defaultBankAccountResourceId": {
@@ -10807,6 +10867,15 @@
         },
         "paymentMethod": {
           "description": "Default payment method.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DefaultReportTemplateConfigurationResponse": {
+      "properties": {
+        "templateConfiguration": {
+          "description": "System default layout, as a JSON-encoded string. Pass it, edited or not, as templateConfiguration to Create Organization Report Template.",
           "type": "string"
         }
       },
@@ -15917,6 +15986,26 @@
       },
       "type": "object"
     },
+    "PackTemplateRequest": {
+      "properties": {
+        "templateOrder": {
+          "description": "Position of the template in the pack, starting at 1. Must be unique within the pack.",
+          "example": 1,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "templateResourceId": {
+          "description": "Resource ID of the report template to include in the pack.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        }
+      },
+      "required": [
+        "templateOrder",
+        "templateResourceId"
+      ],
+      "type": "object"
+    },
     "PageableResponse": {
       "properties": {
         "data": {
@@ -20226,6 +20315,16 @@
         "rejectionReason",
         "resourceId"
       ],
+      "type": "object"
+    },
+    "ReportTemplateResourceResponse": {
+      "properties": {
+        "resourceId": {
+          "description": "Resource ID of the report template.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "RequestChangesClaimRecord": {
@@ -29712,6 +29811,38 @@
       "required": [
         "classificationType",
         "name",
+        "resourceId"
+      ],
+      "type": "object"
+    },
+    "UpdateOrganizationReportTemplateRequest": {
+      "properties": {
+        "packTemplates": {
+          "description": "Templates included in the pack, in order. Replaces the pack's current list. Report packs only. When the included templates change, update the includedComponents of templateConfiguration in the same request so the two stay in step.",
+          "items": {
+            "$ref": "#/definitions/PackTemplateRequest"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array"
+        },
+        "resourceId": {
+          "description": "Resource ID of the report template, from the URL path.",
+          "type": "string"
+        },
+        "templateConfiguration": {
+          "description": "Template layout, as a JSON-encoded string. Replaces the stored layout in full.",
+          "type": "string"
+        },
+        "templateName": {
+          "description": "Display name of the template. Must be unique among the organization's templates of the same report type.",
+          "example": "Monthly Profit and Loss",
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
         "resourceId"
       ],
       "type": "object"
@@ -56654,6 +56785,205 @@
         "tags": [
           "Organization Report Templates"
         ]
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a report template. When templateConfiguration is omitted, the template starts from the system default layout for the report type, the same layout Get Default Report Template Configuration returns. A report pack needs both templateConfiguration and packTemplates. The new template is not made the default; use Set Default Organization Report Template for that.",
+        "operationId": "create-organization-report-template",
+        "parameters": [
+          {
+            "description": "The report template to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateOrganizationReportTemplateRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ReportTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Organization Report Template",
+        "tags": [
+          "Organization Report Templates"
+        ]
+      }
+    },
+    "/api/v1/organization-report-template/default-configuration": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Get the system default layout for a report type: the layout a new template starts from when Create Organization Report Template is called without templateConfiguration. Edit it and pass it to Create Organization Report Template to start from a customized layout. Report packs have no default layout.",
+        "operationId": "list-organization-report-template-default-configuration",
+        "parameters": [
+          {
+            "description": "Report type to get the default layout for.",
+            "enum": [
+              "PROFIT_AND_LOSS",
+              "BALANCE_SHEET",
+              "CASHFLOW",
+              "EQUITY_MOVEMENT",
+              "TRIAL_BALANCE",
+              "GENERAL_LEDGER",
+              "VAT_LEDGER",
+              "CASH_BALANCE",
+              "AGED_RECEIVABLES_DETAILS",
+              "AGED_RECEIVABLES_SUMMARY",
+              "AGED_PAYABLES_DETAILS",
+              "AGED_PAYABLES_SUMMARY"
+            ],
+            "in": "query",
+            "name": "reportType",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Reporting framework whose default layout to return (default IAS_1). PROFIT_AND_LOSS and CASHFLOW only.",
+            "enum": [
+              "IAS_1",
+              "IFRS_18",
+              "GAAP",
+              "IND_AS",
+              "IFRS_SME"
+            ],
+            "in": "query",
+            "name": "framework",
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/DefaultReportTemplateConfigurationResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Default Report Template Configuration",
+        "tags": [
+          "Organization Report Templates"
+        ]
       }
     },
     "/api/v1/organization-report-template/search": {
@@ -56733,6 +57063,90 @@
       }
     },
     "/api/v1/organization-report-template/{resourceId}": {
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Delete a report template and remove it from every report pack that includes it. The default template of a report type cannot be deleted, nor can the only template of a report type, nor a template that is the last one left in a report pack. Report packs can always be deleted.",
+        "operationId": "delete-organization-report-template",
+        "parameters": [
+          {
+            "description": "Resource ID of the report template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ReportTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete Organization Report Template",
+        "tags": [
+          "Organization Report Templates"
+        ]
+      },
       "get": {
         "consumes": [
           "application/json"
@@ -56801,6 +57215,185 @@
           }
         ],
         "summary": "Get Organization Report Template",
+        "tags": [
+          "Organization Report Templates"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update a report template's name, layout, or included templates. Fields left out keep their current values; templateConfiguration and packTemplates each replace the stored value in full. The report type and framework cannot be changed.",
+        "operationId": "update-organization-report-template",
+        "parameters": [
+          {
+            "description": "Resource ID of the report template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The report template fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateOrganizationReportTemplateRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ReportTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Organization Report Template",
+        "tags": [
+          "Organization Report Templates"
+        ]
+      }
+    },
+    "/api/v1/organization-report-template/{resourceId}/set-default": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Make a report template the default for its report type. The template that was the default before stops being the default.",
+        "operationId": "create-organization-report-template-set-default",
+        "parameters": [
+          {
+            "description": "Resource ID of the report template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ReportTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Set Default Organization Report Template",
         "tags": [
           "Organization Report Templates"
         ]
@@ -76956,7 +77549,7 @@
       "name": "SQL Query"
     },
     {
-      "description": "Manage the organization's report templates.",
+      "description": "Create, update, search, and delete the organization's report templates, and set the default template for each report type.",
       "name": "Organization Report Templates"
     },
     {

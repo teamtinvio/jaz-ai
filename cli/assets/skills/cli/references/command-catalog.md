@@ -434,20 +434,36 @@ Provisioned upstream; no create/update/delete exists.
 
 `roleCodes` is the column that matters: a module can be enabled and still deny the caller, because access is per role. "The module is on" and "I can use it" are different questions.
 
-### `clio report-templates`: Saved report layouts (read-only, 3 tools)
-Authored in the dashboard; no create/update/delete exists.
+### `clio report-templates`: Report layouts and report packs (8 tools)
+The saved layout of each report (title, fonts, rows, columns, period), one default per report type, and packs that bundle several reports into one document. Every command that takes `<template>` accepts its resourceId or exact name. Full reference: the api skill's `references/report-templates.md`.
 
 | Subcommand | Key flags |
 |------------|-----------|
-| `list` | `--json`, `--format`: **no paging flags, deliberately** |
-| `get <resourceId>` | none |
-| `search` | `--report-type`, `--report-category`, `--default`, `--filter`, `--sort`, `--order`: **no paging flags** |
+| `list` | `--json`, `--format`: **no paging flags, deliberately** (the endpoint returns everything) |
+| `get <template>` | `--keys a,b` (part of the layout), `--row <id>` (one row), `--config-out <file>` (the whole layout, to edit; not with `--keys`/`--row`), `--json` |
+| `search` | `--name`, `--type`, `--category`, `--default`, `--filter`, `--sort`, `--order`: **no paging flags** |
+| `default-config` | `--type <T>` (required), `--framework IAS_1\|IFRS_18`, `--out <file>` |
+| `create` | `--name`, `--type` (required); `--framework`; layout flags below; `--report <template>` (repeat, packs) |
+| `update <template>` | `--name`; layout flags below; `--report <template>` (repeat: replaces a pack's reports) |
+| `set-default <template>` | Makes it the default for every export and dashboard view of that report; prints the undo |
+| `delete <template>` | Refused for a type's default and a pack's last report |
 
-Neither `list` nor `search` declares `--limit`/`--offset`/`--all`/`--max-rows`: both ignore them upstream, returning the full set in one response regardless. The flags are omitted rather than accepted-and-ignored.
+Layout flags on `create` / `update`:
+- `--set path=value`: change one value; the value is read as JSON when it parses, else as text (repeatable).
+- `--remove path`: remove one value (repeatable).
+- `--edits <file>`: a JSON list of edits (`set`, `insert`, `remove`, `updateRow`, `addRow`, `removeRow`, `moveRow`).
+- `--config-file <file>`: the whole layout.
 
-Two of the three search filters 500 upstream today (measured 2026-09-07): `--report-category` fails alone but works when `--report-type` is also supplied, and `--default` fails. `--report-type` alone is reliable.
+```bash
+clio report-templates get "Board P&L" --config-out pl.json                 # the whole layout, to a file
+clio report-templates create --name "Board P&L" --type PROFIT_AND_LOSS --set pdfTitleConfigs.title="Board P&L"
+clio report-templates update "Board P&L" --set colorTheme=calm
+clio report-templates create --name "Board pack" --type REPORT_PACK --report "Board P&L" --report "Standard Balance Sheet"
+clio exports download --type profit-and-loss --format PDF --start-date 2026-01-01 --end-date 2026-06-30 --template "Board P&L"
+clio report-templates set-default "Board P&L"
+```
 
-`templateConfiguration` is a JSON **string**, not an object; read it with `--json`.
+`list` and `search` return summaries without layouts (`configurationChars` gives each layout's size); `get` returns the layout as an object without the server-owned `coaSnapshot`. Search runs over the full list, so every filter works, `--name` included (upstream's own search answers 500 for four of its five filters). A write prints what the server did not keep, if anything (`notSaved`): profit-and-loss and balance-sheet layouts drop keys the server does not model.
 
 ### `clio pseudo-sql` (alias: `sql`): Read-only SQL over the curated reporting tables (6 tools)
 A restricted SQL subset against Jaz's curated reporting schema, **not** the customer's database. SELECT only, single statement, 16384-char cap; the engine rejects DML, so there is no write verb.
@@ -531,7 +547,9 @@ Also: `clio reports pdf` (generate PDF from a message/document).
 ### `clio exports`: Data export downloads
 | Subcommand | Key flags |
 |------------|-----------|
-| `download` | `--type`, `--start-date`, `--end-date`, `--currency`, `--tags`, `--contact` |
+| `download` | `--type`, `--format XLSX\|PDF`, `--start-date`, `--end-date`, `--currency`, `--tags`, `--contact`, `--template <template>` |
+
+`--template` renders the report with one of the organization's report templates (resourceId or name), for profit-and-loss, balance-sheet, cashflow, equity-movement, trial-balance, general-ledger, tax-ledger, cash-balance, ar-report, ar-details-report, ap-report and ap-details-report. The template must be of that report's type; it is checked before the export is requested, because upstream answers a mismatched or unknown template with an empty 200 and no file. Omit it to use the organization's default template.
 
 ---
 
@@ -732,7 +750,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 381 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 386 operations.
 
 ### `clio serve`: HTTP daemon
 Starts the HTTP daemon for ChatKit and email channel integrations.

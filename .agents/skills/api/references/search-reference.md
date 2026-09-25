@@ -28,7 +28,7 @@ All search endpoints share this identical structure:
 
 **Response shape**: `{ totalElements, totalPages, data: [...] }`; all search/list endpoints return this flat structure directly (no outer `data` wrapper).
 
-> **Exception**: the two halves of this family answer differently upstream. `POST /organization-report-template/search` returns a **bare array** with no envelope; `GET /organization-report-template` returns its rows under a **`reportTemplates`** key with no counts. Measured 2026-09-07: the two halves disagree with each other and with the house style. The tools normalize the list, so you always read `.data`.
+> **Exception**: the two halves of this family answer differently upstream. `POST /organization-report-template/search` returns a **bare array** with no envelope; `GET /organization-report-template` returns its rows under a **`reportTemplates`** key with no counts. Measured 2026-09-07: the two halves disagree with each other and with the house style. The tools normalize the list, so you always read `.data`. The report template search tool does not call `/search` at all: four of its five filters answer 500 upstream (re-measured 2026-09-24), so it filters the full list with the same grammar plus `templateName`. See `references/report-templates.md`.
 
 ---
 

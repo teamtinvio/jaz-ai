@@ -678,6 +678,18 @@ Battle-tested patterns from production Jaz API clients:
 | `isPrintable` | `printable` | Boolean, no `is` prefix. Default `false`; most classifiers are not printable |
 | `categories` | `classes` | The "categories" or "options" are called `classes` |
 
+### Report Template Fields
+
+| What You'd Guess | Actual API Field | Notes |
+|------------------|-------------------|-------|
+| `layout` / `config` | `templateConfiguration` | A JSON-encoded **string** on the wire; the Clio tools hand it over as an object |
+| `name` | `templateName` | Unique per report type |
+| `type` | `reportType` | UPPER_SNAKE: `PROFIT_AND_LOSS`, `VAT_LEDGER` (the tax ledger), `AGED_RECEIVABLES_SUMMARY`, ... |
+| `default` | `isDefault` | One per report type; change with set-default, never on update |
+| `templateId` (exports) | `templateResourceId` | On `data-exports/{type}` |
+| `templateId` (templated reports) | `reportTemplateResourceId` | On `generate-reports/templated-*` |
+| `reports` (pack) | `packTemplates[].templateResourceId` + `templateOrder` | Must match the layout's `includedComponents` TEMPLATE entries |
+
 ## Background Jobs
 
 🚨 The single most dangerous trap in background-jobs:

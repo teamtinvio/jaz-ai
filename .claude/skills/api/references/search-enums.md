@@ -548,7 +548,7 @@ All search endpoints return:
 }
 ```
 
-**Exception**: `GET /organization-report-template` returns its rows under a `reportTemplates` key, not `data` (measured 2026-09-06). Its `/search` sibling returns a **bare array** with no envelope (measured 2026-09-07). The tools normalize the list; read `.data` on both.
+**Exception**: `GET /organization-report-template` returns its rows under a `reportTemplates` key, not `data` (measured 2026-09-06). Its `/search` sibling returns a **bare array** with no envelope (measured 2026-09-07). The tools normalize the list; read `.data` on both. Since 2026-09-24 the report template search tool filters the list itself instead of calling `/search`, because four of the search endpoint's five filters answer 500; it takes the same filter grammar plus `templateName` (`references/report-templates.md`).
 
 ---
 

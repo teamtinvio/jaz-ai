@@ -1,5 +1,19 @@
 # Changelog
 
+## [5.74.0] - 2026-09-24
+
+**Customize your report templates: create, edit, set the default, and export with them.**
+
+Your assistant and the command line can now manage report templates end to end, not just list them. Create a template for any report (profit and loss, balance sheet, cash flow, trial balance, general ledger, tax ledger, aging, cash balance) or a report pack that bundles several reports into one document. Change a title, colours, fonts, the period, columns or the rows of a statement without rewriting the whole layout. Make a template the default, and export any of those reports as PDF or Excel with the template you choose.
+
+- Refer to a template by its name; no id lookup needed.
+- Reading a large statement layout shows its structure first, so your assistant can change one row without loading everything.
+- Changes that would quietly break a report are refused before anything is saved: an unknown colour or font, a total that points at a missing row, removing a total the report depends on, a replacement layout missing parts of the current one, or deleting the last report in a pack.
+- Making a template the default tells you which one it replaced, so you can switch back.
+- Exporting with a template of the wrong report type now explains the problem instead of failing with an unreadable error.
+- Searching templates works for every filter, including by name.
+- Aged receivables and aged payables detail reports can now be exported, as PDF or Excel.
+
 ## [5.73.4] - 2026-09-24
 
 **Slow reports and auto-reconciliation answer clearly instead of timing out.**

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.73.4+eda170c4",
+  "contentVersion": "5.74.0+2459d4ad",
   "counts": {
-    "tools": 381,
-    "namespaces": 46,
+    "tools": 386,
+    "namespaces": 47,
     "calculators": 13,
     "recipes": 13,
     "jobs": 12,
     "skills": 7,
     "commands": 76,
-    "apiRules": 159
+    "apiRules": 160
   },
   "namespaces": [
     {
@@ -67,6 +67,10 @@
     {
       "name": "financial_reports",
       "description": "Core financial statements: trial balance (TB), balance sheet (BS/B/S), profit & loss (PnL/P&L/income statement), cash flow, general ledger (GL), cash balance/position, equity movement, VAT/GST ledger. Also: how profitable, what is the balance. XLSX/PDF file exports of any of these statements are produced via download_export (lives in operational_reports namespace; switch there or call by name)."
+    },
+    {
+      "name": "report_templates",
+      "description": "Report templates: the saved layout of a report (title, fonts, rows, columns, period) and report packs (several reports in one document). List, read, search, create, edit, set the default, delete. Customize or rename a P&L, balance sheet, cash flow, trial balance, GL, GST/VAT ledger or aging layout; change which template a report uses by default. Render a template with download_export."
     },
     {
       "name": "operational_reports",
@@ -142,7 +146,7 @@
     },
     {
       "name": "organization",
-      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). List/search saved report templates. Agent context bundle. Next document reference number (numbering series) for invoices, bills, credit notes, quotes, orders and journals."
+      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). Agent context bundle. Next document reference number (numbering series) for invoices, bills, credit notes, quotes, orders and journals."
     },
     {
       "name": "document_ai",
@@ -1054,24 +1058,59 @@
     },
     {
       "name": "list_organization_report_templates",
-      "namespace": "organization",
-      "description": "List saved organization report templates.",
+      "namespace": "report_templates",
+      "description": "List every report template (no layouts): reportType, isDefault (one per type), a pack's reports. Read one with get_organization_report_template.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "get_organization_report_template",
-      "namespace": "organization",
-      "description": "Get a saved report template by resourceId.",
+      "namespace": "report_templates",
+      "description": "Read a report template and its layout (templateConfiguration). Too large to return whole: configurationKeys (key sizes) and rowOutline come back; ask for keys or one row.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "search_organization_report_templates",
-      "namespace": "organization",
-      "description": "Search report templates by type, category, or default flag.",
+      "namespace": "report_templates",
+      "description": "Find report templates by name, report type, category or default flag.",
       "readOnly": true,
       "destructive": false
+    },
+    {
+      "name": "get_default_organization_report_template_configuration",
+      "namespace": "report_templates",
+      "description": "The default layout a new template of this report type starts from.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_organization_report_template",
+      "namespace": "report_templates",
+      "description": "Create a report template from the default layout (or templateConfiguration), with edits applied. A pack needs packTemplates. Not made the default; names are unique per report type. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_organization_report_template",
+      "namespace": "report_templates",
+      "description": "Rename a report template, change its layout (edits or templateConfiguration), or a pack's reports (packTemplates). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "set_default_organization_report_template",
+      "namespace": "report_templates",
+      "description": "Make a template its report type's default: every export and dashboard view of it then uses it, org-wide. Answers with previousDefault. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_organization_report_template",
+      "namespace": "report_templates",
+      "description": "Delete a report template (also removed from packs). Refused for a type's default and a pack's last report. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
     },
     {
       "name": "move_transaction_capsules",

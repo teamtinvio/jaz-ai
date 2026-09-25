@@ -2,9 +2,9 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "5.73.4",
+  "version": "5.74.0",
   "description": "Fastest way to manage money",
-  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 381 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
+  "long_description": "Built for accountants, finance teams, and the businesses they serve. IFRS-first, multi-currency, multi-user by default. The 386 operations listed here are all reachable, but this extension does not load them all at once: it lists 3 meta-tools and loads the operations you need on demand, so it costs about 600 tokens of context instead of 78KB. Ask the agent \"what can you do?\" for the full map.",
   "author": {
     "name": "Jaz",
     "email": "build.with@jaz.ai",
@@ -556,15 +556,35 @@
     },
     {
       "name": "list_organization_report_templates",
-      "description": "List saved organization report templates."
+      "description": "List every report template (no layouts): reportType, isDefault (one per type), a pack's reports. Read one with get_organization_report_template."
     },
     {
       "name": "get_organization_report_template",
-      "description": "Get a saved report template by resourceId."
+      "description": "Read a report template and its layout (templateConfiguration). Too large to return whole: configurationKeys (key sizes) and rowOutline come back; ask for keys or one row."
     },
     {
       "name": "search_organization_report_templates",
-      "description": "Search report templates by type, category, or default flag."
+      "description": "Find report templates by name, report type, category or default flag."
+    },
+    {
+      "name": "get_default_organization_report_template_configuration",
+      "description": "The default layout a new template of this report type starts from."
+    },
+    {
+      "name": "create_organization_report_template",
+      "description": "Create a report template from the default layout (or templateConfiguration), with edits applied. A pack needs packTemplates. Not made the default; names are unique per report type. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_organization_report_template",
+      "description": "Rename a report template, change its layout (edits or templateConfiguration), or a pack's reports (packTemplates). If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "set_default_organization_report_template",
+      "description": "Make a template its report type's default: every export and dashboard view of it then uses it, org-wide. Answers with previousDefault. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_organization_report_template",
+      "description": "Delete a report template (also removed from packs). Refused for a type's default and a pack's last report. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "move_transaction_capsules",
@@ -696,7 +716,7 @@
     },
     {
       "name": "download_export",
-      "description": "Analytical / financial / audit report file (XLSX or PDF). Returns { fileName, fileUrl } (pre-signed, ~5 min). Use this tool, not export_records, for anomaly / audit / risk analyses, statements, aging, summaries, ledgers, statement-of-account.\n\nPer-type date / scope (wrong set → 422 \"X is required\"):\n- balance-sheet → snapshotDate\n- cashflow, equity-movement → primaryStartDate + primaryEndDate (secondary* optional)\n- bank-closing-balance → reportDate\n- bank-reconciliation-* → startDate + endDate + bankAccountResourceId\n- fixed-assets-reconciliation-summary → startDate + endDate + accountResourceId (fixed-asset UUIDs; search fixed_assets first)\n- statement-of-account-export → contactResourceId (dates optional; omitted = all-time)\n- trial-balance, cash-balance, ar-report, ap-report → endDate\n- other summaries (P&L, GL, sales/purchase, tax, fixed-assets-register, etc.) → startDate + endDate\n\nFor raw entity rows use export_records; for ad-hoc SELECT use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow returns the IAS 7 templated report (404 template_not_found if none configured, jaz-api Rule 147)."
+      "description": "Analytical / financial / audit report file (XLSX or PDF). Returns { fileName, fileUrl } (pre-signed, ~5 min). Use this tool, not export_records, for anomaly / audit / risk analyses, statements, aging, summaries, ledgers, statement-of-account.\n\nPer-type date / scope (wrong set → 422 \"X is required\"):\n- balance-sheet → snapshotDate\n- cashflow, equity-movement → primaryStartDate + primaryEndDate (secondary* optional)\n- bank-closing-balance → reportDate\n- bank-reconciliation-* → startDate + endDate + bankAccountResourceId\n- fixed-assets-reconciliation-summary → startDate + endDate + accountResourceId (fixed-asset UUIDs; search fixed_assets first)\n- statement-of-account-export → contactResourceId (dates optional; omitted = all-time)\n- trial-balance, cash-balance, ar-report, ap-report, ar-details-report, ap-details-report → endDate\n- other summaries (P&L, GL, sales/purchase, tax, fixed-assets-register, etc.) → startDate + endDate\n\nFor raw entity rows use export_records; for ad-hoc SELECT use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow returns the IAS 7 templated report (404 template_not_found if none configured, jaz-api Rule 147)."
     },
     {
       "name": "preview_pseudo_sql",

@@ -944,6 +944,30 @@ Two of the seven never reach you through this path: a zero `adjustmentValue` and
 **Cause**: `add_employee` was called without `claimProfileResourceId` ("A claim profile is required for an employee — it carries the employee balance account used to convert and pay claims"). The claim profile is **server-required**; the org default is NOT auto-applied for employees (unlike claims), even when a default profile exists.
 **Fix**: Pick a profile via `search_claim_profiles` and pass its `resourceId` as `claimProfileResourceId`. The profile is locked while the employee has unsettled claims.
 
+### "DUPLICATE_REPORT_TEMPLATE_EXISTS" (422)
+**Cause**: A report template of the same report type already has this name. Names are unique per report type, ignoring case and treating space and `_` alike ("My P&L" and "my_p&l" collide); the same name on another report type is fine.
+**Fix**: Pick another name, or update the existing template. The Clio tools refuse this before sending and name the existing template's resourceId.
+
+### "NO_TEMPLATE_FOUND" (422)
+**Cause**: A P&L or cashflow default layout was asked for (default configuration, or a create with no `templateConfiguration`) under a framework that has none. Only `IAS_1` and `IFRS_18` have one; `GAAP`, `IND_AS` and `IFRS_SME` pass validation and then land here.
+**Fix**: Use `IAS_1` or `IFRS_18`, or pass `templateConfiguration` (for example an existing template's layout, from `get_organization_report_template`).
+
+### "CANNOT_DELETE_REPORT_TEMPLATE" (422)
+**Cause**: The template is the default of its report type, or the only template of it.
+**Fix**: Make another template the default first (`set_default_organization_report_template`; CLI `clio report-templates set-default`), then delete.
+
+### "TEMPLATE_NOT_FOUND" / "DUPLICATE_TEMPLATE_ORDER" (422)
+**Cause**: A report pack's `packTemplates` lists a template that does not exist, or two reports at the same `templateOrder`.
+**Fix**: List the templates and send `packTemplates` again. The Clio tools take pack reports as names or ids in order and number them, so neither arises through them.
+
+### "template_not_found" (404, templated reports)
+**Cause**: A `generate-reports/templated-*` call named a template that exists but is of another report type. The message ("not found in organization") says the template does not exist; it does.
+**Fix**: Pass a template of that report's type.
+
+### Export returns HTTP 200 with an EMPTY body
+**Cause**: A `data-exports/{type}` call named a report template it cannot use: one that does not exist, or one of another report type (also an unknown `templateName`). Measured on all 12 template-taking exports. No status code says so.
+**Fix**: Pass a template of that export's report type (table in `references/report-templates.md`). `download_export` / `clio exports download` take `template` (a name or id) and check it first; given a raw `templateResourceId`, they report the empty answer as an error instead of retrying it.
+
 ---
 
 ## Repair Suggestions (W1.3)

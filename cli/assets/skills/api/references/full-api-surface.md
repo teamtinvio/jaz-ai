@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 466 spec paths and 594 spec operations and is the authoritative list; check it before concluding
+> carries 468 spec paths and 599 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -519,7 +519,16 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 ### Organization Report Templates
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/organization-report-template/search` | Search report templates |
+| GET | `/organization-report-template` | List every template (rows under `reportTemplates`; ignores paging) |
+| GET | `/organization-report-template/:resourceId` | Get one |
+| POST | `/organization-report-template/search` | Search (4 of 5 filters answer 500; Clio filters the list instead) |
+| GET | `/organization-report-template/default-configuration` | The default layout a new template of a report type starts from |
+| POST | `/organization-report-template` | Create (layout defaults to the system layout; a pack needs its layout and `packTemplates`) |
+| PUT | `/organization-report-template/:resourceId` | Rename, replace the layout, or replace a pack's reports |
+| POST | `/organization-report-template/:resourceId/set-default` | Make it its report type's default (every export then uses it) |
+| DELETE | `/organization-report-template/:resourceId` | Delete (refused for a type's default) |
+
+Layouts, `edits` and measured quirks: `report-templates.md`.
 
 ### Catalogs
 | Method | Path | Description |

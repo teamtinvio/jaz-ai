@@ -2908,6 +2908,87 @@ Body `{ "hash": "..." }`. Deletes the record but RELEASES its payment records as
 
 Records an unapplied payment for the bank record and matches the two. Direction, account, currency, date and amount come from the bank record. `amount` is optional and, when sent, must EQUAL the bank record's amount (`TOTAL_RECONCILIATION_AMOUNT_MISMATCHED_WITH_STATEMENT_ENTRY_AMOUNT` otherwise); there is no partial match. `rateToFunctional` is required for a foreign-currency account. `amount` belongs INSIDE `unappliedPaymentDetails`: at the top level it is silently dropped. Returns `{ bankStatementEntryResourceId, status, reference, valueDate, unappliedPaymentResourceId }`.
 
+## 28. Report Templates
+
+The saved layout of a report, one default per report type, plus report packs. The layout fields, `edits`, and every measured quirk are in `references/report-templates.md`; this section is the wire.
+
+Rules that hold on every route below:
+- `templateConfiguration` is a **JSON-encoded string** in every request and response. Profit-and-loss and balance-sheet layouts come back with a server-owned `coaSnapshot` (a copy of the chart of accounts, rebuilt on every save; omit it when sending).
+- Writes return only `{ "data": { "resourceId": "..." } }`. Read the template back to see what was stored.
+- Names are unique per report type, ignoring case and treating space and `_` alike (422 `DUPLICATE_REPORT_TEMPLATE_EXISTS`).
+
+### GET /api/v1/organization-report-template
+
+Every template of the organization in one response, **under `reportTemplates`, not `data`**, and ignoring `limit`/`offset`. Rows: `resourceId`, `templateName`, `reportType`, `reportCategory`, `isDefault`, `templateConfiguration`, and on packs `reportPackType` and `packTemplates` (`[{ templateResourceId, templateName, templateOrder, reportType }]`).
+
+### GET /api/v1/organization-report-template/{resourceId}
+
+`{ "data": { ...one row... } }`. 404 `Report template not found` for an unknown id. A template read in the same second it was created can 404 once.
+
+### POST /api/v1/organization-report-template/search
+
+`{ filter, sort }`, answers a bare array. **Four of its five filters answer 500** (`reportCategory` without `reportType`, `isDefault`, `reportTypes`, `resourceId`), and there is no name filter. Clio filters the list instead.
+
+### GET /api/v1/organization-report-template/default-configuration
+
+`?reportType=PROFIT_AND_LOSS&framework=IFRS_18` returns `{ "data": { "templateConfiguration": "..." } }`, the layout a new template starts from, in the organization's own currency. The 12 single-report types only (not `REPORT_PACK`). `framework` is accepted for `PROFIT_AND_LOSS` and `CASHFLOW` only, and **only `IAS_1` and `IFRS_18` have a layout**: the other three answer 422 `NO_TEMPLATE_FOUND`. Takes 0.1-5 s (it builds a report preview).
+
+### POST /api/v1/organization-report-template
+
+```json
+{ "templateName": "Board P&L", "reportType": "PROFIT_AND_LOSS", "framework": "IAS_1", "templateConfiguration": "{...}" }
+```
+
+- **Required:** `templateName` (max 255) and `reportType`.
+- **Omit `templateConfiguration`** to start from the default layout. Any well-formed JSON is accepted as a layout, and an unusable one renders as the default.
+- **`framework`** is for P&L, balance sheet, cashflow and equity movement only; it defaults to `IAS_1` and cannot change later.
+- **`REPORT_PACK` requires both** `templateConfiguration` and `packTemplates: [{ templateResourceId, templateOrder }]`. They are refused on any other type.
+  - Keep `packTemplates` and the layout's `TEMPLATE` components in step, or the missing report renders as an error page.
+  - Refusals: `TEMPLATE_NOT_FOUND` for an unknown member, `DUPLICATE_TEMPLATE_ORDER` for a repeated position.
+- **Not made the default**, except that the first template of a type (in practice, the first pack) becomes its default.
+- Returns 201.
+
+### PUT /api/v1/organization-report-template/{resourceId}
+
+Any of `templateName`, `templateConfiguration`, `packTemplates`.
+- `templateConfiguration` and `packTemplates` each **replace** the stored value in full.
+- Report type and framework cannot change; other fields are ignored without an error.
+- `packTemplates` on a non-pack is 422.
+
+### POST /api/v1/organization-report-template/{resourceId}/set-default
+
+No body. Makes the template its report type's default and clears the previous one. **Every export and dashboard view of that report then uses it.** 404 for an unknown id.
+
+### DELETE /api/v1/organization-report-template/{resourceId}
+
+Removes the template from every pack that includes it.
+- **Refused:** the default of a report type (422 `CANNOT_DELETE_REPORT_TEMPLATE`, "Set another template as the default first"), and the only template of a type.
+- **Not refused:** a pack's last report whenever the pack has any other component, which leaves the pack with no reports. Clio refuses that one itself.
+- Packs can always be deleted. Deleting the default pack hands the default to the newest remaining pack.
+
+### Rendering with a template
+
+`POST /api/v1/data-exports/{type}` takes `templateResourceId` (or `templateName`) for these types, each rendering one report type:
+
+| Export type | Report type |
+|---|---|
+| `profit-and-loss` | `PROFIT_AND_LOSS` |
+| `balance-sheet` | `BALANCE_SHEET` |
+| `cashflow` | `CASHFLOW` |
+| `equity-movement` | `EQUITY_MOVEMENT` |
+| `trial-balance` | `TRIAL_BALANCE` |
+| `general-ledger` | `GENERAL_LEDGER` |
+| `tax-ledger` | `VAT_LEDGER` |
+| `cash-balance` | `CASH_BALANCE` |
+| `ar-report` | `AGED_RECEIVABLES_SUMMARY` |
+| `ar-details-report` | `AGED_RECEIVABLES_DETAILS` |
+| `ap-report` | `AGED_PAYABLES_SUMMARY` |
+| `ap-details-report` | `AGED_PAYABLES_DETAILS` |
+
+- **A template that is unknown, or of another report type, answers HTTP 200 with an EMPTY body.** It is not an error status, and there is no file.
+- Omit the template to render the organization's default.
+- The `generate-reports/templated-*` endpoints take `reportTemplateResourceId` and return the report as JSON; a template of the wrong type answers 404 `template_not_found`.
+
 ---
 
-*Last updated: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09, added Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13: Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*
+*Last updated: 2026-09-24 (added Report Templates, section 28). Previous: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09, added Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13: Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*
