@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.74.1] - 2026-09-25
+
+Internal test documentation update. No user-facing changes since v5.74.0.
+
 ## [5.74.0] - 2026-09-24
 
 **Customize your report templates: create, edit, set the default, and export with them.**
