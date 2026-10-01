@@ -463,7 +463,7 @@ clio exports download --type profit-and-loss --format PDF --start-date 2026-01-0
 clio report-templates set-default "Board P&L"
 ```
 
-`list` and `search` return summaries without layouts (`configurationChars` gives each layout's size); `get` returns the layout as an object without the server-owned `coaSnapshot`. Search runs over the full list, so every filter works, `--name` included (upstream's own search answers 500 for four of its five filters). A write prints what the server did not keep, if anything (`notSaved`): profit-and-loss and balance-sheet layouts drop keys the server does not model.
+`list` and `search` return summaries without layouts (`configurationChars` gives each layout's size); `get` returns the layout as an object without the server-owned `coaSnapshot`. Search runs over the full list, so every filter works, `--name` included (upstream's own search refuses `and` / `or` and sorting by name). A write prints what the server did not keep, if anything (`notSaved`): profit-and-loss and balance-sheet layouts drop keys the server does not model.
 
 ### `clio pseudo-sql` (alias: `sql`): Read-only SQL over the curated reporting tables (6 tools)
 A restricted SQL subset against Jaz's curated reporting schema, **not** the customer's database. SELECT only, single statement, 16384-char cap; the engine rejects DML, so there is no write verb.

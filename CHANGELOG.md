@@ -1,5 +1,9 @@
 # Changelog
 
+## [5.74.2] - 2026-10-01
+
+Your assistant's reference notes on searching report templates are up to date: they now say which filters the platform's own search accepts today. Searching templates works as before, with every filter, including by name.
+
 ## [5.74.1] - 2026-09-25
 
 Internal test documentation update. No user-facing changes since v5.74.0.

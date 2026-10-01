@@ -7022,7 +7022,7 @@
           "type": "string"
         },
         "amount": {
-          "description": "Amount received into the destination account.",
+          "description": "Amount received into the destination account, in its currency. Must match cashOut.amount unless the two accounts hold different currencies.",
           "minimum": 0,
           "type": "number"
         }
@@ -7039,7 +7039,7 @@
           "type": "string"
         },
         "amount": {
-          "description": "Amount taken from the source account.",
+          "description": "Amount taken from the source account, in its currency. Must match cashIn.amount unless the two accounts hold different currencies.",
           "minimum": 0,
           "type": "number"
         }
@@ -8929,7 +8929,7 @@
     "CreateOrganizationReportTemplateRequest": {
       "properties": {
         "framework": {
-          "description": "Reporting framework, for PROFIT_AND_LOSS, BALANCE_SHEET, CASHFLOW, and EQUITY_MOVEMENT only. Defaults to IAS_1 for those report types. For PROFIT_AND_LOSS and CASHFLOW, also selects which system default layout is used when templateConfiguration is omitted.",
+          "description": "Reporting framework, for PROFIT_AND_LOSS, BALANCE_SHEET, CASHFLOW, and EQUITY_MOVEMENT only. Defaults to IAS_1 for those report types. For PROFIT_AND_LOSS and CASHFLOW, also selects which system default layout is used when templateConfiguration is omitted; default layouts exist for IAS_1 and IFRS_18 only, so GAAP, IND_AS, and IFRS_SME need templateConfiguration.",
           "enum": [
             "IAS_1",
             "IFRS_18",
@@ -15742,48 +15742,65 @@
     },
     "OrganizationReportTemplateFilter": {
       "properties": {
-        "and": {
-          "description": "Combine with another filter using AND.",
-          "type": "object"
-        },
         "isDefault": {
           "allOf": [
             {
               "$ref": "#/definitions/BooleanExpression"
             }
           ],
-          "description": "Whether this is the default template."
-        },
-        "or": {
-          "description": "Combine with another filter using OR.",
-          "type": "object"
+          "description": "Match only default templates (true) or only non-default templates (false)."
         },
         "reportCategory": {
           "allOf": [
             {
-              "$ref": "#/definitions/StringExpression"
+              "$ref": "#/definitions/ReportTemplateStringExpression"
             }
           ],
-          "description": "Filter by report category."
+          "description": "Match templates in this report category."
         },
         "reportType": {
-          "description": "Filter by report type.",
+          "description": "Match templates that lay out this report.",
+          "enum": [
+            "PROFIT_AND_LOSS",
+            "BALANCE_SHEET",
+            "CASHFLOW",
+            "EQUITY_MOVEMENT",
+            "TRIAL_BALANCE",
+            "GENERAL_LEDGER",
+            "VAT_LEDGER",
+            "CASH_BALANCE",
+            "AGED_RECEIVABLES_DETAILS",
+            "AGED_RECEIVABLES_SUMMARY",
+            "AGED_PAYABLES_DETAILS",
+            "AGED_PAYABLES_SUMMARY",
+            "REPORT_PACK"
+          ],
+          "example": "PROFIT_AND_LOSS",
           "type": "string"
         },
         "reportTypes": {
-          "description": "Filter by report types.",
+          "description": "Match templates that lay out any of these reports.",
           "items": {
             "type": "string"
           },
+          "maxItems": 13,
           "type": "array"
         },
         "resourceId": {
           "allOf": [
             {
+              "$ref": "#/definitions/ReportTemplateStringExpression"
+            }
+          ],
+          "description": "Match the template with this resource ID."
+        },
+        "templateName": {
+          "allOf": [
+            {
               "$ref": "#/definitions/StringExpression"
             }
           ],
-          "description": "Filter by report template resource ID."
+          "description": "Match templates by display name. Every text operator is supported."
         }
       },
       "type": "object"
@@ -20325,6 +20342,18 @@
           "type": "string"
         }
       },
+      "type": "object"
+    },
+    "ReportTemplateStringExpression": {
+      "properties": {
+        "eq": {
+          "description": "Match values equal to this.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "eq"
+      ],
       "type": "object"
     },
     "RequestChangesClaimRecord": {
@@ -29817,6 +29846,12 @@
     },
     "UpdateOrganizationReportTemplateRequest": {
       "properties": {
+        "hash": {
+          "description": "The hash of the template as last read from Get, List, or Search. When sent, the update is refused with 422 INVALID_CHECK_SUM if the template has changed since, so a concurrent edit is not overwritten. Read the template again and reapply the change.",
+          "example": "9e107d9d372bb6826bd81d3542a419d6",
+          "maxLength": 64,
+          "type": "string"
+        },
         "packTemplates": {
           "description": "Templates included in the pack, in order. Replaces the pack's current list. Report packs only. When the included templates change, update the includedComponents of templateConfiguration in the same request so the two stay in step.",
           "items": {
@@ -29826,10 +29861,6 @@
           "minItems": 1,
           "type": "array"
         },
-        "resourceId": {
-          "description": "Resource ID of the report template, from the URL path.",
-          "type": "string"
-        },
         "templateConfiguration": {
           "description": "Template layout, as a JSON-encoded string. Replaces the stored layout in full.",
           "type": "string"
@@ -29838,13 +29869,9 @@
           "description": "Display name of the template. Must be unique among the organization's templates of the same report type.",
           "example": "Monthly Profit and Loss",
           "maxLength": 255,
-          "minLength": 1,
           "type": "string"
         }
       },
-      "required": [
-        "resourceId"
-      ],
       "type": "object"
     },
     "UpdateOrganizationUserClientRequest": {
@@ -36685,7 +36712,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Record a cash transfer between two accounts.",
+        "description": "Record a cash transfer between two accounts. When both accounts hold the same currency, cashOut.amount and cashIn.amount must match. When the accounts hold different currencies, the amounts may differ and both must be greater than 0; the transfer rate is cashIn.amount divided by cashOut.amount.",
         "operationId": "create-cash-transfer",
         "parameters": [
           {
@@ -56790,7 +56817,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create a report template. When templateConfiguration is omitted, the template starts from the system default layout for the report type, the same layout Get Default Report Template Configuration returns. A report pack needs both templateConfiguration and packTemplates. The new template is not made the default; use Set Default Organization Report Template for that.",
+        "description": "Create a report template. When templateConfiguration is omitted, the template starts from the system default layout for the report type, the same layout Get Default Report Template Configuration returns. A report pack needs both templateConfiguration and packTemplates. The first template of a report type becomes its default; any later template is not made the default, so use Set Default Organization Report Template for that. For PROFIT_AND_LOSS and CASHFLOW, default layouts exist for the IAS_1 and IFRS_18 frameworks only; with GAAP, IND_AS, or IFRS_SME, pass templateConfiguration.",
         "operationId": "create-organization-report-template",
         "parameters": [
           {
@@ -56903,13 +56930,10 @@
             "type": "string"
           },
           {
-            "description": "Reporting framework whose default layout to return (default IAS_1). PROFIT_AND_LOSS and CASHFLOW only.",
+            "description": "Reporting framework whose default layout to return (default IAS_1). PROFIT_AND_LOSS and CASHFLOW only. Default layouts exist for IAS_1 and IFRS_18.",
             "enum": [
               "IAS_1",
-              "IFRS_18",
-              "GAAP",
-              "IND_AS",
-              "IFRS_SME"
+              "IFRS_18"
             ],
             "in": "query",
             "name": "framework",
@@ -56991,7 +57015,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Search report templates with filters and sort.",
+        "description": "Search report templates with filters and sort. templateName supports every text operator; resourceId and reportCategory support an exact match (eq) only.",
         "operationId": "search-organization-report-template",
         "parameters": [
           {
@@ -57223,7 +57247,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Update a report template's name, layout, or included templates. Fields left out keep their current values; templateConfiguration and packTemplates each replace the stored value in full. The report type and framework cannot be changed.",
+        "description": "Update a report template's name, layout, or included templates. Fields left out keep their current values; templateConfiguration and packTemplates each replace the stored value in full. The report type and framework cannot be changed, and a request that sends them, or any other field not listed here, is rejected. Send the hash from the last read to have the update refused, rather than overwrite a change made since.",
         "operationId": "update-organization-report-template",
         "parameters": [
           {

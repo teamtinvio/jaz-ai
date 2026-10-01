@@ -289,7 +289,7 @@ clio report-templates create --name "Board pack" --type REPORT_PACK \
 
 ### Search
 
-Upstream's search endpoint answers 500 for four of its five filters, and has no name filter, so `search_organization_report_templates` filters the full list instead. That matches because the list is every template at once. It uses the same filter grammar, plus `templateName`:
+Upstream's search endpoint now honours `isDefault`, `reportCategory`, `resourceId`, `reportType`, `reportTypes` and `templateName` (eq, contains), but still refuses `and` / `or` and sorting by `templateName` (measured 2026-10-01), so `search_organization_report_templates` filters the full list instead. That matches because the list is every template at once. It uses the same filter grammar, plus `templateName`:
 
 ```jsonc
 { "filter": { "or": [ { "templateName": { "contains": "board" } }, { "isDefault": { "eq": true }, "reportType": "REPORT_PACK" } ] } }

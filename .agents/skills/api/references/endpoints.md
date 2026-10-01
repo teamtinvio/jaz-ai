@@ -2927,7 +2927,7 @@ Every template of the organization in one response, **under `reportTemplates`, n
 
 ### POST /api/v1/organization-report-template/search
 
-`{ filter, sort }`, answers a bare array. **Four of its five filters answer 500** (`reportCategory` without `reportType`, `isDefault`, `reportTypes`, `resourceId`), and there is no name filter. Clio filters the list instead.
+`{ filter, sort }`, answers a bare array. Honours `isDefault`, `reportCategory`, `resourceId`, `reportType` (plain string), `reportTypes` (plain array) and `templateName` (eq, contains); refuses `and` / `or` (400) and sorting by `templateName` (422). Measured 2026-10-01. Clio filters the full list instead, which supports all of them.
 
 ### GET /api/v1/organization-report-template/default-configuration
 

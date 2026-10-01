@@ -521,7 +521,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 |--------|------|-------------|
 | GET | `/organization-report-template` | List every template (rows under `reportTemplates`; ignores paging) |
 | GET | `/organization-report-template/:resourceId` | Get one |
-| POST | `/organization-report-template/search` | Search (4 of 5 filters answer 500; Clio filters the list instead) |
+| POST | `/organization-report-template/search` | Search (no `and` / `or` or name sort; Clio filters the list instead) |
 | GET | `/organization-report-template/default-configuration` | The default layout a new template of a report type starts from |
 | POST | `/organization-report-template` | Create (layout defaults to the system layout; a pack needs its layout and `packTemplates`) |
 | PUT | `/organization-report-template/:resourceId` | Rename, replace the layout, or replace a pack's reports |
