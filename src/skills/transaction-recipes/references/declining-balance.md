@@ -1,25 +1,27 @@
-# Recipe: Declining Balance Depreciation (engine name: `depreciation`)
+# Recipe: Declining Balance Depreciation (calculator type: `depreciation`)
 
-> Canonical recipe for non-straight-line depreciation methods (double declining balance / DDB, 150% declining balance / 150DB) where Jaz native FA can't auto-handle. Engine emits N future-dated DRAFT depreciation journals upfront. **Do NOT register the asset in Jaz native FA register** (would trigger duplicate SL depreciation).
+> Canonical recipe for non-straight-line depreciation methods (double declining balance / DDB, 150% declining balance / 150DB), which the Jaz native FA register does not post. One depreciation journal per period, in one capsule. **Do NOT register the asset in the Jaz FA register with straight-line depreciation** (it would post duplicate SL depreciation). You calculate, create the capsule and post each journal yourself (see `building-blocks.md` § The three-step flow).
 
-## Tools, recipes, calculators this recipe uses
+## Tools and calculator this recipe uses
 
-### Recipe engine entry point
-- **`plan_recipe(recipe: 'depreciation', method: 'ddb' | '150db', ...)`** (used in step 2): returns RecipePlan with N future-dated depreciation journals (one per period in the schedule), capsule shape, required accounts.
-- **`execute_recipe(recipe: 'depreciation', ...)`** (used in step 4): posts N future-dated DRAFT journals all attached to the same capsule. NO fixed-asset step (recipe assumes asset is tracked in CoA only, not in FA register).
+### Calculator (offline, posts nothing)
+- **MCP: `calculate(type: 'depreciation', cost, salvageValue, usefulLifeYears, method, frequency, currency)`** (step 1). `method` is `ddb` (the default), `150db` or `sl`; `frequency` is `annual` (the default) or `monthly`.
+- **CLI: `clio calc depreciation --cost <c> --salvage <s> --life <years> --method <ddb|150db|sl> --frequency <annual|monthly> --currency <code> --json`** (step 1): the same result.
 
-### Calculator (cross-check, no API key needed)
-- **`clio calc depreciation --cost <c> --salvage <s> --life <years> --method <ddb|150db|sl> --frequency <annual|monthly> --json`** (used in step 1): full depreciation schedule. Returns `{ totalDepreciation, schedule[n] }` where each row carries `period`, `openingBookValue`, `depreciationAmount`, `accumulatedDepreciation`, `closingBookValue`. Final period absorbs rounding to land at salvage value exactly.
+The depreciation calculator takes no start date: its steps are never dated. You date each journal yourself (step 4).
 
-### Tools (jaz-api / direct)
-- **`search_capsules(filter: {title: {eq: <capsule.name>}})`**: step 0 idempotency check. One depreciation capsule per asset; duplicate setup is almost always an error.
-- **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation (Vehicles)', 'Depreciation Expense']}})`** (step 3): confirm the asset, contra-asset, and expense GL accounts exist.
-- **`generate_trial_balance(endDate: <date>)`** (step 5): verify NBV matches schedule.
-- **`bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])`** (step 5 monthly): finalize this period's pre-emitted DRAFT depreciation journal.
+### Posting tools
+- **`list_capsule_types` / `create_capsule_type(displayName: 'Depreciation')` / `create_capsule(...)`** (step 3).
+- **`create_journal(...)`** (step 4): one per period. The amount changes as book value falls, so a fixed-amount schedule does not fit.
+
+### Lookup and verification tools
+- **`search_capsules(filter: {title: {eq: <capsule title>}})`**: step 0 idempotency check. One depreciation capsule per asset; duplicate setup is almost always an error.
+- **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation (Vehicles)', 'Depreciation Expense']}})`** (step 2): confirm the asset, contra-asset, and expense GL accounts exist.
+- **`generate_trial_balance(endDate: <date>)`** (step 5): verify NBV matches the schedule.
 
 ### Cross-references
-- Operational context: invoked during month-end close (only when an asset uses a non-SL method; Jaz native FA handles SL automatically). For SL: `create_fixed_asset` directly via `fixed-assets` tool family; do NOT use this recipe.
-- Sibling: `asset-disposal.md` for end-of-life de-recognition; `ifrs16-lease.md` (lease engine) which uses SL depreciation via the FA register because ROU is always SL under IFRS 16.
+- Operational context: invoked during month-end close (only when an asset uses a non-SL method; Jaz native FA handles SL automatically). For SL: `create_fixed_asset` directly; do NOT use this recipe.
+- Sibling: `asset-disposal.md` for end-of-life de-recognition; `ifrs16-lease.md`, which uses SL depreciation via the FA register because the ROU asset is depreciated straight-line there.
 - IFRS / accounting context: IAS 16.62, depreciation method should reflect the pattern of consumption of the asset's economic benefits. DDB / 150DB are valid alternatives to SL when usage is front-loaded (vehicles, technology). NOT for buildings, land improvements (always SL).
 
 ---
@@ -29,104 +31,129 @@
 ### Step 0: Idempotency check
 
 ```
-search_capsules(filter: {title: {eq: 'DDB Depreciation — 5 years (Delivery Vehicle FY2025)'}})
+search_capsules(filter: {title: {eq: 'DDB Depreciation, 5 years, Delivery Vehicle TRK-001'}})
 ```
 
-If a result returns: halt and surface "Depreciation capsule for asset `<name>` already exists. Re-running would create duplicate depreciation journals. Confirm: if revising the depreciation schedule (changed useful life or salvage), close the existing capsule, reverse remaining DRAFT journals via `delete_journal`, then re-execute."
+If a result returns: halt and surface "Depreciation capsule for asset `<name>` already exists. Re-posting would create duplicate depreciation journals. Confirm: if revising the depreciation schedule (changed useful life or salvage), delete the remaining DRAFT journals via `delete_journal`, then post the revised periods into the same capsule."
 
-### Step 1: Independent cross-check (calculator)
-
-```
-clio calc depreciation --cost 50000 --salvage 5000 --life 5 --method ddb --frequency monthly --currency SGD --json
-```
-
-Returns: `{ totalDepreciation: 45000, schedule: [{period: 1, openingBookValue: 50000, depreciationAmount: 833.33, accumulatedDepreciation: 833.33, closingBookValue: 49166.67}, ...60] }`. For DDB: amounts decline each period (40% annual rate × declining book value × 1/12 monthly). Final period absorbs rounding to land at exactly salvage value ($5,000).
-
-DDB rate formula: `2 / useful-life-years = 40% annual` for 5-year life.
-150DB rate: `1.5 / useful-life-years = 30% annual` for 5-year life.
-
-Save schedule to `workpapers/<period>/depreciation-<asset-id>.json` for the workpaper record (audit will sample-test).
-
-### Step 2: Plan the recipe
+### Step 1: Calculate
 
 ```
-plan_recipe(
-  // Accounts, capsule and counterparty are not plan_recipe params: execute_recipe resolves accounts from the CoA and takes bankAccountName / contactName.
-  recipe: 'depreciation',
+calculate(
+  type: 'depreciation',
   cost: 50000,
   salvageValue: 5000,
   usefulLifeYears: 5,
   method: 'ddb',
   frequency: 'monthly',
-  startDate: '2025-01-01',
   currency: 'SGD'
 )
 ```
 
-Returns `RecipePlan` with `requiredAccounts: ['Vehicles', 'Accumulated Depreciation (Vehicles)', 'Depreciation Expense']`, `needsContact: false`, `needsBankAccount: false`, `steps[1..60]`: 60 future-dated DRAFT depreciation journals (one per month). Each is Dr Depreciation Expense / Cr Accumulated Depreciation, varying amount per the DDB schedule.
-
-### Step 3: Resolve dependencies
-
-For each account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. If empty: halt. Suggested classifications: asset GL → `Non-current Asset`; accumulated depreciation → `Non-current Asset` (contra); expense → `Operating Expense`.
-
-NO contact resolution (depreciation has no counterparty). NO bank account resolution.
-
-### Step 4: Execute
-
 ```
-execute_recipe(recipe: 'depreciation', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
+clio calc depreciation --cost 50000 --salvage 5000 --life 5 --method ddb --frequency monthly --currency SGD --json
 ```
 
-Returns: `{ capsule: {resourceId, type, title}, steps: [{step, action, status, resourceId}, ...60], summary: {total: 60, created: 60} }`. The recipe creates **60 future-dated DRAFT depreciation journals** (one per month for 5 years), all attached to the same capsule. Each journal is dated end-of-month for its period.
+Returns `{ totalDepreciation: 45000, schedule: [{ period, date, openingBookValue, ddbAmount, slAmount, methodUsed, depreciation, closingBookValue, journal }, ...60], blueprint }`. `date` is `null` on every row.
 
-**Critical:** Do NOT also call `create_fixed_asset` for this asset. The asset is tracked via the CoA only (its cost sits in `Vehicles` account; its NBV is `cost − accumulated depreciation` per TB). Registering in Jaz FA would trigger duplicate SL depreciation, double-counting.
+DDB rate formula: `2 / useful-life-years = 40% annual` for 5-year life.
+150DB rate: `1.5 / useful-life-years = 30% annual` for 5-year life.
 
-If the asset MUST be in the FA register for reporting reasons (e.g. fixed-assets-summary report grouping): use Jaz FA with `depreciationMethod: 'sl'` BUT mark the asset as "manually depreciated" via custom field, and immediately archive the auto-emitted SL depreciation journals (risky pattern, prefer recipe-only).
+For this asset the annual charges are 20,000 / 12,000 / 7,200 / 4,320 / 1,480. Each year the calculator computes the declining-balance charge (`ddbAmount`) and straight-line over the remaining life (`slAmount`), and switches to SL once SL is at least the declining-balance charge or the declining-balance charge would take book value below salvage; `methodUsed` shows which applied. Here it switches in year 5 (the DDB charge would breach the $5,000 floor), so the book value lands on the salvage value exactly and never below it.
+
+With `frequency: 'monthly'` each year's charge is spread evenly over its 12 months (1,666.67 a month in year 1, 1,000.00 in year 2, ...), and the last month of each year absorbs the rounding.
+
+**Monthly posting reads `schedule[]`, not `blueprint.steps`.** For DDB and 150DB the blueprint always carries the ANNUAL steps (5 here), whatever the frequency. The 60 monthly entries are the `journal` on each `schedule` row.
+
+Save the schedule to `workpapers/<period>/depreciation-<asset-id>.json` for the workpaper record (audit will sample-test).
+
+### Step 2: Resolve accounts
+
+The calculator's `Depreciation Expense` and `Accumulated Depreciation` are labels. Map each to the real account:
+- `search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation (Vehicles)', 'Depreciation Expense']}})`. If one is missing: halt. Suggested classifications: asset GL → `Non-current Asset`; accumulated depreciation → `Non-current Asset` (contra); expense → `Operating Expense`.
+
+NO contact (depreciation has no counterparty). NO bank account.
+
+### Step 3: Create the capsule
+
+```
+list_capsule_types()
+create_capsule(
+  capsuleTypeResourceId: <id of 'Depreciation'>,
+  title: 'DDB Depreciation, 5 years, Delivery Vehicle TRK-001',
+  description: <blueprint.capsuleDescription>
+)
+```
+
+If `Depreciation` is not in the list: `create_capsule_type(displayName: 'Depreciation')` first.
+
+### Step 4: Post the journals
+
+One `create_journal` per period, dated by you (month-end for monthly, year-end for annual), with that period's amount:
+
+```
+create_journal(
+  valueDate: '2025-01-31',
+  reference: 'DEP-TRK-001-01',
+  journalEntries: [
+    { accountResourceId: <Depreciation Expense>, type: 'DEBIT', amount: 1666.67, description: 'DDB depreciation, month 1 of 60' },
+    { accountResourceId: <Accumulated Depreciation (Vehicles)>, type: 'CREDIT', amount: 1666.67, description: 'DDB depreciation, month 1 of 60' }
+  ],
+  saveAsDraft: false,
+  capsuleResourceId: <capsule id>
+)
+```
+
+Post each period's journal at that period's close, or post them all now as drafts and finalize one per period. Agree the cadence with the practitioner; the reference pattern (`DEP-TRK-001-01` to `-60`) is what finds a period's journal later.
+
+**Critical:** Do NOT also register this asset in the FA register with `depreciationMethod: 'STRAIGHT_LINE'`. The asset is tracked via the CoA (its cost sits in the `Vehicles` account; its NBV is `cost − accumulated depreciation` per TB). A straight-line registration would post duplicate depreciation, double-counting.
+
+If the asset MUST be in the FA register for reporting reasons (e.g. the fixed-assets summary report): register it with `depreciationMethod: 'NO_DEPRECIATION'`, so the register lists the asset and posts nothing. The register's book value then stays at cost; the journals in this capsule are the depreciation record.
 
 ### Step 5: Monthly action (during monthly-close)
 
-For each month after recipe execution, this period's DRAFT depreciation journal already exists. Monthly close action:
+Post this period's journal, or find it by its reference and finalize it:
 
 ```
-**STOP: not selectable by filter.** Journals carry no capsule or fixed-asset link in either direction (`JournalFilter` declares neither; a journal row has no such field even at `view: 'full'`; `GET /capsules/{id}` returns only a `totalTransactions` count, measured 2026-09-07). A date+status search returns every matching DRAFT in the org, so it must never feed `bulk_update_journals` or `delete_journal`. Surface the capsule and its expected count to the practitioner and let them identify the journals.
+search_journals(filter: {reference: {eq: 'DEP-TRK-001-03'}})
 update_journal(resourceId: <journal id>, saveAsDraft: false)
 ```
 
-Verify after finalize:
+Journals cannot be filtered by capsule, and a date-plus-status search returns every matching DRAFT in the org: never feed one into `bulk_update_journals` or `delete_journal`.
+
+Verify after each period:
 - `generate_trial_balance(endDate: <month-end>)`.
-- Assert: `balance['Accumulated Depreciation (Vehicles)'] == -schedule[periodIndex].accumulatedDepreciation` (within 1 cent).
-- Assert: `balance['Depreciation Expense'] (period MTD) == schedule[periodIndex].depreciationAmount` (within 1 cent).
+- Assert: `balance['Accumulated Depreciation (Vehicles)'] == -(cost - schedule[periodIndex].closingBookValue)` (within 1 cent).
+- Assert: `balance['Depreciation Expense'] (period MTD) == schedule[periodIndex].depreciation` (within 1 cent).
 - Assert: `balance['Vehicles'] - |balance['Accumulated Depreciation (Vehicles)']| == schedule[periodIndex].closingBookValue`.
 
 After the FINAL period (month 60):
-- Assert: `closingBookValue == salvage` exactly ($5,000; engine forces final-period adjustment).
-- Asset is now fully depreciated. If sold/disposed at salvage value: invoke `asset-disposal` recipe. If retained at salvage value: capsule closes; no further depreciation.
+- Assert: `closingBookValue == salvage` exactly ($5,000; the final period carries the rounding).
+- Asset is now fully depreciated. If sold/disposed: follow `asset-disposal.md`. If retained at salvage value: close the capsule; no further depreciation.
 
 ---
 
-## Common error classes and recovery
+## Common problems and recovery
 
-| Source | Error | Recovery |
+| Where | Problem | Recovery |
 |--------|-------|----------|
-| `plan_recipe` | 422 `unsupported_recipe` | File-name alias `declining-balance` was used. Use canonical engine name `depreciation` with explicit `method: 'ddb'` or `'150db'`. |
-| `plan_recipe` | 422 `useful_life_invalid` | Useful life must be ≥ 2 years. Asset with useful life < 2 years: expense as period cost via `create_bill` to `Operating Expense`. |
-| `plan_recipe` | 422 `salvage_exceeds_cost` | Salvage ≥ cost is non-sensical. Verify inputs. |
-| `execute_recipe` | 422 `account_not_found` | Step 3 incomplete. `search_accounts`; create via `create_account`. |
-| Verification | NBV stuck above schedule | Either a DRAFT wasn't finalized (re-run step 5), OR Jaz FA also auto-posted SL depreciation (asset got duplicate-registered). Audit `search_fixed_assets(filter: {name: {contains: <asset>}})`. If duplicated: archive the auto-FA depreciation journals + remove the duplicate, **not** with `discard_fixed_asset`, whose own description is "records the disposal and final depreciation", i.e. it POSTS more entries in a case that wanted fewer. If the duplicate is still a draft, `delete_fixed_asset` (draft-only by design). If it is already active, stop: deleting is impossible and reversing its posted depreciation is a judgment call; surface both registrations to the practitioner. |
-| Asset reaches salvage early (impairment) | (process) | Per IAS 36, if recoverable amount drops below NBV, write down. Manual journal: Dr Impairment Loss / Cr Accumulated Depreciation for the impairment amount. Reverse remaining DRAFT depreciation journals (`delete_journal`); recipe assumed normal life. |
-| Disposal mid-life | (process) | Invoke `asset-disposal.md` recipe. Then close depreciation capsule, delete remaining DRAFT depreciation journals. |
+| Calculator | "Useful life (years) must be a positive integer" | Whole years only, 1 or more. An item with no multi-period life is a period cost: expense it via `create_bill` to `Operating Expense`. |
+| Calculator | "Salvage value (S) must be less than cost (C)" | Salvage ≥ cost is non-sensical. Verify inputs. |
+| Step 2 | An account is missing | `search_accounts`; create via `create_account`. |
+| Verification | NBV stuck above schedule | Either a period's journal is missing or still a DRAFT (re-run step 5), OR Jaz FA also auto-posted SL depreciation (asset got duplicate-registered). Audit `search_fixed_assets(filter: {name: {contains: <asset>}})`. If duplicated: remove the duplicate registration and its auto-posted depreciation, **not** with `discard_fixed_asset`, whose own description is "records the disposal and final depreciation", i.e. it POSTS more entries in a case that wanted fewer. If the duplicate is still a draft, `delete_fixed_asset` (draft-only by design). If it is already active, stop: deleting is impossible and reversing its posted depreciation is a judgment call; surface both registrations to the practitioner. |
+| Asset reaches salvage early (impairment) | (process) | Per IAS 36, if recoverable amount drops below NBV, write down. Manual journal: Dr Impairment Loss / Cr Accumulated Depreciation for the impairment amount. Delete the remaining DRAFT depreciation journals (`delete_journal`) and recalculate from the written-down value; the schedule assumed a normal life. |
+| Disposal mid-life | (process) | Follow `asset-disposal.md`. Then close the depreciation capsule and delete any remaining DRAFT depreciation journals. |
 
 ---
 
 ## Variations
 
 - **150DB**: `method: '150db'`. Rate is 1.5x SL instead of 2x. Less aggressive front-loading.
-- **Annual frequency**: `frequency: 'annual'`. 5 annual journals instead of 60 monthly. Used when reporting cadence is annual or asset is small.
-- **Sum-of-years' digits (SYD)**: NOT supported by the engine. Use `clio calc depreciation` with `--method sl` for the calculation, then post manual journals for each period (rare in modern practice).
+- **Annual frequency**: `frequency: 'annual'` (the default). 5 annual journals instead of 60 monthly. Used when reporting cadence is annual or asset is small. Here `blueprint.steps` and `schedule[]` agree.
+- **Sum-of-years' digits (SYD)**: NOT supported by the calculator. Work the SYD amounts by hand and post manual journals for each period (rare in modern practice).
 - **Units-of-production**: NOT supported (depreciation per unit produced, not per period). Manual journal pattern: at each period-end, compute `units × per-unit-rate`, post Dr Depreciation Expense / Cr Accumulated Depreciation.
-- **Component depreciation** (IFRS 16.43): different parts of an asset depreciated separately. Each component gets its own recipe invocation + capsule.
-- **Mid-period acquisition:** The calculator does NOT prorate the first period. Schedule entries are full-period (e.g. monthly) starting from `startDate`. For partial-period accuracy, either (a) set `startDate` to the first of the period after acquisition (lose the partial-period depreciation), or (b) post a manual partial-period journal via `create_journal` for the days-in-acquisition-period, then run `plan_recipe` from the next full period.
+- **Component depreciation** (IAS 16.43): different parts of an asset depreciated separately. Each component gets its own calculation + capsule.
+- **Mid-period acquisition:** The calculator does NOT prorate the first period. Schedule entries are full periods. For partial-period accuracy, either (a) start the journals in the first full period after acquisition (lose the partial-period depreciation), or (b) post a manual partial-period journal via `create_journal` for the days in the acquisition period, then post the schedule from the next full period.
 
 ---
 
@@ -136,4 +163,4 @@ After the FINAL period (month 60):
 - Year-end close (full FY-end depreciation reconciliation): sum 12 monthly journals against `clio calc depreciation --frequency annual` cross-check; auditor will sample-test.
 - Data migration: opening accumulated depreciation loaded via conversion (Conversion Clearing > Accumulated Depreciation account); recipe runs forward from the migration date with `cost: <NBV at migration>` instead of original cost. Useful-life-years should be `remaining life`, not original.
 - Sibling recipe `asset-disposal.md`: end-of-life de-recognition.
-- `audit-prep.md` step 8: supporting schedule via `search_capsules(filter: {status: {eq: 'ACTIVE'}}) (capsule type is not filterable; see `jobs/references/building-blocks.md` § Filter limits)` + per-capsule `clio calc depreciation` recompute.
+- `audit-prep.md` step 8: supporting schedule via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable; see `jobs/references/building-blocks.md` § Filter limits) + per-capsule `clio calc depreciation` recompute.

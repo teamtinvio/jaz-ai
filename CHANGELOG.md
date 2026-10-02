@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.0.0] - 2026-10-02
+
+**Recipes are retired. Calculators stay, behind one tool, and you post the entries yourself.**
+
+Your assistant no longer runs a "recipe" that creates a capsule and posts a whole schedule in one step, and capsule recipes are no longer available through the assistant or the command line. The 13 financial calculators remain: loan, lease and hire purchase, depreciation, prepaid expense, deferred revenue, FX revaluation check, expected credit loss, provisions, fixed deposit, asset disposal, accrued expense, leave accrual and dividend.
+
+- Ask for a schedule and your assistant calculates it, shows you the entries, then creates the capsule and posts each entry as an ordinary journal, bill, invoice or cash entry that you can review.
+- The calculators work without signing in, in your assistant and on the command line (`clio calc`).
+- Your assistant can now create a capsule type when none fits, and can file a scheduled journal under a capsule.
+- What changes for you: your assistant now confirms which accounts to post to and posts each entry separately, so long schedules take more steps.
+- An assistant still asking for a recipe is told what to use instead, and nothing is posted.
+- Removed from the command line: `clio capsule-transaction` (`clio ct`), `clio capsule-recipes`, and all 12 printed job checklists (`clio jobs month-end`, `quarter-end`, `year-end`, `gst-vat`, `credit-control`, `supplier-recon`, `audit-prep`, `fa-review`, and the checklists that `clio jobs bank-recon`, `payment-run`, `document-collection` and `statutory-filing` printed when run on their own). The job guides your assistant follows are unchanged in purpose and now the single description of each job. `clio jobs` keeps its working tools: `bank-recon match` (bank matching), `payment-run outstanding` (outstanding bills), `document-collection ingest` (document ingest) and `statutory-filing sg-cs` / `sg-ca` (the Singapore tax computations).
+- In the hosted connector, the "IFRS Recipes & Capsules" group is now two groups: Capsules and Financial Calculators.
+
+Capsules themselves are unchanged. This release changes the assistant and the command line only; it does not change the Jaz app.
+
 ## [5.74.2] - 2026-10-01
 
 Your assistant's reference notes on searching report templates are up to date: they now say which filters the platform's own search accepts today. Searching templates works as before, with every filter, including by name.

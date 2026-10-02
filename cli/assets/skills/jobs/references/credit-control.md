@@ -1,8 +1,8 @@
 # Credit Control / AR Chase
 
-> Systematically chase overdue customer invoices, assess collection risk, identify bad debt. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs credit-control` prints this same phased checklist.)
+> Systematically chase overdue customer invoices, assess collection risk, identify bad debt. Walk the steps below in order, calling the named platform tools directly.
 
-## Tools, recipes, calculators this job uses
+## Tools and calculators this job uses
 
 ### Platform tools
 - **`generate_aged_ar(endDate: <date>)`**: step 1: AR aging report with bucket breakdown.
@@ -11,19 +11,19 @@
 - **`get_contact_signals(resourceId: <id>, btType: 'SALE')`**: step 3: pull cadence + outlier signals + outstanding balance for the customer. Mid-7 endpoint.
 - **`apply_credits_to_invoice(...)`** / **`create_customer_credit_note(...)`**: step 6: write-off path A for stage-3 specific impairment.
 - **`pay_invoice(... paymentMethod: 'DEBT_WRITE_OFF' ...)`**: step 6: write-off path B (direct).
-- **`plan_recipe(recipe: 'ecl', ...)` + `execute_recipe(...)`**: step 7: ECL collective top-up if material change in aging.
+- **`calculate(type: 'ecl', ...)`**, then `create_capsule` + `create_journal` with `capsuleResourceId`: step 7: ECL collective top-up if material change in aging.
 - **`download_export(exportType: 'analysis-receivables-customer-risk', startDate, endDate)`**: step 8: pre-empt audit by surfacing high-risk customers.
 
 ### Cross-references
 - Run inside the month-end close (AR aging review + flag overdue) and ad-hoc whenever the overdue threshold is hit.
 - Sibling jobs: `bank-recon.md` (newly-cleared customer payments shift the aging), `audit-prep.md` step 6 (year-end AR aging review).
-- Recipes: `ecl` for the collective provision; path A/B for specific write-offs. See the transaction-recipes skill.
+- Calculator: `ecl` for the collective provision; path A/B for specific write-offs. See the transaction-recipes skill for the pattern.
 
 ---
 
 ## Steps
 
-Walk steps 1-8 below. (Local CLI: `clio jobs credit-control --overdue-days 30` prints the same phased checklist.)
+Walk steps 1-8 below.
 
 ## Step 1: AR aging snapshot
 
@@ -130,22 +130,23 @@ pay_invoice(
 )
 ```
 
-Per memory rule [Bad Debt Write-off]: `paymentMethod: 'DEBT_WRITE_OFF'` is the canonical method enum. Bad Debt Expense GL must exist in CoA.
+`paymentMethod: 'DEBT_WRITE_OFF'` is the canonical method enum. Bad Debt Expense GL must exist in CoA.
 
 Future-receivable reversal: if the customer eventually pays after write-off (rare but possible), post via `create_journal`: Dr Cash / Cr Bad Debt Recoveries (separate revenue line for transparency).
 
 ## Step 7: ECL collective top-up (if material aging shift)
 
-If the AR aging shifted materially this period (e.g., $50K moved from current to 90d+): invoke the `ecl` recipe for the collective top-up.
+If the AR aging shifted materially this period (e.g., $50K moved from current to 90d+): run the `ecl` calculator for the collective top-up.
 
 ```
 clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <org ECL loss-rate matrix> --existing-provision <TB Allowance balance> --json
 ```
 
-If `topUpRequired > materiality threshold`:
+If `adjustmentRequired > materiality threshold`:
 ```
-plan_recipe(recipe: 'ecl', ...)
-execute_recipe(...)   // creates its own ECL Provision capsule; regroup with move_transaction_capsules if needed
+calculate(type: 'ecl', buckets: <[{name, balance, rate}]>, existingProvision: <TB Allowance balance>, startDate: <period-end>)
+create_capsule(capsuleTypeResourceId: <ECL Provision type id, from list_capsule_types>, title: <blueprint.capsuleName>)
+create_journal(valueDate: <period-end>, autoReference: true, journalEntries: [<the calculator's journal lines, accounts resolved via search_accounts>], capsuleResourceId: <capsule id>)
 bulk_update_journals(items: [{resourceId: <id>, saveAsDraft: false}, ...])
 ```
 
@@ -169,7 +170,7 @@ Returns XLSX with high-risk customer flags (rising aging trends, recently-defaul
 | Step 3 | `get_contact_signals` returns `null` | The freshness layer is offline; skip the signals step and use aging alone. Don't halt the job. |
 | Step 6 Path A | `apply_credits_to_invoice` 422 `credit_exceeds_balance` | Split the credit across multiple invoices, OR reduce the credit amount to match the bill balance. |
 | Step 6 Path B | `paymentMethod: 'DEBT_WRITE_OFF'` rejected | Verify the enum value via `jaz-api/SKILL.md` (some orgs may have custom payment-method config; default supports DEBT_WRITE_OFF). |
-| Step 7 ECL recipe | Top-up causes Bad Debt Expense to spike | Expected: material aging shift = material P&L impact. Surface to practitioner; potentially split across multiple periods if it's a known one-off (rare). |
+| Step 7 ECL top-up | Top-up causes Bad Debt Expense to spike | Expected: material aging shift = material P&L impact. Surface to practitioner; potentially split across multiple periods if it's a known one-off (rare). |
 | Customer files insolvency mid-chase | (process) | Stop chase. Move directly to step 6 specific write-off. Document the insolvency filing reference. |
 | Customer pays post-write-off | (rare) | Post `create_journal`: Dr Cash / Cr Bad Debt Recoveries. Don't reverse the original write-off; keep the audit trail clean. |
 
@@ -189,4 +190,4 @@ Returns XLSX with high-risk customer flags (rising aging trends, recently-defaul
 - `month-end-close.md`: AR aging review + chase activity log inside the period close.
 - `quarter-end-close.md` Q2: formal ECL provision review (collective).
 - `audit-prep.md` step 6: year-end AR aging; specific impairments documented via path A/B with capsules.
-- Recipes: `ecl`. See the transaction-recipes skill.
+- Calculator: `ecl`. See the transaction-recipes skill for the pattern.

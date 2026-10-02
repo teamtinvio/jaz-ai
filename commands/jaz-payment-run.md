@@ -5,7 +5,7 @@ argument-hint: "[--due-before YYYY-MM-DD]"
 
 # Payment Run
 
-Execute a batch payment run via `clio jobs payment-run`. Identifies outstanding bills and processes payments.
+Run the payment run playbook from the jaz-jobs skill (`references/payment-run.md`). Identifies outstanding bills and processes payments.
 
 ## Usage
 
@@ -16,15 +16,17 @@ Execute a batch payment run via `clio jobs payment-run`. Identifies outstanding 
 
 ## Workflow
 
-### 1. Generate the blueprint
+### 1. Open the playbook
 
-```bash
-clio jobs payment-run --due-before 2025-02-28 --json
-```
+The steps are in the jaz-jobs skill: `references/payment-run.md`. Read it first and walk its steps in order.
 
 ### 2. Review outstanding bills
 
-The blueprint lists all unpaid/overdue bills matching the criteria, grouped by supplier.
+```bash
+clio jobs payment-run outstanding --due-before 2025-02-28 --json
+```
+
+Lists all unpaid bills due on or before the date, grouped by supplier. Add `--supplier <name>` or `--currency <code>` to narrow.
 
 ### 3. Confirm payment list
 

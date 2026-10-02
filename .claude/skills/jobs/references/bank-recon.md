@@ -1,8 +1,8 @@
 # Bank Reconciliation
 
-> Clear unreconciled bank statement entries by matching, creating, or flagging. Highest-leverage book-accuracy job in Jaz: clean cash means everything else has a fighting chance. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs bank-recon` prints this same phased checklist.)
+> Clear unreconciled bank statement entries by matching, creating, or flagging. Highest-leverage book-accuracy job in Jaz: clean cash means everything else has a fighting chance. Walk the steps below in order, calling the named platform tools directly.
 
-## Tools, recipes, calculators this job uses
+## Tools and calculators this job uses
 
 ### Platform tools: discovery + auto-match
 - **`list_bank_accounts()`** (step 1): pull all bank-type CoA accounts (per `jaz-api/SKILL.md` rule 18: GET `/bank-accounts` returns flat array `[{...}]`, NOT the standard paginated `{ data, totalElements, totalPages }` shape; normalize before consuming).
@@ -29,7 +29,7 @@
 - **`reconcile_cash_transfer(...)`**: inter-account transfer.
 
 ### Platform tools: create missing transactions
-- **`mcp magic create --file <pdf>` / `create_bt_from_attachment(...)`** (step 6 path B): OCR + autofill bill or invoice from receipt PDF/JPG.
+- **`create_bt_from_attachment(...)`** (step 6 path B): OCR + autofill bill or invoice from receipt PDF/JPG. Local CLI: `clio magic create --file <pdf> --type bill`.
 - **`create_cash_in(...)` / `create_cash_out(...)`** (step 6 path C): bank fees, interest, FX charges that have no source document.
 - **`create_bank_rule(...)`** (preventive): build a rule for any recurring pattern you handled this run (subscription, rent, utility) so it auto-applies next time.
 
@@ -50,7 +50,7 @@
 
 ## Steps
 
-Walk steps 1-8 below. (Local CLI: `clio jobs bank-recon --period 2025-01` prints the same phased checklist.)
+Walk steps 1-8 below.
 
 ## Step 1: Discover bank accounts
 
@@ -156,7 +156,7 @@ For unreconciled rows that have no book-side counterpart yet:
 
 **Path B, has document (PDF/JPG):**
 ```
-mcp magic create --file <invoice-or-receipt-path>
+clio magic create --file <invoice-or-receipt-path> --type bill   # or --type invoice
 # OR equivalent MCP call:
 create_bt_from_attachment(
   businessTransactionType: 'BILL' | 'INVOICE',
@@ -259,7 +259,7 @@ Per account: `bookBalance == bankStatementBalance ± documentedTimingDifference`
 
 ## Tips
 
-- **Weekly cadence beats monthly catch-up.** Monday-morning 15-min recon vs end-of-month 3-hour scramble. Recipe + cascade matcher amortize across short queues much faster.
+- **Weekly cadence beats monthly catch-up.** Monday-morning 15-min recon vs end-of-month 3-hour scramble. Bank rules + the cascade matcher clear short queues much faster.
 - **Bank rules are the highest-ROI investment.** Every recurring transaction (rent, subscription, utility) handled this run = a one-line `create_bank_rule` away from never seeing it again.
 - **Aspire + Airwallex direct feeds eliminate CSV imports.** No file step before step 2.
 - **Common bank-fee account suggestions:** `Bank Charges` / `Bank Fees` (Operating Expense), `Interest Expense` (for overdraft / loan interest paid to bank), `Interest Income` (savings / deposits), `Foreign Exchange Gain/Loss` (for FX conversion spreads).

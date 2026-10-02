@@ -1,11 +1,11 @@
 # Document Collection
 
-> Scan + classify client docs (invoices, bills, credit notes, bank statements) from local dirs or cloud links (Dropbox, Google Drive, OneDrive); decrypt encrypted PDFs (`qpdf`); upload via Jaz Magic. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs document-collection` prints this same phased checklist; the `ingest` subcommand below does the local/cloud scan.)
+> Scan + classify client docs (invoices, bills, credit notes, bank statements) from local dirs or cloud links (Dropbox, Google Drive, OneDrive); decrypt encrypted PDFs (`qpdf`); upload via Jaz Magic. Walk the steps below in order, calling the named platform tools directly. (Local CLI: the `clio jobs document-collection ingest` sub-tool below does the local/cloud scan.)
 
-## Tools, recipes, calculators this job uses
+## Tools and calculators this job uses
 
 ### Platform tools
-- **`mcp magic create --file <pdf>` / `create_bt_from_attachment(businessTransactionType: 'BILL'|'INVOICE'|'CUSTOMER_CREDIT_NOTE'|'SUPPLIER_CREDIT_NOTE', sourceUrl)`**: step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction.
+- **`create_bt_from_attachment(businessTransactionType: 'BILL'|'INVOICE'|'CUSTOMER_CREDIT_NOTE'|'SUPPLIER_CREDIT_NOTE', sourceUrl)`**: step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction. Local CLI: `clio magic create --file <pdf> --type bill`.
 - **`finalize_bill(...)` / `finalize_invoice(...)` / `finalize_customer_credit_note(...)`**: step 5: finalize practitioner-reviewed Magic-extracted DRAFTs.
 - **`import_bank_statement(accountResourceId, sourceUrl | attached file)`**: step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
 - **`search_background_jobs(filter: {resourceId: {eq: <jobId>}})`**: step 7: poll Magic / bank-import async jobs to terminal status.
@@ -13,7 +13,7 @@
 ### CLI tools (jaz-cli, offline)
 - **`clio jobs document-collection ingest --source <local-dir> --json`**: step 2 ingest local: scan a local directory, classify per file-type heuristics, output JSON with per-file metadata (`{path, classifiedAs, confidence, encrypted, suggestedAction}`).
 - **`clio jobs document-collection ingest --source 'https://www.dropbox.com/scl/fo/...' --json`**: step 2 ingest cloud: same flow over a Dropbox / Google Drive / OneDrive shared link. Recursive folder traversal. Files downloaded to a temp dir.
-- **step 3 decryption is AUTOMATIC; there is no flag.** The same `ingest` call detects password-protected PDFs and decrypts via `qpdf`. Per memory rule: if `__pw__<password>` is in the filename, the ingest tool extracts and uses the password automatically.
+- **step 3 decryption is AUTOMATIC; there is no flag.** The same `ingest` call detects password-protected PDFs and decrypts via `qpdf`. If `__pw__<password>` is in the filename, the ingest tool extracts and uses the password automatically.
 
 ### External dependencies
 - **`qpdf`** binary: required for encrypted PDF decryption. Document-collection ingest detects encryption + invokes qpdf transparently. If qpdf missing: surface install instruction (`brew install qpdf` on macOS, `apt-get install qpdf` on Linux).
@@ -27,7 +27,7 @@
 
 ## Steps
 
-Walk steps 1-8 below. (Local CLI: `clio jobs document-collection --period 2025-01` prints the same phased checklist.)
+Walk steps 1-8 below.
 
 ## Step 1: Identify the source
 
@@ -86,7 +86,7 @@ Decrypted files replace the original in the ingest manifest; original kept for a
 For each file with `suggestedAction: 'magic-create-bill' | 'magic-create-invoice' | 'magic-create-credit-note'`:
 
 ```
-mcp magic create --file <decrypted path> --type bill
+clio magic create --file <decrypted path> --type bill
 # OR equivalent MCP call:
 create_bt_from_attachment(
   businessTransactionType: 'BILL',

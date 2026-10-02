@@ -7,7 +7,7 @@ Schemas live in `workspace.md` (KIT.md, ORG.md, `.env`) and `close-state.md` (CL
 ## Ground rules for every flow
 
 1. **One organization per session; ORG.md decides which.** Use its `organization_id` on every call. OAuth CLI: `clio <command> --org oauth:<organization_id> --json`. Hosted MCP: pass the same ID explicitly. Never rely on the shared active organization. For the optional API-key route only, source the folder's `.env` in the same command and omit `--org`; verify the key resolves to the recorded ID.
-2. **Draft first.** `saveAsDraft` defaults to `false` in the API; omitting it posts live. Every write in a Jaz Kit flow sets `saveAsDraft: true` (or `--plan` then a non-finalized run for `clio ct`) unless the org's `rules/` explicitly relaxes that transaction type. Finalization happens in the review flow, never as a side effect.
+2. **Draft first.** `saveAsDraft` defaults to `false` in the API; omitting it posts live. Every write in a Jaz Kit flow sets `saveAsDraft: true` unless the org's `rules/` explicitly relaxes that transaction type. Finalization happens in the review flow, never as a side effect.
 3. **Never print a key.** The key lives in the workspace `.env`, which the user pastes into (never chat, never a message, never an error). Source the file; do not read the key value into your own output. `jk-` strings are redacted on sight.
 4. **Judgment gets recorded.** When the user accepts a variance, carries a residual, or overrides a default, call `jot` at that moment. Mechanical steps never jot.
 5. **Report exceptions, not dumps.** Surface the top few items that need a decision; write the full output to the period's `workpapers/`.
@@ -101,7 +101,7 @@ Requires an open session. The playbooks are in the jobs skill; this flow adds st
 
 **3. Open or resume CLOSE.md** at `closes/<period>/CLOSE.md`. Resuming: read it and **do not re-run confirmed steps**. Any step marked `started` but not `confirmed` crashed mid-write; see the resume rule below before touching it.
 
-**4. Walk the playbook**: month-end, quarter-end, or year-end from the jobs skill (`clio jobs <type> --period <period> --json` prints the same phased checklist if you want it as data). For each step:
+**4. Walk the playbook**: month-end, quarter-end, or year-end from the jobs skill (the per-job reference doc is the plan; there is no checklist command). For each step:
 - mark it `started` in CLOSE.md **before** the call that writes
 - create as draft; add each created record to the review queue with a link built by `navigate` (never write a dashboard URL from memory)
 - mark `confirmed` only after the platform confirms

@@ -1,6 +1,6 @@
 # Building Blocks for Jobs
 
-> Shared concepts every job uses. Names of platform tools + Jaz primitives + recipe-engine entry points. Read this before any per-job reference.
+> Shared concepts every job uses. Names of platform tools + Jaz primitives + the calculate-then-post flow. Read this before any per-job reference.
 
 ## Accounting periods
 
@@ -48,46 +48,64 @@ Standard assertions:
 - TB AP == `generate_aged_ap(endDate)` total.
 - TB Cash == `generate_bank_balance_summary(primarySnapshotDate)` per-bank total (via `bank-recon.md`).
 
-## Pre-emitted DRAFT journal pattern
+## Calculated schedules: calculate, capsule, post
 
-Recipe engine creates ALL future-dated journals upfront as DRAFT (loan: 60 monthly journals; prepaid-expense: 12 monthly journals; lease: termMonths monthly journals; etc.). The recipe engine does NOT use Jaz schedulers; pre-emitted DRAFTs are the canonical pattern.
+There is no one-call "recipe" execution. Any job step that needs a schedule (loan, lease, prepaid, deferred revenue, accrual, ECL, provision, dividend, disposal) is three steps you perform yourself:
 
-Monthly action per recipe-managed capsule:
+```
+calculate(type: 'prepaid-expense', amount: 12000, periods: 12, startDate: '2025-01-01')
+list_capsule_types()
+create_capsule(capsuleTypeResourceId: <type id>, title: <blueprint.capsuleName>, description: <blueprint.capsuleDescription>)
+create_journal(valueDate: <step date>, autoReference: true, journalEntries: [<step lines>], capsuleResourceId: <capsule id>)
+```
+
+1. **`calculate`** is offline and read-only (local CLI: `clio calc <type> ... --json`). It returns the schedule and, when `startDate` is given, a `blueprint`: `capsuleType`, `capsuleName`, `capsuleDescription`, and `steps[]`, each with an `action` (`journal`, `bill`, `invoice`, `cash-in`, `cash-out`, `fixed-asset`, `note`), a `date`, and `lines[]` of `{account, debit, credit}`. Without a start date most calculators return the schedule only. It posts nothing.
+2. **Capsule:** `list_capsule_types`, match the blueprint's `capsuleType` by name, then `create_capsule`. If the type is missing, `create_capsule_type(displayName: <capsuleType>)` first.
+3. **Post each step** with the tool its `action` names: `create_journal`, `create_bill`, `create_invoice`, `create_cash_in`, `create_cash_out`, each with `capsuleResourceId`. The blueprint's `account` values are generic names ("Prepaid Asset", "Cash / Bank Account"): resolve each to the org's own account with `search_accounts` and confirm the mapping with the user before posting. A cash step can only carry lines on the side opposite the bank: if a cash-in or cash-out step has another line on the bank's side (for example withholding tax), post the net cash entry and a separate journal for that line. A fixed amount repeating every period can be one `create_scheduled_journal` instead of N journals.
+
+`fx-reval` is verification only: Jaz revalues foreign-currency balances at period end, so posting its result double-counts.
+
+## Future-dated DRAFT journal pattern
+
+When a schedule was posted up front as future-dated DRAFT journals (creates default to draft), each close finalizes the current period's journal:
+
 ```
 search_journals(filter: {valueDate: {between: [<period-start>, <period-end>]}, status: {eq: 'DRAFT'}})
-update_journal(resourceId: <this period's pre-emitted journal>, saveAsDraft: false)
+update_journal(resourceId: <this period's journal>, saveAsDraft: false)
 ```
 
-For Jaz-scheduler-driven recurrences (`create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`, subscriptions): scheduler templates auto-fire and create new ACTIVE entries each period. Different primitive; the recipe engine doesn't use these.
+For Jaz-scheduler-driven recurrences (`create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`, subscriptions): scheduler templates auto-fire and create new ACTIVE entries each period, so there is nothing to finalize.
 
 ## Capsule conventions
 
-Every recipe-engine call attaches its outputs to a capsule. Search across all capsules of a type for cross-cutting reporting:
+Every calculated schedule is posted into a capsule. Search across capsules for cross-cutting reporting:
 
 ```
 search_capsules(filter: {status: {eq: 'ACTIVE'}})
 ```
 
-Capsule types used by jobs:
-- `Prepaid Expenses`: recipe `prepaid-expense`
-- `Deferred Revenue`: recipe `deferred-revenue`
-- `Accrued Expenses`: recipe `accrued-expense` (also bonus accruals)
-- `Loan Repayment`: recipe `loan`
-- `Lease`: recipe `lease` (incl. hire-purchase)
-- `Depreciation`: recipe `depreciation` (DDB / 150DB; SL goes through Jaz native FA)
-- `Fixed Deposit`: recipe `fixed-deposit`
-- `Asset Disposal`: recipe `asset-disposal`
-- `Provisions`: recipe `provision` (IAS 37)
-- `ECL Provision`: recipe `ecl` (IFRS 9 simplified)
-- `Employee Benefits`: recipes `leave-accrual` + `accrued-expense` (bonus)
-- `Dividends`: recipe `dividend`
-- `Intercompany`: manual (no engine)
+Capsule types used by jobs (the `capsuleType` each calculator's blueprint names):
+- `Prepaid Expenses`: calculator `prepaid-expense`
+- `Deferred Revenue`: calculator `deferred-revenue`
+- `Accrued Expenses`: calculator `accrued-expense` (also bonus accruals)
+- `Loan Repayment`: calculator `loan`
+- `Lease Accounting`: calculator `lease`
+- `Hire Purchase`: calculator `lease` with a useful life (hire purchase)
+- `Depreciation`: calculator `depreciation` (DDB / 150DB; SL goes through Jaz native FA)
+- `Fixed Deposit`: calculator `fixed-deposit`
+- `Asset Disposal`: calculator `asset-disposal`
+- `Provisions`: calculator `provision` (IAS 37)
+- `ECL Provision`: calculator `ecl` (IFRS 9 simplified)
+- `Employee Benefits`: calculators `leave-accrual` + `accrued-expense` (bonus)
+- `Dividends`: calculator `dividend`
+- `Intercompany`: manual (no calculator)
 - `Capital Projects`: manual (CWIP-to-FA)
 - `M&A` / `Restructuring` / `Insurance Claim` / `Bad Debt Write-off` / `Investments`: manual (per `transaction-recipes/references/building-blocks.md` § Capsules)
 
 Group GL by capsule for the auditor:
 ```
-get_capsule(resourceId)   # returns totalTransactions (a COUNT), not the transactions; GL cannot group by capsule
+generate_general_ledger(startDate: <period-start>, endDate: <period-end>, groupBy: 'CAPSULE')   # the ledger grouped by capsule
+get_capsule(resourceId)   # returns totalTransactions (a COUNT), not the transactions
 ```
 
 ## Platform tools every job uses
@@ -103,8 +121,9 @@ get_capsule(resourceId)   # returns totalTransactions (a COUNT), not the transac
 | `generate_general_ledger` | Investigation + audit-prep |
 | `generate_fa_summary` / `generate_fa_recon_summary` | FA review, year-end |
 | `search_journals` / `search_invoices` / `search_bills` | Discovery + filter, every job |
-| `search_capsules` | Recipe-managed lifecycle discovery |
-| `bulk_finalize_drafts` | Monthly-close + every job that finalizes pre-emitted DRAFTs |
+| `calculate` | Schedules + journal lines for every calculated step (posts nothing) |
+| `search_capsules` | Capsule lifecycle discovery |
+| `bulk_finalize_drafts` / `bulk_update_journals` | Monthly-close + every job that finalizes DRAFTs (journals go through `bulk_update_journals`) |
 | `update_account` lockDate | Period close |
 
 ## Job sequencing
@@ -113,7 +132,7 @@ Period-close jobs layer on each other; the ad-hoc jobs slot into the period clos
 
 | Job | Builds on / invokes |
 |-----|---------------------|
-| `month-end-close` | foundation: bank-recon (step 3), document-collection (capture late bills), per-recipe finalize (accruals, prepaid, deferred, depreciation, loan) |
+| `month-end-close` | foundation: bank-recon (step 3), document-collection (capture late bills), per-schedule finalize (accruals, prepaid, deferred, depreciation, loan) |
 | `quarter-end-close` | month-end-close ×3 + GST/VAT filing, ECL review, bonus true-up, intercompany recon, provision unwinding |
 | `year-end-close` | quarter-end-close ×4 + FA reconciliation, true-ups, dividends, retained-earnings rollover; hands off to audit-prep |
 | `audit-prep` | runs after year-end-close; consumes fa-review, supplier-recon (majors), bank-recon outputs; feeds statutory-filing |
@@ -146,7 +165,7 @@ Every leg carries its own explicit `org_id`: a wrong "active" org silently posts
 
 ## Cross-references
 
-- `transaction-recipes/references/building-blocks.md`: recipe-side primitives (capsules, schedulers, the engine itself, recipe-name aliases). Pair with this file for full context.
+- `transaction-recipes/references/building-blocks.md`: recipe-side primitives (capsules, schedulers, calculators). Pair with this file for full context.
 - `jaz-api/SKILL.md`: endpoint-by-endpoint API rules. Cited per-job for specific gotchas.
 
 ### Filter limits on capsules and journals (measured 2026-09-07)
@@ -167,10 +186,10 @@ compare case-insensitively with separators normalized rather than testing equali
 `capsuleResourceId`, no `fixedAssetResourceId`. There is no reverse route either: a capsule exposes
 only `totalTransactions` (a count), and no `/capsules/{id}/journals` endpoint exists. Narrow with
 the declared fields (`valueDate`, `status`, `type`, `templateType`, `tags`, `reference`) and report the capsule
-and its `totalTransactions` count and let the practitioner identify the journals. Do NOT assume the
-recipe left a link to match on: `referencePrefix` is optional with no default (`core/recipe/types.ts`),
-is caller-chosen text unrelated to the capsule id, and the engine sets no tags on anything it creates
-(`core/recipe/engine.ts`). Note `tags` is PLURAL; `tag` is rejected.
+and its `totalTransactions` count and let the practitioner identify the journals. `get_journal` does
+return the link per journal as `capsule: {resourceId, type, title}`, so a candidate can be checked
+one at a time. When you post a schedule yourself, give its journals a shared `reference` prefix or
+tag so the next close can find them. Note `tags` is PLURAL; `tag` is rejected.
 
 **Capsules cannot be filtered by date either.** `startDate` and `endDate` are declared on
 `CapsuleFilter` and pass validation, but every form measured on 2026-09-07 (`{gte}`, `{between}`,

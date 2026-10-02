@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 76 command groups. Organized by domain.
+Complete reference for all 74 command groups. Organized by domain.
 
 ---
 
@@ -605,15 +605,11 @@ Every write after `record` takes `--hash` (from `search` or the last write). A l
 | `create` | `--title`, `--type`, `--input` |
 | `update <id>` | `--title`, `--input` |
 | `delete <id>` | |
+| `types` | `--json` (list capsule types; gives the id `create --type` needs) |
+| `create-type` | `--name`, `--description`, `--input` |
+| `move` | `--transactions`, `--to`, `--from` |
 
-### `clio capsule-transaction` (alias: `ct`): Transaction recipes
-13 IFRS-compliant recipe subcommands. Each runs a calculator, creates a capsule, and posts all transactions.
-
-Subcommands: `loan`, `lease`, `depreciation`, `prepaid-expense`, `deferred-revenue`, `fx-reval`, `ecl`, `provision`, `fixed-deposit`, `asset-disposal`, `accrued-expense`, `leave-accrual`, `dividend`
-
-Shared flags: `--plan`, `--input`, `--bank-account`, `--contact`, `--existing-txn`, `--ref`, `--finalize`, `--json`
-
-Each subcommand has calculator-specific required options (e.g., `--principal`, `--rate`, `--term` for loan).
+To post a calculated schedule: `clio calc <type> --json` for the steps, `clio capsules create` for the capsule, then one `journals` / `bills` / `invoices` / `cash-in` / `cash-out` `create` per step with `capsuleResourceId` in the `--input` body.
 
 ---
 
@@ -642,30 +638,18 @@ Common optional flags: `--start-date`, `--currency`, `--json`
 
 ---
 
-## Jobs (Offline Blueprints + Online Tools)
+## Jobs (Working Tools)
 
-### `clio jobs`: 12 job blueprints + tools
-Blueprints are offline (no auth). Tools require auth.
+### `clio jobs`: job tools
+Five working sub-tools. The job playbooks themselves (month-end close, GST/VAT filing, audit prep, ...) are reference docs in the jaz-jobs skill, not commands.
 
-| Subcommand | Type | Key flags |
+| Subcommand | Auth | Key flags |
 |------------|------|-----------|
-| `month-end` | Blueprint | `--period`, `--currency` |
-| `quarter-end` | `--period`, Blueprint | `--currency` |
-| `year-end` | `--period`, Blueprint | `--currency` |
-| `bank-recon` | Blueprint | `--account`, `--period`, `--currency` |
-| `match` | Tool | `--input` (bank records + transactions JSON) |
-| `gst-vat` | Blueprint | `--period` |
-| `payment-run` | Blueprint | `--due-before`, `--currency` |
-| `outstanding` | Tool | `--limit` (group outstanding bills) |
-| `credit-control` | `--overdue-days`, Blueprint | |
-| `supplier-recon` | `--supplier`, `--period`, Blueprint | |
-| `audit-prep` | `--period`, Blueprint | |
-| `fa-review` | `--currency`, Blueprint | |
-| `document-collection` | Blueprint | `--currency` |
-| `ingest` | `--source`, Tool | `<path>` (classify + upload documents) |
-| `statutory-filing` | Blueprint | `--ya`, `--jurisdiction`, `--currency` |
-| `sg-cs` | Tool | `--input` (compute Singapore Form C-S) |
-| `sg-ca` | Tool | `--input` (compute Singapore capital allowances) |
+| `bank-recon match` | Offline | `--input` (bank records + transactions JSON), `--tolerance`, `--date-window`, `--max-group`, `--currency`, `--find-all`, `--json` |
+| `payment-run outstanding` | Required | `--due-before`, `--currency`, `--supplier`, `--limit`, `--json` (outstanding bills grouped by supplier) |
+| `document-collection ingest` | Only with `--upload` | `--source` (local dir, .zip, or share URL), `--type`, `--upload`, `--bank-account`, `--timeout`, `--json` |
+| `statutory-filing sg-cs` | Offline | `--input`, or `--ya`, `--revenue`, `--profit`, `--depreciation`, `--exemption`, `--json` (Singapore Form C-S) |
+| `statutory-filing sg-ca` | Offline | `--input`, or `--ya`, `--cost`, `--category`, `--acquired`, `--json` (Singapore capital allowances) |
 
 ---
 
@@ -750,7 +734,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 386 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 381 operations.
 
 ### `clio serve`: HTTP daemon
 Starts the HTTP daemon for ChatKit and email channel integrations.

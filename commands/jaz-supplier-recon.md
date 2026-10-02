@@ -5,7 +5,7 @@ argument-hint: "[--supplier <name>] [--period YYYY-MM]"
 
 # Supplier Statement Reconciliation
 
-Execute the supplier recon workflow via `clio jobs supplier-recon`. Compares your AP ledger to the supplier's statement.
+Run the supplier recon playbook from the jaz-jobs skill (`references/supplier-recon.md`). Compares your AP ledger to the supplier's statement.
 
 ## Usage
 
@@ -16,16 +16,14 @@ Execute the supplier recon workflow via `clio jobs supplier-recon`. Compares you
 
 ## Workflow
 
-### 1. Generate the blueprint
+### 1. Open the playbook
 
-```bash
-clio jobs supplier-recon --supplier "Acme Supplies" --period 2025-01 --json
-```
+The steps are in the jaz-jobs skill: `references/supplier-recon.md`. Read it first and walk its steps in order; it names the exact tool or command for each one.
 
 ### 2. Pull AP data for the supplier
 
 ```bash
-clio bills search --contact "Acme Supplies" --from 2025-01-01 --to 2025-01-31 --json
+clio bills search --contact-name "Acme Supplies" --from 2025-01-01 --to 2025-01-31 --json
 ```
 
 ### 3. Compare against supplier statement
@@ -50,6 +48,6 @@ clio reports generate aged-ap --to 2025-01-31 --json
 
 ## Key Rules
 
-- `--supplier` accepts supplier name (fuzzy matched)
+- `--contact-name` filters bills by supplier name
 - Supplier statements are external documents; user must provide them
 - Common discrepancies: missing credit notes, FX rate differences, GST/tax differences

@@ -2,8 +2,8 @@
 
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
-  <img src="https://img.shields.io/badge/tools-386-blue?style=for-the-badge" alt="386 tools">
-  <img src="https://img.shields.io/badge/API_rules-160-green?style=for-the-badge" alt="160 API rules">
+  <img src="https://img.shields.io/badge/tools-381-blue?style=for-the-badge" alt="381 tools">
+  <img src="https://img.shields.io/badge/API_rules-148-green?style=for-the-badge" alt="148 API rules">
   <img src="https://img.shields.io/badge/skills-7-purple?style=for-the-badge" alt="7 skills">
   <img src="https://img.shields.io/badge/recipe_playbooks-16-orange?style=for-the-badge" alt="16 Recipe Playbooks">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
@@ -17,7 +17,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/stargazers"><img src="https://img.shields.io/github/stars/teamtinvio/jaz-ai?style=flat-square&logo=github" alt="GitHub stars"></a>
 </p>
 
-The complete agent surface for [Jaz](https://jaz.ai) accounting. 386 tools, 7 skills, 16 recipe playbooks, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, first-try tool selection, structured errors an agent can recover from.
+The complete agent surface for [Jaz](https://jaz.ai) accounting. 381 tools, 7 skills, 16 recipe playbooks, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, first-try tool selection, structured errors an agent can recover from.
 
 > Also fully compatible with [Juan Accounting](https://juan.ac) (same API surface).
 
@@ -72,7 +72,7 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.74.2", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@6.0.0", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -85,13 +85,13 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@5.74.2", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@6.0.0", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@5.74.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@6.0.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -146,7 +146,7 @@ npx jaz-clio init --check          # report drift between installed agent-rules 
 
 Skills install to `.agents/skills/` (Agent Skills standard, used by Cursor, Copilot, Codex, Antigravity, Windsurf, Goose, Roo Code, Junie, Amp, and more) or `.claude/skills/` (Claude Code).
 
-`init` also writes a one-page `jaz-agent-rules.md` block to the path your platform reads on workspace open, so any agent (Claude / GPT / Gemini / Copilot / Cursor) starts every session with the meta-tool discovery flow, the 6 API gotchas, and the recipe-engine carve-outs.
+`init` also writes a one-page `jaz-agent-rules.md` block to the path your platform reads on workspace open, so any agent (Claude / GPT / Gemini / Copilot / Cursor) starts every session with the meta-tool discovery flow, the 6 API gotchas, and the calculate-then-post flow for IFRS schedules.
 
 The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.Y.Z -->` / `<!-- END jaz-agent-rules -->`), so re-running `init` updates only the Jaz block; your own rules above and below stay untouched. Run `clio init --check` to report drift between your installed version and the current package version (exit 1 = drift, exit 0 = current).
 
@@ -161,26 +161,26 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 
 ## How many tools is it?
 
-One catalog, three packagings. Every install reaches the **same 386 operations**; they are presented differently because hosts have different context budgets.
+One catalog, three packagings. Every install reaches the **same 381 operations**; they are presented differently because hosts have different context budgets.
 
 | Install | `tools/list` shows | Operations reachable | Why |
 |---|---|---|---|
-| Claude Code plugin, `.mcpb`, Gemini, Cursor / VS Code / Windsurf / Codex | **3** meta-tools | all 386 operations | Lazy: `search_tools` → `describe_tools` → `execute_tool`. ~600 tokens of context instead of ~78KB. |
-| Remote connector (`mcp.jaz.ai`), M365 Copilot, OpenAI Responses | 47 namespace tools | all 386 operations | One tool per accounting area; each routes to its operations, documented in its description. |
-| `JAZ_MCP_FLAT=1` (either transport) | 386 tools | all 386 operations | Every operation listed directly. Heaviest payload; enables per-tool read-only parallelism. |
+| Claude Code plugin, `.mcpb`, Gemini, Cursor / VS Code / Windsurf / Codex | **3** meta-tools | all 381 operations | Lazy: `search_tools` → `describe_tools` → `execute_tool`. ~600 tokens of context instead of ~78KB. |
+| Remote connector (`mcp.jaz.ai`), M365 Copilot, OpenAI Responses | 48 namespace tools | all 381 operations | One tool per accounting area; each routes to its operations, documented in its description. |
+| `JAZ_MCP_FLAT=1` (either transport) | 381 tools | all 381 operations | Every operation listed directly. Heaviest payload; enables per-tool read-only parallelism. |
 
-A directory listing that says "386 tools" and a client that shows 3 or 47 are describing the same server. Nothing is missing.
+A directory listing that says "381 tools" and a client that shows 3 or 47 are describing the same server. Nothing is missing.
 
 Ask the agent **"what can you do?"** on any of them; it answers from the connector's own live capability map (`describe_capabilities`), never from the length of its tool list.
 
 ## What you get
 
-- **386 tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and notes which operations are safe to retry. The model picks the right tool on the first call.
+- **381 tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and notes which operations are safe to retry. The model picks the right tool on the first call.
 - **7 skills** with the production-grade rules and playbooks any agent needs:
 
 | Skill | What it teaches an agent |
 |-------|--------------------------|
-| **jaz-api** | 160 API rules, every endpoint, error catalog, field aliases, response shapes |
+| **jaz-api** | 148 API rules, every endpoint, error catalog, field aliases, response shapes |
 | **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
 | **jaz-conversion** | Xero / QuickBooks / Sage / MYOB / Excel migration, CoA mapping, FX, clearing accounts, TB verification |
 | **jaz-jobs** | 12 close playbooks (month-end / quarter-end / year-end / bank-recon / GST-VAT / payment-run / credit-control / supplier-recon / audit-prep / FA-review / statutory-filing) + Singapore Form C-S |
@@ -198,9 +198,9 @@ The stack is one binary plus markdown skills, exposed through three layers that 
 
 | Layer | What it is | Use it alone when |
 |-------|------------|-------------------|
-| **Skills** | Domain knowledge as markdown (160 API rules, 16 recipe playbooks, 12 jobs, conversion playbooks). The agent reads these at session start. | Your agent reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
-| **CLI** (`jaz-clio`) | A `clio` binary: 76 command groups + 13 offline calculators + 12 offline blueprints + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
-| **MCP server** (`clio mcp`) | The same binary in MCP mode: 386 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
+| **Skills** | Domain knowledge as markdown (148 API rules, 16 recipe playbooks, 12 jobs, conversion playbooks). The agent reads these at session start. | Your agent reads markdown but cannot call binaries (e.g., a Custom GPT with no actions). |
+| **CLI** (`jaz-clio`) | A `clio` binary: 74 command groups + 13 offline calculators + job tools (bank matcher, outstanding bills, document ingest, Singapore tax) + live API access. Humans run it; agents shell out to it. | You're scripting CI / running offline calculators / a human is at the terminal. |
+| **MCP server** (`clio mcp`) | The same binary in MCP mode: 381 tools as agent-callable functions with structured envelopes. | This is the default for any agent (Claude / GPT / Gemini / Copilot / Cursor) that takes accounting actions. |
 
 Skills layer on top of either. Most installs (Claude Code plugin, Claude Desktop MCPB, Cursor + MCP, Gemini extension) load Skills + MCP together. The MCP server runs **locally** (stdio, via the CLI binary) or **hosted** (the [remote connector](#remote-connector--no-install) at `mcp.jaz.ai`, no install). **The same operations either way, packaged differently.** See [How many tools is it?](#how-many-tools-is-it).
 
@@ -219,7 +219,7 @@ Or call the CLI directly:
 clio auth login                    # once per computer
 clio invoices list --json
 clio calc loan --principal 100000 --rate 6 --term 60 --json
-clio jobs month-end --period 2025-01 --json
+clio jobs payment-run outstanding --due-before 2025-01-31 --json
 clio approvals approve <resourceId> --entity bills --json
 clio sql preview "SELECT invoice_number, balance FROM invoices WHERE balance > 0 LIMIT 10"
 clio ledger-find-fix preview --level TRANSACTIONS --input recode.json
@@ -246,8 +246,8 @@ Built so any model sees the right tool fast and calls it once.
 
 | What | How |
 |------|-----|
-| **MCP delivery: local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of schemas for all 386 operations (~78KB). The agent searches into the catalog only when needed. |
-| **MCP delivery: hosted connector** | 47 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
+| **MCP delivery: local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of schemas for all 381 operations (~78KB). The agent searches into the catalog only when needed. |
+| **MCP delivery: hosted connector** | 48 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
 | **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
 | **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
 | **Discovery ranker** | In-memory, no network round-trip. Scans tool name + description + searchHint + namespace. |
@@ -271,7 +271,7 @@ Run period work conversationally. Describe it to any agent:
 > Close March for Acme. Bank-recon DBS Current first.
 > File GST for Q1.
 
-13 calculators (`clio calc loan / depreciation / lease / ecl / fx-reval / provision / fixed-deposit / asset-disposal / prepaid-expense / deferred-revenue / accrued-expense / leave-accrual / dividend`), 12 job blueprints (`clio jobs month-end / quarter-end / year-end / bank-recon / document-collection / gst-vat / payment-run / credit-control / supplier-recon / audit-prep / fa-review / statutory-filing`), all with `--json` for structured blueprint output.
+13 calculators (`clio calc loan / depreciation / lease / ecl / fx-reval / provision / fixed-deposit / asset-disposal / prepaid-expense / deferred-revenue / accrued-expense / leave-accrual / dividend`), 12 job playbooks in the jaz-jobs skill (month-end / quarter-end / year-end close, bank recon, document collection, GST/VAT filing, payment run, credit control, supplier recon, audit prep, FA review, statutory filing), and five job tools (`clio jobs bank-recon match`, `payment-run outstanding`, `document-collection ingest`, `statutory-filing sg-cs` / `sg-ca`), all with `--json` for structured output. Calculators post nothing: to book a schedule, create a capsule and post each step with `capsuleResourceId`.
 
 In Claude Code, ten commands walk the jobs that have real steps to follow:
 
@@ -335,7 +335,7 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill t
 - **[OpenAPI spec](spec/openapi.yaml)** · full HTTP surface, synced weekly
 - **[README-cli.md](README-cli.md)** · npm-package README, full CLI command catalog
 - **[help.jaz.ai](https://help.jaz.ai)** · Jaz product help center
-- **CLI surface**: 76 command groups across the `clio` binary
+- **CLI surface**: 74 command groups across the `clio` binary
 
 <details>
 <summary><strong>What's inside · skill file catalog</strong></summary>
@@ -344,7 +344,7 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill t
 
 | Reference | Content |
 |-----------|---------|
-| `SKILL.md` | 160 API rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
+| `SKILL.md` | 148 API rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
 | `endpoints.md` | Request/response examples for every core endpoint |
 | `errors.md` | Error catalog with root causes and fixes |
 | `field-map.md` | Intuitive name → actual field name mapping |
@@ -366,18 +366,18 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill t
 | `building-blocks.md` | Capsules, schedulers, manual journals, FA, tracking tags, nano classifiers |
 | `prepaid-amortization.md` | Annual insurance/rent paid upfront, monthly scheduler recognition |
 | `deferred-revenue.md` | Upfront customer payment, monthly revenue recognition |
-| `accrued-expenses.md` | Month-end accrual + reversal cycle using dual schedulers |
+| `accrued-expenses.md` | Month-end accrual + next-period reversal as a journal pair |
 | `bank-loan.md` | Loan disbursement, amortization table, monthly installments |
 | `ifrs16-lease.md` | ROU asset + lease liability unwinding (IFRS 16) |
 | `declining-balance.md` | DDB/150DB with switch-to-SL logic |
 | `fixed-deposit.md` | Placement, compound interest accrual, maturity (IFRS 9) |
 | `hire-purchase.md` | Like IFRS 16 but depreciate over useful life |
 | `asset-disposal.md` | Sale/scrap/write-off with gain/loss (IAS 16) |
-| `fx-revaluation.md` | Non-AR/AP FX revaluation with Day 1 reversal (IAS 21) |
+| `fx-revaluation.md` | FX revaluation check (IAS 21): verifies the revaluation Jaz posts itself; the result is not posted |
 | `bad-debt-provision.md` | ECL simplified approach provision matrix (IFRS 9) |
 | `employee-accruals.md` | Leave (scheduler) + bonus (manual) accruals (IAS 19) |
 | `provisions.md` | PV recognition + monthly discount unwinding (IAS 37) |
-| `dividend.md` | Declaration + payment (two manual journals) |
+| `dividend.md` | Declaration journal + payment cash-out, with optional withholding tax |
 | `intercompany.md` | Mirrored invoices/bills across two entities |
 | `capital-wip.md` | CIP accumulation → FA transfer on completion |
 
@@ -477,7 +477,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@5.74.2", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@6.0.0", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 

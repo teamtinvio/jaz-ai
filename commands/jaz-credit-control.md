@@ -5,7 +5,7 @@ argument-hint: "[--overdue-days 30]"
 
 # Credit Control
 
-Execute the credit control workflow via `clio jobs credit-control`. Reviews AR aging and generates a chase list.
+Run the credit control playbook from the jaz-jobs skill (`references/credit-control.md`). Reviews AR aging and generates a chase list.
 
 ## Usage
 
@@ -16,11 +16,9 @@ Execute the credit control workflow via `clio jobs credit-control`. Reviews AR a
 
 ## Workflow
 
-### 1. Generate the blueprint
+### 1. Open the playbook
 
-```bash
-clio jobs credit-control --overdue-days 30 --json
-```
+The steps are in the jaz-jobs skill: `references/credit-control.md`. Read it first and walk its steps in order; it names the exact tool or command for each one.
 
 ### 2. Review aged receivables
 
@@ -28,11 +26,11 @@ clio jobs credit-control --overdue-days 30 --json
 clio reports generate aged-ar --to 2025-02-28 --json
 ```
 
-The blueprint breaks down receivables by aging bucket: current, 1-30, 31-60, 61-90, 91+.
+The report breaks down receivables by aging bucket: current, 1-30, 31-60, 61-90, 91+.
 
 ### 3. Generate chase list
 
-The blueprint produces a prioritized list of overdue customers with:
+From the aging report, build a prioritized list of overdue customers (default threshold: 30 days overdue) with:
 - Contact details
 - Invoice references and amounts
 - Days overdue
@@ -48,18 +46,18 @@ clio calc ecl --current <amt> --30d <amt> --60d <amt> --90d <amt> --120d <amt> -
 
 ### 5. Record provisions (if needed)
 
-Post the provision journal with the same buckets and rates:
+Re-run the calculator with `--existing-provision <amt>` to get the top-up (`adjustmentRequired`) and its journal lines. It posts nothing. Then book the top-up yourself:
 
 ```bash
-clio ct ecl --current <amt> --30d <amt> --60d <amt> --90d <amt> --120d <amt> --rates 0.5,1,3,10,50 \
-  --existing-provision <amt> --start-date <YYYY-MM-DD> --plan --json
+clio capsules types --json
+clio capsules create --type <capsuleTypeId> --title "ECL provision <period>" --json
+clio journals create --input ecl-journal.json --json   # body: valueDate, journalEntries, capsuleResourceId
 ```
 
-Review the plan output, then re-run without `--plan` to post. Entries are created as drafts unless you pass `--finalize`. Needs Bad Debt Expense and Allowance for Doubtful Debts accounts.
+The journal is created as a draft unless you pass `--finalize`. Needs Bad Debt Expense and Allowance for Doubtful Debts accounts.
 
 ## Key Rules
 
-- `--overdue-days` sets the threshold for the chase list (default: 30)
 - AR aging report uses `aged-ar` report type
 - ECL provisioning uses IFRS 9 simplified approach (5-bucket matrix)
 - No `amountDue` field on invoices; check `paymentRecords` to determine remaining balance

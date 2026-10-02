@@ -5,7 +5,7 @@ argument-hint: "[bank account] [period YYYY-MM]"
 
 # Bank Reconciliation
 
-Execute the bank recon workflow via `clio jobs bank-recon`. Includes automated matching and manual resolution steps.
+Run the bank recon playbook from the jaz-jobs skill (`references/bank-recon.md`). Includes automated matching and manual resolution steps.
 
 ## Usage
 
@@ -16,11 +16,9 @@ Execute the bank recon workflow via `clio jobs bank-recon`. Includes automated m
 
 ## Workflow
 
-### 1. Generate the blueprint
+### 1. Open the playbook
 
-```bash
-clio jobs bank-recon --account "DBS Current" --period 2025-01 --json
-```
+The steps are in the jaz-jobs skill: `references/bank-recon.md`. Read it first and walk its steps in order; it names the exact tool or command for each one.
 
 ### 2. Import bank statement (if not already imported)
 
@@ -33,14 +31,16 @@ Or for OFX/QIF files, same command (format auto-detected).
 ### 3. Run automated matching
 
 ```bash
-clio jobs bank-recon match --account "DBS Current" --json
+clio jobs bank-recon match --input bank-data.json --json
 ```
+
+`--input` is a JSON file holding the unreconciled `bankRecords` and the candidate `transactions` (format in the jaz-jobs skill, `references/bank-match.md`). The matcher takes no `--account` flag: pull the account's records first (`clio bank records <bankAccountResourceId> --status UNRECONCILED --json`).
 
 The matcher uses a 5-phase cascade: 1:1 exact, N:1 group, 1:N split, N:M complex, fuzzy.
 
 ### 4. Review unmatched items
 
-The blueprint lists unmatched bank records and book entries. For each:
+The matcher output lists unmatched bank records and book entries. For each:
 - **Bank record with no book entry**: Create the missing transaction (invoice, bill, cash entry, journal)
 - **Book entry with no bank record**: Verify timing (may match next period's statement)
 - **Partial matches**: Confirm and adjust
@@ -55,7 +55,7 @@ Compare closing balance per books vs bank statement.
 
 ## Key Rules
 
-- `--account` accepts bank account name (fuzzy matched)
+- `clio bank import --account` accepts the bank account name (fuzzy matched)
 - Bank records are imported via `clio bank import` (CSV, OFX, QIF)
 - The matcher runs offline; it suggests matches but doesn't auto-confirm
 - Bank statement balance vs book balance difference = unreconciled items

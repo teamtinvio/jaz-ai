@@ -1,8 +1,8 @@
 # Payment Run
 
-> Process outstanding supplier bills in a structured weekly or fortnightly batch through the Jaz platform tools. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs payment-run` prints this same phased checklist.)
+> Process outstanding supplier bills in a structured weekly or fortnightly batch through the Jaz platform tools. Walk the steps below in order, calling the named platform tools directly.
 
-## Tools, recipes, calculators this job uses
+## Tools and calculators this job uses
 
 ### Platform tools (jaz-api)
 - **`search_bills(filter: {status: {eq: 'UNPAID'}, balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`**, used in step 2: pull due bills (paginate via `offset` if `>200`).
@@ -16,7 +16,6 @@
 - **`finalize_bill(resourceId: <id>)`**, used in step 0 fallback: bills must be `status: APPROVED` (not `DRAFT`) before they accept payments.
 
 ### CLI tools (jaz-cli)
-- **`clio jobs payment-run --due-before <YYYY-MM-DD> --json`**: emit blueprint as JSON for downstream agent consumption.
 - **`clio jobs payment-run outstanding --due-before <YYYY-MM-DD> --currency SGD --json`**: fetch outstanding bills grouped by supplier (uses API key; equivalent to step 2 + step 4 grouping in one call).
 
 ### Cross-references
@@ -38,7 +37,7 @@ If results: surface "A payment run with prefix `PAYRUN-2025-02-28-*` already exe
 
 ## Step 1: Set the run window
 
-Pick the cutoff date for the run (the bills you'll clear are those due on or before it). (Local CLI: `clio jobs payment-run --due-before 2025-02-28` prints the phased checklist for this cutoff.)
+Pick the cutoff date for the run (the bills you'll clear are those due on or before it).
 
 ## Step 2: Identify bills
 

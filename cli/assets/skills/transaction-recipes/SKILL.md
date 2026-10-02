@@ -1,15 +1,16 @@
 ---
 name: jaz-recipes
-version: 5.74.2
+version: 6.0.0
 description: >-
   Use this skill when modeling complex multi-step accounting transactions:
   anything that spans multiple periods, involves changing amounts, or requires
   linked entries. Covers 16 IFRS-compliant recipes (prepaid amortization,
   deferred revenue, loans, IFRS 16 leases, hire purchase, fixed deposits,
   asset disposal, FX revaluation, ECL, IAS 37 provisions, dividends,
-  intercompany, capital WIP) and 13 financial calculators that produce
-  execution-ready blueprints. Also use when the user mentions depreciation,
-  amortization, lease accounting, loan schedules, or any IFRS calculation.
+  intercompany, capital WIP) and 13 financial calculators that return the
+  schedule and the journal lines to post. Also use when the user mentions
+  depreciation, amortization, lease accounting, loan schedules, or any IFRS
+  calculation.
 license: MIT
 compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill alongside this one. For the operational close workflows these recipes plug into (month-end close, GST/VAT filing, year-end close), load the jaz-jobs skill.
 ---
@@ -18,7 +19,7 @@ compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent t
 
 You are modeling **complex multi-step accounting scenarios** in Jaz: transactions that span multiple periods, involve changing amounts, or require several linked entries to complete a single business event.
 
-> **Jaz-native, not generic.** Every recipe in this skill is designed around the Jaz recipe engine (`plan_recipe` / `execute_recipe`), Jaz capsule types, Jaz CoA classifications, and Jaz scheduler primitives. It is NOT an interchangeable IFRS reference; it is the operating manual for posting these transactions through the Jaz ledger. If you find yourself hand-constructing journal entries from this skill, you have skipped step 1: invoke `plan_recipe(recipe: ...)` first and let the engine emit the entries.
+> **Jaz-native, not generic.** Every recipe in this skill is designed around the Jaz calculators (`calculate` / `clio calc`), Jaz capsule types, Jaz CoA classifications, and Jaz scheduler primitives. It is NOT an interchangeable IFRS reference; it is the operating manual for posting these transactions through the Jaz ledger. Never work the amounts by hand: run the calculator first and post the lines it returns. Nothing posts a recipe for you: the calculator posts nothing, and you create the capsule and each entry yourself (see "Posting a Recipe: Three Steps").
 
 **This skill provides Jaz-contextual recipes with full accounting logic. For API field names and payloads, load the `jaz-api` skill alongside this one. For the operational close workflows that invoke these recipes (month-end close, GST/VAT filing, year-end close), load the `jaz-jobs` skill.**
 
@@ -31,7 +32,7 @@ You are modeling **complex multi-step accounting scenarios** in Jaz: transaction
 - Recording depreciation using methods Jaz doesn't natively support (declining balance, 150DB)
 - Managing fixed deposit placements with interest accrual schedules (IFRS 9)
 - Disposing of fixed assets: sale, scrap, or write-off with gain/loss calculation (IAS 16)
-- FX revaluation of non-AR/AP monetary items at period-end (IAS 21)
+- Verifying the period-end FX revaluation Jaz posts itself (IAS 21): the calculator checks the figure, and its result is not posted
 - Calculating expected credit loss provisions on aged receivables (IFRS 9)
 - Accruing employee leave and bonus obligations (IAS 19)
 - Recognizing provisions at PV with discount unwinding (IAS 37)
@@ -47,8 +48,9 @@ Every recipe uses a combination of these Jaz features. See `references/building-
 | Building Block | Role in Recipes |
 |---|---|
 | **Capsules** | Group all related entries into one workflow container |
+| **Calculators** | Return the schedule and the journal lines for each step (offline, post nothing) |
 | **Schedulers** | Automate fixed-amount recurring journals (prepaid, deferred, leave) |
-| **Manual Journals** | Record variable-amount entries (loan interest, IFRS 16 unwinding, FX reval, ECL) |
+| **Manual Journals** | Record variable-amount entries (loan interest, IFRS 16 unwinding, ECL) |
 | **Fixed Assets** | Native straight-line depreciation for ROU assets and completed capital projects |
 | **Invoices / Bills** | Trade documents for intercompany, supplier bills for capital WIP |
 | **Tracking Tags** | Tag all entries in a scenario for report filtering |
@@ -59,9 +61,9 @@ Every recipe uses a combination of these Jaz features. See `references/building-
 
 Jaz schedulers generate **fixed-amount** recurring entries. This determines which recipe pattern to use:
 
-- **Fixed amounts each period** → Use a scheduler inside a capsule (automated)
-- **Variable amounts each period** → Use manual journals inside a capsule (calculated per period)
-- **One-off or two-entry events** → Use manual journals (e.g., dividend declaration + payment)
+- **Fixed amounts each period** → One scheduler can replace the N dated journals (it posts each occurrence itself)
+- **Variable amounts each period** → Use manual journals inside a capsule (one per period, amounts from the calculator)
+- **One-off or two-entry events** → Use manual journals (e.g., a dividend declaration; its payment is a cash-out)
 
 If a scenario genuinely fits either pattern, record the pick once the entries post: `jot(kind: METHOD)` naming the pattern chosen and the deciding fact.
 
@@ -69,19 +71,19 @@ If a scenario genuinely fits either pattern, record the pick once the entries po
 |---|---|---|
 | Prepaid Amortization | Scheduler + capsule | Same amount each month |
 | Deferred Revenue | Scheduler + capsule | Same amount each month |
-| Accrued Expenses | Two schedulers + capsule | Accrual + reversal cycle with end dates |
+| Accrued Expenses | Manual journals + capsule | Accrual + reversal pair per period, re-estimated each time |
 | Employee Leave Accrual | Scheduler + capsule | Fixed monthly accrual |
 | Bank Loan | Manual journals + capsule | Interest changes as principal reduces |
 | IFRS 16 Lease | Hybrid (native FA + manual journals) + capsule | ROU depreciation is fixed; liability unwinding changes |
 | Declining Balance | Manual journals + capsule | Depreciation changes as book value reduces |
-| FX Revaluation | Manual journals + capsule | Rates change each period |
+| FX Revaluation | Verification only: nothing posted, no capsule | Jaz revalues foreign-currency balances itself at period end; the calculator verifies that figure and its result is not posted |
 | ECL Provision | Manual journals + capsule | Receivables and rates change each quarter |
 | Fixed Deposit | Cash-out + manual journals + cash-in + capsule | Placement, monthly accruals, maturity |
 | Hire Purchase | Manual journals + FA registration + capsule | Like IFRS 16 but depreciate over useful life |
 | Asset Disposal | Manual journal + FA deregistration | One-off compound entry + FA update |
 | Provisions (IAS 37) | Manual journals + cash-out + capsule | Unwinding amount changes each month |
 | Bonus Accrual | Manual journals + capsule | Revenue/profit changes each quarter |
-| Dividends | Manual journals + capsule | One-off: declaration + payment |
+| Dividends | Manual journal + cash-out + capsule | One-off: declaration journal, then the payment as a cash-out (with withholding tax, a journal for the withheld amount too) |
 | Intercompany | Invoices/bills + capsule | Mirrored entries in two entities |
 | Capital WIP | Bills/journals + FA registration + capsule | Accumulate then transfer |
 
@@ -97,9 +99,9 @@ Each recipe includes: scenario description, accounts involved, journal entries, 
 
 ### Tier 2: Manual Journal Recipes (Calculated)
 
-3. **[Accrued Expenses](references/accrued-expenses.md)**: Month-end expense accrual and start-of-month reversal using two schedulers with end dates, plus the actual supplier bill. *Paired calculator: `clio calc accrued-expense`. Typical context: month-end close (accruals step inside the month-end close).*
+3. **[Accrued Expenses](references/accrued-expenses.md)**: Month-end expense accrual and next-period reversal as a journal pair per period, plus the actual supplier bill. *Paired calculator: `clio calc accrued-expense`. Typical context: month-end close (accruals step inside the month-end close).*
 
-4. **[Bank Loan](references/bank-loan.md)**: Loan disbursement, monthly installments splitting principal and interest, full amortization table with worked example. *Typical context: ad-hoc (one-off setup at loan drawdown, then month-end close picks up each installment journal via the scheduler the recipe creates).*
+4. **[Bank Loan](references/bank-loan.md)**: Loan disbursement, monthly installments splitting principal and interest, full amortization table with worked example. *Paired calculator: `clio calc loan`. Typical context: ad-hoc (one-off setup at loan drawdown, then month-end close posts or finalizes each installment journal).*
 
 5. **[IFRS 16 Lease](references/ifrs16-lease.md)**: Right-of-use asset recognition, lease liability unwinding with changing interest, native FA for ROU straight-line depreciation. *Typical context: month-end close (depreciation + liability unwinding booking each period inside the month-end close) and year-end (ROU register sign-off inside the fixed-asset review + the year-end close).*
 
@@ -113,7 +115,7 @@ Each recipe includes: scenario description, accounts involved, journal entries, 
 
 ### Tier 3: Month-End Close Recipes
 
-10. **[FX Revaluation (verification only)](references/fx-revaluation.md)**: Jaz auto-handles ALL period-end IAS 21.23 FX translation (AR, AP, cash, bank, intercompany, term deposits, FX provisions). The recipe and `clio calc fx-reval` are for VERIFICATION ONLY (independent cross-check vs what Jaz auto-posted). Do NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` (would double-post). *Typical context: period-end / year-end FX verification flow.*
+10. **[FX Revaluation (verification only)](references/fx-revaluation.md)**: Jaz auto-handles ALL period-end IAS 21.23 FX translation (AR, AP, cash, bank, intercompany, term deposits, FX provisions). The recipe and `clio calc fx-reval` / `calculate(type: 'fx-reval')` are for VERIFICATION ONLY (independent cross-check vs what Jaz auto-posted). Do NOT post the calculator's result (it would double-count). *Typical context: period-end / year-end FX verification flow.*
 
 11. **[Bad Debt Provision / ECL](references/bad-debt-provision.md)**: IFRS 9 simplified approach provision matrix using aged receivables and historical loss rates. *Paired calculator: `clio calc ecl`. Typical context: GST/VAT filing cycle (ECL reviewed alongside the return prep since AR aging is already pulled) and year-end (ECL true-up inside the year-end close).*
 
@@ -123,26 +125,33 @@ Each recipe includes: scenario description, accounts involved, journal entries, 
 
 13. **[Provisions with PV Unwinding](references/provisions.md)**: IAS 37 provision recognized at PV, with monthly discount unwinding schedule. For warranties, legal claims, decommissioning, restructuring. *Paired calculator: `clio calc provision`. Typical context: month-end close (monthly discount-unwinding journal inside the month-end close); initial recognition triggered ad-hoc when the obligating event occurs.*
 
-14. **[Dividend Declaration & Payment](references/dividend.md)**: Board-declared dividend: two journals (declaration reducing retained earnings, then payment). Optional withholding tax adds a third step. *Paired calculator: `clio calc dividend`. Typical context: year-end (dividend declaration is part of the year-end close after profit is finalized) or ad-hoc (interim dividends).*
+14. **[Dividend Declaration & Payment](references/dividend.md)**: Board-declared dividend: a declaration journal reducing retained earnings, then the payment as a cash-out. Optional withholding tax adds a journal for the withheld amount and a cash-out for its remittance. *Paired calculator: `clio calc dividend`. Typical context: year-end (dividend declaration is part of the year-end close after profit is finalized) or ad-hoc (interim dividends).*
 
 15. **[Intercompany Transactions](references/intercompany.md)**: Mirrored invoices/bills or journals across two Jaz entities with matching intercompany reference, quarterly settlement. *Typical context: month-end close (mirror entries booked each period inside the month-end close) and year-end (intercompany elimination + confirmation inside audit prep).*
 
 16. **[Capital WIP to Fixed Asset](references/capital-wip.md)**: Cost accumulation in CIP account during construction/development, transfer to FA on completion, auto-depreciation via Jaz FA module. *Typical context: month-end close (cost accumulation each period) and year-end (transfer to FA + commissioning review inside the fixed-asset review).*
 
-## How to Use These Recipes
+## Posting a Recipe: Three Steps
 
-1. **Read the recipe** for your scenario: understand the accounts, journal entries, and capsule structure.
-2. **Create the accounts** listed in the "Accounts Involved" table (if they don't already exist in the CoA).
-3. **Create the capsule** with an appropriate capsule type.
-4. **Run the calculator** (if available) to generate exact amounts: `clio calc <command> --json` gives you a complete blueprint. Where you picked the method yourself (e.g. `--method ddb` over `sl`), record the judgment after the entries post: `jot(kind: METHOD)` naming the method and why.
-5. **Record the initial transaction** (bill, invoice, or journal); assign it to the capsule.
-6. **For scheduler recipes**: Create the scheduler with the same capsule; it generates all subsequent entries automatically.
-7. **For manual journal recipes**: Record each period's journal using the calculator output or worked example, always assigning to the same capsule.
-8. **Verify** using the steps in each recipe (ledger grouping by capsule, trial balance checks).
+No tool runs a recipe end to end. You perform three explicit steps (full detail, the action-to-tool mapping and the draft / reference rules are in `references/building-blocks.md`):
 
-## Financial Calculators (CLI)
+1. **Calculate.** `calculate(type, ...)` (MCP) or `clio calc <type> ... --json` (CLI). Offline, read-only, no account needed. It returns the schedule and, when a start date is given, a `blueprint` with dated steps and the journal lines for each step. It posts nothing.
+2. **Create the capsule.** `list_capsule_types` (create the type with `create_capsule_type` if it is missing), then `create_capsule`.
+3. **Post each blueprint step** with the real transaction tools, each carrying `capsuleResourceId`: `create_journal`, `create_bill`, `create_invoice`, `create_cash_in`, `create_cash_out`. Where the same amount repeats every period, one `create_scheduled_journal` can replace the N dated journals. Fixed assets go through the fixed-asset tools (`create_fixed_asset`, `mark_fixed_asset_sold`, `discard_fixed_asset`).
 
-The `jaz-clio` CLI includes 13 IFRS-compliant financial calculators. Each produces a formatted schedule + per-period journal entries + human-readable workings. Use `--json` for structured output with a complete **blueprint**: capsule type/name, tags, custom fields, workings (capsuleDescription), and every step with action type, date, accounts, and amounts.
+Around those three steps:
+
+- **Read the recipe** for your scenario first: the accounts, the journal entries, the capsule structure and the worked example.
+- **Resolve every account yourself.** Blueprint lines carry labels (`Cash / Bank Account`, `Loan Payable`), not accounts. Map each with `search_accounts` / `list_accounts` (bank accounts via `list_bank_accounts`); create a missing account only after the practitioner confirms its classification.
+- **Record judgment.** Where you picked the method yourself (e.g. `method: 'ddb'` over `'sl'`), record it after the entries post: `jot(kind: METHOD)` naming the method and why.
+- **Verify** using the steps in each recipe (general ledger grouped by capsule, trial balance checks).
+- **`fx-reval` is VERIFICATION ONLY.** Jaz revalues foreign-currency balances at period end (IAS 21.23); posting the calculator's result double-counts.
+
+## Financial Calculators
+
+13 IFRS-compliant financial calculators, reachable two ways with the same result: the MCP tool `calculate(type: <type>, ...)` and the CLI `clio calc <type>`. Each produces a schedule + per-period journal entries + human-readable workings. On the CLI use `--json` for structured output with the **blueprint**: capsule type/name, tags, custom fields, workings (capsuleDescription), and every step with action type, date, accounts, and amounts.
+
+The MCP param names differ from the CLI flags: `annualRate` (`--rate`), `termMonths` (`--term`), `monthlyPayment` (`--payment`), `usefulLifeMonths` (`--useful-life`), `salvageValue` (`--salvage`), `usefulLifeYears` (`--life`), `acquisitionDate` / `disposalDate` (`--acquired` / `--disposed`), `compounding` (`--compound`), `daysPerYear` (`--days`), and `buckets: [{ name, balance, rate }]` for ECL (`--current`, `--30d` ... `--rates`).
 
 All calculators support `--currency <code>` and `--json`.
 
@@ -187,8 +196,8 @@ clio calc asset-disposal --cost 50000 --salvage 5000 --life 5 --acquired 2022-01
 
 # ── Tier 3 Calculators ──────────────────────────────────────────
 
-# FX revaluation: unrealized gain/loss on non-AR/AP items (IAS 21)
-# Typical context: month-end close (period-end FX reval) + year-end (revaluation)
+# FX revaluation (IAS 21): VERIFICATION ONLY. Checks the revaluation Jaz posts itself; never post this result.
+# Typical context: month-end close + year-end (cross-check the platform's period-end revaluation)
 # --rate-direction is REQUIRED: these rates read foreign-first (1 USD = 1.35 SGD).
 # A list_currency_rates value would be FUNCTIONAL_TO_SOURCE instead.
 clio calc fx-reval --amount 50000 --book-rate 1.35 --closing-rate 1.38 --rate-direction SOURCE_TO_FUNCTIONAL [--position ASSET|LIABILITY] [--currency USD] [--base-currency SGD] [--json]
@@ -226,7 +235,7 @@ clio jobs bank-recon match --input bank-data.json [--tolerance 0.01] [--date-win
 
 ### Blueprint Output (`--json`)
 
-Every calculator's `--json` output includes a `blueprint` object, a complete execution plan for creating the capsule and posting all transactions in Jaz:
+The result includes a `blueprint` object: the capsule to create and the steps to post, in order. The dated calculators (loan, lease, prepaid, deferred revenue, provision, fixed deposit, accrued expense, leave accrual) return `blueprint: null` when no start date is given.
 
 ```json
 {
@@ -254,17 +263,19 @@ Every calculator's `--json` output includes a `blueprint` object, a complete exe
 }
 ```
 
-**Blueprint action types** (each step tells you HOW to execute it in Jaz):
+**Blueprint action types** (each step tells you which tool posts it):
 
-| Action | When used | Jaz module |
+| Action | When used | Tool |
 |---|---|---|
-| `bill` | Supplier document (prepaid expense) | Bills |
-| `invoice` | Customer document (deferred revenue) | Invoices |
-| `cash-in` | Cash arrives in bank (loan disbursement, FD maturity) | Bank / Manual Journal |
-| `cash-out` | Cash leaves bank (FD placement, provision settlement) | Bank / Manual Journal |
-| `journal` | No cash movement (accrual, depreciation, unwinding, reval) | Manual Journals |
-| `fixed-asset` | Register/update FA module (ROU asset, capital project) | Fixed Assets |
-| `note` | Instruction only (deregister FA on disposal) | N/A |
+| `bill` | Supplier document (prepaid expense) | `create_bill` |
+| `invoice` | Customer document (deferred revenue) | `create_invoice` |
+| `cash-in` | Cash arrives in bank (loan disbursement, FD maturity) | `create_cash_in` |
+| `cash-out` | Cash leaves bank (FD placement, provision settlement) | `create_cash_out` |
+| `journal` | Accrual, depreciation, unwinding, installment split | `create_journal` |
+| `fixed-asset` | Instruction: register the asset (ROU asset) | `create_fixed_asset` |
+| `note` | Instruction: update the FA register on disposal | `mark_fixed_asset_sold` / `discard_fixed_asset` |
+
+Account names in `lines` are labels to map to real accounts, and cash entries post ACTIVE immediately (no draft state): post a future-dated cash step when the money moves. A cash step can only carry lines on the side opposite the bank: if a cash-in or cash-out step has another line on the bank's side (for example withholding tax), post the net cash entry and a separate journal for that line.
 
 **Math guarantees:**
 - `financial` npm package (TypeScript port of numpy-financial) for PV, PMT, no hand-rolled TVM
@@ -273,87 +284,13 @@ Every calculator's `--json` output includes a `blueprint` object, a complete exe
 - DDB→SL switch when straight-line >= declining balance or when DDB would breach salvage floor
 - All journal entries balanced (debits = credits in every step)
 
-## Agent Tools (Daemon)
-
-When running as a daemon agent (`clio serve`), recipes are available via two dedicated tools:
-
-- **`plan_recipe`** (read-only): Run a calculator and see what accounts, contacts, and bank accounts are needed, no API calls. Use this first to verify requirements.
-- **`execute_recipe`** (write): Full end-to-end recipe execution (run calculator, auto-resolve accounts from chart of accounts, create capsule, post all entries). **1 tool call replaces ~20 manual tool calls.**
-
-Both tools accept all 13 recipe types: loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend.
-
-Scheduler creation tools are also available: `create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`.
-
-## Server-side recipe execution (Jaz API)
-
-A second path: 5 IFRS recipes (Loan Amortization, Accrual Reversal, Prepaid Amortization, Deferred Revenue, IFRS 16 Lease) also have a SERVER-SIDE lifecycle via Jaz REST. This produces real capsule entities + scheduler atoms (recurring journal postings), distinct from the offline `plan_recipe` / `execute_recipe` path which is client-side compute.
-
-**Two distinct execution paths:**
-
-| Path | When to use | Tools |
-|---|---|---|
-| **Offline calculator** | Plan first, post manually. Agent has CoA picked. No need for a server-side capsule entity. Works without an API key. | `plan_recipe` → `execute_recipe` |
-| **Server-side trigger** | "Create the bill AND the prepaid amortization schedule in one shot." Capsule entity needed for FE/reporting. Requires API key. | Trigger via `capsuleRecipe` payload on `create_bill` / `create_invoice` / `create_journal` / `create_cash_in` / `create_cash_out` (and their `update_*` variants), OR standalone `preview_capsule_recipe` first. |
-
-**Server-side tools** (group: `capsule_recipes`):
-
-- `list_capsule_recipes` (read-only): list registered IFRS recipes + per-version JSON Schemas. SOURCE OF TRUTH for `recipeName` values; don't hard-code.
-- `get_capsule_recipe(name)` (read-only): one descriptor by enum name with `versions[].inputSchema`.
-- `preview_capsule_recipe({recipeName, recipeVersion?, inputs, baseTransactionResourceId?, baseTransactionType?, organizationResourceId?})` (read-only): pure compute, no side effects. Returns `{legs[], expectedOutput[], previewMarkdown}`. Use BEFORE triggering via `capsuleRecipe` payload to validate inputs.
-- `resume_capsule_recipe(capsuleResourceId)` (write, NOT idempotent): retry a FAILED recipe job from its failed leg. ≤3 same-leg attempts then terminal `BLOCKED_AFTER_3_RESUME_ATTEMPTS`.
-- `rollback_capsule_recipe(capsuleResourceId, dryRun?: boolean)` (write; dryRun IS idempotent): delete every scheduler atom created by the recipe. Preview with `dryRun=true` before committing.
-
-**Trigger-mutation payload**: to create a base-trx AND fire a recipe in one shot, pass `capsuleRecipe: {recipeName, recipeVersion?, inputs}` to the create/update mutation. Mutually exclusive with `capsuleResourceId` (the "attach to existing capsule" path).
-
-### Three pre-flight gates BEFORE sending `capsuleRecipe` (else the response silently nulls)
-
-The trigger mutation is **best-effort post-commit**: if the recipe publish fails inside customer-service, the base-trx still commits, the response still returns its normal success status (201 on create, 200 on update), but `capsuleRecipeJob` is null and **no error reason is surfaced on the response body**. Three causes of silent null; gate every one of them before sending:
-
-| Gate | Constraint | Pre-flight check |
-|---|---|---|
-| **Base trx type** | `recipeName` must match a trigger mutation in the recipe's `allowedBaseTransactionTypes`. PREPAID_AMORTIZATION→PURCHASE, DEFERRED_REVENUE→SALE, ACCRUAL_REVERSAL→JOURNAL_MANUAL, IFRS16_LEASE→JOURNAL_MANUAL, LOAN_AMORTIZATION→JOURNAL_DIRECT_CASH_IN \| JOURNAL_MANUAL | `get_capsule_recipe(name).allowedBaseTransactionTypes` ↔ trigger mutation |
-| **Currency** | Recipe `currency`, every `*AccountResourceId` account's `currencyCode`, and base trx `currencyCode` ALL must match (v1 recipes are single-currency) | `currencyCode` of every input account, via `search_accounts(filter: {resourceId: {in: [<ids>]}})` |
-| **Account class** | Each `*AccountResourceId` slot has an `x-accountClass` constraint in the recipe inputSchema (Asset/Liability/Expense/Revenue) | `get_capsule_recipe(name).versions[0].inputSchema.properties.<field>['x-accountClass']` vs each account's `accountClass` from the same `search_accounts` read |
-
-**The canonical pre-flight is one call**: `preview_capsule_recipe(recipeName, inputs)`. Pure-compute (no side effects). Surfaces every input/class/currency violation as a clean 422 with a concrete `error_type`. The trigger mutation does NOT surface these; it just returns its normal success status with no `capsuleRecipeJob`. Always preview first if you can't trust the inputs.
-
-See `jaz-api` Rule 143 (silent-null failure mode + diagnosis sequence), Rule 144 (closed enum on `recipeName`), Rule 150 (RECIPE_INVALID_BASE_TRANSACTION_TYPE, preview-only, NOT trigger), Rule 156 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH), Rule 157 (x-accountClass slot constraint).
-
-**Recovery flow** (when `capsuleRecipeJob` is null on the response):
-
-1. **Re-run `preview_capsule_recipe`** with the same `recipeName` + `inputs`. The 422 you get back is the exact reason the trigger mutation silently nulled. Fix the input and retry.
-2. **Poll `search_background_jobs --filter '{"baseTransactionResourceId":{"eq":"<id>"}}'`**: if a `FAILED` job exists, `errorDetails` has the publish failure. If no job exists, the publish never queued (validation rejected pre-queue).
-3. **Job status `FAILED`** → `resume_capsule_recipe` (≤3 attempts) OR `rollback_capsule_recipe(dryRun=true)` first, then `rollback_capsule_recipe(dryRun=false)`. Record the judgment: `jot(kind: RECOVERY)` naming resume or rollback and the basis.
-4. **Capsule wasn't created via the recipe engine** → rollback returns 422 `RECIPE_ROLLBACK_JOB_NOT_FOUND`; use `delete_capsule` for legacy capsules.
-
-**DO NOT** use server-side execution for `fx-reval`: Jaz auto-handles ALL period-end IAS 21.23 FX translation; double-posting risk identical to the offline `execute_recipe(recipe: 'fx-reval')` warning.
-
-### Template Customization (optional): `templateOverrides`
-
-A recipe generates text for the capsule title/description, each scheduled posting's label/description, the journal-line memos, and the schedule reference. To customize any of those, pass `templateOverrides` alongside `inputs` on `preview_capsule_recipe` and on the `capsuleRecipe` trigger payload:
-
-```
-capsuleRecipe: {
-  recipeName: "LOAN_AMORTIZATION",
-  inputs: { ... },
-  templateOverrides: [
-    { slotKey: "capsule.title", template: "Loan {{loanReference}}" },
-    { slotKey: "leg.description.payment", template: "" }   // empty string clears a nullable slot
-  ]
-}
-```
-
-Discovery + rules:
-- **Discover the slots first**: `get_capsule_recipe(name).data.versions[].templateSlots[]` lists each `slotKey`, its `uiLabel`, `defaultTemplate`, `supportedVariables`, and `nullable`. Send only the slots you change.
-- Each `slotKey` MUST be one the recipe publishes; every `{{var}}` in `template` MUST be in that slot's `supportedVariables`; `template` ≤2000 chars; an empty `template` clears a `nullable` slot (omit the entry to keep the default; a non-nullable slot rejects a blank).
-- **Preview is the gate.** `preview_capsule_recipe` surfaces override mistakes as clean 422 `ERR_RECIPE_OVERRIDE_*` codes. On the trigger path, an invalid override falls under the same best-effort silent-null behavior as everything else in the payload (see the three gates above), so preview before you trigger.
-- CLI: `clio capsule-recipes get <name>` prints the slots; `clio capsule-recipes preview --recipe <name> --inputs '{...}' --template-override capsule.title='Loan {{loanReference}}'` (repeatable).
-
 ## See Also
 
 - **API field names and payloads**: Load the `jaz-api` skill (see `references/endpoints.md` and `references/field-map.md`)
+- **Three-step flow, action-to-tool mapping, capsule rules**: `references/building-blocks.md`
 - **Capsule API**: `POST /capsules`, `POST /capsuleTypes` (see api skill's `references/full-api-surface.md`)
 - **Scheduler API**: `POST /scheduled/journals`, `POST /scheduled/invoices`, `POST /scheduled/bills`
 - **Fixed Assets API**: `POST /fixed-assets` (see api skill's `references/feature-glossary.md`)
 - **Enrichments overview**: See `references/building-blocks.md` or api skill's `references/feature-glossary.md`
-- **Operational close workflows (jaz-jobs)**: For the close playbooks that drive these recipes, load the `jaz-jobs` skill: month-end close (period-end recognition + accruals + FX reval), GST/VAT filing (ECL review during return prep), and year-end close (year-end true-ups, dividends, intercompany elimination).
+- **Scheduler tools**: `create_scheduled_journal`, `create_scheduled_invoice`, `create_scheduled_bill`
+- **Operational close workflows (jaz-jobs)**: For the close playbooks that drive these recipes, load the `jaz-jobs` skill: month-end close (period-end recognition + accruals + a check of the platform's FX revaluation), GST/VAT filing (ECL review during return prep), and year-end close (year-end true-ups, dividends, intercompany elimination).

@@ -1,26 +1,27 @@
-# Recipe: Bad Debt / ECL Provision (engine name: `ecl`)
+# Recipe: Bad Debt / ECL Provision (calculator type: `ecl`)
 
-> One-shot recipe for IFRS 9 simplified-approach ECL on trade receivables. Engine emits 1 journal: top-up (or reversal) of the existing Allowance for Doubtful Debts to match the per-bucket × loss-rate calculation. Run quarterly or annually (most SMBs); not monthly.
+> One-shot recipe for IFRS 9 simplified-approach ECL on trade receivables. One journal: the top-up (or release) of the existing Allowance for Doubtful Debts to match the per-bucket × loss-rate calculation. Run quarterly or annually (most SMBs); not monthly. You calculate, create the capsule and post the journal yourself (see `building-blocks.md` § The three-step flow).
 
-## Tools, recipes, calculators this recipe uses
+## Tools and calculator this recipe uses
 
-### Recipe engine entry point
-- **`plan_recipe(recipe: 'ecl', ...)`**, used in step 2: returns RecipePlan with one journal: top-up amount (Dr Bad Debt Expense / Cr Allowance for Doubtful Debts) for the delta between calculated ECL and existing provision. If existing > calculated: reversal direction.
-- **`execute_recipe(recipe: 'ecl', ...)`**, used in step 4: posts the single ECL journal. ONE-SHOT: no schedule, no future-dated entries.
+### Calculator (offline, posts nothing)
+- **MCP: `calculate(type: 'ecl', buckets, existingProvision, startDate, currency)`** (step 1). `buckets` is a list of `{ name, balance, rate }` with `rate` in percent; `startDate` is the provision date and dates the journal step.
+- **CLI: `clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <r1>,<r2>,<r3>,<r4>,<r5> --existing-provision <ep> --currency <code> --json`** (step 1): the same calculation over five fixed buckets. The CLI has no date flag, so its journal step is undated.
 
-### Calculator (cross-check, no API key needed)
-- **`clio calc ecl --current <c> --30d <30> --60d <60> --90d <90> --120d <120> --rates <r1>,<r2>,<r3>,<r4>,<r5> --existing-provision <ep> --currency <code> --json`**, used in step 1: applies per-bucket loss rates to receivables aged into 5 buckets. Returns `{ totalReceivables, calculatedEcl, existingProvision, topUpRequired, perBucket: [{bucket, balance, lossRate, ecl}, ...] }`. Top-up positive = increase provision; negative = release / reverse.
+### Posting tools
+- **`list_capsule_types` / `create_capsule_type(displayName: 'ECL Provision')` / `create_capsule(...)`** (step 3).
+- **`create_journal(...)`** (step 4): the single ECL adjustment. ONE-SHOT: no schedule, no future-dated entries.
 
-### Tools (jaz-api / direct)
-- **`generate_aged_ar(endDate: <date>)`**, step 1 input: pull AR aged into the same 5 buckets the calculator expects (current, 30d, 60d, 90d, 120d+).
-- **`search_accounts(filter: {name: {in: ['Allowance for Doubtful Debts', 'Bad Debt Expense']}})`**: step 3.
-- **`generate_trial_balance(endDate: <date>)`**, step 1 input: pull `existingProvision` from current `Allowance for Doubtful Debts` balance; step 5 verify post-journal balance matches calculated ECL.
-- **`search_capsules(filter: {title: {eq: <capsule.name>}})`**: step 0 idempotency check (one ECL capsule per period; quarterly = 4 per FY).
-- **`apply_credits_to_invoice(...)` / `create_customer_credit_note(...)`**, step 6 specific write-off pattern: when individual invoices are deemed unrecoverable, write them off via credit note OR direct payment with `paymentMethod: 'DEBT_WRITE_OFF'` (per memory rule).
+### Lookup and verification tools
+- **`generate_aged_ar(endDate: <date>)`** (step 1 input): AR aged into the buckets the calculator expects.
+- **`search_accounts(filter: {name: {in: ['Allowance for Doubtful Debts', 'Bad Debt Expense']}})`**: step 2.
+- **`generate_trial_balance(endDate: <date>)`** (step 1 input): pull `existingProvision` from the current `Allowance for Doubtful Debts` balance; step 5 verify the post-journal balance matches the calculated ECL.
+- **`search_capsules(filter: {title: {eq: <capsule title>}})`**: step 0 idempotency check (one ECL capsule per period; quarterly = 4 per FY).
+- **`apply_credits_to_invoice(...)` / `create_customer_credit_note(...)`** (step 6, specific write-off pattern): when individual invoices are deemed unrecoverable, write them off via credit note OR direct payment with `paymentMethod: 'DEBT_WRITE_OFF'`.
 
 ### Cross-references
 - Operational context: invoked during year-end close (Y4 in `year-end-close.md`) for FY-end ECL; during the GST/VAT filing cycle if quarterly cadence is set; rarely during month-end close (mental check during variance review only).
-- Sibling: `provisions.md` (engine `provision`): IAS 37 provisions with PV unwinding pattern, more complex than this recipe.
+- Sibling: `provisions.md` (calculator `provision`): IAS 37 provisions with PV unwinding pattern, more complex than this recipe.
 - IFRS / accounting context: IFRS 9.5.5.15 (simplified approach mandatory for trade receivables); IFRS 9.B5.5.35 (provision matrix). For specific large customers in stage-3 (objective evidence of impairment): supplement this recipe with specific impairment via `create_customer_credit_note` per customer.
 
 ---
@@ -35,24 +36,40 @@ search_capsules(filter: {title: {eq: 'FY2025 Year-End ECL True-Up'}})
 
 If a result returns: halt. ECL is one-shot per period; duplicate would double-recognize.
 
-### Step 1: Pull AR aging + existing provision
+### Step 1: Pull AR aging + existing provision, then calculate
 
 ```
 generate_aged_ar(endDate: '2025-12-31')
 ```
 
 Returns aging buckets. Map to calculator inputs:
-- `current` (0-30d, not yet due or just due)
-- `30d` (31-60d)
-- `60d` (61-90d)
-- `90d` (91-120d)
-- `120d+` (over 120d)
+- `current` (not yet overdue)
+- `30d` (1-30 days overdue)
+- `60d` (31-60 days overdue)
+- `90d` (61-90 days overdue)
+- `120d` (91+ days overdue)
 
 ```
 generate_trial_balance(endDate: '2025-12-31')
 ```
 
 Pull `balance['Allowance for Doubtful Debts']` (sign-flipped; it's a contra-asset, naturally credit balance). This is `existingProvision`.
+
+```
+calculate(
+  type: 'ecl',
+  buckets: [
+    {name: 'Current', balance: 100000, rate: 0.5},
+    {name: '1-30 days', balance: 50000, rate: 2},
+    {name: '31-60 days', balance: 20000, rate: 5},
+    {name: '61-90 days', balance: 10000, rate: 10},
+    {name: '91+ days', balance: 5000, rate: 50}
+  ],
+  existingProvision: 5000,
+  currency: 'SGD',
+  startDate: '2025-12-31'  // provision date: the aged AR report date. The ECL journal step is dated on it.
+)
+```
 
 ```
 clio calc ecl \
@@ -67,52 +84,58 @@ clio calc ecl \
   --json
 ```
 
-Returns: `{ totalReceivables: 185000, calculatedEcl: 5750, existingProvision: 5000, topUpRequired: 750, perBucket: [{bucket: 'current', balance: 100000, lossRate: 0.005, ecl: 500}, ...] }`. Top-up of $750 needed.
+Returns `{ totalReceivables: 185000, totalEcl: 6000, weightedRate: 3.2432, adjustmentRequired: 1000, isIncrease: true, bucketDetails: [{ bucket: 'Current', balance: 100000, lossRate: 0.5, ecl: 500 }, ...], journal, blueprint }`. The bucket ECLs are 500 + 1,000 + 1,000 + 1,000 + 2,500 = 6,000; against the existing 5,000 a top-up of $1,000 is needed.
 
-`--rates` defaults: tune to the entity's historical loss rate. Common starting point for SMBs: `0.5,2,5,10,50` (%) for the 5 buckets. Auditor will sample-test the rates against actual historical losses; keep documentation of how rates were derived.
+Rates are PERCENT: `0.5,2,5,10,50` means 0.5%, 2%, 5%, 10%, 50% (NOT 50%, 200%, 500%...). Tune them to the entity's historical loss rate. Common starting point for SMBs: `0.5,2,5,10,50` for the 5 buckets. Auditor will sample-test the rates against actual historical losses; keep documentation of how rates were derived.
 
-If `topUpRequired` is below the entity's materiality threshold: skip the recipe entirely; document the decision in your working notes ("ECL change immaterial: $X below threshold $Y").
+`blueprint.steps` (single `journal`): Dr Bad Debt Expense 1,000 / Cr Allowance for Doubtful Debts 1,000.
 
-### Step 2: Plan the recipe
+If `adjustmentRequired` is negative (calculated ECL < existing provision; `isIncrease: false`): the journal direction reverses (Dr Allowance for Doubtful Debts / Cr Bad Debt Expense for the release).
 
-```
-plan_recipe(
-  recipe: 'ecl',
-  buckets: [
-    {name: 'Current', balance: 100000, rate: 0.5},
-    {name: '1-30 days', balance: 50000, rate: 2},
-    {name: '31-60 days', balance: 20000, rate: 5},
-    {name: '61-90 days', balance: 10000, rate: 10},
-    {name: '91+ days', balance: 5000, rate: 50}
-  ],
-  existingProvision: 5000,
-  currency: 'SGD',
-  startDate: '2025-12-31'  // provision date: the aged AR report date. The ECL journal is dated on it.
-)
-```
+If `adjustmentRequired` is 0 there is nothing to post: `blueprint.steps` is empty. Stop here and record that the provision was reviewed and unchanged.
 
-Returns `RecipePlan` with `requiredAccounts: ['Allowance for Doubtful Debts', 'Bad Debt Expense']`, `needsContact: false`, `needsBankAccount: false`, `steps[1]` (single journal): Dr Bad Debt Expense 750 / Cr Allowance for Doubtful Debts 750.
+If the adjustment is below the entity's materiality threshold: skip the posting entirely; document the decision in your working notes ("ECL change immaterial: $X below threshold $Y").
 
-If `topUpRequired` is negative (calculated ECL < existing provision): the journal direction reverses (Dr Allowance for Doubtful Debts / Cr Bad Debt Expense for the release).
+### Step 2: Resolve accounts
 
-### Step 3: Resolve dependencies
-
-For each account in `requiredAccounts`:
-- `search_accounts(filter: {name: {eq: <accountName>}})`. Suggested classifications: `Allowance for Doubtful Debts` → `Current Asset` (contra-AR; sometimes set up as separate account, sometimes as a sub-account of `Accounts Receivable`); `Bad Debt Expense` → `Operating Expense`.
+The blueprint's `Bad Debt Expense` and `Allowance for Doubtful Debts` are labels. Map each to the real account:
+- `search_accounts(filter: {name: {in: ['Allowance for Doubtful Debts', 'Bad Debt Expense']}})`. Suggested classifications: `Allowance for Doubtful Debts` → `Current Asset` (contra-AR; sometimes set up as separate account, sometimes as a sub-account of `Accounts Receivable`); `Bad Debt Expense` → `Operating Expense`.
 
 If `Allowance for Doubtful Debts` doesn't exist in the CoA: `create_account(name: 'Allowance for Doubtful Debts', code: <unused account code>, accountType: 'Current Asset')` first. Common gap in CoAs that haven't run formal ECL.
 
-### Step 4: Execute
+No contact and no bank account are involved.
+
+### Step 3: Create the capsule
 
 ```
-execute_recipe(recipe: 'ecl', ...same args...)  // accounts auto-resolved from CoA; pass `bankAccountName` / `contactName` for fuzzy resolve
+list_capsule_types()
+create_capsule(
+  capsuleTypeResourceId: <id of 'ECL Provision'>,
+  title: 'FY2025 Year-End ECL True-Up',
+  description: <blueprint.capsuleDescription>
+)
 ```
 
-`startDate` is required: it dates the ECL journal, so pass the aged AR report date (`2025-12-31` here).
+If `ECL Provision` is not in the list: `create_capsule_type(displayName: 'ECL Provision')` first.
 
-When the calculated ECL equals `existingProvision` there is no adjustment: the plan has no steps and `execute_recipe` refuses with "Nothing to post" before creating anything.
+### Step 4: Post the journal
 
-Returns: `{ capsule: {resourceId, type, title}, steps: [{step: 1, action: 'journal', status: 'created', resourceId: <journal id>}], summary: {total: 1, created: 1} }`. The single journal is DRAFT; finalize via `update_journal(resourceId: <id>, saveAsDraft: false)` once the practitioner confirms the inputs.
+Date it on the aged AR report date:
+
+```
+create_journal(
+  valueDate: '2025-12-31',
+  reference: 'ECL-FY2025',
+  journalEntries: [
+    { accountResourceId: <Bad Debt Expense>, type: 'DEBIT', amount: 1000, description: 'ECL provision increase, IFRS 9 simplified approach' },
+    { accountResourceId: <Allowance for Doubtful Debts>, type: 'CREDIT', amount: 1000, description: 'ECL provision increase, IFRS 9 simplified approach' }
+  ],
+  saveAsDraft: true,
+  capsuleResourceId: <capsule id>
+)
+```
+
+The journal is a DRAFT; finalize via `update_journal(resourceId: <id>, saveAsDraft: false)` once the practitioner confirms the inputs.
 
 ### Step 5: Verify
 
@@ -121,8 +144,8 @@ generate_trial_balance(endDate: '2025-12-31')
 ```
 
 Assert:
-- `balance['Allowance for Doubtful Debts'] == -calculatedEcl` (within 1 cent). Updated to match the new computed ECL.
-- `balance['Bad Debt Expense'] (period MTD) increased by topUpRequired` (or reduced if reversal direction).
+- `balance['Allowance for Doubtful Debts'] == -totalEcl` (within 1 cent). Updated to match the new computed ECL.
+- `balance['Bad Debt Expense'] (period MTD) increased by adjustmentRequired` (or reduced if it is a release).
 - `(balance['Accounts Receivable'] - |balance['Allowance for Doubtful Debts']|)` is the net receivables presented on the balance sheet (BS line: `Trade Receivables, net`).
 
 ### Step 6: Specific impairment (stage 3, separate from this recipe)
@@ -159,30 +182,29 @@ pay_invoice(
 )
 ```
 
-Per memory rule [PH IBO VAT proforma rule] and [Bank FX is Revaluation, not Realized]: use the appropriate jurisdiction-specific account if your CoA distinguishes write-offs from generic bad debt expense.
+Use the appropriate jurisdiction-specific account if your CoA distinguishes write-offs from generic bad debt expense.
 
 Write-offs reduce both the gross AR balance AND offset against the existing Allowance (since the customer is now provisioned for). Re-run step 1 `generate_aged_ar` afterwards; the written-off customer should no longer appear, and the corresponding portion of the Allowance should reduce.
 
 ---
 
-## Common error classes and recovery
+## Common problems and recovery
 
-| Source | Error | Recovery |
+| Where | Problem | Recovery |
 |--------|-------|----------|
-| `plan_recipe` | 422 `unsupported_recipe` | File-name alias `bad-debt-provision` was used. Use canonical engine name `ecl`. |
-| `plan_recipe` | 422 `bucket_count_invalid` | Engine expects exactly 5 buckets: current, 30d, 60d, 90d, 120d+. Adjust input. |
-| `plan_recipe` | 422 `loss_rate_invalid` | Each rate must be 0-1 (decimal) OR 0-100 (percent). Engine accepts both; verify your --rates 0.5,2,5,10,50 means 0.5%, 2%, 5%, 10%, 50% (NOT 50%, 200%, 500%...). |
-| `execute_recipe` | 422 `account_not_found` for `Allowance for Doubtful Debts` | Step 3 incomplete. Most-commonly-missing account. Create via `create_account(name: 'Allowance for Doubtful Debts', code: <unused account code>, accountType: 'Current Asset')`. |
-| Verification | TB Allowance ≠ calculated ECL after journal posts | Investigate: likely an interim period had its own ECL recipe that wasn't reversed (cumulative). Audit via `generate_general_ledger(accountResourceIds: [<Allowance>], startDate: <FY-start>, endDate: <today>)`. |
-| Specific write-off changes ECL inputs | (process) | After Path A or Path B write-off, re-run step 1 `generate_aged_ar` and re-execute the ECL recipe with updated buckets; the calculated ECL likely reduces because the worst customer is now off the books. |
+| Calculator | "... balance must be zero or positive" / "... loss rate must be zero or positive" | A bucket balance or rate is negative. A credit balance in an aging bucket is an unapplied receipt or credit note: resolve it in AR first, do not net it into the ECL. |
+| Calculator | ECL far larger than expected | Rates were passed as percentages of 100 by mistake, or as decimals where percent is expected. `2` is 2%; `0.02` is 0.02%. |
+| Step 2 | `Allowance for Doubtful Debts` is missing | Most-commonly-missing account. Create via `create_account(name: 'Allowance for Doubtful Debts', code: <unused account code>, accountType: 'Current Asset')`. |
+| Verification | TB Allowance ≠ calculated ECL after journal posts | Investigate: likely an interim period posted its own ECL adjustment after `existingProvision` was read (cumulative). Audit via `generate_general_ledger(accountResourceIds: [<Allowance>], startDate: <FY-start>, endDate: <today>)`. |
+| Specific write-off changes ECL inputs | (process) | After Path A or Path B write-off, re-run step 1 `generate_aged_ar` and recalculate with updated buckets; the calculated ECL likely reduces because the worst customer is now off the books. |
 
 ---
 
 ## Variations
 
-- **Quarterly cadence**: same recipe, run quarterly with `valueDate: <quarter-end>`. The review cadence (`monthly` | `quarterly` | `annual`) depends on the entity's policy. Most SMBs run annual (FY-end only) or quarterly.
+- **Quarterly cadence**: same recipe, run quarterly with the journal dated `<quarter-end>`. The review cadence (`monthly` | `quarterly` | `annual`) depends on the entity's policy. Most SMBs run annual (FY-end only) or quarterly.
 - **Specific high-risk customer with stage-3 impairment**: combine simplified-approach ECL recipe (collective) + Path A or B specific write-off (individual). Run the collective AFTER the specific write-offs so the buckets reflect post-write-off balances.
-- **Multi-currency AR**: ECL is per-currency. Run the recipe per currency (each with its own `Allowance for Doubtful Debts (<currency>)` if you want segregation, or aggregate into one base-currency Allowance). Jaz auto-handles FX revaluation of the AR + Allowance balances per IAS 21.23 (do NOT invoke `fx-reval`).
+- **Multi-currency AR**: ECL is per-currency. Run the recipe per currency (each with its own `Allowance for Doubtful Debts (<currency>)` if you want segregation, or aggregate into one base-currency Allowance). Jaz auto-handles FX revaluation of the AR + Allowance balances per IAS 21.23 (do NOT post an `fx-reval` result).
 - **Forward-looking macroeconomic adjustments** (IFRS 9 paragraphs B5.5.51-54): apply a multiplier to the `--rates` to reflect current/expected economic conditions. E.g., recession overlay: `--rates 1.0,3,7,15,60` instead of `0.5,2,5,10,50`. Document the rationale in your working notes.
 - **POCI assets** (purchased or originated credit-impaired): NOT supported by this simplified-approach recipe. Use stage-3 specific impairment via Path A/B for each.
 
@@ -194,4 +216,4 @@ Write-offs reduce both the gross AR balance AND offset against the existing Allo
 - GST/VAT filing cycle (where applicable): quarterly ECL review for entities on a quarterly cadence.
 - Month-end close: mental ECL cross-check during variance analysis only; formal recipe runs annually/quarterly.
 - `audit-prep.md` step 8: supporting schedule via the most recent `ECL Provision` capsule + the underlying `clio calc ecl` JSON. Auditor tests rate appropriateness against actual historical loss data.
-- Sibling `provisions.md` (engine `provision`): IAS 37 provisions with PV unwinding (more complex pattern).
+- Sibling `provisions.md` (calculator `provision`): IAS 37 provisions with PV unwinding (more complex pattern).

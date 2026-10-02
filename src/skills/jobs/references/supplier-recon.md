@@ -1,8 +1,8 @@
 # Supplier Statement Reconciliation
 
-> Compare AP balance per Jaz vs supplier's statement. Identify missing bills, duplicate payments, pricing discrepancies, timing differences. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs supplier-recon` prints this same phased checklist.)
+> Compare AP balance per Jaz vs supplier's statement. Identify missing bills, duplicate payments, pricing discrepancies, timing differences. Walk the steps below in order, calling the named platform tools directly.
 
-## Tools, recipes, calculators this job uses
+## Tools and calculators this job uses
 
 ### Platform tools
 - **`search_contacts(filter: {supplier: true, name: {eq: <supplier>}})`** (step 1): resolve the supplier resourceId. Use fuzzy match if exact fails.
@@ -34,7 +34,7 @@
 
 ## Steps
 
-Walk steps 1-8 below. (Local CLI: `clio jobs supplier-recon --supplier "<name>" --period 2025-01` prints the same phased checklist.)
+Walk steps 1-8 below.
 
 ## Step 1: Resolve supplier
 
@@ -94,7 +94,7 @@ Practitioner provides the supplier's statement (PDF, email, paper). Per-line-ite
 
 | Discrepancy | Likely cause | Fix |
 |-------------|--------------|-----|
-| Bill on supplier statement, not in Jaz | Missed bill (most common) | `mcp magic create --file <statement-pdf>` extracts the missing bill, OR manual `create_bill(...)`; pay if owed. |
+| Bill on supplier statement, not in Jaz | Missed bill (most common) | `create_bt_from_attachment` (local CLI: `clio magic create --file <bill-pdf> --type bill`) extracts the missing bill from its PDF, OR manual `create_bill(...)`; pay if owed. |
 | Bill in Jaz, not on supplier statement | Supplier hasn't issued / lost the invoice | Verify with supplier; if confirmed bogus, `delete_bill` (DRAFT) OR `create_supplier_credit_note` (if ACTIVE). |
 | Different amounts on same reference | Pricing dispute | Practitioner contacts supplier for clarification. Possible adjustment journal post-resolution. |
 | Bill paid per Jaz, supplier says unpaid | Bank reconciliation gap | Pull bank statement for the payment date; verify the wire/cheque cleared. If cleared, send remittance proof to supplier. |
@@ -139,7 +139,7 @@ Keep, per supplier:
 
 - **Run for major suppliers only.** Top 10 suppliers by total spend cover 80% of AP risk. Mid + tail suppliers: skip or batch annually.
 - **Quarterly cadence** for major suppliers; **annual** for tier-2.
-- **Statement format varies wildly.** PDF / Excel / paper. `mcp magic create` works on most PDFs but not all; fallback to manual.
+- **Statement format varies wildly.** PDF / Excel / paper. `clio magic create` works on most PDFs but not all; fallback to manual.
 - **Pre-payment-run check.** Run supplier-recon BEFORE `payment-run.md` to capture any disputed bills (don't pay) and missing bills (post + pay this run).
 
 ---

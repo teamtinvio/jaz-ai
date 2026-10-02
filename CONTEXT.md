@@ -5,7 +5,7 @@ Runtime guidance for AI agents using Jaz AI tools (CLI, MCP, or skills).
 ## Before You Start
 
 1. **Bootstrap with context.** Run `clio context --json` to get the org's chart of accounts, currencies, tax profiles, and active settings. This prevents guessing.
-2. **Check what's available.** CLI: `clio --help`. MCP: call `describe_capabilities` (or `search_tools` with an empty query on the meta-tool surface), **not** `tools/list`. Depending on packaging, `tools/list` returns 3, 47, or 386 entries for the same 386 operations; only the capability map tells you what actually exists.
+2. **Check what's available.** CLI: `clio --help`. MCP: call `describe_capabilities` (or `search_tools` with an empty query on the meta-tool surface), **not** `tools/list`. Depending on packaging, `tools/list` returns 3, 48, or 381 entries for the same 381 operations; only the capability map tells you what actually exists.
 
 ## Working with Data
 
@@ -31,7 +31,7 @@ as given and set `rateDirection` (`FUNCTIONAL_TO_SOURCE` | `SOURCE_TO_FUNCTIONAL
 which way the user's number reads, ask. (Some read-side fields are named `rateSourceToFunctional` and
 are the other direction by design; the name always tells you.)
 
-11. **Offline tools are always safe.** Calculators (`clio calc`) and job blueprints (`clio jobs`) need no auth and make no API calls. Use them freely for planning and computation.
+11. **Offline tools are always safe.** Calculators (`clio calc`, or the `calculate` tool) need no auth, make no API calls and post nothing. Use them freely for planning and computation. To book a calculated schedule, create a capsule and post each step yourself with `capsuleResourceId`.
 12. **OAuth by default.** Hosted connectors sign in through their host. For local CLI/MCP, run `clio auth login` once on the intended computer; both share the saved session and refresh it automatically. Never copy tokens into chats, workspaces, or another application's configuration. API keys and PATs remain optional.
 
 13. **Name the organization on every call.** Use `--org oauth:<resourceId>` for local OAuth, or the explicit organization ID in MCP tools. For API-key profiles, retain `--org <label>`. Do not rely on the shared active organization. Verify that CLI, MCP, and Jaz Kit's ORG.md refer to the same resource ID before writing. Existing per-company `.env` keys remain supported as an optional route; don't mix their key overrides with OAuth selectors.

@@ -291,7 +291,7 @@ When bank records and transactions are in different currencies, the calculator a
 
 ## Integration with Bank Recon Job
 
-This calculator is designed to work as a pre-matching step in the `clio jobs bank-recon` workflow:
+This calculator is designed to work as a pre-matching step in the bank recon job (`bank-recon.md`):
 
 1. **Pull data:** Fetch unreconciled bank records + cashflow transactions from Jaz API
 2. **Run matcher:** `clio jobs bank-recon match --input data.json --json`

@@ -1,8 +1,8 @@
 # GST/VAT Filing
 
-> Produce the filing-ready summary + supporting detail for IRAS F5 (SG) or BIR Form 2550Q (PH). Does NOT file; produces the numbers + supporting detail. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs gst-vat --period <YYYY-QN>` prints this same phased checklist.)
+> Produce the filing-ready summary + supporting detail for IRAS F5 (SG) or BIR Form 2550Q (PH). Does NOT file; produces the numbers + supporting detail. Walk the steps below in order, calling the named platform tools directly.
 
-## Tools, recipes, calculators this job uses
+## Tools and calculators this job uses
 
 ### Platform tools
 - **`generate_vat_ledger(startDate: <period-start>, endDate: <period-end>)`**, step 1: the canonical tax ledger. Returns input + output tax totals + per-tax-profile breakdown.
@@ -23,7 +23,7 @@
 
 ## Steps
 
-Walk steps 1-8 below. (Local CLI: `clio jobs gst-vat --period 2025-Q1` prints the same phased checklist.)
+Walk steps 1-8 below.
 
 ## Step 1: Pull the tax ledger
 

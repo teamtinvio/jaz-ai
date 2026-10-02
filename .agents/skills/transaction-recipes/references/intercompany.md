@@ -1,14 +1,14 @@
-# Recipe: Intercompany Transactions (manual, no engine)
+# Recipe: Intercompany Transactions (manual, no calculator)
 
-> Cross-org charge + settlement pattern between two related entities (parent ↔ subsidiary, sister entities). NO recipe engine: built from primitive `create_invoice` + `create_bill` + cross-org capsule per entity. Each leg posts in its own org via separate Jaz API key.
+> Cross-org charge + settlement pattern between two related entities (parent ↔ subsidiary, sister entities). No calculator: built from `create_invoice` + `create_bill` + a capsule per entity. Each leg posts in its own org via separate Jaz API key.
 
-## Why no engine
+## Why no calculator
 
-Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity A invoices Entity B; Entity B records Entity A's invoice as a bill). The recipe engine operates within a single org context. Multi-org coordination is the caller's responsibility; each entity has its own Jaz org and API key, and the agent must switch the active credentials between legs (see Multi-org auth below).
+Intercompany requires posting MIRRORED entries in TWO different Jaz orgs (Entity A invoices Entity B; Entity B records Entity A's invoice as a bill). There is nothing to compute, and every tool call posts into exactly one org. Multi-org coordination is the caller's responsibility; each entity has its own Jaz org and API key, and the agent must switch the active credentials between legs (see Multi-org auth below).
 
-## Tools, recipes, calculators this recipe uses
+## Tools this recipe uses
 
-### Primitive MCP tools (no engine wrapper)
+### Posting tools
 - **`create_invoice(...)`** (Entity A side): post the management-fee invoice to Entity B (the customer in Entity A's org).
 - **`create_bill(...)`** (Entity B side): post the same management-fee as a bill from Entity A (the supplier in Entity B's org).
 - **`create_capsule(capsuleTypeResourceId: <id of 'Intercompany' from list_capsule_types>, ...)`**: one capsule per entity, both with matching reference (e.g., `IC-MGMT-2025-Q1`).
@@ -71,6 +71,7 @@ create_invoice(
   contactResourceId: <Entity B as a customer in Entity A's contacts>,
   reference: 'IC-MGMT-2025-Q1-JAN',
   valueDate: '2025-01-31',
+  dueDate: '2025-02-28',
   lineItems: [{
     name: 'Management services, January 2025',
     accountResourceId: <Entity A's 'Intercompany Revenue' GL>,
@@ -92,6 +93,7 @@ create_bill(
   contactResourceId: <Entity A as a supplier in Entity B's contacts>,
   reference: 'IC-MGMT-2025-Q1-JAN',
   valueDate: '2025-01-31',
+  dueDate: '2025-02-28',
   lineItems: [{
     name: 'Management services, January 2025',
     accountResourceId: <Entity B's 'Intercompany Expense' or 'Management Fee Expense' GL>,

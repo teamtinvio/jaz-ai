@@ -5,7 +5,7 @@ argument-hint: "<period YYYY-QN>"
 
 # GST/VAT Filing Preparation
 
-Execute the GST/VAT filing workflow via `clio jobs gst-vat`. Reviews the tax ledger and produces a filing-ready summary.
+Run the GST/VAT filing playbook from the jaz-jobs skill (`references/gst-vat-filing.md`). Reviews the tax ledger and produces a filing-ready summary.
 
 ## Usage
 
@@ -16,15 +16,17 @@ Execute the GST/VAT filing workflow via `clio jobs gst-vat`. Reviews the tax led
 
 ## Workflow
 
-### 1. Generate the blueprint
+### 1. Open the playbook
 
-```bash
-clio jobs gst-vat --period 2025-Q1 --json
-```
+The steps are in the jaz-jobs skill: `references/gst-vat-filing.md`. Read it first and walk its steps in order; it names the exact tool or command for each one.
 
 ### 2. Review the tax ledger
 
-The blueprint walks through:
+```bash
+clio reports generate vat-ledger --from 2025-01-01 --to 2025-03-31 --json
+```
+
+The playbook walks through:
 - Output tax (sales) totals by tax code
 - Input tax (purchases) totals by tax code
 - Exempt and out-of-scope transactions
@@ -41,7 +43,7 @@ For misclassified tax codes: correct the underlying transactions.
 clio reports generate trial-balance --to 2025-03-31 --json
 ```
 
-The GST summary from the blueprint maps directly to the GST F5 return boxes (Singapore) or equivalent local form.
+The tax ledger totals map to the GST F5 return boxes (Singapore) or equivalent local form.
 
 ### 5. File
 

@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 5.74.2
+version: 6.0.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -8,7 +8,7 @@ description: >-
   precedence, output formats, entity resolution, and common workflow patterns.
   Also use when the user asks how to use clio, what commands are available, or
   how to automate accounting tasks from the command line. Covers all
-  76 command groups and 386 tools, including employee-expense claims.
+  74 command groups and 381 tools, including employee-expense claims.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 ---
@@ -17,7 +17,7 @@ compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 
 > **Audience note:** for power users and CI/automation. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output. For day-to-day accounting inside Claude Desktop / Cowork, the MCP tools cover the common flows without dropping to the CLI.
 
-You are working with **Clio** (`jaz-clio`), the CLI for the Jaz accounting platform. 76 command groups, 13 calculators, 12 job blueprints, 386 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
+You are working with **Clio** (`jaz-clio`), the CLI for the Jaz accounting platform. 74 command groups, 13 calculators, 12 job playbooks (jaz-jobs skill), 381 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
 
 ## When to Use This Skill
 
@@ -180,7 +180,6 @@ Rules:
 | `--ref <reference>` | Search/create commands | Reference string |
 | `--tag <name>` | Search/create commands | Tag filter or assignment |
 | `--input <file>` | Create/update commands | Read full JSON body from file |
-| `--plan` | Recipe commands | Offline plan mode (no auth) |
 
 ## Search Query Expressions (`--query`)
 
@@ -277,13 +276,13 @@ Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $
 
 **Reports & Exports**: `reports` (16 report types), `exports`
 
-**AI & Automation**: `magic` (create, status), `quick-fix`, `ledger-find-fix` (preview, apply), `capsules`, `capsule-transaction` (alias: `ct`, 13 recipe types)
+**AI & Automation**: `magic` (create, status), `quick-fix`, `ledger-find-fix` (preview, apply), `capsules`
 
 **Judgment journal**: `jots` (create, recall, dispose). Every write command also takes `--jot "<one line>"` to log the judgment behind that specific write inline, no extra call (see `--jot` in Common Flags).
 
 **Calculators**: `calc` (loan, lease, depreciation, prepaid-expense, deferred-revenue, fx-reval, ecl, provision, fixed-deposit, asset-disposal, accrued-expense, leave-accrual, dividend)
 
-**Jobs**: `jobs` (month-end, quarter-end, year-end, bank-recon, gst-vat, payment-run, credit-control, supplier-recon, audit-prep, fa-review, document-collection, statutory-filing) + tools (match, outstanding, ingest, sg-cs, sg-ca)
+**Jobs**: `jobs` (`bank-recon match`, `payment-run outstanding`, `document-collection ingest`, `statutory-filing sg-cs`, `statutory-filing sg-ca`). The job playbooks themselves are in the **jaz-jobs** skill.
 
 **Organization**: `org` (info), `org-users`, `auth`
 
@@ -295,7 +294,7 @@ See `references/command-catalog.md` for the full catalog with subcommands and fl
 
 ## Offline vs Online
 
-Offline commands (no auth needed): `calc`, `jobs` (blueprints only), `capsule-transaction --plan`, `help-center`, `init`, `versions`, `update`
+Offline commands (no auth needed): `calc`, `jobs bank-recon match`, `jobs statutory-filing sg-cs` / `sg-ca`, `help-center`, `init`, `versions`, `update`
 
 Everything else requires authentication (API key).
 
@@ -357,31 +356,22 @@ Transaction create commands (`invoices`, `bills`, `customer-credit-notes`, `supp
 
 This catches mistakes before the API call, saving round-trip time and providing clearer error messages.
 
-## Capsule-Transaction Recipes
+## Calculated Schedules (calculate, capsule, post)
 
-The `capsule-transaction` (alias: `ct`) command group is the most powerful CLI feature. Each subcommand:
+There is no one-shot recipe command. A loan, lease, prepaid, deferred revenue, accrual, ECL, provision, fixed deposit, disposal or dividend is three steps:
 
-1. Runs a financial calculator (same as `clio calc`)
-2. Creates a capsule to group the transactions
-3. Posts all transactions (invoices, bills, journals) in sequence
-
-Two entry paths:
-- **Full**: provide `--input` (account mapping) or let it auto-resolve from your chart of accounts
-- **Attach**: provide `--existing-txn <id>` to skip the initial transaction and create only the delta (e.g., attach depreciation to an existing purchase bill)
-
-Plan mode (`--plan`) is offline and shows what accounts are needed and what steps will be created, without making any API calls.
+1. **Calculate (offline):** `clio calc <type> ... --json` returns the schedule and, when `--start-date` is given, a `blueprint`: the capsule type and name plus dated steps with journal lines. It posts nothing.
+2. **Create the capsule:** `clio capsules types` to find the type id (`clio capsules create-type --name <name>` if it is missing), then `clio capsules create --type <typeId> --title <title>`.
+3. **Post each step** with `clio journals create` / `clio bills create` / `clio invoices create` / `clio cash-in create` / `clio cash-out create`, passing a JSON body via `--input` that includes `capsuleResourceId`. A fixed amount repeating every period can be one `clio schedulers create-journal`.
 
 ```bash
-# Plan mode: see what's needed (offline)
-clio ct loan --principal 100000 --rate 5 --term 60 --plan
-
-# Execute with auto-resolve (uses fuzzy matching against your chart of accounts)
-clio ct loan --principal 100000 --rate 5 --term 60 --start-date 2026-01-01 --ref LOAN-001
-
-# Execute with explicit account mapping
-clio ct loan --principal 100000 --rate 5 --term 60 --start-date 2026-01-01 \
-  --input account-mapping.json --bank-account "Bank - SGD" --contact "HSBC"
+clio calc loan --principal 100000 --rate 5 --term 60 --start-date 2026-01-01 --json > loan.json
+clio capsules types --json
+clio capsules create --type <typeId> --title "Bank loan 2026" --json
+clio journals create --input step-2.json --json   # body includes capsuleResourceId
 ```
+
+`clio calc fx-reval` is verification only: Jaz revalues foreign-currency balances at period end, so do not post its result.
 
 ## Tips
 
@@ -391,7 +381,7 @@ clio ct loan --principal 100000 --rate 5 --term 60 --start-date 2026-01-01 \
 4. **Draft-then-finalize**: The CLI defaults to saving as draft (overrides the API default of `saveAsDraft: false`). Use `--finalize` to create a finalized transaction immediately. Note: `cash-in`, `cash-out` and `cash-transfer` have no draft state and so take no `--finalize`; they always post ACTIVE.
 5. **Idempotent creates**: Use `--input` with the same JSON to get consistent results. The API dedup guards catch duplicate contacts, items, and accounts.
 6. **Check before bulk ops**: Always preview with `--json | jq length` before piping IDs into `quick-fix`. To find & fix (recode, retag, re-date) records found by a condition, across record types, `clio ledger-find-fix preview` lists what would change and why anything is excluded, and `clio ledger-find-fix apply -- <previewId>` runs exactly that, once.
-7. **Offline calculators for exploration**: `clio calc` commands need no auth -- use them to explore scenarios before committing with `clio ct`.
+7. **Offline calculators for exploration**: `clio calc` commands need no auth -- use them to explore scenarios before posting anything.
 8. **Help center for guidance**: `clio hc "how to reconcile"` searches the full Jaz help center locally (hybrid: embeddings + keyword).
 
 See `references/common-workflows.md` for end-to-end multi-command patterns.

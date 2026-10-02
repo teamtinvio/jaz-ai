@@ -63,12 +63,9 @@ clio bank records "$BANK_ID" --status POSSIBLE_DUPLICATE --json
 
 ## 3. Month-End Close Workflow
 
-Generate a blueprint, run reports, and create any adjusting journals.
+Follow the month-end playbook in the jaz-jobs skill (`references/month-end-close.md`), run reports, and create any adjusting journals.
 
 ```bash
-# Generate month-end checklist (offline, no auth)
-clio jobs month-end --period 2026-03 --currency SGD --json > month-end-checklist.json
-
 # Run key reports for review
 clio reports generate trial-balance --to 2026-03-31 --json > tb-mar.json
 clio reports generate profit-loss --from 2026-03-01 --to 2026-03-31 --json > pl-mar.json
@@ -134,42 +131,36 @@ clio invoices pay "$INVOICE_ID" \
 
 ## 5. Equipment Purchase with Depreciation
 
-Record a fixed asset purchase, calculate depreciation, and create journal entries via capsule-transaction.
+Register a fixed asset, cross-check its depreciation schedule, and (for a declining-balance method only) post the charges into a capsule.
 
 ```bash
-# Create the fixed asset record
+# Register the asset. Jaz posts straight-line depreciation itself: do not also journal it.
 clio fixed-assets create \
   --name "Office Printer" \
   --type "Office Equipment" \
   --amount 3600 \
   --date 2026-01-01 \
-  --input '{"depreciationMethod":"STRAIGHT_LINE","usefulLifeMonths":36,"salvageValue":0}'
+  --depreciation-start 2026-01-01 \
+  --asset-account "$ASSET_ACCOUNT_ID" \
+  --depreciation-method STRAIGHT_LINE \
+  --effective-life 36 \
+  --residual 0
 
-# Preview the depreciation schedule (offline, no auth)
+# Cross-check the schedule (offline, no auth). --life is in YEARS; --method is sl, ddb or 150db.
 clio calc depreciation \
   --cost 3600 \
   --salvage 0 \
-  --life 36 \
-  --method straight-line \
+  --life 3 \
+  --method sl \
+  --frequency monthly \
   --currency SGD \
   --json
 
-# Execute as a capsule-transaction (creates capsule + monthly journals)
-clio ct depreciation \
-  --cost 3600 \
-  --salvage 0 \
-  --life 36 \
-  --method straight-line \
-  --ref "DEP-PRINTER" \
-  --json
-
-# Or plan first (offline) to see what accounts are needed
-clio ct depreciation \
-  --cost 3600 \
-  --salvage 0 \
-  --life 36 \
-  --method straight-line \
-  --plan
+# Declining balance (ddb / 150db) is not a register method: register the asset with
+# --depreciation-method NO_DEPRECIATION, then post each period's charge from the calculator yourself.
+clio capsules types --json
+clio capsules create --type "$CAPSULE_TYPE_ID" --title "Office Printer depreciation" --json
+clio journals create --input dep-2026-01.json --json   # body: valueDate, journalEntries, capsuleResourceId
 ```
 
 ## 6. Search, Filter, and Bulk-Update Workflow
@@ -244,8 +235,8 @@ eval "$(clio auth shell-init)"
 Ingest documents, extract data via AI, and review results.
 
 ```bash
-# Ingest a folder of mixed PDFs (invoices, bills, bank statements)
-clio jobs document-collection --json
+# Scan and classify a folder of mixed PDFs (invoices, bills, bank statements); add --upload to send them to Jaz
+clio jobs document-collection ingest --source ./client-docs --json
 
 # Or extract a single document (file, URL, or raw HTML)
 clio magic create --file ./invoice-from-supplier.pdf --type bill --json

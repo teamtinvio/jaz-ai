@@ -1,8 +1,8 @@
-# Recipe: FX Revaluation, verification-only (engine name: `fx-reval`)
+# Recipe: FX Revaluation, verification-only (calculator type: `fx-reval`)
 
 > **Jaz auto-handles FX revaluation for ALL foreign-currency monetary balances.** AR, AP, cash, bank accounts, intercompany journals, term deposits, FX-denominated provisions, all of it. Period-end translation per IAS 21.23 happens inside the platform with no manual journal required.
 >
-> **DO NOT invoke `execute_recipe(recipe: 'fx-reval', ...)` in normal operation.** It would double-post against Jaz's auto-emitted FX gain/loss journals. The recipe survives in the engine for one purpose: **independent cross-check** of what Jaz auto-posted.
+> **DO NOT post the `fx-reval` calculator's result.** Its output includes a revaluation journal and a reversal; posting either would double-count against Jaz's auto-emitted FX gain/loss journals. The calculator exists for one purpose: **independent cross-check** of what Jaz auto-posted. No capsule is created and nothing is posted in this recipe.
 
 ## What this recipe is for now
 
@@ -14,24 +14,23 @@
 
 - Posting FX reval journals: Jaz already did it
 - Posting Day 1 reversals: Jaz already did it
-- Hand-building FX schedules: `clio calc fx-reval` does it offline
+- Hand-building FX schedules: the calculator does it offline
 - Setting up scheduled FX reval: Jaz handles it on the reporting date
 
-## Tools, recipes, calculators this recipe uses
+## Tools and calculator this recipe uses
 
-### Calculator (cross-check, no API key needed)
-- **`clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <period-end> --rate-direction <FUNCTIONAL_TO_SOURCE|SOURCE_TO_FUNCTIONAL> --currency <code> --base-currency <base currency> --json`**: independent gain/loss computation. `--rate-direction` is REQUIRED. `--position` defaults to `ASSET`; pass `LIABILITY` for a payable or provision, where a rising base value is a **loss** rather than a gain. Returns `{ bookValue, closingValue, gainOrLoss, isGain }`. Use this to verify what Jaz auto-posted, not to feed `execute_recipe`.
+### Calculator (offline, posts nothing)
+- **MCP: `calculate(type: 'fx-reval', amount, bookRate, closingRate, rateDirection, position, currency, baseCurrency)`**: independent gain/loss computation. `rateDirection` is REQUIRED. `position` defaults to `ASSET`; pass `LIABILITY` for a payable or provision, where a rising base value is a **loss** rather than a gain.
+- **CLI: `clio calc fx-reval --amount <foreign> --book-rate <historical> --closing-rate <period-end> --rate-direction <FUNCTIONAL_TO_SOURCE|SOURCE_TO_FUNCTIONAL> --currency <code> --base-currency <base currency> --json`**: the same result (`--position` for the balance-sheet side).
+
+Both return `{ bookValue, closingValue, gainOrLoss, isGain, journal, reversalJournal, blueprint }`. Use the numbers to verify what Jaz auto-posted. The `journal`, `reversalJournal` and blueprint steps show what the entry would be; they are for comparison, never for posting.
 
 ### Tools (jaz-api / direct): verification only
 - **`generate_general_ledger(startDate: <period-start>, endDate: <date>, accountResourceIds: [<FX Unrealized Gain | Loss>])`**: pull what Jaz auto-posted to the FX accounts during the period.
 - **`generate_general_ledger(startDate: <FY-start>, endDate: <date>)`**: discover all foreign-currency monetary balances at period end.
-- **`list_currency_rates(currencyCode: 'USD')`**: confirm the closing rate Jaz used (take the rate effective on or before period-end; the tool has no date filter). Per `jaz-api/SKILL.md` rule 49, the API stores rates `functionalToSource` (1 base unit = N foreign). `calc fx-reval` now **requires** `--rate-direction`, so there is no implicit convention to get wrong: pass a `list_currency_rates` value with `--rate-direction FUNCTIONAL_TO_SOURCE`, or an everyday "1 USD = 1.35 SGD" quote with `SOURCE_TO_FUNCTIONAL`. Both describe the same position and produce the same valuation.
+- **`list_currency_rates(currencyCode: 'USD')`**: confirm the closing rate Jaz used (take the rate effective on or before period-end; the tool has no date filter). Per `jaz-api/SKILL.md` rule 49, the API stores rates `functionalToSource` (1 base unit = N foreign). The calculator **requires** a rate direction (`rateDirection`, CLI `--rate-direction`), so there is no implicit convention to get wrong: pass a `list_currency_rates` value with `FUNCTIONAL_TO_SOURCE`, or an everyday "1 USD = 1.35 SGD" quote with `SOURCE_TO_FUNCTIONAL`. Both describe the same position and produce the same valuation.
 - **`generate_trial_balance(endDate: <date>)`**: confirm foreign-currency monetary balances translated correctly at the closing rate.
 - **`generate_balance_sheet(snapshotDate: <date>)`**: IAS 21.23 verification (all monetary items at closing rate).
-
-### Engine entry points (DO NOT INVOKE in normal operation)
-- ~~`plan_recipe(recipe: 'fx-reval', ...)`~~: engine still accepts this for legacy reasons; output is for inspection only.
-- ~~`execute_recipe(recipe: 'fx-reval', ...)`~~ (and `clio ct fx-reval` without `--plan`): **refused.** Executing would double-post, so the engine rejects the call before it creates anything.
 
 ### Cross-references
 - Operational context: invoked during month-end close only as a VERIFICATION step (cross-check Jaz's auto-posted reval against an independent calculation; surface any variance). Same during the GST/VAT filing cycle and year-end close.
@@ -47,7 +46,7 @@
 search_accounts(filter: {name: {in: ['FX Unrealized Gain', 'FX Unrealized Loss', 'FX Bank Revaluation', 'FX Realized Gain', 'FX Realized Loss']}})
 ```
 
-Get the resourceIds for every FX account in the org. Per memory rule [Bank FX is Revaluation, not Realized]: bank/cash FX is always "FX Bank Revaluation" (not "Realized"). AR/AP FX uses "Realized" (settlement-time) and "Unrealized" (period-end translation). All emitted automatically.
+Get the resourceIds for every FX account in the org. Bank/cash FX is always "FX Bank Revaluation" (not "Realized"). AR/AP FX uses "Realized" (settlement-time) and "Unrealized" (period-end translation). All emitted automatically.
 
 ```
 generate_general_ledger(
@@ -79,6 +78,18 @@ list_currency_rates(currencyCode: 'USD')   // pick the rate effective on or befo
 Then run the calculator:
 
 ```
+calculate(
+  type: 'fx-reval',
+  amount: 50000,
+  bookRate: <rate the balance was booked at, same direction>,
+  closingRate: <rateFunctionalToSource from list_currency_rates, as-is>,
+  rateDirection: 'FUNCTIONAL_TO_SOURCE',
+  currency: 'USD',
+  baseCurrency: 'SGD'
+)
+```
+
+```
 clio calc fx-reval \
   --amount 50000 \
   --book-rate <pull from earliest unposted-against rate>  \
@@ -89,7 +100,7 @@ clio calc fx-reval \
   --json
 ```
 
-Returns `{ gainLoss, baseCurrencyValueAtClose }`. This is what the FX gain/loss for that balance *should* be in isolation.
+Read `gainOrLoss` (signed; `isGain` says which) and `closingValue` (the balance in base currency at the closing rate). This is what the FX gain/loss for that balance *should* be in isolation.
 
 ### Step 4: Reconcile expected vs actual
 
@@ -117,7 +128,7 @@ This file feeds `audit-prep.md` step 8 supporting schedules. Auditors love indep
 
 - Pure SGD-only org (no foreign currencies): skip entirely.
 - Org with multi-currency disabled: `list_currency_rates` returns nothing useful; skip and document.
-- An auto-posted FX journal that an auditor questions (post-hoc): use this verification flow to demonstrate the calculation; do NOT correct via `execute_recipe`. If a real correction is needed, post a manual journal targeting `FX Unrealized Gain` / `Loss` directly and document why.
+- An auto-posted FX journal that an auditor questions (post-hoc): use this verification flow to demonstrate the calculation; do NOT correct it by posting the calculator's journal. If a real correction is needed, post a manual journal targeting `FX Unrealized Gain` / `Loss` directly and document why.
 
 ---
 
@@ -127,15 +138,13 @@ This file feeds `audit-prep.md` step 8 supporting schedules. Auditors love indep
 |--------|-------|----------|
 | Independent calc disagrees with Jaz | Variance > the entity's materiality threshold | Investigate per "Likely causes" in step 4. Common false positive: book rate drift after a settlement event mid-period. Re-run with the post-settlement book rate. |
 | `list_currency_rates` returns no rate for the period end | No closing rate set | Practitioner must `add_currency_rate(...)` for the period-end. Without it, Jaz can't translate either; this is also why your variance is suspect (Jaz may have used the most recent rate before period-end as a fallback, not the actual closing rate). |
-| Practitioner asks to post a manual reval anyway | (process error) | Halt and explain: Jaz already posted. Manual posting will double-count. If they insist there's a real correction needed, route through a manual journal against `FX Unrealized Gain/Loss` with a clear narrative, NOT through `execute_recipe`. |
+| Practitioner asks to post a manual reval anyway | (process error) | Halt and explain: Jaz already posted. Manual posting will double-count. If they insist there's a real correction needed, route through a manual journal against `FX Unrealized Gain/Loss` with a clear narrative that says what is being corrected and why. |
 
 ---
 
-## Why the engine still plans the recipe
+## Orgs without automatic FX revaluation (rare, legacy)
 
-Historical: pre-platform-auto-FX-reval orgs needed this. Some orgs may still run on a configuration where auto-FX is disabled (rare, legacy). `execute_recipe(recipe: 'fx-reval', ...)` is refused for every org, so for those orgs take the period-end journal and Day 1 reversal from `plan_recipe(recipe: 'fx-reval', ...)` and post them as two manual journals with `create_journal` (the reversal dated the first day of the next period). DO NOT do this in any modern org.
-
-If you genuinely need to know whether auto-FX is enabled for a specific org: check organization settings via `get_organization()`. If the auto-FX flag is on (default and typical), this recipe is verification-only as documented above.
+**This section applies ONLY to an org where automatic FX revaluation is confirmed off. Everywhere else this recipe is verification only and nothing is posted.** Some orgs may still run on a configuration where automatic FX revaluation is disabled. Never assume it: confirm with the practitioner, and check that the period's general ledger carries no auto-posted FX revaluation entries, before treating an org as one of them. Only for such an org: take the period-end `journal` and the `reversalJournal` from the calculator and post them as two manual journals with `create_journal`, the reversal dated the first day of the next period. DO NOT do this in any org where Jaz revalues automatically, which is the default and the typical case.
 
 ---
 

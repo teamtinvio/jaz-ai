@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 5.74.2
+version: 6.0.0
 description: >-
   Use this skill for recurring accounting workflows: month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -18,14 +18,24 @@ You are helping an **SMB accountant or bookkeeper** complete recurring accountin
 
 > **Jaz-native, not generic.** Every job in this skill names specific Jaz tools (`search_invoices`, `quick_reconcile`, `bulk_finalize_drafts`, `reconcile_with_payments`, report tools like `generate_trial_balance`, `download_export`), Jaz reconciliation modes, and Jaz capsule patterns. It is NOT an interchangeable accounting workflow reference; it is the operating manual for running these processes through the Jaz platform tools. When the playbook says "match bank entries", it means call the 5-phase cascade matcher (`clio jobs bank-recon match` for a local CLI run, or follow the cascade logic in `references/bank-match.md` and drive the `reconcile_*` tools directly), not "use any matching algorithm".
 
-**Jobs combine recipes, calculators, and platform tools into complete business processes.** If recipes are ingredients, jobs are the meal. Each per-job reference is the canonical end-to-end orchestration: it lists the phases, and for each step names the exact report tool, recipe, or API call to run.
+**Jobs combine accounting patterns, calculators, and platform tools into complete business processes.** Each per-job reference is the only description of its job: it lists the phases, and for each step names the exact report tool, calculator, or API call to run.
 
 ## How to run a job
 
 You orchestrate the **real platform tools directly**, following the phase sequence in the per-job reference:
 
-- **Hosted / MCP agent (no shell):** the per-job reference is your checklist. Walk its phases in order and call the named platform tools: `plan_recipe` / `execute_recipe`, `search_invoices` / `search_bills` / `search_bank_records`, the `generate-reports/*` report tools (`generate_trial_balance`, `generate_aged_ar`, `generate_vat_ledger`, …), `reconcile_*`, `create_journal`, `bulk_finalize_drafts`, `update_account` lockDate, and so on. There is no separate "blueprint tool" to call; the reference IS the plan.
-- **Local CLI convenience:** if you're running `clio` in a terminal (e.g. Claude Code), `clio jobs <type> --json` prints the same phased checklist for the period so a human or script can follow it. This is a convenience, not the main path for a hosted agent; the platform tools above are the path that actually does the work.
+- **The per-job reference is your checklist.** Walk its phases in order and call the named platform tools: `calculate`, `search_invoices` / `search_bills` / `search_bank_records`, the `generate-reports/*` report tools (`generate_trial_balance`, `generate_aged_ar`, `generate_vat_ledger`, …), `reconcile_*`, `create_capsule`, `create_journal`, `bulk_finalize_drafts`, `update_account` lockDate, and so on. There is no "blueprint tool" or checklist command to call; the reference IS the plan.
+- **Local CLI helpers:** five `clio jobs` sub-tools do real work for specific steps (see "CLI helpers" below).
+
+### Scheduled and calculated entries
+
+When a step needs a calculated schedule, do it in three steps (there is no one-call recipe execution):
+
+1. **Calculate:** `calculate` with `type` = `loan` | `lease` | `depreciation` | `prepaid-expense` | `deferred-revenue` | `ecl` | `provision` | `fixed-deposit` | `asset-disposal` | `accrued-expense` | `leave-accrual` | `dividend` (CLI: `clio calc <type> ... --json`). Offline; returns the schedule and, with a start date, dated steps with journal lines. Posts nothing.
+2. **Group:** `list_capsule_types`, then `create_capsule` with the matching `capsuleTypeResourceId` and a `title`.
+3. **Post:** one `create_journal` / `create_bill` / `create_invoice` / `create_cash_in` / `create_cash_out` per step, each with `capsuleResourceId`. A fixed amount repeating every period can be one `create_scheduled_journal` instead of N journals.
+
+`fx-reval` is verification only: Jaz revalues foreign-currency balances itself, so never post its result.
 
 ## When to Use This Skill
 
@@ -43,63 +53,53 @@ You orchestrate the **real platform tools directly**, following the phase sequen
 
 ### Period-Close Jobs (Layered)
 
-Period-close jobs build on each other. Quarter = month + extras. Year = quarter + extras. Each level runs **standalone by default** (includes all steps from lower levels). Use `--incremental` to generate only the extras.
+Period-close jobs build on each other. Quarter = month + extras. Year = quarter + extras. Each reference covers the full run and marks which phases are the extras.
 
-| Job | CLI (local convenience) | Description |
-|-----|-------------------------|-------------|
-| **Month-End Close** | `clio jobs month-end --period YYYY-MM` | 5 phases: pre-close prep, accruals, valuations, verification, lock. The foundation. |
-| **Quarter-End Close** | `clio jobs quarter-end --period YYYY-QN` | Month-end for each month + GST/VAT, ECL review, bonus accruals, intercompany, provision unwinding. |
-| **Year-End Close** | `clio jobs year-end --period YYYY` | Quarter-end for each quarter + true-ups, dividends, retained-earnings rollover, audit prep, final lock. |
+| Job | Reference | Description |
+|-----|-----------|-------------|
+| **Month-End Close** | `references/month-end-close.md` | 5 phases: pre-close prep, accruals, valuations, verification, lock. The foundation. |
+| **Quarter-End Close** | `references/quarter-end-close.md` | Month-end for each month + GST/VAT, ECL review, bonus accruals, intercompany, provision unwinding. |
+| **Year-End Close** | `references/year-end-close.md` | Quarter-end for each quarter + true-ups, dividends, retained-earnings rollover, audit prep, final lock. |
 
 ### Ad-Hoc Jobs
 
-| Job | CLI (local convenience) | Description |
-|-----|-------------------------|-------------|
-| **Bank Recon** | `clio jobs bank-recon` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path; create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate: per-entry, so fetch ids with `search_bank_records` first (auto-commit high-confidence, checkpoint the rest; see `references/bank-recon.md` Step 4a). Cascade matcher: `clio jobs bank-recon match`. |
-| **Document Collection** | `clio jobs document-collection` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for upload via Jaz Magic. Ingest helper: `clio jobs document-collection ingest`. |
-| **GST/VAT Filing** | `clio jobs gst-vat --period YYYY-QN` | Tax ledger review, discrepancy check, filing summary. |
-| **Payment Run** | `clio jobs payment-run` | Select outstanding bills by due date, process payments. |
-| **Credit Control** | `clio jobs credit-control` | AR aging review, overdue chase list, bad debt assessment. Run on-demand when AR aging deteriorates. |
-| **Supplier Recon** | `clio jobs supplier-recon` | AP vs supplier statement, identify mismatches. Run for major suppliers and at year-end for audit AP confirmations. |
-| **Audit Preparation** | `clio jobs audit-prep --period YYYY` | Compile reports, schedules, reconciliations for auditor/tax. |
-| **FA Review** | `clio jobs fa-review` | Fixed asset register review, disposal/write-off processing. Run as part of year-end. |
-| **Statutory Filing** | `clio jobs statutory-filing` | Corporate income tax computation. CLI engines: `clio jobs statutory-filing sg-cs` (Form C-S computation), `clio jobs statutory-filing sg-ca` (capital allowance schedule). See the SG Form C-S section below. |
+| Job | Reference | Description |
+|-----|-----------|-------------|
+| **Bank Recon** | `references/bank-recon.md` | Clear unreconciled items: match, categorize, resolve. **Match to EXISTING open bills/invoices/payments (`reconcile_with_payments`) is the primary path; create-new only when nothing matches.** Drive end-to-end via the `view_auto_reconciliation` decision gate: per-entry, so fetch ids with `search_bank_records` first (auto-commit high-confidence, checkpoint the rest; see `references/bank-recon.md` Step 4a). Cascade matcher: `clio jobs bank-recon match`. |
+| **Document Collection** | `references/document-collection.md` | Scan and classify client documents from local directories and cloud links (Dropbox, Drive, OneDrive). Outputs file paths for upload via Jaz Magic. Ingest helper: `clio jobs document-collection ingest`. |
+| **GST/VAT Filing** | `references/gst-vat-filing.md` | Tax ledger review, discrepancy check, filing summary. |
+| **Payment Run** | `references/payment-run.md` | Select outstanding bills by due date, process payments. Outstanding-bills helper: `clio jobs payment-run outstanding`. |
+| **Credit Control** | `references/credit-control.md` | AR aging review, overdue chase list, bad debt assessment. Run on-demand when AR aging deteriorates. |
+| **Supplier Recon** | `references/supplier-recon.md` | AP vs supplier statement, identify mismatches. Run for major suppliers and at year-end for audit AP confirmations. |
+| **Audit Preparation** | `references/audit-prep.md` | Compile reports, schedules, reconciliations for auditor/tax. |
+| **FA Review** | `references/fa-review.md` | Fixed asset register review, disposal/write-off processing. Run as part of year-end. |
+| **Statutory Filing** | `references/sg-tax/wizard-workflow.md` | Corporate income tax computation. CLI engines: `clio jobs statutory-filing sg-cs` (Form C-S computation), `clio jobs statutory-filing sg-ca` (capital allowance schedule). See the SG Form C-S section below. |
 
 ## How Jobs Work
 
 Each per-job reference is a **phased checklist** of steps. Each step names:
 
 - **API call**: the exact platform tool + request body to execute the step
-- **Recipe reference**: link to the transaction-recipes skill for complex accounting patterns
-- **Calculator command**: `clio calc` command for independent financial cross-checks
+- **Recipe reference**: the transaction-recipes pattern behind a complex step
+- **Calculator**: the `calculate` type (or `clio calc` command) for the schedule or cross-check
 - **Verification check**: how to confirm the step was completed correctly
 - **Conditional flag**: steps that only apply in certain situations (e.g., "only if multi-currency org")
 
 Steps that carry real judgment (hold, defer, accept a variance, resume after a failure) also name the jot to record at that moment via the `jot` tool. Mechanical steps never do: a jot marks a choice among real alternatives, not activity.
 
-**For AI agents (hosted or CLI):** walk the phases in the per-job reference and call the named platform tools directly. Use the jaz-api skill for payload shapes.
-**For developers / scripts:** `clio jobs <type> --json` prints the phased checklist as JSON to drive automation pipelines.
-**For accountants:** use the formatted checklist (`clio jobs <type>`) to work through the close systematically.
+Use the jaz-api skill for payload shapes.
 
-## CLI Usage (local convenience)
+## CLI helpers
 
-These commands print the phased checklist for a period. They are a terminal convenience; a hosted agent drives the platform tools named in each reference directly.
+`clio jobs` holds five working sub-tools, not checklists.
 
 ```bash
-# Period-close (standalone = full plan, --incremental = extras only)
-clio jobs month-end --period 2025-01 [--currency SGD] [--json]
-clio jobs quarter-end --period 2025-Q1 [--incremental] [--json]
-clio jobs year-end --period 2025 [--incremental] [--json]
-
-# Ad-hoc
-clio jobs bank-recon [--account "DBS Current"] [--period 2025-01] [--json]
-clio jobs gst-vat --period 2025-Q1 [--json]
-clio jobs payment-run [--due-before 2025-02-28] [--json]
-clio jobs credit-control [--overdue-days 30] [--json]
-clio jobs supplier-recon [--supplier "Acme Corp"] [--period 2025-01] [--json]
-clio jobs audit-prep --period 2025 [--json]
-clio jobs fa-review [--json]
+clio jobs bank-recon match --input bank-data.json [--tolerance 0.01] [--date-window 14] [--json]
+clio jobs payment-run outstanding [--due-before 2025-02-28] [--supplier "Acme Corp"] [--currency SGD] [--json]
+clio jobs document-collection ingest --source ./client-docs [--upload] [--bank-account "DBS Current"] [--json]
 ```
+
+The other two, `clio jobs statutory-filing sg-cs` and `sg-ca`, are shown in the Singapore Form C-S section below.
 
 ## Relationship to Other Skills
 
@@ -107,7 +107,7 @@ clio jobs fa-review [--json]
 |-------|------|
 | **jaz-api** | Provides the exact API payloads for each step (field names, gotchas, error handling) |
 | **jaz-recipes** | Provides the accounting patterns for complex steps (accruals, FX reval, ECL, etc.) |
-| **jaz-jobs** (this skill) | Combines recipes + platform tools into sequenced, verifiable business processes |
+| **jaz-jobs** (this skill) | Combines those patterns + platform tools into sequenced, verifiable business processes |
 
 **Load all three skills together** for the complete picture. Jobs reference recipes by name; read the referenced recipe for implementation details.
 

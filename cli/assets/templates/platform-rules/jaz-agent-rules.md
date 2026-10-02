@@ -4,15 +4,15 @@ Jaz accounting guidance for this workspace. Load the installed Jaz skills for de
 
 ## Discovery
 
-Jaz exposes **386 tools across 47 namespaces**. Your tool list shows **3, 47, or 386** entries depending on packaging; **never infer capability from its length.**
+Jaz exposes **381 tools across 48 namespaces**. Your tool list shows **3, 48, or 381** entries depending on packaging; **never infer capability from its length.**
 
 - **3**: `search_tools(query)` → `describe_tools(names)` → `execute_tool(name, args)`. Empty query returns the namespace map.
-- **47**: namespace routers; call one with `{ operation, arguments }`. Its description lists its operations.
-- **386**: call operations directly by name.
+- **48**: namespace routers; call one with `{ operation, arguments }`. Its description lists its operations.
+- **381**: call operations directly by name.
 
 `describe_capabilities` returns the capability map on all three. **Call it before telling the user Jaz cannot do something.**
 
-No API key needed: `describe_capabilities`, `plan_recipe`, `search_help_center` (marked `Offline.`).
+No API key needed: `describe_capabilities`, `calculate`, `search_help_center` (marked `Offline.`).
 
 ## API contract: the 6 rules that prevent 90% of 422s
 
@@ -23,14 +23,15 @@ No API key needed: `describe_capabilities`, `plan_recipe`, `search_help_center` 
 5. **Pagination uses `limit` / `offset`**: `offset` is a 0-indexed page number (offset=1 = second page), not a row-skip. Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): the general ledger (and templated), the AR/AP details reports (and templated), purchase items (list and search), currency rates, and employee payouts search. Sort is required when `offset` is set.
 6. **Create responses return `{ resourceId }` only**; re-GET to load the full entity.
 
-## Transactions: never hand-construct journals for IFRS
+## Transactions: never hand-compute schedules for IFRS
 
-For depreciation, amortization, ECL, IFRS 16 leases, hire purchase, loans, IAS 37 provisions, deferred revenue, fixed deposits, asset disposal, accrued expenses, leave accrual, dividends, **always use the recipe engine**:
+For depreciation, amortization, ECL, IFRS 16 leases, hire purchase, loans, IAS 37 provisions, deferred revenue, fixed deposits, asset disposal, accrued expenses, leave accrual, dividends, **always run the calculator, then post its steps**:
 
-1. `plan_recipe(recipe, ...)` → schedule + journals (offline, no posting).
-2. `execute_recipe(recipe, ..., startDate)` → posts capsule + all entries (replaces ~20 manual tool calls).
+1. `calculate(type, ...)` → schedule + journal lines (offline).
+2. `create_capsule` (type from `list_capsule_types`).
+3. Post each step with `create_journal` / `create_bill` / `create_invoice` / `create_cash_in` / `create_cash_out` with `capsuleResourceId`.
 
-Exception: `fx-reval` is verification-only; Jaz auto-handles period-end IAS 21.23 FX translation. Calling `execute_recipe(recipe: 'fx-reval')` would double-post.
+Exception: `fx-reval` is verification-only; Jaz revalues FX at period end (IAS 21.23). Never post it.
 
 ## Bulk operations
 

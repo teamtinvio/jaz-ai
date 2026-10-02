@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "5.74.2+e5d8079b",
+  "contentVersion": "6.0.0+daf02e9f",
   "counts": {
-    "tools": 386,
-    "namespaces": 47,
+    "tools": 381,
+    "namespaces": 48,
     "calculators": 13,
-    "recipes": 13,
+    "recipes": 16,
     "jobs": 12,
     "skills": 7,
-    "commands": 76,
-    "apiRules": 160
+    "commands": 74,
+    "apiRules": 148
   },
   "namespaces": [
     {
@@ -133,8 +133,12 @@
       "description": "Employees (expense-claim members): create, update, get, delete, and search employees; search the employee-balance directory (reimbursement balances owed); link or unlink a login user; and bulk-import employees from a sheet (preprocess preview → async import). Archive an employee with update active=false rather than deleting."
     },
     {
-      "name": "capsules_and_recipes",
-      "description": "Capsules (transaction groupings/capsule types). Financial recipes: amortization, depreciation, deferred revenue, IFRS 16 leases, hire purchase, fixed deposits, FX revaluation, loan schedules, ECL/expected credit loss, IAS 37 provisions, asset disposal. Two recipe execution paths: offline (plan_recipe + execute_recipe: client-side calculators, no API key) and server-side (list/get/preview/resume/rollback_capsule_recipe: produce real capsule entities via Jaz API). Plus capsuleRecipe payload on trigger mutations (create_bill, create_journal, create_cash_in, etc.) to create and trigger a recipe in one shot, with optional templateOverrides to customize the generated text (Customize Recipe). Keywords: calculate, provision, schedule, expected credit loss, revaluation, amortize, rollback recipe, customize template overrides slots."
+      "name": "capsules",
+      "description": "Capsules: group related transactions (a loan and its repayments, a prepaid bill and its amortization journals). Create, get, update, delete, search capsules; list and create capsule types; move transactions between capsules."
+    },
+    {
+      "name": "calculators",
+      "description": "Offline financial calculators: amortization, depreciation, deferred revenue, prepaid amortization, IFRS 16 leases, hire purchase, fixed deposits, FX revaluation, loan schedules, ECL/expected credit loss, IAS 37 provisions, asset disposal, accruals, leave accrual, dividends. Returns the schedule and journal lines; posts nothing. Keywords: calculate, provision, schedule, expected credit loss, revaluation, amortize, recipe, prepaid-expense, accrued-expense."
     },
     {
       "name": "scheduled_transactions",
@@ -331,7 +335,7 @@
     {
       "name": "update_invoice",
       "namespace": "invoices",
-      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced; pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -394,14 +398,14 @@
     {
       "name": "create_bill",
       "namespace": "bills",
-      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\"; sales-only profiles cause 422. reference MUST be unique; use the SUPPLIER'S OWN invoice number. If the document genuinely has none, set autoReference:true for the org's next number. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating; show it, retry with allowDuplicate only once the user confirms it is separate. Optional capsuleRecipe (PURCHASE base only: PREPAID_AMORTIZATION). Other recipes silently null here; pre-flight with preview_capsule_recipe. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create a new bill. Same rules as create_invoice: name not description, saveAsDraft defaults true, accountResourceId REQUIRED on lineItems for finalized bills (search accounts first, e.g. Operating Expense). When selecting a tax profile, use search_tax_profiles with appliesTo \"purchase\"; sales-only profiles cause 422. reference MUST be unique; use the SUPPLIER'S OWN invoice number. If the document genuinely has none, set autoReference:true for the org's next number. Never invent one. A duplicate guard (supplier + date + currency + amount) returns `_guard: duplicate_suspected` with the existing bill instead of creating; show it, retry with allowDuplicate only once the user confirms it is separate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "update_bill",
       "namespace": "bills",
-      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced; pass the complete updated lineItems array. Optional capsuleRecipe retro-attaches a recipe on activation; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -736,49 +740,56 @@
     },
     {
       "name": "list_capsule_types",
-      "namespace": "capsules_and_recipes",
-      "description": "List capsule types (e.g., PREPAID_EXPENSE, DEFERRED_REVENUE). Use to get capsuleTypeResourceId before creating capsules via create_capsule. NOT the same as list_capsule_recipes (which lists IFRS recipe descriptors with JSON Schema input contracts).",
+      "namespace": "capsules",
+      "description": "List capsule types (e.g., PREPAID_EXPENSE, DEFERRED_REVENUE). Use to get capsuleTypeResourceId before creating capsules via create_capsule. No suitable type: create_capsule_type.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "list_capsules",
-      "namespace": "capsules_and_recipes",
+      "namespace": "capsules",
       "description": "List capsules (transaction groupings for amortization, deferred revenue, etc.). Paginated; response includes totalElements. Use limit/offset to page.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "search_capsules",
-      "namespace": "capsules_and_recipes",
+      "namespace": "capsules",
       "description": "Search capsules.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "get_capsule",
-      "namespace": "capsules_and_recipes",
+      "namespace": "capsules",
       "description": "Fetch a capsule by internal resourceId. To search by other fields, use `search_capsules`.",
       "readOnly": true,
       "destructive": false
     },
     {
+      "name": "create_capsule_type",
+      "namespace": "capsules",
+      "description": "Create a capsule type (a category of capsule, e.g. \"Loan\", \"Prepaid Expenses\"). List capsule types first and reuse a matching one; create only when none fits. Needs an admin role. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
       "name": "create_capsule",
-      "namespace": "capsules_and_recipes",
-      "description": "Create a new (legacy) capsule. List capsule types first to get the capsuleTypeResourceId. `title` is required and must be non-empty (blank/empty rejected with 422). For IFRS recipe-driven capsules (PREPAID_AMORTIZATION, LOAN_AMORTIZATION, etc.), use `preview_capsule_recipe` + `capsuleRecipe` payload on a trigger mutation instead; those create the capsule + scheduler atoms in one shot. This tool is for manually-grouped legacy capsules. If this action involved a judgment call, record it (jot field or jot tool).",
+      "namespace": "capsules",
+      "description": "Create a new capsule. List capsule types first to get the capsuleTypeResourceId. `title` is required and must be non-empty (blank/empty rejected with 422). Then pass its resourceId as capsuleResourceId on each transaction that belongs to it. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "update_capsule",
-      "namespace": "capsules_and_recipes",
+      "namespace": "capsules",
       "description": "Update a capsule title or description. Required fields are auto-merged from current state. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "delete_capsule",
-      "namespace": "capsules_and_recipes",
+      "namespace": "capsules",
       "description": "Delete a capsule. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
@@ -1114,7 +1125,7 @@
     },
     {
       "name": "move_transaction_capsules",
-      "namespace": "capsules_and_recipes",
+      "namespace": "capsules",
       "description": "Move business transactions from one capsule to another. Pass the transaction resourceIds, the source capsule (oldCapsuleResourceId), and the destination (newCapsuleResourceId). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
@@ -1164,7 +1175,7 @@
     {
       "name": "update_cash_in",
       "namespace": "cash_entries",
-      "description": "Update a cash-in entry: reference, date, tags, untaxed lines. Notes and lines with a tax profile are refused locally (the API update fails on them today): for those, void the entry and create a new one. Otherwise edit here rather than creating a duplicate. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a cash-in entry: reference, date, tags, untaxed lines. Notes and lines with a tax profile are refused locally (the API update fails on them today): for those, void the entry and create a new one. Otherwise edit here rather than creating a duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1178,7 +1189,7 @@
     {
       "name": "update_cash_out",
       "namespace": "cash_entries",
-      "description": "Update a cash-out entry: reference, date, tags, untaxed lines. Notes and lines with a tax profile are refused locally (the API update fails on them today): for those, void the entry and create a new one. Otherwise edit here rather than creating a duplicate. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a cash-out entry: reference, date, tags, untaxed lines. Notes and lines with a tax profile are refused locally (the API update fails on them today): for those, void the entry and create a new one. Otherwise edit here rather than creating a duplicate. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1386,52 +1397,10 @@
       "destructive": false
     },
     {
-      "name": "plan_recipe",
-      "namespace": "capsules_and_recipes",
-      "description": "Offline. Plan an IFRS transaction (schedule + journals) WITHOUT posting. Returns RecipePlan: capsuleType, capsuleName, requiredAccounts, needsContact, steps (journal|bill|invoice|cash-in|cash-out), calculator output.",
+      "name": "calculate",
+      "namespace": "calculators",
+      "description": "Offline. Run a financial calculator: returns the schedule and each step's journal lines. Posts nothing. Never compute these by hand.",
       "readOnly": true,
-      "destructive": false
-    },
-    {
-      "name": "execute_recipe",
-      "namespace": "capsules_and_recipes",
-      "description": "Execute a recipe end-to-end: calculator + capsule + post all entries in one call. PREFERRED over manual creation (replaces ~20 tool calls). After plan_recipe, ALWAYS use this (not create_journal/create_invoice/create_cash_out).",
-      "readOnly": false,
-      "destructive": false
-    },
-    {
-      "name": "list_capsule_recipes",
-      "namespace": "capsules_and_recipes",
-      "description": "Server-side recipe lifecycle (NOT the offline calculator; for offline planning use plan_recipe + execute_recipe). List all registered IFRS capsule recipes with per-version JSON Schemas. Source of truth for recipeName values used in capsuleRecipe payloads on trigger mutations (create_bill, create_journal, create_cash_in, etc.); DON'T hard-code the 5 enum values. Each descriptor carries displayName, capsuleType, requiresBaseTransaction, allowedBaseTransactionTypes[], expectedAtomTypes[], and versions[] with inputSchema (JSON Schema Draft 7) per version.",
-      "readOnly": true,
-      "destructive": false
-    },
-    {
-      "name": "get_capsule_recipe",
-      "namespace": "capsules_and_recipes",
-      "description": "Get one capsule recipe descriptor by enum name. inputSchema at `data.versions[0].inputSchema` (NOT top-level). Carries `allowedBaseTransactionTypes`, `x-accountClass` per *AccountResourceId slot, `x-baseTrxBinding` for auto-fills, and `versions[].templateSlots[]`, the slotKeys + supportedVariables you can pass to capsuleRecipe.templateOverrides (Customize Recipe). Use list_capsule_recipes for available names.",
-      "readOnly": true,
-      "destructive": false
-    },
-    {
-      "name": "preview_capsule_recipe",
-      "namespace": "capsules_and_recipes",
-      "description": "Compute the blueprint a recipe would build, WITHOUT persisting. Returns { legs[], expectedOutput[], previewMarkdown }. **Pre-flight gate** before sending capsuleRecipe payloads; trigger mutations silently null on publish failure but preview surfaces every problem as a clean 422 (ERR_RECIPE_ACCOUNT_CURRENCY_MISMATCH, RECIPE_INVALID_BASE_TRANSACTION_TYPE, ERR_RECIPE_OVERRIDE_*; Rule 143). Also the gate for templateOverrides: invalid slotKeys/variables come back as ERR_RECIPE_OVERRIDE_* here. The base-trx triplet (baseTransactionResourceId, baseTransactionType, organizationResourceId) is all-or-nothing: supply all three to auto-fill totalAmount/currency/anchor dates, OR omit all three for a pure compute preview.",
-      "readOnly": true,
-      "destructive": false
-    },
-    {
-      "name": "resume_capsule_recipe",
-      "namespace": "capsules_and_recipes",
-      "description": "Server-side recipe lifecycle. Resume a FAILED recipe job from the leg that failed. NOT idempotent; each call counts toward the 3-attempt limit. After 3 same-leg failures the job is terminally BLOCKED_AFTER_3_RESUME_ATTEMPTS and only rollback_capsule_recipe remains. Returns the updated CapsuleRecipeJob handle with status, resumeAttempts, terminalReason. If this action involved a judgment call, record it (jot field or jot tool).",
-      "readOnly": false,
-      "destructive": false
-    },
-    {
-      "name": "rollback_capsule_recipe",
-      "namespace": "capsules_and_recipes",
-      "description": "Server-side recipe lifecycle. Delete every scheduler atom posted by this capsule's recipe. dryRun=true returns the would-delete list without deleting (idempotent, safe to call repeatedly). dryRun=false performs the delete. Status enum: SUCCESS | BLOCKED | PARTIAL_ROLLBACK | DRY_RUN. PARTIAL_ROLLBACK with blockedAtomResourceIds[] means some atoms are referenced downstream. Retry idempotent; escalate if persistent. Capsules NOT created via the recipe engine return 422 RECIPE_ROLLBACK_JOB_NOT_FOUND (\"nothing to roll back\"). If this action involved a judgment call, record it (jot field or jot tool).",
-      "readOnly": false,
       "destructive": false
     },
     {
@@ -1458,7 +1427,7 @@
     {
       "name": "update_journal",
       "namespace": "journals",
-      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. Optional capsuleRecipe retro-attaches a recipe; same base-type constraint as create variant. Mutex with capsuleResourceId. Rule 143. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1675,14 +1644,14 @@
     {
       "name": "discard_fixed_asset",
       "namespace": "fixed_assets",
-      "description": "Discard (write off) a fixed asset. Records the disposal and final depreciation. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Discard (write off) a fixed asset. Records the disposal and final depreciation itself: do not also post a manual disposal journal. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "mark_fixed_asset_sold",
       "namespace": "fixed_assets",
-      "description": "Mark a fixed asset as sold. Links to the sale transaction and records gain/loss. When the user asks to sell an asset, use this tool directly; retrieve the asset first with list_fixed_assets or search_fixed_assets to get the resourceId. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Mark a fixed asset as sold. Links to the sale transaction and records the disposal and gain/loss itself: do not also post a manual disposal journal. When the user asks to sell an asset, use this tool directly; retrieve the asset first with list_fixed_assets or search_fixed_assets to get the resourceId. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2916,8 +2885,6 @@
     "bills",
     "bookmarks",
     "calc",
-    "capsule-recipes",
-    "capsule-transaction",
     "capsules",
     "cash-in",
     "cash-out",
@@ -3008,19 +2975,22 @@
     "dividend"
   ],
   "recipes": [
-    "loan",
-    "lease",
-    "depreciation",
-    "prepaid-expense",
-    "deferred-revenue",
-    "fx-reval",
-    "ecl",
-    "provision",
-    "fixed-deposit",
+    "accrued-expenses",
     "asset-disposal",
-    "accrued-expense",
-    "leave-accrual",
-    "dividend"
+    "bad-debt-provision",
+    "bank-loan",
+    "capital-wip",
+    "declining-balance",
+    "deferred-revenue",
+    "dividend",
+    "employee-accruals",
+    "fixed-deposit",
+    "fx-revaluation",
+    "hire-purchase",
+    "ifrs16-lease",
+    "intercompany",
+    "prepaid-amortization",
+    "provisions"
   ],
   "jobs": [
     "month-end-close",

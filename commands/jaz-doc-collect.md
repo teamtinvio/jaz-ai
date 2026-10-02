@@ -5,7 +5,7 @@ argument-hint: "<directory or cloud link>"
 
 # Document Collection
 
-Execute the document collection workflow via `clio jobs document-collection`. Scans directories, classifies documents, and prepares them for upload.
+Run the document collection playbook from the jaz-jobs skill (`references/document-collection.md`). Scans directories, classifies documents, and prepares them for upload.
 
 ## Usage
 
@@ -16,18 +16,16 @@ Execute the document collection workflow via `clio jobs document-collection`. Sc
 
 ## Workflow
 
-### 1. Generate the blueprint
+### 1. Open the playbook
 
-```bash
-clio jobs document-collection --json
-```
+The steps are in the jaz-jobs skill: `references/document-collection.md`. Read it first and walk its steps in order. The only `clio jobs document-collection` command is the `ingest` sub-tool below.
 
 ### 2. Scan and classify
 
 Point the workflow at a directory:
 
 ```bash
-clio jobs document-collection ingest --path ~/Downloads/client-docs/ --json
+clio jobs document-collection ingest --source ~/Downloads/client-docs/ --json
 ```
 
 The ingestor:

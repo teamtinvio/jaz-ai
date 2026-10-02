@@ -27,9 +27,9 @@
 
 11. **`clio schema` is for tool introspection, not data.** `clio schema --json` lists command groups and tool counts. `clio schema invoices --json` shows tool definitions. `clio schema invoices create --json` shows parameter schema. None of these hit the API.
 
-12. **Job blueprints output plain text by default.** `clio jobs month-end` prints a checklist. Add `--json` for structured output. Some job tools (`match`, `outstanding`, `sg-cs`) require auth; blueprint generators are offline.
+12. **`clio jobs` is five working tools, not checklists.** `bank-recon match`, `payment-run outstanding`, `document-collection ingest`, `statutory-filing sg-cs` and `statutory-filing sg-ca`. No checklist commands exist (month-end, GST/VAT, audit prep and the rest are not commands): the job playbooks are reference docs in the jaz-jobs skill. `payment-run outstanding` and `ingest --upload` need auth; `match`, `sg-cs` and `sg-ca` run offline. Add `--json` for structured output.
 
-13. **Capsule-transaction recipes: always `--plan` first.** `clio ct loan --plan` shows what accounts and transactions will be created, offline. Only run without `--plan` when you know the account mapping is correct. Recipes create real finalized transactions.
+13. **There is no recipe command: calculate, then post.** `clio calc <type> --json` returns the schedule and journal lines and posts nothing. To book it, create a capsule (`clio capsules create`) and post each step yourself (`journals` / `bills` / `invoices` / `cash-in` / `cash-out` `create`, with `capsuleResourceId` in the `--input` body). The calculator's account names are generic ("Cash / Bank Account"): map each to a real account before posting. `clio calc fx-reval` is verification only; never post its result.
 
 14. **The `--input` flag reads JSON from a file.** For complex payloads (multi-line-item invoices, detailed journals), write JSON to a temp file and pass `--input payload.json` instead of long `--lines` flags with shell escaping issues. When `--input` is provided, all other body flags are ignored.
 

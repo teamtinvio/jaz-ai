@@ -1,8 +1,8 @@
 # Audit Preparation
 
-> Compile the report pack + supporting schedules + reconciliations an auditor or tax agent needs to issue an opinion or file a return. Walk the steps below in order, calling the named platform tools directly. (Local CLI convenience: `clio jobs audit-prep --period <YYYY>` prints this same phased deliverables checklist.)
+> Compile the report pack + supporting schedules + reconciliations an auditor or tax agent needs to issue an opinion or file a return. Walk the steps below in order, calling the named platform tools directly.
 
-## Tools, recipes, calculators this job uses
+## Tools and calculators this job uses
 
 ### Platform tools: financial statements
 - **`generate_trial_balance(endDate: <FY-end>)`** (step 2): master reconciliation. Every other report ties back to this.
@@ -32,7 +32,7 @@
 ### Calculators (cross-check schedules, no API key needed)
 - **`clio calc loan --principal --rate --term --start-date --json`** (step 8): independent loan amortization for the loan schedule.
 - **`clio calc lease --payment --term --rate --json`** (step 8): IFRS 16 ROU + lease liability schedule.
-- **`clio calc ecl --receivables <json> --json`** (step 8): ECL provision matrix per IFRS 9.
+- **`clio calc ecl --current --30d --60d --90d --120d --rates --json`** (step 8): ECL provision matrix per IFRS 9.
 - **`clio calc fixed-deposit --principal --rate --term --json`** (step 8): FD interest accrual.
 - **`clio calc depreciation --cost --salvage --life --method --json`** (step 8): per-asset depreciation cross-check vs FA register.
 
@@ -56,7 +56,7 @@ Even small exempt SG companies need this pack for the external accountant who pr
 
 ## Step 1: Scope the deliverables
 
-The jurisdiction-specific deliverable list. SG: TB / BS / P&L / CF / EM / AR aging / AP aging / bank recon / FA register / GST F5 yearly / supporting schedules. PH: same + ITR-specific schedules. (Local CLI: `clio jobs audit-prep --period 2025` prints this deliverables checklist.)
+The jurisdiction-specific deliverable list. SG: TB / BS / P&L / CF / EM / AR aging / AP aging / bank recon / FA register / GST F5 yearly / supporting schedules. PH: same + ITR-specific schedules.
 
 ## Step 2: Trial balance (the master)
 
@@ -109,11 +109,11 @@ Use `endDate` not `startDate` (rule 36, point-in-time snapshot). Assert:
 - `aged_ar.totalOutstanding == TB['Accounts Receivable'].balance` (recoverability gate; auditor tests > 90d aging for ECL adequacy).
 - `aged_ap.totalOutstanding == TB['Accounts Payable'].balance` (completeness gate).
 
-If ECL provision feels inadequate for the > 90d bucket, run the ECL recipe immediately:
+If ECL provision feels inadequate for the > 90d bucket, run the ECL calculator immediately:
 ```
-plan_recipe(recipe: 'ecl', buckets: <aged AR buckets as [{name, balance, rate}]>, existingProvision, startDate, ...)
+calculate(type: 'ecl', buckets: <aged AR buckets as [{name, balance, rate}]>, existingProvision, startDate)
 ```
-And post any top-up provision via `execute_recipe`. This avoids an auditor-proposed adjustment at fieldwork.
+And post any top-up provision yourself: `create_capsule` (type `ECL Provision`), then `create_journal` with `capsuleResourceId` (the three-step flow in `building-blocks.md` § Calculated schedules). This avoids an auditor-proposed adjustment at fieldwork.
 
 ## Step 7: Bank reconciliation (NON-NEGOTIABLE)
 
@@ -220,7 +220,7 @@ The SG Form C-S wizard walks the user field-by-field through the C-S form, prefi
 | Source | Error | Recovery |
 |--------|-------|----------|
 | `generate_*` | 422 `period_not_closed` | Year-end close incomplete. Route to `year-end-close.md` first. |
-| `generate_bank_recon_*` | `unreconciledCount > 0` | Route to `bank-recon.md`; do NOT hand pack with this open. |
+| `generate_bank_recon_summary` / `generate_bank_recon_details` | `unreconciledCount > 0` | Route to `bank-recon.md`; do NOT hand pack with this open. |
 | `download_export` | 422 `period_too_long` | GL XLSX rejected for >12 months. Split into per-quarter exports. |
 | `download_export` | 504 timeout | Large org. Re-run with smaller `endDate` range or contact infrastructure team. |
 | `update_account` | 422 `lock_date_in_future` | The CoA `lockDate` must be ≤ the period end date. Use today if unsure. |
