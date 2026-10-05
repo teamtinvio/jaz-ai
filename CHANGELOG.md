@@ -1,5 +1,9 @@
 # Changelog
 
+## [6.0.2] - 2026-10-05
+
+Internal release automation update. No user-facing changes since v6.0.1.
+
 ## [6.0.1] - 2026-10-05
 
 **Clearer tool names and safety labels in the hosted connector.**
