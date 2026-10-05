@@ -1,6 +1,6 @@
 ---
 name: jaz-kit
-version: 6.0.0
+version: 6.0.1
 description: >-
   Use this skill when an accountant, bookkeeper, or owner is running real books
   in Jaz across one or more organizations from the terminal: setting up a

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "6.0.0+daf02e9f",
+  "contentVersion": "6.0.1+01a695d6",
   "counts": {
     "tools": 381,
-    "namespaces": 48,
+    "namespaces": 49,
     "calculators": 13,
     "recipes": 16,
     "jobs": 12,
@@ -78,7 +78,11 @@
     },
     {
       "name": "pseudo_sql",
-      "description": "Pseudo-SQL ad-hoc read-only queries against the curated reporting schema (custom select, custom report, query data, run sql). Includes live schema introspection (get_pseudo_sql_schema) + sync preview (≤100 rows) + async CSV export. Use when search_* / download_export canonical reports don't cover the question."
+      "description": "Pseudo-SQL ad-hoc read-only queries against the curated reporting schema (custom select, custom report, query data, run sql). Includes live schema introspection (get_pseudo_sql_schema), sync preview (≤100 rows) and polling a CSV export (get_pseudo_sql_export). Use when search_* / download_export canonical reports don't cover the question. To export a query as CSV, use pseudo_sql_exports."
+    },
+    {
+      "name": "pseudo_sql_exports",
+      "description": "Export a pseudo-SQL query result as a CSV file: start an async export (then poll get_pseudo_sql_export in pseudo_sql), or run and download in one call. Write and preview the query with pseudo_sql first."
     },
     {
       "name": "contacts",
@@ -97,8 +101,8 @@
       "description": "Tags for categorizing transactions. Custom fields for adding metadata (text, date, dropdown). Create, search, delete tags and custom fields."
     },
     {
-      "name": "nano_classifiers",
-      "description": "Nano classifiers (tracking categories/dimensions). List, search, create, update, delete classifiers and their classes. Used for line-item tagging and dimensional reporting. Also: tracking categories, cost centers, departments, projects."
+      "name": "tracking_categories",
+      "description": "Tracking categories (nano classifiers; dimensions). List, search, create, update, delete classifiers and their classes. Used for line-item tagging and dimensional reporting. Also: tracking categories, cost centers, departments, projects."
     },
     {
       "name": "chart_of_accounts",
@@ -133,8 +137,8 @@
       "description": "Employees (expense-claim members): create, update, get, delete, and search employees; search the employee-balance directory (reimbursement balances owed); link or unlink a login user; and bulk-import employees from a sheet (preprocess preview → async import). Archive an employee with update active=false rather than deleting."
     },
     {
-      "name": "capsules",
-      "description": "Capsules: group related transactions (a loan and its repayments, a prepaid bill and its amortization journals). Create, get, update, delete, search capsules; list and create capsule types; move transactions between capsules."
+      "name": "transaction_groups",
+      "description": "Transaction groups (capsules): group related transactions (a loan and its repayments, a prepaid bill and its amortization journals). Create, get, update, delete, search capsules; list and create capsule types; move transactions between capsules."
     },
     {
       "name": "calculators",
@@ -740,56 +744,56 @@
     },
     {
       "name": "list_capsule_types",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "List capsule types (e.g., PREPAID_EXPENSE, DEFERRED_REVENUE). Use to get capsuleTypeResourceId before creating capsules via create_capsule. No suitable type: create_capsule_type.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "list_capsules",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "List capsules (transaction groupings for amortization, deferred revenue, etc.). Paginated; response includes totalElements. Use limit/offset to page.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "search_capsules",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "Search capsules.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "get_capsule",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "Fetch a capsule by internal resourceId. To search by other fields, use `search_capsules`.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "create_capsule_type",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "Create a capsule type (a category of capsule, e.g. \"Loan\", \"Prepaid Expenses\"). List capsule types first and reuse a matching one; create only when none fits. Needs an admin role. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "create_capsule",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "Create a new capsule. List capsule types first to get the capsuleTypeResourceId. `title` is required and must be non-empty (blank/empty rejected with 422). Then pass its resourceId as capsuleResourceId on each transaction that belongs to it. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "update_capsule",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "Update a capsule title or description. Required fields are auto-merged from current state. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "delete_capsule",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "Delete a capsule. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
@@ -939,7 +943,7 @@
       "namespace": "currencies",
       "description": "Enable one or more currencies for the organization. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "list_currency_rates",
@@ -953,21 +957,21 @@
       "namespace": "currencies",
       "description": "Add or set an exchange rate for a currency. ALWAYS use this tool even when the user says \"update rate\"; it handles both new and existing rates. Rate direction is base→source (1 org-base unit = N of this currency); see the rate param before sending. Call list_currencies first to get valid currency codes. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "update_currency_rate",
       "namespace": "currencies",
       "description": "Update an EXISTING exchange rate record by its resourceId. Requires the rate resourceId from list_currency_rates. WARNING: If the user says \"update the rate\" or \"set the rate\", they almost always mean add_currency_rate (which creates/overwrites for a date). Only use this tool when explicitly modifying an existing rate record by ID. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "bulk_upsert_currency_rates",
       "namespace": "currencies",
       "description": "Max 500 exchange rates per call. Auto-enables currencies not yet enabled in the org; no need to call add_currency first. Requires rateDirection per rate. Response surfaces per-row failures: `failedRows[]` (each with rowIndex, columnName, columnValue, errorCode, errorMessage) + `failedCount` alongside `resourceIds[]` for successful inserts. Omitting `rateApplicableTo` defaults it to `rateApplicableFrom - 0.999ms` (no temporal gap). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "list_tax_profiles",
@@ -1125,7 +1129,7 @@
     },
     {
       "name": "move_transaction_capsules",
-      "namespace": "capsules",
+      "namespace": "transaction_groups",
       "description": "Move business transactions from one capsule to another. Pass the transaction resourceIds, the source capsule (oldCapsuleResourceId), and the destination (newCapsuleResourceId). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
@@ -1363,9 +1367,9 @@
     },
     {
       "name": "export_pseudo_sql",
-      "namespace": "pseudo_sql",
+      "namespace": "pseudo_sql_exports",
       "description": "Kick off an async CSV export of a pseudo-SQL SELECT against the curated reporting schema. Returns { jobId, status }. Same DSL constraints as preview_pseudo_sql (SELECT-only, ≤16384 chars, single statement). Poll status via get_pseudo_sql_export; terminal states are COMPLETED (downloadUrl present, ~15min S3 expiry), FAILED, or EXPIRED. For one-shot \"give me the CSV\" use run_pseudo_sql_and_download instead. Supply idempotencyKey to dedupe across retries; same key + DIFFERENT query returns the prior job's result (server-side primary).",
-      "readOnly": true,
+      "readOnly": false,
       "destructive": false
     },
     {
@@ -1377,9 +1381,9 @@
     },
     {
       "name": "run_pseudo_sql_and_download",
-      "namespace": "pseudo_sql",
+      "namespace": "pseudo_sql_exports",
       "description": "One-shot composite: kickoff async export → poll every 2s → return { jobId, status, downloadUrl, buffer? | localPath? }. Default 25s timeout (safe under typical 30s MCP provider timeout, configurable up to 90s). Idempotency-Key auto-set to sha256(query).slice(0,16) so same-query repeats dedupe. Default returns CSV buffer; pass downloadToFile=true to write to ~/Downloads/pseudo-sql-<jobId>.csv. On TIMED_OUT returns { status:'TIMED_OUT', jobId }; caller can retry via get_pseudo_sql_export. Use for \"run this query and give me the CSV\" flows; use export_pseudo_sql + get_pseudo_sql_export for fine-grained control.",
-      "readOnly": true,
+      "readOnly": false,
       "destructive": false
     },
     {
@@ -1483,7 +1487,7 @@
     {
       "name": "classify_documents",
       "namespace": "document_ai",
-      "description": "Use this when the user points at a FOLDER, a .zip, a Dropbox / Google Drive / OneDrive folder share link, or a pile/batch of mixed documents. Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / quote / order / purchase request / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Returns a manifest (per-file type + confidence + counts) plus a collectionId. If nothing is extractable it returns `hint` (why + what to do) and `summary.skippedExtensions`: relay it, do NOT call extract_documents; review it, then call extract_documents with that collectionId to create the drafts. The source is FETCHED BY THE JAZ SERVER: a direct .zip/file link, or a Dropbox / Google Drive / OneDrive share link. A local path works only when this tool runs on your own machine. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Use this when the user points at a FOLDER, a .zip, a Dropbox / Google Drive / OneDrive folder share link, or a pile/batch of mixed documents. Sort a ZIP or share link of MIXED accounting documents: classifies each file into invoice / bill / customer credit note / supplier credit note / quote / order / purchase request / bank statement by its FOLDER NAME within the source (e.g. files under an \"invoices/\" folder become invoices), WITHOUT creating anything. Returns a manifest (per-file type + confidence + counts) plus a collectionId. If nothing is extractable it returns `hint` (why + what to do) and `summary.skippedExtensions`: relay it, do NOT call extract_documents; review it, then call extract_documents with that collectionId to create the drafts. The source is FETCHED BY THE JAZ SERVER: a direct .zip/file link, or a Dropbox / Google Drive / OneDrive share link. A local path works only when this tool runs on your own machine.",
       "readOnly": false,
       "destructive": false
     },
@@ -1898,7 +1902,7 @@
       "namespace": "tax_profiles",
       "description": "Update an existing tax profile. Omitted fields keep their current values; status is not updatable. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
-      "destructive": false
+      "destructive": true
     },
     {
       "name": "create_claim_type",
@@ -2357,42 +2361,42 @@
     },
     {
       "name": "list_nano_classifiers",
-      "namespace": "nano_classifiers",
+      "namespace": "tracking_categories",
       "description": "List nano classifiers (tracking categories). Paginated. Nano classifiers tag line items with structured categories.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "get_nano_classifier",
-      "namespace": "nano_classifiers",
+      "namespace": "tracking_categories",
       "description": "Get a nano classifier by resourceId. Returns type and all classes.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "search_nano_classifiers",
-      "namespace": "nano_classifiers",
+      "namespace": "tracking_categories",
       "description": "Search nano classifiers (tracking categories).",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "create_nano_classifier",
-      "namespace": "nano_classifiers",
+      "namespace": "tracking_categories",
       "description": "Create a nano classifier (tracking category). Provide a type name and list of class names. printable defaults to true. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "update_nano_classifier",
-      "namespace": "nano_classifiers",
+      "namespace": "tracking_categories",
       "description": "Update a nano classifier. Omitted fields are kept; classes is optional. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "delete_nano_classifier",
-      "namespace": "nano_classifiers",
+      "namespace": "tracking_categories",
       "description": "Delete a nano classifier. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true

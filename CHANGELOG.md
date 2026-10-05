@@ -1,5 +1,16 @@
 # Changelog
 
+## [6.0.1] - 2026-10-05
+
+**Clearer tool names and safety labels in the hosted connector.**
+
+- Two tool groups have clearer names: "Nano classifiers" is now **Tracking Categories** and "Capsules" is now **Transaction Groups (Capsules)**. What they do is unchanged, and an assistant that still uses the old names keeps working.
+- Actions that fetch a link you give them (statement imports, document scans, spreadsheet reads, Dropbox / Google Drive / OneDrive folders) or that email someone (user invites) are now labelled as reaching outside Jaz.
+- Adding a currency, changing an exchange rate and changing a tax profile are now labelled as hard to undo. A currency cannot be removed once added, and a rate or tax profile change replaces the old value.
+- Query exports have their own group, **Ad-hoc Query Exports (SQL)**, because starting an export creates a job you can see. The query tools themselves stay labelled as reads.
+- An assistant still using an older tool list can read report templates through the Organization group again.
+- In the hosted connector, a query export is collected through its download link. Saving it straight to a file now works only when the assistant runs on your own computer.
+
 ## [6.0.0] - 2026-10-02
 
 **Recipes are retired. Calculators stay, behind one tool, and you post the entries yourself.**

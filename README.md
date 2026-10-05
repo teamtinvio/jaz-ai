@@ -72,7 +72,7 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@6.0.0", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@6.0.1", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -85,13 +85,13 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@6.0.0", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@6.0.1", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@6.0.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@6.0.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -166,7 +166,7 @@ One catalog, three packagings. Every install reaches the **same 381 operations**
 | Install | `tools/list` shows | Operations reachable | Why |
 |---|---|---|---|
 | Claude Code plugin, `.mcpb`, Gemini, Cursor / VS Code / Windsurf / Codex | **3** meta-tools | all 381 operations | Lazy: `search_tools` → `describe_tools` → `execute_tool`. ~600 tokens of context instead of ~78KB. |
-| Remote connector (`mcp.jaz.ai`), M365 Copilot, OpenAI Responses | 48 namespace tools | all 381 operations | One tool per accounting area; each routes to its operations, documented in its description. |
+| Remote connector (`mcp.jaz.ai`), M365 Copilot, OpenAI Responses | 49 namespace tools | all 381 operations | One tool per accounting area; each routes to its operations, documented in its description. |
 | `JAZ_MCP_FLAT=1` (either transport) | 381 tools | all 381 operations | Every operation listed directly. Heaviest payload; enables per-tool read-only parallelism. |
 
 A directory listing that says "381 tools" and a client that shows 3 or 47 are describing the same server. Nothing is missing.
@@ -247,7 +247,7 @@ Built so any model sees the right tool fast and calls it once.
 | What | How |
 |------|-----|
 | **MCP delivery: local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of schemas for all 381 operations (~78KB). The agent searches into the catalog only when needed. |
-| **MCP delivery: hosted connector** | 48 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
+| **MCP delivery: hosted connector** | 49 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
 | **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
 | **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
 | **Discovery ranker** | In-memory, no network round-trip. Scans tool name + description + searchHint + namespace. |
@@ -477,7 +477,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@6.0.0", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@6.0.1", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 
