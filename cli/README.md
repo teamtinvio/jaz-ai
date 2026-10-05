@@ -7,9 +7,9 @@
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
-<p align="center"><b>Jaz accounting on the command line, and inside any AI agent.</b></p>
+<p align="center"><b>Fastest ledger for agents.</b><br>Jaz accounting on the command line, and inside any AI agent.</p>
 
-381 tools · 74 command groups · 7 skills · 13 calculators · 12 close playbooks · 148 field-tested API rules.
+381 tools · 74 command groups · 7 skills · 13 calculators · 12 job playbooks · 148 field-tested API rules.
 
 ```bash
 npm install -g jaz-clio
@@ -25,7 +25,7 @@ Node.js 18+. Works with [Jaz](https://jaz.ai) and [Juan Accounting](https://juan
 - [MCP server](#mcp-server)
 - [Skills](#skills)
 - [Jaz Kit · run your practice](#jaz-kit--run-your-practice)
-- [Semantic help-center search](#semantic-help-center-search-optional)
+- [Help-center search](#help-center-search)
 - [Privacy](#privacy) · [Support](#support) · [License](#license)
 
 ## Three ways in
@@ -54,7 +54,8 @@ API-key profiles, `--api-key`, `JAZ_API_KEY`, and PATs remain supported. Use `--
 ## CLI
 
 ```bash
-clio invoices create --contact "ACME" --json           # draft an invoice, JSON back
+clio invoices create --contact "ACME" --date 2026-10-05 --due 2026-11-04 --auto-ref \
+  --lines '[{"name":"Consulting","quantity":1,"unitPrice":500}]' --json   # draft an invoice
 clio bank import --file statement.csv --account <id>    # import and auto-reconcile
 clio exports download --type profit-and-loss --format PDF  # download the P&L as a PDF
 clio calc lease --payment 5000 --term 36 --rate 5      # IFRS 16, offline, instant
@@ -81,7 +82,7 @@ Command groups by area:
 - **Reports and data**: `reports`, `exports`, `export-records`, `report-templates`, `pseudo-sql` (`sql`), `filing-submissions`, `background-jobs`
 - **Organization**: `org`, `org-users`, `references`, `modules` (`features`), `bookmarks`, `attachments`, `magic`, `jots`, `navigate` (`nav`), `help-center` (`hc`)
 - **Calculators and job tools**: `calc` (offline), `jobs`
-- **Setup and tooling**: `auth`, `init`, `update`, `versions`, `version`, `health`, `completion`, `context`, `schema`, `resolve`, `mcp`, `mcp-call`, `serve`
+- **Setup and tooling**: `auth`, `init`, `update`, `versions`, `version`, `health`, `completion`, `schema`, `resolve`, `mcp`, `mcp-call`
 
 ### Foreign currency
 
@@ -120,7 +121,7 @@ Run `clio auth login` once on this computer before enabling local MCP, then pin 
 claude mcp add jaz -- npx -y jaz-clio@latest mcp --org oauth:<resourceId>
 ```
 
-**Cursor · VS Code · Windsurf**
+**Cursor · Windsurf** (VS Code uses a `servers` key instead of `mcpServers`; see the [repository README](https://github.com/teamtinvio/jaz-ai#install--30-seconds))
 
 ```json
 {
@@ -172,7 +173,7 @@ Each company lives under `~/Documents/Jaz Kit/orgs/<company>/`, holding its clos
 
 Everything is drafted first, every record carries a link into Jaz for you to review, and an interrupted close resumes exactly where it stopped. Multi-company work needs this CLI, which you already have. Full guide in the [repository README](https://github.com/teamtinvio/jaz-ai#jaz-kit--run-your-practice).
 
-## Semantic help-center search (optional)
+## Help-center search
 
 `search_help_center` runs keyword search over the bundled help-center corpus by default. Set `CLIO_HELP_CENTER_OPENAI_API_KEY` to add semantic search, which matches on intent rather than exact keywords: the CLI embeds only your query through the OpenAI embeddings API (`text-embedding-3-small`, the model the bundled index was built with) and merges both rankings. On an auth failure it warns once and falls back to keyword search. Use a project-scoped key restricted to embedding models with a low monthly cap. CLI only: MCPB installs ship without the embedding index and always use keyword search.
 

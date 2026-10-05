@@ -40,7 +40,7 @@ Skills are available at both standard discovery paths in this repo:
 - **`.agents/skills/`** · [Agent Skills](https://agentskills.io) open standard (Codex, Copilot, Cursor, Antigravity, Windsurf, Goose, Roo Code, Junie, Amp)
 - **`.claude/skills/`** · Claude Code native path
 
-Both point to the same source content in `src/skills/`.
+Both hold the same content as `src/skills/`.
 
 ## More
 

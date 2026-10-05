@@ -55,7 +55,7 @@ Compare the gain or loss the register booked with the calculator's figure.
 Check the trial balance for fixed asset and accumulated depreciation accounts:
 
 ```bash
-clio accounts search --name "Fixed Asset" --json
+clio accounts search "Fixed Asset" --json
 clio reports generate trial-balance --to 2025-12-31 --json
 ```
 

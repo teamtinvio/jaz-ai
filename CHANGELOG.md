@@ -1,5 +1,14 @@
 # Changelog
 
+## [6.0.3] - 2026-10-05
+
+**A new listing: Fastest ledger for agents.**
+
+- The extension's description, here and in the ChatGPT directory, now says what the ledger covers: invoicing, bills, payments, quotes and orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write.
+- Command examples that failed as written now work: creating an invoice, adding a currency during migration, and searching accounts in the fixed asset review.
+- Getting started no longer points to `clio context`, which the published command line does not include. Load the organization with `clio org info`, then list accounts, currencies and tax profiles.
+- Help-center search is described as it works: your query goes to Jaz's hosted help center, with no sign-in needed.
+
 ## [6.0.2] - 2026-10-05
 
 Internal release automation update. No user-facing changes since v6.0.1.

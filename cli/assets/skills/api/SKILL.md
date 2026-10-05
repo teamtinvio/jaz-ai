@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 6.0.2
+version: 6.0.3
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 148 production gotchas, error
@@ -475,11 +475,10 @@ For detailed reference, read these files in this skill directory:
 - **[references/dependencies.md](./references/dependencies.md)**: Resource creation dependencies and required order
 - **[references/full-api-surface.md](./references/full-api-surface.md)**: Complete endpoint catalog (80+ endpoints), enums, search filters, limits
 - **[references/feature-glossary.md](./references/feature-glossary.md)**: Business context per feature: what each feature does and why, extracted from [help.jaz.ai](https://help.jaz.ai)
-- **[help-center-mirror/](./help-center-mirror/)**: Full help center content split by section (auto-generated from [help.jaz.ai](https://help.jaz.ai))
 
 ## Help Center Knowledge Base (`clio help-center` / `clio hc`)
 
-For product questions (how-to, feature behavior, troubleshooting), use `clio help-center` instead of reading raw help-center-mirror files:
+For product questions (how-to, feature behavior, troubleshooting), use `clio help-center` (or the `search_help_center` tool):
 
 ```bash
 clio help-center "how to apply credit note"              # search help center
@@ -487,11 +486,7 @@ clio help-center "bank recon" --limit 3                  # limit results
 clio help-center "scheduled invoices" --section invoices # filter by section
 ```
 
-Supports `--json` for structured output. 186 articles across 20 sections. Automatically uses hybrid search (embeddings + keyword) when available, falls back to keyword + synonym expansion offline.
-
-**When to use `clio help-center` vs reading raw files:**
-- Use `clio help-center` when you need specific answers (returns only relevant articles, saves context)
-- Read `help-center-mirror/*.md` directly only when you need to scan an entire section comprehensively
+Supports `--json` for structured output. Searches Jaz's hosted help center, no sign-in needed, and returns only the relevant articles.
 
 ## Dashboard Deep Links (navigation tools)
 

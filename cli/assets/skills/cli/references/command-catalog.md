@@ -705,15 +705,8 @@ See SKILL.md Auth Precedence section for full details.
 
 ### `clio help-center` (alias: `hc`): Help center search
 ```
-clio hc <query>          # Hybrid search (embeddings + keyword)
+clio hc <query>          # Search the Jaz help center (hosted, no sign-in)
 clio hc "bank recon" --section settings --limit 3
-```
-
-### `clio context`: Agent reference data
-```
-clio context                        # All reference data
-clio context --workflow sales       # Sales workflow only
-clio context -w purchases --json   # JSON output
 ```
 
 ### `clio export-records`: Export to XLSX
@@ -735,9 +728,6 @@ Universal async tracker: any operation returning a jobId (contacts bulk-upsert, 
 
 ### `clio mcp`: MCP stdio server
 Starts an MCP server for Claude Code / AI tool integration. Exposes all 381 operations.
-
-### `clio serve`: HTTP daemon
-Starts the HTTP daemon for ChatKit and email channel integrations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

@@ -39,7 +39,7 @@ For invoices and bills, use Jaz Magic (server-side OCR + autofill). The Magic en
 
 - **Endpoint:** `POST /api/v1/magic/createBusinessTransactionFromAttachment`
 - **Fields:** `sourceFile` (PDF/JPG), `businessTransactionType` (`"BILL"` or `"INVOICE"`), `sourceType` (`"FILE"` or `"URL"`)
-- **Auth:** Uses the same API key from `clio auth`; clio handles auth automatically
+- **Auth:** Uses the same sign-in as `clio auth login` (or a saved API key); clio handles auth automatically
 
 Magic extraction is async: the upload returns immediately, OCR runs in background. Use `clio bills search` or `clio invoices search` to verify the extracted documents.
 

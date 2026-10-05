@@ -46,7 +46,7 @@ clio accounts create --name "Sales Revenue" --type "Revenue" --json
 clio contacts create --name "Acme Corp" --customer --json
 
 # Enable currencies (if multi-currency)
-clio currencies add --code USD --json
+clio currencies add USD --json
 ```
 
 **Phase 2: Quick conversion** (balances only):

@@ -1,7 +1,7 @@
 {
   "name": "jaz-clio",
-  "version": "6.0.2",
-  "description": "Clio: Command Line Interface Operator for Jaz AI.",
+  "version": "6.0.3",
+  "description": "Fastest ledger for agents. Jaz accounting CLI and MCP server: invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close.",
   "type": "module",
   "bin": {
     "clio": "./dist/index.js"

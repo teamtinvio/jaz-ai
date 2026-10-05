@@ -12,7 +12,7 @@ Jaz exposes **381 tools across 49 namespaces**. Your tool list shows **3, 49, or
 
 `describe_capabilities` returns the capability map on all three. **Call it before telling the user Jaz cannot do something.**
 
-No API key needed: `describe_capabilities`, `calculate`, `search_help_center` (marked `Offline.`).
+No API key needed: `describe_capabilities`, `calculate` (marked `Offline.`), and `search_help_center`.
 
 ## API contract: the 6 rules that prevent 90% of 422s
 

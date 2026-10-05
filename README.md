@@ -1,4 +1,4 @@
-# Jaz AI · Agent stack for the ledger
+# Jaz AI · Fastest ledger for agents
 
 <p align="center">
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
@@ -17,13 +17,15 @@
   <a href="https://github.com/teamtinvio/jaz-ai/stargazers"><img src="https://img.shields.io/github/stars/teamtinvio/jaz-ai?style=flat-square&logo=github" alt="GitHub stars"></a>
 </p>
 
-The complete agent surface for [Jaz](https://jaz.ai) accounting. 381 tools, 7 skills, 16 recipe playbooks, 13 calculators, 12 close playbooks. Works with any agent: Claude, GPT, Gemini, Copilot, Cursor. Token-lean discovery, first-try tool selection, structured errors an agent can recover from.
+[Jaz](https://jaz.ai) is built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write from any agent: Claude, ChatGPT, Gemini, Codex, Copilot, Cursor. Tools load only when needed, so your agents stay lean and fast.
 
 > Also fully compatible with [Juan Accounting](https://juan.ac) (same API surface).
 
 ## Contents
 
 - [Install · 30 seconds](#install--30-seconds)
+- [Sign in with OAuth](#sign-in-with-oauth)
+- [How many tools is it?](#how-many-tools-is-it)
 - [What you get](#what-you-get)
 - [Three layers](#three-layers)
 - [Quick start](#quick-start)
@@ -35,20 +37,9 @@ The complete agent surface for [Jaz](https://jaz.ai) accounting. 381 tools, 7 sk
 - [Troubleshooting](#troubleshooting)
 - [Privacy & security](#privacy--security)
 - [Support](#support)
+- [License](#license)
 
 For a guided setup, copy the [Jaz agent setup prompt](agent-setup-prompt.md) and paste it into your agent. It will help you choose where to connect Jaz, handle installation, and guide you through sign-in.
-
-## Sign in with OAuth
-
-OAuth is the default for new setups. Hosted connectors handle sign-in inside the agent. For the CLI, local MCP, Claude Code plugin, Desktop extension, or Gemini extension, run `npx -y jaz-clio@latest auth login` on the computer that runs Jaz. The browser opens for Jaz sign-in and consent; local tools share the saved session and refresh it automatically. No key belongs in the MCP configuration.
-
-If several organizations are available, choose one after sign-in. Agents can use `auth login --json` to obtain the choices, then `auth select <resourceId> --json`. Pin commands and local MCP with `--org oauth:<resourceId>`. Use `auth organizations --json` to refresh the list. Install skills independently of authentication.
-
-For a custom application calling the API directly, use Jaz's authorization-code flow with PKCE and refresh tokens. Register the application's callback at `https://api.getjaz.com/oauth/register`, start consent at `https://api.getjaz.com/oauth/authorize`, and exchange or refresh tokens at `https://api.getjaz.com/oauth/token`. Registration returns the client credentials used by the token endpoint. Keep them private. Select the intended organization during consent for a single-organization integration; use explicit organization selection through CLI/MCP for agent workflows. The published OpenAPI specification's API-key examples describe the optional key-based route.
-
-API keys and PATs remain supported. Explicit `--org` selects its saved credentials ahead of an inherited `JAZ_API_KEY`; without `--org`, the environment key retains precedence. Do not combine `--api-key` with `--org`. Existing key profiles remain available through `--org <label>`; use `auth add <key> --as <label>` for optional key-based access. Never paste credentials into agent chat. `auth logout` removes only the local OAuth session; revoke the grant in Jaz to remove server-side access.
-
-Browser login requires a callback to the computer running Jaz. For an isolated agent sandbox, configure the user's intended machine or use a hosted connector. Do not copy refresh tokens from another application.
 
 ## Install · 30 seconds
 
@@ -72,7 +63,7 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@6.0.2", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@6.0.3", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -85,13 +76,13 @@ Browser login requires a callback to the computer running Jaz. For an isolated a
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@6.0.2", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@6.0.3", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@6.0.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@6.0.3` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -159,17 +150,29 @@ The block is wrapped in version-stamped markers (`<!-- BEGIN jaz-agent-rules vX.
 | Windsurf | `.windsurf/rules/jaz.md` |
 | Gemini CLI | `GEMINI.md` |
 
+## Sign in with OAuth
+
+OAuth is the default for new setups. Hosted connectors handle sign-in inside the agent. For the CLI, local MCP, Claude Code plugin, Desktop extension, or Gemini extension, run `npx -y jaz-clio@latest auth login` on the computer that runs Jaz. The browser opens for Jaz sign-in and consent; local tools share the saved session and refresh it automatically. No key belongs in the MCP configuration.
+
+If several organizations are available, choose one after sign-in. Agents can use `auth login --json` to obtain the choices, then `auth select <resourceId> --json`. Pin commands and local MCP with `--org oauth:<resourceId>`. Use `auth organizations --json` to refresh the list. Install skills independently of authentication.
+
+For a custom application calling the API directly, use Jaz's authorization-code flow with PKCE and refresh tokens. Register the application's callback at `https://api.getjaz.com/oauth/register`, start consent at `https://api.getjaz.com/oauth/authorize`, and exchange or refresh tokens at `https://api.getjaz.com/oauth/token`. Registration returns the client credentials used by the token endpoint. Keep them private. Select the intended organization during consent for a single-organization integration; use explicit organization selection through CLI/MCP for agent workflows. The published OpenAPI specification's API-key examples describe the optional key-based route.
+
+API keys and PATs remain supported. Explicit `--org` selects its saved credentials ahead of an inherited `JAZ_API_KEY`; without `--org`, the environment key retains precedence. Do not combine `--api-key` with `--org`. Existing key profiles remain available through `--org <label>`; use `auth add <key> --as <label>` for optional key-based access. Never paste credentials into agent chat. `auth logout` removes only the local OAuth session; revoke the grant in Jaz to remove server-side access.
+
+Browser login requires a callback to the computer running Jaz. For an isolated agent sandbox, configure the user's intended machine or use a hosted connector. Do not copy refresh tokens from another application.
+
 ## How many tools is it?
 
 One catalog, three packagings. Every install reaches the **same 381 operations**; they are presented differently because hosts have different context budgets.
 
 | Install | `tools/list` shows | Operations reachable | Why |
 |---|---|---|---|
-| Claude Code plugin, `.mcpb`, Gemini, Cursor / VS Code / Windsurf / Codex | **3** meta-tools | all 381 operations | Lazy: `search_tools` → `describe_tools` → `execute_tool`. ~600 tokens of context instead of ~78KB. |
+| Claude Code plugin, `.mcpb`, Gemini, Cursor / VS Code / Windsurf / Codex | **3** meta-tools | all 381 operations | Lazy: `search_tools` → `describe_tools` → `execute_tool`. ~360 tokens of context instead of ~78KB. |
 | Remote connector (`mcp.jaz.ai`), M365 Copilot, OpenAI Responses | 49 namespace tools | all 381 operations | One tool per accounting area; each routes to its operations, documented in its description. |
 | `JAZ_MCP_FLAT=1` (either transport) | 381 tools | all 381 operations | Every operation listed directly. Heaviest payload; enables per-tool read-only parallelism. |
 
-A directory listing that says "381 tools" and a client that shows 3 or 47 are describing the same server. Nothing is missing.
+A directory listing that says "381 tools" and a client that shows 3 or 49 are describing the same server. Nothing is missing.
 
 Ask the agent **"what can you do?"** on any of them; it answers from the connector's own live capability map (`describe_capabilities`), never from the length of its tool list.
 
@@ -183,13 +186,13 @@ Ask the agent **"what can you do?"** on any of them; it answers from the connect
 | **jaz-api** | 148 API rules, every endpoint, error catalog, field aliases, response shapes |
 | **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
 | **jaz-conversion** | Xero / QuickBooks / Sage / MYOB / Excel migration, CoA mapping, FX, clearing accounts, TB verification |
-| **jaz-jobs** | 12 close playbooks (month-end / quarter-end / year-end / bank-recon / GST-VAT / payment-run / credit-control / supplier-recon / audit-prep / FA-review / statutory-filing) + Singapore Form C-S |
+| **jaz-jobs** | 12 job playbooks (month-end / quarter-end / year-end close, bank recon, document collection, GST/VAT filing, payment run, credit control, supplier recon, audit prep, FA review, statutory filing) + Singapore Form C-S |
 | **jaz-recipes** | 16 recipe playbooks (IFRS: loans, IFRS 16 leases, depreciation, FX reval, ECL, IAS 37 provisions, asset disposal, etc.) + 13 calculators |
 | **jaz-pseudo-sql** | Read-only SQL over the curated reporting schema: ad-hoc questions, joins and aggregates, sync preview or async CSV export |
 | **jaz-kit** | Multi-organization operator workspace: per-org context, resumable period closes, draft review queue, policies and rules |
 
 - **3 meta-tools** (`search_tools`, `describe_tools`, `execute_tool`) for deferred discovery so the full catalog never has to load into context.
-- **Help center mirror** at `help-center-mirror/` synced weekly from Intercom.
+- **Help center search** built in: `search_help_center` answers from the Jaz help center.
 - **Structured-search DSL** for natural-feeling queries (`status:unpaid amount:>500 contact:Acme`).
 
 ## Three layers
@@ -246,10 +249,8 @@ Built so any model sees the right tool fast and calls it once.
 
 | What | How |
 |------|-----|
-| **MCP delivery: local, plugin, `.mcpb`** | 3 meta-tools (~600 tokens) instead of schemas for all 381 operations (~78KB). The agent searches into the catalog only when needed. |
+| **MCP delivery: local, plugin, `.mcpb`** | 3 meta-tools (~360 tokens) instead of schemas for all 381 operations (~78KB). The agent searches into the catalog only when needed. |
 | **MCP delivery: hosted connector** | 49 namespace tools (~28.6k tokens) with every operation documented inline. No discovery round-trip; fits ChatGPT's ~5k-per-tool cap. |
-| **OpenAI Responses API** | Native deferred tool_search with namespace bundles. ~78% token reduction over a static tool list. |
-| **Anthropic delivery** | Tool list cached via prompt-cache breakpoints (5-min TTL). System blocks cached. ~5KB/request savings after v5.4.4 cleanup. |
 | **Discovery ranker** | In-memory, no network round-trip. Scans tool name + description + searchHint + namespace. |
 | **Disambiguation** | Every tricky pair (`download_export` vs `export_records`, `view_auto_reconciliation` vs `quick_reconcile`, `validate_drafts` vs per-entity validators) has explicit "USE THIS, not X" preambles. Cuts the 1-3 wrong-tool retries. |
 | **Median tool call** | Subsecond for read tools; bounded by the Jaz API + network. |
@@ -258,11 +259,11 @@ Built so any model sees the right tool fast and calls it once.
 ## For AI agents
 
 - **Skills load automatically** from `.claude/skills/`, `.agents/skills/`, the Claude Code marketplace, the Gemini CLI extension, or the Claude Desktop MCPB.
-- **Discovery is one-shot.** 68 canonical-query lock-in tests guarantee the right tool at rank 1 for the queries that matter.
+- **Discovery is one-shot.** Canonical-query lock-in tests guarantee the right tool at rank 1 for the queries that matter.
 - **Disambiguation is explicit.** Tools that look similar carry "USE THIS, not X" preambles. No more guessing.
 - **Errors are structured.** Server validation failures return field-level details so the agent can self-correct.
 - **Multi-org is native.** Comma-separated keys (`jk-aaa,jk-bbb`) or PATs unlock cross-org tools (`list_organizations`, per-call `org_id`).
-- **CONTEXT.md** captures runtime rules-of-engagement (bootstrap with `clio context --json`, search before create, mutate as draft first, never echo API keys).
+- **CONTEXT.md** captures runtime rules-of-engagement (load the organization first, search before create, mutate as draft first, never echo API keys).
 
 ## For accountants
 
@@ -332,7 +333,7 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill t
 - **[CONTEXT.md](CONTEXT.md)** · runtime rules-of-engagement for agents using the stack
 - **[CHANGELOG.md](CHANGELOG.md)** · release notes
 - **[Skills source](src/skills/)** · all 7 skills (jaz-api / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-pseudo-sql / jaz-kit)
-- **[OpenAPI spec](spec/openapi.yaml)** · full HTTP surface, synced weekly
+- **[OpenAPI spec](spec/openapi.yaml)** · full HTTP surface, synced daily
 - **[README-cli.md](README-cli.md)** · npm-package README, full CLI command catalog
 - **[help.jaz.ai](https://help.jaz.ai)** · Jaz product help center
 - **CLI surface**: 74 command groups across the `clio` binary
@@ -348,7 +349,7 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill t
 | `endpoints.md` | Request/response examples for every core endpoint |
 | `errors.md` | Error catalog with root causes and fixes |
 | `field-map.md` | Intuitive name → actual field name mapping |
-| `search-reference.md` | Filter fields, sort fields, operators for 28 search endpoints |
+| `search-reference.md` | Filter fields, sort fields, operators for 25 search endpoints |
 | `search-enums.md` | Valid enum values for every searchable filter field, by entity |
 | `search-syntax.md` | Structured-search DSL: operators, precedence, and edge cases |
 | `full-api-surface.md` | Complete endpoint catalog, enums, limits |
@@ -357,6 +358,7 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill t
 | `claims.md` | Employee-expense claims: records, lifecycle, bulk actions, types/profiles/posting-rules, conversion, payouts |
 | `orders.md` | Sale quotes/orders and purchase requests/orders: the pre-invoice/pre-bill pipeline |
 | `bank-rule-column-mapping.md` | Bank-rule column-value mapping: resolve fields per statement row from a custom column |
+| `report-templates.md` | Report templates: layouts, packs, defaults, and which edits each report type accepts |
 
 ### jaz-recipes (16 recipe playbooks + 13 calculators)
 
@@ -477,7 +479,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@6.0.2", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@6.0.3", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 
