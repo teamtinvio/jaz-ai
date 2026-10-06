@@ -1,5 +1,9 @@
 # Changelog
 
+## [7.0.1] - 2026-10-06
+
+- ChatGPT now gets one tool per action at the connector address it already uses. Claude and other connectors keep the grouped tools. No change for Claude users.
+
 ## [7.0.0] - 2026-10-06
 
 **Report and document tools now use the names you see in Jaz.**

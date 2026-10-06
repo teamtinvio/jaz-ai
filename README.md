@@ -63,7 +63,7 @@ For a guided setup, copy the [Jaz agent setup prompt](agent-setup-prompt.md) and
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@7.0.0", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@7.0.1", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -76,13 +76,13 @@ For a guided setup, copy the [Jaz agent setup prompt](agent-setup-prompt.md) and
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@7.0.0", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@7.0.1", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@7.0.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@7.0.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -479,7 +479,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@7.0.0", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@7.0.1", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 
