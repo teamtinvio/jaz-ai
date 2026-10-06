@@ -1,5 +1,9 @@
 # Changelog
 
+## [6.1.1] - 2026-10-06
+
+- Finalizing several drafts at once now checks each item first. An item without a transaction type or id is refused with a message saying what to send, including how to pass on the results of a draft validation, instead of failing against the server one by one.
+
 ## [6.1.0] - 2026-10-06
 
 **ChatGPT gets one tool per action.**

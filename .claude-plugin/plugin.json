@@ -1,6 +1,6 @@
 {
   "name": "jaz-ai",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "description": "Fastest ledger for agents. Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Skills add migration from Xero, QuickBooks, Sage, and MYOB, close playbooks, financial calculators, Singapore Form C-S, and Jaz Kit for running many organizations. Works with Claude Code, Codex, Copilot, Cursor, and any MCP-compatible agent.",
   "author": {
     "name": "Jaz",
