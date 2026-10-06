@@ -1,5 +1,14 @@
 # Changelog
 
+## [6.1.0] - 2026-10-06
+
+**ChatGPT gets one tool per action.**
+
+- The hosted connector has a second endpoint for ChatGPT, `https://mcp.jaz.ai/chatgpt/mcp`. It lists 108 everyday actions (invoices, bills, credit notes, orders, journals, cash, payments, contacts, bank reconciliation, reports, data queries, document capture) each as its own tool with its own fields, which is the shape ChatGPT's directory requires. The Claude connector at `https://mcp.jaz.ai/mcp` is unchanged.
+- With `JAZ_MCP_FLAT` on and several organizations connected, every tool now shows its `org_id` field, so the assistant can pick the organization from the tool itself. File-capable tools there also take a file from the conversation.
+- Actions that change a record you already have are now labelled destructive: updates, bulk upserts, converting an order, reconciling a bank entry, quick fixes, and submitting, approving or requesting changes. An update replaces the old values, so your assistant now asks before it runs one. Creating a new record is unchanged.
+- The organizations list now says its ids go on any tool call, not only on the search-then-run path.
+
 ## [6.0.3] - 2026-10-05
 
 **A new listing: Fastest ledger for agents.**
