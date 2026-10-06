@@ -10,9 +10,9 @@
 - **`generate_bank_balance_summary(primarySnapshotDate: <cutoff>)`**, used in step 5: confirm cash availability before approving the batch.
 - **`get_contact(resourceId: <contactResourceId>)`**, used in step 4 (per supplier): pull payment terms / preferred payment method / bank details (especially `taxId`, `bankAccountNumber`, `bicSwift` for GIRO file generation).
 - **`pay_bill(resourceId: <id>, paymentAmount, transactionAmount, accountResourceId, valueDate, ...)`**, used in step 6: post the payment per bill. NO BATCH PAYMENT ENDPOINT yet; one POST per bill.
-- **`search_payments(filter: {businessTransactionReference: {startWith: <run-prefix>}, valueDate: {eq: <run-date>}})`**, used in step 8: idempotency / verification check (re-running the run won't duplicate-pay if all references match).
+- **`search_cashflow_transactions(filter: {businessTransactionReference: {startWith: <run-prefix>}, valueDate: {eq: <run-date>}})`**, used in step 8: idempotency / verification check (re-running the run won't duplicate-pay if all references match).
 
-  > **The field and the operator are both exact.** `search_payments` hits `POST /cashflow-transactions/search` → `TransactionsFilter`, which declares no `additionalProperties`, so an undeclared field is rejected outright rather than ignored. It has **no `reference`** (that is `businessTransactionReference`) and `StringExpression` has **no `startsWith`**: the prefix operator is spelled **`startWith`**, no "s". Until 5.55.3 this line asked for both wrong names, so the idempotency check (the step standing between a re-run and paying every supplier twice) could not return anything. Use `startWith`, not `contains`: measured on the sandbox 2026-09-07, `contains: 'PR-'` matched 3 rows that do **not** start with that prefix, and a looser match here silently widens what the run treats as already-paid.
+  > **The field and the operator are both exact.** `search_cashflow_transactions` hits `POST /cashflow-transactions/search` → `TransactionsFilter`, which declares no `additionalProperties`, so an undeclared field is rejected outright rather than ignored. It has **no `reference`** (that is `businessTransactionReference`) and `StringExpression` has **no `startsWith`**: the prefix operator is spelled **`startWith`**, no "s". Until 5.55.3 this line asked for both wrong names, so the idempotency check (the step standing between a re-run and paying every supplier twice) could not return anything. Use `startWith`, not `contains`: measured on the sandbox 2026-09-07, `contains: 'PR-'` matched 3 rows that do **not** start with that prefix, and a looser match here silently widens what the run treats as already-paid.
 - **`finalize_bill(resourceId: <id>)`**, used in step 0 fallback: bills must be `status: APPROVED` (not `DRAFT`) before they accept payments.
 
 ### CLI tools (jaz-cli)
@@ -30,7 +30,7 @@
 Generate a run prefix: `PAYRUN-<YYYY-MM-DD>-<seq>`. Before proceeding:
 
 ```
-search_payments(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}})
+search_cashflow_transactions(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}})
 ```
 
 If results: surface "A payment run with prefix `PAYRUN-2025-02-28-*` already executed on this date (`<n>` payments totalling `<amt>`). Confirm intent; re-run will create duplicate payments." Halt unless practitioner confirms.
@@ -117,13 +117,13 @@ After all `pay_bill` calls succeed:
 
 ```
 generate_aged_payables(endDate: '2025-02-28')
-search_payments(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}, valueDate: {eq: '2025-02-28'}})
+search_cashflow_transactions(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}, valueDate: {eq: '2025-02-28'}})
 ```
 
 Assert:
 - AP aging total reduced by `sum(payments.transactionAmount)` (in base currency, FX-converted at value date).
 - Bills fully paid no longer appear in aging; partials carry the payment in `paymentRecords[]`; derive outstanding from it.
-- `search_payments` returns N rows where N = bills paid in step 6.
+- `search_cashflow_transactions` returns N rows where N = bills paid in step 6.
 
 ```
 generate_bank_balance_summary(primarySnapshotDate: '2025-02-28')
@@ -141,7 +141,7 @@ Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)
 | `pay_bill` | 422 `currency_mismatch` | `paymentAmount` currency ≠ bank account currency. Either pay from the matching-currency bank account, or model as FX (different `paymentAmount` and `transactionAmount`). |
 | `pay_bill` | 422 `bill_already_paid` | Bill went `PAID` since step 2. Re-run `search_bills` for fresh state; remove from batch. |
 | `pay_bill` | 422 `lock_date_violated` | `valueDate` is in a locked period. Either lift the lock via `update_account` lock_date OR adjust `valueDate` to the next open period. |
-| `pay_bill` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent; re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. Record the judgment: `jot(kind: RECOVERY)` naming the resume point and the bills already paid. |
+| `pay_bill` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent; re-running the loop creates duplicates. Use `search_cashflow_transactions` with the run prefix to identify what succeeded; resume from the next unprocessed bill. Record the judgment: `jot(kind: RECOVERY)` naming the resume point and the bills already paid. |
 | `generate_aged_payables` | Total mismatch with `search_bills` | Likely `PARTIALLY_PAID` bills excluded from `search_bills` filter. Add `status: {in: ['UNPAID', 'PARTIALLY_PAID']}` and retry. |
 
 ---

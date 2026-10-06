@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "7.0.1+2c20c85c",
+  "contentVersion": "8.0.0+1ab22b63",
   "counts": {
-    "tools": 382,
+    "tools": 380,
     "namespaces": 49,
     "calculators": 13,
     "recipes": 16,
@@ -1338,20 +1338,6 @@
       "destructive": true
     },
     {
-      "name": "list_payments",
-      "namespace": "payments_and_search",
-      "description": "List recent rows from the cashflow-transaction ledger, newest first. Same ledger and same id trap as search_payments. Paginated.",
-      "readOnly": true,
-      "destructive": false
-    },
-    {
-      "name": "search_payments",
-      "namespace": "payments_and_search",
-      "description": "Searches the cashflow-transaction LEDGER (every BT type), NOT payment records: its resourceId 404s on get_payment/update_payment, which want a document's paymentRecords id. direction enum: PAYIN | PAYOUT.",
-      "readOnly": true,
-      "destructive": false
-    },
-    {
       "name": "download_export",
       "namespace": "operational_reports",
       "description": "Analytical / financial / audit report file (XLSX or PDF). Returns { fileName, fileUrl } (pre-signed, ~5 min). Use this tool, not export_records, for anomaly / audit / risk analyses, statements, aging, summaries, ledgers, statement-of-account.",
@@ -2516,7 +2502,7 @@
     {
       "name": "get_payment",
       "namespace": "payments_and_search",
-      "description": "Get a payment record. Takes a PAYMENT resourceId; the ledger resourceId list_payments/search_payments return is a different entity and 404s here.",
+      "description": "Get a payment record. Takes a PAYMENT resourceId; the ledger resourceId search_cashflow_transactions returns is a different entity and 404s here.",
       "readOnly": true,
       "destructive": false
     },

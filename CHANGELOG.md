@@ -1,5 +1,10 @@
 # Changelog
 
+## [8.0.0] - 2026-10-06
+
+- `search_payments` and `list_payments` are removed. Both searched the cashflow ledger (every transaction type), not payment records, so the names were misleading. Use `search_cashflow_transactions`, which takes the same filters plus status and free-text search. On the command line, `clio payments list` and `clio payments search` are removed; use `clio cashflow search`.
+- `get_payment`, `update_payment` and `delete_payment` are unchanged; they work on payment records.
+
 ## [7.0.1] - 2026-10-06
 
 - ChatGPT now gets one tool per action at the connector address it already uses. Claude and other connectors keep the grouped tools. No change for Claude users.

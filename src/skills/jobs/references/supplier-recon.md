@@ -8,7 +8,7 @@
 - **`search_contacts(filter: {supplier: true, name: {eq: <supplier>}})`** (step 1): resolve the supplier resourceId. Use fuzzy match if exact fails.
 - **`get_contact(resourceId: <supplier id>)`** (step 1 detail): pull the supplier's payment terms, contact info.
 - **`search_bills(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}}, limit: 200)`** (step 2): pull all bills from this supplier in the period. Paginate.
-- **`search_payments(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}, direction: {eq: 'PAYOUT'}})`** (step 3): pull all payments to this supplier.
+- **`search_cashflow_transactions(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}, direction: {eq: 'PAYOUT'}})`** (step 3): pull all payments to this supplier.
 - **`search_supplier_credit_notes(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: [<period-start>, <period-end>]}})`** (step 4): pull credit notes that may have been applied.
 
   > **A filter value must be an OBJECT, not a bare scalar.** This is the trap these lines fell into:
@@ -17,7 +17,7 @@
   > **is** declared on bills, supplier credit notes and invoices; it is typed `StringExpression`, so it
   > needs an operator: `{eq: <id>}`. Measured 2026-09-07: the bare form 400s on both, `{eq: …}` returns
   > 200 on both. The nested `contact: {resourceId: {eq: <id>}}` form used above also works and is what
-  > `search_payments` requires, because `TransactionsFilter` is the one of the four that genuinely does
+  > `search_cashflow_transactions` requires, because `TransactionsFilter` is the one of the four that genuinely does
   > **not** declare `contactResourceId`; there, and only there, the field really is absent.
   >
   > The amount filter differs by endpoint: `totalAmount` is accepted on bills and on
@@ -67,7 +67,7 @@ For an opening-balance recon: also pull the supplier's pre-period balance via `g
 ## Step 3: Pull payments
 
 ```
-search_payments(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: ['2025-01-01', '2025-01-31']}, direction: {eq: 'PAYOUT'}})
+search_cashflow_transactions(filter: {contact: {resourceId: {eq: <supplier id>}}, valueDate: {between: ['2025-01-01', '2025-01-31']}, direction: {eq: 'PAYOUT'}})
 ```
 
 Per payment: `{resourceId, reference, valueDate, paymentAmount, transactionAmount, paymentMethod, billResourceId}`. Save.
@@ -98,7 +98,7 @@ Practitioner provides the supplier's statement (PDF, email, paper). Per-line-ite
 | Bill in Jaz, not on supplier statement | Supplier hasn't issued / lost the invoice | Verify with supplier; if confirmed bogus, `delete_bill` (DRAFT) OR `create_supplier_credit_note` (if ACTIVE). |
 | Different amounts on same reference | Pricing dispute | Practitioner contacts supplier for clarification. Possible adjustment journal post-resolution. |
 | Bill paid per Jaz, supplier says unpaid | Bank reconciliation gap | Pull bank statement for the payment date; verify the wire/cheque cleared. If cleared, send remittance proof to supplier. |
-| Bill unpaid per Jaz, supplier says paid | Payment recorded against wrong supplier OR bill | Audit `search_payments(filter: {valueDate: {eq: <date>}, totalAmount: {eq: <amount>}})`; identify mis-routing; post correcting journal OR re-issue payment. |
+| Bill unpaid per Jaz, supplier says paid | Payment recorded against wrong supplier OR bill | Audit `search_cashflow_transactions(filter: {valueDate: {eq: <date>}, totalAmount: {eq: <amount>}})`; identify mis-routing; post correcting journal OR re-issue payment. |
 | Supplier credit note not in Jaz | Missed credit | `create_supplier_credit_note(...)` per supplier statement. Then `apply_credits_to_bill(...)` to the offsetting bill. |
 | Currency mismatch | FX bills with different rates | Confirm Jaz used the right rate per `jaz-api/SKILL.md` rule 25; the supplier statement may use spot rate, Jaz uses recorded rate. Document the FX gap. |
 

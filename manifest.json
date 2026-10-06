@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "7.0.1",
+  "version": "8.0.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -711,14 +711,6 @@
       "description": "Remove a user from the organization. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
-      "name": "list_payments",
-      "description": "List recent rows from the cashflow-transaction ledger, newest first. Same ledger and same id trap as search_payments. Paginated."
-    },
-    {
-      "name": "search_payments",
-      "description": "Searches the cashflow-transaction LEDGER (every BT type), NOT payment records: its resourceId 404s on get_payment/update_payment, which want a document's paymentRecords id. direction enum: PAYIN | PAYOUT."
-    },
-    {
       "name": "download_export",
       "description": "Analytical / financial / audit report file (XLSX or PDF). Returns { fileName, fileUrl } (pre-signed, ~5 min). Use this tool, not export_records, for anomaly / audit / risk analyses, statements, aging, summaries, ledgers, statement-of-account.\n\nPer-type date / scope (wrong set → 422 \"X is required\"):\n- balance-sheet → snapshotDate\n- cashflow, equity-movement → primaryStartDate + primaryEndDate (secondary* optional)\n- bank-closing-balance → reportDate\n- bank-reconciliation-* → startDate + endDate + bankAccountResourceId\n- fixed-assets-reconciliation-summary → startDate + endDate + accountResourceId (fixed-asset UUIDs; search fixed_assets first)\n- statement-of-account-export → contactResourceId (dates optional; omitted = all-time)\n- trial-balance, cash-balance, ar-report, ap-report, ar-details-report, ap-details-report → endDate\n- other summaries (P&L, GL, sales/purchase, tax, fixed-assets-register, etc.) → startDate + endDate\n\nFor raw entity rows use export_records; for ad-hoc SELECT use preview_pseudo_sql / run_pseudo_sql_and_download. Cashflow returns the IAS 7 templated report (404 template_not_found if none configured, jaz-api Rule 147)."
     },
@@ -1384,7 +1376,7 @@
     },
     {
       "name": "get_payment",
-      "description": "Get a payment record. Takes a PAYMENT resourceId; the ledger resourceId list_payments/search_payments return is a different entity and 404s here."
+      "description": "Get a payment record. Takes a PAYMENT resourceId; the ledger resourceId search_cashflow_transactions returns is a different entity and 404s here."
     },
     {
       "name": "update_payment",
