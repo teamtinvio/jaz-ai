@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "6.1.1+959f5c36",
+  "contentVersion": "7.0.0+ef1a8389",
   "counts": {
-    "tools": 381,
+    "tools": 382,
     "namespaces": 49,
     "calculators": 13,
     "recipes": 16,
@@ -158,7 +158,7 @@
     },
     {
       "name": "document_ai",
-      "description": "File attachments, spreadsheets, and document AI. Read and parse rows from attached spreadsheets: CSV, Excel, XLSX. Scan a single invoice / bill / receipt PDF or image to create a draft bill, invoice, or expense claim via AI extraction (create_bt_from_attachment, with the file or a sourceUrl). Auto-sort a whole FOLDER, a .zip, or a Dropbox / Google Drive / OneDrive folder share link of mixed paperwork (\"create docs from this Dropbox folder link\", a pile/batch of invoices and bills) into invoices, bills, credit notes, and bank statements with classify_documents, then create the drafts with extract_documents. Upload and list attachments; track extraction workflows."
+      "description": "File attachments, spreadsheets, and document AI. Read and parse rows from attached spreadsheets: CSV, Excel, XLSX. Scan a single invoice / bill / receipt PDF or image to create a draft bill, invoice, or expense claim via AI extraction (create_transaction_from_document, with the file or a sourceUrl). Auto-sort a whole FOLDER, a .zip, or a Dropbox / Google Drive / OneDrive folder share link of mixed paperwork (\"create docs from this Dropbox folder link\", a pile/batch of invoices and bills) into invoices, bills, credit notes, and bank statements with classify_documents, then create the drafts with extract_documents. Upload and list attachments; track extraction workflows."
     },
     {
       "name": "fixed_assets",
@@ -617,16 +617,16 @@
       "destructive": false
     },
     {
-      "name": "generate_aged_ar",
+      "name": "generate_aged_receivables",
       "namespace": "operational_reports",
-      "description": "Generate aged accounts receivable summary.",
+      "description": "Aged Receivables as at endDate, by customer: what is outstanding per contact, in aging buckets. For credit control, collections and customer payment follow-up.",
       "readOnly": true,
       "destructive": false
     },
     {
-      "name": "generate_aged_ap",
+      "name": "generate_aged_payables",
       "namespace": "operational_reports",
-      "description": "Generate aged accounts payable summary.",
+      "description": "Aged Payables as at endDate, by supplier: what is outstanding per contact, in aging buckets. For payment runs and supplier follow-up.",
       "readOnly": true,
       "destructive": false
     },
@@ -1457,7 +1457,7 @@
       "destructive": false
     },
     {
-      "name": "create_bt_from_attachment",
+      "name": "create_transaction_from_document",
       "namespace": "document_ai",
       "description": "Create a business transaction (invoice/bill/credit note/quote/order/purchase request) from a SINGLE file (max 10 MB), a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. Quotes/orders land DRAFT/PENDING: relay the result `next`. When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. For a FOLDER, a .zip, a Dropbox/Drive/OneDrive folder share link, or several/mixed documents at once, use classify_documents (then extract_documents) instead, not this per-file. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
@@ -1473,7 +1473,7 @@
     {
       "name": "wait_for_magic_workflows",
       "namespace": "document_ai",
-      "description": "Poll magic extraction workflow(s) until each reaches a terminal state (transaction created (a draft is ready), OCR succeeded/failed, or errored) or until the wait budget elapses. Use after create_bt_from_attachment / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll.",
+      "description": "Poll magic extraction workflow(s) until each reaches a terminal state (transaction created (a draft is ready), OCR succeeded/failed, or errored) or until the wait budget elapses. Use after create_transaction_from_document / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll.",
       "readOnly": true,
       "destructive": false
     },
@@ -1744,37 +1744,44 @@
       "destructive": false
     },
     {
-      "name": "generate_bank_recon_summary",
+      "name": "generate_bank_reconciliation_summary",
       "namespace": "operational_reports",
       "description": "Generate bank reconciliation summary for a specific bank account. Essential for month-end close; call this for each in-scope bank account for the current entity and reporting period. Use for bank recon status, unreconciled items count, or reconciliation summaries.",
       "readOnly": true,
       "destructive": false
     },
     {
-      "name": "generate_bank_recon_details",
+      "name": "generate_bank_reconciliation_details",
       "namespace": "operational_reports",
       "description": "Generate detailed bank reconciliation report showing matched/unmatched items.",
       "readOnly": true,
       "destructive": false
     },
     {
-      "name": "generate_fa_summary",
+      "name": "generate_fixed_assets_summary",
       "namespace": "operational_reports",
       "description": "Generate fixed assets summary report grouped by account, type, category, or status.",
       "readOnly": true,
       "destructive": false
     },
     {
-      "name": "generate_fa_recon_summary",
+      "name": "generate_fixed_assets_reconciliation_summary",
       "namespace": "operational_reports",
       "description": "Generate fixed assets reconciliation summary: reconciles asset register with general ledger.",
       "readOnly": true,
       "destructive": false
     },
     {
-      "name": "generate_ar_report",
+      "name": "generate_aged_receivables_summary",
       "namespace": "operational_reports",
-      "description": "Generate accounts receivable aging report. Shows outstanding invoices grouped by aging buckets. Use this when discussing customer payment allocation, credit control, or AR status; generate the report to show the full picture.",
+      "description": "Aged Receivables Summary as at endDate: the summary report the dashboard shows under that name. For credit control, collections and customer payment follow-up; for the breakdown per customer, use generate_aged_receivables.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_aged_payables_summary",
+      "namespace": "operational_reports",
+      "description": "Aged Payables Summary as at endDate: the summary report the dashboard shows under that name. For payment runs and supplier follow-up; for the breakdown per supplier, use generate_aged_payables.",
       "readOnly": true,
       "destructive": false
     },

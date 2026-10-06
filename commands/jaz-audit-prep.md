@@ -36,10 +36,10 @@ clio reports generate profit-loss --from 2025-01-01 --to 2025-12-31 --json
 clio reports generate cashflow --from 2025-01-01 --to 2025-12-31 --json
 
 # Aged AR
-clio reports generate aged-ar --to 2025-12-31 --json
+clio reports generate aged-receivables --to 2025-12-31 --json
 
 # Aged AP
-clio reports generate aged-ap --to 2025-12-31 --json
+clio reports generate aged-payables --to 2025-12-31 --json
 ```
 
 ### 3. Supporting schedules

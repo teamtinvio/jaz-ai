@@ -9,7 +9,7 @@
 
 ### Platform tools: quarterly extras
 - **`generate_vat_ledger(startDate: <Q-start>, endDate: <Q-end>)`**, Q1 GST/VAT filing prep: full quarterly tax ledger.
-- **`generate_aged_ar(endDate: <Q-end>)`**: Q2 ECL formal review input.
+- **`generate_aged_receivables(endDate: <Q-end>)`**: Q2 ECL formal review input.
 - **`calculate(type: 'ecl', ...)`**, then `create_capsule` + `create_journal` with `capsuleResourceId`: Q2 ECL top-up if material (the three-step flow in `building-blocks.md` § Calculated schedules).
 - **`search_journals(filter: {tags: {eq: 'bonus-accrual'}, valueDate: {between: [<Q-start>, <Q-end>]}})`**: Q3 bonus YTD pull.
 - **`create_journal(...)`**: Q3 bonus true-up adjustment (manual one-off).
@@ -68,7 +68,7 @@ Full step-by-step in `gst-vat-filing.md`.
 ### Q2: ECL formal review
 
 ```
-generate_aged_ar(endDate: '2025-03-31')
+generate_aged_receivables(endDate: '2025-03-31')
 clio calc ecl --current 100000 --30d 50000 --60d 20000 --90d 10000 --120d 5000 --rates 0.5,2,5,10,50 --existing-provision <TB Allowance balance> --currency <base currency> --json
 ```
 

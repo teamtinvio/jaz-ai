@@ -1,6 +1,6 @@
 ---
 name: jaz-conversion
-version: 6.1.1
+version: 7.0.0
 description: >-
   Use this skill when migrating accounting data into Jaz, importing from Xero,
   QuickBooks, Sage, MYOB, or Excel exports. Covers the full conversion pipeline:

@@ -43,7 +43,7 @@ The user provides the supplier statement (PDF, email, or manually entered). Comp
 ### 5. Generate aged AP for verification
 
 ```bash
-clio reports generate aged-ap --to 2025-01-31 --json
+clio reports generate aged-payables --to 2025-01-31 --json
 ```
 
 ## Key Rules

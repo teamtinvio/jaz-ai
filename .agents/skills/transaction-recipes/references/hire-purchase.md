@@ -17,7 +17,7 @@ The lease calculator handles both: pass `usefulLifeMonths` (CLI `--useful-life`)
 Returns the lease result shape: `{ presentValue, monthlyRouDepreciation, depreciationMonths, isHirePurchase, totalCashPayments, totalInterest, totalDepreciation, initialJournal, schedule[termMonths], blueprint }`. `isHirePurchase` is `true`, `depreciationMonths` equals the useful life, and `blueprint.capsuleType` is `Hire Purchase`.
 
 ### Posting and lookup tools
-- All the same as `ifrs16-lease.md`: `list_capsule_types`, `create_capsule_type`, `create_capsule`, `create_journal`, `create_fixed_asset`, plus `search_capsules`, `search_accounts`, `search_contacts` for the financing counterparty, `list_bank_accounts`, `generate_trial_balance` and `generate_fa_summary`.
+- All the same as `ifrs16-lease.md`: `list_capsule_types`, `create_capsule_type`, `create_capsule`, `create_journal`, `create_fixed_asset`, plus `search_capsules`, `search_accounts`, `search_contacts` for the financing counterparty, `list_bank_accounts`, `generate_trial_balance` and `generate_fixed_assets_summary`.
 
 ### Cross-references
 - See `ifrs16-lease.md` for the full step-by-step, problems table, and variations. This file documents only the hire-purchase-specific deltas.

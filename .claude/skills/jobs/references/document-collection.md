@@ -5,7 +5,7 @@
 ## Tools and calculators this job uses
 
 ### Platform tools
-- **`create_bt_from_attachment(businessTransactionType: 'BILL'|'INVOICE'|'CUSTOMER_CREDIT_NOTE'|'SUPPLIER_CREDIT_NOTE', sourceUrl)`**: step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction. Local CLI: `clio magic create --file <pdf> --type bill`.
+- **`create_transaction_from_document(businessTransactionType: 'BILL'|'INVOICE'|'CUSTOMER_CREDIT_NOTE'|'SUPPLIER_CREDIT_NOTE', sourceUrl)`**: step 4: OCR + line-item extraction + contact + CoA suggestion. Creates DRAFT transaction. Local CLI: `clio magic create --file <pdf> --type bill`.
 - **`finalize_bill(...)` / `finalize_invoice(...)` / `finalize_customer_credit_note(...)`**: step 5: finalize practitioner-reviewed Magic-extracted DRAFTs.
 - **`import_bank_statement(accountResourceId, sourceUrl | attached file)`**: step 6: bank statements (CSV / OFX / PDF); creates bank records pending reconciliation per `bank-recon.md`.
 - **`search_background_jobs(filter: {resourceId: {eq: <jobId>}})`**: step 7: poll Magic / bank-import async jobs to terminal status.
@@ -88,7 +88,7 @@ For each file with `suggestedAction: 'magic-create-bill' | 'magic-create-invoice
 ```
 clio magic create --file <decrypted path> --type bill
 # OR equivalent MCP call:
-create_bt_from_attachment(
+create_transaction_from_document(
   businessTransactionType: 'BILL',
   sourceUrl: <file URL>   // omit when the host attaches the file to the call
 )

@@ -6,7 +6,7 @@
 
 ### Platform tools (jaz-api)
 - **`search_bills(filter: {status: {eq: 'UNPAID'}, balanceAmount: {gt: 0}, dueDate: {lte: <cutoff>}}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`**, used in step 2: pull due bills (paginate via `offset` if `>200`).
-- **`generate_aged_ap(endDate: <cutoff>)`**, used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
+- **`generate_aged_payables(endDate: <cutoff>)`**, used in step 3: total-AP cross-check; flag bills in 60d+ aging buckets.
 - **`generate_bank_balance_summary(primarySnapshotDate: <cutoff>)`**, used in step 5: confirm cash availability before approving the batch.
 - **`get_contact(resourceId: <contactResourceId>)`**, used in step 4 (per supplier): pull payment terms / preferred payment method / bank details (especially `taxId`, `bankAccountNumber`, `bicSwift` for GIRO file generation).
 - **`pay_bill(resourceId: <id>, paymentAmount, transactionAmount, accountResourceId, valueDate, ...)`**, used in step 6: post the payment per bill. NO BATCH PAYMENT ENDPOINT yet; one POST per bill.
@@ -60,10 +60,10 @@ For each bill, also collect: `contactResourceId`, `currency`, `originalAmount`, 
 ## Step 3: AP aging cross-check
 
 ```
-generate_aged_ap(endDate: '2025-02-28')
+generate_aged_payables(endDate: '2025-02-28')
 ```
 
-Verify: `sum(derived outstanding) ≈ generate_aged_ap.totalOutstanding` (within the materiality threshold). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling; surface to the user.
+Verify: `sum(derived outstanding) ≈ generate_aged_payables.totalOutstanding` (within the materiality threshold). Mismatch indicates pending bills in non-`UNPAID` status (e.g., `PARTIALLY_PAID`) that need separate handling; surface to the user.
 
 Flag any bill in the 60d+ bucket; these need priority OR dispute resolution. Exclude bills the user has flagged as disputed.
 
@@ -116,7 +116,7 @@ pay_bill(
 After all `pay_bill` calls succeed:
 
 ```
-generate_aged_ap(endDate: '2025-02-28')
+generate_aged_payables(endDate: '2025-02-28')
 search_payments(filter: {businessTransactionReference: {startWith: 'PAYRUN-2025-02-28-'}, valueDate: {eq: '2025-02-28'}})
 ```
 
@@ -142,7 +142,7 @@ Assert: per-account balance reduced by `sum(paymentAmount per accountResourceId)
 | `pay_bill` | 422 `bill_already_paid` | Bill went `PAID` since step 2. Re-run `search_bills` for fresh state; remove from batch. |
 | `pay_bill` | 422 `lock_date_violated` | `valueDate` is in a locked period. Either lift the lock via `update_account` lock_date OR adjust `valueDate` to the next open period. |
 | `pay_bill` | 500 mid-run | Some payments succeeded; others didn't. NOT idempotent; re-running the loop creates duplicates. Use `search_payments` with the run prefix to identify what succeeded; resume from the next unprocessed bill. Record the judgment: `jot(kind: RECOVERY)` naming the resume point and the bills already paid. |
-| `generate_aged_ap` | Total mismatch with `search_bills` | Likely `PARTIALLY_PAID` bills excluded from `search_bills` filter. Add `status: {in: ['UNPAID', 'PARTIALLY_PAID']}` and retry. |
+| `generate_aged_payables` | Total mismatch with `search_bills` | Likely `PARTIALLY_PAID` bills excluded from `search_bills` filter. Add `status: {in: ['UNPAID', 'PARTIALLY_PAID']}` and retry. |
 
 ---
 

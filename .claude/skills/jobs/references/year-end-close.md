@@ -8,14 +8,14 @@
 - **`quarter-end-close.md`**: invoked four times in standalone mode (Q1, Q2, Q3, Q4) before annual extras run.
 
 ### Platform tools: annual extras
-- **`generate_fa_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>, groupBy: 'CATEGORY')`**: Y1 FA reconciliation: full-year depreciation movement per asset.
-- **`generate_fa_recon_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>)`**: Y1 verification: opening NBV + additions − disposals − depreciation = closing NBV.
+- **`generate_fixed_assets_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>, groupBy: 'CATEGORY')`**: Y1 FA reconciliation: full-year depreciation movement per asset.
+- **`generate_fixed_assets_reconciliation_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>)`**: Y1 verification: opening NBV + additions − disposals − depreciation = closing NBV.
 - **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED']}})`**: Y1 enumeration of FAs.
 - **`mark_fixed_asset_sold(...)` for a sale or `discard_fixed_asset(...)` for a write-off (both are operations, not status mutations)**: Y1 fallback if any FA has incorrect status at FY-end.
 - **`search_journals(filter: {tags: {eq: 'leave-accrual'}, valueDate: {between: [<FY-start>, <FY-end>]}})` / `search_journals(filter: {tags: {eq: 'bonus-accrual'}, ...})`**: Y2 true-up: pull all FY accrual journals to compare against actuals.
 - **`create_journal(...)`**: Y2 true-up adjustment journals (manual one-off, no calculator).
 - **`calculate(type: 'dividend', ...)`**, then `create_capsule` + `create_journal` (declaration) + `create_cash_out` (payment), each with `capsuleResourceId`: Y3 dividend declaration + payment.
-- **`calculate(type: 'ecl', ...)`**, then `create_capsule` + `create_journal` with `capsuleResourceId`: Y4 IFRS 9 ECL year-end true-up against `generate_aged_ar`.
+- **`calculate(type: 'ecl', ...)`**, then `create_capsule` + `create_journal` with `capsuleResourceId`: Y4 IFRS 9 ECL year-end true-up against `generate_aged_receivables`.
 - **`update_account(resourceId: <CoA root>, lockDate: <FY-end>)`**: Y8 final lock.
 
 ### Platform tools: current/non-current reclassification (manual annual journals)
@@ -60,15 +60,15 @@ For each quarter Q1-Q4: invoke `quarter-end-close.md` job. Each builds on its ow
 ### Y1: Final FA reconciliation
 
 ```
-generate_fa_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
-generate_fa_recon_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
+generate_fixed_assets_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
+generate_fixed_assets_reconciliation_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
 ```
 
 For Jaz native straight-line depreciation: should be automatic and correct. Verify the 12-month aggregate against `generate_general_ledger(accountResourceIds: [<Depreciation Expense>], startDate, endDate)`.
 
 For non-SL assets (DDB, 150DB) depreciated from a `calculate(type: 'depreciation', method: 'ddb' | '150db')` schedule: the year's journals were posted into the asset's capsule (up front as future-dated DRAFTs, or one per monthly close). Confirm all are FINALIZED via `search_journals(filter: {status: {eq: 'DRAFT'}, valueDate: {between: [<FY-start>, <FY-end>]}})` (should be empty). If non-empty: route back to `month-end-close.md` step 9.
 
-Reconcile `generate_fa_recon_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond the materiality threshold → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {valueDate: {between: [<FY-start>, <FY-end>]}})`); typical cause is a disposal posted without `mark_fixed_asset_sold` / `discard_fixed_asset`.
+Reconcile `generate_fixed_assets_reconciliation_summary` formula: `openingNbv + additions − disposals − depreciation == closingNbv == TB[Fixed Assets].balance`. Mismatch beyond the materiality threshold → investigate via `search_fixed_assets(filter: {status: {eq: 'ACTIVE'}})` cross-referenced against the depreciation capsule's journals (`search_journals(filter: {valueDate: {between: [<FY-start>, <FY-end>]}})`); typical cause is a disposal posted without `mark_fixed_asset_sold` / `discard_fixed_asset`.
 
 ### Y2: Annual true-ups (manual journals)
 
@@ -130,7 +130,7 @@ For interim dividends declared during the year: those should already be posted i
 ### Y4: IFRS 9 ECL year-end true-up
 
 ```
-generate_aged_ar(endDate: '2025-12-31')
+generate_aged_receivables(endDate: '2025-12-31')
 ```
 
 Bucket AR by aging band per the org's ECL loss-rate matrix (current 0.5%, 30d 2%, 60d 5%, 90d 10%, 120d+ 50%; tune per the org's historical loss data).

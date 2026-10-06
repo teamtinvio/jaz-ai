@@ -1,5 +1,14 @@
 # Changelog
 
+## [7.0.0] - 2026-10-06
+
+**Report and document tools now use the names you see in Jaz.**
+
+- Renamed to match the dashboard: `generate_aged_receivables` (Aged Receivables, by contact), `generate_aged_receivables_summary` (Aged Receivables Summary), `generate_aged_payables` (Aged Payables, by contact), `generate_bank_reconciliation_summary`, `generate_bank_reconciliation_details`, `generate_fixed_assets_summary`, `generate_fixed_assets_reconciliation_summary`, and `create_transaction_from_document` for creating an invoice, bill or credit note from a file. The old names no longer work.
+- New: `generate_aged_payables_summary`, the Aged Payables Summary report.
+- The two aged receivables reports had swapped names before: the one called a summary returned the report by contact, and the other one was the summary. Each name now matches what it returns.
+- Command line: `clio reports generate` takes the same names: `aged-receivables`, `aged-receivables-summary`, `aged-payables`, `aged-payables-summary`, `bank-reconciliation-summary`, `bank-reconciliation-details`, `fixed-assets-summary`, `fixed-assets-reconciliation-summary`. The old type names no longer work.
+
 ## [6.1.1] - 2026-10-06
 
 - Finalizing several drafts at once now checks each item first. An item without a transaction type or id is refused with a message saying what to send, including how to pass on the results of a draft validation, instead of failing against the server one by one.

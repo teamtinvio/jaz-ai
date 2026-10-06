@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "6.1.1",
+  "version": "7.0.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -299,12 +299,12 @@
       "description": "Generate a cashflow report."
     },
     {
-      "name": "generate_aged_ar",
-      "description": "Generate aged accounts receivable summary."
+      "name": "generate_aged_receivables",
+      "description": "Aged Receivables as at endDate, by customer: what is outstanding per contact, in aging buckets. For credit control, collections and customer payment follow-up."
     },
     {
-      "name": "generate_aged_ap",
-      "description": "Generate aged accounts payable summary."
+      "name": "generate_aged_payables",
+      "description": "Aged Payables as at endDate, by supplier: what is outstanding per contact, in aging buckets. For payment runs and supplier follow-up."
     },
     {
       "name": "generate_cash_balance",
@@ -779,7 +779,7 @@
       "description": "Create bank statement entries via JSON POST (1-100 records per call). For CSV/OFX file imports, use import_bank_statement instead.\n\nFields per record:\n- amount (required): positive = cash-in, negative = cash-out\n- transactionDate (required): YYYY-MM-DD\n- description, payerOrPayee, reference: optional strings\n\nReturns {data: {errors: []}} on success. accountResourceId must be a bank-type CoA account (find via list_bank_accounts). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
-      "name": "create_bt_from_attachment",
+      "name": "create_transaction_from_document",
       "description": "Create a business transaction (invoice/bill/credit note/quote/order/purchase request) from a SINGLE file (max 10 MB), a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. Quotes/orders land DRAFT/PENDING: relay the result `next`. When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. For a FOLDER, a .zip, a Dropbox/Drive/OneDrive folder share link, or several/mixed documents at once, use classify_documents (then extract_documents) instead, not this per-file. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
@@ -788,7 +788,7 @@
     },
     {
       "name": "wait_for_magic_workflows",
-      "description": "Poll magic extraction workflow(s) until each reaches a terminal state (transaction created (a draft is ready), OCR succeeded/failed, or errored) or until the wait budget elapses. Use after create_bt_from_attachment / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll."
+      "description": "Poll magic extraction workflow(s) until each reaches a terminal state (transaction created (a draft is ready), OCR succeeded/failed, or errored) or until the wait budget elapses. Use after create_transaction_from_document / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll."
     },
     {
       "name": "create_claim_from_attachment",
@@ -943,24 +943,28 @@
       "description": "Generate bank balance summary report: snapshot of all bank account balances at a point in time."
     },
     {
-      "name": "generate_bank_recon_summary",
+      "name": "generate_bank_reconciliation_summary",
       "description": "Generate bank reconciliation summary for a specific bank account. Essential for month-end close; call this for each in-scope bank account for the current entity and reporting period. Use for bank recon status, unreconciled items count, or reconciliation summaries."
     },
     {
-      "name": "generate_bank_recon_details",
+      "name": "generate_bank_reconciliation_details",
       "description": "Generate detailed bank reconciliation report showing matched/unmatched items."
     },
     {
-      "name": "generate_fa_summary",
+      "name": "generate_fixed_assets_summary",
       "description": "Generate fixed assets summary report grouped by account, type, category, or status."
     },
     {
-      "name": "generate_fa_recon_summary",
+      "name": "generate_fixed_assets_reconciliation_summary",
       "description": "Generate fixed assets reconciliation summary: reconciles asset register with general ledger."
     },
     {
-      "name": "generate_ar_report",
-      "description": "Generate accounts receivable aging report. Shows outstanding invoices grouped by aging buckets. Use this when discussing customer payment allocation, credit control, or AR status; generate the report to show the full picture."
+      "name": "generate_aged_receivables_summary",
+      "description": "Aged Receivables Summary as at endDate: the summary report the dashboard shows under that name. For credit control, collections and customer payment follow-up; for the breakdown per customer, use generate_aged_receivables."
+    },
+    {
+      "name": "generate_aged_payables_summary",
+      "description": "Aged Payables Summary as at endDate: the summary report the dashboard shows under that name. For payment runs and supplier follow-up; for the breakdown per supplier, use generate_aged_payables."
     },
     {
       "name": "get_ledger_highlights",

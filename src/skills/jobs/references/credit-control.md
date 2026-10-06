@@ -5,7 +5,7 @@
 ## Tools and calculators this job uses
 
 ### Platform tools
-- **`generate_aged_ar(endDate: <date>)`**: step 1: AR aging report with bucket breakdown.
+- **`generate_aged_receivables(endDate: <date>)`**: step 1: AR aging report with bucket breakdown.
 - **`search_invoices(filter: {status: {eq: 'UNPAID'}, dueDate: {lt: <date>}, contactResourceId: <customer>}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`**: step 2: per-customer overdue detail. Paginate.
 - **`get_contact(resourceId: <customer id>)`**: step 2: pull contact info (email, phone, primary contact).
 - **`get_contact_signals(resourceId: <id>, btType: 'SALE')`**: step 3: pull cadence + outlier signals + outstanding balance for the customer. Mid-7 endpoint.
@@ -28,7 +28,7 @@ Walk steps 1-8 below.
 ## Step 1: AR aging snapshot
 
 ```
-generate_aged_ar(endDate: '2025-01-31')
+generate_aged_receivables(endDate: '2025-01-31')
 ```
 
 Save the AR aging snapshot. Returns aging buckets (current, 30d, 60d, 90d, 120d+) per customer. Total per bucket informs collection priority.

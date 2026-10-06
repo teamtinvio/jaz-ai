@@ -44,8 +44,8 @@ generate_balance_sheet(snapshotDate: <period-end>)
 Standard assertions:
 - TB: `Debits == Credits` (always; if not, system bug).
 - BS: `Total Assets == Total Liabilities + Total Equity`.
-- TB AR == `generate_aged_ar(endDate)` total.
-- TB AP == `generate_aged_ap(endDate)` total.
+- TB AR == `generate_aged_receivables(endDate)` total.
+- TB AP == `generate_aged_payables(endDate)` total.
 - TB Cash == `generate_bank_balance_summary(primarySnapshotDate)` per-bank total (via `bank-recon.md`).
 
 ## Calculated schedules: calculate, capsule, post
@@ -115,11 +115,11 @@ get_capsule(resourceId)   # returns totalTransactions (a COUNT), not the transac
 | `generate_trial_balance` | Verification, every job |
 | `generate_balance_sheet` | Verification |
 | `generate_profit_and_loss` | Verification + period analysis |
-| `generate_aged_ar` / `generate_aged_ap` | Aging-aware jobs (credit-control, payment-run, audit-prep) |
-| `generate_bank_recon_summary` / `generate_bank_recon_details` | Bank-recon, audit-prep |
+| `generate_aged_receivables` / `generate_aged_payables` | Aging-aware jobs (credit-control, payment-run, audit-prep) |
+| `generate_bank_reconciliation_summary` / `generate_bank_reconciliation_details` | Bank-recon, audit-prep |
 | `generate_vat_ledger` | GST/VAT, quarter-end Q1 |
 | `generate_general_ledger` | Investigation + audit-prep |
-| `generate_fa_summary` / `generate_fa_recon_summary` | FA review, year-end |
+| `generate_fixed_assets_summary` / `generate_fixed_assets_reconciliation_summary` | FA review, year-end |
 | `search_journals` / `search_invoices` / `search_bills` | Discovery + filter, every job |
 | `calculate` | Schedules + journal lines for every calculated step (posts nothing) |
 | `search_capsules` | Capsule lifecycle discovery |

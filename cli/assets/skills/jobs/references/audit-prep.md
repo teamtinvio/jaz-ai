@@ -13,10 +13,10 @@
 - **`generate_general_ledger(startDate, endDate, groupBy: 'ACCOUNT')`** (step 5): the auditor's primary working document.
 
 ### Platform tools: supporting schedules
-- **`generate_aged_ar(endDate)` / `generate_aged_ap(endDate)`**: step 6.
-- **`generate_bank_recon_summary(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate)` / `generate_bank_recon_details(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate, filter)` per bank account**: step 7. NON-NEGOTIABLE deliverable.
+- **`generate_aged_receivables(endDate)` / `generate_aged_payables(endDate)`**: step 6.
+- **`generate_bank_reconciliation_summary(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate)` / `generate_bank_reconciliation_details(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate, filter)` per bank account**: step 7. NON-NEGOTIABLE deliverable.
 - **`generate_bank_balance_summary(primarySnapshotDate)`**: step 7. Cross-reference to bank confirmation letters.
-- **`generate_fa_summary(primarySnapshotStartDate, primarySnapshotEndDate, groupBy)` / `generate_fa_recon_summary(primarySnapshotStartDate, primarySnapshotEndDate)`**: step 8.
+- **`generate_fixed_assets_summary(primarySnapshotStartDate, primarySnapshotEndDate, groupBy)` / `generate_fixed_assets_reconciliation_summary(primarySnapshotStartDate, primarySnapshotEndDate)`**: step 8.
 - **`generate_vat_ledger(startDate, endDate)`**: step 9. Annual total ties to sum of quarterly F5 returns.
 
 ### Platform tools: XLSX deliverables
@@ -101,8 +101,8 @@ The tool returns 50 rows per call by default. Page it at `limit` 50-100: a GL ro
 ## Step 6: AR / AP aging
 
 ```
-generate_aged_ar(endDate: '2025-12-31')
-generate_aged_ap(endDate: '2025-12-31')
+generate_aged_receivables(endDate: '2025-12-31')
+generate_aged_payables(endDate: '2025-12-31')
 ```
 
 Use `endDate` not `startDate` (rule 36, point-in-time snapshot). Assert:
@@ -118,8 +118,8 @@ And post any top-up provision yourself: `create_capsule` (type `ECL Provision`),
 ## Step 7: Bank reconciliation (NON-NEGOTIABLE)
 
 ```
-generate_bank_recon_summary(bankAccountResourceId: <each bank account>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
-generate_bank_recon_details(bankAccountResourceId: <each bank account>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', filter: {valueDate: {range: ['2025-01-01', '2025-12-31']}})
+generate_bank_reconciliation_summary(bankAccountResourceId: <each bank account>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
+generate_bank_reconciliation_details(bankAccountResourceId: <each bank account>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', filter: {valueDate: {range: ['2025-01-01', '2025-12-31']}})
 generate_bank_balance_summary(primarySnapshotDate: '2025-12-31')
 ```
 
@@ -130,8 +130,8 @@ If `unreconciledCount > 0`: halt audit-prep and route back to `bank-recon.md` jo
 ## Step 8: Fixed assets + supporting schedules
 
 ```
-generate_fa_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
-generate_fa_recon_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
+generate_fixed_assets_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
+generate_fixed_assets_reconciliation_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
 ```
 
 Assert: `fa_recon.openingNbv + additions - disposals - depreciation == fa_recon.closingNbv == TB['Fixed Assets'].balance`.
@@ -220,7 +220,7 @@ The SG Form C-S wizard walks the user field-by-field through the C-S form, prefi
 | Source | Error | Recovery |
 |--------|-------|----------|
 | `generate_*` | 422 `period_not_closed` | Year-end close incomplete. Route to `year-end-close.md` first. |
-| `generate_bank_recon_summary` / `generate_bank_recon_details` | `unreconciledCount > 0` | Route to `bank-recon.md`; do NOT hand pack with this open. |
+| `generate_bank_reconciliation_summary` / `generate_bank_reconciliation_details` | `unreconciledCount > 0` | Route to `bank-recon.md`; do NOT hand pack with this open. |
 | `download_export` | 422 `period_too_long` | GL XLSX rejected for >12 months. Split into per-quarter exports. |
 | `download_export` | 504 timeout | Large org. Re-run with smaller `endDate` range or contact infrastructure team. |
 | `update_account` | 422 `lock_date_in_future` | The CoA `lockDate` must be ≤ the period end date. Use today if unsure. |

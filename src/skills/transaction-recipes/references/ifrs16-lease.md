@@ -19,7 +19,7 @@
 - **`search_contacts(filter: {supplier: true, name: {eq: <lessor>}})`**: step 2 (lease counterparty).
 - **`list_bank_accounts()`**: step 2 (the account the lease payments leave from).
 - **`generate_trial_balance(endDate: <date>)`**: step 5 verify.
-- **`generate_fa_summary(primarySnapshotStartDate: <period-start>, primarySnapshotEndDate: <period-end>, groupBy: 'CATEGORY')`**: step 5 verify Jaz auto-posted ROU depreciation.
+- **`generate_fixed_assets_summary(primarySnapshotStartDate: <period-start>, primarySnapshotEndDate: <period-end>, groupBy: 'CATEGORY')`**: step 5 verify Jaz auto-posted ROU depreciation.
 
 ### Cross-references
 - Operational context: invoked during month-end close (post or finalize this period's unwinding journal + verify Jaz FA posted ROU depreciation) and at `jobs/references/year-end-close.md` Y6 (current/non-current reclassification of the next 12 months' principal portion).

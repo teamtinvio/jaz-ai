@@ -15,7 +15,7 @@
 
 ### Lookup and verification tools
 - **`get_fixed_asset(resourceId: <id>)`** (step 1): the asset's registered cost, purchase date and net book value. Use the live FA-register values; the auditor wants those, not a cached estimate.
-- **`generate_fa_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <disposalDate>, groupBy: 'CATEGORY')`** (step 1 alt): NBV from Jaz's running FA register. If this matches your independent calculation, use it as the authoritative NBV. If they diverge: investigate (likely a missing depreciation journal).
+- **`generate_fixed_assets_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <disposalDate>, groupBy: 'CATEGORY')`** (step 1 alt): NBV from Jaz's running FA register. If this matches your independent calculation, use it as the authoritative NBV. If they diverge: investigate (likely a missing depreciation journal).
 - **`search_capsules(filter: {title: {eq: <capsule title>}})`**: step 0 idempotency check. Each disposal is unique; duplicate disposal journals would corrupt the FA register reconciliation.
 - **`search_accounts(filter: {name: {in: ['Vehicles', 'Accumulated Depreciation (Vehicles)', 'Gain on Disposal', 'Loss on Disposal']}})`**: step 2.
 - **`generate_trial_balance(endDate: <disposalDate>)`** (step 6): verify cost + accumulated depreciation cleared; gain/loss in P&L.
@@ -195,7 +195,7 @@ get_fixed_asset(resourceId: <FA UUID>)
 Should now show `status: 'DISPOSED'`, and no further depreciation auto-posting.
 
 ```
-generate_fa_recon_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>)
+generate_fixed_assets_reconciliation_summary(primarySnapshotStartDate: <FY-start>, primarySnapshotEndDate: <FY-end>)
 ```
 Should reflect the disposal in the year's movement: `openingNbv − depreciation − disposals == closingNbv`.
 

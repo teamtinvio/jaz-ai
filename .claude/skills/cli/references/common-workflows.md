@@ -70,7 +70,7 @@ Follow the month-end playbook in the jaz-jobs skill (`references/month-end-close
 clio reports generate trial-balance --to 2026-03-31 --json > tb-mar.json
 clio reports generate profit-loss --from 2026-03-01 --to 2026-03-31 --json > pl-mar.json
 clio reports generate balance-sheet --to 2026-03-31 --json > bs-mar.json
-clio reports generate bank-recon-summary --to 2026-03-31 --json > recon-mar.json
+clio reports generate bank-reconciliation-summary --to 2026-03-31 --json > recon-mar.json
 
 # Create adjusting journal if needed
 clio journals create \
@@ -83,8 +83,8 @@ clio journals create \
   --finalize
 
 # Generate aged AR/AP reports
-clio reports generate aged-ar --to 2026-03-31 --json > aged-ar-mar.json
-clio reports generate aged-ap --to 2026-03-31 --json > aged-ap-mar.json
+clio reports generate aged-receivables --to 2026-03-31 --json > aged-receivables-mar.json
+clio reports generate aged-payables --to 2026-03-31 --json > aged-payables-mar.json
 ```
 
 ## 4. FX Transaction: Add Currency, Set Rate, Create Invoice

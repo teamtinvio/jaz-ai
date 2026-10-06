@@ -9,7 +9,7 @@ separate surface.
 
 A receipt is a BILL (a vendor's invoice) or a CLAIM (an employee's reimbursed expense):
 different tools. Decide by intent, else by capability: call `get_my_context` and read
-`moduleRoles`: PURCHASES ≠ NO_ACCESS → bill (`create_bt_from_attachment`); else
+`moduleRoles`: PURCHASES ≠ NO_ACCESS → bill (`create_transaction_from_document`); else
 EMPLOYEE_CLAIMS ≠ NO_ACCESS → claim (`create_claim_from_attachment`). The always-on
 `claims-routing` policy carries the full rule.
 

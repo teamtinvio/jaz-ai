@@ -7,8 +7,8 @@
 ### Platform tools
 - **`search_fixed_assets(filter: {status: {in: ['ACTIVE', 'DISPOSED', 'DISCARDED']}}, limit: 200)`**, step 1: enumerate FAs. Paginate.
 - **`get_fixed_asset(resourceId: <id>)`**, step 2: per-asset detail (purchaseAmount, purchaseDate, depreciationStartDate, effectiveLife in months, depreciationMethod, depreciableValueResidualAmount, NBV).
-- **`generate_fa_summary(primarySnapshotStartDate: <period-start>, primarySnapshotEndDate: <period-end>, groupBy: 'CATEGORY')`**, step 3: aggregate FA register at period end.
-- **`generate_fa_recon_summary(primarySnapshotStartDate: <year-start>, primarySnapshotEndDate: <year-end>)`**, step 3: reconcile movement (opening + additions − disposals − depreciation = closing).
+- **`generate_fixed_assets_summary(primarySnapshotStartDate: <period-start>, primarySnapshotEndDate: <period-end>, groupBy: 'CATEGORY')`**, step 3: aggregate FA register at period end.
+- **`generate_fixed_assets_reconciliation_summary(primarySnapshotStartDate: <year-start>, primarySnapshotEndDate: <year-end>)`**, step 3: reconcile movement (opening + additions − disposals − depreciation = closing).
 - **`generate_general_ledger(accountResourceIds: [<FA category GL>], startDate, endDate)`**, step 4: per-FA-category GL movement vs FA register.
 - **`mark_fixed_asset_sold(resourceId: <id>, depreciationEndDate, assetDisposalGainLossAccountResourceId, saleBusinessTransactionType, saleItemResourceId)` / `discard_fixed_asset(resourceId: <id>, disposalDate, depreciationEndDate)`**, step 5: status updates for disposals. Mirror endpoints `POST /api/v1/mark-as-sold/fixed-assets` (sale) / `POST /api/v1/discard-fixed-assets/{id}` (scrap).
 - **`calculate(type: 'asset-disposal', ...)`**, then `create_capsule` + `create_journal` with `capsuleResourceId`, step 5: per disposal identified during review (see the `asset-disposal` recipe).
@@ -50,8 +50,8 @@ For each ACTIVE asset, flag for practitioner attention:
 ## Step 3: FA register reconciliation
 
 ```
-generate_fa_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
-generate_fa_recon_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
+generate_fixed_assets_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31', groupBy: 'CATEGORY')
+generate_fixed_assets_reconciliation_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-12-31')
 ```
 
 Keep both the FA summary and the recon summary. Assert per FA category:

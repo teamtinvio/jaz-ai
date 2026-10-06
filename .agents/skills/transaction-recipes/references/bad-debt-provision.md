@@ -13,7 +13,7 @@
 - **`create_journal(...)`** (step 4): the single ECL adjustment. ONE-SHOT: no schedule, no future-dated entries.
 
 ### Lookup and verification tools
-- **`generate_aged_ar(endDate: <date>)`** (step 1 input): AR aged into the buckets the calculator expects.
+- **`generate_aged_receivables(endDate: <date>)`** (step 1 input): AR aged into the buckets the calculator expects.
 - **`search_accounts(filter: {name: {in: ['Allowance for Doubtful Debts', 'Bad Debt Expense']}})`**: step 2.
 - **`generate_trial_balance(endDate: <date>)`** (step 1 input): pull `existingProvision` from the current `Allowance for Doubtful Debts` balance; step 5 verify the post-journal balance matches the calculated ECL.
 - **`search_capsules(filter: {title: {eq: <capsule title>}})`**: step 0 idempotency check (one ECL capsule per period; quarterly = 4 per FY).
@@ -39,7 +39,7 @@ If a result returns: halt. ECL is one-shot per period; duplicate would double-re
 ### Step 1: Pull AR aging + existing provision, then calculate
 
 ```
-generate_aged_ar(endDate: '2025-12-31')
+generate_aged_receivables(endDate: '2025-12-31')
 ```
 
 Returns aging buckets. Map to calculator inputs:
@@ -184,7 +184,7 @@ pay_invoice(
 
 Use the appropriate jurisdiction-specific account if your CoA distinguishes write-offs from generic bad debt expense.
 
-Write-offs reduce both the gross AR balance AND offset against the existing Allowance (since the customer is now provisioned for). Re-run step 1 `generate_aged_ar` afterwards; the written-off customer should no longer appear, and the corresponding portion of the Allowance should reduce.
+Write-offs reduce both the gross AR balance AND offset against the existing Allowance (since the customer is now provisioned for). Re-run step 1 `generate_aged_receivables` afterwards; the written-off customer should no longer appear, and the corresponding portion of the Allowance should reduce.
 
 ---
 
@@ -196,7 +196,7 @@ Write-offs reduce both the gross AR balance AND offset against the existing Allo
 | Calculator | ECL far larger than expected | Rates were passed as percentages of 100 by mistake, or as decimals where percent is expected. `2` is 2%; `0.02` is 0.02%. |
 | Step 2 | `Allowance for Doubtful Debts` is missing | Most-commonly-missing account. Create via `create_account(name: 'Allowance for Doubtful Debts', code: <unused account code>, accountType: 'Current Asset')`. |
 | Verification | TB Allowance ≠ calculated ECL after journal posts | Investigate: likely an interim period posted its own ECL adjustment after `existingProvision` was read (cumulative). Audit via `generate_general_ledger(accountResourceIds: [<Allowance>], startDate: <FY-start>, endDate: <today>)`. |
-| Specific write-off changes ECL inputs | (process) | After Path A or Path B write-off, re-run step 1 `generate_aged_ar` and recalculate with updated buckets; the calculated ECL likely reduces because the worst customer is now off the books. |
+| Specific write-off changes ECL inputs | (process) | After Path A or Path B write-off, re-run step 1 `generate_aged_receivables` and recalculate with updated buckets; the calculated ECL likely reduces because the worst customer is now off the books. |
 
 ---
 

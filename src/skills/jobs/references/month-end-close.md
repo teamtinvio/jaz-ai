@@ -8,7 +8,7 @@
 - **`search_invoices(filter: {valueDate: {between: [<period-start>, <period-end>]}}, sortBy: 'valueDate', sortOrder: 'ASC', limit: 200)`**: step 1: confirm sales invoices entered. Paginate via `offset`.
 - **`search_bills(filter: {valueDate: {between: [<period-start>, <period-end>]}}, ...)`**: step 2: confirm purchase bills entered.
 - **`search_bank_records(accountResourceId: <id>, status: 'UNRECONCILED', startDate: <from>, endDate: <to>)`**: step 3: pull unreconciled bank statement entries per account.
-- **`generate_aged_ar(endDate: <date>)` / `generate_aged_ap(endDate: <date>)`**: steps 4-5: aging reports tied to TB AR / AP balances.
+- **`generate_aged_receivables(endDate: <date>)` / `generate_aged_payables(endDate: <date>)`**: steps 4-5: aging reports tied to TB AR / AP balances.
 
 ### Platform tools: accruals + valuations
 Every calculated step below is the three-step flow in `building-blocks.md` § Calculated schedules: `calculate` (schedule + journal lines, posts nothing), then `list_capsule_types` + `create_capsule`, then one `create_journal` / `create_bill` / `create_invoice` / `create_cash_in` / `create_cash_out` per step with `capsuleResourceId`.
@@ -19,7 +19,7 @@ Every calculated step below is the three-step flow in `building-blocks.md` § Ca
 - **`calculate(type: 'depreciation', ...)`**: step 9: only when an asset uses non-SL method (DDB, 150DB). Jaz native FA handles SL automatically. Verify FA register first.
 - **`calculate(type: 'leave-accrual', ...)`**: step 10: monthly leave accrual; the same amount repeats, so one `create_scheduled_journal` covers the year.
 - **FX revaluation**: step 12: **Jaz auto-handles**. `calculate(type: 'fx-reval', ...)` is verification only; do NOT post its result (would double-post).
-- **`calculate(type: 'ecl', ...)`**: step 13: top-up bad-debt provision based on `generate_aged_ar` buckets.
+- **`calculate(type: 'ecl', ...)`**: step 13: top-up bad-debt provision based on `generate_aged_receivables` buckets.
 
 ### Platform tools: reconciliation execution
 - **`view_auto_reconciliation(bankStatementEntryResourceIds: [<id>, ...])`**: step 3: READ-ONLY suggestions (does NOT write). Per-entry only; source ids from `search_bank_records` (status `UNRECONCILED`).
@@ -69,7 +69,7 @@ Compare count + sum against POS / sales register. Missing invoices = understated
 search_bills(filter: {valueDate: {between: ['2025-01-01', '2025-01-31']}}, sortBy: 'valueDate', sortOrder: 'ASC', limit: 200)
 ```
 
-Cross-reference against email + supplier portals + physical mail. Late bills = missed expenses = overstated profit. For PDFs in hand: `create_bt_from_attachment` with the file and `businessTransactionType: 'BILL'` (Jaz Magic OCR + autofill; local CLI: `clio magic create --file <pdf> --type bill`) to generate the bill draft.
+Cross-reference against email + supplier portals + physical mail. Late bills = missed expenses = overstated profit. For PDFs in hand: `create_transaction_from_document` with the file and `businessTransactionType: 'BILL'` (Jaz Magic OCR + autofill; local CLI: `clio magic create --file <pdf> --type bill`) to generate the bill draft.
 
 ### Step 3: Bank reconciliation
 
@@ -79,15 +79,15 @@ For each bank account:
 2. `search_bank_records(accountResourceId: <bank account resourceId>, status: 'UNRECONCILED', startDate: '2025-01-01', endDate: '2025-01-31', limit: 200, sortBy: 'valueDate', sortOrder: 'ASC')`.
 3. If results: drive the 5-phase cascade matcher (Step 4 in `bank-recon.md`; local CLI: `clio jobs bank-recon match --input <records> --tolerance 0.01 --date-window 14 --json`). For each match, invoke the matching `reconcile_*` tool.
 4. `view_auto_reconciliation(bankStatementEntryResourceIds: [<id>, ...], recommendationType: 'MAGIC_MATCH')`: READ-ONLY suggestions for residuals (per-entry; get ids from `search_bank_records`, status `UNRECONCILED`); commit via `quick_reconcile` / `apply_bank_rule` / per-entry `reconcile_*`.
-5. `generate_bank_recon_summary(bankAccountResourceId: <id>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31')`. Confirm `unreconciledCount == 0` OR document the residuals for the period and surface to the user.
+5. `generate_bank_reconciliation_summary(bankAccountResourceId: <id>, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31')`. Confirm `unreconciledCount == 0` OR document the residuals for the period and surface to the user.
 
 Full detail in `bank-recon.md`. NOT idempotent; see error table.
 
 ### Steps 4-5: AR / AP aging
 
 ```
-generate_aged_ar(endDate: '2025-01-31')
-generate_aged_ap(endDate: '2025-01-31')
+generate_aged_receivables(endDate: '2025-01-31')
+generate_aged_payables(endDate: '2025-01-31')
 ```
 
 Use `endDate` (rule 36: point-in-time, not period-range). Assert: aging totals match `generate_trial_balance` AR/AP lines within the org's materiality threshold. Flag > 60d for credit-control / payment-priority. Disputed bills exit the active aging; annotate for the user.
@@ -127,7 +127,7 @@ Mirror of step 7. Existing `Deferred Revenue` capsules: find this period's DRAFT
 search_fixed_assets(filter: {status: {eq: 'ACTIVE'}, depreciationMethod: {eq: 'NO_DEPRECIATION'}})
 ```
 
-For Jaz-native SL assets: depreciation auto-posts; verify via `generate_fa_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31', groupBy: 'CATEGORY')` showing month's depreciation movement. The search above returns the assets registered with `NO_DEPRECIATION`: the register's only methods are `STRAIGHT_LINE` and `NO_DEPRECIATION`, so these are the assets depreciated by manual journal (declining balance). Confirm each one's method with the practitioner, then `calculate(type: 'depreciation', method: 'ddb' | '150db', cost, salvageValue, usefulLifeYears, frequency: 'monthly')` per asset. With `frequency: 'monthly'` the calculator's `blueprint.steps` are still ANNUAL and the monthly figures are in `schedule[]`: read this period's charge from `schedule[]`, not `blueprint.steps`. Post it with `create_journal` (Dr Depreciation Expense / Cr Accumulated Depreciation) into the asset's `Depreciation` capsule. The depreciation calculator takes no start date, so its rows are undated: ask the practitioner for the posting date and set each journal's `valueDate` yourself.
+For Jaz-native SL assets: depreciation auto-posts; verify via `generate_fixed_assets_summary(primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31', groupBy: 'CATEGORY')` showing month's depreciation movement. The search above returns the assets registered with `NO_DEPRECIATION`: the register's only methods are `STRAIGHT_LINE` and `NO_DEPRECIATION`, so these are the assets depreciated by manual journal (declining balance). Confirm each one's method with the practitioner, then `calculate(type: 'depreciation', method: 'ddb' | '150db', cost, salvageValue, usefulLifeYears, frequency: 'monthly')` per asset. With `frequency: 'monthly'` the calculator's `blueprint.steps` are still ANNUAL and the monthly figures are in `schedule[]`: read this period's charge from `schedule[]`, not `blueprint.steps`. Post it with `create_journal` (Dr Depreciation Expense / Cr Accumulated Depreciation) into the asset's `Depreciation` capsule. The depreciation calculator takes no start date, so its rows are undated: ask the practitioner for the posting date and set each journal's `valueDate` yourself.
 
 ### Step 10: Employee benefit accruals
 
@@ -182,7 +182,7 @@ Bank FX is revaluation, not realized: bank/cash FX uses `FX Bank Revaluation` (n
 Mental check on AR aging > 90d bucket changes. If material change vs prior month: run the ECL calculator.
 
 ```
-calculate(type: 'ecl', buckets: <generate_aged_ar buckets, each {name, balance, rate} with rate from the org ECL loss-rate matrix>, existingProvision, startDate)
+calculate(type: 'ecl', buckets: <generate_aged_receivables buckets, each {name, balance, rate} with rate from the org ECL loss-rate matrix>, existingProvision, startDate)
 ```
 
 If `adjustmentRequired` is non-zero, post it with one `create_journal` (Dr Bad Debt Expense / Cr Allowance for Doubtful Debts for an increase) into an `ECL Provision` capsule.
@@ -200,8 +200,8 @@ generate_trial_balance(endDate: '2025-01-31')
 Save the close trial balance for the period (you'll diff next month against it). Assert:
 - Debits == Credits (exact).
 - Cash / bank balances match step 3 bank reconciliation summaries.
-- AR balance == `generate_aged_ar.totalOutstanding` from step 4.
-- AP balance == `generate_aged_ap.totalOutstanding` from step 5.
+- AR balance == `generate_aged_receivables.totalOutstanding` from step 4.
+- AP balance == `generate_aged_payables.totalOutstanding` from step 5.
 - No unexpected balances (negative cash, credit balances on expense accounts).
 
 ### Steps 15-16: P&L + Balance Sheet

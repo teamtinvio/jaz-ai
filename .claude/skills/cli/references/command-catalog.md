@@ -529,7 +529,7 @@ Dynamic strings in schedulers: `{{Day}}`, `{{Date}}`, `{{Date+X}}`, `{{DateRange
 clio reports generate <type> [flags]
 ```
 
-Types: `trial-balance`, `balance-sheet`, `profit-loss`, `cashflow`, `aged-ar`, `aged-ap`, `cash-balance`, `general-ledger`, `vat-ledger`, `equity-movement`, `bank-balance-summary`, `bank-recon-summary`, `bank-recon-details`, `fa-summary`, `fa-recon-summary`, `ar-report`, `ledger-highlights`
+Types: `trial-balance`, `balance-sheet`, `profit-loss`, `cashflow`, `aged-receivables`, `aged-payables`, `cash-balance`, `general-ledger`, `vat-ledger`, `equity-movement`, `bank-balance-summary`, `bank-reconciliation-summary`, `bank-reconciliation-details`, `fixed-assets-summary`, `fixed-assets-reconciliation-summary`, `aged-receivables-summary`, `aged-payables-summary`, `ledger-highlights`
 
 | Flag | Purpose |
 |------|---------|
@@ -727,7 +727,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 381 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 382 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

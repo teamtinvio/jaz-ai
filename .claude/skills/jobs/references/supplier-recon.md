@@ -23,7 +23,7 @@
   > The amount filter differs by endpoint: `totalAmount` is accepted on bills and on
   > cashflow-transactions but **rejected on supplier credit notes**, and no `paymentAmount` filter
   > exists anywhere; it is a response field on a payment, not a filter key.
-- **`generate_aged_ap(endDate: <date>)`** (step 5): per-supplier outstanding balance.
+- **`generate_aged_payables(endDate: <date>)`** (step 5): per-supplier outstanding balance.
 - **`create_bill(...)`** / **`apply_credits_to_bill(...)`** / **`create_supplier_credit_note(...)`** (step 6): post any missing items identified during recon.
 
 ### Cross-references
@@ -62,7 +62,7 @@ search_bills(
 
 Per bill: `{resourceId, reference, valueDate, currency, originalAmount, paymentRecords, status, dueDate}`. `balanceAmount` is a FILTER key only; the API accepts it in a filter but never returns it on a bill or invoice. Reading it back yields undefined. Derive outstanding instead: `totalAmount - sum(paymentRecords[].transactionAmount) - sum(creditsApplied[].amountApplied)`, and fetch with `view: 'full'` because a lean row omits `paymentRecords` entirely. Keep the Jaz-side bill list for the recon pack.
 
-For an opening-balance recon: also pull the supplier's pre-period balance via `generate_aged_ap(endDate: <period-start - 1 day>)` and filter to this supplier.
+For an opening-balance recon: also pull the supplier's pre-period balance via `generate_aged_payables(endDate: <period-start - 1 day>)` and filter to this supplier.
 
 ## Step 3: Pull payments
 
@@ -83,7 +83,7 @@ Save. Each credit note may have been applied to one or more bills; the applicati
 ## Step 5: Compute Jaz-side closing balance
 
 ```
-generate_aged_ap(endDate: '2025-01-31')
+generate_aged_payables(endDate: '2025-01-31')
 ```
 
 Filter to this supplier. Compute: opening balance + new bills (step 2) - payments (step 3) - applied credit notes (step 4) = closing balance per Jaz.
@@ -94,7 +94,7 @@ Practitioner provides the supplier's statement (PDF, email, paper). Per-line-ite
 
 | Discrepancy | Likely cause | Fix |
 |-------------|--------------|-----|
-| Bill on supplier statement, not in Jaz | Missed bill (most common) | `create_bt_from_attachment` (local CLI: `clio magic create --file <bill-pdf> --type bill`) extracts the missing bill from its PDF, OR manual `create_bill(...)`; pay if owed. |
+| Bill on supplier statement, not in Jaz | Missed bill (most common) | `create_transaction_from_document` (local CLI: `clio magic create --file <bill-pdf> --type bill`) extracts the missing bill from its PDF, OR manual `create_bill(...)`; pay if owed. |
 | Bill in Jaz, not on supplier statement | Supplier hasn't issued / lost the invoice | Verify with supplier; if confirmed bogus, `delete_bill` (DRAFT) OR `create_supplier_credit_note` (if ACTIVE). |
 | Different amounts on same reference | Pricing dispute | Practitioner contacts supplier for clarification. Possible adjustment journal post-resolution. |
 | Bill paid per Jaz, supplier says unpaid | Bank reconciliation gap | Pull bank statement for the payment date; verify the wire/cheque cleared. If cleared, send remittance proof to supplier. |
@@ -108,7 +108,7 @@ For each missing bill / credit note: post via `create_bill` / `create_supplier_c
 
 After corrections:
 ```
-generate_aged_ap(endDate: '2025-01-31')
+generate_aged_payables(endDate: '2025-01-31')
 ```
 
 Filter to supplier. New closing balance should match the supplier statement closing balance within tolerance (typically zero; pricing rounding on long-running accounts can leave cents).

@@ -1,12 +1,12 @@
 {
   "name": "jaz-ai",
-  "version": "6.1.1",
+  "version": "7.0.0",
   "description": "Fastest ledger for agents. Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast.",
   "contextFileName": "CONTEXT.md",
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@6.1.1", "mcp"]
+      "args": ["-y", "jaz-clio@7.0.0", "mcp"]
     }
   }
 }

@@ -29,13 +29,13 @@
 - **`reconcile_cash_transfer(...)`**: inter-account transfer.
 
 ### Platform tools: create missing transactions
-- **`create_bt_from_attachment(...)`** (step 6 path B): OCR + autofill bill or invoice from receipt PDF/JPG. Local CLI: `clio magic create --file <pdf> --type bill`.
+- **`create_transaction_from_document(...)`** (step 6 path B): OCR + autofill bill or invoice from receipt PDF/JPG. Local CLI: `clio magic create --file <pdf> --type bill`.
 - **`create_cash_in(...)` / `create_cash_out(...)`** (step 6 path C): bank fees, interest, FX charges that have no source document.
 - **`create_bank_rule(...)`** (preventive): build a rule for any recurring pattern you handled this run (subscription, rent, utility) so it auto-applies next time.
 
 ### Platform tools: verification
-- **`generate_bank_recon_summary(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate)`** (step 7): per-account formal recon statement.
-- **`generate_bank_recon_details(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate, filter: {valueDate: {range: [from, to]}})`** (step 7): line-level recon detail for audit pack.
+- **`generate_bank_reconciliation_summary(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate)`** (step 7): per-account formal recon statement.
+- **`generate_bank_reconciliation_details(bankAccountResourceId, primarySnapshotStartDate, primarySnapshotEndDate, filter: {valueDate: {range: [from, to]}})`** (step 7): line-level recon detail for audit pack.
 - **`generate_bank_balance_summary(primarySnapshotDate)`** (step 8): book balance vs bank statement balance per account.
 
 ### CLI tools: bulk auto-match cascade (offline)
@@ -158,7 +158,7 @@ For unreconciled rows that have no book-side counterpart yet:
 ```
 clio magic create --file <invoice-or-receipt-path> --type bill   # or --type invoice
 # OR equivalent MCP call:
-create_bt_from_attachment(
+create_transaction_from_document(
   businessTransactionType: 'BILL' | 'INVOICE',
   sourceUrl: <file URL>   // omit when the host attaches the file to the call
 )
@@ -220,8 +220,8 @@ search_bank_records(accountResourceId: B.resourceId, status: 'UNRECONCILED', lim
 Target: zero rows OR all remaining are documented timing differences (outstanding cheques, deposits in transit clearing next period; practitioner annotates). Record the judgment: `jot(kind: SCOPE)` naming each residual accepted as a timing difference and why it clears next period.
 
 ```
-generate_bank_recon_summary(bankAccountResourceId: B.resourceId, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31')
-generate_bank_recon_details(bankAccountResourceId: B.resourceId, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31', filter: {valueDate: {range: ['2025-01-01', '2025-01-31']}})
+generate_bank_reconciliation_summary(bankAccountResourceId: B.resourceId, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31')
+generate_bank_reconciliation_details(bankAccountResourceId: B.resourceId, primarySnapshotStartDate: '2025-01-01', primarySnapshotEndDate: '2025-01-31', filter: {valueDate: {range: ['2025-01-01', '2025-01-31']}})
 ```
 
 Keep both the summary and the line-level detail per account; audit-prep step 7 will require them.

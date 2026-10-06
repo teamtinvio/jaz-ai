@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 6.1.1
+version: 7.0.0
 description: >-
   Use this skill for recurring accounting workflows: month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -24,7 +24,7 @@ You are helping an **SMB accountant or bookkeeper** complete recurring accountin
 
 You orchestrate the **real platform tools directly**, following the phase sequence in the per-job reference:
 
-- **The per-job reference is your checklist.** Walk its phases in order and call the named platform tools: `calculate`, `search_invoices` / `search_bills` / `search_bank_records`, the `generate-reports/*` report tools (`generate_trial_balance`, `generate_aged_ar`, `generate_vat_ledger`, …), `reconcile_*`, `create_capsule`, `create_journal`, `bulk_finalize_drafts`, `update_account` lockDate, and so on. There is no "blueprint tool" or checklist command to call; the reference IS the plan.
+- **The per-job reference is your checklist.** Walk its phases in order and call the named platform tools: `calculate`, `search_invoices` / `search_bills` / `search_bank_records`, the `generate-reports/*` report tools (`generate_trial_balance`, `generate_aged_receivables`, `generate_vat_ledger`, …), `reconcile_*`, `create_capsule`, `create_journal`, `bulk_finalize_drafts`, `update_account` lockDate, and so on. There is no "blueprint tool" or checklist command to call; the reference IS the plan.
 - **Local CLI helpers:** five `clio jobs` sub-tools do real work for specific steps (see "CLI helpers" below).
 
 ### Scheduled and calculated entries

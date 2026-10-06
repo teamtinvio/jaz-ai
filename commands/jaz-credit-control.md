@@ -23,7 +23,7 @@ The steps are in the jaz-jobs skill: `references/credit-control.md`. Read it fir
 ### 2. Review aged receivables
 
 ```bash
-clio reports generate aged-ar --to 2025-02-28 --json
+clio reports generate aged-receivables --to 2025-02-28 --json
 ```
 
 The report breaks down receivables by aging bucket: current, 1-30, 31-60, 61-90, 91+.
@@ -58,6 +58,6 @@ The journal is created as a draft unless you pass `--finalize`. Needs Bad Debt E
 
 ## Key Rules
 
-- AR aging report uses `aged-ar` report type
+- Aged Receivables uses the `aged-receivables` report type
 - ECL provisioning uses IFRS 9 simplified approach (5-bucket matrix)
 - No `amountDue` field on invoices; check `paymentRecords` to determine remaining balance
