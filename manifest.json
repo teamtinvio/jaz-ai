@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.0.0",
+  "version": "9.0.1",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -1352,7 +1352,7 @@
     },
     {
       "name": "record_withholding_tax_certificate",
-      "description": "Record a customer's Withholding Tax Certificate (BIR Form 2307, creditable withholding / CWT; PH orgs only) against their invoices and customer credit notes, as one payment batch. accountResourceId must be the \"Creditable Withholding Tax\" system account. Each transaction's amounts are the tax withheld from it. Async: returns a jobId (search_background_jobs). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record a customer's Withholding Tax Certificate (BIR Form 2307, creditable withholding / CWT; PH orgs only) against their invoices and customer credit notes, as one payment batch. accountResourceId must be the \"Creditable Withholding Tax\" system account. Each transaction's amounts are the tax withheld from it. Async: returns a jobId (search_background_jobs). Read it back on get_invoice as recordedWithholding_ph; it is not in the invoice's payment list. delete_payment with that record's resourceId removes it. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_bill_payments",
