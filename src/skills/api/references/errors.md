@@ -749,13 +749,7 @@ The same applies on update: `PUT /cash-in-entries/:id` with `saveAsDraft: true` 
 **Request**: POST /api/v1/bills with `withholdingTax` on line items
 **Error**: `"WITHHOLDING_CODE_NOT_FOUND"` or similar withholding-related error
 **Cause**: The organization does not have withholding tax enabled, or the code is invalid for this region.
-**Fix**: Remove the `withholdingTax` field from ALL line items and retry. This is a common pattern for cross-region compatibility: Singapore orgs typically don't use withholding tax, but Philippines orgs do.
-
-**Retry pattern** (from production):
-1. Submit bill/credit note with `withholdingTax` fields
-2. If error contains "WITHHOLDING" (case-insensitive), strip `withholdingTax` from all line items
-3. Retry the same request without withholding tax
-4. Log which org doesn't support withholding tax to avoid future retries
+**Fix**: First check the code against `list_withholding_codes` (`GET /withholding-codes`): codes contain a space (`WC 158`, not `WC158`). If the organization does not use withholding (Singapore orgs typically don't; Philippines orgs do), remove `withholdingTax` from the line items, retry, and tell the user the bill was recorded without it. Never strip it silently: the withholding disappears from the bill.
 
 ---
 

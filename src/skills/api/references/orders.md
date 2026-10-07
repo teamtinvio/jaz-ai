@@ -18,7 +18,7 @@ Two MCP namespaces wrap these: **`sale_orders`** (Sale Quotes + Sale Orders) and
 | `PURCHASE_REQUEST` | DRAFT (default) / ACTIVE (saveAsDraft:false) | **accept** (ACTIVE → ACCEPTED) | VOID | yes (default true) |
 | `PURCHASE_ORDER` | DRAFT (default) / ACTIVE (saveAsDraft:false) | **confirm** → CONFIRMED | VOID | yes (default true) |
 
-- **Quotes & Requests use `accept`. Orders use `confirm`.** (`transition_*` enforces this via a documentType × action matrix.)
+- **Quotes & Requests use `accept`. Orders use `confirm`.** Each is its own tool: `accept_sale_quote`, `confirm_sale_order`, `accept_purchase_request`, `confirm_purchase_order`.
 - **`accept` works on the ISSUED state, not DRAFT**: a Sale Quote must be CREATED, a Purchase Request must be ACTIVE. Accepting a DRAFT returns `422 Invalid status` (verified live). **Issue an existing DRAFT in place** with the update tool's flag: `update_sale_order` `isDraftToActiveSaleQuote: true` (→ CREATED), `update_purchase_order` `isDraftToActivePurchaseRequest: true` (→ ACTIVE). Send every stored line with its `resourceId` in the SAME update: a flag-only update is refused with `422 SALE_LINE_ITEMS_REQUIRED` (verified live 2026-09-23 on a sale quote). It keeps the document's number and line ids (verified live: DRAFT → CREATED, same reference, same line `resourceId`; a line without an account issued fine), so never create a second quote/request to issue one. (Update with `saveAsDraft:false` does NOT issue a DRAFT, verified live.) To create one already issued, pass `saveAsDraft:false` on create.
 - **Sale Orders have no draft state**: `saveAsDraft` is ignored; created directly as `CREATED`.
 - **PENDING orders.** Jaz Magic creates Sale Orders and Purchase Orders as `PENDING`. Take one live with `update_sale_order` `isPendingToActiveSaleOrder: true` / `update_purchase_order` `isPendingToActivePurchaseOrder: true`. Search accepts `status: PENDING`.
@@ -85,13 +85,13 @@ To change a few fields on some lines without resending the document, use `quick_
 
 ## Delete vs Void
 
-- **DELETE is draft-only** (422 on anything non-draft). `transition_* action:DELETE` pre-flights status and returns a `repair` hint to use `VOID` for non-draft records.
-- **VOID** cancels any non-draft quote/request/order; optional `internalNotes` reason.
+- **DELETE is draft-only** (422 on anything non-draft). `delete_sale_order` / `delete_purchase_order` pre-flight the status and return a `repair` pointing at the void tool for a non-draft record.
+- **VOID** (`void_sale_order` / `void_purchase_order`) cancels any non-draft quote/request/order; optional `internalNotes` reason.
 
 ## MCP tools
 
-`sale_orders`: `create_sale_order`, `get_sale_order`, `search_sale_orders`, `search_sale_order_line_items`, `update_sale_order`, `transition_sale_order` (action: ACCEPT | CONFIRM | VOID | DELETE), `convert_sale_order_to_invoice`.
-`purchase_orders`: `create_purchase_order`, `get_purchase_order`, `search_purchase_orders`, `search_purchase_order_line_items`, `update_purchase_order`, `transition_purchase_order`, `convert_purchase_order_to_bill`.
+`sale_orders`: `create_sale_order`, `get_sale_order`, `search_sale_orders`, `search_sale_order_line_items`, `update_sale_order`, `accept_sale_quote`, `confirm_sale_order`, `void_sale_order`, `delete_sale_order`, `convert_sale_order_to_invoice`.
+`purchase_orders`: `create_purchase_order`, `get_purchase_order`, `search_purchase_orders`, `search_purchase_order_line_items`, `update_purchase_order`, `accept_purchase_request`, `confirm_purchase_order`, `void_purchase_order`, `delete_purchase_order`, `convert_purchase_order_to_bill`.
 
 PDF downloads for the documents these convert into: `download_bill_pdf` (`bills`), `download_supplier_credit_note_pdf` (`supplier_credit_notes`), alongside the existing `download_invoice_pdf` / `download_credit_note_pdf`.
 

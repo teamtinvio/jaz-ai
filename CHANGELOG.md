@@ -1,5 +1,19 @@
 # Changelog
 
+## [9.0.0] - 2026-10-07
+
+**Philippine withholding tax (EWT and CWT) now works through the connector.**
+
+- Bills and supplier credit notes take expanded withholding tax (EWT) on each line, the same as in Jaz.
+- Finalizing a draft bill or credit note no longer removes the withholding tax already on its lines. Before, the finalized document had none.
+- New: `record_withholding_tax_certificate` records the BIR Form 2307 a customer gives you (creditable withholding, CWT) against their invoices and credit notes, the same as recording a Withholding Tax Certificate payment in Jaz.
+- `list_withholding_tax_codes` is replaced by `list_withholding_codes`. The old tool returned industry classification codes, not withholding codes. The new one returns the BIR codes (ATCs) with their rate and type, and can filter by country, code and type. The old name no longer works.
+- Command line: `clio tax-profiles wht-codes` is replaced by `clio tax-profiles withholding-codes`, with the same filters.
+
+**Quote and order steps are separate tools.**
+
+- `transition_sale_order` is replaced by `accept_sale_quote`, `confirm_sale_order`, `void_sale_order` and `delete_sale_order`; `transition_purchase_order` by `accept_purchase_request`, `confirm_purchase_order`, `void_purchase_order` and `delete_purchase_order`. Each does one step, so an assistant can no longer pick the wrong one. The old names no longer work.
+
 ## [8.0.0] - 2026-10-06
 
 - `search_payments` and `list_payments` are removed. Both searched the cashflow ledger (every transaction type), not payment records, so the names were misleading. Use `search_cashflow_transactions`, which takes the same filters plus status and free-text search. On the command line, `clio payments list` and `clio payments search` are removed; use `clio cashflow search`.

@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 468 spec paths and 599 spec operations and is the authoritative list; check it before concluding
+> carries 475 spec paths and 607 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -848,11 +848,12 @@ incomplete. Reaching them needs a raw HTTP call.
 | POST | `/bank-records/:accountResourceId/archive` | Archive bank records |
 | POST | `/bank-records/:accountResourceId/unarchive` | Unarchive bank records |
 
-### Withholding (1): 2026-07-31
+### Withholding (2): 2026-07-31, withholding-codes 2026-10-06
 
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/payments/withholding` | Record withholding on a sale / sale credit note payment (see SKILL.md Rule 45) |
+| GET | `/withholding-codes` | Withholding codes (BIR ATCs) for line `withholdingTax` and 2307 allocations (Rule 98) |
 
 ---
 

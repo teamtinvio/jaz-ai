@@ -7986,6 +7986,86 @@
       ],
       "type": "object"
     },
+    "CreateEcommerceProfileRequest": {
+      "properties": {
+        "clearingAccountResourceId": {
+          "description": "Account that carries what the platform owes: every settlement balances to it,\nat the document's net. Required.",
+          "type": "string"
+        },
+        "clearingAccounts": {
+          "description": "Per-payment-method clearing accounts. Absent or empty means every settlement\nuses clearingAccountResourceId.",
+          "items": {
+            "$ref": "#/definitions/EcommerceClearingAccountInput"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "eventMappings": {
+          "description": "Where each event type posts. An entry names either an eventType or a family,\nnever both; a family maps every event in it at once and a named eventType wins\nover its family. Fetch the catalogue first -- some families refuse a tax\nprofile outright and sending one fails the whole save.",
+          "items": {
+            "$ref": "#/definitions/EcommerceEventMappingInput"
+          },
+          "maxItems": 500,
+          "type": "array"
+        },
+        "innerAxis": {
+          "description": "How lines are grouped inside a journal: BY_ACCOUNT, BY_EVENT, BY_ORDER or\nBY_LINE. Defaults to BY_EVENT.",
+          "enum": [
+            "BY_ACCOUNT",
+            "BY_EVENT",
+            "BY_ORDER",
+            "BY_LINE"
+          ],
+          "type": "string"
+        },
+        "journalDatePolicy": {
+          "description": "Which date values the journal: DOCUMENT_DATE, PERIOD_END or PAYOUT_DATE.\nDefaults to DOCUMENT_DATE. A policy whose date the document lacks falls back\nto the document date.",
+          "enum": [
+            "DOCUMENT_DATE",
+            "PERIOD_END",
+            "PAYOUT_DATE"
+          ],
+          "type": "string"
+        },
+        "journalReferenceTemplate": {
+          "description": "Journal reference template. Blank resets to the default. Placeholders\n{sourceType}, {externalId}, {documentDate} and {periodEnd} are substituted.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "lineDescriptionTemplate": {
+          "description": "Journal line description template. Blank resets to the default.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name (max 255, case-insensitive unique per organization). Required.",
+          "example": "Shopify SG",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "outerAxis": {
+          "description": "How many journals one settlement becomes: PER_DOCUMENT, PER_DAY or PER_MONTH.\nDefaults to PER_MONTH.",
+          "enum": [
+            "PER_DOCUMENT",
+            "PER_DAY",
+            "PER_MONTH"
+          ],
+          "type": "string"
+        },
+        "platformCode": {
+          "description": "The platform (SHOPIFY, LAZADA, ...) this profile's mapping is built for.\nRequired: a profile cannot be saved without one. Fetch the catalogue's event\nlist scoped to this platform before mapping events.",
+          "example": "SHOPIFY",
+          "maxLength": 64,
+          "type": "string"
+        }
+      },
+      "required": [
+        "clearingAccountResourceId",
+        "name",
+        "platformCode"
+      ],
+      "type": "object"
+    },
     "CreateFixedAssetRequest": {
       "properties": {
         "accumulatedDepreciationAccountResourceId": {
@@ -11089,6 +11169,180 @@
           "type": "string"
         }
       },
+      "type": "object"
+    },
+    "EcommerceClearingAccountInput": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Account settlements on this payment method balance to.",
+          "type": "string"
+        },
+        "paymentMethod": {
+          "description": "Payment method as the platform names it, e.g. PAYPAL.",
+          "example": "PAYPAL",
+          "maxLength": 50,
+          "type": "string"
+        }
+      },
+      "required": [
+        "accountResourceId",
+        "paymentMethod"
+      ],
+      "type": "object"
+    },
+    "EcommerceEventMappingInput": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Account this event posts to. Must be a class the catalogue allows for it.",
+          "type": "string"
+        },
+        "eventType": {
+          "description": "A canonical event type, e.g. SALE_GOODS or FEE_COMMISSION. Give this or\nfamily, never both. A named eventType wins over its family.",
+          "example": "SALE_GOODS",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "family": {
+          "description": "A family, e.g. REVENUE or FEE, mapping every event in it at once. Give this\nor eventType, never both.",
+          "example": "REVENUE",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "taxProfileResourceId": {
+          "description": "Tax profile for this event. Families that refuse one reject the whole profile\nsave rather than ignoring it -- the catalogue's refusesTaxProfile says which.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "accountResourceId"
+      ],
+      "type": "object"
+    },
+    "EcommerceProfileFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "clearingAccount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/OrganizationAccountNestedFilter"
+            }
+          ],
+          "description": "Filter by the clearing account's own name or code. Fields inside are OR'd."
+        },
+        "clearingAccountResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by clearing account resource ID."
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "innerAxis": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by inner axis, stored as the enum name: BY_ACCOUNT, BY_EVENT, BY_ORDER, BY_LINE."
+        },
+        "journalDatePolicy": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by journal date policy, stored as the enum name."
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by name."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "outerAxis": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by outer axis, stored as the enum name: PER_DOCUMENT, PER_DAY, PER_MONTH."
+        },
+        "platformCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by platform, e.g. SHOPIFY or LAZADA. isNull finds pooled profiles\n(existing rows that predate the platform being required)."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by resource ID."
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by status, ACTIVE or INACTIVE. Stored as the enum name, so match it\nexactly rather than by the label a screen shows."
+        }
+      },
+      "type": "object"
+    },
+    "EcommerceProfileSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "enum": [
+              "resourceId",
+              "name",
+              "status",
+              "platformCode",
+              "createdAt",
+              "updatedAt"
+            ],
+            "type": "string"
+          },
+          "maxItems": 10,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
       "type": "object"
     },
     "EditOrganizationCurrencyCustomRateClientRequest": {
@@ -22223,6 +22477,46 @@
       },
       "type": "object"
     },
+    "SearchEcommerceProfilesRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/EcommerceProfileFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/EcommerceProfileSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
     "SearchEmployeeBalancesRequest": {
       "properties": {
         "filter": {
@@ -24017,6 +24311,27 @@
       },
       "required": [
         "className"
+      ],
+      "type": "object"
+    },
+    "SetEcommerceProfileStatusRequest": {
+      "properties": {
+        "resourceId": {
+          "description": "Resource ID of the profile, from the URL path.",
+          "type": "string"
+        },
+        "status": {
+          "description": "ACTIVE or INACTIVE. INACTIVE also pauses and unlinks every connected store\nposting through this profile; that unlink is one-way. It does NOT make the\nprofile deletable, because delete asks whether a store still references it.",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "resourceId",
+        "status"
       ],
       "type": "object"
     },
@@ -29210,6 +29525,116 @@
       ],
       "type": "object"
     },
+    "UpdateEcommerceProfileEventMappingsRequest": {
+      "properties": {
+        "eventMappings": {
+          "description": "The complete mapping. An empty list clears it, leaving a profile that can\npost nothing until it is mapped again.",
+          "items": {
+            "$ref": "#/definitions/EcommerceEventMappingInput"
+          },
+          "maxItems": 500,
+          "type": "array"
+        },
+        "resourceId": {
+          "description": "Resource ID of the profile, from the URL path.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "eventMappings",
+        "resourceId"
+      ],
+      "type": "object"
+    },
+    "UpdateEcommerceProfileRequest": {
+      "properties": {
+        "clearingAccountResourceId": {
+          "description": "Account that carries what the platform owes.",
+          "type": "string"
+        },
+        "clearingAccounts": {
+          "description": "Sending a list REPLACES every per-payment-method clearing account. Null leaves them alone.",
+          "items": {
+            "$ref": "#/definitions/EcommerceClearingAccountInput"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "eventMappings": {
+          "description": "Sending a list REPLACES the whole mapping. Null leaves it alone.",
+          "items": {
+            "$ref": "#/definitions/EcommerceEventMappingInput"
+          },
+          "maxItems": 500,
+          "type": "array"
+        },
+        "innerAxis": {
+          "description": "How lines are grouped inside a journal.",
+          "enum": [
+            "BY_ACCOUNT",
+            "BY_EVENT",
+            "BY_ORDER",
+            "BY_LINE"
+          ],
+          "type": "string"
+        },
+        "journalDatePolicy": {
+          "description": "Which date values the journal.",
+          "enum": [
+            "DOCUMENT_DATE",
+            "PERIOD_END",
+            "PAYOUT_DATE"
+          ],
+          "type": "string"
+        },
+        "journalReferenceTemplate": {
+          "description": "Journal reference template. Blank resets to the default.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "lineDescriptionTemplate": {
+          "description": "Journal line description template. Blank resets to the default.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name (max 255, case-insensitive unique per organization).",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "outerAxis": {
+          "description": "How many journals one settlement becomes.",
+          "enum": [
+            "PER_DOCUMENT",
+            "PER_DAY",
+            "PER_MONTH"
+          ],
+          "type": "string"
+        },
+        "platformCode": {
+          "description": "The platform (SHOPIFY, LAZADA, ...) this profile's mapping is built for.\nNull means no change. A profile cannot be saved without one, so this can\nonly be omitted when the profile already has a platform; it cannot be\ncleared back to pooled.",
+          "example": "SHOPIFY",
+          "maxLength": 64,
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the profile, from the URL path.",
+          "type": "string"
+        },
+        "status": {
+          "description": "ACTIVE or INACTIVE. INACTIVE stops new conversions and pauses every connected\nstore posting through this profile, which also unlinks them. That unlink is\none-way, so the merchant reassigns the stores they want afterwards. Prefer the\ndedicated status endpoint when status is all that changes: a mapping list sent\nwrong here replaces the whole mapping.",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "resourceId"
+      ],
+      "type": "object"
+    },
     "UpdateEmployeeRequest": {
       "properties": {
         "active": {
@@ -31484,27 +31909,23 @@
     "WithholdingTaxRequest": {
       "properties": {
         "code": {
-          "description": "Withholding tax code from the withholding-tax-codes reference list.",
-          "example": "01111",
+          "description": "Alphanumeric tax code (ATC) from /withholding-codes.",
+          "example": "WC 158",
           "type": "string"
         },
         "description": {
-          "description": "Withholding tax description.",
+          "description": "Withholding tax description, as the code's row in /withholding-codes gives it.",
           "type": "string"
         },
         "rate": {
-          "description": "Withholding tax rate as a percentage (e.g. 10 for 10%).",
-          "example": 10,
+          "description": "Withholding tax rate as a percentage (e.g. 1 for 1%).",
+          "example": 1,
           "minimum": 0,
           "type": "number"
         },
         "type": {
-          "description": "Document type the withholding tax applies to.",
-          "enum": [
-            "bill",
-            "invoice"
-          ],
-          "example": "bill",
+          "description": "Payee type of the code, as its row in /withholding-codes gives it: corp (corporation) or ind (individual).",
+          "example": "corp",
           "type": "string"
         }
       },
@@ -47214,6 +47635,490 @@
         ]
       }
     },
+    "/api/v1/e-commerce-event-catalogue": {
+      "get": {
+        "description": "Every canonical event type and what a profile may do with it: the account classes a mapping may point at, the tax side, and whether the family refuses a tax profile outright. Read this before building a profile: sending a tax profile to a family that refuses one fails the whole save rather than being ignored.",
+        "operationId": "list-e-commerce-event-catalogue",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get E-commerce Event Catalogue",
+        "tags": [
+          "E-commerce Profiles"
+        ]
+      }
+    },
+    "/api/v1/e-commerce-profiles": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create an e-commerce profile: the clearing account that carries what the platform owes, and the account and tax profile each event type posts to. Fetch the event catalogue first: some families refuse a tax profile, and sending one fails the whole save.",
+        "operationId": "create-e-commerce-profile",
+        "parameters": [
+          {
+            "description": "The e-commerce profile to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateEcommerceProfileRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create E-commerce Profile",
+        "tags": [
+          "E-commerce Profiles"
+        ]
+      }
+    },
+    "/api/v1/e-commerce-profiles/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's e-commerce profiles. Coded fields (status, outerAxis, innerAxis, journalDatePolicy) are stored as their enum names, so match those rather than the labels a screen shows.",
+        "operationId": "search-e-commerce-profile",
+        "parameters": [
+          {
+            "description": "Search criteria.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchEcommerceProfilesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search E-commerce Profiles",
+        "tags": [
+          "E-commerce Profiles"
+        ]
+      }
+    },
+    "/api/v1/e-commerce-profiles/{resourceId}": {
+      "delete": {
+        "description": "Soft-delete an e-commerce profile. Refused while any connected store still posts through it; making the profile inactive does not change that, because it changes no reference. Returns deleted false where nothing was deleted.",
+        "operationId": "delete-e-commerce-profile",
+        "parameters": [
+          {
+            "description": "Resource ID of the e-commerce profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete E-commerce Profile",
+        "tags": [
+          "E-commerce Profiles"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update an e-commerce profile. Null on each field means no change. Sending an eventMappings or clearingAccounts list REPLACES the whole of it, so use the dedicated endpoints when that is all you mean to change.",
+        "operationId": "update-e-commerce-profile",
+        "parameters": [
+          {
+            "description": "Resource ID of the e-commerce profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The fields to change.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateEcommerceProfileRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update E-commerce Profile",
+        "tags": [
+          "E-commerce Profiles"
+        ]
+      }
+    },
+    "/api/v1/e-commerce-profiles/{resourceId}/event-mappings": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Replace a profile's whole event mapping. The list sent becomes the mapping: anything left out is dropped. An empty list clears it, leaving a profile that can post nothing until it is mapped again.",
+        "operationId": "update-e-commerce-profile-event-mapping",
+        "parameters": [
+          {
+            "description": "Resource ID of the e-commerce profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The complete event mapping.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateEcommerceProfileEventMappingsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Replace E-commerce Profile Event Mappings",
+        "tags": [
+          "E-commerce Profiles"
+        ]
+      }
+    },
+    "/api/v1/e-commerce-profiles/{resourceId}/status": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Stop or start a profile. INACTIVE refuses new conversions and pauses every connected store posting through it, which also unlinks those stores. That unlink is one-way, so the stores are reassigned afterwards rather than restored. It does NOT make the profile deletable: delete asks whether a store still references it, and this changes no reference.",
+        "operationId": "update-e-commerce-profile-status",
+        "parameters": [
+          {
+            "description": "Resource ID of the e-commerce profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The status to set.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SetEcommerceProfileStatusRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Set E-commerce Profile Status",
+        "tags": [
+          "E-commerce Profiles"
+        ]
+      }
+    },
     "/api/v1/employees": {
       "post": {
         "consumes": [
@@ -49223,7 +50128,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "summary": "AP Report",
+        "summary": "Aged Payables Summary",
         "tags": [
           "Generate Reports"
         ]
@@ -49293,7 +50198,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "summary": "Generate AP Summary Report",
+        "summary": "Aged Payables by Contact",
         "tags": [
           "Generate Reports"
         ]
@@ -49433,7 +50338,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "summary": "AR Report",
+        "summary": "Aged Receivables Summary",
         "tags": [
           "Generate Reports"
         ]
@@ -49503,7 +50408,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "summary": "Generate AR Summary Report",
+        "summary": "Aged Receivables by Contact",
         "tags": [
           "Generate Reports"
         ]
@@ -77252,23 +78157,121 @@
         ]
       }
     },
-    "/api/v1/withholding-tax-codes": {
+    "/api/v1/withholding-codes": {
       "get": {
         "consumes": [
           "application/json"
         ],
-        "description": "List the organization's withholding tax codes.",
-        "operationId": "list-withholding-tax-codes",
+        "description": "List the withholding tax codes a transaction can carry, with their rate and type. In the Philippines these are the BIR alphanumeric tax codes (ATC), such as WC158 for expanded withholding (EWT) on bills and the creditable withholding (CWT) codes on a BIR Form 2307. Use a code's `code`, `rate` and `type` for a bill line's `withholdingTax`, and its `resourceId` for a BIR Form 2307 allocation's `withholdingCodeResourceId` (the same code table).",
+        "operationId": "list-withholding-codes",
         "parameters": [
           {
             "default": 100,
-            "description": "Maximum number of results per page (max 1000).",
+            "description": "Maximum number of results per page (max 100).",
             "in": "query",
             "name": "limit",
             "type": "integer"
           },
           {
-            "description": "Zero-indexed row offset into the result set.",
+            "description": "Zero-indexed page number.",
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          },
+          {
+            "description": "Filter by country code (ISO 3166-1 alpha-2), e.g. PH.",
+            "in": "query",
+            "name": "countryCode",
+            "type": "string"
+          },
+          {
+            "description": "Filter by code, partial match (e.g. WC158).",
+            "in": "query",
+            "name": "code",
+            "type": "string"
+          },
+          {
+            "description": "Filter by withholding type.",
+            "in": "query",
+            "name": "type",
+            "type": "string"
+          },
+          {
+            "description": "Filter by the business transaction a code applies to.",
+            "in": "query",
+            "name": "appliesTo",
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Withholding Codes",
+        "tags": [
+          "Withholding Tax Codes"
+        ]
+      }
+    },
+    "/api/v1/withholding-tax-codes": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List industry classification codes (PSIC, MSIC, NAICS, SIC), which this route has always served. For the withholding tax codes a transaction carries (BIR ATCs), use GET /api/v1/withholding-codes.",
+        "operationId": "list-withholding-tax-codes",
+        "parameters": [
+          {
+            "default": 100,
+            "description": "Maximum number of results per page (max 100).",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "description": "Zero-indexed page number.",
             "in": "query",
             "name": "offset",
             "type": "integer"
@@ -77332,7 +78335,7 @@
             "ApiKeyAuth": []
           }
         ],
-        "summary": "List Withholding Tax Codes",
+        "summary": "List Industry Classification Codes",
         "tags": [
           "Withholding Tax Codes"
         ]
@@ -77595,6 +78598,10 @@
     {
       "description": "Write, search, and review agent judgment records (jots), with per-entry acknowledgments and review dispositions (flag, reject, or endorse).",
       "name": "Jots"
+    },
+    {
+      "description": "Create, update, search, and delete e-commerce profiles, replace their event mappings, and view the event catalogue.",
+      "name": "E-commerce Profiles"
     }
   ]
 }

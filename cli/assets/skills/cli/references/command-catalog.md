@@ -192,7 +192,7 @@ Same subcommands and flags as `cash-in`.
 | `create` | `--rate`, `--name`, `--tax-type-code` |
 | `update <id>` | `--name`, `--rate` |
 | `types` | List available tax type codes |
-| `wht-codes` | List withholding tax codes |
+| `withholding-codes` | List withholding codes (BIR ATCs) for a bill line's withholding tax and a Withholding Tax Certificate (2307) |
 
 ### `clio filing-submissions`: Tax return filings (read-only, 1 tool)
 | Subcommand | Key flags |
@@ -725,7 +725,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 380 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 387 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

@@ -643,7 +643,7 @@ The `payments` array uses the same 6-field structure as standalone payments. pro
 
 ### Withholding Tax on Line Items
 
-Bills and supplier credit notes support withholding tax per line item:
+Bills and supplier credit notes support expanded withholding tax (EWT, Philippines) per line item. Copy `code`, `rate`, `type` and `description` from one `GET /withholding-codes` row (`list_withholding_codes`); a field left out is not stored:
 
 ```json
 {
@@ -653,15 +653,18 @@ Bills and supplier credit notes support withholding tax per line item:
     "quantity": 1,
     "accountResourceId": "expense-uuid",
     "withholdingTax": {
-      "code": "WC010",
-      "rate": 10,
-      "description": "Professional fees"
+      "code": "WC 158",
+      "rate": 1,
+      "type": "corp",
+      "description": "Income Payment Made By Top Withholding Agents To Their Local/Resident Supplier Of Goods Other Than Those Covered By Other Rates Of Withholding Tax"
     }
   }]
 }
 ```
 
-**Retry pattern**: If the organization doesn't support withholding tax, the API returns `WITHHOLDING_CODE_NOT_FOUND`. On this error, remove the `withholdingTax` field from all line items and retry the request.
+**On `WITHHOLDING_CODE_NOT_FOUND`**: check the code against `list_withholding_codes` (codes contain a space). If the organization does not use withholding (non-PH), remove `withholdingTax` and say so; never strip it silently. See errors.md.
+
+Customer-side withholding (CWT) is not a line field: record the customer's BIR Form 2307 with `record_withholding_tax_certificate` (`POST /sales/batch-payments`, `paymentMethod: WITHHOLDING_TAX_CERTIFICATE`, `ph2307Details`). SKILL.md rule 98 has the rules.
 
 ---
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "8.0.0+1ab22b63",
+  "contentVersion": "9.0.0+190db9b1",
   "counts": {
-    "tools": 380,
+    "tools": 387,
     "namespaces": 49,
     "calculators": 13,
     "recipes": 16,
@@ -34,11 +34,11 @@
     },
     {
       "name": "sale_orders",
-      "description": "Sales order documents: Sale Quotes (estimates/quotations) and Sale Orders. Create, get, search, update, and transition (accept a quote, confirm an order, void, delete). A Sale Order links to its quote via saleQuoteResourceId; the quote must be issued (not DRAFT/VOID). Tracks fulfillment via orderState. Pipeline: quote → order → invoice (convert_sale_order_to_invoice)."
+      "description": "Sales order documents: Sale Quotes (estimates/quotations) and Sale Orders. Create, get, search, update, accept a quote, confirm an order, void, delete a draft. A Sale Order links to its quote via saleQuoteResourceId; the quote must be issued (not DRAFT/VOID). Tracks fulfillment via orderState. Pipeline: quote → order → invoice (convert_sale_order_to_invoice)."
     },
     {
       "name": "purchase_orders",
-      "description": "Purchase order documents: Purchase Requests (requisitions) and Purchase Orders (POs). Create, get, search, update, and transition (accept a request, confirm an order, void, delete). A Purchase Order links to its request via purchaseRequestResourceId; the request must be issued (not DRAFT/VOID). Tracks fulfillment via orderState. Pipeline: request → order → bill (convert_purchase_order_to_bill)."
+      "description": "Purchase order documents: Purchase Requests (requisitions) and Purchase Orders (POs). Create, get, search, update, accept a request, confirm an order, void, delete a draft. A Purchase Order links to its request via purchaseRequestResourceId; the request must be issued (not DRAFT/VOID). Tracks fulfillment via orderState. Pipeline: request → order → bill (convert_purchase_order_to_bill)."
     },
     {
       "name": "journals",
@@ -166,7 +166,7 @@
     },
     {
       "name": "payments_and_search",
-      "description": "Payment records: get, update, delete individual payments. List payments/credits on invoices and bills. Reverse credit applications. Cashflow transaction search. Universal cross-entity search. Also: payment run, batch payment, payment matching, void payment, payment history, credit note applications, transaction summary."
+      "description": "Payment records: get, update, delete individual payments. List payments/credits on invoices and bills. Reverse credit applications. Record a withholding tax certificate from a customer (BIR Form 2307, CWT). Cashflow transaction search. Universal cross-entity search. Also: payment run, batch payment, payment matching, void payment, payment history, credit note applications, transaction summary."
     },
     {
       "name": "unapplied_payments",
@@ -477,9 +477,30 @@
       "destructive": true
     },
     {
-      "name": "transition_sale_order",
+      "name": "accept_sale_quote",
       "namespace": "sale_orders",
-      "description": "Advance or cancel a Sale Quote / Sale Order lifecycle. action:",
+      "description": "Accept an issued Sale Quote (CREATED → ACCEPTED). A DRAFT can't be accepted: issue it first with update_sale_order isDraftToActiveSaleQuote:true. An issued Sale Quote can already be linked, so accepting is optional. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "confirm_sale_order",
+      "namespace": "sale_orders",
+      "description": "Confirm a Sale Order (→ CONFIRMED). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "void_sale_order",
+      "namespace": "sale_orders",
+      "description": "Void (cancel) a Sale Quote or Sale Order that is not a draft. For a draft use delete_sale_order. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_sale_order",
+      "namespace": "sale_orders",
+      "description": "Delete a DRAFT Sale Quote or Sale Order. Anything issued: void_sale_order. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -512,9 +533,30 @@
       "destructive": true
     },
     {
-      "name": "transition_purchase_order",
+      "name": "accept_purchase_request",
       "namespace": "purchase_orders",
-      "description": "Advance or cancel a Purchase Request / Purchase Order lifecycle. action:",
+      "description": "Accept an issued Purchase Request (ACTIVE → ACCEPTED). A DRAFT can't be accepted: issue it first with update_purchase_order isDraftToActivePurchaseRequest:true. An issued Purchase Request can already be linked, so accepting is optional. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "confirm_purchase_order",
+      "namespace": "purchase_orders",
+      "description": "Confirm a Purchase Order (→ CONFIRMED). If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "void_purchase_order",
+      "namespace": "purchase_orders",
+      "description": "Void (cancel) a Purchase Request or Purchase Order that is not a draft. For a draft use delete_purchase_order. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_purchase_order",
+      "namespace": "purchase_orders",
+      "description": "Delete a DRAFT Purchase Request or Purchase Order. Anything issued: void_purchase_order. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -1863,9 +1905,9 @@
       "destructive": true
     },
     {
-      "name": "list_withholding_tax_codes",
+      "name": "list_withholding_codes",
       "namespace": "tax_profiles",
-      "description": "List withholding tax codes (industry classification codes for PH/SG compliance). Returns full list (no pagination).",
+      "description": "List withholding codes (BIR ATCs, PH): code, rate, type, description. A row feeds a bill or supplier credit note line's withholdingTax (EWT) and, by its resourceId, a Withholding Tax Certificate (BIR Form 2307, CWT) allocation. limit max 100.",
       "readOnly": true,
       "destructive": false
     },
@@ -2412,6 +2454,13 @@
       "name": "reverse_invoice_credit",
       "namespace": "payments_and_search",
       "description": "Reverse (unapply) a credit note from an invoice. The credit note becomes UNAPPLIED again. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "record_withholding_tax_certificate",
+      "namespace": "payments_and_search",
+      "description": "Record a customer's Withholding Tax Certificate (BIR Form 2307, creditable withholding / CWT; PH orgs only) against their invoices and customer credit notes, as one payment batch. accountResourceId must be the \"Creditable Withholding Tax\" system account. Each transaction's amounts are the tax withheld from it. Async: returns a jobId (search_background_jobs). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

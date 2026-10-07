@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -204,7 +204,7 @@
     },
     {
       "name": "create_sale_order",
-      "description": "Create a Sale Quote or Sale Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` unique per org; set autoReference:true for the org's next number.\n\nSALE_QUOTE: DRAFT by default. Lifecycle DRAFT → (issue) → CREATED → (transition_sale_order ACCEPT) → ACCEPTED. A DRAFT quote can't be linked or accepted: issue it via update_sale_order isDraftToActiveSaleQuote:true, never a second quote.\nSALE_ORDER: created directly as CREATED (no draft state). Link to a quote via saleQuoteResourceId: the quote MUST be CREATED or ACCEPTED (not DRAFT/VOID). Lifecycle CREATED → CONFIRMED (transition_sale_order CONFIRM). Jaz Magic orders start PENDING (activate via update_sale_order).\n\nA linked order must use its quote's currency. accountResourceId is required on each lineItem when the document is not a draft. Invoice it with convert_sale_order_to_invoice. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a Sale Quote or Sale Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` unique per org; set autoReference:true for the org's next number.\n\nSALE_QUOTE: DRAFT by default. Lifecycle DRAFT → (issue) → CREATED → (accept_sale_quote) → ACCEPTED. A DRAFT quote can't be linked or accepted: issue it via update_sale_order isDraftToActiveSaleQuote:true, never a second quote.\nSALE_ORDER: created directly as CREATED (no draft state). Link to a quote via saleQuoteResourceId: the quote MUST be CREATED or ACCEPTED (not DRAFT/VOID). Lifecycle CREATED → CONFIRMED (confirm_sale_order). Jaz Magic orders start PENDING (activate via update_sale_order).\n\nA linked order must use its quote's currency. accountResourceId is required on each lineItem when the document is not a draft. Invoice it with convert_sale_order_to_invoice. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_sale_order",
@@ -219,12 +219,24 @@
       "description": "Update an editable Sale Quote or Sale Order (reference, dates, notes, custom fields, lines), or issue a DRAFT quote / activate a PENDING order. lineItems EDITS stored lines by resourceId, never replaces them: get_sale_order first. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
-      "name": "transition_sale_order",
-      "description": "Advance or cancel a Sale Quote / Sale Order lifecycle. action:\n- ACCEPT: Sale Quote only (CREATED → ACCEPTED). The quote must already be issued; a DRAFT can't be accepted (issue it first with update_sale_order isDraftToActiveSaleQuote:true). A CREATED quote is already linkable, so accept is optional.\n- CONFIRM: Sale Order only (CREATED → CONFIRMED).\n- VOID: either, when not a draft (cancels the document).\n- DELETE: DRAFT only; for anything non-draft use VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "name": "accept_sale_quote",
+      "description": "Accept an issued Sale Quote (CREATED → ACCEPTED). A DRAFT can't be accepted: issue it first with update_sale_order isDraftToActiveSaleQuote:true. An issued Sale Quote can already be linked, so accepting is optional. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "confirm_sale_order",
+      "description": "Confirm a Sale Order (→ CONFIRMED). If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "void_sale_order",
+      "description": "Void (cancel) a Sale Quote or Sale Order that is not a draft. For a draft use delete_sale_order. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_sale_order",
+      "description": "Delete a DRAFT Sale Quote or Sale Order. Anything issued: void_sale_order. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "create_purchase_order",
-      "description": "Create a Purchase Request or Purchase Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` unique per org; set autoReference:true for the org's next number.\n\nPURCHASE_REQUEST: DRAFT by default. Lifecycle DRAFT → (issue) → ACTIVE → (transition_purchase_order ACCEPT) → ACCEPTED. A DRAFT request can't be linked or accepted: issue it via update_purchase_order isDraftToActivePurchaseRequest:true, never a second request.\nPURCHASE_ORDER: DRAFT by default (saveAsDraft:false → ACTIVE). Link a request via purchaseRequestResourceId: it MUST be ACTIVE or ACCEPTED. Lifecycle DRAFT → ACTIVE → CONFIRMED (transition_purchase_order CONFIRM). Jaz Magic orders start PENDING (activate via update_purchase_order).\n\nA linked order must use its request's currency. accountResourceId is required on each lineItem when not a draft. Bill it with convert_purchase_order_to_bill. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a Purchase Request or Purchase Order (pick via documentType). lineItem text field = `name`. Dates YYYY-MM-DD. `reference` unique per org; set autoReference:true for the org's next number.\n\nPURCHASE_REQUEST: DRAFT by default. Lifecycle DRAFT → (issue) → ACTIVE → (accept_purchase_request) → ACCEPTED. A DRAFT request can't be linked or accepted: issue it via update_purchase_order isDraftToActivePurchaseRequest:true, never a second request.\nPURCHASE_ORDER: DRAFT by default (saveAsDraft:false → ACTIVE). Link a request via purchaseRequestResourceId: it MUST be ACTIVE or ACCEPTED. Lifecycle DRAFT → ACTIVE → CONFIRMED (confirm_purchase_order). Jaz Magic orders start PENDING (activate via update_purchase_order).\n\nA linked order must use its request's currency. accountResourceId is required on each lineItem when not a draft. Bill it with convert_purchase_order_to_bill. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_purchase_order",
@@ -239,8 +251,20 @@
       "description": "Update an editable Purchase Request or Purchase Order (reference, dates, notes, custom fields, lines), or issue a DRAFT request / activate a PENDING order. lineItems EDITS stored lines by resourceId, never replaces them: get_purchase_order first. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
-      "name": "transition_purchase_order",
-      "description": "Advance or cancel a Purchase Request / Purchase Order lifecycle. action:\n- ACCEPT: Purchase Request only (ACTIVE → ACCEPTED). The request must already be issued; a DRAFT can't be accepted (issue it first with update_purchase_order isDraftToActivePurchaseRequest:true). An ACTIVE request is already linkable, so accept is optional.\n- CONFIRM: Purchase Order only (ACTIVE → CONFIRMED).\n- VOID: either, when not a draft (cancels the document).\n- DELETE: DRAFT only; for anything non-draft use VOID. If this action involved a judgment call, record it (jot field or jot tool)."
+      "name": "accept_purchase_request",
+      "description": "Accept an issued Purchase Request (ACTIVE → ACCEPTED). A DRAFT can't be accepted: issue it first with update_purchase_order isDraftToActivePurchaseRequest:true. An issued Purchase Request can already be linked, so accepting is optional. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "confirm_purchase_order",
+      "description": "Confirm a Purchase Order (→ CONFIRMED). If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "void_purchase_order",
+      "description": "Void (cancel) a Purchase Request or Purchase Order that is not a draft. For a draft use delete_purchase_order. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_purchase_order",
+      "description": "Delete a DRAFT Purchase Request or Purchase Order. Anything issued: void_purchase_order. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "convert_sale_order_to_invoice",
@@ -1011,8 +1035,8 @@
       "description": "Delete a custom field. Removes it from all future transactions. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
-      "name": "list_withholding_tax_codes",
-      "description": "List withholding tax codes (industry classification codes for PH/SG compliance). Returns full list (no pagination)."
+      "name": "list_withholding_codes",
+      "description": "List withholding codes (BIR ATCs, PH): code, rate, type, description. A row feeds a bill or supplier credit note line's withholdingTax (EWT) and, by its resourceId, a Withholding Tax Certificate (BIR Form 2307, CWT) allocation. limit max 100."
     },
     {
       "name": "search_tax_profiles",
@@ -1325,6 +1349,10 @@
     {
       "name": "reverse_invoice_credit",
       "description": "Reverse (unapply) a credit note from an invoice. The credit note becomes UNAPPLIED again. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "record_withholding_tax_certificate",
+      "description": "Record a customer's Withholding Tax Certificate (BIR Form 2307, creditable withholding / CWT; PH orgs only) against their invoices and customer credit notes, as one payment batch. accountResourceId must be the \"Creditable Withholding Tax\" system account. Each transaction's amounts are the tax withheld from it. Async: returns a jobId (search_background_jobs). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_bill_payments",

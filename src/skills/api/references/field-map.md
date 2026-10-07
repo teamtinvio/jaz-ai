@@ -208,11 +208,14 @@ COGS maps to `"Direct Costs"`; "Cost of Goods Sold" is the default account name 
 | What You'd Guess | Actual API Field | Notes |
 |---|---|---|
 | `tax` | `withholdingTax` | Nested object on each line item |
-| `withholdingTaxCode` | `withholdingTax.code` | String code (e.g., "WC010") |
-| `withholdingTaxRate` | `withholdingTax.rate` | Numeric percentage (e.g., 10) |
-| `withholdingTaxDescription` | `withholdingTax.description` | Optional description |
+| `withholdingTaxCode` | `withholdingTax.code` | The ATC, space included (e.g., "WC 158") |
+| `withholdingTaxRate` | `withholdingTax.rate` | Numeric percentage (e.g., 1) |
+| `withholdingTaxType` | `withholdingTax.type` | corp, ind, final or wvat |
+| `withholdingTaxDescription` | `withholdingTax.description` | The code's description |
 
-**Not supported on**: Invoices, customer credit notes, journals, cash entries. Only bills and supplier credit notes.
+Copy all four from one `list_withholding_codes` row; a field left out is not stored on the line.
+
+**Line-level only on**: bills and supplier credit notes (EWT). Customer-side withholding (CWT) on invoices is recorded from the customer's BIR Form 2307 with `record_withholding_tax_certificate`, not on invoice lines.
 
 ---
 
