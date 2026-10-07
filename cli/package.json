@@ -1,6 +1,6 @@
 {
   "name": "jaz-clio",
-  "version": "9.0.1",
+  "version": "9.0.2",
   "description": "Fastest ledger for agents. Jaz accounting CLI and MCP server: invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close.",
   "type": "module",
   "bin": {

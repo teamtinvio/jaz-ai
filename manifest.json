@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.0.1",
+  "version": "9.0.2",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -1472,7 +1472,7 @@
     },
     {
       "name": "apply_bank_rule",
-      "description": "Apply a pre-configured bank rule (action shortcut) to a batch of bank statement entries (max 500). Async: returns a jobId. Poll search_background_jobs filtered by resourceId. The rule executes its configured action (e.g. RECONCILE_WITH_DIRECT_CASH_ENTRY) on each entry. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Reconcile bank statement entries (max 500) with one saved bank rule: each entry gets the cash-in or cash-out entry the rule defines (its accounts and amount split). Async: returns a jobId; poll search_background_jobs filtered by resourceId. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_direct_cash_entry",

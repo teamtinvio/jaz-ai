@@ -1,5 +1,9 @@
 # Changelog
 
+## [9.0.2] - 2026-10-07
+
+- `apply_bank_rule` now says plainly what it does: each bank statement entry you pick is reconciled with the cash-in or cash-out entry the saved bank rule defines.
+
 ## [9.0.1] - 2026-10-07
 
 - `record_withholding_tax_certificate` now says where to find the certificate after recording it: on the invoice, under its withholding records, not in its payment list. So an assistant checking its work no longer mistakes a recorded certificate for a failed one and records it twice.
