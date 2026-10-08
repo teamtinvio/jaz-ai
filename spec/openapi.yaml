@@ -925,6 +925,10 @@
     },
     "BTShipping": {
       "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the Revenue account the shipping amount is posted to. Must be an active Revenue-class\naccount of the organization. When omitted, the system-generated \"Shipping Revenue\" account is used.",
+          "type": "string"
+        },
         "shippingAmount": {
           "description": "Shipping amount in the transaction currency.",
           "minimum": 0,
@@ -16719,15 +16723,15 @@
     "Ph2307AllocationInput": {
       "properties": {
         "amount": {
-          "description": "Withheld amount for this code, in the transaction currency.",
+          "description": "Income amount the tax was withheld from, for this code, in the payment currency. Same sign as baseAmount.",
           "type": "number"
         },
         "baseAmount": {
-          "description": "Base amount the withholding is computed on, in the transaction currency.",
+          "description": "Tax withheld under this code, in the payment currency. The allocations' baseAmount must add up to the payment total.",
           "type": "number"
         },
         "withholdingCodeResourceId": {
-          "description": "Resource ID of the withholding tax code.",
+          "description": "Resource ID of the withholding code, from GET /withholding-codes.",
           "type": "string"
         }
       },
@@ -78162,7 +78166,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "List the withholding tax codes a transaction can carry, with their rate and type. In the Philippines these are the BIR alphanumeric tax codes (ATC), such as WC158 for expanded withholding (EWT) on bills and the creditable withholding (CWT) codes on a BIR Form 2307. Use a code's `code`, `rate` and `type` for a bill line's `withholdingTax`, and its `resourceId` for a BIR Form 2307 allocation's `withholdingCodeResourceId` (the same code table).",
+        "description": "List the withholding tax codes a transaction can carry, with their rate and type. In the Philippines these are the BIR alphanumeric tax codes (ATC), such as `WC 158` (codes contain a space) for expanded withholding (EWT) on bills and the creditable withholding (CWT) codes on a BIR Form 2307. Use a code's `code`, `rate` and `type` for a bill line's `withholdingTax`, and its `resourceId` for a BIR Form 2307 allocation's `withholdingCodeResourceId` (the same code table).",
         "operationId": "list-withholding-codes",
         "parameters": [
           {
@@ -78185,13 +78189,13 @@
             "type": "string"
           },
           {
-            "description": "Filter by code, partial match (e.g. WC158).",
+            "description": "Filter by code, partial match. Codes contain a space: WC 158 matches, WC158 does not.",
             "in": "query",
             "name": "code",
             "type": "string"
           },
           {
-            "description": "Filter by withholding type.",
+            "description": "Filter by withholding type: corp, ind, final or wvat.",
             "in": "query",
             "name": "type",
             "type": "string"

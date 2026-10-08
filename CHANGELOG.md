@@ -1,5 +1,9 @@
 # Changelog
 
+## [9.1.0] - 2026-10-08
+
+- The hosted connector (mcp.jaz.ai) now speaks MCP 2026-07-28, the newest version of the protocol, alongside the earlier versions. Clients that support it, including ChatGPT and Claude Code, now connect in one request instead of first being turned away and retrying the older multi-step handshake. Connections are quicker and fail less often. Tools and results are unchanged.
+
 ## [9.0.2] - 2026-10-07
 
 - `apply_bank_rule` now says plainly what it does: each bank statement entry you pick is reconciled with the cash-in or cash-out entry the saved bank rule defines.

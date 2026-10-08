@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 9.0.2
+version: 9.1.0
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 148 production gotchas, error
