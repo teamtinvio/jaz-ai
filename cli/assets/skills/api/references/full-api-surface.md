@@ -218,7 +218,7 @@ The 6 sync endpoints are NOT idempotent on the same `bankStatementEntryResourceI
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/drafts/validate` | **Sync**. Validate up to 500 drafts for conversion eligibility in ONE call. Returns per-item errors + display data inline. No state change. Safe to call repeatedly. |
+| POST | `/drafts/validate` | **Sync**. Check up to 500 drafts in ONE call: per-item errors, line items and totals, and signals (possible duplicate, total outside the contact's range, new currency / terms / tax, a line on an account or item the contact has not used). No state change. Safe to call repeatedly. |
 | POST | `/drafts/convert-to-active` | **Async**, returns `{ jobId }`. Promote up to 500 drafts to ACTIVE in ONE call. NOT idempotent on already-promoted drafts. |
 | POST | `/drafts/submit-for-approval` | **Async**, returns `{ jobId }`. Route up to 500 drafts into approval workflow in ONE call. NOT idempotent on drafts with in-flight approval. |
 
@@ -237,6 +237,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/contacts/search` | Advanced search |
 | PUT | `/contacts/:resourceId` | Update |
 | DELETE | `/contacts/:resourceId` | Delete |
+| GET | `/contacts/:resourceId/signals?btType=` | The contact's usual values for one transaction type, open balance, and billing rhythm when regular. Read-only. |
 | POST | `/contacts/bulk-upsert` | Bulk create/update contacts (max 500); **async**, returns `{ jobId }`. Poll `/background-jobs/search` with `filter.resourceId`. |
 
 ### Contact Groups

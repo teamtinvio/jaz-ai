@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.1.0",
+  "version": "9.2.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -112,7 +112,7 @@
     },
     {
       "name": "get_contact_signals",
-      "description": "Read-only contact pattern intelligence (cadence, outliers, divergences, severity). USE THIS for stand-alone history lookup before drafting (e.g. \"what does this supplier normally look like?\"). Use validate_drafts instead when you have a specific draft to score.\n\nReturns null when the contact has no qualifying history yet (sampleSize < 5) or the freshness layer is unavailable. Per-pair cache (contactId × btType); duplicate calls for the same pair return the same result.\n\nThree response slices (severitySummary, outlierFlags, revealedDivergences) populate ONLY on the validate_drafts path; empty/null here."
+      "description": "A contact's usual values for one transaction type, from its recent posted transactions (last 12 months, up to 50): currency, payment terms, tax, account and item, each with counts. Also returns its open balance (all dates and currencies, in the base currency, up to 12h behind payments) and, only for a contact that transacts regularly, its billing rhythm (median interval, last and next expected date). USE THIS before drafting (\"what does this supplier normally look like?\"). To check a specific draft against this history use validate_drafts.\n\nsampleSize 0 with severitySummary.dominantLabel NEW = no history of this type. NO_ALERTS = could not be computed; carry on without it. 403 NOT_HAVE_ENOUGH_PERMISSION = the user lacks Sales (SALE, SALE_CREDIT_NOTE) or Purchases (PURCHASE, PURCHASE_CREDIT_NOTE)."
     },
     {
       "name": "create_contact",
@@ -1516,7 +1516,7 @@
     },
     {
       "name": "validate_drafts",
-      "description": "BULK validate up to 500 draft business transactions in ONE call, mixing any btType. SYNC: returns per-item errors + display data; no state change. Run before convert_drafts_to_active.\n\nbtType enum: SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE = customer CN, PURCHASE_CREDIT_NOTE = supplier CN. Journals NOT in this enum.\n\nEach result carries contactSignals (Mid-7: cadence, outliers, severity, divergences from contact's modal pattern; null if no contact / no history) and breakdown (Balance-panel payload: line items + subtotal/tax/total/balance/exchange rate). Top-level contactSignalsMeta.unavailable=true → freshness layer offline for whole batch.\n\nUSE THIS to score a specific draft against contact history. For stand-alone \"what does this contact normally look like?\" without a draft → use get_contact_signals."
+      "description": "BULK check up to 500 drafts in ONE call, any mix of btType (SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE, PURCHASE_CREDIT_NOTE; not journals). SYNC, no state change. Run before convert_drafts_to_active.\n\nEach result: eligible + errors[] (what blocks conversion), breakdown (lines, subtotal, shipping, tax, total, balance, exchange rate, totalInFunctional) and contactSignals, the draft vs the contact's recent posted transactions of the same type:\n- severitySummary.dominantLabel + tone (RED probably wrong, YELLOW unusual, BLUE nothing found, GRAY could not check): POSSIBLE_DUPLICATE, NEW_CURRENCY, ABOVE_USUAL / BELOW_USUAL (outside 1.5x the contact's range), NEW_TERMS, TAX_TYPE, NEW_GST, NEW_COA / NEW_ITEM (account or item the contact never used), NEW (<5 compared), NORMAL, NO_ALERTS.\n- Evidence: duplicateFlags (the twin; RED same supplier reference, YELLOW same amount + date), outlierFlags (previous min / max), revealedDivergences (line number, names).\ncontactSignals is null when the draft is ineligible, has no contact, or contactSignalsMeta.unavailable.\n\nUSE THIS to check a specific draft; for \"what does this contact normally look like?\" use get_contact_signals."
     },
     {
       "name": "convert_drafts_to_active",

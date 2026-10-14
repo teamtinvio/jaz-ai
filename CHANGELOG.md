@@ -1,5 +1,15 @@
 # Changelog
 
+## [9.2.0] - 2026-10-14
+
+**Draft checks now point at real problems.**
+
+- `validate_drafts` flags a possible duplicate: a bill with the same supplier invoice number as another bill or draft (red), or the same amount, currency and date (yellow), and names the other document.
+- The amount check now fires only when a total is outside the contact's own range in its recent documents, and says by how much (previous smallest and largest). The billing-rhythm warnings on drafts are gone.
+- A line on an account or item the contact has never used is called out by line number, with the account or item names.
+- Every signal carries a colour (red, yellow, blue, gray), and a clean draft says what was checked.
+- `get_contact_signals` returns the contact's usual currency, terms, tax, account and item with counts, its open balance, and its billing rhythm when it bills regularly. It no longer returns lists that were always empty.
+
 ## [9.1.0] - 2026-10-08
 
 - The hosted connector (mcp.jaz.ai) now speaks MCP 2026-07-28, the newest version of the protocol, alongside the earlier versions. Clients that support it, including ChatGPT and Claude Code, now connect in one request instead of first being turned away and retrying the older multi-step handshake. Connections are quicker and fail less often. Tools and results are unchanged.

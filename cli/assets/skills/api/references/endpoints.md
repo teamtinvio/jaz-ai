@@ -483,6 +483,27 @@ Create exchange rates in bulk (max 500). **Auto-enables currencies not yet enabl
 { "data": { "resourceId": "uuid", ... } }
 ```
 
+### GET /api/v1/contacts/{resourceId}/signals?btType=PURCHASE
+
+The contact's usual values for one transaction type (`SALE`, `PURCHASE`, `SALE_CREDIT_NOTE`, `PURCHASE_CREDIT_NOTE`; required), from its posted transactions of the last 12 months (most recent 50). SKILL.md rule 138.
+
+```json
+// Response (cadence only for a regular contact; outstanding absent when nothing is open):
+{ "data": {
+  "sampleSize": 24, "signalQuality": "STABLE",
+  "patterns": [
+    {"field": "PAYMENT_TERMS", "value": "Net 30", "rawValue": "30", "matchCount": 23, "totalCount": 24, "confidence": 0.958},
+    {"field": "TOP_COA", "value": "Office Supplies", "rawValue": "uuid", "matchCount": 30, "totalCount": 33, "confidence": 0.909}
+  ],
+  "cadence": {"medianIntervalDays": 30, "daysSinceLast": 34, "intervalRatio": 1.13, "lastDate": "2026-09-09", "nextExpectedDate": "2026-10-09"},
+  "outstanding": {"totalAmount": "5400.00", "currencyCode": "SGD", "pastDueAmount": "0.00", "pastDueCount": 0,
+                  "notYetDueAmount": "5400.00", "notYetDueCount": 2, "activeBillCount": 2}
+} }
+// No history of the type: sampleSize 0, patterns [], "severitySummary": {"dominantLabel": "NEW", "tone": "BLUE"}.
+// Could not compute: "severitySummary": {"dominantLabel": "NO_ALERTS", "tone": "GRAY"}.
+// No access to the Sales / Purchases module: 403 NOT_HAVE_ENOUGH_PERMISSION.
+```
+
 ---
 
 ## 6. Items

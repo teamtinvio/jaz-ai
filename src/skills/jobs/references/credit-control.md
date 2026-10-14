@@ -8,7 +8,7 @@
 - **`generate_aged_receivables(endDate: <date>)`**: step 1: AR aging report with bucket breakdown.
 - **`search_invoices(filter: {status: {eq: 'UNPAID'}, dueDate: {lt: <date>}, contactResourceId: <customer>}, sortBy: 'dueDate', sortOrder: 'ASC', limit: 200)`**: step 2: per-customer overdue detail. Paginate.
 - **`get_contact(resourceId: <customer id>)`**: step 2: pull contact info (email, phone, primary contact).
-- **`get_contact_signals(resourceId: <id>, btType: 'SALE')`**: step 3: pull cadence + outlier signals + outstanding balance for the customer. Mid-7 endpoint.
+- **`get_contact_signals(resourceId: <id>, btType: 'SALE')`**: step 3: the customer's usual payment terms, open balance and, for a regular customer, billing rhythm.
 - **`apply_credits_to_invoice(...)`** / **`create_customer_credit_note(...)`**: step 6: write-off path A for stage-3 specific impairment.
 - **`pay_invoice(... paymentMethod: 'DEBT_WRITE_OFF' ...)`**: step 6: write-off path B (direct).
 - **`calculate(type: 'ecl', ...)`**, then `create_capsule` + `create_journal` with `capsuleResourceId`: step 7: ECL collective top-up if material change in aging.
@@ -55,34 +55,34 @@ get_contact(resourceId: <customer id>)
 
 For each customer build a chase record: `{customerName, totalOverdue, oldestDaysOverdue, invoices: [{reference, valueDate, dueDate, daysOverdue, outstanding}], primaryContact}`.
 
-## Step 3: Contact-signals pull (Mid-7)
+## Step 3: Customer context
 
 ```
 get_contact_signals(resourceId: <customer id>, btType: 'SALE')
 ```
 
-Returns: `{ cadence, outlierFlags[], severitySummary, patternDivergenceFlags, outstandingSnapshot, revealedPatterns[] }`. High-signal data for collection prioritization:
-- **Cadence outliers** (this customer typically pays N days late): expected vs current overdue.
-- **Severity** (`LOW` / `MEDIUM` / `HIGH`): customer-specific risk index.
-- **Pattern divergence**: a customer who's never been overdue is now; escalate.
+Returns the customer's usual values from its recent invoices and its open balance:
+- **`patterns[]`** with `field: 'PAYMENT_TERMS'`: the terms this customer is usually invoiced on (e.g. Net 30, 11 of 12 invoices). An overdue invoice on unusually long terms is a negotiation point; on the usual terms it is plain lateness.
+- **`outstanding`**: everything the customer owes across all invoices, dates and currencies, in the base currency: `totalAmount`, `pastDueAmount` / `pastDueCount`, `notYetDueAmount`. Use it to size the conversation (how much more is coming due), not to rank risk. It can be up to 12 hours behind recent payments, so the aging report from step 1 stays the source for what is overdue.
+- **`cadence`** (only for a customer invoiced regularly): how often the customer is invoiced (median interval, last and next expected invoice date). It describes invoicing rhythm, not payment behavior.
 
-Keep the contact-signals output per customer.
+There is no risk score or payment-lateness history in this response. Rank customers on the aging in step 1 and the chase history in step 5.
 
 ## Step 4: Categorize for action
 
-Per customer, classify based on aging bucket + contact-signals:
+Per customer, classify on the aging bucket, the amount owed and the chase history:
 
-| Bucket | Signal | Action |
-|--------|--------|--------|
+| Bucket | Condition | Action |
+|--------|-----------|--------|
 | < 30d | (any) | Soft reminder email, automated tooling outside Jaz. |
-| 30-60d | severity LOW | Phone call OR formal email. Document in narrative. |
-| 30-60d | severity MEDIUM/HIGH | Phone call + escalation to AR manager. |
+| 30-60d | first time overdue | Phone call OR formal email. Document in narrative. |
+| 30-60d | overdue before, or large `outstanding.notYetDueAmount` still to come | Phone call + escalation to AR manager. |
 | 60-90d | (any) | Formal demand letter. Begin specific-provision review (path A/B if appropriate). |
 | 90-120d | (any) | Final demand. Suspend further credit. Begin write-off review. |
-| 120d+ | severity LOW | Final demand + small claims / mediation option. |
-| 120d+ | severity HIGH | Likely uncollectible; proceed to step 6 specific write-off. |
+| 120d+ | customer still responding | Final demand + small claims / mediation option. |
+| 120d+ | no response, or evidence of insolvency | Likely uncollectible; proceed to step 6 specific write-off. |
 
-The contact-signals `outstandingSnapshot.recoverabilityScore` (0-100) is a useful tie-breaker.
+"Overdue before" comes from your chase log (step 5).
 
 ## Step 5: Document chase activities
 
@@ -167,7 +167,8 @@ Returns XLSX with high-risk customer flags (rising aging trends, recently-defaul
 | Source | Error | Recovery |
 |--------|-------|----------|
 | Step 2 | `search_invoices` returns 0 despite aging shows overdue | Aging report may include `PARTIALLY_PAID` invoices; expand filter `status: {in: ['UNPAID', 'PARTIALLY_PAID']}`. |
-| Step 3 | `get_contact_signals` returns `null` | The freshness layer is offline; skip the signals step and use aging alone. Don't halt the job. |
+| Step 3 | `severitySummary.dominantLabel` is `NO_ALERTS` | Signals could not be computed; use aging alone. Don't halt the job. |
+| Step 3 | 403 `NOT_HAVE_ENOUGH_PERMISSION` | The user has no access to Sales; ask them, or skip step 3. |
 | Step 6 Path A | `apply_credits_to_invoice` 422 `credit_exceeds_balance` | Split the credit across multiple invoices, OR reduce the credit amount to match the bill balance. |
 | Step 6 Path B | `paymentMethod: 'DEBT_WRITE_OFF'` rejected | Verify the enum value via `jaz-api/SKILL.md` (some orgs may have custom payment-method config; default supports DEBT_WRITE_OFF). |
 | Step 7 ECL top-up | Top-up causes Bad Debt Expense to spike | Expected: material aging shift = material P&L impact. Surface to practitioner; potentially split across multiple periods if it's a known one-off (rare). |
@@ -179,7 +180,7 @@ Returns XLSX with high-risk customer flags (rising aging trends, recently-defaul
 ## Tips
 
 - **Run weekly, not monthly.** Aging gets worse the longer you wait. A 30-day-overdue invoice has a 70% recovery rate; 90-day-overdue drops to 40%; 120+ days to 20%.
-- **Contact-signals is the differentiator.** `get_contact_signals` surfaces who's likely to pay and who's behaving abnormally. Without this, credit control is just "send reminders to everyone."
+- **Context before the call.** `get_contact_signals` gives the customer's usual terms and total exposure in one read, so the chase conversation starts from facts, not just the overdue invoice.
 - **Capsule per customer write-off** = audit trail. Even small write-offs ($500+) should have a capsule with the chase history.
 - **Year-end specific impairment** is harder than monthly. Catch it monthly; auditor will sample-test path A/B write-offs as part of audit-prep.
 

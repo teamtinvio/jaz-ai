@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.1.0+de86ba52",
+  "contentVersion": "9.2.0+af193221",
   "counts": {
     "tools": 387,
     "namespaces": 49,
@@ -290,7 +290,7 @@
     {
       "name": "get_contact_signals",
       "namespace": "contacts",
-      "description": "Read-only contact pattern intelligence (cadence, outliers, divergences, severity). USE THIS for stand-alone history lookup before drafting (e.g. \"what does this supplier normally look like?\"). Use validate_drafts instead when you have a specific draft to score.",
+      "description": "A contact's usual values for one transaction type, from its recent posted transactions (last 12 months, up to 50): currency, payment terms, tax, account and item, each with counts. Also returns its open balance (all dates and currencies, in the base currency, up to 12h behind payments) and, only for a contact that transacts regularly, its billing rhythm (median interval, last and next expected date). USE THIS before drafting (\"what does this supplier normally look like?\"). To check a specific draft against this history use validate_drafts.",
       "readOnly": true,
       "destructive": false
     },
@@ -2747,7 +2747,7 @@
     {
       "name": "validate_drafts",
       "namespace": "drafts",
-      "description": "BULK validate up to 500 draft business transactions in ONE call, mixing any btType. SYNC: returns per-item errors + display data; no state change. Run before convert_drafts_to_active.",
+      "description": "BULK check up to 500 drafts in ONE call, any mix of btType (SALE = invoice, PURCHASE = bill, SALE_CREDIT_NOTE, PURCHASE_CREDIT_NOTE; not journals). SYNC, no state change. Run before convert_drafts_to_active.",
       "readOnly": true,
       "destructive": false
     },
