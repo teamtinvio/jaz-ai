@@ -56,6 +56,8 @@ For a guided setup, copy the [Jaz agent setup prompt](agent-setup-prompt.md) and
 | **OpenAI Responses API** | Hosted HTTP MCP only (see [Responses API note](#openai-responses-api)) |
 | **npm (CLI)** | `npm install -g jaz-clio && clio auth login` |
 
+The Claude Code plugin runs the MCP server bundled inside it (needs Node.js 18 or later on `PATH`), so a session starts it without an npm download, and the server version changes only when the plugin updates. To stay current, turn on auto-update for the `jaz-plugins` marketplace (`/plugin` → **Marketplaces**), or run `claude plugin update jaz-ai@jaz-plugins`.
+
 **Stdio MCP config** (Claude Desktop, Cursor, Windsurf, OpenAI Codex CLI / Agents SDK, any host that runs MCP servers as local processes):
 
 ```json
@@ -63,7 +65,7 @@ For a guided setup, copy the [Jaz agent setup prompt](agent-setup-prompt.md) and
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@9.2.0", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@9.2.1", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -76,13 +78,13 @@ For a guided setup, copy the [Jaz agent setup prompt](agent-setup-prompt.md) and
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@9.2.0", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@9.2.1", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@9.2.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@9.2.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -479,7 +481,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@9.2.0", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@9.2.1", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 

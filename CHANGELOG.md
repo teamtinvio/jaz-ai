@@ -1,5 +1,9 @@
 # Changelog
 
+## [9.2.1] - 2026-10-18
+
+- Claude Code plugin: the Jaz MCP server now starts from the copy bundled in the plugin instead of being fetched through npx at every session start. It starts about three times faster, each session uses one process instead of two (about half the memory), and the server changes only when you update the plugin. Turn on auto-update for the `jaz-plugins` marketplace in `/plugin` → Marketplaces, or run `claude plugin update jaz-ai@jaz-plugins`.
+
 ## [9.2.0] - 2026-10-14
 
 **Draft checks now point at real problems.**
