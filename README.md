@@ -65,7 +65,7 @@ The Claude Code plugin runs the MCP server bundled inside it (needs Node.js 18 o
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@9.2.1", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@9.2.2", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -78,13 +78,13 @@ The Claude Code plugin runs the MCP server bundled inside it (needs Node.js 18 o
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@9.2.1", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@9.2.2", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@9.2.1` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@9.2.2` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -481,7 +481,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@9.2.1", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@9.2.2", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 

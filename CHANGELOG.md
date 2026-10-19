@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.2.2] - 2026-10-19
+
+- Bank reconciliation: the assistant now applies a learned cash-in or cash-out suggestion on its own only when Jaz shows it as "High Confidence". A "New Pattern" suggestion, one Jaz is still learning, waits for you to confirm it, even at full confidence. This checks the pattern's status the way Jaz's own auto-reconcile does. Jaz's auto-reconcile also checks how the suggestion's contact was chosen, which the assistant cannot see yet.
+- When a bank line has both, its "High Confidence" suggestion can now be applied even if a "New Pattern" one scores higher. When two suggestions tie on score but would post different things, neither is applied on its own: the line waits for you.
+- Suggestions that wait for you now say why (`checkpointReason`). A learned suggestion or bank rule shows the account, contact and tax it would post (`proposedPosting`), and `view_auto_reconciliation` shows each learned suggestion's `lifecycleStatus`. When more than 25 lines need review, the result says how many.
+
 ## [9.2.1] - 2026-10-18
 
 - Claude Code plugin: the Jaz MCP server now starts from the copy bundled in the plugin instead of being fetched through npx at every session start. It starts about three times faster, each session uses one process instead of two (about half the memory), and the server changes only when you update the plugin. Turn on auto-update for the `jaz-plugins` marketplace in `/plugin` → Marketplaces, or run `claude plugin update jaz-ai@jaz-plugins`.
