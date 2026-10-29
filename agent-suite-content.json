@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.2.2+e20478ad",
+  "contentVersion": "9.2.3+0b55a3f0",
   "counts": {
     "tools": 387,
     "namespaces": 49,
@@ -86,7 +86,7 @@
     },
     {
       "name": "contacts",
-      "description": "Contacts (customers/suppliers/vendors), contact groups, customer segmentation. Create, search, get, update, delete contacts. Bulk upsert contacts from CSV / spreadsheet imports: async, returns jobId, poll background_jobs. List/create contact groups."
+      "description": "Contacts (customers/suppliers/vendors), contact groups, customer segmentation. Create, search, get, update, delete contacts. Contact signals: usual values and billing rhythm. Bulk upsert contacts from CSV / spreadsheet imports: async, returns jobId, poll background_jobs. List/create contact groups."
     },
     {
       "name": "items_and_inventory",
@@ -182,7 +182,7 @@
     },
     {
       "name": "quick_fix",
-      "description": "Quick Fix: bulk-update transactions or line items in one call: dates, contacts, tags, accounts, tax profiles, custom fields on invoices/bills/journals/credit-notes/cash-entries/schedulers. Ledger Find & Fix: preview one change to records found by filter across those types, run it once the user confirms. Also: batch update, mass edit, find & fix, find and fix, find & recode, find and recode, recode, reclassify, bulk edit, change all, move these to account, retag, re-date, change the contact on all, fix the account on every."
+      "description": "Quick Fix: bulk-update or set fields on transactions or line items in one call, on bills, cash entries, customer credit notes, invoices, journal schedules, journals, purchase schedules, sale schedules, subscription schedules, supplier credit notes, purchase orders, purchase requests, sale orders, sale quotes. On a record: capsule, contact, currency and exchange rate, custom fields, due date, tags, tax currency, account, reference, billing address, billing and shipping address, template, end date, internal notes, repeat interval, start date. On lines: tracking classes, discount, item, line name, account, quantity, tax profile, unit price, withholding tax, amount, description, SKU. Ledger Find & Fix: preview one change to records found by filter across those types, run it once the user confirms. Also: batch update, mass edit, find & fix, find and fix, find & recode, find and recode, recode, reclassify, bulk edit, change all, move these to account, retag, re-date, change the contact on all, fix the account on every."
     },
     {
       "name": "export_records",

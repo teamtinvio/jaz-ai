@@ -1,5 +1,6 @@
 {
   "version": "1",
+  "schemaRevision": 3,
   "screens": [
     {
       "key": "accounts",
@@ -9,22 +10,39 @@
     {
       "key": "bank-reconciliation.bank-accounts",
       "path": "/bank-reconciliation/bank-accounts",
-      "label": "Bank Accounts"
+      "label": "Bank Accounts",
+      "aliases": [
+        "bank records",
+        "bank",
+        "records"
+      ]
     },
     {
       "key": "cashflow.all-cashflow.all",
       "path": "/cashflow/all-cashflow/all",
-      "label": "All"
+      "label": "All",
+      "aliases": [
+        "all",
+        "all cashflow"
+      ]
     },
     {
       "key": "cashflow.all-cashflow.reconciled",
       "path": "/cashflow/all-cashflow/reconciled",
-      "label": "Reconciled"
+      "label": "Reconciled",
+      "aliases": [
+        "reconciled",
+        "reconciled cashflow"
+      ]
     },
     {
       "key": "cashflow.all-cashflow.unreconciled",
       "path": "/cashflow/all-cashflow/unreconciled",
-      "label": "Unreconciled"
+      "label": "Unreconciled",
+      "aliases": [
+        "unreconciled",
+        "unreconciled cashflow"
+      ]
     },
     {
       "key": "cashflow.cash-entries.Cash-ins",
@@ -112,6 +130,36 @@
       "label": "Beneficiaries"
     },
     {
+      "key": "deferrals.completed.all",
+      "path": "/deferrals/completed/all",
+      "label": "All"
+    },
+    {
+      "key": "deferrals.completed.closed-out",
+      "path": "/deferrals/completed/closed-out",
+      "label": "Closed Out"
+    },
+    {
+      "key": "deferrals.completed.fully-amortized",
+      "path": "/deferrals/completed/fully-amortized",
+      "label": "Fully Amortized"
+    },
+    {
+      "key": "deferrals.eligible.all",
+      "path": "/deferrals/eligible/all",
+      "label": "All"
+    },
+    {
+      "key": "deferrals.register.active",
+      "path": "/deferrals/register/active",
+      "label": "Active"
+    },
+    {
+      "key": "deferrals.register.draft",
+      "path": "/deferrals/register/draft",
+      "label": "Draft"
+    },
+    {
       "key": "employees",
       "path": "/employees",
       "label": "Employees"
@@ -119,22 +167,98 @@
     {
       "key": "employees.claims",
       "path": "/employees/claims",
-      "label": "Claims"
+      "label": "Claims",
+      "aliases": [
+        "claims",
+        "employee claims"
+      ]
+    },
+    {
+      "key": "employees.claims.active",
+      "path": "/employees/claims/active",
+      "label": "Active"
+    },
+    {
+      "key": "employees.claims.drafts",
+      "path": "/employees/claims/drafts",
+      "label": "Drafts"
+    },
+    {
+      "key": "employees.claims.forApproval",
+      "path": "/employees/claims/forApproval",
+      "label": "ForApproval"
+    },
+    {
+      "key": "employees.claims.pendingApproval",
+      "path": "/employees/claims/pendingApproval",
+      "label": "PendingApproval"
+    },
+    {
+      "key": "employees.claims.resubmit",
+      "path": "/employees/claims/resubmit",
+      "label": "Resubmit"
+    },
+    {
+      "key": "employees.claims.voided",
+      "path": "/employees/claims/voided",
+      "label": "Voided"
     },
     {
       "key": "employees.directory",
       "path": "/employees/directory",
-      "label": "Directory"
+      "label": "Directory",
+      "aliases": [
+        "employees",
+        "directory"
+      ]
+    },
+    {
+      "key": "employees.directory.active",
+      "path": "/employees/directory/active",
+      "label": "Active"
+    },
+    {
+      "key": "employees.directory.archived",
+      "path": "/employees/directory/archived",
+      "label": "Archived"
     },
     {
       "key": "employees.payouts",
       "path": "/employees/payouts",
-      "label": "Payouts"
+      "label": "Payouts",
+      "aliases": [
+        "payouts",
+        "payout",
+        "employee payouts"
+      ]
+    },
+    {
+      "key": "employees.payouts.action-needed",
+      "path": "/employees/payouts/action-needed",
+      "label": "Action Needed"
+    },
+    {
+      "key": "employees.payouts.cancelled",
+      "path": "/employees/payouts/cancelled",
+      "label": "Cancelled"
+    },
+    {
+      "key": "employees.payouts.completed",
+      "path": "/employees/payouts/completed",
+      "label": "Completed"
+    },
+    {
+      "key": "employees.payouts.in-progress",
+      "path": "/employees/payouts/in-progress",
+      "label": "In Progress"
     },
     {
       "key": "fixed-assets.disposals.all",
       "path": "/fixed-assets/disposals/all",
-      "label": "All"
+      "label": "All",
+      "aliases": [
+        "disposals"
+      ]
     },
     {
       "key": "fixed-assets.disposals.discarded",
@@ -145,6 +269,11 @@
       "key": "fixed-assets.disposals.sold",
       "path": "/fixed-assets/disposals/sold",
       "label": "Sold"
+    },
+    {
+      "key": "fixed-assets.eligible.all",
+      "path": "/fixed-assets/eligible/all",
+      "label": "All"
     },
     {
       "key": "fixed-assets.register.active",
@@ -234,7 +363,13 @@
     {
       "key": "journal-entries.all-journals.active-journal-entries",
       "path": "/journal-entries/all-journals/active-journal-entries",
-      "label": "Active Journal Entries"
+      "label": "Active Journal Entries",
+      "aliases": [
+        "journal",
+        "manual",
+        "manual journal",
+        "all manual journals"
+      ]
     },
     {
       "key": "journal-entries.all-journals.draft",
@@ -722,6 +857,11 @@
       "label": "Bill Due"
     },
     {
+      "key": "purchase-orders.orders.for-review",
+      "path": "/purchase-orders/orders/for-review",
+      "label": "For Review"
+    },
+    {
       "key": "purchase-orders.orders.open",
       "path": "/purchase-orders/orders/open",
       "label": "Open"
@@ -884,12 +1024,21 @@
     {
       "key": "purchases.transactions.balance-due",
       "path": "/purchases/transactions/balance-due",
-      "label": "Balance Due"
+      "label": "Balance Due",
+      "aliases": [
+        "bills",
+        "bill due",
+        "bills due",
+        "bills balance due"
+      ]
     },
     {
       "key": "purchases.transactions.draft",
       "path": "/purchases/transactions/draft",
-      "label": "Draft"
+      "label": "Draft",
+      "aliases": [
+        "bill drafts"
+      ]
     },
     {
       "key": "purchases.transactions.received",
@@ -919,7 +1068,11 @@
     {
       "key": "reports.aged-payables.summary",
       "path": "/reports/aged-payables/summary",
-      "label": "Summary"
+      "label": "Summary",
+      "aliases": [
+        "aged payables",
+        "payables"
+      ]
     },
     {
       "key": "reports.aged-receivables.details",
@@ -929,7 +1082,11 @@
     {
       "key": "reports.aged-receivables.summary",
       "path": "/reports/aged-receivables/summary",
-      "label": "Summary"
+      "label": "Summary",
+      "aliases": [
+        "aged receivables",
+        "receivables"
+      ]
     },
     {
       "key": "reports.anomalies.bills",
@@ -954,7 +1111,11 @@
     {
       "key": "reports.balance-sheet",
       "path": "/reports/balance-sheet",
-      "label": "Balance Sheet"
+      "label": "Balance Sheet",
+      "aliases": [
+        "balance sheet",
+        "sheet"
+      ]
     },
     {
       "key": "reports.banks.closing-balance",
@@ -994,7 +1155,10 @@
     {
       "key": "reports.cash-balance",
       "path": "/reports/cash-balance",
-      "label": "Cash Balance"
+      "label": "Cash Balance",
+      "aliases": [
+        "cash balance"
+      ]
     },
     {
       "key": "reports.cashflow",
@@ -1004,7 +1168,22 @@
     {
       "key": "reports.data-exports",
       "path": "/reports/data-exports",
-      "label": "Data Exports"
+      "label": "Data Exports",
+      "aliases": [
+        "data exports",
+        "exports",
+        "data"
+      ]
+    },
+    {
+      "key": "reports.deferrals.reconciliation-summary",
+      "path": "/reports/deferrals/reconciliation-summary",
+      "label": "Reconciliation Summary"
+    },
+    {
+      "key": "reports.deferrals.register",
+      "path": "/reports/deferrals/register",
+      "label": "Register"
     },
     {
       "key": "reports.diagnostics.expense-health",
@@ -1039,7 +1218,12 @@
     {
       "key": "reports.general-ledger",
       "path": "/reports/general-ledger",
-      "label": "General Ledger"
+      "label": "General Ledger",
+      "aliases": [
+        "ledger",
+        "general ledger",
+        "general"
+      ]
     },
     {
       "key": "reports.gst-report",
@@ -1047,9 +1231,49 @@
       "label": "Gst Report"
     },
     {
+      "key": "reports.journals.entry-lines-summary",
+      "path": "/reports/journals/entry-lines-summary",
+      "label": "Entry Lines Summary"
+    },
+    {
+      "key": "reports.journals.report",
+      "path": "/reports/journals/report",
+      "label": "Report"
+    },
+    {
+      "key": "reports.journals.transactions-summary",
+      "path": "/reports/journals/transactions-summary",
+      "label": "Transactions Summary"
+    },
+    {
       "key": "reports.profit-and-loss",
       "path": "/reports/profit-and-loss",
-      "label": "Profit And Loss"
+      "label": "Profit And Loss",
+      "aliases": [
+        "profit and loss",
+        "profit",
+        "loss"
+      ]
+    },
+    {
+      "key": "reports.purchases.items-summary",
+      "path": "/reports/purchases/items-summary",
+      "label": "Items Summary"
+    },
+    {
+      "key": "reports.purchases.payments-summary",
+      "path": "/reports/purchases/payments-summary",
+      "label": "Payments Summary"
+    },
+    {
+      "key": "reports.purchases.report",
+      "path": "/reports/purchases/report",
+      "label": "Report"
+    },
+    {
+      "key": "reports.purchases.transactions-summary",
+      "path": "/reports/purchases/transactions-summary",
+      "label": "Transactions Summary"
     },
     {
       "key": "reports.reports-packages",
@@ -1057,9 +1281,33 @@
       "label": "Reports Packages"
     },
     {
+      "key": "reports.sales.items-summary",
+      "path": "/reports/sales/items-summary",
+      "label": "Items Summary"
+    },
+    {
+      "key": "reports.sales.payments-summary",
+      "path": "/reports/sales/payments-summary",
+      "label": "Payments Summary"
+    },
+    {
+      "key": "reports.sales.report",
+      "path": "/reports/sales/report",
+      "label": "Report"
+    },
+    {
+      "key": "reports.sales.transactions-summary",
+      "path": "/reports/sales/transactions-summary",
+      "label": "Transactions Summary"
+    },
+    {
       "key": "reports.trial-balance",
       "path": "/reports/trial-balance",
-      "label": "Trial Balance"
+      "label": "Trial Balance",
+      "aliases": [
+        "trial balance",
+        "trial"
+      ]
     },
     {
       "key": "sale-credits.line-items.active",
@@ -1192,6 +1440,11 @@
       "label": "Active"
     },
     {
+      "key": "sales-orders.orders.for-review",
+      "path": "/sales-orders/orders/for-review",
+      "label": "For Review"
+    },
+    {
       "key": "sales-orders.orders.invoice-due",
       "path": "/sales-orders/orders/invoice-due",
       "label": "Invoice Due"
@@ -1289,12 +1542,21 @@
     {
       "key": "sales.transactions.balance-due",
       "path": "/sales/transactions/balance-due",
-      "label": "Balance Due"
+      "label": "Balance Due",
+      "aliases": [
+        "invoices",
+        "invoice due",
+        "invoices due",
+        "invoices balance due"
+      ]
     },
     {
       "key": "sales.transactions.draft",
       "path": "/sales/transactions/draft",
-      "label": "Draft"
+      "label": "Draft",
+      "aliases": [
+        "invoice drafts"
+      ]
     },
     {
       "key": "sales.transactions.resubmit",
@@ -1467,7 +1729,13 @@
       "urlTemplate": "?modal=agent_suite_email",
       "mountPath": "/home",
       "label": "Agent Suite Email",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "agent builder",
+        "builder",
+        "agent",
+        "email agent"
+      ]
     },
     {
       "key": "agent-suite.modal.agent_suite_jots",
@@ -2061,7 +2329,11 @@
       "urlTemplate": "?modal=cashflow-new-cash-in",
       "mountPath": "/cashflow/all-cashflow/all",
       "label": "Cashflow New Cash In",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "cash in",
+        "new cash in"
+      ]
     },
     {
       "key": "cashflow.modal.cashflow-new-cash-out",
@@ -2070,7 +2342,11 @@
       "urlTemplate": "?modal=cashflow-new-cash-out",
       "mountPath": "/cashflow/all-cashflow/all",
       "label": "Cashflow New Cash Out",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "cash out",
+        "new cash out"
+      ]
     },
     {
       "key": "cashflow.modal.cashflow-new-cash-transfer",
@@ -2622,6 +2898,82 @@
       "requiresId": true
     },
     {
+      "key": "contacts.modal.edit-beneficiary",
+      "resource": "contacts",
+      "modalType": "edit-beneficiary",
+      "urlTemplate": "?modal=edit-beneficiary&id={id}",
+      "mountPath": "/contacts/all-contacts",
+      "label": "Edit Beneficiary",
+      "requiresId": true
+    },
+    {
+      "key": "contacts.modal.edit-contacts",
+      "resource": "contacts",
+      "modalType": "edit-contacts",
+      "urlTemplate": "?modal=edit-contacts&id={id}",
+      "mountPath": "/contacts/all-contacts",
+      "label": "Edit Contacts",
+      "requiresId": true
+    },
+    {
+      "key": "contacts.modal.import-contacts",
+      "resource": "contacts",
+      "modalType": "import-contacts",
+      "urlTemplate": "?modal=import-contacts",
+      "mountPath": "/contacts/all-contacts",
+      "label": "Import Contacts",
+      "requiresId": false
+    },
+    {
+      "key": "contacts.modal.manage-groups",
+      "resource": "contacts",
+      "modalType": "manage-groups",
+      "urlTemplate": "?modal=manage-groups",
+      "mountPath": "/contacts/all-contacts",
+      "label": "Manage Groups",
+      "requiresId": false
+    },
+    {
+      "key": "contacts.modal.new-beneficiary",
+      "resource": "contacts",
+      "modalType": "new-beneficiary",
+      "urlTemplate": "?modal=new-beneficiary",
+      "mountPath": "/contacts/all-contacts",
+      "label": "New Beneficiary",
+      "requiresId": false
+    },
+    {
+      "key": "contacts.modal.new-contacts",
+      "resource": "contacts",
+      "modalType": "new-contacts",
+      "urlTemplate": "?modal=new-contacts",
+      "mountPath": "/contacts/all-contacts",
+      "label": "New Contacts",
+      "requiresId": false,
+      "aliases": [
+        "contact",
+        "new contact"
+      ]
+    },
+    {
+      "key": "contacts.modal.view-beneficiary",
+      "resource": "contacts",
+      "modalType": "view-beneficiary",
+      "urlTemplate": "?modal=view-beneficiary&id={id}",
+      "mountPath": "/contacts/all-contacts",
+      "label": "View Beneficiary",
+      "requiresId": true
+    },
+    {
+      "key": "contacts.modal.view-contacts",
+      "resource": "contacts",
+      "modalType": "view-contacts",
+      "urlTemplate": "?modal=view-contacts&id={id}",
+      "mountPath": "/contacts/all-contacts",
+      "label": "View Contacts",
+      "requiresId": true
+    },
+    {
       "key": "data-exports.modal.download-balance-sheet-report",
       "resource": "data-exports",
       "modalType": "download-balance-sheet-report",
@@ -2757,6 +3109,61 @@
       "requiresId": false
     },
     {
+      "key": "deferrals.modal.duplicate-deferral",
+      "resource": "deferrals",
+      "modalType": "duplicate-deferral",
+      "urlTemplate": "?modal=duplicate-deferral&id={id}",
+      "mountPath": "/deferrals/register/active",
+      "label": "Duplicate Deferral",
+      "requiresId": true
+    },
+    {
+      "key": "deferrals.modal.edit-deferral",
+      "resource": "deferrals",
+      "modalType": "edit-deferral",
+      "urlTemplate": "?modal=edit-deferral&id={id}",
+      "mountPath": "/deferrals/register/active",
+      "label": "Edit Deferral",
+      "requiresId": true,
+      "draftEditable": true
+    },
+    {
+      "key": "deferrals.modal.import-deferrals",
+      "resource": "deferrals",
+      "modalType": "import-deferrals",
+      "urlTemplate": "?modal=import-deferrals",
+      "mountPath": "/deferrals/register/active",
+      "label": "Import Deferrals",
+      "requiresId": false
+    },
+    {
+      "key": "deferrals.modal.manage-deferral-accounts",
+      "resource": "deferrals",
+      "modalType": "manage-deferral-accounts",
+      "urlTemplate": "?modal=manage-deferral-accounts",
+      "mountPath": "/deferrals/register/active",
+      "label": "Manage Deferral Accounts",
+      "requiresId": false
+    },
+    {
+      "key": "deferrals.modal.new-deferral",
+      "resource": "deferrals",
+      "modalType": "new-deferral",
+      "urlTemplate": "?modal=new-deferral",
+      "mountPath": "/deferrals/register/active",
+      "label": "New Deferral",
+      "requiresId": false
+    },
+    {
+      "key": "deferrals.modal.view-deferral",
+      "resource": "deferrals",
+      "modalType": "view-deferral",
+      "urlTemplate": "?modal=view-deferral&id={id}",
+      "mountPath": "/deferrals/register/active",
+      "label": "View Deferral",
+      "requiresId": true
+    },
+    {
       "key": "employees.modal.disburse-payout",
       "resource": "employees",
       "modalType": "disburse-payout",
@@ -2781,7 +3188,8 @@
       "urlTemplate": "?modal=edit-claim&id={id}",
       "mountPath": "/home",
       "label": "Edit Claim",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true
     },
     {
       "key": "employees.modal.edit-employee",
@@ -2790,7 +3198,16 @@
       "urlTemplate": "?modal=edit-employee&id={id}",
       "mountPath": "/home",
       "label": "Edit Employee",
-      "requiresId": true
+      "requiresId": true,
+      "tabs": [
+        {
+          "name": "tab",
+          "values": [
+            "details",
+            "beneficiary"
+          ]
+        }
+      ]
     },
     {
       "key": "employees.modal.import-claims",
@@ -2817,7 +3234,11 @@
       "urlTemplate": "?modal=new-claim",
       "mountPath": "/home",
       "label": "New Claim",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "new claim",
+        "employee claim"
+      ]
     },
     {
       "key": "employees.modal.new-employee",
@@ -2826,7 +3247,10 @@
       "urlTemplate": "?modal=new-employee",
       "mountPath": "/home",
       "label": "New Employee",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "new employee"
+      ]
     },
     {
       "key": "employees.modal.record-payout",
@@ -2916,7 +3340,11 @@
       "urlTemplate": "?modal=edit-fixed-asset&id={id}",
       "mountPath": "/fixed-assets/register/active",
       "label": "Edit Fixed Asset",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true,
+      "draftEditWhen": {
+        "field": "registrationType"
+      }
     },
     {
       "key": "fixed-assets.modal.edit-transfered-fixed-asset",
@@ -2925,7 +3353,12 @@
       "urlTemplate": "?modal=edit-transfered-fixed-asset&id={id}",
       "mountPath": "/fixed-assets/register/active",
       "label": "Edit Transfered Fixed Asset",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true,
+      "draftEditWhen": {
+        "field": "registrationType",
+        "equals": "TRANSFER"
+      }
     },
     {
       "key": "fixed-assets.modal.import-register-fixed-assets",
@@ -2952,7 +3385,10 @@
       "urlTemplate": "?modal=new-register-fixed-asset",
       "mountPath": "/fixed-assets/register/active",
       "label": "New Register Fixed Asset",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "new fixed asset"
+      ]
     },
     {
       "key": "fixed-assets.modal.sell-fixed-asset",
@@ -3114,7 +3550,12 @@
       "urlTemplate": "?modal=edit-cash-in-journal&id={id}",
       "mountPath": "/journal-entries/all-journals/active-journal-entries",
       "label": "Edit Cash In Journal",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true,
+      "draftEditWhen": {
+        "field": "templateType",
+        "equals": "DIRECT_CASH_IN"
+      }
     },
     {
       "key": "journal-entries.modal.edit-cash-out-journal",
@@ -3123,7 +3564,12 @@
       "urlTemplate": "?modal=edit-cash-out-journal&id={id}",
       "mountPath": "/journal-entries/all-journals/active-journal-entries",
       "label": "Edit Cash Out Journal",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true,
+      "draftEditWhen": {
+        "field": "templateType",
+        "equals": "DIRECT_CASH_OUT"
+      }
     },
     {
       "key": "journal-entries.modal.edit-cash-transfer-journal",
@@ -3132,7 +3578,12 @@
       "urlTemplate": "?modal=edit-cash-transfer-journal&id={id}",
       "mountPath": "/journal-entries/all-journals/active-journal-entries",
       "label": "Edit Cash Transfer Journal",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true,
+      "draftEditWhen": {
+        "field": "templateType",
+        "equals": "CASH_TRANSFER"
+      }
     },
     {
       "key": "journal-entries.modal.edit-journal",
@@ -3141,7 +3592,11 @@
       "urlTemplate": "?modal=edit-journal&id={id}",
       "mountPath": "/journal-entries/all-journals/active-journal-entries",
       "label": "Edit Journal",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true,
+      "draftEditWhen": {
+        "field": "templateType"
+      }
     },
     {
       "key": "journal-entries.modal.edit-schedule-journal",
@@ -3222,7 +3677,11 @@
       "urlTemplate": "?modal=new-journal",
       "mountPath": "/journal-entries/all-journals/active-journal-entries",
       "label": "New Journal",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "journal entry",
+        "new journal entry"
+      ]
     },
     {
       "key": "journal-entries.modal.new-opening-balance",
@@ -3240,7 +3699,11 @@
       "urlTemplate": "?modal=new-schedule-journal",
       "mountPath": "/journal-entries/all-journals/active-journal-entries",
       "label": "New Schedule Journal",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "journal schedule",
+        "new journal schedule"
+      ]
     },
     {
       "key": "journal-entries.modal.new-tracking-tags",
@@ -3330,7 +3793,8 @@
       "urlTemplate": "?modal=edit-purchase-credit&id={id}",
       "mountPath": "/purchase-credits/transactions/active-purchase-credits",
       "label": "Edit Purchase Credit",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true
     },
     {
       "key": "purchase-credits.modal.fast-fix-purchase-credit",
@@ -3366,7 +3830,11 @@
       "urlTemplate": "?modal=new-purchase-credit",
       "mountPath": "/purchase-credits/transactions/active-purchase-credits",
       "label": "New Purchase Credit",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "supplier credit",
+        "new supplier credit"
+      ]
     },
     {
       "key": "purchase-credits.modal.purchase-credit-reconciled-statement-line",
@@ -3384,7 +3852,10 @@
       "urlTemplate": "?modal=view-purchase-credit&id={id}",
       "mountPath": "/purchase-credits/transactions/active-purchase-credits",
       "label": "View Purchase Credit",
-      "requiresId": true
+      "requiresId": true,
+      "aliases": [
+        "view supplier credit"
+      ]
     },
     {
       "key": "purchase-deposits.modal.manage-deposits-purchase",
@@ -3474,7 +3945,44 @@
       "urlTemplate": "?modal=edit-request&id={id}",
       "mountPath": "/purchase-orders/order-items/active",
       "label": "Edit Request",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true
+    },
+    {
+      "key": "purchase-orders.modal.fast-fix-purchase-order",
+      "resource": "purchase-orders",
+      "modalType": "fast-fix-purchase-order",
+      "urlTemplate": "?modal=fast-fix-purchase-order",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Fast Fix Purchase Order",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-orders.modal.fast-fix-purchase-order-line-items",
+      "resource": "purchase-orders",
+      "modalType": "fast-fix-purchase-order-line-items",
+      "urlTemplate": "?modal=fast-fix-purchase-order-line-items",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Fast Fix Purchase Order Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-orders.modal.fast-fix-request",
+      "resource": "purchase-orders",
+      "modalType": "fast-fix-request",
+      "urlTemplate": "?modal=fast-fix-request",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Fast Fix Request",
+      "requiresId": false
+    },
+    {
+      "key": "purchase-orders.modal.fast-fix-request-line-items",
+      "resource": "purchase-orders",
+      "modalType": "fast-fix-request-line-items",
+      "urlTemplate": "?modal=fast-fix-request-line-items",
+      "mountPath": "/purchase-orders/order-items/active",
+      "label": "Fast Fix Request Line Items",
+      "requiresId": false
     },
     {
       "key": "purchase-orders.modal.import-purchase-orders",
@@ -3492,7 +4000,11 @@
       "urlTemplate": "?modal=new-purchase-order",
       "mountPath": "/purchase-orders/order-items/active",
       "label": "New Purchase Order",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "purchase order",
+        "new purchase order"
+      ]
     },
     {
       "key": "purchase-orders.modal.new-request",
@@ -3501,7 +4013,13 @@
       "urlTemplate": "?modal=new-request",
       "mountPath": "/purchase-orders/order-items/active",
       "label": "New Request",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "request",
+        "purchase request",
+        "new request",
+        "new purchase request"
+      ]
     },
     {
       "key": "purchase-orders.modal.send-request-for-signature",
@@ -3603,6 +4121,15 @@
       "requiresId": true
     },
     {
+      "key": "purchase-payments.modal.purchase-edit-unapplied-container",
+      "resource": "purchase-payments",
+      "modalType": "purchase-edit-unapplied-container",
+      "urlTemplate": "?modal=purchase-edit-unapplied-container&id={id}",
+      "mountPath": "/purchase-payments/all-payments/active-purchase-payments",
+      "label": "Purchase Edit Unapplied Container",
+      "requiresId": true
+    },
+    {
       "key": "purchase-payments.modal.purchase-view-batch-payment",
       "resource": "purchase-payments",
       "modalType": "purchase-view-batch-payment",
@@ -3654,7 +4181,8 @@
       "urlTemplate": "?modal=edit-purchase&id={id}",
       "mountPath": "/purchases/transactions/active-purchases",
       "label": "Edit Purchase",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true
     },
     {
       "key": "purchases.modal.edit-scheduled-purchase",
@@ -3720,6 +4248,15 @@
       "requiresId": false
     },
     {
+      "key": "purchases.modal.import-bills-any-csv",
+      "resource": "purchases",
+      "modalType": "import-bills-any-csv",
+      "urlTemplate": "?modal=import-bills-any-csv",
+      "mountPath": "/purchases/transactions/active-purchases",
+      "label": "Import Bills Any Csv",
+      "requiresId": false
+    },
+    {
       "key": "purchases.modal.make-purchase-recurring",
       "resource": "purchases",
       "modalType": "make-purchase-recurring",
@@ -3753,7 +4290,10 @@
       "urlTemplate": "?modal=new-purchase",
       "mountPath": "/purchases/transactions/active-purchases",
       "label": "New Purchase",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "new bill"
+      ]
     },
     {
       "key": "purchases.modal.new-scheduled-purchase",
@@ -3762,7 +4302,11 @@
       "urlTemplate": "?modal=new-scheduled-purchase",
       "mountPath": "/purchases/transactions/active-purchases",
       "label": "New Scheduled Purchase",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "bill schedule",
+        "new bill schedule"
+      ]
     },
     {
       "key": "purchases.modal.purchase-duplicate-order",
@@ -3825,7 +4369,10 @@
       "urlTemplate": "?modal=view-purchase&id={id}",
       "mountPath": "/purchases/transactions/active-purchases",
       "label": "View Purchase",
-      "requiresId": true
+      "requiresId": true,
+      "aliases": [
+        "view bill"
+      ]
     },
     {
       "key": "purchases.modal.view-scheduled-purchase",
@@ -3852,7 +4399,8 @@
       "urlTemplate": "?modal=edit-sale-credit&id={id}",
       "mountPath": "/sale-credits/transactions/active-sale-credits",
       "label": "Edit Sale Credit",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true
     },
     {
       "key": "sale-credits.modal.fast-fix-sale-credit",
@@ -3888,7 +4436,11 @@
       "urlTemplate": "?modal=new-sale-credit",
       "mountPath": "/sale-credits/transactions/active-sale-credits",
       "label": "New Sale Credit",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "customer credit",
+        "new customer credit"
+      ]
     },
     {
       "key": "sale-credits.modal.sale-credit-reconciled-statement-line",
@@ -3915,7 +4467,10 @@
       "urlTemplate": "?modal=view-sale-credit&id={id}",
       "mountPath": "/sale-credits/transactions/active-sale-credits",
       "label": "View Sale Credit",
-      "requiresId": true
+      "requiresId": true,
+      "aliases": [
+        "view customer credit"
+      ]
     },
     {
       "key": "sale-payments.modal.sale-credit-note-refund",
@@ -3960,6 +4515,15 @@
       "urlTemplate": "?modal=sale-edit-payment&id={id}",
       "mountPath": "/sale-payments/all-payments/active-sale-payments",
       "label": "Sale Edit Payment",
+      "requiresId": true
+    },
+    {
+      "key": "sale-payments.modal.sale-edit-unapplied-container",
+      "resource": "sale-payments",
+      "modalType": "sale-edit-unapplied-container",
+      "urlTemplate": "?modal=sale-edit-unapplied-container&id={id}",
+      "mountPath": "/sale-payments/all-payments/active-sale-payments",
+      "label": "Sale Edit Unapplied Container",
       "requiresId": true
     },
     {
@@ -4077,7 +4641,44 @@
       "urlTemplate": "?modal=edit-quote&id={id}",
       "mountPath": "/sales-orders/order-items/active",
       "label": "Edit Quote",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true
+    },
+    {
+      "key": "sales-orders.modal.fast-fix-order",
+      "resource": "sales-orders",
+      "modalType": "fast-fix-order",
+      "urlTemplate": "?modal=fast-fix-order",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Fast Fix Order",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.fast-fix-order-line-items",
+      "resource": "sales-orders",
+      "modalType": "fast-fix-order-line-items",
+      "urlTemplate": "?modal=fast-fix-order-line-items",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Fast Fix Order Line Items",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.fast-fix-quote",
+      "resource": "sales-orders",
+      "modalType": "fast-fix-quote",
+      "urlTemplate": "?modal=fast-fix-quote",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Fast Fix Quote",
+      "requiresId": false
+    },
+    {
+      "key": "sales-orders.modal.fast-fix-quote-line-items",
+      "resource": "sales-orders",
+      "modalType": "fast-fix-quote-line-items",
+      "urlTemplate": "?modal=fast-fix-quote-line-items",
+      "mountPath": "/sales-orders/order-items/active",
+      "label": "Fast Fix Quote Line Items",
+      "requiresId": false
     },
     {
       "key": "sales-orders.modal.import-sales-orders",
@@ -4104,7 +4705,11 @@
       "urlTemplate": "?modal=new-order",
       "mountPath": "/sales-orders/order-items/active",
       "label": "New Order",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "sale order",
+        "new sale order"
+      ]
     },
     {
       "key": "sales-orders.modal.new-quote",
@@ -4113,7 +4718,13 @@
       "urlTemplate": "?modal=new-quote",
       "mountPath": "/sales-orders/order-items/active",
       "label": "New Quote",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "quote",
+        "sale quote",
+        "new quote",
+        "new sale quote"
+      ]
     },
     {
       "key": "sales-orders.modal.send-for-signature",
@@ -4230,7 +4841,8 @@
       "urlTemplate": "?modal=edit-sale&id={id}",
       "mountPath": "/sales/transactions/active-sales",
       "label": "Edit Sale",
-      "requiresId": true
+      "requiresId": true,
+      "draftEditable": true
     },
     {
       "key": "sales.modal.edit-scheduled-sale",
@@ -4323,6 +4935,15 @@
       "requiresId": false
     },
     {
+      "key": "sales.modal.import-invoices-any-csv",
+      "resource": "sales",
+      "modalType": "import-invoices-any-csv",
+      "urlTemplate": "?modal=import-invoices-any-csv",
+      "mountPath": "/sales/transactions/active-sales",
+      "label": "Import Invoices Any Csv",
+      "requiresId": false
+    },
+    {
       "key": "sales.modal.make-sale-recurring",
       "resource": "sales",
       "modalType": "make-sale-recurring",
@@ -4347,7 +4968,10 @@
       "urlTemplate": "?modal=new-sale",
       "mountPath": "/sales/transactions/active-sales",
       "label": "New Sale",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "new invoice"
+      ]
     },
     {
       "key": "sales.modal.new-scheduled-sale",
@@ -4356,7 +4980,11 @@
       "urlTemplate": "?modal=new-scheduled-sale",
       "mountPath": "/sales/transactions/active-sales",
       "label": "New Scheduled Sale",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "invoice schedule",
+        "new invoice schedule"
+      ]
     },
     {
       "key": "sales.modal.new-subscription-sale",
@@ -4428,7 +5056,10 @@
       "urlTemplate": "?modal=view-sale&id={id}",
       "mountPath": "/sales/transactions/active-sales",
       "label": "View Sale",
-      "requiresId": true
+      "requiresId": true,
+      "aliases": [
+        "view invoice"
+      ]
     },
     {
       "key": "sales.modal.view-scheduled-sale",
@@ -4482,7 +5113,12 @@
       "urlTemplate": "?modal=chart_of_accounts",
       "mountPath": "/home",
       "label": "Chart Of Accounts",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "chart of accounts",
+        "accounts",
+        "chart"
+      ]
     },
     {
       "key": "settings.modal.claims",
@@ -4500,7 +5136,12 @@
       "urlTemplate": "?modal=classifiers",
       "mountPath": "/home",
       "label": "Classifiers",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "nano classifier",
+        "classifier",
+        "nano"
+      ]
     },
     {
       "key": "settings.modal.custom_fields",
@@ -4509,7 +5150,13 @@
       "urlTemplate": "?modal=custom_fields",
       "mountPath": "/home",
       "label": "Custom Fields",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "custom fields",
+        "fields",
+        "custom",
+        "custom field"
+      ]
     },
     {
       "key": "settings.modal.data_transfer",
@@ -4545,7 +5192,12 @@
       "urlTemplate": "?modal=email_templates",
       "mountPath": "/home",
       "label": "Email Templates",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "email templates",
+        "email",
+        "email template"
+      ]
     },
     {
       "key": "settings.modal.field_templates",
@@ -4554,6 +5206,15 @@
       "urlTemplate": "?modal=field_templates",
       "mountPath": "/home",
       "label": "Field Templates",
+      "requiresId": false
+    },
+    {
+      "key": "settings.modal.invite_to_jaz",
+      "resource": "settings",
+      "modalType": "invite_to_jaz",
+      "urlTemplate": "?modal=invite_to_jaz",
+      "mountPath": "/home",
+      "label": "Invite To Jaz",
       "requiresId": false
     },
     {
@@ -4572,7 +5233,11 @@
       "urlTemplate": "?modal=organization_details",
       "mountPath": "/home",
       "label": "Organization Details",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "currencies",
+        "currency"
+      ]
     },
     {
       "key": "settings.modal.payment-profiles",
@@ -4599,7 +5264,12 @@
       "urlTemplate": "?modal=pdf_templates",
       "mountPath": "/home",
       "label": "Pdf Templates",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "pdf templates",
+        "pdf",
+        "pdf template"
+      ]
     },
     {
       "key": "settings.modal.preferences",
@@ -4644,7 +5314,13 @@
       "urlTemplate": "?modal=tags",
       "mountPath": "/home",
       "label": "Tags",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "tracking tags",
+        "tags",
+        "tracking",
+        "tag"
+      ]
     },
     {
       "key": "settings.modal.user_management",
@@ -4653,7 +5329,11 @@
       "urlTemplate": "?modal=user_management",
       "mountPath": "/home",
       "label": "User Management",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "users",
+        "user"
+      ]
     },
     {
       "key": "settings.modal.vat_profiles",
@@ -4662,7 +5342,943 @@
       "urlTemplate": "?modal=vat_profiles",
       "mountPath": "/home",
       "label": "Vat Profiles",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "tax profiles",
+        "tax",
+        "tax profile"
+      ]
     }
+  ],
+  "resources": [
+    {
+      "resource": "agent-suite",
+      "params": [],
+      "paramsAudited": true
+    },
+    {
+      "resource": "bank-reconciliation",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "contact",
+            "item-tax-profile",
+            "tax-settings",
+            "add-adjustments",
+            "view-sale-payment",
+            "view-bank-recon-sale-payment",
+            "view-bank-recon-sale-batch-payment",
+            "view-bank-recon-purchase-batch-payment",
+            "view-sale",
+            "view-bank-recon-sale",
+            "view-purchase",
+            "view-bank-recon-purchase",
+            "br-view-sale-credit",
+            "view-bank-recon-sale-credit",
+            "view-purchase-credit",
+            "view-bank-recon-purchase-credit",
+            "view-purchase-payment",
+            "view-bank-recon-purchase-payment",
+            "view-sale-credit-payment",
+            "view-bank-recon-sale-credit-payment",
+            "view-purchase-credit-payment",
+            "view-bank-recon-purchase-credit-payment",
+            "view-journal",
+            "view-reconciled-journal",
+            "item-accounts",
+            "cash-in-accounts",
+            "cash-out-accounts",
+            "adjustment-accounts",
+            "delete-statement-line",
+            "reset-reconciliation",
+            "cerate-bank-rule",
+            "edit-bank-rule",
+            "br-new-invoice-receipt",
+            "br-new-bill-receipt",
+            "br-new-unapplied-payment",
+            "br-update-exchange-rate",
+            "br-new-create-journal",
+            "br-create-cash-transfer-journal",
+            "br-create-cash-entry-journal",
+            "br-record-payment",
+            "br-convert-amount",
+            "br-convert-adjustment-rate",
+            "br-transaction-fees",
+            "br-quick-reconcile",
+            "br-select-journal-currency",
+            "br-view-adjustment-currency",
+            "br-action-view-direct-cash-entry",
+            "br-action-view-cash-transfer",
+            "br-tracking-tags",
+            "br-dynamic-string",
+            "new-shortcut-reconcile",
+            "edit-shortcut-reconcile",
+            "duplicate-shortcut-reconcile",
+            "br-action-shortcut-reconcile",
+            "delete-bank-statement",
+            "new-tracking-tags",
+            "br-inventory-item",
+            "br-capsule",
+            "br-new-capsule",
+            "types-rank",
+            "copy-settings",
+            "new-bank-field",
+            "edit-bank-field",
+            "copy-bank-field"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "capsules",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "edit-capsule",
+            "move-capsule",
+            "update-type",
+            "new-type",
+            "delete-type",
+            "delete-capsule",
+            "delete-empty-capsule"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "cashflow",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "tracking-tags",
+            "new-tag",
+            "new-contact",
+            "item-accounts",
+            "item-tax-profile"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "catalogs",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "delete-catalog",
+            "tracking-tags",
+            "classifiers-item-level",
+            "activity-log",
+            "bulk-edit-line-items",
+            "new-contact-group"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "compliance",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "fastfile-preview",
+            "fastfile-xml-preview",
+            "fastfile-confirmations",
+            "delete-batch",
+            "cancel-batch",
+            "show-loader",
+            "fastfile-terms-summary"
+          ]
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "contacts",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "statement",
+            "contact-sales",
+            "contact-sales-credits",
+            "contact-purchases",
+            "contact-purchases-credits",
+            "delete-contact",
+            "download-ar-statement",
+            "download-ap-statement",
+            "contact-add-new-currency",
+            "contact-add-new-group",
+            "contact-add-new-group-with-contacts",
+            "contact-manage-emails",
+            "contact-delete-group",
+            "contact-edit-group",
+            "contact-send-email",
+            "activity-log",
+            "custom-field",
+            "delete-beneficiary"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "data-exports",
+      "params": [
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "deferrals",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "item-accounts",
+            "delete-deferral",
+            "activity-log",
+            "close-out-deferral",
+            "undo-close-out-deferral"
+          ]
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "employees",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "archive",
+            "unarchive",
+            "delete",
+            "claim-custom-field",
+            "claim-apply-tags",
+            "claim-new-tracking-tag",
+            "claim-classifiers-item-level",
+            "claim-classifiers-bt-level",
+            "view-employee-user-permissions",
+            "claim-item-accounts",
+            "claim-item-tax-profile",
+            "claim-item-claim-type",
+            "claim-new-vendor",
+            "bulk-edit-line-items",
+            "claim-tax-settings",
+            "claim-cancel",
+            "claim-delete",
+            "claim-approve",
+            "claim-reject",
+            "claim-request-changes",
+            "claim-post",
+            "claim-record-payout",
+            "claim-disburse-payout",
+            "claim-unpost",
+            "employee-new-claim-profile"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "fastfile",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "fastfile-preview"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "fixed-assets",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "undo-disposal-fixed-asset",
+            "undo-close-out-fixed-asset",
+            "delete-fixed-asset",
+            "activity-log",
+            "item-accounts"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "inventory",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "base-unit-conversion",
+            "edit-base-unit-conversion",
+            "delete-base-unit-conversion"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "items",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "delete-item",
+            "tracking-tags",
+            "activity-log",
+            "item-accounts",
+            "item-tax-profile"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "journal-entries",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "contact",
+            "item-accounts",
+            "cash-in-account",
+            "cash-out-account",
+            "item-tax-profile",
+            "tax-settings",
+            "void-journal-entry",
+            "delete-journal-entry",
+            "delete-schedule-journal-entry",
+            "confirm-edit",
+            "tracking-tags",
+            "new-tracking-tags",
+            "inventory-item",
+            "manage-tags",
+            "activity-log",
+            "opening-balance-adjustment",
+            "import-accounts",
+            "convert-amount",
+            "select-journal-currency",
+            "update-exchange-rate",
+            "journal-reference",
+            "inventory",
+            "capsule",
+            "new-capsule",
+            "edit-contact",
+            "add-prior-periods",
+            "bulk-edit-line-items",
+            "cash-in-receipt-email-preview"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "purchase-credits",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "credit-to",
+            "credit-from",
+            "contact",
+            "tax-settings",
+            "item-tax-profile",
+            "item-accounts",
+            "new-payment-account",
+            "custom-field",
+            "delete-purchase-credit",
+            "convert-to-active-purchase-credit",
+            "approve-purchase-credit",
+            "request-changes-purchase-credit",
+            "record-refund",
+            "update-refund",
+            "apply-credit",
+            "edit-credit",
+            "view-refund",
+            "void-purchase-credit",
+            "confirm-edit-total",
+            "default-settings",
+            "update-accounts",
+            "remove-item-level-vats",
+            "update-currency",
+            "add-new-currency",
+            "update-exchange-rate",
+            "classifiers-item-level",
+            "classifiers-bt-level",
+            "purchase-credits-apply-tags",
+            "new-tracking-tags",
+            "currency-settings",
+            "tracking-tags",
+            "select-currency",
+            "inventory",
+            "base-unit-conversion",
+            "activity-log",
+            "capsule",
+            "new-capsule",
+            "purchase-credit-add-to-batch-payment",
+            "edit-contact",
+            "bulk-edit-line-items",
+            "edit-line-item"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "purchase-deposits",
+      "params": [
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "purchase-orders",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "link-existing-bill",
+            "link-existing-purchase-order",
+            "tracking-tags",
+            "bill-from",
+            "bill-to",
+            "contact",
+            "tax-settings",
+            "email-settings",
+            "shipping",
+            "item-tax-profile",
+            "bulk-edit-line-items",
+            "custom-field",
+            "default-settings",
+            "update-accounts",
+            "update-vats",
+            "update-currency",
+            "add-new-currency",
+            "update-exchange-rate",
+            "request-email-preview",
+            "apply-tags",
+            "classifiers-bt-level",
+            "internal-notes",
+            "new-contact",
+            "new-account",
+            "new-tax-profile",
+            "void-request",
+            "delete-request",
+            "request-changes-request",
+            "request-changes-order",
+            "void-order",
+            "delete-order",
+            "manage-tags",
+            "activity-log",
+            "classifiers-item-level",
+            "edit-line-item",
+            "inventory",
+            "base-unit-conversion",
+            "capsule",
+            "new-capsule",
+            "catalogs",
+            "new-tracking-tags",
+            "signature-activity",
+            "internal-signer"
+          ]
+        },
+        {
+          "name": "actionId"
+        },
+        {
+          "name": "subaction",
+          "values": [
+            "add-new-currency",
+            "none",
+            "new-capsule-type"
+          ]
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "purchase-payments",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "forDisbursement",
+            "addBeneficiary"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "purchases",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "contact",
+            "custom-field",
+            "item-tax-profile",
+            "item-accounts",
+            "bulk-edit-line-items",
+            "void-purchase",
+            "delete-purchase",
+            "convert-to-active-purchase",
+            "request-changes-purchase",
+            "record-payment",
+            "update-payment",
+            "apply-credit",
+            "view-payment",
+            "tax-settings",
+            "confirm-edit-total",
+            "default-settings",
+            "update-accounts",
+            "remove-item-level-vats",
+            "schedule-details",
+            "update-currency",
+            "add-new-currency",
+            "update-exchange-rate",
+            "transaction-fees",
+            "classifiers-item-level",
+            "classifiers-bt-level",
+            "purchases-apply-tags",
+            "edit-scheduled-purchase-payment",
+            "new-tracking-tags",
+            "currency-settings",
+            "tracking-tags",
+            "select-currency",
+            "inventory",
+            "base-unit-conversion",
+            "inventory-item",
+            "activity-log",
+            "manage-tags",
+            "capsule",
+            "new-Capsule",
+            "purchase-add-to-batch-payment",
+            "edit-contact",
+            "edit-line-item",
+            "assign-expenses"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "sale-credits",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "credit-to",
+            "credit-from",
+            "contact",
+            "tax-settings",
+            "item-tax-profile",
+            "item-accounts",
+            "new-payment-account",
+            "custom-field",
+            "delete-sale-credit",
+            "convert-to-active-sale-credit",
+            "approve-sale-credit",
+            "request-changes-sale-credit",
+            "record-refund",
+            "update-refund",
+            "record-withholding",
+            "update-withholding",
+            "apply-credit",
+            "edit-credit",
+            "view-refund",
+            "void-sale-credit",
+            "confirm-edit-total",
+            "confirm-remove-withholding",
+            "default-settings",
+            "add-new-currency",
+            "classifiers-item-level",
+            "classifiers-bt-level",
+            "preview-email",
+            "confirm-disable-email",
+            "preview-email-template",
+            "sale-email-template-preview",
+            "sale-credits-apply-tags",
+            "new-tracking-tags",
+            "sale-credits-internal-notes",
+            "currency-settings",
+            "sale-credits-catalogs",
+            "tracking-tags",
+            "select-currency",
+            "settings",
+            "currencySettings",
+            "exchangeToken",
+            "rateFunctionalToSource",
+            "rateSourceToFunctional",
+            "rateSource",
+            "valueDate",
+            "update-currency",
+            "inventory",
+            "base-unit-conversion",
+            "activity-log",
+            "capsule",
+            "new-capsule",
+            "sale-credit-add-to-batch-payment",
+            "edit-contact",
+            "bulk-edit-line-items",
+            "edit-line-item"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "sale-payments",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "sale-activity-log"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "sales",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "bill-from",
+            "bill-to",
+            "contact",
+            "tax-settings",
+            "email-settings",
+            "sale-email-template-preview",
+            "shipping",
+            "shipping-tax-profile",
+            "item-tax-profile",
+            "item-accounts",
+            "bulk-edit-line-items",
+            "add-billable-expenses",
+            "billable-expense-records",
+            "billable-expense-bill",
+            "new-payment-account",
+            "custom-field",
+            "void-sale",
+            "delete-sale",
+            "convert-to-active-sale",
+            "request-changes-sale",
+            "record-payment",
+            "record-withholding",
+            "update-payment",
+            "update-withholding",
+            "apply-credit",
+            "view-payment",
+            "confirm-edit-total",
+            "confirm-remove-withholding",
+            "default-settings",
+            "update-accounts",
+            "update-vats",
+            "schedule-details",
+            "confirm-disable-email",
+            "confirm-disable-email-and-open-record-payment",
+            "update-currency",
+            "add-new-currency",
+            "update-exchange-rate",
+            "invoice-email-preview",
+            "receipt-email-preview",
+            "transaction-fees",
+            "classifiers-item-level",
+            "classifiers-bt-level",
+            "sales-apply-tags",
+            "sales-catalogs",
+            "edit-scheduled-sale-payment",
+            "sale-proration-details",
+            "delete-subscription-sale",
+            "new-tracking-tags",
+            "sales-internal-notes",
+            "currency-settings",
+            "fast-fix-currency-change",
+            "tracking-tags",
+            "select-currency",
+            "payment-profile",
+            "inventory",
+            "base-unit-conversion",
+            "inventory-item",
+            "activity-log",
+            "manage-tags",
+            "capsule",
+            "new-capsule",
+            "sale-add-to-batch-payment",
+            "edit-contact",
+            "edit-line-item"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "sales-deposits",
+      "params": [
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "sales-orders",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "link-existing-invoice",
+            "link-existing-order",
+            "tracking-tags",
+            "bill-from",
+            "bill-to",
+            "contact",
+            "catalogs",
+            "capsule",
+            "tax-settings",
+            "email-settings",
+            "shipping",
+            "shipping-tax-profile",
+            "item-tax-profile",
+            "custom-field",
+            "default-settings",
+            "update-accounts",
+            "update-vats",
+            "update-currency",
+            "add-new-currency",
+            "update-exchange-rate",
+            "quote-email-preview",
+            "order-email-preview",
+            "apply-tags",
+            "classifiers-item-level",
+            "classifiers-bt-level",
+            "internal-notes",
+            "new-contact",
+            "new-account",
+            "new-tax-profile",
+            "void-quote",
+            "delete-quote",
+            "request-changes-quote",
+            "request-changes-order",
+            "void-order",
+            "delete-order",
+            "manage-tags",
+            "activity-log",
+            "convert-to-order",
+            "create-invoice",
+            "create-recurring-invoice",
+            "new-tracking-tags",
+            "email-template-preview",
+            "base-unit-conversion",
+            "bulk-edit-line-items",
+            "new-capsule",
+            "signature-activity",
+            "internal-signer",
+            "edit-line-item"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "settings",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "switch_organization",
+            "new_user",
+            "import_users",
+            "new_api_key",
+            "edit_user_permissions",
+            "edit_api_key",
+            "view_api_key",
+            "revoke_api_key",
+            "view_current_user",
+            "remove_user",
+            "new_vat_profile",
+            "view_current_vat_profile",
+            "edit_vat_profile",
+            "delete_vat_profile",
+            "new_tag",
+            "update_tag",
+            "remove_tag",
+            "new_classifier",
+            "update_classifier",
+            "remove_classifier",
+            "new_custom_field",
+            "edit_custom_field",
+            "delete_custom_field",
+            "new_chart_of_account",
+            "new_payment_account",
+            "edit_chart_of_account",
+            "edit_payment_account",
+            "new_bookmark",
+            "edit_bookmark",
+            "new_currency",
+            "new_custom_exchange_rate",
+            "edit_custom_exchange_rate",
+            "custom_exchange_rates",
+            "import_exchange_rates",
+            "referral_reward",
+            "credit_summary",
+            "import_accounts",
+            "delete_organization_account",
+            "confirm_deactivate_account",
+            "activity_log",
+            "edit_account_mapping_details",
+            "bulk_deactivate_accounts",
+            "bulk_delete_accounts",
+            "bulk_set_lock_date",
+            "new_pdf_template",
+            "edit_pdf_template",
+            "duplicate_pdf_template",
+            "preview_pdf_template",
+            "new_email_template",
+            "edit_email_template",
+            "duplicate_email_template",
+            "new_signature_profile",
+            "edit_signature_profile",
+            "duplicate_signature_profile",
+            "new_claim_profile",
+            "edit_claim_profile",
+            "delete_claim_profile",
+            "new_claim_type",
+            "edit_claim_type",
+            "delete_claim_type",
+            "new_aggregation_rule",
+            "edit_aggregation_rule",
+            "delete_aggregation_rule",
+            "new_report_template",
+            "edit_report_template",
+            "duplicate_report_template",
+            "edit_field_template",
+            "new_billing_account",
+            "edit_billing_account",
+            "prorate_subscription",
+            "top_up",
+            "view_invoice",
+            "bill_to_details",
+            "new_payment_method",
+            "new_payment_gateway",
+            "edit_payment_gateway",
+            "new_payment_profile",
+            "new_disbursement_profile",
+            "edit_disbursement_profile",
+            "edit_payment_profile",
+            "upcoming_dues",
+            "new_data_transfer",
+            "new_data_backup",
+            "activate_juan_payments",
+            "add_funds_juan_payments",
+            "withdraw_funds_juan_payments",
+            "activate_e_invoicing",
+            "activate_my_e_invoicing",
+            "activate_ph_e_invoicing",
+            "arrange_callback",
+            "new_invite_code",
+            "edit_invite_code",
+            "delete_invite_code"
+          ]
+        },
+        {
+          "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    }
+  ],
+  "reservedParams": [
+    "id",
+    "auth",
+    "modal",
+    "onboard",
+    "reason",
+    "maxCustomUsers",
+    "menu_modal",
+    "universal",
+    "referer",
+    "returnTo",
+    "error",
+    "threadId",
+    "org",
+    "stay_platform",
+    "bounce",
+    "agent",
+    "rd",
+    "tv"
   ]
 }

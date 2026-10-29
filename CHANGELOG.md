@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.2.3] - 2026-10-29
+
+**Quick fix reaches every field it can change, and no longer reports a change that did not happen.**
+
+- `quick_fix_transactions` and `quick_fix_line_items` now list every field each record type takes, read from the Jaz API itself: currency, discounts, billing and shipping addresses, notes, templates, custom fields, tracking classes, withholding tax and the rest. An assistant now finds quick fix for a change like moving posted bills to another currency while keeping their lines and tax, which it used to say was not possible.
+- A field the record type does not take is now refused, with the fields it does take. Before, the change came back as updated and nothing changed: a bill's currency sent as `currency` instead of `currencySettings`, or a recurring schedule's line change sent beside the line number instead of inside `attributes`.
+- After a change to your books, the assistant now reads records fresh. Before, a record it had already read while answering the same message could come back as it was before the change, so it might say the change had failed when it had worked, or make it twice.
+
 ## [9.2.2] - 2026-10-19
 
 - Bank reconciliation: the assistant now applies a learned cash-in or cash-out suggestion on its own only when Jaz shows it as "High Confidence". A "New Pattern" suggestion, one Jaz is still learning, waits for you to confirm it, even at full confidence. This checks the pattern's status the way Jaz's own auto-reconcile does. Jaz's auto-reconcile also checks how the suggestion's contact was chosen, which the assistant cannot see yet.

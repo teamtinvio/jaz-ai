@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.2.2",
+  "version": "9.2.3",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -1308,11 +1308,11 @@
     },
     {
       "name": "quick_fix_transactions",
-      "description": "One record, or other fields on many records of one type. Contact/date/capsule/tags on several: preview_ledger_find_fix.\n\nCommon: valueDate, contactResourceId, tags, customFields, capsuleResourceId, currencySettings. invoices/bills + dueDate; cash-entries: currencySetting SINGULAR ({rateFunctionalToSource, exchangeToken}); journal-schedules + startDate/endDate/interval. Matrix: jaz-api Rule 107.\n\ntags REPLACES all tags: max 50 × 50 chars; AR/AP ≤1000 chars joined, else 422.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }; 207: retry failed only. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "One record, or other fields on many records of one type. Contact/date/capsule/tags on several: preview_ledger_find_fix.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }; 207: retry failed only. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "quick_fix_line_items",
-      "description": "One line, or other fields on many lines. Account/classifiers on several lines: preview_ledger_find_fix.\n\nBody:\n- Invoices, bills, CNs, journals, cash-entries, orders: lineItemResourceIds, attributes.\n- Sale/purchase/subscription schedules: schedulerUpdates, arrayIndex (0-based).\n- Journal schedules: schedulerUpdates, lineItemResourceId.\n\nCommon: name, quantity, unit, unitPrice, discount {rateType: PERCENTAGE|FLAT, rateValue}, organizationAccountResourceId, taxProfileResourceId, classifierConfig. Purchase + withholdingTax {code, rate, rateType, type}. Not create shapes. Journals/cash-entries: amount + description. Matrix: jaz-api Rule 107.\n\nclassifierConfig: set one (≥1 class by resourceId or entityResourceId) or remove one ({resourceId, deleted: true}); others stay; [] no-op.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "One line, or other fields on many lines. Account/classifiers on several lines: preview_ledger_find_fix.\n\nclassifierConfig: set one (type, printable, ≥1 class by resourceId or entityResourceId) or remove one ({resourceId, deleted: true}); others stay; [] no-op.\n\nResponse: { updated, failed: [{resourceId, error, errorCode}] }. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_nano_classifiers",
