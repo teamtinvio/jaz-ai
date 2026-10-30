@@ -18140,6 +18140,9 @@
           "type": "string"
         }
       },
+      "required": [
+        "addressLine1"
+      ],
       "type": "object"
     },
     "QuickFixBillAttributes": {
@@ -18155,10 +18158,10 @@
         "currencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Source currency exchange settings."
+          "description": "Source currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "customFields": {
           "description": "Custom field values for this bill.",
@@ -18182,10 +18185,10 @@
         "taxCurrencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Tax currency exchange settings."
+          "description": "Tax currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "valueDate": {
           "description": "Bill date, in YYYY-MM-DD format (organization timezone).",
@@ -18213,6 +18216,10 @@
           "type": "string"
         }
       },
+      "required": [
+        "billingAddress",
+        "name"
+      ],
       "type": "object"
     },
     "QuickFixBillLineItemsRequest": {
@@ -18267,6 +18274,11 @@
           "type": "string"
         }
       },
+      "required": [
+        "billingAddress",
+        "name",
+        "shippingAddress"
+      ],
       "type": "object"
     },
     "QuickFixBillsRequest": {
@@ -18441,6 +18453,23 @@
       ],
       "type": "object"
     },
+    "QuickFixCurrencySettingsRequest": {
+      "properties": {
+        "exchangeToken": {
+          "description": "Exchange rate quote token. Leave out to use a custom rate; a token fetches the platform rate.",
+          "type": "string"
+        },
+        "rateFunctionalToSource": {
+          "description": "Exchange rate from the organization's base currency to the source currency.",
+          "type": "number"
+        },
+        "sourceCurrencyCode": {
+          "description": "Source currency code (ISO 4217).",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "QuickFixCustomerCreditNoteAttributes": {
       "properties": {
         "capsuleResourceId": {
@@ -18470,10 +18499,10 @@
         "currencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Source currency exchange settings."
+          "description": "Source currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "customFields": {
           "description": "Custom field values for this credit note.",
@@ -18497,10 +18526,10 @@
         "taxCurrencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Tax currency exchange settings."
+          "description": "Tax currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "templateResourceId": {
           "description": "UUID of the PDF report template.",
@@ -18627,10 +18656,10 @@
         "currencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Source currency exchange settings."
+          "description": "Source currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "customFields": {
           "description": "Custom field values for this invoice.",
@@ -18658,10 +18687,10 @@
         "taxCurrencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Tax currency exchange settings."
+          "description": "Tax currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "templateResourceId": {
           "description": "UUID of the PDF report template.",
@@ -18805,10 +18834,6 @@
             "MONTHLY",
             "YEARLY"
           ],
-          "type": "string"
-        },
-        "startDate": {
-          "description": "Schedule start date, in YYYY-MM-DD format (organization timezone).",
           "type": "string"
         },
         "tags": {
@@ -19094,10 +19119,10 @@
         "currencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Source currency exchange settings."
+          "description": "Source currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "customFields": {
           "description": "Custom field values for generated bills.",
@@ -19132,10 +19157,10 @@
         "taxCurrencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Tax currency exchange settings."
+          "description": "Tax currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         }
       },
       "type": "object"
@@ -19311,10 +19336,10 @@
         "currencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Source currency exchange settings."
+          "description": "Source currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "customFields": {
           "description": "Custom field values for generated invoices.",
@@ -19353,10 +19378,10 @@
         "taxCurrencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Tax currency exchange settings."
+          "description": "Tax currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "templateResourceId": {
           "description": "UUID of the PDF report template.",
@@ -19617,10 +19642,10 @@
         "currencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Source currency exchange settings."
+          "description": "Source currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "customFields": {
           "description": "Custom field values for this credit note.",
@@ -19640,10 +19665,10 @@
         "taxCurrencySettings": {
           "allOf": [
             {
-              "$ref": "#/definitions/BTCurrencySettingsRequest"
+              "$ref": "#/definitions/QuickFixCurrencySettingsRequest"
             }
           ],
-          "description": "Tax currency exchange settings."
+          "description": "Tax currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
         },
         "valueDate": {
           "description": "Credit note date, in YYYY-MM-DD format (organization timezone).",

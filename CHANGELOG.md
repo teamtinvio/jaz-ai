@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.2.4] - 2026-10-30
+
+**The assistant now asks before a change deletes payments.**
+
+- On an invoice, bill or credit note that has payments, changing its currency, exchange rate or line amounts makes Jaz delete those payments (refunds, on a credit note) and release their bank matches, and nothing records them again. The assistant now names each payment the change would delete and waits for you to confirm. Through quick fix this also covers a new date on a document in another currency, since its exchange rate is fetched again. Changes that leave the amounts alone, such as a new account, a rename, tags or notes, go through as before.
+- `quick_fix_line_items` takes `resourceIds`, the invoices, bills or credit notes the lines are on, when it changes a quantity, price, discount, tax or withholding, so their payments can be checked first.
+- Quick fix follows what the Jaz API now requires: a currency change always names the currency (`sourceCurrencyCode`), even when only the rate changes, and a new billing or shipping address (`billFrom`, `billTo`, `creditFrom`, `creditTo`) replaces the stored one, so the fields you are not changing are sent again. Journal schedules no longer offer a start date change, which was never accepted.
+
 ## [9.2.3] - 2026-10-29
 
 **Quick fix reaches every field it can change, and no longer reports a change that did not happen.**
