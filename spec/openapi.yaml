@@ -6989,7 +6989,7 @@
           "type": "string"
         },
         "resourceId": {
-          "description": "Resource ID of an EXISTING payment on this record, when editing. Send it to update that\npayment in place so it keeps its identity and any bank-statement match. Leave it out to\nrecord a NEW payment — echoing a stored payment without it creates a duplicate.",
+          "description": "Resource ID of an EXISTING payment on this record, when editing. Send it to update that\npayment in place so it keeps its identity and any bank-statement match. Leave it out to\nrecord a NEW payment. Echoing a stored payment without it creates a duplicate.",
           "type": "string"
         },
         "saveAsDraft": {
@@ -8158,7 +8158,7 @@
           "type": "string"
         },
         "resourceId": {
-          "description": "Resource ID of an EXISTING refund on this record, when editing. Send it to update that\nrefund in place so it keeps its identity and any bank-statement match. Leave it out to\nrecord a NEW refund — echoing a stored refund without it creates a duplicate.",
+          "description": "Resource ID of an EXISTING refund on this record, when editing. Send it to update that\nrefund in place so it keeps its identity and any bank-statement match. Leave it out to\nrecord a NEW refund. Echoing a stored refund without it creates a duplicate.",
           "type": "string"
         },
         "saveAsDraft": {
@@ -8822,7 +8822,7 @@
           "type": "string"
         },
         "resourceId": {
-          "description": "Resource ID of an EXISTING payment on this record, when editing. Send it to update that\npayment in place so it keeps its identity and any bank-statement match. Leave it out to\nrecord a NEW payment — echoing a stored payment without it creates a duplicate.",
+          "description": "Resource ID of an EXISTING payment on this record, when editing. Send it to update that\npayment in place so it keeps its identity and any bank-statement match. Leave it out to\nrecord a NEW payment. Echoing a stored payment without it creates a duplicate.",
           "type": "string"
         },
         "saveAsDraft": {
@@ -10525,7 +10525,7 @@
           "type": "string"
         },
         "resourceId": {
-          "description": "Resource ID of an EXISTING refund on this record, when editing. Send it to update that\nrefund in place so it keeps its identity and any bank-statement match. Leave it out to\nrecord a NEW refund — echoing a stored refund without it creates a duplicate.",
+          "description": "Resource ID of an EXISTING refund on this record, when editing. Send it to update that\nrefund in place so it keeps its identity and any bank-statement match. Leave it out to\nrecord a NEW refund. Echoing a stored refund without it creates a duplicate.",
           "type": "string"
         },
         "saveAsDraft": {
@@ -15482,6 +15482,10 @@
           "maxLength": 64,
           "type": "string"
         },
+        "recommendationId": {
+          "description": "UUID of the accepted suggestion, from statementLines[].recommendations[].recommendationId in Search Magic Reconciliations. Optional; surrounding spaces are ignored and a blank value is treated as absent. The reconciliation is credited to that suggestion while it is still offered (about an hour after it was computed). It does not change what is reconciled.",
+          "type": "string"
+        },
         "retryToken": {
           "description": "Idempotency retry token, folded into the server-side idempotency key so an edit-then-retry produces a fresh journal.",
           "maxLength": 255,
@@ -16570,6 +16574,38 @@
       },
       "type": "object"
     },
+    "MagicMatchEntryError": {
+      "properties": {
+        "errorCode": {
+          "description": "Code naming why the entry was not reconciled, for example MATCHED_PAYMENT_ALREADY_RECONCILED.",
+          "type": "string"
+        },
+        "errorMessage": {
+          "description": "What the code means, in a fixed sentence per code. A code without one of its own gets a neutral sentence telling you to read the line again before any retry.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "MagicMatchFailedEntry": {
+      "properties": {
+        "bankStatementEntryResourceId": {
+          "description": "Resource ID of the bank statement entry.",
+          "type": "string"
+        },
+        "errors": {
+          "description": "Why the entry was not reconciled.",
+          "items": {
+            "$ref": "#/definitions/MagicMatchEntryError"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "errors"
+      ],
+      "type": "object"
+    },
     "MagicMatchReconcileClientRequest": {
       "properties": {
         "autoReconcileRunResourceId": {
@@ -16581,7 +16617,7 @@
           "type": "string"
         },
         "entries": {
-          "description": "One row per bank statement entry to reconcile.",
+          "description": "One row per bank statement entry to reconcile. At most 100 entries may be MAGIC_RECONCILE_WITH_CASH_IN_OUT, and a bank statement entry that has one may appear only once.",
           "items": {
             "$ref": "#/definitions/MagicMatchReconcileEntry"
           },
@@ -16606,6 +16642,12 @@
           "description": "Resource ID of the bank statement entry.",
           "type": "string"
         },
+        "learnedPredictionResourceId": {
+          "description": "Resource ID of the learned prediction, from the suggestion. Required for MAGIC_RECONCILE_WITH_CASH_IN_OUT.",
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
         "matchedBatchResourceId": {
           "description": "Batch payment resource ID to reconcile against the entry.",
           "type": "string"
@@ -16626,10 +16668,31 @@
           "maxItems": 100,
           "type": "array"
         },
+        "predictedPayload": {
+          "description": "Predicted payload (opaque JSON) from the suggestion, passed through verbatim. Required for MAGIC_RECONCILE_WITH_CASH_IN_OUT.",
+          "maxLength": 65536,
+          "type": "string"
+        },
+        "predictedPayloadSchemaVersion": {
+          "description": "Predicted payload schema version from the suggestion. Required for MAGIC_RECONCILE_WITH_CASH_IN_OUT.",
+          "maxLength": 64,
+          "minLength": 1,
+          "type": "string"
+        },
+        "recommendationId": {
+          "description": "UUID of the accepted suggestion, from statementLines[].recommendations[].recommendationId in Search Magic Reconciliations. Optional; surrounding spaces are ignored and a blank value is treated as absent. The reconciliation is credited to that suggestion while it is still offered (about an hour after it was computed). It does not change what is reconciled.",
+          "type": "string"
+        },
+        "retryToken": {
+          "description": "Idempotency retry token for MAGIC_RECONCILE_WITH_CASH_IN_OUT, folded into the server-side idempotency key so an edit-then-retry produces a fresh journal.",
+          "maxLength": 255,
+          "type": "string"
+        },
         "workflowType": {
-          "description": "Workflow type. Only MAGIC_MATCH (match to existing BTs/payments) is supported on this endpoint.",
+          "description": "Workflow type. MAGIC_MATCH reconciles the entry against existing transactions or payments. MAGIC_RECONCILE_WITH_CASH_IN_OUT accepts a learned-prediction suggestion for the entry and needs learnedPredictionResourceId, predictedPayload and predictedPayloadSchemaVersion.",
           "enum": [
-            "MAGIC_MATCH"
+            "MAGIC_MATCH",
+            "MAGIC_RECONCILE_WITH_CASH_IN_OUT"
           ],
           "type": "string"
         }
@@ -16638,6 +16701,50 @@
         "bankStatementEntryResourceId",
         "workflowType"
       ],
+      "type": "object"
+    },
+    "MagicMatchReconcileResponse": {
+      "properties": {
+        "failed": {
+          "description": "Entries that were not reconciled, each with its errors. Always present, possibly empty. An entry here may still have posted when the failure was unexpected, so read its bank record before any retry.",
+          "items": {
+            "$ref": "#/definitions/MagicMatchFailedEntry"
+          },
+          "type": "array"
+        },
+        "reconciled": {
+          "description": "Entries that were reconciled. Always present, possibly empty.",
+          "items": {
+            "$ref": "#/definitions/MagicMatchReconciledEntry"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "failed",
+        "reconciled"
+      ],
+      "type": "object"
+    },
+    "MagicMatchReconciledEntry": {
+      "properties": {
+        "bankStatementEntryResourceId": {
+          "description": "Resource ID of the bank statement entry.",
+          "type": "string"
+        },
+        "reference": {
+          "description": "Reference on the bank statement entry.",
+          "type": "string"
+        },
+        "status": {
+          "description": "Status of the bank statement entry after reconciling.",
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Value date of the bank statement entry, as epoch milliseconds.",
+          "type": "integer"
+        }
+      },
       "type": "object"
     },
     "MagicWorkflowBankStatementDetails": {
@@ -71689,7 +71796,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Accept an ML learned-prediction suggestion (from view auto-reconciliation). predictedPayload and predictedPayloadSchemaVersion are passed through from the suggestion verbatim. Supply retryToken to force a fresh journal on an edit-then-retry; omit it for an idempotent replay.",
+        "description": "Accept an ML learned-prediction suggestion (from view auto-reconciliation). predictedPayload and predictedPayloadSchemaVersion are passed through from the suggestion verbatim. Supply retryToken to force a fresh journal on an edit-then-retry; omit it for an idempotent replay. Supply the suggestion's recommendationId to credit the reconciliation to that suggestion while it is still offered (about an hour after it was computed).",
         "operationId": "create-reconciliation-learned-prediction",
         "parameters": [
           {
@@ -71759,7 +71866,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Bulk-accept magic-match suggestions. Each entry reconciles a bank statement entry against existing open business transactions (matchedBusinessTransactions) and/or existing payments (matchedPayments). Returns reconciled and failed entries separately. NOT idempotent at the entry level.",
+        "description": "Bulk-accept magic reconciliation suggestions. A MAGIC_MATCH entry reconciles a bank statement entry against existing open business transactions (matchedBusinessTransactions) and/or existing payments (matchedPayments), and is NOT idempotent. A MAGIC_RECONCILE_WITH_CASH_IN_OUT entry accepts a learned-prediction suggestion exactly as Reconcile Bank Statement with Learned Prediction does for one entry.\n\nWhen every entry reconciles, or some do and others do not, the response is 200 with both reconciled and failed, each always present (an entry is in exactly one). When no entry reconciles, the request fails with 422. An entry in failed may still have posted when its failure was unexpected, and a 422 can follow entries that posted, so read each line before any retry, and never resend a MAGIC_MATCH entry blindly.\n\nAt most 100 entries may be MAGIC_RECONCILE_WITH_CASH_IN_OUT, a bank statement entry that has one may appear only once, and an entry may carry only its own workflow's fields (no matches on a MAGIC_RECONCILE_WITH_CASH_IN_OUT entry, no learned-prediction fields on a MAGIC_MATCH entry); each is refused with 422 before anything is reconciled.",
         "operationId": "create-reconciliation-magic-match",
         "parameters": [
           {
@@ -71779,7 +71886,19 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/BaseResponse"
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/MagicMatchReconcileResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
             }
           },
           "400": {

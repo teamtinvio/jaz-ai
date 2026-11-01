@@ -1,5 +1,14 @@
 # Changelog
 
+## [9.2.6] - 2026-11-01
+
+**Bank reconciliation: accept learned cash-in and cash-out suggestions in bulk, and credit each accept to its suggestion.**
+
+- `reconcile_magic_match` now takes learned-prediction entries (`MAGIC_RECONCILE_WITH_CASH_IN_OUT`) beside matches to existing transactions, up to 100 of them per call, so a batch of reviewed suggestions is applied in one call.
+- When the assistant applies a suggestion from `view_auto_reconciliation`, it passes on the suggestion's ID, so Jaz records which suggestion you accepted.
+- A batch in which some entries reconcile and others do not now comes back as a partial result listing both, instead of an error. A failed entry may still have posted, so the assistant reads the line again before any retry.
+- `clio reconciliations magic-match` exits with an error code when any entry failed.
+
 ## [9.2.5] - 2026-11-01
 
 - Quick fix: a custom field can be named by its name or by its ID.

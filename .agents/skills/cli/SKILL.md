@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 9.2.5
+version: 9.2.6
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -316,7 +316,7 @@ The same operation is `navigate` on the MCP surface. Full usage rules live in th
 
 CLI commands exit with standard codes:
 - **Exit 0**: success
-- **Exit 1**: your input needs changing (missing flags, malformed id, over-limit or duplicate batch, blank required text, unknown enum value). Also a business refusal on some commands, e.g. `approvals`.
+- **Exit 1**: your input needs changing (missing flags, malformed id, over-limit or duplicate batch, blank required text, unknown enum value). Also a business refusal on some commands, e.g. `approvals`, and a partial success on `reconciliations magic-match` (outcome on stdout; re-read the lines before any retry).
 - **Exit 2**: the request was fine and the API refused or failed, OR an internal defect
 - **Exit 3**: auth (invalid, missing or unresolvable key)
 

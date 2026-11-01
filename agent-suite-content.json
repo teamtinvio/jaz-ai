@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.2.5+deffecf4",
+  "contentVersion": "9.2.6+6d26c461",
   "counts": {
     "tools": 387,
     "namespaces": 49,
@@ -2726,7 +2726,7 @@
     {
       "name": "reconcile_magic_match",
       "namespace": "reconciliations",
-      "description": "Bulk-accept MAGIC_MATCH suggestions: reconcile many bank entries against EXISTING open business transactions and/or payments in one call (max 500 entries). Feed entries from view_auto_reconciliation suggestions. Returns a per-entry split { reconciled[], failed[] }: a 200 with a non-empty failed[] is a PARTIAL success; surface failed entries (with their errorCode) and loop. Entry-level idempotency-keyed server-side. Use reconcile_with_payments for a single precise match; use this to accept a batch of suggestions at once. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk-accept magic suggestions from view_auto_reconciliation (pass each one's recommendationId): max 500 entries, at most 100 MAGIC_RECONCILE_WITH_CASH_IN_OUT, each bank entry once, each entry with only its own workflow's fields. MAGIC_MATCH reconciles against EXISTING open business transactions and/or payments. MAGIC_RECONCILE_WITH_CASH_IN_OUT accepts a learned prediction as reconcile_learned_prediction does; learnedPredictionResourceId, predictedPayload and predictedPayloadSchemaVersion are required for it, VERBATIM from the suggestion. Returns { reconciled[], failed[] }, either possibly absent or empty; a non-empty failed[] is a PARTIAL success: surface each errorCode. None reconciled = a 422 error. A failed entry, a 422 or a 500 may follow entries that posted, so re-read the lines (search_bank_records) before any retry, never fall back to reconcile_with_payments blind: MAGIC_MATCH entries are NOT idempotent; a CASH_IN_OUT entry is keyed on bank entry + prediction + retryToken. Use reconcile_with_payments for a single precise match. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
