@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.2.5] - 2026-11-01
+
+- Quick fix: a custom field can be named by its name or by its ID.
+- Quick fix: the assistant now knows a cash entry names its tax currency differently from invoices and bills, so a tax-currency change on cash entries is sent the way Jaz expects.
+- The assistant's view of the Jaz API is up to date again, including the newer deferral, lease and fixed asset endpoints. No new tools.
+
 ## [9.2.4] - 2026-10-30
 
 **The assistant now asks before a change deletes payments.**
