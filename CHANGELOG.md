@@ -1,5 +1,9 @@
 # Changelog
 
+## [9.2.7] - 2026-11-02
+
+Internal API drift check update. No user-facing changes since v9.2.6.
+
 ## [9.2.6] - 2026-11-01
 
 **Bank reconciliation: accept learned cash-in and cash-out suggestions in bulk, and credit each accept to its suggestion.**
