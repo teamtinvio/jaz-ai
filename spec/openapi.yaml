@@ -16546,6 +16546,11 @@
     },
     "MagicFileResult": {
       "properties": {
+        "backgroundJobId": {
+          "description": "Resource ID of the background job processing the file, for tracking when it finishes. Omitted when the upload started none.",
+          "example": "9b2f4e6d-8a1c-4d3e-b5f7-0a9c8e7d6f5a",
+          "type": "string"
+        },
         "errorCode": {
           "description": "Error code when processing failed.",
           "type": "string"

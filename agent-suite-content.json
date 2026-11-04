@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.2.7+1ab9dac6",
+  "contentVersion": "9.3.0+2d4a7493",
   "counts": {
     "tools": 387,
     "namespaces": 49,
@@ -738,7 +738,7 @@
     {
       "name": "bulk_upsert_items",
       "namespace": "items_and_inventory",
-      "description": "Max 500 items per call. Provide resourceId per item to update (partial: only changed fields needed, server preserves existing values). Omit resourceId to create (defaults: status=ACTIVE, itemCategory=NON_INVENTORY). If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Max 500 items per call. Provide resourceId per item to update (partial: only changed fields needed, server preserves existing values). Omit resourceId to create (defaults: status=ACTIVE, itemCategory=NON_INVENTORY). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -1396,7 +1396,7 @@
     {
       "name": "export_pseudo_sql",
       "namespace": "pseudo_sql_exports",
-      "description": "Kick off an async CSV export of a pseudo-SQL SELECT against the curated reporting schema. Returns { jobId, status }. Same DSL constraints as preview_pseudo_sql (SELECT-only, ≤16384 chars, single statement). Poll status via get_pseudo_sql_export; terminal states are COMPLETED (downloadUrl present, ~15min S3 expiry), FAILED, or EXPIRED. For one-shot \"give me the CSV\" use run_pseudo_sql_and_download instead. Supply idempotencyKey to dedupe across retries; same key + DIFFERENT query returns the prior job's result (server-side primary).",
+      "description": "Kick off an async CSV export of a pseudo-SQL SELECT against the curated reporting schema. Returns { jobId, status }. Same DSL constraints as preview_pseudo_sql (SELECT-only, ≤16384 chars, single statement). Poll status via get_pseudo_sql_export; terminal states are COMPLETED (downloadUrl present, ~15min S3 expiry), FAILED, or EXPIRED. If the result says it runs in the background, do not poll: its result arrives by itself. For one-shot \"give me the CSV\" use run_pseudo_sql_and_download instead. Supply idempotencyKey to dedupe across retries; same key + DIFFERENT query returns the prior job's result (server-side primary).",
       "readOnly": false,
       "destructive": false
     },
@@ -1473,7 +1473,7 @@
     {
       "name": "import_bank_statement",
       "namespace": "bank_accounts",
-      "description": "Import a bank statement from a URL or an attached file (max 10 MB). Processing is async; check magic workflows for status. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Import a bank statement from a URL or an attached file (max 10 MB). Processing is async; check magic workflows for status. If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1487,7 +1487,7 @@
     {
       "name": "create_transaction_from_document",
       "namespace": "document_ai",
-      "description": "Create a business transaction (invoice/bill/credit note/quote/order/purchase request) from a SINGLE file (max 10 MB), a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async. Quotes/orders land DRAFT/PENDING: relay the result `next`. When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. For a FOLDER, a .zip, a Dropbox/Drive/OneDrive folder share link, or several/mixed documents at once, use classify_documents (then extract_documents) instead, not this per-file. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create a business transaction (invoice/bill/credit note/quote/order/purchase request) from a SINGLE file (max 10 MB), a URL, or raw HTML (e.g. an email body) using AI extraction. Processing is async: the result is a workflow id, not the record. If the result says it runs in the background, do not poll: its result arrives by itself. Quotes/orders land DRAFT/PENDING: relay the result `next`. When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. For a FOLDER, a .zip, a Dropbox/Drive/OneDrive folder share link, or several/mixed documents at once, use classify_documents (then extract_documents) instead, not this per-file. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1501,14 +1501,14 @@
     {
       "name": "wait_for_magic_workflows",
       "namespace": "document_ai",
-      "description": "Poll magic extraction workflow(s) until each reaches a terminal state (transaction created (a draft is ready), OCR succeeded/failed, or errored) or until the wait budget elapses. Use after create_transaction_from_document / extract_documents to know when drafts are ready. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll.",
+      "description": "Poll magic extraction workflow(s) until each reaches a terminal state (transaction created (a draft is ready), OCR succeeded/failed, or errored) or until the wait budget elapses. Use after create_transaction_from_document / extract_documents to know when drafts are ready; a workflow whose result said it runs in the background answers with that note instead. Returns each workflow's current status plus the still-pending ids; if any are still pending after the budget, call again to keep waiting. Batched into one request per poll.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "create_claim_from_attachment",
       "namespace": "document_ai",
-      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction: from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. The draft is born BOUND to the uploader's own employee automatically; to file for someone else pass employeeResourceId (server requires a claims Manager/Admin). Optional contact, claim profile, currency, value date. Returns a workflow handle; the claim appears in Drafts asynchronously (no manual bind step). If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction: from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. The draft is born BOUND to the uploader's own employee automatically; to file for someone else pass employeeResourceId (server requires a claims Manager/Admin). Optional contact, claim profile, currency, value date. Returns a workflow handle; the claim appears in Drafts asynchronously (no manual bind step). If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1522,7 +1522,7 @@
     {
       "name": "extract_documents",
       "namespace": "document_ai",
-      "description": "Create draft transactions from a classified document collection (see classify_documents). Uploads each file to the right AI-extraction endpoint (invoices/bills/credit notes via business-transaction extraction, bank statements via statement import), de-duplicates identical files, and returns the workflow ids to poll with wait_for_magic_workflows. Processing is async; drafts appear once the workflows reach a terminal state. Pass the collectionId from classify_documents. Returns `whereToSee[]`: the screen each landed type appears on + its uploaded/failed split (+ `next` for quotes/orders): relay those links (no `navigate`) and say drafts are still arriving. An unbuildable link is omitted, named in `partialFailures`. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create draft transactions from a classified document collection (see classify_documents). Uploads each file to the right AI-extraction endpoint (invoices/bills/credit notes via business-transaction extraction, bank statements via statement import), de-duplicates identical files, and returns the workflow ids (wait_for_magic_workflows reads them). Processing is async; drafts appear once the workflows reach a terminal state. If the result says it runs in the background, do not poll: its result arrives by itself. Pass the collectionId from classify_documents. Returns `whereToSee[]`: the screen each landed type appears on + its uploaded/failed split (+ `next` for quotes/orders): relay those links (no `navigate`) and, unless the result says it runs in the background, say drafts are still arriving. An unbuildable link is omitted, named in `partialFailures`. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -2145,35 +2145,35 @@
     {
       "name": "bulk_submit_claims",
       "namespace": "claim_processing",
-      "description": "Bulk-submit DRAFT claims (ASYNC). Returns a job handle {jobId,...}; poll search_background_jobs by jobId for per-item results. Max 500 ids. Each claim must have a reference; referenceless claims fail per-item with CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (check the job result). If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk-submit DRAFT claims (ASYNC). Returns the final job if it finished, else a job handle {jobId,...} to poll with search_background_jobs by jobId for per-item results. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. Each claim must have a reference; referenceless claims fail per-item with CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (check the job result). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_approve_claims",
       "namespace": "claim_processing",
-      "description": "Bulk-approve SUBMITTED claims (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk-approve SUBMITTED claims (ASYNC). Returns the final job if it finished, else a job handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_reject_claims",
       "namespace": "claim_processing",
-      "description": "Bulk-reject claims with one shared reason (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk-reject claims with one shared reason (ASYNC). Returns the final job if it finished, else a job handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_cancel_claims",
       "namespace": "claim_processing",
-      "description": "Bulk-cancel claims with one shared reason (ASYNC). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk-cancel claims with one shared reason (ASYNC). Returns the final job if it finished, else a job handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_delete_claims",
       "namespace": "claim_processing",
-      "description": "Bulk-delete claims (ASYNC; only DRAFT/REJECTED/CANCELLED are deletable). Returns a job handle; poll search_background_jobs by jobId. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk-delete claims (ASYNC; only DRAFT/REJECTED/CANCELLED are deletable). Returns the final job if it finished, else a job handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2278,7 +2278,7 @@
     {
       "name": "import_employees",
       "namespace": "employees",
-      "description": "Bulk create/update/delete employees (max 100 rows per array). Rows validate synchronously (422 row errors), then an async job queues: poll search_background_jobs by jobId. Create rows need name + claimProfileResourceId (userResourceId optional). If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk create/update/delete employees (max 100 rows per array). Rows validate synchronously (422 row errors), then an async job queues: the result is the final job if it finished, else poll search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Create rows need name + claimProfileResourceId (userResourceId optional). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2460,7 +2460,7 @@
     {
       "name": "record_withholding_tax_certificate",
       "namespace": "payments_and_search",
-      "description": "Record a customer's Withholding Tax Certificate (BIR Form 2307, creditable withholding / CWT; PH orgs only) against their invoices and customer credit notes, as one payment batch. accountResourceId must be the \"Creditable Withholding Tax\" system account. Each transaction's amounts are the tax withheld from it. Async: returns a jobId (search_background_jobs). Read it back on get_invoice as recordedWithholding_ph; it is not in the invoice's payment list. delete_payment with that record's resourceId removes it. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Record a customer's Withholding Tax Certificate (BIR Form 2307, creditable withholding / CWT; PH orgs only) against their invoices and customer credit notes, as one payment batch. accountResourceId must be the \"Creditable Withholding Tax\" system account. Each transaction's amounts are the tax withheld from it. Async: returns the final job if it finished, else a jobId (search_background_jobs). If the result says it runs in the background, do not poll: its result arrives by itself. Read it back on get_invoice as recordedWithholding_ph; it is not in the invoice's payment list. delete_payment with that record's resourceId removes it. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2600,7 +2600,7 @@
     {
       "name": "bulk_upsert_contacts",
       "namespace": "contacts",
-      "description": "Bulk create/update contacts (max 500). resourceId per row → update (partial; omitted fields preserve existing). Omit resourceId → create. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Per-row failures in errorDetails (NOT failedRows; that's the sync pattern). On PARTIAL_SUCCESS: succeeded rows are committed; re-submit only failed rowIndex entries.",
+      "description": "Bulk create/update contacts (max 500). resourceId per row → update (partial; omitted fields preserve existing). Omit resourceId → create. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Per-row failures in errorDetails (NOT failedRows; that's the sync pattern). On PARTIAL_SUCCESS: succeeded rows are committed; re-submit only failed rowIndex entries.",
       "readOnly": false,
       "destructive": true
     },
@@ -2614,42 +2614,42 @@
     {
       "name": "bulk_upsert_invoice_line_items",
       "namespace": "invoices",
-      "description": "Nested line items per invoice (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Nested line items per invoice (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_bills",
       "namespace": "bills",
-      "description": "Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead; that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED; last wins). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead; that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED; last wins). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_bill_line_items",
       "namespace": "bills",
-      "description": "Nested line items per bill (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Nested line items per bill (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_customer_credit_notes",
       "namespace": "customer_credit_notes",
-      "description": "Max 500 customer credit notes per call. Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Max 500 customer credit notes per call. Natural key: creditNoteReference. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_supplier_credit_notes",
       "namespace": "supplier_credit_notes",
-      "description": "Max 500 supplier credit notes per call. Natural key: creditNoteReference. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Max 500 supplier credit notes per call. Natural key: creditNoteReference. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_journals",
       "namespace": "journals",
-      "description": "Max 500 manual journals per call. NATURAL KEY: `journalReference` (NOT `reference`; every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]`; different from `clio journals create` which uses entries). A leg is `organizationAccountResourceId` + EXACTLY ONE of `debitAmount` / `creditAmount`; omit the unused side, do not send 0, and do NOT use the `accountResourceId`+`amount`+`type` shape `create_journal` takes. Debits must equal credits per journal. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Max 500 manual journals per call. NATURAL KEY: `journalReference` (NOT `reference`; every other bulk-upsert uses entityReference, this one is asymmetric). LEGS field: `journalEntries[]` (NOT `entries[]`; different from `clio journals create` which uses entries). A leg is `organizationAccountResourceId` + EXACTLY ONE of `debitAmount` / `creditAmount`; omit the unused side, do not send 0, and do NOT use the `accountResourceId`+`amount`+`type` shape `create_journal` takes. Debits must equal credits per journal. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 (YYYY-MM-DD) only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2663,14 +2663,14 @@
     {
       "name": "quick_reconcile",
       "namespace": "reconciliations",
-      "description": "Bulk-reconcile bank statement entries against a list of journals (max 500). Reconciliation mode is hardcoded to QUICK_RECON. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. Caller provides bankAccountResourceId + journalsForReconciliation[] (each row: bankStatementEntryResourceId, journalReference, journalAccountResourceId). If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Bulk-reconcile bank statement entries against a list of journals (max 500). Reconciliation mode is hardcoded to QUICK_RECON. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Caller provides bankAccountResourceId + journalsForReconciliation[] (each row: bankStatementEntryResourceId, journalReference, journalAccountResourceId). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "apply_bank_rule",
       "namespace": "reconciliations",
-      "description": "Reconcile bank statement entries (max 500) with one saved bank rule: each entry gets the cash-in or cash-out entry the rule defines (its accounts and amount split). Async: returns a jobId; poll search_background_jobs filtered by resourceId. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Reconcile bank statement entries (max 500) with one saved bank rule: each entry gets the cash-in or cash-out entry the rule defines (its accounts and amount split). Async: returns the final job if it finished, else a jobId; poll search_background_jobs filtered by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2754,14 +2754,14 @@
     {
       "name": "convert_drafts_to_active",
       "namespace": "drafts",
-      "description": "BULK promote: finalize up to 500 draft business transactions to ACTIVE in ONE call, mixing any combination of invoices, bills, and credit notes (no per-type tools needed). Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent: a second call on already-promoted drafts returns 422. Filter the draft list by status: DRAFT before submitting. Pair with validate_drafts for a pre-flight check on large batches. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "BULK promote: finalize up to 500 draft business transactions to ACTIVE in ONE call, mixing any combination of invoices, bills, and credit notes (no per-type tools needed). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. NOT idempotent: a second call on already-promoted drafts returns 422. Filter the draft list by status: DRAFT before submitting. Pair with validate_drafts for a pre-flight check on large batches. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "submit_drafts_for_approval",
       "namespace": "drafts",
-      "description": "BULK submit: route up to 500 draft business transactions into the approval workflow in ONE call, mixing any combination of invoices, bills, and credit notes. Async; returns jobId → poll search_background_jobs by resourceId; PARTIAL_SUCCESS data[0].errorDetails. NOT idempotent on drafts that already have an in-flight approval request. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "BULK submit: route up to 500 draft business transactions into the approval workflow in ONE call, mixing any combination of invoices, bills, and credit notes. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. NOT idempotent on drafts that already have an in-flight approval request. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2810,7 +2810,7 @@
     {
       "name": "bulk_approve_documents",
       "namespace": "approvals",
-      "description": "Approve up to 100 PENDING documents. Irreversible, posts each ledger: confirm first. Async: returns a jobId, poll search_background_jobs. One unknown or other-org id: whole batch 422. Non-pending ones are skipped, listed on the job tasks. After a timeout or 500, read approvalStatus before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Approve up to 100 PENDING documents. Irreversible, posts each ledger: confirm first. Async: returns the final job if it finished, else a jobId to poll with search_background_jobs. If the result says it runs in the background, do not poll: its result arrives by itself. One unknown or other-org id: whole batch 422. Non-pending ones are skipped, listed on the job tasks. After a timeout or 500, read approvalStatus before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2824,7 +2824,7 @@
     {
       "name": "bulk_request_document_changes",
       "namespace": "approvals",
-      "description": "Send up to 500 documents back for changes with one message. Async: returns a jobId; poll search_background_jobs. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Send up to 500 documents back for changes with one message. Async: returns the final job if it finished, else a jobId to poll with search_background_jobs. If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

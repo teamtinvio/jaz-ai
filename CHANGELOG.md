@@ -1,5 +1,10 @@
 # Changelog
 
+## [9.3.0] - 2026-11-04
+
+- Updating or finalizing an invoice, bill or credit note now hands back the record as it stands after the change, so the assistant shows the new values and status instead of the old ones.
+- `run_pseudo_sql_and_download` now returns its CSV file when the export finishes within the call.
+
 ## [9.2.7] - 2026-11-02
 
 Internal API drift check update. No user-facing changes since v9.2.6.
