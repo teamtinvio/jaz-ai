@@ -418,6 +418,58 @@
       ],
       "type": "object"
     },
+    "AddCommentRequest": {
+      "properties": {
+        "content": {
+          "description": "Comment text, 1 to 4000 characters once leading and trailing spaces are removed. To mention a user, write `<@userResourceId>` in the text, using the userResourceId that List Organization Users gives for the user. The user's name is filled in when the comment is saved, so the comment is stored and returned with `<Name@userResourceId>`, and that form is read the same way if you send it. A comment can mention at most 20 different users, and each must be an active member of the organization, or the whole request is refused. Text such as @Name without the markup mentions no one.",
+          "example": "Please check this with <@3b6d2f84-1c5a-4d7e-9b0f-8a2c4e6f1d35>.",
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        },
+        "threadId": {
+          "description": "Identifier of the open thread to add the comment to. When left out or empty, the comment joins the open thread of the record, or opens a new thread when none is open. A resolved thread accepts no comments.",
+          "example": "AbCdEfGhIjKlMnOpQrSt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "content"
+      ],
+      "type": "object"
+    },
+    "AddCommentResponse": {
+      "properties": {
+        "commentId": {
+          "description": "Identifier of the new comment.",
+          "example": "ZyXwVuTsRqPoNmLkJiHg",
+          "type": "string"
+        },
+        "content": {
+          "description": "Comment text as stored, with each mention written as `<Name@userResourceId>`.",
+          "example": "Please check this with <Grace Hopper@3b6d2f84-1c5a-4d7e-9b0f-8a2c4e6f1d35>.",
+          "type": "string"
+        },
+        "mentions": {
+          "description": "Users mentioned in the comment, once each in the order they appear. Empty when the comment mentions no one.",
+          "items": {
+            "$ref": "#/definitions/MentionResponse"
+          },
+          "type": "array"
+        },
+        "text": {
+          "description": "Comment text for reading, with each mention shown as @Name.",
+          "example": "Please check this with @Grace Hopper.",
+          "type": "string"
+        },
+        "threadId": {
+          "description": "Identifier of the thread the comment was posted in: the thread named in the request, the open thread, or the thread opened for the comment.",
+          "example": "AbCdEfGhIjKlMnOpQrSt",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "AddEmployeeRequest": {
       "properties": {
         "active": {
@@ -1204,6 +1256,28 @@
         "order",
         "sortBy"
       ],
+      "type": "object"
+    },
+    "BaseMessageResponse": {
+      "properties": {
+        "data": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BaseMessageResponseMsg"
+            }
+          ],
+          "description": "The response message."
+        }
+      },
+      "type": "object"
+    },
+    "BaseMessageResponseMsg": {
+      "properties": {
+        "message": {
+          "description": "Outcome message.",
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "BaseResponse": {
@@ -5893,6 +5967,57 @@
         "targetResourceId": {
           "description": "What this row resolves to: a resource UUID for account/tax/classifier/contact maps, or the tag NAME for a tags map.",
           "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "CommentResponse": {
+      "properties": {
+        "authorName": {
+          "description": "Display name of the author when the comment was written.",
+          "example": "Ada Lovelace",
+          "type": "string"
+        },
+        "authorUserResourceId": {
+          "description": "Resource ID of the user who wrote the comment.",
+          "example": "9f4a1c2e-6b7d-4e8f-a3b1-5c6d7e8f9a0b",
+          "type": "string"
+        },
+        "commentId": {
+          "description": "Identifier of the comment.",
+          "example": "ZyXwVuTsRqPoNmLkJiHg",
+          "type": "string"
+        },
+        "content": {
+          "description": "Comment text as stored, with each mention written as `<Name@userResourceId>`.",
+          "example": "Please check this with <Grace Hopper@3b6d2f84-1c5a-4d7e-9b0f-8a2c4e6f1d35>.",
+          "type": "string"
+        },
+        "createdAt": {
+          "description": "When the comment was written, as epoch milliseconds.",
+          "example": 1730765100000,
+          "type": "integer"
+        },
+        "isEdited": {
+          "description": "When true, the comment was edited after it was written.",
+          "type": "boolean"
+        },
+        "mentions": {
+          "description": "Users mentioned in the comment, once each in the order they appear. Empty when the comment mentions no one.",
+          "items": {
+            "$ref": "#/definitions/MentionResponse"
+          },
+          "type": "array"
+        },
+        "text": {
+          "description": "Comment text for reading, with each mention shown as @Name.",
+          "example": "Please check this with @Grace Hopper.",
+          "type": "string"
+        },
+        "updatedAt": {
+          "description": "When the comment was last edited, as epoch milliseconds. Null when it was never edited.",
+          "example": 1730768700000,
+          "type": "integer"
         }
       },
       "type": "object"
@@ -17106,6 +17231,20 @@
       ],
       "type": "object"
     },
+    "MarkAllNotificationsReadResponse": {
+      "properties": {
+        "marked": {
+          "description": "Number of unread notifications marked read by this call, at most 2000. It counts every unread notification of the caller, including those about record types this API does not list.",
+          "example": 57,
+          "type": "integer"
+        },
+        "more": {
+          "description": "When true, more unread notifications may remain: call again until it is false.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "MarkAsReconciledClientRequest": {
       "properties": {
         "bankAccountResourceId": {
@@ -17230,6 +17369,21 @@
         "cashflowTransactionResourceId",
         "paymentAmount"
       ],
+      "type": "object"
+    },
+    "MentionResponse": {
+      "properties": {
+        "name": {
+          "description": "Name of the mentioned user as written in the comment. Empty when the comment gives none.",
+          "example": "Grace Hopper",
+          "type": "string"
+        },
+        "userResourceId": {
+          "description": "Resource ID of the mentioned user.",
+          "example": "3b6d2f84-1c5a-4d7e-9b0f-8a2c4e6f1d35",
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "MoveTransactionCapsuleClientRequest": {
@@ -17373,6 +17527,106 @@
         "reference": {
           "description": "The next reference, formatted with the organization's prefix, separator, optional date and\nzero padding. Reading it does not consume it: the number is only taken when a document is\ncreated, so repeated calls return the same value.",
           "example": "INV-04/09/26-07",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "NotificationListResponse": {
+      "properties": {
+        "data": {
+          "description": "Notifications on the requested page, newest first. Empty when the page has none.",
+          "items": {
+            "$ref": "#/definitions/NotificationResponse"
+          },
+          "type": "array"
+        },
+        "totalElements": {
+          "description": "Total number of records matching the query.",
+          "example": 42,
+          "type": "integer"
+        },
+        "totalPages": {
+          "description": "Total number of pages.",
+          "example": 3,
+          "type": "integer"
+        },
+        "truncated": {
+          "description": "When true, 500 notifications were read from the last 365 days, so older ones may exist that are not listed and an unread notification may be missing.",
+          "type": "boolean"
+        },
+        "windowDays": {
+          "description": "Number of days back the list reaches.",
+          "example": 365,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "NotificationResponse": {
+      "properties": {
+        "authorName": {
+          "description": "Display name of the author when the comment was written.",
+          "example": "Ada Lovelace",
+          "type": "string"
+        },
+        "authorUserResourceId": {
+          "description": "Resource ID of the user who wrote the comment.",
+          "example": "9f4a1c2e-6b7d-4e8f-a3b1-5c6d7e8f9a0b",
+          "type": "string"
+        },
+        "bankAccountResourceId": {
+          "description": "Resource ID of the bank account that holds the bank record. Set only for bank-records notifications, and null when it cannot be worked out from the comment that raised the notification. Pass it as bankAccountResourceId to list the threads of the bank record.",
+          "example": "6e0c4b7a-2f9d-4a13-b58e-7c1d3e5f9a42",
+          "type": "string"
+        },
+        "createdAt": {
+          "description": "When the notification was raised, as epoch milliseconds.",
+          "example": 1730764800000,
+          "type": "integer"
+        },
+        "entityReference": {
+          "description": "Reference of the record, such as a bill or invoice number.",
+          "example": "",
+          "type": "string"
+        },
+        "entityResourceId": {
+          "description": "Resource ID of the record the notification is about.",
+          "example": "5b1f3c1e-0d36-4a67-8b0e-0a4f2b7f4c11",
+          "type": "string"
+        },
+        "entityType": {
+          "description": "Type of the record the notification is about, as it appears in the URL: bills, invoices, supplier-credit-notes, customer-credit-notes, or bank-records. Empty when the notification is about a record type this API does not list, or when its details are hidden from the caller.",
+          "example": "bills",
+          "type": "string"
+        },
+        "isRead": {
+          "description": "When true, the notification has been read.",
+          "type": "boolean"
+        },
+        "notificationId": {
+          "description": "Identifier of the notification.",
+          "example": "Hq3ZpLmN8sT1vWxYz4Ab",
+          "type": "string"
+        },
+        "readAt": {
+          "description": "When the notification was read, as epoch milliseconds. Null while it is unread.",
+          "example": 1730798400000,
+          "type": "integer"
+        },
+        "text": {
+          "description": "Comment text for reading, with each mention shown as @Name.",
+          "example": "Please check this with @Grace Hopper.",
+          "type": "string"
+        },
+        "threadId": {
+          "description": "Identifier of the comment thread the notification is about.",
+          "example": "AbCdEfGhIjKlMnOpQrSt",
+          "type": "string"
+        },
+        "type": {
+          "description": "Kind of notification, such as MENTION, COMMENT, or REACTION.",
+          "example": "MENTION",
           "type": "string"
         }
       },
@@ -26422,6 +26676,19 @@
       ],
       "type": "object"
     },
+    "SetNotificationReadRequest": {
+      "properties": {
+        "isRead": {
+          "description": "True marks the notification read, false marks it unread. Required.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "isRead"
+      ],
+      "type": "object"
+    },
     "SeveritySummary": {
       "properties": {
         "additionalCount": {
@@ -29791,6 +30058,51 @@
       ],
       "type": "object"
     },
+    "ThreadResponse": {
+      "properties": {
+        "commentCount": {
+          "description": "Number of comments in the thread, not counting deleted ones. It can be larger than the number of comments listed.",
+          "example": 3,
+          "type": "integer"
+        },
+        "comments": {
+          "description": "The newest comments in the thread, at most commentLimit of them, oldest first, without deleted ones. Empty when the thread has no comments or commentLimit is 0.",
+          "items": {
+            "$ref": "#/definitions/CommentResponse"
+          },
+          "type": "array"
+        },
+        "commentsTruncated": {
+          "description": "When true, the thread has more comments than were listed: commentCount is larger than commentLimit, or larger than 5 where the endpoint takes no commentLimit. The comments field then holds only the newest ones, and List Comments reads the rest.",
+          "type": "boolean"
+        },
+        "createdAt": {
+          "description": "When the thread was opened, as epoch milliseconds.",
+          "example": 1730764800000,
+          "type": "integer"
+        },
+        "isResolved": {
+          "description": "When true, the thread is resolved and accepts no new comments.",
+          "type": "boolean"
+        },
+        "resolvedAt": {
+          "description": "When the thread was resolved, as epoch milliseconds. Null while the thread is open.",
+          "example": 1730798400000,
+          "type": "integer"
+        },
+        "resolvedByUserResourceId": {
+          "description": "Resource ID of the user who resolved the thread. Null while the thread is open.",
+          "example": "9f4a1c2e-6b7d-4e8f-a3b1-5c6d7e8f9a0b",
+          "type": "string"
+        },
+        "threadId": {
+          "description": "Identifier of the comment thread.",
+          "example": "AbCdEfGhIjKlMnOpQrSt",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "TransactionCreateResponse": {
       "properties": {
         "appliedRate": {
@@ -31490,6 +31802,21 @@
       },
       "required": [
         "resourceId"
+      ],
+      "type": "object"
+    },
+    "UpdateCommentRequest": {
+      "properties": {
+        "content": {
+          "description": "New comment text, 1 to 4000 characters once leading and trailing spaces are removed. It replaces the old text, so an edit can add mentions and remove them. To mention a user, write `<@userResourceId>` in the text, using the userResourceId that List Organization Users gives for the user. The user's name is filled in when the comment is saved, so the comment is stored and returned with `<Name@userResourceId>`, and that form is read the same way if you send it. A comment can mention at most 20 different users, and each must be an active member of the organization, or the whole request is refused. Text such as @Name without the markup mentions no one.",
+          "example": "Please check this with <@3b6d2f84-1c5a-4d7e-9b0f-8a2c4e6f1d35>.",
+          "maxLength": 4000,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "content"
       ],
       "type": "object"
     },
@@ -43217,6 +43544,1169 @@
         "summary": "Close Out Lease",
         "tags": [
           "Leases"
+        ]
+      }
+    },
+    "/api/v1/collaboration/notifications": {
+      "get": {
+        "description": "List the caller's notifications about comments on bills, invoices, supplier credit notes, customer credit notes, and bank records, newest first. Only unread notifications are listed unless status is all. Only the newest 500 notifications from the last 365 days are read, and truncated is true when that limit was reached, so an older unread notification may not be listed. The totals cover only those newest notifications. The list holds only the notifications the caller may see: an admin of the sales or purchases module sees every notification about that module's invoices, bills, and credit notes, other users with access to the module see the ones about records they created, and bank record notifications are listed to admins and preparers of the accounting module. The caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "parameters": [
+          {
+            "default": "unread",
+            "description": "Which notifications to list: unread for the ones not read yet, all for read and unread ones.",
+            "enum": [
+              "unread",
+              "all"
+            ],
+            "in": "query",
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "default": 20,
+            "description": "Maximum number of results per page (default 20, max 50).",
+            "in": "query",
+            "maximum": 50,
+            "minimum": 1,
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "description": "Zero-indexed page number.",
+            "in": "query",
+            "maximum": 65536,
+            "minimum": 0,
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/NotificationListResponse"
+            }
+          },
+          "400": {
+            "description": "The query string cannot be read.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, or the member who created the API key is not an active member of the organization.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not expected in normal use: listing notifications looks up no single record. Listed so a client handles it as it does for the other collaboration endpoints.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "A query value is not valid.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List Notifications",
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/v1/collaboration/notifications/read-all": {
+      "post": {
+        "description": "Mark up to 2000 of the caller's unread notifications read. marked counts every unread notification of the caller that this call marked, including those about record types this API does not list. When more is true, unread notifications may remain: call again until it is false. A repeated call returns marked 0. If a call fails part way, the notifications already marked stay marked and a retry marks the rest. A 503 answered after a write may already have committed. The caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/MarkAllNotificationsReadResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Not expected in normal use: this endpoint reads no request body or query string. Listed so a client handles it as it does for the other collaboration endpoints.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, or the member who created the API key is not an active member of the organization.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not expected in normal use: this endpoint looks up no single record. Listed so a client handles it as it does for the other collaboration endpoints.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Not expected in normal use: this endpoint takes no input to validate. Listed so a client handles it as it does for the other collaboration endpoints.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Mark All Notifications as Read",
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/v1/collaboration/notifications/{notificationId}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Mark one of the caller's notifications read or unread and return it. Marking it unread clears readAt. This works for every notification of the caller. The response carries the notification's details only when the record is visible to the caller under their current roles, by the same rule as the list. For a notification about a record the caller may not see, a record type this API does not list, or content this API cannot read, the response carries only notificationId, isRead, readAt, and createdAt, and every other field is empty. A repeated request with the same isRead returns 200 again. A 503 answered after a write may already have committed. The caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "parameters": [
+          {
+            "description": "Identifier of the notification.",
+            "in": "path",
+            "name": "notificationId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "New read state of the notification.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SetNotificationReadRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/NotificationResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "The request body cannot be read.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, or the member who created the API key is not an active member of the organization.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "The notification does not exist in the caller's inbox.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "The notification identifier is not valid, or isRead is missing.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Mark Notification as Read or Unread",
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/v1/collaboration/{entityType}/{resourceId}/comments": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Add a comment to a bill, invoice, supplier credit note, customer credit note, or bank record. Without a threadId the comment joins the open thread of the record, or opens a thread when none is open. To mention users, write `<@userResourceId>` in content, using the userResourceId that List Organization Users gives for the user: the name is filled in when the comment is saved. Each mentioned user must be an active member of the organization, and a comment can mention at most 20 different users. A repeated POST posts again: list the threads and look for your text before retrying. A 503 answered after a write may already have committed. The record must be visible to the caller, and the caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "parameters": [
+          {
+            "description": "Type of the record, as it appears in the URL.",
+            "enum": [
+              "bills",
+              "invoices",
+              "supplier-credit-notes",
+              "customer-credit-notes",
+              "bank-records"
+            ],
+            "in": "path",
+            "name": "entityType",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the record.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the bank account the bank record belongs to. Required when entityType is bank-records and ignored for every other type.",
+            "in": "query",
+            "name": "bankAccountResourceId",
+            "type": "string"
+          },
+          {
+            "description": "Comment to add.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddCommentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/AddCommentResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "The request body or the query string cannot be read.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, the member who created the API key is not an active member of the organization, or the caller cannot open the record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "The record does not exist or is not visible to the caller, or the thread named in threadId does not exist.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "A value is not valid: the text is blank or longer than 4000 characters, the text mentions a user who is not an active member of the organization or more than 20 different users, the thread is resolved, or bankAccountResourceId is missing for a bank record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Add Comment",
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/v1/collaboration/{entityType}/{resourceId}/threads": {
+      "get": {
+        "description": "List the comment threads on a bill, invoice, supplier credit note, customer credit note, or bank record, newest thread first. Each thread carries its newest comments, oldest first, without deleted ones: commentLimit sets how many (5 by default, 0 for none), commentCount is the full number of comments, and commentsTruncated is true when commentCount is larger than commentLimit, so older comments are not listed. List Comments reads them. The record must be visible to the caller, and the caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "parameters": [
+          {
+            "description": "Type of the record, as it appears in the URL.",
+            "enum": [
+              "bills",
+              "invoices",
+              "supplier-credit-notes",
+              "customer-credit-notes",
+              "bank-records"
+            ],
+            "in": "path",
+            "name": "entityType",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the record.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the bank account the bank record belongs to. Required when entityType is bank-records and ignored for every other type.",
+            "in": "query",
+            "name": "bankAccountResourceId",
+            "type": "string"
+          },
+          {
+            "default": 20,
+            "description": "Maximum number of results per page (default 20, max 50).",
+            "in": "query",
+            "maximum": 50,
+            "minimum": 1,
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "description": "Zero-indexed page number.",
+            "in": "query",
+            "maximum": 65536,
+            "minimum": 0,
+            "name": "offset",
+            "type": "integer"
+          },
+          {
+            "default": 5,
+            "description": "Number of comments to list in each thread, the newest ones, oldest first. Use 0 to list no comments and read only commentCount.",
+            "in": "query",
+            "maximum": 50,
+            "minimum": 0,
+            "name": "commentLimit",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PageableResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/definitions/ThreadResponse"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "The query string cannot be read.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, the member who created the API key is not an active member of the organization, or the caller cannot open the record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "The record does not exist or is not visible to the caller.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "A path or query value is not valid, or bankAccountResourceId is missing for a bank record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List Comment Threads",
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/v1/collaboration/{entityType}/{resourceId}/threads/{threadId}/comments": {
+      "get": {
+        "description": "List the comments of one comment thread on a bill, invoice, supplier credit note, customer credit note, or bank record, newest comment first, without deleted ones. totalElements is the number of comments in the thread. The thread can be open or resolved. The record must be visible to the caller, and the caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "parameters": [
+          {
+            "description": "Type of the record, as it appears in the URL.",
+            "enum": [
+              "bills",
+              "invoices",
+              "supplier-credit-notes",
+              "customer-credit-notes",
+              "bank-records"
+            ],
+            "in": "path",
+            "name": "entityType",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the record.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Identifier of the comment thread.",
+            "in": "path",
+            "name": "threadId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the bank account the bank record belongs to. Required when entityType is bank-records and ignored for every other type.",
+            "in": "query",
+            "name": "bankAccountResourceId",
+            "type": "string"
+          },
+          {
+            "default": 20,
+            "description": "Maximum number of results per page (default 20, max 50).",
+            "in": "query",
+            "maximum": 50,
+            "minimum": 1,
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "description": "Zero-indexed page number.",
+            "in": "query",
+            "maximum": 65536,
+            "minimum": 0,
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PageableResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/definitions/CommentResponse"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "The query string cannot be read.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, the member who created the API key is not an active member of the organization, or the caller cannot open the record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "The record does not exist or is not visible to the caller, or the thread does not exist.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "A path or query value is not valid, or bankAccountResourceId is missing for a bank record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List Comments",
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/v1/collaboration/{entityType}/{resourceId}/threads/{threadId}/comments/{commentId}": {
+      "delete": {
+        "description": "Delete your own comment on a bill, invoice, supplier credit note, customer credit note, or bank record. Only the author can delete a comment, and only while its thread is open. A deleted comment is no longer listed. A repeated DELETE returns 404 because the comment is already deleted. A 503 answered after a write may already have committed. The record must be visible to the caller, and the caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "parameters": [
+          {
+            "description": "Type of the record, as it appears in the URL.",
+            "enum": [
+              "bills",
+              "invoices",
+              "supplier-credit-notes",
+              "customer-credit-notes",
+              "bank-records"
+            ],
+            "in": "path",
+            "name": "entityType",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the record.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Identifier of the comment thread.",
+            "in": "path",
+            "name": "threadId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Identifier of the comment.",
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the bank account the bank record belongs to. Required when entityType is bank-records and ignored for every other type.",
+            "in": "query",
+            "name": "bankAccountResourceId",
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseMessageResponse"
+            }
+          },
+          "400": {
+            "description": "The query string cannot be read.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, the member who created the API key is not an active member of the organization, the caller cannot open the record, or the caller is not the author of the comment.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "The record does not exist or is not visible to the caller, or the thread or comment does not exist or the comment was already deleted.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "A path or query value is not valid, the thread is resolved, or bankAccountResourceId is missing for a bank record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Delete Comment",
+        "tags": [
+          "Collaboration"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Replace the text of your own comment on a bill, invoice, supplier credit note, customer credit note, or bank record. Only the author can update a comment, and only while its thread is open. The new content can add mentions and remove them, written as in Add Comment: `<@userResourceId>` in the text, with the name filled in when the comment is saved. Each mentioned user must be an active member of the organization, and a comment can mention at most 20 different users. A repeated PUT with the same text returns 200 again. A 503 answered after a write may already have committed. The record must be visible to the caller, and the caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "parameters": [
+          {
+            "description": "Type of the record, as it appears in the URL.",
+            "enum": [
+              "bills",
+              "invoices",
+              "supplier-credit-notes",
+              "customer-credit-notes",
+              "bank-records"
+            ],
+            "in": "path",
+            "name": "entityType",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the record.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Identifier of the comment thread.",
+            "in": "path",
+            "name": "threadId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Identifier of the comment.",
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the bank account the bank record belongs to. Required when entityType is bank-records and ignored for every other type.",
+            "in": "query",
+            "name": "bankAccountResourceId",
+            "type": "string"
+          },
+          {
+            "description": "New text of the comment.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateCommentRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/CommentResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "The request body or the query string cannot be read.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, the member who created the API key is not an active member of the organization, the caller cannot open the record, or the caller is not the author of the comment.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "The record does not exist or is not visible to the caller, or the thread or comment does not exist or the comment was deleted.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "A value is not valid: the text is blank or longer than 4000 characters, the text mentions a user who is not an active member of the organization or more than 20 different users, the thread is resolved, or bankAccountResourceId is missing for a bank record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Update Comment",
+        "tags": [
+          "Collaboration"
+        ]
+      }
+    },
+    "/api/v1/collaboration/{entityType}/{resourceId}/threads/{threadId}/resolve": {
+      "post": {
+        "description": "Resolve a comment thread on a bill, invoice, supplier credit note, customer credit note, or bank record, and return the thread with its newest 5 comments, oldest first: commentsTruncated is true when it has more, and List Comments reads them. Any active member who can open the record can resolve its threads, not only the authors. A thread needs at least one comment to be resolved, and a resolved thread accepts no new, edited, or deleted comments. A repeated resolve returns 422 because the thread is already resolved. A 503 answered after a write may already have committed. The record must be visible to the caller, and the caller must be an active member of the organization. This endpoint acts as a user: an API key acts as the member who created it.",
+        "parameters": [
+          {
+            "description": "Type of the record, as it appears in the URL.",
+            "enum": [
+              "bills",
+              "invoices",
+              "supplier-credit-notes",
+              "customer-credit-notes",
+              "bank-records"
+            ],
+            "in": "path",
+            "name": "entityType",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the record.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Identifier of the comment thread.",
+            "in": "path",
+            "name": "threadId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Resource ID of the bank account the bank record belongs to. Required when entityType is bank-records and ignored for every other type.",
+            "in": "query",
+            "name": "bankAccountResourceId",
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ThreadResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "The query string cannot be read.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "The credential is missing, invalid, or does not identify a user.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "The caller is not an active member of the organization, the API key is not active, the member who created the API key is not an active member of the organization, or the caller cannot open the record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "The record does not exist or is not visible to the caller, or the thread does not exist.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "A path or query value is not valid, the thread is already resolved or has no comments, or bankAccountResourceId is missing for a bank record.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "An unexpected error occurred.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Comments and notifications are unavailable. When the outage is temporary, the Retry-After header gives the seconds to wait before retrying.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Resolve Thread",
+        "tags": [
+          "Collaboration"
         ]
       }
     },
@@ -84319,6 +85809,12 @@
       "in": "header",
       "name": "x-jk-api-key",
       "type": "apiKey"
+    },
+    "BearerAuth": {
+      "description": "Bearer token issued by the device code flow (POST /auth/device).",
+      "in": "header",
+      "name": "Authorization",
+      "type": "apiKey"
     }
   },
   "swagger": "2.0",
@@ -84570,6 +86066,10 @@
     {
       "description": "Write, search, and review agent judgment records (jots), with per-entry acknowledgments and review dispositions (flag, reject, or endorse).",
       "name": "Jots"
+    },
+    {
+      "description": "List, add, edit, delete, and resolve comments on invoices, bills, credit notes, and bank records, and read and update notifications.",
+      "name": "Collaboration"
     }
   ]
 }

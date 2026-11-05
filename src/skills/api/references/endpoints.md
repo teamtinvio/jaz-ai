@@ -3027,4 +3027,46 @@ Removes the template from every pack that includes it.
 
 ---
 
-*Last updated: 2026-09-24 (added Report Templates, section 28). Previous: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09, added Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13: Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*
+## 29. Collaboration (Comments and Notifications)
+
+Comment threads on a record, and the notifications for the caller about them. `{entityType}` is one of `bills`, `invoices`, `supplier-credit-notes`, `customer-credit-notes`, `bank-records`; a bank record also takes `?bankAccountResourceId=` (the bank account it belongs to). Every call acts as a user: an API key acts as the member who created it, and a key with no user is refused 401. Timestamps are epoch milliseconds.
+
+### GET /api/v1/collaboration/{entityType}/{resourceId}/threads
+
+Lists the comment threads on one record, newest thread first, each with its newest `commentLimit` comments (default 5, 0 for counts only); `commentsTruncated` says older comments exist.
+
+### POST /api/v1/collaboration/{entityType}/{resourceId}/comments
+
+Adds a comment (`content`, optional `threadId`) to one record; without `threadId` it joins the open thread or opens one. A mention is `<@userResourceId>` written in `content`, at most 20 distinct users, each an active member of the organization or the whole comment is refused 422; the answer carries `content` (saved markup `<Name@userResourceId>`), `text` (`@Name`) and `mentions`. Not idempotent: list the threads before retrying.
+
+### GET /api/v1/collaboration/{entityType}/{resourceId}/threads/{threadId}/comments
+
+Lists the comments of one thread on one record, newest first, paged with `limit` (at most 50) and `offset`.
+
+### PUT /api/v1/collaboration/{entityType}/{resourceId}/threads/{threadId}/comments/{commentId}
+
+Replaces the text of your own comment on one record while its thread is open. The new `content` is judged whole, so an edit can add mentions (`<@userResourceId>`) and remove them by leaving the markup out.
+
+### DELETE /api/v1/collaboration/{entityType}/{resourceId}/threads/{threadId}/comments/{commentId}
+
+Deletes your own comment on one record while its thread is open; a repeat answers 404.
+
+### POST /api/v1/collaboration/{entityType}/{resourceId}/threads/{threadId}/resolve
+
+Resolves a thread on one record, after which it accepts no new, edited or deleted comments; a repeat answers 422.
+
+### GET /api/v1/collaboration/notifications
+
+Lists the notifications for the caller about comments on bills, invoices, supplier credit notes, customer credit notes and bank records, newest first; unread only unless `status=all`.
+
+### PUT /api/v1/collaboration/notifications/{notificationId}
+
+Marks one notification read or unread with `{ "isRead": true | false }`; unread clears `readAt`.
+
+### POST /api/v1/collaboration/notifications/read-all
+
+Marks up to 2000 unread notifications of the caller read; call again while `more` is true.
+
+---
+
+*Last updated: 2026-11-06 (Collaboration mentions are markup in `content`). Previous: 2026-11-05 (added Collaboration, section 29). Previous: 2026-09-24 (added Report Templates, section 28). Previous: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09, added Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13: Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*

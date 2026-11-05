@@ -1,5 +1,14 @@
 # Changelog
 
+## [9.4.0] - 2026-11-06
+
+**Collaboration threads and notifications.**
+
+- `list_comment_threads` and `list_comments` read the comment threads on a bill, invoice, supplier credit note, customer credit note or bank record. Each thread shows its newest comments, and older ones are read a page at a time when needed.
+- `add_comment`, `update_comment` and `delete_comment` post, edit and remove comments through the Jaz API. A record has one open thread, and a resolved thread accepts no new comments. The assistant can mention a teammate in a comment, new or edited. Only active members of the organization can be mentioned, at most 20 per comment.
+- `mark_thread_resolved` closes a thread once the discussion is settled.
+- `list_notifications`, `mark_notification_read` and `mark_all_notifications_read` read your notifications, mark one read or unread, or mark them all read.
+
 ## [9.3.2] - 2026-11-05
 
 - Tagging a record now adds the tag and keeps the ones it already has. Before, "Tag it Q4" on a bill tagged Q3 could leave it with Q4 only. The assistant replaces a record's tags only when you ask for that, for example "change the tag to Q4".

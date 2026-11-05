@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.3.2",
+  "version": "9.4.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -833,6 +833,42 @@
     {
       "name": "read_spreadsheet_rows",
       "description": "Parse rows from a CSV/Excel URL. Returns rows as JSON objects keyed by header (max 500/call, paginatable via offset/limit). Excel response includes availableSheets[]; re-call with sheetIndex if the first sheet is Instructions. Use BEFORE bulk_upsert_* when the user attaches a tabular file."
+    },
+    {
+      "name": "list_comment_threads",
+      "description": "List the comment threads on a bill, invoice, supplier credit note, customer credit note or bank record. A record has at most one open thread. Each thread returns its newest commentLimit comments, oldest first: 5 by default, 0 for counts only. commentsTruncated says when older ones exist; read them with list_comments. Times (createdAt, updatedAt, resolvedAt) are epoch milliseconds in UTC. Bank records need bankAccountResourceId."
+    },
+    {
+      "name": "list_comments",
+      "description": "Read the comments of one thread on a record, newest first, a page at a time. Use it for comments older than the ones list_comment_threads returned. Times (createdAt, updatedAt) are epoch milliseconds in UTC. Bank records need bankAccountResourceId."
+    },
+    {
+      "name": "add_comment",
+      "description": "Post a comment on a bill, invoice, supplier credit note, customer credit note or bank record. The caller is the author. A record has one open thread: without threadId the comment joins it or starts one, and a resolved thread accepts none. To mention someone, write <@userResourceId> in content where the name belongs, with the userResourceId from search_org_users (not the org-user record id); the saved text fills in the name. Only members whose own status is ACTIVE can be mentioned (the row's top-level status from search_org_users, not user.status; an invited member who has not joined is PENDING and cannot), at most 20: any other id refuses the whole comment. A plain @Name is just text and notifies no one. Bank records need bankAccountResourceId."
+    },
+    {
+      "name": "update_comment",
+      "description": "Edit a comment the caller wrote, replacing its whole text. Only the author can, and only while its thread is open: a resolved thread refuses changes. Mentions work as in add_comment: write <@userResourceId> to add one, and keep the <Name@userResourceId> markup from content (text shows only @Name) for each mention to keep; leaving it out removes the mention. Bank records need bankAccountResourceId."
+    },
+    {
+      "name": "delete_comment",
+      "description": "Delete a comment the caller wrote. Only the author can, and only while its thread is open: a resolved thread refuses changes. Bank records need bankAccountResourceId."
+    },
+    {
+      "name": "mark_thread_resolved",
+      "description": "Resolve a comment thread on a record. A resolved thread accepts no new comments: the next comment without threadId starts a new thread. Bank records need bankAccountResourceId."
+    },
+    {
+      "name": "list_notifications",
+      "description": "Notifications addressed to the caller: comments and mentions on records, newest first, unread by default. The Jaz API reads the newest 500 items of the last 365 days; truncated says when older ones exist. Each item names its record and threadId. Times (createdAt, readAt) are epoch milliseconds in UTC."
+    },
+    {
+      "name": "mark_notification_read",
+      "description": "Mark one notification read, or unread with read set to false."
+    },
+    {
+      "name": "mark_all_notifications_read",
+      "description": "Mark every unread notification of the caller read. Returns marked and more: when more is true, call again."
     },
     {
       "name": "validate_invoice_draft",
