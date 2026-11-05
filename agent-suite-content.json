@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.3.0+2d4a7493",
+  "contentVersion": "9.3.1+494fedcb",
   "counts": {
     "tools": 387,
     "namespaces": 49,
@@ -339,7 +339,7 @@
     {
       "name": "update_invoice",
       "namespace": "invoices",
-      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -409,7 +409,7 @@
     {
       "name": "update_bill",
       "namespace": "bills",
-      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -878,7 +878,7 @@
     {
       "name": "update_customer_credit_note",
       "namespace": "customer_credit_notes",
-      "description": "Update a draft customer credit note (change amount, line items, contact, date, notes). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a draft customer credit note (change amount, line items, contact, date, notes). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -948,7 +948,7 @@
     {
       "name": "update_supplier_credit_note",
       "namespace": "supplier_credit_notes",
-      "description": "Update a draft supplier credit note (change amount, line items, contact, date, notes). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a credit note. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update a draft supplier credit note (change amount, line items, contact, date, notes). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

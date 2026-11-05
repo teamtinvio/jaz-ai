@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.3.0",
+  "version": "9.3.1",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -140,7 +140,7 @@
     },
     {
       "name": "update_invoice",
-      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft invoice. Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing draft invoice (change reference, dates, line items, notes, custom fields). Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_invoice",
@@ -180,7 +180,7 @@
     },
     {
       "name": "update_bill",
-      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a draft bill. Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing draft bill (change reference, dates, line items, notes, custom fields). Line items CAN be fully replaced; pass the complete updated lineItems array. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_bill",
@@ -448,7 +448,7 @@
     },
     {
       "name": "update_customer_credit_note",
-      "description": "Update a draft customer credit note (change amount, line items, contact, date, notes). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a credit note. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a draft customer credit note (change amount, line items, contact, date, notes). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "finalize_customer_credit_note",
@@ -488,7 +488,7 @@
     },
     {
       "name": "update_supplier_credit_note",
-      "description": "Update a draft supplier credit note (change amount, line items, contact, date, notes). Use when the user says \"update\", \"change\", \"fix\", or \"correct\" a credit note. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a draft supplier credit note (change amount, line items, contact, date, notes). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "finalize_supplier_credit_note",

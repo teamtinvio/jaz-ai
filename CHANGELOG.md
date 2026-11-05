@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.3.1] - 2026-11-05
+
+- Updating a draft invoice, bill or credit note no longer resets its tax setting, payment terms or contact when only some of its fields are changed.
+- The update tools for invoices, bills and credit notes can switch a document to or from tax-inclusive pricing. On a document with payments, the assistant asks before making that switch, since it changes the totals and deletes the payments.
+- The assistant now changes individual fields of these documents and their existing lines with quick fix, which edits only the fields sent, and keeps the update tools for replacing lines.
+
 ## [9.3.0] - 2026-11-04
 
 - Updating or finalizing an invoice, bill or credit note now hands back the record as it stands after the change, so the assistant shows the new values and status instead of the old ones.
