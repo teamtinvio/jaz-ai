@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.3.2] - 2026-11-05
+
+- Tagging a record now adds the tag and keeps the ones it already has. Before, "Tag it Q4" on a bill tagged Q3 could leave it with Q4 only. The assistant replaces a record's tags only when you ask for that, for example "change the tag to Q4".
+- Every tool that edits tags (quick fix, the update tools for credit notes, cash entries, journals, fixed assets and claims, and Ledger Find & Fix) takes the tags to add and the tags to remove. Tags you do not name stay. Tools that create a record still take its list of tags.
+- Quick fix on one record now hands back that record as it stands after the change, so the assistant shows its new values.
+
 ## [9.3.1] - 2026-11-05
 
 - Updating a draft invoice, bill or credit note no longer resets its tax setting, payment terms or contact when only some of its fields are changed.

@@ -86,7 +86,7 @@ shared reason for the batch.
 required; `contactResourceId` / `vendorName` are mutually exclusive (vendor is optional;
 the server accepts a vendorless draft). `saveAsDraft` defaults **true** → DRAFT with relaxed
 line validation; pass **false** to fully validate + submit in one call (→ SUBMITTED). Line
-items / custom fields / tags use the same shape as `update_claim`.
+items and custom fields use the same shape as `update_claim`; `tags` is the claim's list.
 
 ### Update semantics (verified live)
 
@@ -94,7 +94,9 @@ items / custom fields / tags use the same shape as `update_claim`.
 scalars. `claimItems` is a **full replacement set** (non-empty replaces every line,
 `[]` clears, omit = no change). Attachments are per-row upsert (resourceId = edit, omit =
 add, `deleted:true` = remove); `delete_claim_attachment` removes one and returns the claim.
-`contactResourceId` and `vendorName` are mutually exclusive.
+`contactResourceId` and `vendorName` are mutually exclusive. `tags` is a change,
+`{ add, remove }`: the tool reads the claim and sends its tags with the change applied,
+because a list sent on the PUT replaces every tag.
 
 ### Pickers (bare arrays)
 
