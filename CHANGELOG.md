@@ -1,5 +1,9 @@
 # Changelog
 
+## [9.4.1] - 2026-11-06
+
+Fixes an error that stopped the assistant from answering after 9.4.0.
+
 ## [9.4.0] - 2026-11-06
 
 **Collaboration threads and notifications.**

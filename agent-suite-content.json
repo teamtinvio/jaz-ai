@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.4.0+57dd573b",
+  "contentVersion": "9.4.1+df01b3ab",
   "counts": {
     "tools": 396,
     "namespaces": 50,
@@ -197,7 +197,7 @@
       "description": "Draft business transactions: both local payload validation (invoices, bills, journals, credit notes) AND BULK-FRIENDLY server-side lifecycle: validate_drafts (sync eligibility check), convert_drafts_to_active (async promote to ACTIVE), submit_drafts_for_approval (async route to approval). The lifecycle tools are GENERIC and BULK: one call accepts up to 500 items mixing any combination of {btResourceId, btType: SALE|PURCHASE|SALE_CREDIT_NOTE|PURCHASE_CREDIT_NOTE}. No need for per-entity tools when promoting/submitting drafts at scale. NOT idempotent on already-promoted drafts."
     },
     {
-      "name": "collaboration",
+      "name": "collab",
       "description": "Comment threads on bills, invoices, credit notes and bank records: list threads and comments, add a reply or start a thread, mention a teammate, update or delete your own comment, resolve a thread. Notifications: list unread mentions and comments, mark one read or unread, mark all read."
     },
     {
@@ -1560,63 +1560,63 @@
     },
     {
       "name": "list_comment_threads",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "List the comment threads on a bill, invoice, supplier credit note, customer credit note or bank record. A record has at most one open thread. Each thread returns its newest commentLimit comments, oldest first: 5 by default, 0 for counts only. commentsTruncated says when older ones exist; read them with list_comments. Times (createdAt, updatedAt, resolvedAt) are epoch milliseconds in UTC. Bank records need bankAccountResourceId.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "list_comments",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "Read the comments of one thread on a record, newest first, a page at a time. Use it for comments older than the ones list_comment_threads returned. Times (createdAt, updatedAt) are epoch milliseconds in UTC. Bank records need bankAccountResourceId.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "add_comment",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "Post a comment on a bill, invoice, supplier credit note, customer credit note or bank record. The caller is the author. A record has one open thread: without threadId the comment joins it or starts one, and a resolved thread accepts none. To mention someone, write <@userResourceId> in content where the name belongs, with the userResourceId from search_org_users (not the org-user record id); the saved text fills in the name. Only members whose own status is ACTIVE can be mentioned (the row's top-level status from search_org_users, not user.status; an invited member who has not joined is PENDING and cannot), at most 20: any other id refuses the whole comment. A plain @Name is just text and notifies no one. Bank records need bankAccountResourceId.",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "update_comment",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "Edit a comment the caller wrote, replacing its whole text. Only the author can, and only while its thread is open: a resolved thread refuses changes. Mentions work as in add_comment: write <@userResourceId> to add one, and keep the <Name@userResourceId> markup from content (text shows only @Name) for each mention to keep; leaving it out removes the mention. Bank records need bankAccountResourceId.",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "delete_comment",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "Delete a comment the caller wrote. Only the author can, and only while its thread is open: a resolved thread refuses changes. Bank records need bankAccountResourceId.",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "mark_thread_resolved",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "Resolve a comment thread on a record. A resolved thread accepts no new comments: the next comment without threadId starts a new thread. Bank records need bankAccountResourceId.",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "list_notifications",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "Notifications addressed to the caller: comments and mentions on records, newest first, unread by default. The Jaz API reads the newest 500 items of the last 365 days; truncated says when older ones exist. Each item names its record and threadId. Times (createdAt, readAt) are epoch milliseconds in UTC.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "mark_notification_read",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "Mark one notification read, or unread with read set to false.",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "mark_all_notifications_read",
-      "namespace": "collaboration",
+      "namespace": "collab",
       "description": "Mark every unread notification of the caller read. Returns marked and more: when more is true, call again.",
       "readOnly": false,
       "destructive": true
