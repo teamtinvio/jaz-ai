@@ -1,5 +1,9 @@
 # Changelog
 
+## [9.4.2] - 2026-11-09
+
+Internal release for the hosted email and chat assistants. No user-facing changes to the CLI, the MCP server or the extension since v9.4.1.
+
 ## [9.4.1] - 2026-11-06
 
 Fixes an error that stopped the assistant from answering after 9.4.0.
