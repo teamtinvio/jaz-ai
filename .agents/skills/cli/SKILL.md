@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 9.4.4
+version: 9.4.5
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
