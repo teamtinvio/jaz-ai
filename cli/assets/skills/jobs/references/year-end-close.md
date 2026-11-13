@@ -19,6 +19,7 @@
 - **`update_account(resourceId: <CoA root>, lockDate: <FY-end>)`**: Y8 final lock.
 
 ### Platform tools: current/non-current reclassification (manual annual journals)
+- **Skip loans and leases kept in the `loans` / `leases` registers**: they post the current/non-current move every month-end (verify with `get_loan_totals` / `get_lease_totals`). The manual journals below are only for loans and leases kept manually in capsules.
 - **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable; see `building-blocks.md` § Filter limits)** + per-capsule `clio calc loan` to compute next-12-months principal portion.
 - **`search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable; see `building-blocks.md` § Filter limits)** + per-capsule `clio calc lease` for IFRS 16 reclassification.
 - **`create_journal(...)`** for the reclassification entries (Dr Loan Payable Non-current / Cr Loan Payable Current; Dr Lease Liability Non-current / Cr Lease Liability Current).
@@ -160,6 +161,8 @@ search_capsules(filter: {status: {eq: 'ACTIVE'}})
 Per capsule, recompute the present value at FY-end (`clio calc provision`). Top-up via `create_journal` into the provision's capsule (amount from `calculate(type: 'provision', ...)`) if required, OR reverse via `create_journal` if the obligation reduced.
 
 ### Y6: Current/non-current reclassification (manual journals)
+
+Skip loans and leases kept in the `loans` / `leases` registers: they post the move every month-end (verify with `get_loan_totals` / `get_lease_totals`). This step is only for loans and leases kept manually in capsules.
 
 For each loan capsule:
 ```

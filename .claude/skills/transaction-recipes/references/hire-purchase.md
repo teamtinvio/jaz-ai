@@ -2,7 +2,7 @@
 
 > Variant of the IFRS 16 lease recipe where ownership transfers at the end of the term. Same calculator, same step structure as `ifrs16-lease.md`, but the ROU asset depreciates over its USEFUL LIFE (typically longer), not the financing term.
 
-> **Register first.** To keep a hire purchase on the books, use the `leases` register (`create_lease`): it keeps the schedule and posts the periodic entries itself. This recipe is the manual alternative, for organizations whose plan or role does not include the register, or when the user asks for journals.
+> **Register first.** To keep a hire purchase on the books, use the `leases` register (`create_lease`): it keeps the schedule and posts the interest, depreciation and the current/non-current move itself, never rent (you record every payment). This recipe is the manual alternative, for organizations whose plan or role does not include the register, or when the user asks for journals.
 
 ## Why hire-purchase uses the lease calculator
 

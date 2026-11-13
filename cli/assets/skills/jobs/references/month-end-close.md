@@ -143,7 +143,7 @@ On first month of FY only: `create_capsule` (type `Employee Benefits`), then eit
 
 ### Step 11: Loan interest (finalize this period's draft journal)
 
-Loans kept in the `loans` register post their own interest and repayment entries (check them with `get_loan_totals`); the capsule route below is for loans kept manually.
+Loans kept in the `loans` register post their own interest and the current/non-current move, never cash: you record every repayment yourself (check the balances with `get_loan_totals`; `generate_loans_reconciliation_summary` shows a missed or mis-coded repayment). The capsule route below is for loans kept manually.
 
 For each active loan capsule (via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable; see `building-blocks.md` § Filter limits)):
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## [9.5.1] - 2026-11-13
+
+**Register guidance and CLI fixes.**
+
+- The loans register no longer describes on-demand loans as overdrafts or revolving credit. On-demand loans are director, shareholder, related-party and intercompany accounts; the tools now say that revolving credit, foreign-currency loans, loans given and fixed deposits are not in the register.
+- `clio leases create --finalize`, `clio deferrals create --activate`, `clio fixed-assets create --finalize` and `clio fixed-assets transfer --finalize` now apply the flag when the body comes from `--input`. Before, a file without `saveAsDraft` was saved as a draft.
+- The assistant records a lease rent payment or a scheduled loan repayment as an ordinary cash entry or bill against the liability account the lease or loan names, and tells you which account that is after it activates a lease or loan.
+- Tool descriptions now say that a deferral with a past start date posts every past period at once, that a lease from before Jaz starts at go-live with the remaining term and rent, that settling a loan writes off fees not yet amortized, and that the lease maturity analysis is a sheet of the leases register export.
+- The month-end and year-end close playbooks no longer treat loan repayments as posted by the register, and skip the current and non-current reclassification journals for loans and leases the registers already handle.
+- The API skill's feature glossary gains Deferrals, Leases and Loans sections.
+
 ## [9.5.0] - 2026-11-13
 
 **Registers for fixed assets, prepaid and deferred revenue, leases and loans.**

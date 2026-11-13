@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.5.0",
+  "version": "9.5.1",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -1112,7 +1112,7 @@
     },
     {
       "name": "search_loans",
-      "description": "Search loans (borrowings: term, overdraft, revolving, director loans). Each row carries outstandingPrincipal, currentPortion, nextDueDate and nextDueAmount as at endDate (default today). No free-text query: use the named filters, then get_loan."
+      "description": "Search loans (borrowings: term loans and director, shareholder, related-party or intercompany accounts). Each row carries outstandingPrincipal, currentPortion, nextDueDate and nextDueAmount as at endDate (default today). No free-text query: use the named filters, then get_loan."
     },
     {
       "name": "get_loan",
@@ -1120,7 +1120,7 @@
     },
     {
       "name": "create_loan",
-      "description": "Record a borrowing after preview_loan_schedule; several: bulk_upsert_loans. The register books interest every month-end and the current/non-current split. It never posts cash: the user records the drawdown receipt and EVERY installment IN FULL themselves, to the accounts named in the params.\n- saveAsDraft defaults to true (posts nothing). false activates (Admin only): needs kind, typeCode, name, principalAmount, drawdownDate, the current liability account and, for a term loan, shape, rate, day count and term.\n- Existing loan: send trackingStartDate + openingPrincipalAmount. Its opening balance stays in the user's opening balances.\n- Hire purchase is not a loan: use the leases register.\n- reference is required: pass one or set autoReference. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record a borrowing after preview_loan_schedule; several: bulk_upsert_loans. The register books interest every month-end and the current/non-current split. It never posts cash: the user records the drawdown receipt and EVERY installment IN FULL themselves, to the accounts named in the params.\n- saveAsDraft defaults to true (posts nothing). false activates (Admin only): needs kind, typeCode, name, principalAmount, drawdownDate, the current liability account and, for a term loan, shape, rate, day count and term.\n- Existing loan: send trackingStartDate + openingPrincipalAmount. Its opening balance stays in the user's opening balances.\n- Hire purchase is not a loan: use the leases register.\n- Not in the register: revolving credit, foreign-currency loans (base currency only), loans given, fixed deposits.\n- reference is required: pass one or set autoReference. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_loan",
@@ -1196,7 +1196,7 @@
     },
     {
       "name": "settle_loan",
-      "description": "End a loan early (payoff). The preview shows the payoff (totalAmount = principal + interest + settlement fees + penalty). Recording ends the loan SETTLED and posts no payoff entry: the user records Dr Current Loan / Cr Bank. A term loan cannot be settled on its final due date. On-demand: the user records the repayment first so the ledger reads exactly 0 on the date (LOAN_PAYOFF_NOT_RECORDED); money owed to the company is refused (LOAN_NOTHING_OWED). Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "End a loan early (payoff). The preview shows the payoff (totalAmount = principal + interest + settlement fees + penalty). Recording ends the loan SETTLED, writes off fees not yet amortized and posts no payoff entry: the user records Dr Current Loan / Cr Bank. A term loan cannot be settled on its final due date. On-demand: the user records the repayment first so the ledger reads exactly 0 on the date (LOAN_PAYOFF_NOT_RECORDED); money owed to the company is refused (LOAN_NOTHING_OWED). Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "forgive_loan",
@@ -1288,7 +1288,7 @@
     },
     {
       "name": "generate_leases_summary",
-      "description": "Generate the lease register (the IFRS 16 lease note) for a period: opening liability, additions, interest, payments, terminations, closing, current and non-current, right-of-use asset, grouped by type, status or account."
+      "description": "Generate the lease register (the IFRS 16 lease note) for a period: opening liability, additions, interest, payments, terminations, closing, current and non-current, right-of-use asset, grouped by type, status or account. The maturity analysis is a sheet of the download_export leases-register file."
     },
     {
       "name": "generate_leases_reconciliation_summary",

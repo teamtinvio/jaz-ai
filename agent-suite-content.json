@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.5.0+ddd2710d",
+  "contentVersion": "9.5.1+26e13a13",
   "counts": {
     "tools": 476,
     "namespaces": 56,
@@ -182,7 +182,7 @@
     },
     {
       "name": "loans",
-      "description": "Loans and borrowings register: record a new bank loan, loan, borrowing, bank loan, term loan, director's loan, overdraft, revolving facility, instalment / installment loan. Search, create, update (one or bulk), delete, close out. What do we owe a lender or the bank: outstanding principal, current and non-current at a date, the repayment schedule, an on-demand loan ledger (an on-demand loan has no schedule, is all current and posts no interest), loan types, preview the monthly payment. Loan changes (drawdown, prepay, rate change, settle) are in loan_events; loan reports are in register_reports."
+      "description": "Loans and borrowings register: record a new bank loan, loan, borrowing, bank loan, term loan, director's loan (revolving credit and loans given are not in the register), instalment / installment loan. Search, create, update (one or bulk), delete, close out. What do we owe a lender or the bank: outstanding principal, current and non-current at a date, the repayment schedule, an on-demand loan ledger (an on-demand loan has no schedule, is all current and posts no interest), loan types, preview the monthly payment. Loan changes (drawdown, prepay, rate change, settle) are in loan_events; loan reports are in register_reports."
     },
     {
       "name": "loan_events",
@@ -2068,7 +2068,7 @@
     {
       "name": "search_loans",
       "namespace": "loans",
-      "description": "Search loans (borrowings: term, overdraft, revolving, director loans). Each row carries outstandingPrincipal, currentPortion, nextDueDate and nextDueAmount as at endDate (default today). No free-text query: use the named filters, then get_loan.",
+      "description": "Search loans (borrowings: term loans and director, shareholder, related-party or intercompany accounts). Each row carries outstandingPrincipal, currentPortion, nextDueDate and nextDueAmount as at endDate (default today). No free-text query: use the named filters, then get_loan.",
       "readOnly": true,
       "destructive": false
     },
@@ -2215,7 +2215,7 @@
     {
       "name": "settle_loan",
       "namespace": "loan_events",
-      "description": "End a loan early (payoff). The preview shows the payoff (totalAmount = principal + interest + settlement fees + penalty). Recording ends the loan SETTLED and posts no payoff entry: the user records Dr Current Loan / Cr Bank. A term loan cannot be settled on its final due date. On-demand: the user records the repayment first so the ledger reads exactly 0 on the date (LOAN_PAYOFF_NOT_RECORDED); money owed to the company is refused (LOAN_NOTHING_OWED). Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "End a loan early (payoff). The preview shows the payoff (totalAmount = principal + interest + settlement fees + penalty). Recording ends the loan SETTLED, writes off fees not yet amortized and posts no payoff entry: the user records Dr Current Loan / Cr Bank. A term loan cannot be settled on its final due date. On-demand: the user records the repayment first so the ledger reads exactly 0 on the date (LOAN_PAYOFF_NOT_RECORDED); money owed to the company is refused (LOAN_NOTHING_OWED). Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2376,7 +2376,7 @@
     {
       "name": "generate_leases_summary",
       "namespace": "register_reports",
-      "description": "Generate the lease register (the IFRS 16 lease note) for a period: opening liability, additions, interest, payments, terminations, closing, current and non-current, right-of-use asset, grouped by type, status or account.",
+      "description": "Generate the lease register (the IFRS 16 lease note) for a period: opening liability, additions, interest, payments, terminations, closing, current and non-current, right-of-use asset, grouped by type, status or account. The maturity analysis is a sheet of the download_export leases-register file.",
       "readOnly": true,
       "destructive": false
     },

@@ -1,6 +1,6 @@
 ---
 name: jaz-jobs
-version: 9.5.0
+version: 9.5.1
 description: >-
   Use this skill for recurring accounting workflows: month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -29,7 +29,7 @@ You orchestrate the **real platform tools directly**, following the phase sequen
 
 ### Scheduled and calculated entries
 
-Leases, hire purchases, loans, prepaid expenses and deferred revenue kept on the books live in their registers (`leases`, `loans`, `loan_events`, `deferrals`), which post their own periodic entries: a close step only verifies and finalizes what they posted. If a register refuses (403), tell the user and offer the calculated schedule with manual journals; do not use it unasked. For everything else, and for items kept manually, when a step needs a calculated schedule, do it in three steps (there is no one-call recipe execution):
+Leases, hire purchases, loans, prepaid expenses and deferred revenue kept on the books live in their registers (`leases`, `loans`, `loan_events`, `deferrals`), which post their own periodic entries, never cash: a close step only verifies and finalizes what they posted. If a register refuses (403), tell the user and offer the calculated schedule with manual journals; do not use it unasked. For everything else, and for items kept manually, when a step needs a calculated schedule, do it in three steps (there is no one-call recipe execution):
 
 1. **Calculate:** `calculate` with `type` = `loan` | `lease` | `depreciation` | `prepaid-expense` | `deferred-revenue` | `ecl` | `provision` | `fixed-deposit` | `asset-disposal` | `accrued-expense` | `leave-accrual` | `dividend` (CLI: `clio calc <type> ... --json`). Offline; returns the schedule and, with a start date, dated steps with journal lines. Posts nothing.
 2. **Group:** `list_capsule_types`, then `create_capsule` with the matching `capsuleTypeResourceId` and a `title`.

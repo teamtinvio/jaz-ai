@@ -106,6 +106,8 @@ Cash transfer FX logic: currency and exchange rates are derived server-side from
 
 Containers that group related transactions for complex accounting scenarios. Use cases: prepaid expenses (annual insurance amortization), deferred revenue, accrued expenses, fixed asset acquisitions (CIP), intercompany transactions, renovation projects.
 
+Prepaid expenses and deferred revenue kept on the books belong in the Deferrals register (below); capsules are for items kept manually, and for accruals and the other cases above.
+
 A capsule links invoices, bills, journals, and schedulers into a single logical unit. If a scheduler belongs to a capsule, every recurring entry it generates is automatically created under that same capsule; this is how prepaid expenses, deferred revenue, and accruals spread entries across periods while keeping them grouped. The ledger can be filtered and grouped by capsule (the only enrichment that supports group-by). Capsule Types are customizable labels. A capsule must be empty before deletion. Transactions can be bulk-attached via Quick Fix or moved between capsules.
 
 **API**: CRUD `GET/POST/PUT/DELETE /capsules`, `POST /capsules/search`, `POST /move-transaction-capsules`, CRUD `GET/POST/PUT/DELETE /capsuleTypes`, `POST /capsuleTypes/search` (also available as `/capsule-types/*` kebab-case aliases)
@@ -190,6 +192,42 @@ Fixed asset register with straight-line depreciation. Register assets from invoi
 Fixed assets lock their linked line items: cannot edit account, amounts, or exchange rates on a line item with an active fixed asset. Must delete the asset before modifying the line item. Fixed asset journals can be grouped in capsules for CIP, renovations, and disposals.
 
 **API**: CRUD `GET/POST/PUT/DELETE /fixed-assets`, `POST /fixed-assets/search`, `POST /mark-as-sold/fixed-assets`, `POST /undo-disposal/fixed-assets/:id`, `POST /discard-fixed-assets/:id`, `POST /transfer-fixed-assets`, `POST /fixed-assets/preview-custom-schedule` and `POST /fixed-assets/calculate-disposal` (both read-only), `POST /fixed-assets-types/search`
+
+---
+
+## Deferrals
+
+Spreads whole bill, invoice or journal lines over months: prepaid expenses (an asset released to expense) and deferred revenue (a liability released to revenue). The amount is never typed: it is the net of tax of the chosen lines, which must come from one document and one account marked as a deferral account. Jaz posts the whole release schedule when the deferral is activated, including every past period if the start date is in the past; it does not create the bill, invoice or journal, which the user records as usual. A draft posts nothing but holds its lines.
+
+Editing a schedule field on an active deferral rewrites every row and is refused once a period is locked. Close out stops the releases and posts nothing for the remaining balance (it stays on the deferral account until the user journals it); reopen undoes it. Deleting a deferral frees its lines. A bill, invoice or journal with a line in a deferral cannot be voided (`CANNOT_VOID_BUSINESS_TRANSACTION_LINKED_WITH_DEFERRAL`), and that line cannot be edited, until the deferral is deleted. Life is 1-1200 months; periods are anniversaries of the start date, not calendar months.
+
+**Tools and reports**: `search_deferral_accounts`, `search_deferral_eligible_lines`, `create_deferral`, `close_out_deferral`, `get_deferral_totals` (always pass the category); `generate_deferrals_summary`, and `generate_deferrals_reconciliation_summary` for register vs ledger.
+
+**API**: `POST /deferrals/eligible-lines/search`, CRUD `/deferrals`, `POST /deferrals/search`, `GET /deferrals/totals`, `POST /close-out/deferrals/:id`, `POST /reopen/deferrals/:id`, `PUT /deferral-accounts`
+
+---
+
+## Leases (IFRS 16)
+
+Lessee leases under IFRS 16 and hire purchase (a lease type, not a loan). The amounts come from the rent schedule and the discount rate, not a typed balance. Jaz posts the recognition entry (right-of-use asset and lease liability), then each month the interest, the depreciation and the current/non-current move. It never posts rent: the user records every rent payment as a bill or cash entry coded to the current lease liability account, not Rent Expense, or the reconciliation shows a gap. A lease from before Jaz starts at the go-live date with the remaining term and rent, and stays out of the opening balances.
+
+A draft posts nothing; activating posts the schedule. Editing a schedule field on an active lease rewrites every entry and is refused once a month is locked; there is no rent review, so a mid-life change is terminate plus a new lease. Close out stops posting but leaves the liability and asset on the books; reopen undoes it. Terminate takes the lease off the books at a month-end with a gain or loss (preview first); undo termination reverses it. The discount rate is % per MONTH (6% a year is 0.5). The term is 1-600 months. A short-term or low-value lease can be registered as EXEMPT and posts nothing.
+
+**Tools and reports**: `create_lease`, `get_lease_schedule`, `get_lease_totals`, `terminate_lease`; `generate_leases_summary`, and `generate_leases_reconciliation_summary` for register vs ledger. The `leases-register` export has a Maturity Analysis sheet.
+
+**API**: CRUD `/leases`, `POST /leases/search`, `GET /leases/totals`, `GET /leases/:id/schedule`, `POST /leases/calculate-flat-rate`, `POST /terminate/leases/:id`, `POST /undo-termination/leases/:id`, `POST /close-out/leases/:id`
+
+---
+
+## Loans
+
+Borrowings, term loans (with a repayment schedule) and on-demand accounts (director, shareholder, related-party or intercompany: no schedule, and no interest posted). The principal and terms are entered; the schedule follows from them. Each month-end Jaz posts the interest and the current/non-current move. It never posts cash: the user records the drawdown receipt (non-current loan account) and every installment in full (current loan account), and no loan event is needed for a scheduled repayment. Revolving credit, foreign-currency loans, loans given and fixed deposits are not in the register.
+
+A draft posts nothing; activating posts the schedule. Editing terms on an active loan rewrites the schedule and is refused once a month is locked; for a mid-life change use a loan event (drawdown, prepay, rate change, payment holiday, capitalize interest, restructure, refinance, settle, forgive, convert to shares). Events go forward only and only the latest can be undone (`undo_loan_event`). Close out stops posting and keeps the balance; reopen undoes it. The rate is % per YEAR (6.5 means 6.5% a year). The term is 1-600 months.
+
+**Tools and reports**: `preview_loan_schedule`, `create_loan`, `get_loan_totals`, the loan event tools; `generate_loans_summary`, `generate_loans_maturity_analysis` (the liquidity note) and `generate_loans_reconciliation_summary` for register vs ledger (a non-zero gap is a missed or mis-coded repayment).
+
+**API**: CRUD `/loans`, `POST /loans/search`, `GET /loans/totals`, `POST /loans/preview-schedule`, `POST /settle/loans/:id` and the other event routes, `POST /undo-event/loans/:id`, `POST /close-out/loans/:id`
 
 ---
 
