@@ -1,5 +1,9 @@
 # Changelog
 
+## [9.4.6] - 2026-11-13
+
+Internal release for the hosted email and chat assistants. No user-facing changes to the CLI, the MCP server or the extension since v9.4.5.
+
 ## [9.4.5] - 2026-11-11
 
 Internal release for the hosted email and chat assistants. No user-facing changes to the CLI, the MCP server or the extension since v9.4.4.
