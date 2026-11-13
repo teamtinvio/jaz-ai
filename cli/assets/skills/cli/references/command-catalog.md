@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 74 command groups. Organized by domain.
+Complete reference for all 77 command groups. Organized by domain.
 
 ---
 
@@ -348,7 +348,59 @@ Dynamic strings in rules: `{{bankReference}}`, `{{bankPayee}}`, `{{bankDescripti
 | `sell <id>` | `--id`, `--depreciation-end-date`, `--sale-type`, `--gain-loss-account` |
 | `transfer <id>` | `--date`, `--type` |
 | `undo-disposal <id>` | Reverse a discard or sale |
+| `preview-schedule` | `--input <file>`: check a custom depreciation schedule (read-only; save only when FULLY_SCHEDULED with no errors) |
+| `calculate-disposal <id>` | `--depreciation-end-date`: accumulated depreciation at disposal (read-only; run before `sell` or `discard`) |
 | `bulk-upsert` | `--input <file>`, `--json`: ⚠️ Date field is `valueDate` (NOT `purchaseDate`: that's the GET response field; bulk request uses `valueDate`). `cost`/`purchaseAmount` synonyms accepted. `effectiveLife`/`usefulLifeMonths` synonyms accepted. Required: `reference`, `registrationType` ("NEW" or "TRANSFER"). Async → jobId |
+
+### `clio leases`: IFRS 16 leases and hire purchase
+The register never posts rent: rent bills and payments are coded to the current lease liability account. `--discount-rate` is % per MONTH (6% a year is 0.5).
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `get <id>` | `--json` |
+| `search` | `--name`, `--ref`, `--status`, `--type-code`, `--view-status`, `--end-date` (as-at), `--from`, `--to`, `--limit`. No natural-language search. |
+| `create` | `--reference`, `--name`, `--type`, `--start`, `--term`, `--rent`, `--payment-timing`, `--discount-rate`, account flags, `--exempt`, `--finalize`, `--input` (stepped rent, prepaid rent, restoration, ownership). A draft unless `--finalize`. |
+| `update <id>` | `--reference`, `--name`, `--notes`, `--activate`, `--input`. A schedule change on an ACTIVE lease rewrites every entry from the start date. |
+| `delete <id>` | Removes every posted entry |
+| `close-out <id>` | `--date`: stops posting, liability and right-of-use asset stay on the books |
+| `reopen <id>` | Undo a close-out |
+| `calculate-termination <id>` | `--date`: preview of the gain or loss (positive = gain) |
+| `terminate <id>` | `--date`, `--gain-loss-account`: takes the lease off the books |
+| `undo-termination <id>` | Undo a termination |
+| `totals` | `--end-date`: liability (current and non-current) and right-of-use net book value |
+| `schedule <id>` | `--view-date` |
+| `types` | Lease types (`typeCode`) |
+| `preview-rent` | `--input <file>`: checks rent ranges, saves nothing |
+| `flat-rate` | `--rate`, `--financed`, `--term`, `--payment-timing`: hire purchase flat rate to monthly discount rate |
+| `bulk-update` | `--input <file>`: partial rows, each needs `resourceId` and `reference`. Async → jobId |
+### `clio loans`: Loans (borrowings), term and on demand
+The register never posts cash: record the drawdown and every installment yourself. `--rate` and `annualInterestRate` are percent per YEAR. Events go forward only and only the latest can be undone; `--preview` calculates and saves nothing.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `search` | `--name`, `--ref`, `--status`, `--kind`, `--type-code`, `--view-status`, `--end-date`, `--limit`, `--all` (no free-text query) |
+| `types` | `--type-name`, `--type-code` |
+| `get <id>` | `--json` |
+| `schedule <id>` | `--view-date` |
+| `events <id>` | `--limit`, `--offset`, `--all`, `--max-rows` |
+| `ledger <id>` | `--end-date`, `--limit`, `--offset` |
+| `totals` | `--end-date`: what we owe, current and non-current |
+| `preview-schedule` | `--input <file>`: schedule from terms, saves nothing |
+| `create` | `--input <file>`, `--activate` (draft by default) |
+| `update <id>` | `--name`, `--notes`, `--activate`, `--input` |
+| `delete <id>` / `reopen <id>` | |
+| `close-out <id>` | `--date`: stop posting from a month-end (not an exit) |
+| `opening-balance <id>` | `--event-type`, `--date`: suggested balance to pass on an event after a missed payment |
+| `drawdown <id>` | `--date`, `--amount`, `--keep`, `--opening-balance`, `--preview` |
+| `prepay <id>` | `--date`, `--amount`, `--keep` (required), `--preview` |
+| `change-rate <id>` | `--date`, `--rate`, `--keep` (required), `--preview` |
+| `capitalize <id>` / `payment-holiday <id>` / `restructure <id>` | `--date` or `--from-period --to-period --treatment`, `--preview` |
+| `settle <id>` | `--date`, `--penalty`, `--preview` (the payoff) |
+| `forgive <id>` / `convert <id>` | `--date`, `--amount` / `--fair-value --share-capital-account`, `--preview` |
+| `refinance <id>` | `--input` (refinanceDate + newLoan), `--date` |
+| `reclassify-current <id>` | `--date`, `--waiver-date` |
+| `undo <id>` | `--event`: reverse the latest event |
+| `bulk-upsert` / `bulk-update` | `--input <file>`: max 500, async → jobId |
 
 ### `clio reconciliations` (alias: `recon`): Bank reconciliation actions (8 tools)
 2 async + 6 sync. Sync endpoints are NOT idempotent: re-running creates duplicate journals.
@@ -482,6 +534,28 @@ The query comes from a positional argument, `--input <file>`, or stdin (`cat q.s
 
 `schema <table>` scopes the catalog to one table plus the joins touching it, and recomputes its counts. Table and column names come from here, syntax rules from `syntax` (both served by one endpoint).
 
+### `clio deferrals`: Prepaid expenses and deferred revenue
+| Subcommand | Key flags |
+|------------|-----------|
+| `get <id>` | `--json` |
+| `search` | `--ref`, `--status`, `--category`, `--view-status`, `--end-date` (as-at), `--limit` |
+| `create` | `--ref`, `--line <id...>`, `--type`, `--name`, `--start`, `--months`, `--amortization-account`, `--activate` (default is a draft that posts nothing), `--input` |
+| `update <id>` | `--ref`, `--name`, `--start`, `--months`, `--activate`, `--input` (partial) |
+| `delete <id>` | Any status; removes every posted row |
+| `close-out <id>` | `--date` (used as given). Posts nothing: the remaining balance stays on the deferral account |
+| `reopen <id>` | Undo a close-out |
+| `totals` | `--category` (required), `--end-date` |
+| `schedule <id>` | `--view-date` |
+| `eligible-lines` | `--ref`, `--category`, `--from`, `--to`: `--limit` counts documents |
+| `types` | `--category` |
+| `accounts` | `--search-terms` |
+| `mark-accounts` | `--account <id...>`, `--unmark`: changes org setup |
+| `preview-schedule` | `--amount`, `--start`, `--months`, `--schedule <json>` |
+| `bulk-upsert` | `--input <file>`: creates only, always ACTIVE, `YYYY-MM-DD` |
+| `bulk-update` | `--input <file>`: partial rows, `resourceId` + `reference` required |
+
+Reports: `clio reports generate deferrals-summary` and `deferrals-reconciliation-summary`.
+
 ### `clio inventory` (alias: `inv`): Inventory tracking
 | Subcommand | Key flags |
 |------------|-----------|
@@ -527,7 +601,7 @@ Dynamic strings in schedulers: `{{Day}}`, `{{Date}}`, `{{Date+X}}`, `{{DateRange
 clio reports generate <type> [flags]
 ```
 
-Types: `trial-balance`, `balance-sheet`, `profit-loss`, `cashflow`, `aged-receivables`, `aged-payables`, `cash-balance`, `general-ledger`, `vat-ledger`, `equity-movement`, `bank-balance-summary`, `bank-reconciliation-summary`, `bank-reconciliation-details`, `fixed-assets-summary`, `fixed-assets-reconciliation-summary`, `aged-receivables-summary`, `aged-payables-summary`, `ledger-highlights`
+Types: `trial-balance`, `balance-sheet`, `profit-loss`, `cashflow`, `aged-receivables`, `aged-payables`, `cash-balance`, `general-ledger`, `vat-ledger`, `equity-movement`, `bank-balance-summary`, `bank-reconciliation-summary`, `bank-reconciliation-details`, `fixed-assets-summary`, `fixed-assets-reconciliation-summary`, `deferrals-summary`, `deferrals-reconciliation-summary`, `aged-receivables-summary`, `aged-payables-summary`, `ledger-highlights`, `loans-summary`, `loans-roll-forward`, `loans-related-party`, `loans-interest`, `loans-maturity-analysis`, `loans-reconciliation-summary`
 
 | Flag | Purpose |
 |------|---------|
@@ -725,7 +799,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 396 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 476 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

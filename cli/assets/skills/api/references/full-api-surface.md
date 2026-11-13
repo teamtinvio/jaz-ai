@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 518 spec paths and 657 spec operations and is the authoritative list; check it before concluding
+> carries 568 spec paths and 710 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -403,6 +403,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/generate-reports/equity-movement` |
 | POST | `/generate-reports/fixed-assets-summary` |
 | POST | `/generate-reports/fixed-assets-recon-summary` |
+| POST | `/generate-reports/loans-summary`, `/loans-roll-forward`, `/loans-related-party`, `/loans-interest`, `/loans-maturity-analysis`, `/loans-recon-summary` |
 | POST | `/generate-reports/templated-*` | Templated versions of above |
 | GET | `/ledger/highlights` | GL summary metadata (counts, date range, currencies) |
 | POST | `/ledger/find-fix/transactions/preview` | Ledger Find & Fix: find records across types, plan a contact, date, capsule or tag change (rule 107a) |
@@ -426,6 +427,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/data-exports/ap-details-report` |
 | POST | `/data-exports/bank-reconciliation-*` |
 | POST | `/data-exports/fixed-assets-*` |
+| POST | `/data-exports/loans-register`, `/data-exports/loans-reconciliation-summary` |
 | POST | `/data-exports/sales-book` |
 | POST | `/data-exports/purchase-book` |
 | POST | `/data-exports/cash-receipt-book` |
@@ -493,12 +495,76 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/undo-disposal/fixed-assets/:resourceId` | Undo disposal |
 | POST | `/discard-fixed-assets/:resourceId` | Discard |
 | POST | `/transfer-fixed-assets` | Transfer between entities |
+| POST | `/close-out/fixed-assets/:resourceId` | Stop depreciating from a month-end, keep the asset (body `closeOutDate`); status `CLOSED_OUT` |
+| POST | `/reopen/fixed-assets/:resourceId` | Undo a close-out; no body |
+| GET | `/fixed-assets/totals` | Register totals as at `endDate` |
+| GET | `/fixed-assets/disposal-totals` | Disposed-asset totals as at `endDate` |
+| GET | `/fixed-assets/:resourceId/schedule` | Depreciation schedule (`viewDate`) |
+| POST | `/fixed-assets/eligible-lines/search` | Unclaimed bill and journal lines on Fixed Asset accounts; `limit` counts documents |
+| POST | `/fixed-assets/bulk-update` | Bulk update (max 500); **async**, returns `{ jobId }`. The route replaces each row in full; the clio tool and CLI merge each row over the stored asset first |
 | POST | `/fixed-assets/bulk-upsert` | Bulk create/update fixed assets (max 500); **async**, returns `{ jobId }`. Natural key: `reference`. Each row needs `registrationType` (NEW \| TRANSFER) + `typeCode`. |
 
 ### Fixed Asset Types
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/fixed-assets-types/search` | Search fixed asset types |
+
+### Deferrals (prepaid expenses and deferred revenue)
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/deferrals/search` | Search deferrals (`viewStatus`, `endDate` as-at, `query`) |
+| GET | `/deferrals`, `/deferrals/:resourceId` | List, get |
+| POST | `/deferrals` | Create; `saveAsDraft` defaults true; amount comes from the source lines |
+| PUT | `/deferrals/:resourceId` | Partial update; `isDraftToActive` activates |
+| DELETE | `/deferrals/:resourceId` | Delete any status |
+| POST | `/close-out/deferrals/:resourceId` | Stop releasing after `closeOutDate`; posts nothing |
+| POST | `/reopen/deferrals/:resourceId` | Undo a close-out; no body |
+| GET | `/deferrals/totals` | Totals as at `endDate`; pass `category` |
+| GET | `/deferrals/:resourceId/schedule` | Release rows (`viewDate`) |
+| POST | `/deferrals/eligible-lines/search` | Unclaimed lines on deferral accounts; `limit` counts documents |
+| POST | `/deferrals/preview-custom-schedule` | Check custom release ranges; saves nothing |
+| POST | `/deferrals/bulk-upsert` | Bulk create (max 500); **async**, returns `{ jobId }` |
+| POST | `/deferrals/bulk-update` | Bulk partial update (max 500); **async**, returns `{ jobId }` |
+| POST | `/deferral-types/search`, `/deferral-accounts/search` | Types, deferral accounts |
+| PUT | `/deferral-accounts` | Mark or unmark deferral accounts |
+| POST | `/generate-reports/deferrals-summary`, `/generate-reports/deferrals-recon-summary` | Roll-forward, register vs ledger |
+| POST | `/data-exports/deferrals-register`, `/data-exports/deferrals-reconciliation-summary` | Exports |
+
+### Leases (IFRS 16)
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/leases` | Create; `saveAsDraft` defaults true. `discountRate` is % per month |
+| POST | `/leases/search` | Search; body `viewStatus` and `endDate` (as-at). `query` answers 400 |
+| GET | `/leases/:resourceId` | Get one, figures as at today |
+| PUT | `/leases/:resourceId` | Partial update; `reference` required; `isDraftToActive` |
+| DELETE | `/leases/:resourceId` | Delete any status |
+| GET | `/leases/:resourceId/schedule` | Schedule (`viewDate`) |
+| GET | `/leases/totals` | Liability and right-of-use value as at `endDate`; no restoration provision |
+| POST | `/leases/preview-rent-schedule` | Check rent ranges (`COMPLETE`/`INCOMPLETE`) |
+| POST | `/leases/calculate-flat-rate` | Hire purchase flat rate to monthly `discountRate` |
+| POST | `/leases/calculate-termination` | Termination preview |
+| POST | `/leases/bulk-update` | Bulk partial update (max 500); **async**, returns `{ jobId }` |
+| POST | `/close-out/leases/:resourceId` | Stop posting, keep balances (body `closeOutDate`) |
+| POST | `/reopen/leases/:resourceId` | Undo a close-out; no body |
+| POST | `/terminate/leases/:resourceId` | Take off the books at a month-end, posting the gain or loss |
+| POST | `/undo-termination/leases/:resourceId` | Undo a termination; no body |
+| POST | `/lease-types/search` | Lease types; `query` answers 400 |
+### Loans
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/loans` | Create (draft by default; `reference` required) |
+| GET | `/loans`, `/loans/:resourceId` | List, get |
+| POST | `/loans/search` | Search (`viewStatus`, `endDate`; no `query`) |
+| PUT | `/loans/:resourceId` | Partial update; `isDraftToActive` |
+| DELETE | `/loans/:resourceId` | Delete |
+| GET | `/loans/totals` | Totals as at `endDate` |
+| GET | `/loans/:resourceId/schedule`, `/events`, `/ledger` | Repayment schedule, events (latest first), on-demand ledger |
+| POST | `/loans/preview-schedule` | Schedule from terms, saves nothing |
+| POST | `/loans/bulk-upsert`, `/loans/bulk-update` | Bulk create ACTIVE / bulk update (max 500); **async**, `{ jobId }` |
+| POST | `/close-out/loans/:resourceId`, `/reopen/loans/:resourceId` | Stop posting from a month-end, reverse |
+| POST | `/loans/calculate-{drawdown,prepayment,rate-change,capitalization,payment-holiday,restructure,settlement,forgiveness,conversion,opening-balance}` | Event previews, save nothing |
+| POST | `/record-drawdown/loans/:id`, `/prepay/loans/:id`, `/change-rate/loans/:id`, `/capitalize-interest/loans/:id`, `/payment-holiday/loans/:id`, `/restructure/loans/:id`, `/settle/loans/:id`, `/forgive/loans/:id`, `/convert-to-shares/loans/:id`, `/refinance/loans/:id`, `/reclassify-as-current/loans/:id`, `/undo-event/loans/:id` | Record an event |
+| GET/POST | `/loan-types`, `/loan-types/search`, `/loan-types/:resourceId` | Loan types |
 
 ### Purchase Items
 | Method | Path | Description |

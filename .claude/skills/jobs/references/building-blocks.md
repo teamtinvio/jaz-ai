@@ -50,7 +50,7 @@ Standard assertions:
 
 ## Calculated schedules: calculate, capsule, post
 
-There is no one-call "recipe" execution. Any job step that needs a schedule (loan, lease, prepaid, deferred revenue, accrual, ECL, provision, dividend, disposal) is three steps you perform yourself:
+Loans, leases, prepaid expenses and deferred revenue are kept in their registers (`loans`, `leases`, `deferrals`), which post their own entries; use the three steps below for those only when the register is not available to the organization and the user asks for journals. There is no one-call "recipe" execution. Any other job step that needs a schedule (accrual, ECL, provision, dividend, disposal) is three steps you perform yourself:
 
 ```
 calculate(type: 'prepaid-expense', amount: 12000, periods: 12, startDate: '2025-01-01')

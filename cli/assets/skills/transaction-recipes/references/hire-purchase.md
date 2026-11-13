@@ -2,6 +2,8 @@
 
 > Variant of the IFRS 16 lease recipe where ownership transfers at the end of the term. Same calculator, same step structure as `ifrs16-lease.md`, but the ROU asset depreciates over its USEFUL LIFE (typically longer), not the financing term.
 
+> **Register first.** To keep a hire purchase on the books, use the `leases` register (`create_lease`): it keeps the schedule and posts the periodic entries itself. This recipe is the manual alternative, for organizations whose plan or role does not include the register, or when the user asks for journals.
+
 ## Why hire-purchase uses the lease calculator
 
 Per IFRS 16.32: when ownership transfers at the end of the lease term, OR a purchase option is reasonably certain, the ROU asset is depreciated to the end of its USEFUL LIFE (not the lease term). For a vehicle on a 36-month HP with 60-month useful life: financing/liability over 36 months, depreciation over 60 months.

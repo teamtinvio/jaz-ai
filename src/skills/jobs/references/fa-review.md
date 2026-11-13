@@ -75,7 +75,7 @@ Cross-check via `clio calc depreciation --frequency annual --json` per asset; au
 
 ## Step 5: Process disposals
 
-For each disposal identified in step 2:
+For each disposal identified in step 2, an asset in the register gets its figures from the register itself: `calculate_fixed_asset_disposal(resourceId, depreciationEndDate)` (`fixed_asset_schedules`) before `mark_fixed_asset_sold` or `discard_fixed_asset`. The calculator below is the cross-check, and the route for an asset that is not in the register:
 
 ```
 calculate(type: 'asset-disposal', cost, salvageValue, usefulLifeYears, acquisitionDate, disposalDate, proceeds, method)

@@ -2,6 +2,8 @@
 
 > One-shot recipe for fixed-asset disposal under IAS 16.67-72 (sale, scrap, write-off). One disposal journal, plus the fixed-asset register update that stops depreciation. The calculator returns the accumulated depreciation, net book value, gain or loss and the journal lines; you post the journal and update the register yourself (see `building-blocks.md` § The three-step flow).
 
+> **Register first.** For an asset in the fixed-asset register, take the figures from `calculate_fixed_asset_disposal` (`fixed_asset_schedules`), then `mark_fixed_asset_sold` or `discard_fixed_asset`, which record the disposal themselves. This recipe covers an asset that is not in the register, and is the cross-check for one that is.
+
 ## Tools and calculator this recipe uses
 
 ### Calculator (offline, posts nothing)

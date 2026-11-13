@@ -189,7 +189,7 @@ Fixed asset register with straight-line depreciation. Register assets from invoi
 
 Fixed assets lock their linked line items: cannot edit account, amounts, or exchange rates on a line item with an active fixed asset. Must delete the asset before modifying the line item. Fixed asset journals can be grouped in capsules for CIP, renovations, and disposals.
 
-**API**: CRUD `GET/POST/PUT/DELETE /fixed-assets`, `POST /fixed-assets/search`, `POST /mark-as-sold/fixed-assets`, `POST /undo-disposal/fixed-assets/:id`, `POST /discard-fixed-assets/:id`, `POST /transfer-fixed-assets`, `POST /fixed-assets-types/search`
+**API**: CRUD `GET/POST/PUT/DELETE /fixed-assets`, `POST /fixed-assets/search`, `POST /mark-as-sold/fixed-assets`, `POST /undo-disposal/fixed-assets/:id`, `POST /discard-fixed-assets/:id`, `POST /transfer-fixed-assets`, `POST /fixed-assets/preview-custom-schedule` and `POST /fixed-assets/calculate-disposal` (both read-only), `POST /fixed-assets-types/search`
 
 ---
 

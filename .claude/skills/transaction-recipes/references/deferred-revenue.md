@@ -2,6 +2,8 @@
 
 > Mirror of prepaid-amortization for the income side: customer pays upfront for a service delivered over time. One upfront invoice coded to the Deferred Revenue liability, then N recognition entries that roll the liability into revenue, all in one capsule. Same operational pattern; opposite accounting direction. You calculate, create the capsule and post each entry yourself (see `building-blocks.md` § The three-step flow).
 
+> **Register first.** To keep deferred revenue on the books, use the `deferrals` register (`create_deferral`): it keeps the schedule and posts the periodic entries itself. This recipe is the manual alternative, for organizations whose plan or role does not include the register, or when the user asks for journals.
+
 ## Tools and calculator this recipe uses
 
 ### Calculator (offline, posts nothing)

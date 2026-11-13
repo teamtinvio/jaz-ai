@@ -1904,6 +1904,7 @@ POST /api/v1/fixed-assets
 - `category`: `"TANGIBLE"` or `"INTANGIBLE"`
 - `saveAsDraft`: Defaults to `true`. Set `false` to activate; requires `purchaseBusinessTransactionType` (`PURCHASE`, `SALE`, `JOURNAL_MANUAL`, `JOURNAL_CASHFLOW`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT` or `JOURNAL_CASH_TRANSFER`) + `purchaseBusinessTransactionResourceId`
 - Optional string fields (`purchaseBusinessTransactionResourceId`, `capsuleResourceId`) can be safely omitted for drafts
+- An active save (`saveAsDraft: false`) also needs `reference` (`FIXED_ASSET_REFERENCE_REQUIRED`; `GET /references/next?type=FIXED_ASSET`) and `typeCode` (`FIXED_ASSET_TYPE_REQUIRED`; `typeName` is overwritten from the type master), plus `category`, `depreciationMethod` and `effectiveLife`. It links ONE purchase line (several lines are separate assets); `purchaseBusinessTransactionResourceId` is the line id from `POST /fixed-assets/eligible-lines/search`, not the document id. The eligible-lines filter also reads `description` and `amount`.
 
 ### Response
 ```json
@@ -1938,6 +1939,245 @@ Register an asset purchased before using Jaz, with accumulated depreciation.
 - `bookValueAccumulatedDepreciationAmount`: depreciation already incurred before registration (Book Value at Start = purchaseAmount - this value)
 - No `purchaseBusinessTransactionType`/`purchaseBusinessTransactionResourceId` (unlike Create, no linked transaction)
 - All other fields same as Create
+
+### Close Out / Reopen Fixed Asset
+POST /api/v1/close-out/fixed-assets/:resourceId
+```json
+{ "closeOutDate": "2026-06-30", "resourceId": "asset-uuid" }
+```
+
+POST /api/v1/reopen/fixed-assets/:resourceId (no body)
+
+- Close out stops depreciation from that month-end; the asset stays on the register, nothing is reversed and no gain or loss is posted. Needs `ACTIVE` and a method other than `NO_DEPRECIATION`; `closeOutDate` is moved to its month-end and must be before the last depreciation month. Status becomes `CLOSED_OUT`.
+- Reopen needs `CLOSED_OUT`; the full schedule is re-posted and the status returns to `ACTIVE`. Edit, sell and discard are refused on a `CLOSED_OUT` asset, so reopen first.
+
+### Bulk Update Fixed Assets
+POST /api/v1/fixed-assets/bulk-update
+
+```json
+{ "fixedAssets": [{ "resourceId": "asset-uuid", "name": "...", "purchaseDate": "2026-01-15", "...": "every update field" }] }
+```
+
+- 1-500 rows, async: returns `{ jobId }`; poll `search_background_jobs`. The ROUTE runs one Update Fixed Asset per row, a **full replace**: an omitted amount or text field is saved as 0 or blank. The `bulk_update_fixed_assets` tool and `clio fixed-assets bulk-update` do not expose that: they read the stored assets (search, 100 ids per request), merge each row over its asset as `update_fixed_asset` does, and submit the merged rows, so a row is `resourceId` plus only the fields to change (`tags` takes `{ add, remove }`). An unknown or repeated `resourceId` fails the whole call before anything is submitted. Calling the route directly, copy every field the row declares: GET returns epoch-millisecond dates and response-only fields; send dates as `YYYY-MM-DD` and leave out anything the row does not declare.
+- Dates are `YYYY-MM-DD` (unlike `bulk-upsert`, which takes epoch milliseconds). A record listed twice returns 422.
+
+### Fixed Asset Totals
+GET /api/v1/fixed-assets/totals?endDate=YYYY-MM-DD
+GET /api/v1/fixed-assets/disposal-totals?endDate=YYYY-MM-DD
+
+- Register totals (purchase amount, accumulated depreciation, net book value) and disposed-asset totals (book value, sale proceeds, gain/loss) as at `endDate` (default today). Disposed assets are not in the register totals. `assetDisposalGainLossAmount`: positive = loss, negative = gain.
+
+### Fixed Asset Schedule
+GET /api/v1/fixed-assets/:resourceId/schedule?viewDate=YYYY-MM-DD
+
+- Month-by-month depreciation rows grouped by year (with book value), plus disposal rows once the asset is sold or discarded.
+- The route takes only `viewDate`: no paging or range, and an asset runs to 1,200 months. The `get_fixed_asset_schedule` tool and `clio fixed-assets schedule` slice client-side with `fromPeriod` / `toPeriod` (row count from 1, inclusive); the tool returns at most 60 whole rows per call with `totalPeriods` and a `note` naming the next range.
+
+### Preview Custom Schedule / Calculate Disposal (read-only POSTs, nothing saved)
+POST /api/v1/fixed-assets/preview-custom-schedule
+```json
+{ "depreciableValueAmount": 1200, "depreciationStartDate": "2026-01-01", "effectiveLife": 12, "customSchedule": [{ "fromPeriod": 1, "toPeriod": 12, "amount": 100 }] }
+```
+
+POST /api/v1/fixed-assets/calculate-disposal
+```json
+{ "resourceId": "asset-uuid", "depreciationEndDate": "2026-06-30" }
+```
+
+- Preview returns `status` (`FULLY_SCHEDULED`, `SHORT`, `OVER`, `INCOMPLETE`), `scheduledAmount`, `difference` (target less scheduled; positive = short), `timeline`, `periods`, `defaultSchedule` (the straight-line split, a starting point to edit) and `errors`. Save the schedule only when `status` is `FULLY_SCHEDULED` with no `errors`.
+- Calculate returns `totalAccumulateDepreciationAtDisposal`: depreciation up to and including the month of `depreciationEndDate`, plus any brought in. Net book value = purchase amount less this; gain or loss on a sale = sale amount less net book value (negative is a loss). Run it before Mark as Sold or Discard. 422 if the asset has no depreciation method yet.
+
+- `periods` runs to one entry per month (up to 1,200). The tool and `clio fixed-assets preview-schedule` window `periods` client-side with `fromPeriod` / `toPeriod` (inclusive; stripped before the request, the route binds strictly): the tool returns at most 60 periods per call with `totalPeriods` and a `note` naming the next range, and `timeline` keeps only the segments touching them.
+
+### Search Eligible Lines (what can be registered)
+POST /api/v1/fixed-assets/eligible-lines/search
+
+- Bill and journal lines on a Fixed Asset account that no asset has claimed, grouped by document then account. `limit` counts **documents**, not lines. Filter fields: `documentType`, `documentResourceId`, `reference`, `valueDate`, `contactName`, `accountResourceId`, `accountName`, `description`, `amount`.
+- To create the asset: `sourceLineResourceId` -> `purchaseBusinessTransactionResourceId`, `documentType` -> `purchaseBusinessTransactionType`, `amount` -> `purchaseAmount`.
+- No natural-language `query`: only fixed-asset record search takes one; this search answers 400 `query_not_supported`.
+
+### Search Fixed Asset Types
+POST /api/v1/fixed-assets-types/search
+
+- Filter `categoryCode`, `typeName`, `typeCode`. Pick a `typeCode` whose `categoryCode` matches the asset `category`.
+- No natural-language `query`: 400 `query_not_supported`.
+
+---
+
+## Deferrals (prepaid expenses and deferred revenue)
+
+A deferral spreads whole bill, invoice or journal lines over months and, when active, posts every release row at once. Routes act as a user: a `jk-` key (`x-jk-api-key`), a personal access token or an OAuth sign-in works. Management credentials (the 48-character organization `API_KEY` header, the management key, the partner API key) are refused with `USER_NOT_AUTHORITY_PERMISSION` (the two deferrals reports accept them); a locked plan returns 403 `NOT_HAVE_ENOUGH_PERMISSION`. Single writes bind strictly: an unknown key is 400 `unknown_field`. Never PUT back a GET response.
+
+### Deferral accounts (set up first)
+POST /api/v1/deferral-accounts/search (`searchTerms` string[] is required by the spec; `[]` lists all)
+PUT /api/v1/deferral-accounts
+```json
+{ "accounts": [{ "organizationAccountResourceId": "account-uuid", "deferralAccount": true }] }
+```
+
+- Nothing is eligible until an account is marked. Current Asset gives `PREPAID_EXPENSE`, Current Liability gives `DEFERRED_REVENUE`. Marking changes org setup: confirm first. Unmarking an account any deferral (draft included) uses is refused (`DEFERRAL_ACCOUNT_IN_USE`).
+
+### Search Eligible Lines
+POST /api/v1/deferrals/eligible-lines/search
+
+- Bill (`PURCHASE`), invoice (`SALE`) and journal lines on a deferral account that no deferral holds, grouped by document then account. `limit` counts **documents**. `amount` is net of tax in base currency. A line with `draftDeferralReference` is held by that draft.
+
+### Deferral Types
+POST /api/v1/deferral-types/search
+
+- Filter `categoryCode`, `typeName`, `typeCode`. The same `typeCode` exists in both categories: always filter by `categoryCode`.
+
+- `POST /api/v1/deferrals/preview-custom-schedule` returns up to 1,200 `periods`. The tool and `clio deferrals preview-schedule` window `periods` client-side with `fromPeriod` / `toPeriod` (inclusive; stripped before the request, the route binds strictly): the tool returns at most 60 periods per call with `totalPeriods` and a `note` naming the next range, and `timeline` keeps only the segments touching them.
+
+### Create Deferral
+POST /api/v1/deferrals (201, full deferral)
+```json
+{ "reference": "DF-000001", "sourceLineResourceIds": ["line-uuid"], "typeCode": "INSURANCE", "name": "Annual insurance", "amortizationStartDate": "2026-04-01", "effectiveLife": 12, "amortizationAccountResourceId": "expense-account-uuid", "saveAsDraft": false }
+```
+
+- `saveAsDraft` defaults **true**; a draft posts nothing. Amount is not an input: it is the sum of the whole lines, net of tax. Lines must be from one document and one account. Periods are anniversary periods from `amortizationStartDate`, not calendar months. `CUSTOM_SCHEDULE` takes `customSchedule: [{ fromPeriod, toPeriod, amount }]`, checked with `POST /deferrals/preview-custom-schedule` (save only when `status` is `FULLY_SCHEDULED` with no `errors`).
+
+### Update / Delete Deferral
+PUT /api/v1/deferrals/:resourceId (`reference` and `resourceId` required; `isDraftToActive: true` activates)
+DELETE /api/v1/deferrals/:resourceId
+
+- Partial update: omitted keeps the stored value; text, tags and lists cannot be cleared. Schedule changes on an ACTIVE deferral delete and re-post every row and are refused once a period is locked. `CLOSED_OUT` is refused (`INVALID_DEFERRAL_STATUS`): reopen first. Delete works on any status and is refused under a lock.
+
+### Close Out / Reopen Deferral
+POST /api/v1/close-out/deferrals/:resourceId
+```json
+{ "closeOutDate": "2026-08-15", "resourceId": "deferral-uuid" }
+```
+
+POST /api/v1/reopen/deferrals/:resourceId (no body)
+
+- Close out removes rows after the date (used as given, not moved to a month-end) and posts nothing: `remainingAmount` stays on the deferral account.
+
+### Search / Get / Totals / Schedule
+POST /api/v1/deferrals/search (`viewStatus`, `endDate` as-at, `filter`, `query`)
+GET /api/v1/deferrals/:resourceId
+GET /api/v1/deferrals/totals?endDate=&category=
+GET /api/v1/deferrals/:resourceId/schedule?viewDate=
+
+- Totals: always pass `category`; prepaid and deferred revenue otherwise add into one meaningless number. Schedule rows are read from posted ledger rows, so a draft has none.
+- The schedule route takes only `viewDate`. `get_deferral_schedule` and `clio deferrals schedule` slice client-side with `fromPeriod` / `toPeriod` (row count from 1, inclusive); the tool returns at most 60 whole rows per call with `totalPeriods` and a `note` naming the next range.
+
+### Bulk Create / Update Deferrals
+POST /api/v1/deferrals/bulk-upsert
+POST /api/v1/deferrals/bulk-update
+
+- 1-500 rows, async: `{ jobId }`, poll `search_background_jobs`. Upsert **creates only**, always ACTIVE, `STRAIGHT_LINE` only, `YYYY-MM-DD` dates. Update rows are partial with `resourceId` and `reference` required per row. A row's `tags` is the whole list and replaces every tag on the deferral, so the tool does not take it: tag changes go through `update_deferral` (add/remove).
+
+### Deferral reports and exports
+POST /api/v1/generate-reports/deferrals-summary
+POST /api/v1/generate-reports/deferrals-recon-summary (`accountResourceIds` optional)
+POST /api/v1/data-exports/deferrals-register
+POST /api/v1/data-exports/deferrals-reconciliation-summary (`accountResourceId` required)
+
+---
+
+## Leases (IFRS 16 lessee leases, hire purchase)
+
+Call as a user: a `jk-` key (`x-jk-api-key`), a PAT or an OAuth sign-in works. Management credentials (the 48-character organization API key, the management key, a partner key) are refused `USER_NOT_AUTHORITY_PERMISSION` on every lease route except reports and exports. Leases are locked on plans without a yearly cadence, `GROWTH`, `INTERNAL` or `JOURNAL_ACCOUNTING` (403 `NOT_HAVE_ENOUGH_PERMISSION`). Posting or changing an active lease needs the Admin role. The body binds strictly: an unknown key is 400 `unknown_field`. Dates sent are `YYYY-MM-DD`; dates read back are epoch milliseconds.
+
+- **The register never posts rent.** Rent bills and payments are coded to the current lease liability account; a rent bill coded to Rent Expense double counts. The reconciliation report shows the gap.
+- **`discountRate` is % per MONTH**: 6% a year is `0.5`, not `6` and not `0.06`.
+- **`customSchedule` is the rent**: `amount` is the rent of each month in the range, ranges cover months 1 to `leaseTerm` with no gap or overlap, at least one above 0.
+
+- `POST /api/v1/leases/preview-rent-schedule` returns up to 600 `periods`. The tool and `clio leases preview-rent` window `periods` client-side with `fromPeriod` / `toPeriod` (inclusive; stripped before the request, the route binds strictly): the tool returns at most 60 periods per call with `totalPeriods` and a `note` naming the next range, and `timeline` keeps only the segments touching them.
+
+### Create Lease
+POST /api/v1/leases (returns 201 with the lease)
+```json
+{
+  "reference": "LS-000001", "name": "Office level 3", "typeCode": "OFFICE",
+  "commencementDate": "2026-01-01", "leaseTerm": 36, "paymentTiming": "ADVANCE", "discountRate": 0.5,
+  "customSchedule": [{ "fromPeriod": 1, "toPeriod": 36, "amount": 5000 }],
+  "rouAssetAccountResourceId": "uuid", "accumulatedDepreciationAccountResourceId": "uuid",
+  "depreciationExpenseAccountResourceId": "uuid", "leaseLiabilityAccountResourceId": "uuid",
+  "interestExpenseAccountResourceId": "uuid", "saveAsDraft": false
+}
+```
+- `saveAsDraft` defaults **true**: a draft posts nothing but returns `leaseLiabilityAmount`, `rouAssetAmount` and `endDate` when the terms already make a schedule. `reference` is required on drafts too (`GET /references/next?type=LEASE`).
+- `exemptionType: "EXEMPT"` (short-term or low-value) takes only reference, name, type, start and term, and posts nothing.
+- Optional: `contactResourceId` (lessor), `prepaidLeasePaymentsAmount` + account, `restorationCostAmount` + provision account, `ownershipTransfers` + `usefulLife` + `purchaseOptionPrice`, `leaseLiabilityNonCurrentAccountResourceId` (needed when principal falls due after 12 months). Interest Expense must be a Finance Cost account. The five required accounts (right-of-use asset, accumulated depreciation, depreciation expense, current lease liability, interest expense) must all be different (`LEASE_ACCOUNTS_NOT_DISTINCT`); the non-current liability account is added only when principal falls due after 12 months.
+- Hire purchase: `POST /leases/calculate-flat-rate` `{ "flatRate": 2.78, "financedAmount": 68000, "leaseTerm": 84, "paymentTiming": "ARREARS" }` returns the monthly `discountRate` (0.4322 here), `instalment`, `finalInstalment`, `totalInterest`. Create with `typeCode: "HIRE_PURCHASE"`, rent `instalment` for months 1 to term-1 and `finalInstalment` for the last, usually `ownershipTransfers: true` with `usefulLife`.
+
+### Update Lease
+PUT /api/v1/leases/:resourceId
+- Partial: omitted fields keep their value; `reference` and `resourceId` are required. `isDraftToActive: true` activates a draft.
+- On an ACTIVE lease, any schedule field (start, term, rent, timing, rate, prepaid, restoration, ownership, any account) rewrites every entry from the start date (past months restated) and is refused once a month is locked. There is no rent review or extension: a genuine mid-life change is terminate plus a new lease, which books a gain or loss.
+- Refused on `CLOSED_OUT` and `TERMINATED` leases (`INVALID_LEASE_STATUS`).
+
+### Search Leases / Lease Types
+POST /api/v1/leases/search, POST /api/v1/lease-types/search
+- Body `filter`, `sort`, `limit`, `offset` (a 0-indexed page), plus `viewStatus` (`ACTIVE`, `DRAFT`, `EXEMPT`, `COMPLETED`, `ENDED`, `CLOSED_OUT`, `TERMINATED`) and `endDate` (the as-at date) on leases. `query` answers 400 `query_not_supported`. A terminated lease shows its liability at termination.
+- Figures (`leaseLiabilityRemaining`, `currentPortion`, `nonCurrentPortion`, `rouNetBookValue`) come from the schedule, not the ledger.
+
+### Lease Schedule and Totals
+GET /api/v1/leases/:resourceId/schedule?viewDate=YYYY-MM-DD, GET /api/v1/leases/totals?endDate=YYYY-MM-DD
+- The schedule route takes only `viewDate`, and a lease runs to 600 months. `get_lease_schedule` and `clio leases schedule` slice client-side with `fromPeriod` / `toPeriod` (`PERIOD` rows by `periodNumber`, inclusive); the tool returns at most 60 months per call with `totalPeriods` and a `note` naming the next range. The RECOGNITION row comes with the first window and a close-out or termination note with the last.
+- Totals: `rouNetBookValue`, `leaseLiability`, `currentPortion`, `nonCurrentPortion`; the restoration provision, drafts, exempt, terminated and ended leases are left out.
+
+### Close Out / Reopen Lease
+POST /api/v1/close-out/leases/:resourceId `{ "closeOutDate": "2026-06-30", "resourceId": "uuid" }`; POST /api/v1/reopen/leases/:resourceId (no body)
+- Close out is **not an exit**: posting stops after the month-end, liability and right-of-use asset stay on the books. To take a lease off the books, terminate it.
+
+### Terminate Lease
+POST /api/v1/leases/calculate-termination `{ "resourceId": "uuid", "terminationDate": "2026-09-30" }` (preview, saves nothing); POST /api/v1/terminate/leases/:resourceId `{ "resourceId": "uuid", "terminationDate": "2026-09-30", "terminationGainLossAccountResourceId": "uuid" }`; POST /api/v1/undo-termination/leases/:resourceId (no body)
+- Preview first. `terminationGainLossAmount` is positive for a **gain** (the reverse of fixed assets). The gain/loss account is required when it is not 0. The restoration provision is not reversed; a penalty goes on a bill.
+
+### Bulk Update Leases
+POST /api/v1/leases/bulk-update `{ "leases": [{ "resourceId": "uuid", "reference": "LS-000001", "name": "..." }] }`
+- 1-500 rows, async: returns `{ jobId }`; poll `search_background_jobs`. Each row is the partial update; for renaming or activating drafts, not for rent changes. A row's `tags` is the whole list and replaces every tag on the lease, so the tool does not take it: tag changes go through `update_lease` (add/remove).
+
+### Lease Reports and Exports
+POST /api/v1/generate-reports/leases-summary (the IFRS 16 note; `groupBy` `TYPE`, `STATUS` or `ACCOUNT`), POST /api/v1/generate-reports/leases-recon-summary (register vs GL per lease account; `accountResourceIds` optional); POST /api/v1/data-exports/leases-register, POST /api/v1/data-exports/leases-reconciliation-summary (`accountResourceId` required)
+- Reports need `REPORTS:ADMIN`. A liability difference in the reconciliation almost always means a rent bill coded elsewhere, posted in another month, or not booked.
+
+## Loans (borrowings; term and on demand)
+
+The register never posts cash: the user records the drawdown receipt (non-current loan account) and every installment IN FULL (current loan account). `annualInterestRate` is percent per **year** (6.5 = 6.5% a year). Hire purchase is a lease, not a loan. Every loan route binds strictly (unknown key = 400). Credentials: the routes act as a user, so a `jk-` key (`x-jk-api-key`), a personal access token or an OAuth sign-in works; a management credential (the 48-character organization `API_KEY` header, the management key, the partner API key) is refused with `USER_NOT_AUTHORITY_PERMISSION`, reads and previews included. Only the loan reports and data exports accept management callers (reports need `REPORTS:ADMIN`; a locked plan answers them 422 `UNAUTHORIZED`, the other routes 403 `NOT_HAVE_ENOUGH_PERMISSION`). `calculate-*` and `preview-schedule` save nothing but need a read-write token: a token limited to read-only scope refuses them, since their paths end neither in `/search` nor `/preview`. Loan search and loan-type search give 400 `query_not_supported` for `query`.
+
+### Loans
+| Method | Path | Notes |
+|--------|------|-------|
+| POST | `/loans` | Create; `saveAsDraft` defaults true; `reference` required; returns 201 with the loan |
+| GET | `/loans/:resourceId` | Get, figures as of today |
+| PUT | `/loans/:resourceId` | Partial; `reference` + `resourceId` required; `fees` replaces the list; `isDraftToActive`. A term, fee or account change on an ACTIVE loan rewrites the schedule from the start |
+| DELETE | `/loans/:resourceId` | Any status; removes the loan's own rows |
+| POST | `/loans/search` | Body `filter`, `sort`, `limit`, `offset`, plus `viewStatus` and `endDate` (as-at) |
+| GET | `/loans/totals` | `endDate`: outstandingPrincipal, currentPortion, nonCurrentPortion, accruedInterest |
+| GET | `/loans/:resourceId/schedule` | `viewDate` only: no paging or range, up to 600 rows. `get_loan_schedule` / `preview_loan_schedule` and `clio loans schedule` slice client-side with `fromPeriod` / `toPeriod` (`periodNumber`, inclusive); the tools return at most 60 installments per call with `totalPeriods` and a `note` naming the next range |
+| GET | `/loans/:resourceId/events` | Latest first, with `canUndo`; `limit`, `offset` |
+| GET | `/loans/:resourceId/ledger` | On-demand only; `endDate`, `limit`, `offset` |
+| POST | `/loans/preview-schedule` | Schedule from terms, saves nothing; `preview_loan_schedule` and `clio loans preview-schedule` take the same client-side `fromPeriod` / `toPeriod` as the schedule route (stripped before the request) |
+| POST | `/loans/bulk-upsert` | Create ACTIVE loans (max 500, creates only, dates YYYY-MM-DD); async `{ jobId }` |
+| POST | `/loans/bulk-update` | PUT per row (max 500); async `{ jobId }` |
+| POST | `/close-out/loans/:resourceId` | Body `closeOutDate`; not an exit |
+| POST | `/reopen/loans/:resourceId` | No body |
+| GET/POST | `/loan-types`, `/loan-types/search`, `/loan-types/:resourceId` | Master types (BANK, DIRECTOR, ...) |
+
+### Loan events
+Forward only (a date before the latest event is refused); only the latest event can be undone; a retry within 2 minutes returns `LOAN_EVENT_DUPLICATE` (the first call committed). CUSTOM-shape loans refuse drawdown, prepay, rate change, capitalize, payment holiday and restructure (`LOAN_EVENT_ON_LENDER_SCHEDULE`); on-demand loans take only settle, forgive and convert (`LOAN_NOT_A_TERM_LOAN` otherwise), and an on-demand settle needs the ledger at exactly 0 (`LOAN_PAYOFF_NOT_RECORDED`; owed to the company is `LOAN_NOTHING_OWED`). Forgiveness by the lender, a conversion difference and a restructure catch-up need a gain or loss account, sent or already on the loan (`LOAN_GAIN_LOSS_ACCOUNT_REQUIRED`). `fairValue` on conversion is 0 or more. `gainLossAmount` above 0 is a gain.
+
+| Event | Preview (saves nothing) | Record |
+|-------|-------------------------|--------|
+| Drawdown | `POST /loans/calculate-drawdown` | `POST /record-drawdown/loans/:id` |
+| Prepayment (`keep` required) | `POST /loans/calculate-prepayment` | `POST /prepay/loans/:id` |
+| Rate change (`keep` required) | `POST /loans/calculate-rate-change` | `POST /change-rate/loans/:id` |
+| Capitalize interest | `POST /loans/calculate-capitalization` | `POST /capitalize-interest/loans/:id` |
+| Payment holiday | `POST /loans/calculate-payment-holiday` | `POST /payment-holiday/loans/:id` |
+| Restructure (10% or more ends the loan, new loan in event details) | `POST /loans/calculate-restructure` | `POST /restructure/loans/:id` |
+| Settle (payoff) | `POST /loans/calculate-settlement` | `POST /settle/loans/:id` |
+| Forgive | `POST /loans/calculate-forgiveness` | `POST /forgive/loans/:id` |
+| Convert to shares | `POST /loans/calculate-conversion` | `POST /convert-to-shares/loans/:id` |
+| Refinance (returns the NEW loan) | none | `POST /refinance/loans/:id` |
+| Reclassify as current (covenant breach) | none | `POST /reclassify-as-current/loans/:id` |
+| Undo | none | `POST /undo-event/loans/:id` (body `eventResourceId`) |
+| Opening balance after a missed payment | `POST /loans/calculate-opening-balance` | none |
+
+Reports: `POST /generate-reports/loans-summary`, `loans-roll-forward`, `loans-related-party`, `loans-interest`, `loans-maturity-analysis` (one request) and `loans-recon-summary` (`accountResourceIds`). Exports: `POST /data-exports/loans-register`, `/data-exports/loans-reconciliation-summary` (`accountResourceId` array required).
 
 ---
 

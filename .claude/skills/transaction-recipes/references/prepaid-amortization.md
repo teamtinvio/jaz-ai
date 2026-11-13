@@ -2,6 +2,8 @@
 
 > Canonical recipe for prepaid expenses paid upfront and recognized over a fixed schedule. Calculate the schedule, create the capsule, then post the supplier bill and the recognition entries yourself (see `building-blocks.md` § The three-step flow).
 
+> **Register first.** To keep a prepaid expense on the books, use the `deferrals` register (`create_deferral`): it keeps the schedule and posts the periodic entries itself. This recipe is the manual alternative, for organizations whose plan or role does not include the register, or when the user asks for journals.
+
 ## Tools and calculator this recipe uses
 
 ### Calculator (offline, posts nothing)

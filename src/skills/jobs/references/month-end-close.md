@@ -110,6 +110,8 @@ Cross-check: `generate_trial_balance(endDate: '2025-01-31')`. Sum credit movemen
 
 ### Step 7: Prepaid expense recognition (finalize this period's draft journal)
 
+Items kept in the `deferrals` register post their own recognition entries (check them with `get_deferral_totals`); the capsule route below is for items kept manually.
+
 For each existing `Prepaid Expenses` capsule (via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable; see `building-blocks.md` § Filter limits)):
 
 1. **STOP: do not select these with a filter.** Journals cannot be narrowed to one capsule by a filter: `JournalFilter` declares no `capsuleResourceId`, and `GET /capsules/{id}` returns only `totalTransactions`, a count (measured 2026-09-07). A date+status search returns EVERY matching DRAFT in the org, including drafts a practitioner deliberately parked, so passing it to `bulk_update_journals(items: [{resourceId, saveAsDraft: false}])` finalizes unrelated work. `get_journal` (`GET /journals/{id}`) does return the link as `capsule: {resourceId, type, title}` (measured 2026-09-23), so check each candidate journal's `capsule.resourceId` against this capsule, keep only the matches, and confirm the count with the practitioner before finalizing.
@@ -119,7 +121,7 @@ For each existing `Prepaid Expenses` capsule (via `search_capsules(filter: {stat
 
 ### Step 8: Deferred revenue recognition
 
-Mirror of step 7. Existing `Deferred Revenue` capsules: find this period's DRAFT journal in each, then `bulk_update_journals(items: [{resourceId, saveAsDraft: false}])`. New deferred setups: `calculate(type: 'deferred-revenue', amount, periods, startDate)`, `create_capsule` (type `Deferred Revenue`), post the invoice (`create_invoice`) and the recognition journals (`create_journal`) with `capsuleResourceId`, then finalize the current period's journal in the same `bulk_update_journals` call.
+Items kept in the `deferrals` register post their own recognition entries (check them with `get_deferral_totals`); the capsule route below is for items kept manually. Mirror of step 7. Existing `Deferred Revenue` capsules: find this period's DRAFT journal in each, then `bulk_update_journals(items: [{resourceId, saveAsDraft: false}])`. New deferred setups: `calculate(type: 'deferred-revenue', amount, periods, startDate)`, `create_capsule` (type `Deferred Revenue`), post the invoice (`create_invoice`) and the recognition journals (`create_journal`) with `capsuleResourceId`, then finalize the current period's journal in the same `bulk_update_journals` call.
 
 ### Step 9: Depreciation
 
@@ -140,6 +142,8 @@ calculate(type: 'leave-accrual', employees: <headcount>, daysPerYear: <leave day
 On first month of FY only: `create_capsule` (type `Employee Benefits`), then either post the 12 monthly journals with `capsuleResourceId`, or, since the amount is the same every month, one `create_scheduled_journal(startDate, endDate, repeat: 'MONTHLY', valueDate, schedulerEntries, capsuleResourceId)`. A schedule only fits when every period's amount is identical, and leave accrual's final period can differ from the others by a few cents (it absorbs the rounding): when it does, end the schedule one period early and post the last period as a single `create_journal` with `capsuleResourceId`. Subsequent months: the scheduler emits automatically (or finalize that month's draft). Local CLI cross-check: `clio calc leave-accrual`.
 
 ### Step 11: Loan interest (finalize this period's draft journal)
+
+Loans kept in the `loans` register post their own interest and repayment entries (check them with `get_loan_totals`); the capsule route below is for loans kept manually.
 
 For each active loan capsule (via `search_capsules(filter: {status: {eq: 'ACTIVE'}})` (capsule type is not filterable; see `building-blocks.md` § Filter limits)):
 

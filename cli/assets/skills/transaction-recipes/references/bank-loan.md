@@ -2,6 +2,8 @@
 
 > Canonical recipe for term loans with fixed monthly installments. Never hand-build the amortization table: the calculator returns it, with the journal lines for every installment. You create the capsule and post the disbursement and each repayment yourself (see `building-blocks.md` § The three-step flow).
 
+> **Register first.** To keep a loan on the books, use the `loans` register (changes in `loan_events`) (`create_loan`): it keeps the schedule and posts the periodic entries itself. This recipe is the manual alternative, for organizations whose plan or role does not include the register, or when the user asks for journals.
+
 ## Tools and calculator this recipe uses
 
 ### Calculator (offline, posts nothing)

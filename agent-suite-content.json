@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.4.7+069f5e75",
+  "contentVersion": "9.5.0+ddd2710d",
   "counts": {
-    "tools": 396,
-    "namespaces": 50,
+    "tools": 476,
+    "namespaces": 56,
     "calculators": 13,
     "recipes": 16,
     "jobs": 12,
     "skills": 7,
-    "commands": 74,
+    "commands": 77,
     "apiRules": 148
   },
   "namespaces": [
@@ -74,7 +74,11 @@
     },
     {
       "name": "operational_reports",
-      "description": "Aging and operational reports: aged receivables (AR aging), aged payables (AP aging), AR report, bank balance summary, bank reconciliation reports, fixed asset (FA) summary, FA reconciliation. Data exports (CSV/Excel/XLSX). Anomaly detection and audit analysis: anomalous invoices, anomalous bills, cashflow anomalies, GL journal audit, exchange rate audit, receivables customer risk, cash expense health. Also: overdue analysis, how much owed, suspicious transactions, audit trail, ledger highlights."
+      "description": "Aging and operational reports: aged receivables (AR aging), aged payables (AP aging), AR report, bank balance summary, bank reconciliation reports. Data exports (CSV/Excel/XLSX). Anomaly detection and audit analysis: anomalous invoices, anomalous bills, cashflow anomalies, GL journal audit, exchange rate audit, receivables customer risk, cash expense health. Also: overdue analysis, how much owed, suspicious transactions, audit trail, ledger highlights. Fixed asset register reports are in register_reports."
+    },
+    {
+      "name": "register_reports",
+      "description": "Register reports: fixed asset register summary by account, type, category or active/closed-out/disposed state (asset register roll-forward over a period), fixed asset register vs general ledger reconciliation (does the register agree with the GL), deferrals summary (prepaid and deferred revenue roll-forward) and deferrals reconciliation (does the prepaid register agree with the GL), lease register summary (IFRS 16 lease note, lease liability roll-forward) and lease register vs general ledger reconciliation (rent coded to the lease liability account). Loan reports: borrowings note summary, loan roll-forward, related-party (director, shareholder) loan balances, loan interest cost, maturity analysis (liquidity note), loan register vs ledger reconciliation."
     },
     {
       "name": "pseudo_sql",
@@ -142,11 +146,11 @@
     },
     {
       "name": "calculators",
-      "description": "Offline financial calculators: amortization, depreciation, deferred revenue, prepaid amortization, IFRS 16 leases, hire purchase, fixed deposits, FX revaluation, loan schedules, ECL/expected credit loss, IAS 37 provisions, asset disposal, accruals, leave accrual, dividends. Returns the schedule and journal lines; posts nothing. Keywords: calculate, provision, schedule, expected credit loss, revaluation, amortize, recipe, prepaid-expense, accrued-expense."
+      "description": "Offline financial calculators: amortization, depreciation, deferred revenue, prepaid amortization, IFRS 16 leases, hire purchase, fixed deposits, FX revaluation, loan schedules, ECL/expected credit loss, IAS 37 provisions, asset disposal, accruals, leave accrual, dividends. Returns the schedule and journal lines; posts nothing. For what-if questions and topics with no register; to keep a lease, loan, prepaid or deferred revenue use its register. Keywords: calculate, what-if, monthly payment, provision, schedule, expected credit loss, revaluation, amortize, recipe, prepaid-expense, accrued-expense."
     },
     {
       "name": "scheduled_transactions",
-      "description": "Scheduled/recurring invoices, bills, journals. Create scheduled invoices/bills/journals, search scheduled transactions. Also: recurring, auto-generate."
+      "description": "Scheduled/recurring invoices, bills, journals. Create scheduled invoices/bills/journals, search scheduled transactions. Also: recurring, auto-generate, set up to repeat every month."
     },
     {
       "name": "subscriptions",
@@ -162,7 +166,27 @@
     },
     {
       "name": "fixed_assets",
-      "description": "Fixed assets (PP&E/property, plant, equipment). Search, create, update, discard, sell, transfer, undo disposal. Also: depreciation, asset register."
+      "description": "Fixed assets (PP&E/property, plant, equipment). Search, create, update (one or bulk), discard, sell, transfer, undo disposal, close out (stop depreciating, keep the asset) and reopen. Also: depreciation, asset register. Depreciation schedules, totals, eligible bill lines and asset types are in fixed_asset_schedules."
+    },
+    {
+      "name": "fixed_asset_schedules",
+      "description": "Read-only fixed asset views. Show one asset's depreciation by month and year, net book value, asset register totals as at a date, disposal totals (gain/loss), eligible bill lines to register as assets, asset types. Check custom depreciation ranges; calculate disposal (accumulated depreciation, net book value) before selling or discarding."
+    },
+    {
+      "name": "deferrals",
+      "description": "Deferrals register: prepaid expense, prepayment, deferred revenue, unearned revenue. Spread a bill over months, recognise an invoice over months (amortization, release schedule). Search, create, update, delete, stop amortising early (close out) and undo it, totals as at a date, schedule, eligible bill or invoice lines, deferral types and deferral accounts (mark the accounts first), bulk create and update."
+    },
+    {
+      "name": "leases",
+      "description": "Leases under IFRS 16: put an office rent lease on the books (right-of-use asset, ROU, and lease liability, current and non-current), hire purchase (flat rate to monthly discount rate), short-term or low-value exemption. Search, create, update, delete, close out, terminate lease (preview the gain or loss first) and undo either; lease schedule, liability totals as at a date, rent schedule preview, lease types."
+    },
+    {
+      "name": "loans",
+      "description": "Loans and borrowings register: record a new bank loan, loan, borrowing, bank loan, term loan, director's loan, overdraft, revolving facility, instalment / installment loan. Search, create, update (one or bulk), delete, close out. What do we owe a lender or the bank: outstanding principal, current and non-current at a date, the repayment schedule, an on-demand loan ledger (an on-demand loan has no schedule, is all current and posts no interest), loan types, preview the monthly payment. Loan changes (drawdown, prepay, rate change, settle) are in loan_events; loan reports are in register_reports."
+    },
+    {
+      "name": "loan_events",
+      "description": "Events on an existing loan: drawdown, prepay or extra repayment, rate change, payment holiday, capitalize interest, restructure, refinance, settle / payoff, forgive / write off a loan, convert loan to shares, covenant breach (reclassify as current), undo loan event, balance after a missed payment. preview: true calculates the figures and saves nothing."
     },
     {
       "name": "payments_and_search",
@@ -1435,7 +1459,7 @@
     {
       "name": "calculate",
       "namespace": "calculators",
-      "description": "Offline. Run a financial calculator: returns the schedule and each step's journal lines. Posts nothing. Never compute these by hand.",
+      "description": "Offline: returns the schedule and each step's journal lines. Posts nothing. Never compute by hand. A lease, loan, prepaid or deferred revenue kept on the books goes in its register (leases, loans, deferrals).",
       "readOnly": true,
       "destructive": false
     },
@@ -1722,51 +1746,520 @@
     {
       "name": "create_fixed_asset",
       "namespace": "fixed_assets",
-      "description": "Register a fixed asset linked to an existing purchase transaction (bill or journal).",
+      "description": "Register a fixed asset from ONE purchase line item of an existing bill or journal (each line is its own asset); several: bulk_upsert_fixed_assets. saveAsDraft defaults to true; false activates (Admin only) and needs reference, typeCode, category, depreciationMethod, effectiveLife, depreciationStartDate, the accounts, and the purchase line's type and id (the LINE ITEM, not the document id). With no linked transaction, use transfer_fixed_asset. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "update_fixed_asset",
       "namespace": "fixed_assets",
-      "description": "Update a fixed asset (draft or active). Send only what changes; the stored asset is merged in first, so omitted fields are preserved, not wiped. isDraftToActive: true activates a draft. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update one fixed asset (draft or active); 2 or more: one bulk_update_fixed_assets call. Send only what changes; omitted fields are preserved. isDraftToActive: true activates a draft. Activating or editing an active asset: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "delete_fixed_asset",
       "namespace": "fixed_assets",
-      "description": "Delete a draft fixed asset. Cannot delete active/disposed assets. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Delete a DRAFT fixed asset, unlinking its purchase line. Any other status is not deleted by the agent: the user does it in Jaz. Prefer undo_fixed_asset_disposal or close_out_fixed_asset. Confirm first: say what it changes and wait for a yes. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "discard_fixed_asset",
       "namespace": "fixed_assets",
-      "description": "Discard (write off) a fixed asset. Records the disposal and final depreciation itself: do not also post a manual disposal journal. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Discard (write off) a fixed asset. Records the disposal and final depreciation itself: do not also post a manual disposal journal. Run calculate_fixed_asset_disposal first for the figures. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "mark_fixed_asset_sold",
       "namespace": "fixed_assets",
-      "description": "Mark a fixed asset as sold. Links to the sale transaction and records the disposal and gain/loss itself: do not also post a manual disposal journal. When the user asks to sell an asset, use this tool directly; retrieve the asset first with list_fixed_assets or search_fixed_assets to get the resourceId. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Mark a fixed asset as sold. Links to the sale transaction and records the disposal and gain/loss itself: do not also post a manual disposal journal. To sell an asset, find its resourceId with search_fixed_assets, then use this tool directly. Run calculate_fixed_asset_disposal first to show the gain or loss. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "transfer_fixed_asset",
       "namespace": "fixed_assets",
-      "description": "Register a previously purchased fixed asset with accumulated depreciation.",
+      "description": "Register an asset bought before using Jaz, imported from a legacy system or purchased outside it, with the depreciation already incurred (bookValueAccumulatedDepreciationAmount); several: bulk_upsert_fixed_assets. No linked bill or journal is needed, unlike create_fixed_asset; the other fields are the same. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "undo_fixed_asset_disposal",
       "namespace": "fixed_assets",
-      "description": "Undo a fixed asset disposal (discard or sale). Restores the asset to active status. When the user asks to reverse or undo a disposal, use this tool directly. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Undo a fixed asset disposal (discard or sale). Restores the asset to active status. When the user asks to reverse or undo a disposal, use this tool directly. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
+    },
+    {
+      "name": "close_out_fixed_asset",
+      "namespace": "fixed_assets",
+      "description": "Close out a fixed asset: depreciation stops from the month-end of closeOutDate, the asset stays on the register, nothing is reversed and no gain or loss is posted. Needs ACTIVE and not NO_DEPRECIATION. Reverse with reopen_fixed_asset. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "reopen_fixed_asset",
+      "namespace": "fixed_assets",
+      "description": "Reopen a CLOSED_OUT fixed asset: the full depreciation schedule is posted again and it returns to ACTIVE. Reopen before selling or discarding it. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_lease",
+      "namespace": "leases",
+      "description": "Get one lease with its figures as at today: lease liability, right-of-use asset, current and non-current portion, accounts, status.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_leases",
+      "namespace": "leases",
+      "description": "Search leases with liability and right-of-use figures as at endDate (default today). viewStatus picks the register tab. A terminated lease shows its figures at termination. No query: use the filters.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_lease",
+      "namespace": "leases",
+      "description": "Put a lease on the books (IFRS 16), or register a hire purchase (typeCode HIRE_PURCHASE).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_lease",
+      "namespace": "leases",
+      "description": "Edit or activate one lease (isDraftToActive: true); 2 or more: one bulk_update_leases call. Partial: send only what changes; reference defaults to the stored one.",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_lease",
+      "namespace": "leases",
+      "description": "Delete a DRAFT lease, freeing its reference. Any other status is not deleted by the agent: the user does it in Jaz. Confirm first: say what it changes and wait for a yes. To end a live lease early use terminate_lease, which keeps history. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "close_out_lease",
+      "namespace": "leases",
+      "description": "Stop a lease posting after the month-end of closeOutDate. NOT an exit: the liability and right-of-use asset stay on the books; to take a lease off use terminate_lease. ACTIVE right-of-use leases only. Reverse with reopen_lease. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "reopen_lease",
+      "namespace": "leases",
+      "description": "Reopen a CLOSED_OUT lease: the later entries are posted again and it returns to ACTIVE. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "calculate_lease_termination",
+      "namespace": "leases",
+      "description": "Preview terminate_lease: the lease liability and right-of-use net book value that would come off the books at the month-end of terminationDate, and the gain or loss (positive = gain). Saves nothing.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "terminate_lease",
+      "namespace": "leases",
+      "description": "Take an ACTIVE lease off the books at the month-end of terminationDate (keys handed back, hire purchase settled early): later entries are removed and a termination entry posts with the gain or loss.",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "undo_lease_termination",
+      "namespace": "leases",
+      "description": "Undo a termination: the termination entry is deleted, later entries are rebuilt and the lease returns to ACTIVE. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_lease_totals",
+      "namespace": "leases",
+      "description": "Lease balance sheet totals as at a date: right-of-use net book value, lease liability, current and non-current portion. Excludes the restoration provision, drafts, exempt, terminated and ended leases. Figures are the schedule's, not the ledger's: use generate_leases_reconciliation_summary for the GL gap.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_lease_schedule",
+      "namespace": "leases",
+      "description": "One lease's schedule by month and by year: payment, interest, principal, liability, current portion, depreciation, net book value. Empty for drafts and exempt leases. At most 60 months per call (totalPeriods): pass fromPeriod/toPeriod for the months asked about.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_lease_types",
+      "namespace": "leases",
+      "description": "Search lease types. typeCode (OFFICE, VEHICLE, HIRE_PURCHASE and others) is what create_lease takes. No natural-language query.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "preview_lease_rent_schedule",
+      "namespace": "leases",
+      "description": "Check rent ranges against the term before saving: status COMPLETE or INCOMPLETE with the first broken rule, total rent and a timeline. Saves nothing; the liability needs a saved draft lease. At most 60 periods per call: see totalPeriods, page with fromPeriod/toPeriod.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "calculate_lease_flat_rate",
+      "namespace": "leases",
+      "description": "Hire purchase helper. Converts a flat annual rate into the monthly discountRate (% per MONTH; pass it straight to create_lease) and returns instalment, finalInstalment, totalInterest and totalPayable.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "bulk_update_leases",
+      "namespace": "leases",
+      "description": "Bulk update leases (max 500) for renaming or activating drafts, not for rent changes. Each row is a partial update and needs resourceId and reference. A resourceId may appear once. No tags: use update_lease. Admin only for active rows. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_fixed_asset_totals",
+      "namespace": "fixed_asset_schedules",
+      "description": "Asset register totals as at a date: purchase amount, accumulated depreciation, net book value.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_fixed_asset_disposal_totals",
+      "namespace": "fixed_asset_schedules",
+      "description": "Disposed (sold or discarded) asset totals as at a date: book value, sale proceeds, gain/loss. Positive = loss.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_fixed_asset_schedule",
+      "namespace": "fixed_asset_schedules",
+      "description": "One asset's depreciation schedule by month and year with book value, plus disposal rows once disposed. At most 60 months per call (totalPeriods): pass fromPeriod/toPeriod for the months asked about (row 1 is period 1).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "preview_fixed_asset_custom_schedule",
+      "namespace": "fixed_asset_schedules",
+      "description": "Check a custom depreciation schedule and get its month-by-month timeline. Saves nothing. Save it (create or update with CUSTOM_SCHEDULE) only when status is FULLY_SCHEDULED with no errors. defaultSchedule is the straight-line split. At most 60 periods per call: see totalPeriods, page with fromPeriod/toPeriod.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "calculate_fixed_asset_disposal",
+      "namespace": "fixed_asset_schedules",
+      "description": "Accumulated depreciation up to the month of depreciationEndDate, plus any brought in, before you sell or discard an asset. Saves nothing but needs the Admin role. Net book value = purchase amount minus totalAccumulateDepreciationAtDisposal; gain or loss on a sale = sale amount minus net book value (negative is a loss; get_fixed_asset_disposal_totals reports loss as positive).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_fixed_asset_eligible_lines",
+      "namespace": "fixed_asset_schedules",
+      "description": "Search unclaimed bill and journal lines on Fixed Asset accounts, grouped by document then account; limit counts documents, not lines. To register one: sourceLineResourceId is purchaseBusinessTransactionResourceId, documentType is purchaseBusinessTransactionType, amount is purchaseAmount.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_fixed_asset_types",
+      "namespace": "fixed_asset_schedules",
+      "description": "Search asset types. Pick a typeCode whose categoryCode matches the asset category.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_deferrals",
+      "namespace": "deferrals",
+      "description": "Search deferrals (prepaid expenses and deferred revenue) with figures as at endDate: deferralAmount, amortizedAmount, remainingAmount. Find by reference or name.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_deferral",
+      "namespace": "deferrals",
+      "description": "Get one deferral: status, viewStatus, category, deferralAmount, amortizedAmount, remainingAmount, schedule settings, accounts and the source lines.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_deferral",
+      "namespace": "deferrals",
+      "description": "Create a deferral that spreads whole bill, invoice or journal lines over months; several: bulk_upsert_deferrals. saveAsDraft defaults to TRUE and a draft posts nothing: pass false to post, then check status before saying it is booked.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_deferral",
+      "namespace": "deferrals",
+      "description": "Update one deferral or activate a draft (isDraftToActive: true); 2 or more: one bulk_update_deferrals call. Partial: send only what changes; text, tags and lists cannot be cleared. Changing schedule fields (lines, start, months, account, method) on an ACTIVE deferral deletes and re-posts every row and is refused once a period is locked. CLOSED_OUT must be reopened first. Never send a get_deferral result back. Activating or changing an ACTIVE deferral: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_deferral",
+      "namespace": "deferrals",
+      "description": "Delete a DRAFT deferral, freeing its source lines and reference. Any other status is not deleted by the agent: the user does it in Jaz. To stop releasing partway and keep history, use close_out_deferral instead. Confirm first: say what it changes and wait for a yes. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "close_out_deferral",
+      "namespace": "deferrals",
+      "description": "Stop releasing after closeOutDate (used as given, any day, not moved to month-end). Posts NOTHING for the remaining balance: it stays on the deferral account (balance sheet) until a journal clears it, so offer a write-off or refund journal. ACTIVE only; reverse with reopen_deferral. Use this, not delete, when a subscription is cancelled. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "reopen_deferral",
+      "namespace": "deferrals",
+      "description": "Reopen a CLOSED_OUT deferral: the stored schedule after the close-out date is posted again and it returns to ACTIVE. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_deferral_totals",
+      "namespace": "deferrals",
+      "description": "Register totals as at a date: deferralAmount, amortizedAmount, remainingAmount for ACTIVE and CLOSED_OUT deferrals. ALWAYS pass category, once per category: without it prepaid assets and deferred revenue liabilities add into one meaningless number.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_deferral_schedule",
+      "namespace": "deferrals",
+      "description": "One deferral's release rows by year: valueDate, amount released, remaining value. Rows come from posted ledger rows, so a draft returns none. A closed-out deferral has a final CLOSED_OUT row. At most 60 rows per call (totalPeriods): pass fromPeriod/toPeriod for the periods asked about (row 1 is period 1).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_deferral_eligible_lines",
+      "namespace": "deferrals",
+      "description": "Search unclaimed bill, invoice and journal lines on deferral accounts, grouped by document then account; limit counts documents, not lines. Empty until an account is marked as a deferral account. A line with draftDeferralReference is already held by that draft. amount is net of tax: the figure the deferral is built from.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_deferral_types",
+      "namespace": "deferrals",
+      "description": "Search deferral types. Pick a typeCode and always filter by categoryCode: the same typeCode exists in both categories.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_deferral_accounts",
+      "namespace": "deferrals",
+      "description": "Search the accounts marked as deferral accounts (Current Asset gives PREPAID_EXPENSE, Current Liability gives DEFERRED_REVENUE). Reconciliation reports take these accountResourceIds.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "mark_deferral_accounts",
+      "namespace": "deferrals",
+      "description": "Mark (deferralAccount: true) or unmark chart-of-accounts entries as deferral accounts. This changes org setup: confirm with the user first. Only active, non-control Current Asset (prepaid) or Current Liability (deferred revenue) accounts; the source line must already be coded to that account. Unmarking an account any deferral uses (drafts included) is refused. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "preview_deferral_custom_schedule",
+      "namespace": "deferrals",
+      "description": "Check uneven release ranges without saving. deferralAmount is the sum of the eligible line amounts. Save with create_deferral only when status is FULLY_SCHEDULED with no errors (others: SHORT, OVER, INCOMPLETE). Periods are anniversary periods from the start date, not calendar months. At most 60 periods per call: see totalPeriods, page with fromPeriod/toPeriod.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_loans",
+      "namespace": "loans",
+      "description": "Search loans (borrowings: term, overdraft, revolving, director loans). Each row carries outstandingPrincipal, currentPortion, nextDueDate and nextDueAmount as at endDate (default today). No free-text query: use the named filters, then get_loan.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_loan",
+      "namespace": "loans",
+      "description": "Get a loan with its terms, accounts and figures as of today: outstandingPrincipal, accruedInterest, currentPortion, nonCurrentPortion, nextDueDate. Schedule: get_loan_schedule; changes: list_loan_events.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_loan",
+      "namespace": "loans",
+      "description": "Record a borrowing after preview_loan_schedule; several: bulk_upsert_loans. The register books interest every month-end and the current/non-current split. It never posts cash: the user records the drawdown receipt and EVERY installment IN FULL themselves, to the accounts named in the params.",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_loan",
+      "namespace": "loans",
+      "description": "Update one loan or activate a draft (isDraftToActive: true); 2 or more: one bulk_update_loans call. Partial: send only what changes; a field cannot be cleared. reference is kept. CLOSED_OUT and ENDED loans refuse edits. On an ACTIVE loan a term, fee or account change rewrites the whole schedule from the start (refused when a month is locked): for a mid-life change use a loan event (rate: change_loan_rate). Activating or changing an ACTIVE loan: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_loan",
+      "namespace": "loans",
+      "description": "Delete a DRAFT loan with its schedule, fees and events. Any other status is not deleted by the agent: the user does it in Jaz. To stop posting but keep the loan, use close_out_loan. Irreversible. Confirm first: say what it changes and wait for a yes. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "close_out_loan",
+      "namespace": "loans",
+      "description": "Stop posting a loan from the month-end of closeOutDate; balances stay and the loan stays on the register. Not an exit: to end a loan use settle_loan, refinance_loan, forgive_loan or convert_loan_to_shares. ACTIVE loans only, and a term loan only before its end date. After close out and reopen, earlier events can never be undone, so undo any you need first. Reverse with reopen_loan. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "reopen_loan",
+      "namespace": "loans",
+      "description": "Reopen a CLOSED_OUT loan: rows are rebuilt from its terms and events and it returns to ACTIVE. Events recorded before the close out can no longer be undone afterwards. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_loan_totals",
+      "namespace": "loans",
+      "description": "What the business owes in total at a date: outstandingPrincipal, currentPortion, nonCurrentPortion, accruedInterest across loans on the books (drafts left out, ended loans 0).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_loan_schedule",
+      "namespace": "loans",
+      "description": "One loan's repayment schedule: per installment dueDate, installment, interest, principal, closingBalance, currentPortion, status (SCHEDULED or SKIPPED), posted. Term loans only: a draft or on-demand loan has no rows. At most 60 installments per call (totalPeriods): pass fromPeriod/toPeriod (periodNumber) for the installments asked about.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_loan_events",
+      "namespace": "loans",
+      "description": "A loan's events, latest first: eventType, effectiveDate, details and canUndo. Read it before undo_loan_event (only the latest event can be undone) and before retrying an event, since a retry within 2 minutes returns LOAN_EVENT_DUPLICATE (the first call committed).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_loan_ledger",
+      "namespace": "loans",
+      "description": "On-demand loans only (term loans return LOAN_NOT_ON_DEMAND): who drew and repaid what on the loan account, latest first, with balance, totalAdvances, totalRepayments and the balance per contact. A negative balance reads owedToYou. Amount above 0 is an advance owed by the company.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_loan_types",
+      "namespace": "loans",
+      "description": "Search loan types (\"Loan Category\"). DIRECTOR, SHAREHOLDER, RELATED_PARTY and INTERCOMPANY feed the related-party report.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "preview_loan_schedule",
+      "namespace": "loans",
+      "description": "The repayment schedule these terms would produce, with installmentAmount, totalInterest, totalPayments, effectiveRate, endDate and nonCurrentAccountRequired. Saves nothing. Use it before create_loan. No accounts needed. At most 60 installments per call: see totalPeriods, page with fromPeriod/toPeriod.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "bulk_upsert_loans",
+      "namespace": "loans",
+      "description": "Bulk CREATE loans (max 500), each ACTIVE as create_loan with saveAsDraft false. Creates only: an existing reference fails LOAN_DUPLICATE_REFERENCE and is never updated. No CUSTOM shape, fees, capitalization, tags or gain/loss accounts: add those with update_loan afterwards. Dates are YYYY-MM-DD. Admin only. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_update_loans",
+      "namespace": "loans",
+      "description": "Bulk update loans (max 500): update_loan per row, in order, same rules. Each row is partial (omitted fields keep the stored value); fees REPLACE the stored list; an ACTIVE loan's term change rewrites its schedule. No tags (rows with tags are refused: use update_loan, which keeps tags you do not name), attachments or custom fields. A resourceId may appear once. reference is required on every row. Admin only for active rows. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "record_loan_drawdown",
+      "namespace": "loan_events",
+      "description": "Raise the principal of a loan on a date (a second tranche) and rebuild the schedule. Term loans, not CUSTOM-schedule. An on-demand advance is just the user's bank entry. The user records Dr Bank / Cr Non-current Loan; the register posts no cash. Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "prepay_loan",
+      "namespace": "loan_events",
+      "description": "Reduce principal on a date with an extra repayment and rebuild the schedule. keep says what stays: the same installment (term shortens) or the same term (installments fall). Term loans, not CUSTOM-schedule. The user records the cash and any penalty. Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "change_loan_rate",
+      "namespace": "loan_events",
+      "description": "The lender changed the interest rate from a date. Use this, never update_loan, for a rate change: an update rewrites history and fails once a month is locked. Term loans, not CUSTOM-schedule. Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "capitalize_loan_interest",
+      "namespace": "loan_events",
+      "description": "The lender added one installment's whole interest to the principal. Later installments are recalculated over the same term. Term loans, not CUSTOM-schedule. Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "record_loan_payment_holiday",
+      "namespace": "loan_events",
+      "description": "Skip installments (a payment holiday). The skipped interest is added to the balance in both treatments. Read the periodNumbers from get_loan_schedule first. Term loans, not CUSTOM-schedule. Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "restructure_loan",
+      "namespace": "loan_events",
+      "description": "New terms from an installment due date, with the 10% test: under 10% the loan continues with a catch-up posted (needs a gain/loss account and the unamortized costs account on the loan: set the latter with update_loan first); 10% or more ends the loan and creates a NEW one (its id is in the event details, reference <old>-R). Send at least one of annualInterestRate, loanTerm, installmentOverride, fees. Sign: gainLossAmount above 0 is a gain. Term loans, not CUSTOM-schedule. Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "settle_loan",
+      "namespace": "loan_events",
+      "description": "End a loan early (payoff). The preview shows the payoff (totalAmount = principal + interest + settlement fees + penalty). Recording ends the loan SETTLED and posts no payoff entry: the user records Dr Current Loan / Cr Bank. A term loan cannot be settled on its final due date. On-demand: the user records the repayment first so the ledger reads exactly 0 on the date (LOAN_PAYOFF_NOT_RECORDED); money owed to the company is refused (LOAN_NOTHING_OWED). Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "forgive_loan",
+      "namespace": "loan_events",
+      "description": "Write off the whole loan: the lender forgave it (gain to profit and loss) or a shareholder forgave it (capital contribution). Term or on-demand (on-demand uses the ledger balance; nothing owed at 0 or below is refused, LOAN_NOTHING_OWED). amount must equal the outstanding principal; interest to date is written off too. Ends the loan SETTLED. Sign: gainLossAmount above 0 is a gain. Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "convert_loan_to_shares",
+      "namespace": "loan_events",
+      "description": "Convert the whole loan (term or on-demand) into shares (IFRIC 19): principal and interest to date are cleared against share capital at fairValue; the difference goes to gain or loss (above 0 is a gain). Ends the loan SETTLED. Preview first (preview: true saves nothing), then record. Recording: Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "refinance_loan",
+      "namespace": "loan_events",
+      "description": "Settle the old TERM loan on refinanceDate and create a new ACTIVE loan from newLoan. Returns the NEW loan. Preview the payoff with settle_loan (preview: true) and the new terms with preview_loan_schedule. The user records the cash. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "reclassify_loan_as_current",
+      "namespace": "loan_events",
+      "description": "Make the whole TERM loan balance current from the first month-end on or after the date (IAS 1.74): use for a covenant breach. waiverDate, when the bank waived it, returns the split to schedule. A waiver cannot be added later: undo the event and record it again with waiverDate. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "undo_loan_event",
+      "namespace": "loan_events",
+      "description": "Reverse the latest event on a loan and rebuild from the day before it. Find it with list_loan_events (canUndo), then undo it. Only the latest event can be undone; ACTIVATE, CLOSE_OUT and REOPEN cannot. If the user names an older event, list the later ones and ask before undoing them, newest first. A replacement loan from refinance or a 10%+ restructure is deleted with it while it has no later event. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "calculate_loan_opening_balance",
+      "namespace": "loan_events",
+      "description": "Suggest an openingBalance for a loan event after a missed, late or partial payment: scheduleBalance (assumes on-time payment), ledgerBalance (what the user posted on the loan accounts) and suggestedBalance. Saves nothing. TERM loans only. Pass the figure the user confirms as openingBalance on the event.",
+      "readOnly": true,
+      "destructive": false
     },
     {
       "name": "list_subscriptions",
@@ -1854,15 +2347,85 @@
     },
     {
       "name": "generate_fixed_assets_summary",
-      "namespace": "operational_reports",
+      "namespace": "register_reports",
       "description": "Generate fixed assets summary report grouped by account, type, category, or status.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "generate_fixed_assets_reconciliation_summary",
-      "namespace": "operational_reports",
+      "namespace": "register_reports",
       "description": "Generate fixed assets reconciliation summary: reconciles asset register with general ledger.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_deferrals_summary",
+      "namespace": "register_reports",
+      "description": "Generate the deferrals roll-forward for a period: deferral amount, opening remaining, amortized in period, closing remaining. Sections never mix categories (prepaid vs deferred revenue).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_deferrals_reconciliation_summary",
+      "namespace": "register_reports",
+      "description": "Generate the deferrals reconciliation: does the deferral register agree with the general ledger, per deferral account and per category. A difference usually means a line on the account not yet deferred.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_leases_summary",
+      "namespace": "register_reports",
+      "description": "Generate the lease register (the IFRS 16 lease note) for a period: opening liability, additions, interest, payments, terminations, closing, current and non-current, right-of-use asset, grouped by type, status or account.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_leases_reconciliation_summary",
+      "namespace": "register_reports",
+      "description": "Reconcile the lease register to the general ledger per lease account, counting scheduled rent as debits to the current lease liability. A liability difference almost always means a rent bill coded elsewhere, posted in another month, or not booked.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_loans_summary",
+      "namespace": "register_reports",
+      "description": "Borrowings note: per loan opening balance, drawdowns, repayments, interest, closing balance, current and non-current portion and accrued interest, grouped by type, status, account or lender. Positions are the register's; movements read the ledger, so an unrecorded repayment shows here.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_loans_roll_forward",
+      "namespace": "register_reports",
+      "description": "Loan roll-forward over a period: opening + drawdowns + repayments + interest + fees + non-cash = closing, tying to the balance sheet. Drawdowns and repayments are the user's own postings, so a missing repayment shows as a gap.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_loans_related_party",
+      "namespace": "register_reports",
+      "description": "Related-party loan balances by contact: loans of type DIRECTOR, SHAREHOLDER, RELATED_PARTY and INTERCOMPANY, for the audit.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_loans_interest",
+      "namespace": "register_reports",
+      "description": "Interest cost per loan for the period: interest, interest added to principal, interest to an asset, fees amortized and total finance cost.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_loans_maturity_analysis",
+      "namespace": "register_reports",
+      "description": "Liquidity note as at the end date: per term loan the undiscounted installments still due within one year, one to two, two to five and over five years, plus future interest and principal outstanding. On-demand balances fall within one year.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "generate_loans_reconciliation_summary",
+      "namespace": "register_reports",
+      "description": "Loan register vs general ledger per account, in two groups: loan liability accounts and unamortized transaction cost accounts. The register side includes what the user is expected to post, so a non-zero difference means a missed, late, partial or mis-coded installment: name the account and amount and check that month. Debit minus credit, so liabilities read negative.",
       "readOnly": true,
       "destructive": false
     },
@@ -2723,7 +3286,28 @@
     {
       "name": "bulk_upsert_fixed_assets",
       "namespace": "fixed_assets",
-      "description": "Bulk create/update fixed assets (max 500). Natural key: reference.",
+      "description": "Bulk CREATE fixed assets (max 500), each saved ACTIVE. Creates only: an existing reference is refused. Admin only.",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_update_fixed_assets",
+      "namespace": "fixed_assets",
+      "description": "Bulk update fixed assets (max 500). Per row send resourceId and only what changes; the stored asset is merged in first, so omitted fields are preserved. Unknown or repeated resourceIds fail the whole call before anything is submitted. Dates are YYYY-MM-DD, unlike bulk_upsert_fixed_assets. Admin only for active rows. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_upsert_deferrals",
+      "namespace": "deferrals",
+      "description": "Bulk CREATE deferrals (max 500). Creates only: an existing reference is refused. Every row is created ACTIVE (posts the whole schedule; Admin only) and STRAIGHT_LINE only. Dates are YYYY-MM-DD. Lines per row: one document, one deferral account (search_deferral_eligible_lines). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "bulk_update_deferrals",
+      "namespace": "deferrals",
+      "description": "Bulk update deferrals (max 500). Each row is a PARTIAL update (as update_deferral): send resourceId, reference and only what changes. A resourceId may appear once. Schedule changes re-post that deferral. No tags: use update_deferral. Admin only for active rows. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -3015,6 +3599,7 @@
     "currency-rates",
     "custom-fields",
     "customer-credit-notes",
+    "deferrals",
     "drafts",
     "employees",
     "export-records",
@@ -3030,7 +3615,9 @@
     "jobs",
     "jots",
     "journals",
+    "leases",
     "ledger-find-fix",
+    "loans",
     "magic",
     "mcp",
     "mcp-call",

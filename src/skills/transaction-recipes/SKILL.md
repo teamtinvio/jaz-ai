@@ -1,6 +1,6 @@
 ---
 name: jaz-recipes
-version: 9.4.7
+version: 9.5.0
 description: >-
   Use this skill when modeling complex multi-step accounting transactions:
   anything that spans multiple periods, involves changing amounts, or requires
@@ -19,7 +19,7 @@ compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent t
 
 You are modeling **complex multi-step accounting scenarios** in Jaz: transactions that span multiple periods, involve changing amounts, or require several linked entries to complete a single business event.
 
-> **Jaz-native, not generic.** Every recipe in this skill is designed around the Jaz calculators (`calculate` / `clio calc`), Jaz capsule types, Jaz CoA classifications, and Jaz scheduler primitives. It is NOT an interchangeable IFRS reference; it is the operating manual for posting these transactions through the Jaz ledger. Never work the amounts by hand: run the calculator first and post the lines it returns. Nothing posts a recipe for you: the calculator posts nothing, and you create the capsule and each entry yourself (see "Posting a Recipe: Three Steps").
+> **Jaz-native, not generic.** Every recipe in this skill is designed around the Jaz calculators (`calculate` / `clio calc`), Jaz capsule types, Jaz CoA classifications, and Jaz scheduler primitives. It is NOT an interchangeable IFRS reference; it is the operating manual for posting these transactions through the Jaz ledger. Never work the amounts by hand: run the calculator first for a what-if, a topic with no register, or the manual alternative, and post the lines it returns. A lease, loan, deferral or fixed asset the user wants kept goes to its register first. Nothing posts a recipe for you: the calculator posts nothing, and you create the capsule and each entry yourself (see "Posting a Recipe: Three Steps").
 
 **This skill provides Jaz-contextual recipes with full accounting logic. For API field names and payloads, load the `jaz-api` skill alongside this one. For the operational close workflows that invoke these recipes (month-end close, GST/VAT filing, year-end close), load the `jaz-jobs` skill.**
 
@@ -40,6 +40,8 @@ You are modeling **complex multi-step accounting scenarios** in Jaz: transaction
 - Recording and reconciling intercompany transactions across entities
 - Capitalizing costs in WIP and transferring to fixed assets
 - Any scenario that groups related transactions in a capsule over multiple periods
+
+> **Registers first.** For a lease, hire purchase, loan, prepaid expense, deferred revenue or fixed asset the user wants kept on the books, use its register (`leases`, `loans` and `loan_events`, `deferrals`, `fixed_assets` and `fixed_asset_schedules`; reports in `register_reports`). The register keeps the schedule and posts the periodic entries itself, and never posts cash: never post those entries again by hand. The recipes for those topics below are the manual alternative: for organizations whose plan or role does not include the register (it answers 403), or when the user asks for journals. If the register refuses, tell the user, name this alternative, and wait. A "what would this look like" question with nothing to record is still a calculator question.
 
 ## Building Blocks
 
@@ -133,7 +135,7 @@ Each recipe includes: scenario description, accounts involved, journal entries, 
 
 ## Posting a Recipe: Three Steps
 
-No tool runs a recipe end to end. You perform three explicit steps (full detail, the action-to-tool mapping and the draft / reference rules are in `references/building-blocks.md`):
+No tool runs a recipe end to end. For a topic with no register, or the manual alternative, you perform three explicit steps (full detail, the action-to-tool mapping and the draft / reference rules are in `references/building-blocks.md`):
 
 1. **Calculate.** `calculate(type, ...)` (MCP) or `clio calc <type> ... --json` (CLI). Offline, read-only, no account needed. It returns the schedule and, when a start date is given, a `blueprint` with dated steps and the journal lines for each step. It posts nothing.
 2. **Create the capsule.** `list_capsule_types` (create the type with `create_capsule_type` if it is missing), then `create_capsule`.

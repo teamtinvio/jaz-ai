@@ -2,6 +2,8 @@
 
 > Canonical recipe for leases (office, equipment, vehicles) under IFRS 16. An initial recognition journal (Dr ROU Asset / Cr Lease Liability at present value), the ROU asset registered in the Jaz fixed-asset register, and N liability-unwinding journals. ROU depreciation runs through the Jaz native FA register (straight-line, auto-posted by Jaz). You calculate, create the capsule and post each entry yourself (see `building-blocks.md` § The three-step flow).
 
+> **Register first.** To keep a lease on the books, use the `leases` register (`create_lease`): it keeps the schedule and posts the periodic entries itself. This recipe is the manual alternative, for organizations whose plan or role does not include the register, or when the user asks for journals.
+
 ## Tools and calculator this recipe uses
 
 ### Calculator (offline, posts nothing)

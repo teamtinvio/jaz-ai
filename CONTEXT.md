@@ -5,7 +5,7 @@ Runtime guidance for AI agents using Jaz AI tools (CLI, MCP, or skills).
 ## Before You Start
 
 1. **Load the organization first.** Run `clio org info --json`, then `clio accounts list --json`, `clio currencies list --json`, and `clio tax-profiles list --json` for the base currency, chart of accounts, currencies, and tax profiles. This prevents guessing.
-2. **Check what's available.** CLI: `clio --help`. MCP: call `describe_capabilities` (or `search_tools` with an empty query on the meta-tool surface), **not** `tools/list`. Depending on packaging, `tools/list` returns 3, 50, or 396 entries for the same 396 operations; only the capability map tells you what actually exists.
+2. **Check what's available.** CLI: `clio --help`. MCP: call `describe_capabilities` (or `search_tools` with an empty query on the meta-tool surface), **not** `tools/list`. Depending on packaging, `tools/list` returns 3, 56, or 476 entries for the same 476 operations; only the capability map tells you what actually exists.
 
 ## Working with Data
 
