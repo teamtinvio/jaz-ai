@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.5.2] - 2026-11-16
+
+**Chat shows whether a tool changed data, and chat sessions open from more records.**
+
+- Chat tool results now say whether the tool only read data or changed it.
+- A chat session opened from a journal entry, a cash-in entry, a cash-out entry, a cash transfer or a payment now knows which record you mean when you say "this".
+
 ## [9.5.1] - 2026-11-13
 
 **Register guidance and CLI fixes.**
