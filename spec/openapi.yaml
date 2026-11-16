@@ -22094,6 +22094,10 @@
           "description": "Payment due date, in YYYY-MM-DD format (organization timezone).",
           "type": "string"
         },
+        "internalNotes": {
+          "description": "Internal notes (not printed, for internal reference only).",
+          "type": "string"
+        },
         "tags": {
           "description": "Tags to apply to the bill. Together they can total at most 1000 characters.",
           "items": {
@@ -22109,6 +22113,10 @@
             }
           ],
           "description": "Tax currency exchange settings. sourceCurrencyCode is required, also when only the rate changes."
+        },
+        "templateResourceId": {
+          "description": "UUID of the PDF report template.",
+          "type": "string"
         },
         "valueDate": {
           "description": "Bill date, in YYYY-MM-DD format (organization timezone).",
@@ -22434,6 +22442,10 @@
           },
           "type": "array"
         },
+        "internalNotes": {
+          "description": "Internal notes (not printed, for internal reference only).",
+          "type": "string"
+        },
         "notes": {
           "description": "Notes printed on the credit note PDF.",
           "type": "string"
@@ -22591,8 +22603,16 @@
           },
           "type": "array"
         },
+        "deliverySlipTemplateResourceId": {
+          "description": "UUID of the delivery slip PDF template.",
+          "type": "string"
+        },
         "dueDate": {
           "description": "Payment due date, in YYYY-MM-DD format (organization timezone).",
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Internal notes (not printed, for internal reference only).",
           "type": "string"
         },
         "invoiceNotes": {
@@ -23576,6 +23596,10 @@
             "$ref": "#/definitions/CustomField"
           },
           "type": "array"
+        },
+        "internalNotes": {
+          "description": "Internal notes (not printed, for internal reference only).",
+          "type": "string"
         },
         "tags": {
           "description": "Tags to apply to the credit note. Together they can total at most 1000 characters.",

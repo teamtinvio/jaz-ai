@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.5.5] - 2026-11-17
+
+**Clio can set internal notes on invoices, bills and credit notes.**
+
+- Clio and the MCP tools can now add or change the internal notes on an invoice, a bill, a customer credit note or a supplier credit note, on any status except void. The printed notes and the line items stay as they are.
+- Quick fix now also takes a PDF template on bills and a delivery slip template on invoices.
+
 ## [9.5.4] - 2026-11-17
 
 **Clio names the tax the way your organisation's country does.**
