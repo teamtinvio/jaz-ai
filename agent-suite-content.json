@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.5.2+d785e0b6",
+  "contentVersion": "9.5.3+b0d3acbb",
   "counts": {
     "tools": 476,
     "namespaces": 56,
@@ -500,7 +500,7 @@
     {
       "name": "update_sale_order",
       "namespace": "sale_orders",
-      "description": "Update an editable Sale Quote or Sale Order (reference, dates, notes, custom fields, lines), or issue a DRAFT quote / activate a PENDING order. lineItems EDITS stored lines by resourceId, never replaces them: get_sale_order first. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an editable Sale Quote or Sale Order, or issue a DRAFT quote / activate a PENDING order. lineItems EDITS stored lines by resourceId, never replaces them: get_sale_order first. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -556,7 +556,7 @@
     {
       "name": "update_purchase_order",
       "namespace": "purchase_orders",
-      "description": "Update an editable Purchase Request or Purchase Order (reference, dates, notes, custom fields, lines), or issue a DRAFT request / activate a PENDING order. lineItems EDITS stored lines by resourceId, never replaces them: get_purchase_order first. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an editable Purchase Request or Purchase Order, or issue a DRAFT request / activate a PENDING order. lineItems EDITS stored lines by resourceId, never replaces them: get_purchase_order first. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

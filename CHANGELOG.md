@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.5.3] - 2026-11-16
+
+**The assistant can change the customer or supplier on an order.**
+
+- Clio and the MCP tools can now change the customer on a sale quote or sale order, and the supplier on a purchase request or purchase order.
+
 ## [9.5.2] - 2026-11-16
 
 **Chat shows whether a tool changed data, and chat sessions open from more records.**
