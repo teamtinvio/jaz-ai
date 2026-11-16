@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.5.6] - 2026-11-17
+
+**Clio lists tracking tags when you ask for tracking tags.**
+
+- Asking Clio or the MCP tools for tracking tags now returns the organisation's tags. Before, the request could be answered with classifiers, which are the line-item dimensions.
+
 ## [9.5.5] - 2026-11-17
 
 **Clio can set internal notes on invoices, bills and credit notes.**

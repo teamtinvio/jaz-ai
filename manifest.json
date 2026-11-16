@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.5.5",
+  "version": "9.5.6",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -372,15 +372,15 @@
     },
     {
       "name": "list_tags",
-      "description": "List tags used for transaction categorization. Paginated; response includes totalElements. Use limit/offset to page."
+      "description": "List tags (Tracking Tags): transaction-level labels. Paginated; response includes totalElements. Use limit/offset to page."
     },
     {
       "name": "search_tags",
-      "description": "Search tags."
+      "description": "Search tags (Tracking Tags)."
     },
     {
       "name": "create_tag",
-      "description": "Create a new tag. Automatically reuses existing tag if one with the same name exists. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a new tag (Tracking Tag). Automatically reuses existing tag if one with the same name exists. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_tag",
@@ -1660,7 +1660,7 @@
     },
     {
       "name": "list_nano_classifiers",
-      "description": "List nano classifiers (tracking categories). Paginated. Nano classifiers tag line items with structured categories."
+      "description": "List nano classifiers (tracking categories). Paginated. Nano classifiers classify line items with structured categories."
     },
     {
       "name": "get_nano_classifier",
