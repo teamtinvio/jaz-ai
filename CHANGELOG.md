@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.5.4] - 2026-11-17
+
+**Clio names the tax the way your organisation's country does.**
+
+- Clio now calls the tax by its name in the organisation's country: GST in Singapore, VAT in the Philippines and Vietnam, PPN in Indonesia and SST in Malaysia, instead of picking up "VAT" from field names.
+
 ## [9.5.3] - 2026-11-16
 
 **The assistant can change the customer or supplier on an order.**
