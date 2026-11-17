@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.5.9] - 2026-11-17
+
+**Clio asks which notes you mean.**
+
+- On a record that has both printed notes and internal notes, a request that says only "notes" is now answered with a question: printed or internal. Before, Clio could add the text to the internal notes when the record already had one. Saying "printed notes" or "internal notes" works as before, with no question.
+
 ## [9.5.8] - 2026-11-17
 
 **Clio can add an attachment as External.**
