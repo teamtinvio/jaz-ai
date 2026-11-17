@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.5.7] - 2026-11-17
+
+**Clio can set internal notes on orders and quotes.**
+
+- Clio and the MCP tools can now add or change the internal notes on a sales order, a quote, a purchase order or a purchase request. Before, a request for internal notes on a quote was written to its Terms & Conditions, and on a sales order it was refused.
+
 ## [9.5.6] - 2026-11-17
 
 **Clio lists tracking tags when you ask for tracking tags.**
