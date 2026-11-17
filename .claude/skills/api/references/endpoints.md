@@ -1182,6 +1182,8 @@ Response (non-standard shape):
 
 Upload a file attachment. Multipart form-data with `file` field (binary, `application/pdf` or `image/*`). Returns the parent transaction with updated `attachments` array.
 
+Optional form field `attachmentType`: `INTERNAL` or `EXTERNAL`; left out, the attachment is stored as Internal. Only invoices, customer credit notes, sale quotes, sale orders, purchase orders and purchase requests take it, and only the attachment lists of those six return `attachmentType` for each attachment. Every other record type answers 400 `attachmentType is not supported on <record type>`, whatever the value.
+
 ### DELETE /api/v1/:type/:resourceId/attachments/:attachmentResourceId
 
 Delete an attachment. Returns the parent transaction with the attachment removed from the `attachments` array. HTTP 200 on success.

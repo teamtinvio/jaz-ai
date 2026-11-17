@@ -634,6 +634,10 @@ account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-gl
 **Cause**: Uploading `text/plain` files to `POST /:type/:id/attachments`.
 **Fix**: API only accepts PDF and image types. Use `application/pdf` or `image/png`. The multipart field name must be `file` (NOT `sourceFile`).
 
+### "attachmentType is not supported on bills" (400)
+**Cause**: Sending the `attachmentType` form field to `POST /:type/:id/attachments` on a record type that does not take it. The message names the record type.
+**Fix**: Only invoices, customer credit notes, sale quotes, sale orders, purchase orders and purchase requests take `attachmentType`. Leave the field out on every other record type.
+
 ---
 
 ## Jaz Magic / Document-Source Errors

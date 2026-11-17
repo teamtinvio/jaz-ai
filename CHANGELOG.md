@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.5.8] - 2026-11-17
+
+**Clio can add an attachment as External.**
+
+- Clio and the MCP tools can now add an attachment as External on an invoice, a customer credit note, a quote, a sales order, a purchase order or a purchase request. Before, every attachment added this way was stored as Internal.
+
 ## [9.5.7] - 2026-11-17
 
 **Clio can set internal notes on orders and quotes.**
