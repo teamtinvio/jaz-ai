@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.5.10] - 2026-11-18
+
+**Comments Clio posts read as your own words.**
+
+- A comment Clio posts on a bill, invoice, credit note or bank record is published under your name, so teammates now read it as written by you. Before, it could refer to you in the third person or mention Clio's own confirmations,. Clio now writes the comment in the first person, never names you, and keeps any question for you in its reply to you. The same rule applies when Clio edits a comment.
+- New live eval `collab-comment-in-callers-voice` covers a teammate asking for a draft bill to be deleted.
+
 ## [9.5.9] - 2026-11-17
 
 **Clio asks which notes you mean.**

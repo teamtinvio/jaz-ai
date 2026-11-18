@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.5.9+12b23b80",
+  "contentVersion": "9.5.10+d9a2b1c2",
   "counts": {
     "tools": 476,
     "namespaces": 56,
@@ -1599,14 +1599,14 @@
     {
       "name": "add_comment",
       "namespace": "collab",
-      "description": "Post a comment on a bill, invoice, supplier credit note, customer credit note or bank record. The caller is the author. A record has one open thread: without threadId the comment joins it or starts one, and a resolved thread accepts none. To mention someone, write <@userResourceId> in content where the name belongs, with the userResourceId from search_org_users (not the org-user record id); the saved text fills in the name. Only members whose own status is ACTIVE can be mentioned (the row's top-level status from search_org_users, not user.status; an invited member who has not joined is PENDING and cannot), at most 20: any other id refuses the whole comment. A plain @Name is just text and notifies no one. Bank records need bankAccountResourceId.",
+      "description": "Post a comment on a bill, invoice, supplier credit note, customer credit note or bank record. The caller is the author, and the text is published under the caller's name as their own words to teammates: write it as the caller would, in the first person, never naming the caller or calling them the user, and never mentioning Clio or its permissions, rules or confirmations. Anything to ask the caller goes in the reply to the caller, not in a comment. A record has one open thread: without threadId the comment joins it or starts one, and a resolved thread accepts none. To mention someone, write <@userResourceId> in content where the name belongs, with the userResourceId from search_org_users (not the org-user record id); the saved text fills in the name. Only members whose own status is ACTIVE can be mentioned (the row's top-level status from search_org_users, not user.status; an invited member who has not joined is PENDING and cannot), at most 20: any other id refuses the whole comment. A plain @Name is just text and notifies no one. Bank records need bankAccountResourceId.",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "update_comment",
       "namespace": "collab",
-      "description": "Edit a comment the caller wrote, replacing its whole text. Only the author can, and only while its thread is open: a resolved thread refuses changes. Mentions work as in add_comment: write <@userResourceId> to add one, and keep the <Name@userResourceId> markup from content (text shows only @Name) for each mention to keep; leaving it out removes the mention. Bank records need bankAccountResourceId.",
+      "description": "Edit a comment the caller wrote, replacing its whole text, which stays the caller's own words to teammates: first person, never naming the caller or calling them the user, never mentioning Clio or its permissions, rules or confirmations. Anything to ask the caller goes in the reply to the caller, not in a comment. Only the author can, and only while its thread is open: a resolved thread refuses changes. Mentions work as in add_comment: write <@userResourceId> to add one, and keep the <Name@userResourceId> markup from content (text shows only @Name) for each mention to keep; leaving it out removes the mention. Bank records need bankAccountResourceId.",
       "readOnly": false,
       "destructive": true
     },
