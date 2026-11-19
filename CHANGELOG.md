@@ -1,5 +1,14 @@
 # Changelog
 
+## [9.5.13] - 2026-11-19
+
+**Clio changes the notes, date, contact or tags on a recorded journal first time.**
+
+- On a recorded journal, asking Clio to change the notes, date, contact or tags now works first time. Before, the first attempt was refused and Clio retried another way, so you saw an error step before the change.
+- Clio no longer says a fixed asset, deferral, lease, loan, cash entry or cash transfer takes no attachments. It now says it cannot attach the file from the chat.
+- Clio no longer offers to change the notes on a cash entry, which it cannot do. It says so and offers to void the entry and create it again.
+- New live eval `quick-fix-internal-note-posted-journal` covers a notes-only change on a recorded journal.
+
 ## [9.5.12] - 2026-11-19
 
 **Clio can match several bank records to one invoice or bill.**

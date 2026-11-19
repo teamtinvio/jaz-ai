@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.5.12+079efe75",
+  "contentVersion": "9.5.13+71814cac",
   "counts": {
     "tools": 477,
     "namespaces": 56,
@@ -1487,7 +1487,7 @@
     {
       "name": "update_journal",
       "namespace": "journals",
-      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Update an existing journal entry: reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. A recorded (ACTIVE) journal is refused unless journalEntries carries every line it keeps: read the journal and resend its lines. Where quick fix is offered, use it instead for a change only to fields it takes. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -1557,21 +1557,21 @@
     {
       "name": "get_attachments",
       "namespace": "document_ai",
-      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note, or order document).",
+      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note, or order document). Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers, which still take files.",
       "readOnly": true,
       "destructive": false
     },
     {
       "name": "add_attachment",
       "namespace": "document_ai",
-      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY; attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY; attachmentId link-by-id is rejected for them. Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers: say the file cannot be attached from here, never that the record or the product takes no attachments. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
     {
       "name": "delete_attachment",
       "namespace": "document_ai",
-      "description": "Delete an attachment from a business transaction (invoice, bill, journal, credit note, or order document). If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Delete an attachment from a business transaction (invoice, bill, journal, credit note, or order document). Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers, which still take files. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

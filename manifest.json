@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.5.12",
+  "version": "9.5.13",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -780,11 +780,11 @@
     },
     {
       "name": "update_journal",
-      "description": "Update an existing journal entry. Can modify reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an existing journal entry: reference, valueDate, entries, notes. Set saveAsDraft=false to finalize. A recorded (ACTIVE) journal is refused unless journalEntries carries every line it keeps: read the journal and resend its lines. Where quick fix is offered, use it instead for a change only to fields it takes. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_update_journals",
-      "description": "Bulk-update journals; most common use is bulk-finalize (saveAsDraft: false on each row). Sync; per-row sequential execution; max 500 per call (a read + a write per row, ~2-4 min for a full 500).\n\nbulk_finalize_drafts only handles invoices/bills/credit-notes; journals need this. Common monthly-close pattern: search_journals(filter:{status:{eq:'DRAFT'}}) → keep the ones for this period → map to {resourceId, saveAsDraft: false} → bulk_update_journals.\n\nEach row carries the same fields as update_journal (resourceId required + any of reference, valueDate, notes, tags, saveAsDraft). Omitted fields preserve existing.\n\nResponse: { updated: [{resourceId}], failed: [{resourceId, error, errorCode, status}], updatedCount, failedCount }. Per-row execution: partial results are normal; retry only failed[].resourceId. errorCode + status come from the underlying JazApiError when available. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-update journals; most common use is bulk-finalize (saveAsDraft: false on each row). Sync; per-row sequential execution; max 500 per call (a read + a write per row, ~2-4 min for a full 500).\n\nbulk_finalize_drafts only handles invoices/bills/credit-notes; journals need this. Common monthly-close pattern: search_journals(filter:{status:{eq:'DRAFT'}}) → keep the ones for this period → map to {resourceId, saveAsDraft: false} → bulk_update_journals.\n\nEach row: resourceId plus any of reference, valueDate, notes, tags, saveAsDraft; omitted fields keep their value. Drafts only: rows send no lines, which a recorded (ACTIVE) journal requires; edit those with quick_fix_transactions or update_journal.\n\nResponse: { updated: [{resourceId}], failed: [{resourceId, error, errorCode, status}], updatedCount, failedCount }. Per-row execution: partial results are normal; retry only failed[].resourceId. errorCode + status come from the underlying JazApiError when available. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "import_bank_statement",
@@ -820,15 +820,15 @@
     },
     {
       "name": "get_attachments",
-      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note, or order document)."
+      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note, or order document). Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers, which still take files."
     },
     {
       "name": "add_attachment",
-      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY; attachmentId link-by-id is rejected for them. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY; attachmentId link-by-id is rejected for them. Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers: say the file cannot be attached from here, never that the record or the product takes no attachments. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_attachment",
-      "description": "Delete an attachment from a business transaction (invoice, bill, journal, credit note, or order document). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Delete an attachment from a business transaction (invoice, bill, journal, credit note, or order document). Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers, which still take files. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "read_spreadsheet_rows",
