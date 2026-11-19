@@ -228,6 +228,7 @@ clio jobs bank-recon match --input data.json --find-all --json
 The matcher finds matches against transactions the org **already has**, so commit via the MATCH-EXISTING path, not create-new:
 
 - A 1:1 (or N:1) match to an **existing open bill/invoice** at `exact` / `fuzzy-high` (≥0.85) confidence → **`reconcile_with_payments`** (pass the matched transaction's `cashflowTransactionResourceId` in `businessTransactionPayments[]`). Do NOT use `reconcile_invoice_receipt`/`reconcile_bill_receipt`; those CREATE a duplicate.
+- A 1:N match (several bank records → ONE existing open invoice, bill or credit note) → **`reconcile_match_to_transaction`** with all of the records' ids: one payment per record, all or nothing.
 - A batch of high-confidence matches → **`reconcile_magic_match`** in one call.
 - Only when the matcher finds NO existing transaction → create one (`reconcile_invoice_receipt`/`reconcile_bill_receipt` or `create_cash_*`).
 - `fuzzy-medium` (0.70 to 0.85) / `nm-confident` → surface for confirmation before committing (checkpoint), don't auto-commit.

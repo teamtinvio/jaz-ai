@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.5.11+7a9c400c",
+  "contentVersion": "9.5.12+079efe75",
   "counts": {
-    "tools": 476,
+    "tools": 477,
     "namespaces": 56,
     "calculators": 13,
     "recipes": 16,
@@ -62,7 +62,7 @@
     },
     {
       "name": "reconciliations",
-      "description": "Apply a reconciliation decision to a bank statement entry (write side). Match bank records to EXISTING open bills/invoices/payments (reconcile_with_payments, the primary path, creates the payment for you), or to journals, cash entries, or transfers, or CREATE new bills/invoices (invoice_receipt/bill_receipt). Distinct from bank_accounts/bank_rules (which configure auto-reconciliation) and view_auto_reconciliation (which queries suggestions). Thirteen endpoints: quick_reconcile + apply_bank_rule + magic_match (bulk), undo_reconciliations (bulk reverse), and direct_cash_entry / cash_journal / manual_journal / cash_transfer / invoice_receipt / bill_receipt / with_payments / learned_prediction / unapplied_payment (per-entry). Match-to-existing is preferred over create-new to avoid duplicates. Most fields prefill from the bank entry when omitted; FX is resolved server-side. To reverse a reconciliation use undo_reconciliations, which unlinks the entry but does NOT delete a record a reconcile call created; it returns linkedRecords so you can delete that record too."
+      "description": "Apply a reconciliation decision to a bank statement entry (write side). Match bank records to EXISTING open bills/invoices/payments (reconcile_with_payments, the primary path, creates the payment for you), or to journals, cash entries, or transfers, or CREATE new bills/invoices (invoice_receipt/bill_receipt). Distinct from bank_accounts/bank_rules (which configure auto-reconciliation) and view_auto_reconciliation (which queries suggestions). Fourteen endpoints: quick_reconcile + apply_bank_rule + magic_match (bulk), undo_reconciliations (bulk reverse), match_to_transaction (several entries to ONE open document), and direct_cash_entry / cash_journal / manual_journal / cash_transfer / invoice_receipt / bill_receipt / with_payments / learned_prediction / unapplied_payment (per-entry). Match-to-existing is preferred over create-new to avoid duplicates. Most fields prefill from the bank entry when omitted; FX is resolved server-side, except match_to_transaction, which needs transactionAmount + currencySettings with a rate when the document and bank account currencies differ or the bank account is not in the base currency. To reverse a reconciliation use undo_reconciliations, which unlinks the entry but does NOT delete a record a reconcile call created; it returns linkedRecords so you can delete that record too."
     },
     {
       "name": "financial_reports",
@@ -3370,7 +3370,14 @@
     {
       "name": "reconcile_with_payments",
       "namespace": "reconciliations",
-      "description": "USE THIS to match a bank statement entry to an EXISTING open bill / invoice / payment (NOT reconcile_bill_receipt or reconcile_invoice_receipt, which CREATE a new bill/invoice). Pass the open transaction's cashflowTransactionResourceId (from search_cashflow_transactions or a view_auto_reconciliation suggestion) in businessTransactionPayments[]: this CREATES the payment AND reconciles in one call; no pay_bill / pay_invoice first. FX is resolved server-side; pass NO rate for the common case (only supply paymentAmount + currencySettings for the rare bill-currency ≠ bank-currency case). Sync: returns the reconciled entry status. NOT idempotent: a blind retry double-creates a payment; confirm reconciled-state via search_bank_records(status: RECONCILED) before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "USE THIS to match a bank statement entry to an EXISTING open bill / invoice / payment (NOT reconcile_bill_receipt or reconcile_invoice_receipt, which CREATE a new bill/invoice). Several entries settling ONE document, or an entry against a credit note: reconcile_match_to_transaction. Pass the open transaction's cashflowTransactionResourceId (from search_cashflow_transactions or a view_auto_reconciliation suggestion) in businessTransactionPayments[]: this CREATES the payment AND reconciles in one call; no pay_bill / pay_invoice first. FX is resolved server-side; pass NO rate for the common case (only supply paymentAmount + currencySettings for the rare bill-currency ≠ bank-currency case). Sync: returns the reconciled entry status. NOT idempotent: a blind retry double-creates a payment; confirm reconciled-state via search_bank_records(status: RECONCILED) before retrying. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "reconcile_match_to_transaction",
+      "namespace": "reconciliations",
+      "description": "Settle SEVERAL bank statement entries (1-100, same bank account, all money in or all money out) against ONE EXISTING open invoice, bill or credit note, e.g. instalments. For ONE entry against an invoice or bill, use reconcile_with_payments instead; ONE entry against a credit note takes this tool too. Creates one payment per entry, dated and sized from it, all or nothing; no pay_bill / pay_invoice first. The document may stay partly open; more than its open balance is refused. Sync: returns each entry's status, the payment ids, and the document's status and balanceAmount. A retry after success is refused (already reconciled); on an unclear outcome check search_bank_records before resending. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

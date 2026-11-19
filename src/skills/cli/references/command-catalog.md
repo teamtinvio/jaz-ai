@@ -402,8 +402,8 @@ The register never posts cash: record the drawdown and every installment yoursel
 | `undo <id>` | `--event`: reverse the latest event |
 | `bulk-upsert` / `bulk-update` | `--input <file>`: max 500, async → jobId |
 
-### `clio reconciliations` (alias: `recon`): Bank reconciliation actions (8 tools)
-2 async + 6 sync. Sync endpoints are NOT idempotent: re-running creates duplicate journals.
+### `clio reconciliations` (alias: `recon`): Bank reconciliation actions (13 subcommands)
+2 async + 11 sync. Each sync call is sent once: after a lost answer, read the entries (`clio bank records --status`) before running it again.
 
 | Subcommand | Type | Key flags |
 |------------|------|-----------|
@@ -415,6 +415,11 @@ The register never posts cash: record the drawdown and every installment yoursel
 | `cash-transfer` | sync | `--input <file>`: inter-account transfer; `accountResourceId` is counterparty |
 | `invoice-receipt` | sync | `--input <file>`: ⚠️ requires BSE from `bank import` (BANK_STATEMENT_ENTRY type). `bank add-records` BSEs (BANK_RECORD type) → 422 "Invalid business transaction type" |
 | `bill-receipt` | sync | `--input <file>`: same BSE-type warning as invoice-receipt |
+| `with-payments` | sync | `--input <file>`: ONE BSE against EXISTING open bills/invoices (creates the payment) and/or existing payments |
+| `match-to-transaction` | sync | `--input <file>`: 1-100 BSEs (same account, same direction) against ONE open invoice, bill or credit note; one payment per BSE, all or nothing |
+| `learned-prediction` | sync | `--input <file>`: accept a learned-prediction suggestion (payload verbatim from `bank auto-recon`) |
+| `magic-match` | sync, bulk | `--input <file>`: accept magic suggestions (max 500); a partial success exits 1 |
+| `undo` | sync, bulk | `--input <file>`: unlink BSEs; the matched record stays and its id is printed |
 
 ### `clio drafts`: Server-side draft lifecycle (3 tools)
 Bulk-friendly: one call accepts mixed btTypes (max 500). NOT idempotent on already-promoted drafts (422).
@@ -799,7 +804,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 476 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 477 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

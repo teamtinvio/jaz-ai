@@ -210,8 +210,14 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | POST | `/reconciliations/cash-transfer` | **Sync**. Inter-account transfer. `amount` required only for cross-currency transfers. |
 | POST | `/reconciliations/invoice-receipt` | **Sync (AR)**. Creates an invoice and auto-reconciles to the bank entry. |
 | POST | `/reconciliations/bill-receipt` | **Sync (AP)**. Creates a bill and auto-reconciles to the bank entry. |
+| POST | `/reconciliations/with-payments` | **Sync**. One bank entry against EXISTING open bills/invoices (creates the payment) and/or existing payments. |
+| POST | `/reconciliations/match-to-transaction` | **Sync**. 1-100 bank entries (same account, same direction) against ONE open invoice, bill or credit note; one payment per entry, all or nothing. |
+| POST | `/reconciliations/learned-prediction` | **Sync**. Accept a learned-prediction suggestion; payload passed verbatim from the suggestion. |
+| POST | `/reconciliations/magic-match` | **Sync, bulk**. Accept magic suggestions (max 500); returns `{ reconciled[], failed[] }`. |
+| POST | `/reconciliations/unapplied-payment` | **Sync**. Record an unapplied payment for the bank entry and match the two; amount, when sent, must equal the entry's. |
+| POST | `/reconciliations/reset` | **Sync, bulk**. Undo: unlink entries (1-500); the matched record stays, listed in `linkedRecords`. |
 
-The 6 sync endpoints are NOT idempotent on the same `bankStatementEntryResourceId`; confirm reconciled state before retrying. Most fields prefill from the bank entry when omitted.
+Confirm reconciled state (`search_bank_records`) before retrying a call whose answer was lost. Most fields prefill from the bank entry when omitted.
 
 ### Drafts (server-side bulk lifecycle)
 **One batch can mix any combination** of `SALE` (invoice), `PURCHASE` (bill), `SALE_CREDIT_NOTE`, `PURCHASE_CREDIT_NOTE`. No per-type endpoints. Max 500 items per call. Journals are NOT in the enum (separate approval flow).

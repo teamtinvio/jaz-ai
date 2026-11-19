@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.5.12] - 2026-11-19
+
+**Clio can match several bank records to one invoice or bill.**
+
+- Clio and the MCP tools can now settle several bank records against one open invoice, bill or credit note in one step, for example the instalments that pay one invoice. Each bank record becomes its own payment on the document and is reconciled, and the document can stay partly paid. Before, each record had to be matched on its own. One record against one document is matched as before.
+- When the money is more than an invoice or bill still owes, Clio now asks what to do with the excess (keep it as credit for the contact, refund it, or apply it to another document) before booking it. Before, it could choose one itself.
+- New live evals `reconcile-several-receipts-one-invoice`, `reconcile-one-receipt-one-invoice` and `reconcile-receipts-over-invoice-balance` cover several receipts paying one invoice, a single receipt, and receipts that add up to more than the invoice's open balance.
+
 ## [9.5.11] - 2026-11-19
 
 **Clio knows which register record you opened it from.**

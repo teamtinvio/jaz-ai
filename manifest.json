@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.5.11",
+  "version": "9.5.12",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -1856,7 +1856,11 @@
     },
     {
       "name": "reconcile_with_payments",
-      "description": "USE THIS to match a bank statement entry to an EXISTING open bill / invoice / payment (NOT reconcile_bill_receipt or reconcile_invoice_receipt, which CREATE a new bill/invoice). Pass the open transaction's cashflowTransactionResourceId (from search_cashflow_transactions or a view_auto_reconciliation suggestion) in businessTransactionPayments[]: this CREATES the payment AND reconciles in one call; no pay_bill / pay_invoice first. FX is resolved server-side; pass NO rate for the common case (only supply paymentAmount + currencySettings for the rare bill-currency ≠ bank-currency case). Sync: returns the reconciled entry status. NOT idempotent: a blind retry double-creates a payment; confirm reconciled-state via search_bank_records(status: RECONCILED) before retrying. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "USE THIS to match a bank statement entry to an EXISTING open bill / invoice / payment (NOT reconcile_bill_receipt or reconcile_invoice_receipt, which CREATE a new bill/invoice). Several entries settling ONE document, or an entry against a credit note: reconcile_match_to_transaction. Pass the open transaction's cashflowTransactionResourceId (from search_cashflow_transactions or a view_auto_reconciliation suggestion) in businessTransactionPayments[]: this CREATES the payment AND reconciles in one call; no pay_bill / pay_invoice first. FX is resolved server-side; pass NO rate for the common case (only supply paymentAmount + currencySettings for the rare bill-currency ≠ bank-currency case). Sync: returns the reconciled entry status. NOT idempotent: a blind retry double-creates a payment; confirm reconciled-state via search_bank_records(status: RECONCILED) before retrying. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "reconcile_match_to_transaction",
+      "description": "Settle SEVERAL bank statement entries (1-100, same bank account, all money in or all money out) against ONE EXISTING open invoice, bill or credit note, e.g. instalments. For ONE entry against an invoice or bill, use reconcile_with_payments instead; ONE entry against a credit note takes this tool too. Creates one payment per entry, dated and sized from it, all or nothing; no pay_bill / pay_invoice first. The document may stay partly open; more than its open balance is refused. Sync: returns each entry's status, the payment ids, and the document's status and balanceAmount. A retry after success is refused (already reconciled); on an unclear outcome check search_bank_records before resending. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "reconcile_magic_match",
