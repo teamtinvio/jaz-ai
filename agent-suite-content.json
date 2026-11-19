@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.5.14+725bd630",
+  "contentVersion": "9.5.15+e4616db4",
   "counts": {
     "tools": 477,
     "namespaces": 56,
@@ -106,7 +106,7 @@
     },
     {
       "name": "tracking_categories",
-      "description": "Nano classifiers: line-item dimensions (department, cost center, project). List, search, create, update, delete classifiers and their classes. Used for dimensional reporting. Not tracking tags (use the tags_and_custom_fields namespace). Also: tracking categories, cost centers, departments, projects."
+      "description": "Nano classifiers: dimensions (department, cost center, project) per line item, or on a register record as a whole. List, search, create, update, delete classifiers and their classes. Used for dimensional reporting. Not tracking tags (use the tags_and_custom_fields namespace). Also: tracking categories, cost centers, departments, projects."
     },
     {
       "name": "chart_of_accounts",
@@ -3027,7 +3027,7 @@
     {
       "name": "list_nano_classifiers",
       "namespace": "tracking_categories",
-      "description": "List nano classifiers (tracking categories). Paginated. Nano classifiers classify line items with structured categories.",
+      "description": "List nano classifiers (tracking categories). Paginated. They classify document lines, and fixed assets, leases, deferrals and loans on the record itself.",
       "readOnly": true,
       "destructive": false
     },

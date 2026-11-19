@@ -256,12 +256,12 @@ A draft posts nothing; activating posts the schedule. Editing terms on an active
 | Layer | Scope | Purpose | Reporting | PDF | Scheduler |
 |-------|-------|---------|-----------|-----|-----------|
 | **Tracking Tags** | Transaction only | Hashtags for advanced reporting | Filter | No | Inherited |
-| **Nano Classifiers** | Line item only | Classification intent (department, cost center) | Filter | Yes (line items) | Inherited |
+| **Nano Classifiers** | Line item; fixed asset, lease, deferral and loan records | Classification intent (department, cost center) | Filter | Yes (line items) | Inherited |
 | **Capsules** | Group of transactions | Workflow container for multi-step accounting | Filter + Group by | No | All entries land in capsule |
 | **Custom Fields** | Transaction | Additional record-keeping | No impact | Yes | No |
 
 - **Tracking Tags**: Like hashtags on transactions, data enrichment for advanced reporting. Transaction-level only (not line items). Can be set on schedulers; generated entries inherit them. Cannot group by tags in reports, only filter.
-- **Nano Classifiers**: Data enrichment with a classification intent: group line items into named classes within a classifier (e.g., Department: Engineering/Sales/Finance). Line-item-level only (not transaction headers). Can be displayed on PDF line items. Can be set on schedulers; generated entries inherit them. Assigning classifiers to items auto-applies them to line items in transactions.
+- **Nano Classifiers**: Data enrichment with a classification intent: group line items into named classes within a classifier (e.g., Department: Engineering/Sales/Finance). On documents they sit on line items, not transaction headers; fixed assets, leases, deferrals and loans carry them on the record itself. Can be displayed on PDF line items. Can be set on schedulers; generated entries inherit them. Assigning classifiers to items auto-applies them to line items in transactions.
 - **Capsules**: Not a classification, a workflow container that groups related transactions for a specific accounting scenario (prepaid, deferred, accrual, CIP). The only enrichment supporting group-by in reports. See dedicated Capsules section above.
 - **Custom Fields**: Text/number/date/dropdown fields for additional record-keeping. Transaction-level, applied to invoices/bills/journals/contacts. Can show on PDFs and be made mandatory. No reporting impact, not available on schedulers.
 

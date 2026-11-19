@@ -1,6 +1,6 @@
 ---
 name: jaz-api
-version: 9.5.14
+version: 9.5.15
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
   REST API. Covers field names, response shapes, 148 production gotchas, error
@@ -139,7 +139,7 @@ The rest of this skill (field names, gotchas, error catalog, dependency order, s
 35d. **Tags are `tags: string[]`** on ALL transaction create/update: invoices, bills, customer CNs, supplier CNs, journals, cash-in, cash-out, cash transfers. CLI uses `--tag <name>` (singular, wrapped to array). API accepts the array directly.
 
 ### Nano Classifiers
-35e. **ClassifierConfig on line items**: `classifierConfig: [{ resourceId: "<capsuleTypeId>", type: "invoice"|"bill", selectedClasses: [{ className: "Class A", resourceId: "<classId>" }], printable: true }]`. Applies to line items on invoices, bills, credit notes, journal entries, and cash entry details. Create capsule types first via `POST /capsule-types`, then reference them in classifierConfig. A selected class needs `resourceId` unless it sends `entityResourceId` instead (a classifier whose options are customers, suppliers, contacts, employees or users). Quick fix and Ledger Find & Fix add `{ resourceId, deleted: true }` to remove one classifier and leave unnamed ones as they are (rule 107).
+35e. **ClassifierConfig**: `classifierConfig: [{ resourceId: "<classifierId>", type: "invoice"|"bill", selectedClasses: [{ className: "Class A", resourceId: "<classId>" }], printable: true }]`. Goes on each line item of invoices, bills, credit notes, journal entries and cash entries, and on the record itself for fixed assets, leases, deferrals and loans (create, update, and the GET returns it). `resourceId` is the nano classifier's (`POST /nano-classifiers` creates one). On those four records `type` is the classifier's own type, as the classifier GET returns it, and an update REPLACES every classifier the record holds (omitting the field keeps them): to add one, send the stored ones plus the new entry. Clio's update tools take a change and merge it. A selected class needs `resourceId` unless it sends `entityResourceId` instead (a classifier whose options are customers, suppliers, contacts, employees or users). Quick fix and Ledger Find & Fix add `{ resourceId, deleted: true }` to remove one classifier and leave unnamed ones as they are (rule 107).
 
 ### Reports
 36. **Report field names differ by type**; this is the most error-prone area:

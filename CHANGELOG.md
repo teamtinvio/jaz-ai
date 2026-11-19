@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.5.15] - 2026-11-19
+
+**Clio can set classifiers on fixed assets, deferrals, leases and loans.**
+
+- You can now ask Clio to add or remove a classifier on a fixed asset, deferral, lease or loan. The classifier goes on the record itself, and the classifiers already on it stay. Before, Clio said classifiers only apply to transaction lines and asked which bill to classify.
+
 ## [9.5.14] - 2026-11-19
 
 **Clio can attach files to fixed assets, deferrals, leases, loans and cash entries.**
