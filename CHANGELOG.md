@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.5.14] - 2026-11-19
+
+**Clio can attach files to fixed assets, deferrals, leases, loans and cash entries.**
+
+- You can now ask Clio to attach a file to a fixed asset, deferral, lease, loan, cash in, cash out or cash transfer, list the files already on one, or remove a file from it. Before, Clio said it could not attach files to these records from the chat.
+
 ## [9.5.13] - 2026-11-19
 
 **Clio changes the notes, date, contact or tags on a recorded journal first time.**

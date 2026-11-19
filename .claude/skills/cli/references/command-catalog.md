@@ -774,7 +774,7 @@ See SKILL.md Auth Precedence section for full details.
 ### `clio attachments`: Transaction attachments
 | Subcommand | Key flags |
 |------------|-----------|
-| `list` | `--type` (invoices, bills, journals, etc.), `--id` |
+| `list` | `--type` (invoices, bills, journals, fixed-assets, cash-in-entries, etc.), `--id` |
 | `add` | `--type`, `--id`, `<file>` |
 | `delete <attachmentId>` | `--type`, `--id` (the transaction; the attachment id is positional) |
 

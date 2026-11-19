@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 568 spec paths and 710 spec operations and is the authoritative list; check it before concluding
+> carries 582 spec paths and 731 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -927,6 +927,13 @@ incomplete. Reaching them needs a raw HTTP call.
 |--------|------|-------------|
 | POST | `/payments/withholding` | Record withholding on a sale / sale credit note payment (see SKILL.md Rule 45) |
 | GET | `/withholding-codes` | Withholding codes (BIR ATCs) for line `withholdingTax` and 2307 allocations (Rule 98) |
+
+### Attachments on registers and cash entries (21): 2026-11-19
+
+`GET` and `POST /{type}/:resourceId/attachments`, `DELETE /{type}/:resourceId/attachments/:attachmentResourceId`
+for `fixed-assets`, `deferrals`, `leases`, `loans`, `cash-in-entries`, `cash-out-entries`, `cash-transfers`.
+Upload takes the `file` field only (no `attachmentType`). Wrapped by `get_attachments` /
+`add_attachment` / `delete_attachment` and `clio attachments`.
 
 ---
 

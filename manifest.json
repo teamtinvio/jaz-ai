@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.5.13",
+  "version": "9.5.14",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -820,15 +820,15 @@
     },
     {
       "name": "get_attachments",
-      "description": "Get attachments for a business transaction (invoice, bill, journal, credit note, or order document). Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers, which still take files."
+      "description": "Get attachments for a record (invoice, bill, journal, credit note, order document, fixed asset, deferral, lease, loan, cash entry or cash transfer)."
     },
     {
       "name": "add_attachment",
-      "description": "Add an attachment to a business transaction. Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. Order documents (sale-quotes, sale-orders, purchase-requests, purchase-orders) support file/sourceUrl upload ONLY; attachmentId link-by-id is rejected for them. Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers: say the file cannot be attached from here, never that the record or the product takes no attachments. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Add an attachment to a record (invoice, bill, journal, credit note, order document, fixed asset, deferral, lease, loan, cash entry or cash transfer). Provide EXACTLY ONE source: sourceUrl (downloaded here, uploaded as bytes), attachmentId (links existing), or a file attached to the call. Two is refused. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_attachment",
-      "description": "Delete an attachment from a business transaction (invoice, bill, journal, credit note, or order document). Cannot reach fixed assets, deferrals, leases, loans, cash entries or cash transfers, which still take files. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Delete an attachment from a record (invoice, bill, journal, credit note, order document, fixed asset, deferral, lease, loan, cash entry or cash transfer). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "read_spreadsheet_rows",

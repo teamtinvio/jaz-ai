@@ -1158,7 +1158,7 @@ Valid `datatypeCode`: `TEXT`, `NUMBER`, `BOOLEAN`, `DATE`, `LINK`.
 
 ### GET /api/v1/:type/:resourceId/attachments
 
-List attachments on a transaction. `:type` is `invoices`, `bills`, `journals`, `customer-credit-notes`, `supplier-credit-notes`, or scheduled variants.
+List attachments on a record. `:type` is `invoices`, `bills`, `journals`, `customer-credit-notes`, `supplier-credit-notes`, `sale-quotes`, `sale-orders`, `purchase-requests`, `purchase-orders`, `fixed-assets`, `deferrals`, `leases`, `loans`, `cash-in-entries`, `cash-out-entries`, `cash-transfers`, or scheduled variants. A cash entry answers 404 under the other direction's path.
 
 Response (non-standard shape):
 ```json
