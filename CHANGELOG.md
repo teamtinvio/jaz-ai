@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.5.11] - 2026-11-19
+
+**Clio knows which register record you opened it from.**
+
+- A Clio chat opened from a fixed asset, deferral, lease or loan now treats "this" as that record and reads it before answering. Before, Clio had no record to go on in these chats and could ask which one you meant.
+- New live eval `chat-record-scope-fixed-asset` covers asking what the open asset cost.
+
 ## [9.5.10] - 2026-11-18
 
 **Comments Clio posts read as your own words.**
