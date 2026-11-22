@@ -1,6 +1,6 @@
 {
   "name": "jaz-clio",
-  "version": "9.5.15",
+  "version": "9.6.0",
   "description": "Fastest ledger for agents. Jaz accounting CLI and MCP server: invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close.",
   "type": "module",
   "bin": {
@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "tsc && node --input-type=module -e \"import{readFileSync,writeFileSync}from'fs';const c=readFileSync('dist/index.js','utf8');if(!c.startsWith('#!')){writeFileSync('dist/index.js','#!/usr/bin/env node\\n'+c)}\"",
-    "postbuild": "rm -rf dist/agent/prompts && cp -r src/agent/prompts dist/agent/prompts && mkdir -p dist/eval/rubrics && cp src/eval/rubrics/*.json dist/eval/rubrics/ && cp src/core/registry/dashboard-routes-manifest.json dist/core/registry/dashboard-routes-manifest.json && cp src/core/registry/agent-suite-content.json dist/core/registry/agent-suite-content.json",
+    "postbuild": "rm -rf dist/agent/prompts && cp -r src/agent/prompts dist/agent/prompts && mkdir -p dist/eval/rubrics && cp src/eval/rubrics/*.json dist/eval/rubrics/ && cp src/core/registry/dashboard-routes-manifest.json dist/core/registry/dashboard-routes-manifest.json && cp src/core/registry/agent-suite-content.json dist/core/registry/agent-suite-content.json && cp src/core/registry/dashboard-page-tools-catalog.json dist/core/registry/dashboard-page-tools-catalog.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "eval:agent:live": "bash scripts/agent-eval-live.sh",

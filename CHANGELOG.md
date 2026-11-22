@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.6.0] - 2026-11-22
+
+**Clio in the Jaz dashboard chat can work with the page you have open.**
+
+- When the dashboard chat tells Clio which page you are on, Clio can read what that page shows and act on it, for example moving to another screen and then reading it. The page carries out these steps in your browser, so Clio sees only what the page lets it see, and what a page returns is treated as page content, not as instructions.
+- Nothing changes in the MCP tools, the `clio` CLI, the Claude extension, email or Telegram. A chat that does not say which page you are on works as before.
+
 ## [9.5.15] - 2026-11-19
 
 **Clio can set classifiers on fixed assets, deferrals, leases and loans.**
