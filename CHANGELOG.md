@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.6.1] - 2026-11-23
+
+**Clio keeps reading your attached file after it uses the page you have open.**
+
+- In the Jaz dashboard chat, a page result is always treated as page content, and a file you attached is still read after Clio uses the page. Before, a file attached to the message could be left out once Clio had read or acted on the page.
+- Nothing changes in the MCP tools, the `clio` CLI, the Claude extension, email or Telegram.
+
 ## [9.6.0] - 2026-11-22
 
 **Clio in the Jaz dashboard chat can work with the page you have open.**
