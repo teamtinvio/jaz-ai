@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.6.3] - 2026-11-23
+
+**Dashboard links from Clio match the current Jaz screens.**
+
+- Links Clio and `clio navigate` give to the fixed asset and deferral lists now open the screens the dashboard has today. Before, links to sold, discarded and closed out fixed assets, and to completed deferrals, pointed at addresses the dashboard no longer uses.
+- Clio can now link you to the lease and loan registers and their reports, the new lease and new loan forms, and the Validate screens.
+- When Clio in the dashboard chat has read the page you have open, it waits for your next message before it changes anything in your books. No dashboard lets Clio read the page yet, so nothing changes there for you today.
+
 ## [9.6.2] - 2026-11-23
 
 **No user-facing changes since v9.6.1.**

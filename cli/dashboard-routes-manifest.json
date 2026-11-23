@@ -130,29 +130,22 @@
       "label": "Beneficiaries"
     },
     {
-      "key": "deferrals.completed.all",
-      "path": "/deferrals/completed/all",
-      "label": "All"
-    },
-    {
-      "key": "deferrals.completed.closed-out",
-      "path": "/deferrals/completed/closed-out",
-      "label": "Closed Out"
-    },
-    {
-      "key": "deferrals.completed.fully-amortized",
-      "path": "/deferrals/completed/fully-amortized",
-      "label": "Fully Amortized"
-    },
-    {
       "key": "deferrals.eligible.all",
       "path": "/deferrals/eligible/all",
       "label": "All"
     },
     {
+      "key": "deferrals.inactive.all",
+      "path": "/deferrals/inactive/all",
+      "label": "All"
+    },
+    {
       "key": "deferrals.register.active",
       "path": "/deferrals/register/active",
-      "label": "Active"
+      "label": "Active",
+      "aliases": [
+        "deferrals"
+      ]
     },
     {
       "key": "deferrals.register.draft",
@@ -253,37 +246,38 @@
       "label": "In Progress"
     },
     {
-      "key": "fixed-assets.disposals.all",
-      "path": "/fixed-assets/disposals/all",
-      "label": "All",
-      "aliases": [
-        "disposals"
-      ]
-    },
-    {
-      "key": "fixed-assets.disposals.discarded",
-      "path": "/fixed-assets/disposals/discarded",
-      "label": "Discarded"
-    },
-    {
-      "key": "fixed-assets.disposals.sold",
-      "path": "/fixed-assets/disposals/sold",
-      "label": "Sold"
-    },
-    {
       "key": "fixed-assets.eligible.all",
       "path": "/fixed-assets/eligible/all",
       "label": "All"
     },
     {
+      "key": "fixed-assets.inactive.all",
+      "path": "/fixed-assets/inactive/all",
+      "label": "All",
+      "aliases": [
+        "disposals",
+        "inactive"
+      ]
+    },
+    {
+      "key": "fixed-assets.inactive.closed-out",
+      "path": "/fixed-assets/inactive/closed-out",
+      "label": "Closed Out"
+    },
+    {
+      "key": "fixed-assets.inactive.discarded",
+      "path": "/fixed-assets/inactive/discarded",
+      "label": "Discarded"
+    },
+    {
+      "key": "fixed-assets.inactive.sold",
+      "path": "/fixed-assets/inactive/sold",
+      "label": "Sold"
+    },
+    {
       "key": "fixed-assets.register.active",
       "path": "/fixed-assets/register/active",
       "label": "Active"
-    },
-    {
-      "key": "fixed-assets.register.close-out",
-      "path": "/fixed-assets/register/close-out",
-      "label": "Close Out"
     },
     {
       "key": "fixed-assets.register.draft",
@@ -425,6 +419,67 @@
       "key": "journal-entries.manual-journals.voided",
       "path": "/journal-entries/manual-journals/voided",
       "label": "Voided"
+    },
+    {
+      "key": "leases.inactive.all",
+      "path": "/leases/inactive/all",
+      "label": "All"
+    },
+    {
+      "key": "leases.inactive.closed-out",
+      "path": "/leases/inactive/closed-out",
+      "label": "Closed Out"
+    },
+    {
+      "key": "leases.inactive.terminated",
+      "path": "/leases/inactive/terminated",
+      "label": "Terminated"
+    },
+    {
+      "key": "leases.register.active",
+      "path": "/leases/register/active",
+      "label": "Active",
+      "aliases": [
+        "leases"
+      ]
+    },
+    {
+      "key": "leases.register.draft",
+      "path": "/leases/register/draft",
+      "label": "Draft"
+    },
+    {
+      "key": "loans.inactive.all",
+      "path": "/loans/inactive/all",
+      "label": "All"
+    },
+    {
+      "key": "loans.inactive.closed-out",
+      "path": "/loans/inactive/closed-out",
+      "label": "Closed Out"
+    },
+    {
+      "key": "loans.inactive.fully-repaid",
+      "path": "/loans/inactive/fully-repaid",
+      "label": "Fully Repaid"
+    },
+    {
+      "key": "loans.inactive.settled",
+      "path": "/loans/inactive/settled",
+      "label": "Settled"
+    },
+    {
+      "key": "loans.register.active",
+      "path": "/loans/register/active",
+      "label": "Active",
+      "aliases": [
+        "loans"
+      ]
+    },
+    {
+      "key": "loans.register.draft",
+      "path": "/loans/register/draft",
+      "label": "Draft"
     },
     {
       "key": "mailbox.annual.action-needed",
@@ -1246,6 +1301,26 @@
       "label": "Transactions Summary"
     },
     {
+      "key": "reports.leases.reconciliation-summary",
+      "path": "/reports/leases/reconciliation-summary",
+      "label": "Reconciliation Summary"
+    },
+    {
+      "key": "reports.leases.register",
+      "path": "/reports/leases/register",
+      "label": "Register"
+    },
+    {
+      "key": "reports.loans.reconciliation-summary",
+      "path": "/reports/loans/reconciliation-summary",
+      "label": "Reconciliation Summary"
+    },
+    {
+      "key": "reports.loans.register",
+      "path": "/reports/loans/register",
+      "label": "Register"
+    },
+    {
       "key": "reports.profit-and-loss",
       "path": "/reports/profit-and-loss",
       "label": "Profit And Loss",
@@ -1692,6 +1767,21 @@
       "key": "scheduled.subscriptions.transactions.set-to-cancel",
       "path": "/scheduled/subscriptions/transactions/set-to-cancel",
       "label": "Set To Cancel"
+    },
+    {
+      "key": "validate",
+      "path": "/validate",
+      "label": "Validate"
+    },
+    {
+      "key": "validate.dashboard",
+      "path": "/validate/dashboard",
+      "label": "Dashboard"
+    },
+    {
+      "key": "validate.reports",
+      "path": "/validate/reports",
+      "label": "Reports"
     }
   ],
   "modals": [
@@ -2044,6 +2134,15 @@
       "requiresId": false
     },
     {
+      "key": "bank-reconciliation.modal.match-to-transaction",
+      "resource": "bank-reconciliation",
+      "modalType": "match-to-transaction",
+      "urlTemplate": "?modal=match-to-transaction",
+      "mountPath": "/bank-reconciliation/bank-accounts",
+      "label": "Match To Transaction",
+      "requiresId": false
+    },
+    {
       "key": "bank-reconciliation.modal.new-bank-account",
       "resource": "bank-reconciliation",
       "modalType": "new-bank-account",
@@ -2320,6 +2419,15 @@
       "urlTemplate": "?modal=cashflow-import-direct-cash-journal",
       "mountPath": "/cashflow/all-cashflow/all",
       "label": "Cashflow Import Direct Cash Journal",
+      "requiresId": false
+    },
+    {
+      "key": "cashflow.modal.cashflow-import-direct-cash-journal-any-csv",
+      "resource": "cashflow",
+      "modalType": "cashflow-import-direct-cash-journal-any-csv",
+      "urlTemplate": "?modal=cashflow-import-direct-cash-journal-any-csv",
+      "mountPath": "/cashflow/all-cashflow/all",
+      "label": "Cashflow Import Direct Cash Journal Any Csv",
       "requiresId": false
     },
     {
@@ -3152,7 +3260,11 @@
       "urlTemplate": "?modal=new-deferral",
       "mountPath": "/deferrals/register/active",
       "label": "New Deferral",
-      "requiresId": false
+      "requiresId": false,
+      "aliases": [
+        "new deferral",
+        "prepayment"
+      ]
     },
     {
       "key": "deferrals.modal.view-deferral",
@@ -3775,6 +3887,96 @@
       "urlTemplate": "?modal=view-schedule-journal&id={id}",
       "mountPath": "/journal-entries/all-journals/active-journal-entries",
       "label": "View Schedule Journal",
+      "requiresId": true
+    },
+    {
+      "key": "leases.modal.duplicate-lease",
+      "resource": "leases",
+      "modalType": "duplicate-lease",
+      "urlTemplate": "?modal=duplicate-lease&id={id}",
+      "mountPath": "/leases/register/active",
+      "label": "Duplicate Lease",
+      "requiresId": true
+    },
+    {
+      "key": "leases.modal.edit-lease",
+      "resource": "leases",
+      "modalType": "edit-lease",
+      "urlTemplate": "?modal=edit-lease&id={id}",
+      "mountPath": "/leases/register/active",
+      "label": "Edit Lease",
+      "requiresId": true,
+      "draftEditable": true
+    },
+    {
+      "key": "leases.modal.new-lease",
+      "resource": "leases",
+      "modalType": "new-lease",
+      "urlTemplate": "?modal=new-lease",
+      "mountPath": "/leases/register/active",
+      "label": "New Lease",
+      "requiresId": false,
+      "aliases": [
+        "new lease"
+      ]
+    },
+    {
+      "key": "leases.modal.view-lease",
+      "resource": "leases",
+      "modalType": "view-lease",
+      "urlTemplate": "?modal=view-lease&id={id}",
+      "mountPath": "/leases/register/active",
+      "label": "View Lease",
+      "requiresId": true
+    },
+    {
+      "key": "loans.modal.duplicate-loan",
+      "resource": "loans",
+      "modalType": "duplicate-loan",
+      "urlTemplate": "?modal=duplicate-loan&id={id}",
+      "mountPath": "/loans/register/active",
+      "label": "Duplicate Loan",
+      "requiresId": true
+    },
+    {
+      "key": "loans.modal.edit-loan",
+      "resource": "loans",
+      "modalType": "edit-loan",
+      "urlTemplate": "?modal=edit-loan&id={id}",
+      "mountPath": "/loans/register/active",
+      "label": "Edit Loan",
+      "requiresId": true,
+      "draftEditable": true
+    },
+    {
+      "key": "loans.modal.import-loans",
+      "resource": "loans",
+      "modalType": "import-loans",
+      "urlTemplate": "?modal=import-loans",
+      "mountPath": "/loans/register/active",
+      "label": "Import Loans",
+      "requiresId": false
+    },
+    {
+      "key": "loans.modal.new-loan",
+      "resource": "loans",
+      "modalType": "new-loan",
+      "urlTemplate": "?modal=new-loan",
+      "mountPath": "/loans/register/active",
+      "label": "New Loan",
+      "requiresId": false,
+      "aliases": [
+        "new loan",
+        "borrowing"
+      ]
+    },
+    {
+      "key": "loans.modal.view-loan",
+      "resource": "loans",
+      "modalType": "view-loan",
+      "urlTemplate": "?modal=view-loan&id={id}",
+      "mountPath": "/loans/register/active",
+      "label": "View Loan",
       "requiresId": true
     },
     {
@@ -5348,6 +5550,51 @@
         "tax",
         "tax profile"
       ]
+    },
+    {
+      "key": "validate.modal.download-vouching-certificate-report",
+      "resource": "validate",
+      "modalType": "download-vouching-certificate-report",
+      "urlTemplate": "?modal=download-vouching-certificate-report",
+      "mountPath": "/home",
+      "label": "Download Vouching Certificate Report",
+      "requiresId": false
+    },
+    {
+      "key": "validate.modal.edit-2307-document",
+      "resource": "validate",
+      "modalType": "edit-2307-document",
+      "urlTemplate": "?modal=edit-2307-document&id={id}",
+      "mountPath": "/home",
+      "label": "Edit 2307 Document",
+      "requiresId": true
+    },
+    {
+      "key": "validate.modal.edit-invoice-document",
+      "resource": "validate",
+      "modalType": "edit-invoice-document",
+      "urlTemplate": "?modal=edit-invoice-document&id={id}",
+      "mountPath": "/home",
+      "label": "Edit Invoice Document",
+      "requiresId": true
+    },
+    {
+      "key": "validate.modal.view-2307-document",
+      "resource": "validate",
+      "modalType": "view-2307-document",
+      "urlTemplate": "?modal=view-2307-document&id={id}",
+      "mountPath": "/home",
+      "label": "View 2307 Document",
+      "requiresId": true
+    },
+    {
+      "key": "validate.modal.view-invoice-document",
+      "resource": "validate",
+      "modalType": "view-invoice-document",
+      "urlTemplate": "?modal=view-invoice-document&id={id}",
+      "mountPath": "/home",
+      "label": "View Invoice Document",
+      "requiresId": true
     }
   ],
   "resources": [
@@ -5692,10 +5939,17 @@
             "tax-settings",
             "void-journal-entry",
             "delete-journal-entry",
+            "edit-reversal",
+            "remove-reversal",
             "delete-schedule-journal-entry",
             "confirm-edit",
             "tracking-tags",
             "new-tracking-tags",
+            "classifiers-journal-level",
+            "apply-tags",
+            "field-defaults",
+            "add-new-currency",
+            "apply-tax-profile",
             "inventory-item",
             "manage-tags",
             "activity-log",
@@ -5703,6 +5957,7 @@
             "import-accounts",
             "convert-amount",
             "select-journal-currency",
+            "edit-reverse-description",
             "update-exchange-rate",
             "journal-reference",
             "inventory",
@@ -5716,6 +5971,52 @@
         },
         {
           "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "leases",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "item-accounts",
+            "delete-lease",
+            "activity-log",
+            "close-out-lease",
+            "undo-close-out-lease",
+            "terminate-lease",
+            "undo-termination"
+          ]
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "loans",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "item-accounts",
+            "delete-loan",
+            "activity-log",
+            "close-out-loan",
+            "undo-close-out-loan",
+            "undo-loan-event",
+            "record-drawdown",
+            "prepay",
+            "change-rate",
+            "capitalize-interest",
+            "payment-holiday",
+            "restructure",
+            "refinance",
+            "settle-loan",
+            "forgive",
+            "convert-to-shares",
+            "reclassify-current"
+          ]
         }
       ],
       "paramsAudited": true
@@ -5804,6 +6105,7 @@
             "custom-field",
             "default-settings",
             "update-accounts",
+            "replace-linked-items",
             "update-vats",
             "update-currency",
             "add-new-currency",
@@ -5832,7 +6134,9 @@
             "catalogs",
             "new-tracking-tags",
             "signature-activity",
-            "internal-signer"
+            "internal-signer",
+            "link-existing-request",
+            "unlink-request"
           ]
         },
         {
@@ -5888,6 +6192,7 @@
             "confirm-edit-total",
             "default-settings",
             "update-accounts",
+            "replace-linked-items",
             "remove-item-level-vats",
             "schedule-details",
             "update-currency",
@@ -5912,7 +6217,10 @@
             "purchase-add-to-batch-payment",
             "edit-contact",
             "edit-line-item",
-            "assign-expenses"
+            "assign-expenses",
+            "purchase-link-existing-order",
+            "purchase-unlink-order",
+            "purchase-unlink-request"
           ]
         },
         {
@@ -5980,7 +6288,8 @@
             "sale-credit-add-to-batch-payment",
             "edit-contact",
             "bulk-edit-line-items",
-            "edit-line-item"
+            "edit-line-item",
+            "edit-text-row"
           ]
         },
         {
@@ -6040,6 +6349,7 @@
             "confirm-remove-withholding",
             "default-settings",
             "update-accounts",
+            "replace-linked-items",
             "update-vats",
             "schedule-details",
             "confirm-disable-email",
@@ -6073,7 +6383,11 @@
             "new-capsule",
             "sale-add-to-batch-payment",
             "edit-contact",
-            "edit-line-item"
+            "edit-line-item",
+            "edit-text-row",
+            "sale-link-existing-order",
+            "sale-unlink-order",
+            "sale-unlink-quote"
           ]
         },
         {
@@ -6113,6 +6427,7 @@
             "custom-field",
             "default-settings",
             "update-accounts",
+            "replace-linked-items",
             "update-vats",
             "update-currency",
             "add-new-currency",
@@ -6144,7 +6459,10 @@
             "new-capsule",
             "signature-activity",
             "internal-signer",
-            "edit-line-item"
+            "edit-line-item",
+            "edit-text-row",
+            "link-existing-quote",
+            "unlink-quote"
           ]
         },
         {
@@ -6256,6 +6574,18 @@
         },
         {
           "name": "actionId"
+        }
+      ],
+      "paramsAudited": true
+    },
+    {
+      "resource": "validate",
+      "params": [
+        {
+          "name": "action",
+          "values": [
+            "match-invoices"
+          ]
         }
       ],
       "paramsAudited": true
