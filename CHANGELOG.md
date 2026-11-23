@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.6.2] - 2026-11-23
+
+**No user-facing changes since v9.6.1.**
+
+- This release prepares Clio in the Jaz dashboard chat to work with more of the page you have open. Nothing changes for you until the dashboard supports it. Nothing changes in the MCP tools, the `clio` CLI, the Claude extension, email or Telegram.
+
 ## [9.6.1] - 2026-11-23
 
 **Clio keeps reading your attached file after it uses the page you have open.**
