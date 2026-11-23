@@ -124,8 +124,9 @@ Turn APPROVED claims into journal entries, and record books-only employee payout
   gateway transfer; `amount` / `paymentAccountResourceId` / `valueDate` required, `reference`
   auto-generated. Its `payoutFor` is `REIMBURSEMENT` / `ADVANCE` only.
 - **`search_employee_payouts`** lists payouts (filter by employee, reference, payout
-  status/type). `payoutType` values: `DIRECT_ENTRY` (books-only DCE), `DISBURSEMENT`
-  (gateway direct-debit-backed real-money payout), `REIMBURSEMENT_PAYOUT`, `ADVANCE`.
+  status/type). `payoutType` takes exactly `DIRECT_ENTRY` (a recorded payout),
+  `DISBURSEMENT` (a payment gateway payout) and `PAYRUN_PAYOUT` (a payrun's payouts,
+  recorded or through the gateway, which the other two leave out); any other value is a 422.
   `DISBURSEMENT` / `DIRECT_ENTRY` rows originate from the gateway/conversion flows and are
   **read-only here** (this surface never disburses); `payoutType` is a different axis from
   `record_employee_payout`'s `payoutFor`. **Note the two views of one row:** a payout you

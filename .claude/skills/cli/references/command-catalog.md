@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 77 command groups. Organized by domain.
+Complete reference for all 80 command groups. Organized by domain.
 
 ---
 
@@ -373,6 +373,78 @@ The register never posts rent: rent bills and payments are coded to the current 
 | `preview-rent` | `--input <file>`: checks rent ranges, saves nothing |
 | `flat-rate` | `--rate`, `--financed`, `--term`, `--payment-timing`: hire purchase flat rate to monthly discount rate |
 | `bulk-update` | `--input <file>`: partial rows, each needs `resourceId` and `reference`. Async → jobId |
+### `clio pay-types`: pay types (what a payslip pays or deducts)
+Updates are partial; a `--clear-...` flag empties a field. No natural-language search.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `get <id>` | `--json` |
+| `search` | `--name`, `--code`, `--category`, `--status`, `--debit-account-resource-id`, `--credit-account-resource-id`, `--limit`, `--offset`, `--sort`, `--order` |
+| `create` | `--name`, `--category` (EARNING, OVERTIME, ALLOWANCE, ADDITIONAL_PAYMENT, DEDUCTION, EMPLOYEE_CONTRIBUTION, EMPLOYEE_TAX, EMPLOYER_CONTRIBUTION, EMPLOYER_TAX), `--debit-account` or `--credit-account` by category, `--code`, `--description`, `--status`, `--input` |
+| `update <id>` | the same flags, `--clear-code`, `--clear-description`, `--clear-debit-account`, `--clear-credit-account`. The category locks once a payslip uses the pay type |
+| `delete <id>` | Refused while anything uses it: set `--status INACTIVE` with `update` |
+
+### `clio payrun-posting-rules`: how a payrun books its journal (not `clio posting-rules`, which is claims)
+| Subcommand | Key flags |
+|------------|-----------|
+| `get <id>` | `--json` |
+| `search` | `--name`, `--is-default`, `--inner-axis`, `--journal-date-policy`, `--net-pay-account-resource-id`, `--limit`, `--offset`, `--sort`, `--order` |
+| `create` | `--name`, `--net-pay-account`, `--inner-axis`, `--journal-date-policy`, `--reference-template`, `--line-template`, `--default`, `--input` |
+| `update <id>` | the same flags; `--default` moves the default, which cannot be unset or deleted |
+| `delete <id>` | Refused for the default rule and for a rule a profile or payrun uses |
+
+### `clio pay-profiles`: shared pay templates
+| Subcommand | Key flags |
+|------------|-----------|
+| `get <id>` | `--json` |
+| `search` | `--name`, `--pay-frequency`, `--currency-code`, `--status`, `--payrun-posting-rule-resource-id`, `--limit`, `--offset`, `--sort`, `--order` |
+| `create` | `--name`, `--frequency`, `--currency`, `--line <payTypeId[=amount]>` (repeat; no amount means set per employee), `--posting-rule`, `--proration`, `--work-week`, `--days-per-month`, `--description`, `--status`, `--input` |
+| `update <id>` | the same flags, `--clear-description`, `--clear-posting-rule`. `--line` replaces every line; frequency and currency lock once employees are on it |
+| `delete <id>` | Refused once any employee is or was on it: set `--status INACTIVE` with `update` |
+
+### `clio employee-pay-details`: an employee's pay on a pay profile from a date
+A raise is a new pay detail from the new date (the previous one ends the day before), not an update. No `get` or `delete`: read through `search`.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `search` | `--employee`, `--pay-profile`, `--in-force-on <date>` (one per employee), `--limit`, `--offset`, `--sort`, `--order` |
+| `create` | `--employee`, `--pay-profile`, `--from <date>`, `--figure <payTypeId=amount>` (repeat), `--notes`, `--input` |
+| `bulk-create` | `--input <file>` `{ "employeePayDetails": [...] }` (max 500). Rows save separately; refused rows are listed and the exit code is 1 |
+| `update <id>` | `--from`, `--to` (last day, ends the pay), `--figure` (replaces every figure), `--notes`, `--clear-to`, `--clear-notes`. Dates: the latest pay detail only |
+
+### `clio payruns`: employee pay runs (one run per period, frequency and currency)
+Drafts only change: a finalized run is refused (`PAYRUN_NOT_DRAFT`). Type, frequency and currency cannot change after create. Updates are partial; a `--clear-...` flag empties a field. No natural-language search. Period, `employeeCount` and `totalNetPayAmount` filters go through `--filter <json>`.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `get <id>` | `--json` |
+| `search` | `--name`, `--ref`, `--status`, `--payrun-type`, `--payout-status`, `--pay-frequency`, `--currency-code`, `--payment-from`, `--payment-to`, `--payslip <json>` (`{"employeeResourceId":"...","payoutStatus":["UNPAID"]}`, beside the filters), `--filter <json>`, `--limit`, `--offset`, `--sort`, `--order` |
+| `create` | `--name`, `--type` (REGULAR, OFF_CYCLE), `--frequency`, `--currency`, `--from`, `--to`, `--payment-date`, `--populate`, `--ref`, `--posting-rule`, `--template`, `--notes`, `--custom-fields`, `--idempotency-key` (default generated), `--input` |
+| `update <id>` | `--name`, `--from`, `--to`, `--payment-date`, `--ref`, `--posting-rule`, `--template`, `--notes`, `--clear-ref`, `--clear-notes`, `--clear-posting-rule`, `--clear-template`. A new period leaves payslips as they are: run `payslips refresh-payrun` |
+| `delete <id>` | New drafts only; a run finalized then unposted must be voided (`void`) |
+| `bulk-delete` | `--ids <list>`; a 202 job, poll with `clio background-jobs get <jobId>` |
+| `add-employees <id>`, `remove-employees <id>` | `--employees <list>`. An employee with no pay gets an empty payslip: give it lines with `save-lines` |
+| `save-lines <id>` | `--payslip <id>` with repeated `--line <payTypeId=amount>` (they REPLACE the payslip's lines), `--notes`, `--clear-notes`; several payslips or kept lines: `--input` `{ "payslips": [...] }` |
+| `populate <id>` | Fills from pay profiles; existing payslips are not changed. Lists who was added and skipped |
+| `preview-populate <id>` | The same, saving nothing |
+| `validate <id>`, `preview-journal <id>` | `--journal-date`. Check a draft as finalize would and show the journal; save nothing. Problems print as a list |
+| `finalize <id>` | `--journal-date`. Posts the journal; a finalized run is unchanged. Validate first |
+| `bulk-finalize` | `--ids <list>` (`--journal-date`, or `--input` with a date per run); a 202 job, poll with `clio background-jobs get <jobId>` |
+| `unpost <id>` | Back to draft. Refused while a payout is live: void it first |
+| `void <id>` | `--reason <text>` (required). Cancels for good; a draft never posted is refused: delete it |
+| `preview-payouts <id>` | `--account <id>` (bank or cash, run currency), `--value-date`, `--ref`, `--notes`, repeated `--payslip <id[=amount]>` (none: every payslip owed, in full). Saves nothing and moves no money |
+| `record-payouts <id>` | The same flags plus `--hash` (retry key, generated if omitted). Records money paid OUTSIDE Jaz and moves none; always a record, never a gateway payment. A 202 job. Sending again after it finished records again |
+| `void-payout <journalId>` | `--reason <text>` (required). The journal id is in the run's `payouts` (`payruns get`) |
+
+### `clio payslips`: payslips of payruns
+| Subcommand | Key flags |
+|------------|-----------|
+| `get <id>` | Lines, amounts and the PDF link (`generatedDocuments`) |
+| `search` | `--payrun`, `--employee`, `--employee-name`, `--pay-profile`, `--payout-status`, `--payrun-status`, `--limit`, `--offset`, `--sort`, `--order` |
+| `refresh <id>` | Rebuild one draft payslip from current pay; hand-added lines stay |
+| `refresh-payrun <payrunId>` | `--payslips <list>` (default all). Payslips that cannot be refreshed are listed and the exit code is 1 |
+| `generate <payrunId>` | `--payslips <list>` (default all). Makes the PDFs of a finalized run again; a 202 job |
+
 ### `clio loans`: Loans (borrowings), term and on demand
 The register never posts cash: record the drawdown and every installment yourself. `--rate` and `annualInterestRate` are percent per YEAR. Events go forward only and only the latest can be undone; `--preview` calculates and saves nothing.
 
@@ -804,7 +876,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 477 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 521 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

@@ -4,11 +4,11 @@ Jaz accounting guidance for this workspace. Load the installed Jaz skills for de
 
 ## Discovery
 
-Jaz exposes **477 tools across 56 namespaces**. Your tool list shows **3, 56, or 477** entries depending on packaging; **never infer capability from its length.**
+Jaz exposes **521 tools across 61 namespaces**. Your tool list shows **3, 61, or 521** entries depending on packaging; **never infer capability from its length.**
 
 - **3**: `search_tools(query)` → `describe_tools(names)` → `execute_tool(name, args)`. Empty query returns the namespace map.
-- **56**: namespace routers; call one with `{ operation, arguments }`.
-- **477**: call operations directly by name.
+- **61**: namespace routers; call one with `{ operation, arguments }`.
+- **521**: call operations directly by name.
 
 **Before telling the user Jaz cannot do something, call `describe_capabilities`** (the capability map, on all three).
 
@@ -26,6 +26,8 @@ No API key needed: `describe_capabilities`, `calculate` (marked `Offline.`), and
 ## Transactions: registers first, then calculators
 
 A lease, hire purchase, loan, prepaid expense, deferred revenue or fixed asset kept on the books goes in its register (`leases`, `loans`, `loan_events`, `deferrals`, `fixed_assets`, `fixed_asset_schedules`, `register_reports`), which posts the periodic entries itself, never cash. On a 403 (plan or role) do not fall back to journals: say it is not available, name the alternative (a calculated schedule with manual journals), and wait for the user to ask.
+
+Payroll (`payrun_settings`, `payruns`, `payrun_processing`): a raise is a new pay detail; payout tools only record a payment made outside Jaz, and a gateway payment is made in the web app.
 
 For what-ifs and for ECL, IAS 37 provisions, fixed deposits, accrued expenses, leave accrual and dividends, **run the calculator, then post its steps**:
 

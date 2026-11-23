@@ -1,5 +1,14 @@
 # Changelog
 
+## [9.7.0] - 2026-11-23
+
+**Clio can run payroll: payruns, payslips and pay setup.**
+
+- You can now ask Clio to create a payrun for a period and fill it with your employees, add or remove employees, edit the lines on a payslip, and refresh payslips from each employee's current pay. Clio can also check what blocks a payrun from being finalized, preview the journal it will post, finalize it, and void it.
+- Clio can list and read payruns and payslips, and set up the pay behind them: pay types, pay profiles and each employee's pay details, in bulk where you have several.
+- Clio can read and change the payrun posting rule, which decides the accounts a payrun posts to.
+- You can ask Clio to record payouts made outside Jaz, such as a bank transfer you already sent, and to void a payout. This records the payout in your books only. No money moves.
+
 ## [9.6.3] - 2026-11-23
 
 **Dashboard links from Clio match the current Jaz screens.**

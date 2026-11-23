@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 582 spec paths and 731 spec operations and is the authoritative list; check it before concluding
+> carries 618 spec paths and 775 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -555,6 +555,36 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | POST | `/terminate/leases/:resourceId` | Take off the books at a month-end, posting the gain or loss |
 | POST | `/undo-termination/leases/:resourceId` | Undo a termination; no body |
 | POST | `/lease-types/search` | Lease types; `query` answers 400 |
+### Payruns, payslips, payrun settings and employee pay
+Needs the Payruns module (402 without it) and an Employees admin user. Searches take `filter` only (`query` answers 400).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/pay-types`, `/pay-types/search` | Create, search pay types (what a payslip pays or deducts) |
+| GET, PUT, DELETE | `/pay-types/:resourceId` | Get, partial update, delete (`PAY_TYPE_IN_USE`: set INACTIVE) |
+| POST | `/payrun-posting-rules`, `/payrun-posting-rules/search` | Create, search payrun posting rules (not claim posting rules) |
+| GET, PUT, DELETE | `/payrun-posting-rules/:resourceId` | Get, partial update, delete; the default cannot be unset or deleted |
+| POST | `/pay-profiles`, `/pay-profiles/search` | Create, search pay profiles (frequency, currency, lines) |
+| GET, PUT, DELETE | `/pay-profiles/:resourceId` | Get, partial update (`payTypeLines` replaces all), delete |
+| POST | `/employee-pay-details`, `/employee-pay-details/search` | Create (a raise is a new one), search (`inForceOn`) |
+| POST | `/employee-pay-details/bulk-create` | Up to 500; answers 200 with a result per row |
+| PUT | `/employee-pay-details/:resourceId` | Correct in place or end the pay; no GET or DELETE |
+| POST | `/payruns`, `/payruns/search` | Create a draft payrun (`populate`, `idempotencyKey`), search (`payslip` beside `filter`) |
+| GET, PUT, DELETE | `/payruns/:resourceId` | Get with payslips, partial update (draft), delete a new draft |
+| POST | `/payruns/bulk/delete` | Delete several new drafts; a 202 job |
+| POST | `/payruns/:resourceId/employees`, `/payruns/:resourceId/employees/remove` | Add (empty payslip if no pay), remove employees |
+| PUT | `/payruns/:resourceId/lines` | Replace payslips' lines (draft) |
+| POST | `/payruns/:resourceId/populate`, `/payruns/:resourceId/populate/preview` | Fill from pay profiles; preview saves nothing |
+| POST | `/payruns/:resourceId/validate`, `/payruns/:resourceId/preview-journal` | Check a draft and preview its journal; a 200 reply with `valid` and `errors` |
+| POST | `/payruns/:resourceId/finalize`, `/payruns/bulk/finalize` | Post the journal (idempotent); several as a 202 job |
+| POST | `/payruns/:resourceId/unpost`, `/payruns/:resourceId/void` | Back to draft (no body); cancel for good (`voidReason`) |
+| POST | `/payruns/:resourceId/payouts/preview`, `/payruns/:resourceId/payouts` | Preview and record payouts (`payoutMethod` `RECORD` only in clio); the second is a 202 job |
+| POST | `/payruns/payouts/:journalResourceId/void` | Void a recorded payout (`voidReason`) |
+| POST | `/payslips/search`; GET `/payslips/:resourceId` | Search, get (PDF link in `generatedDocuments`) |
+| POST | `/payslips/:resourceId/refresh`, `/payruns/:resourceId/payslips/refresh` | Rebuild one or several draft payslips from current pay (the second is not in the public spec yet) |
+| POST | `/payruns/:resourceId/payslips/generate` | Make PDFs again for a finalized run; a 202 job |
+
+
 ### Loans
 | Method | Path | Description |
 |--------|------|-------------|

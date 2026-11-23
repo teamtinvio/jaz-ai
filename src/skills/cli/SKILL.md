@@ -1,6 +1,6 @@
 ---
 name: jaz-cli
-version: 9.6.3
+version: 9.7.0
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -8,7 +8,7 @@ description: >-
   precedence, output formats, entity resolution, and common workflow patterns.
   Also use when the user asks how to use clio, what commands are available, or
   how to automate accounting tasks from the command line. Covers all
-  77 command groups and 477 tools, including employee-expense claims.
+  80 command groups and 521 tools, including employee-expense claims.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 ---
@@ -17,7 +17,7 @@ compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 
 > **Audience note:** for power users and CI/automation. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output. For day-to-day accounting inside Claude Desktop / Cowork, the MCP tools cover the common flows without dropping to the CLI.
 
-You are working with **Clio** (`jaz-clio`), the CLI for the Jaz accounting platform. 77 command groups, 13 calculators, 12 job playbooks (jaz-jobs skill), 477 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
+You are working with **Clio** (`jaz-clio`), the CLI for the Jaz accounting platform. 80 command groups, 13 calculators, 12 job playbooks (jaz-jobs skill), 521 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
 
 ## When to Use This Skill
 
@@ -271,6 +271,9 @@ Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $
 **Employee Claims & Settings**: `claims` (lifecycle + `create` + `from-attachment` + convert + payout), `employees`, `claim-types`, `claim-profiles`, `posting-rules`
 
 **Fixed Assets & Inventory**: `fixed-assets` (alias: `fa`), `inventory` (alias: `inv`)
+
+**Payruns (setup)**: `pay-types`, `payrun-posting-rules` (not `posting-rules`, which is claims), `pay-profiles`, `employee-pay-details` (a raise is a new pay detail, not an update)
+**Payruns**: `payruns` (create `--populate`, search `--payslip <json>`, add/remove employees, `save-lines`, `populate`, `validate`, `preview-journal`, `finalize`, `bulk-finalize`, `unpost`, `void`, `preview-payouts`, `record-payouts` (books only), `void-payout`), `payslips` (search, get, `refresh`, `refresh-payrun`, `generate`)
 
 **Subscriptions & Schedulers**: `subscriptions` (alias: `subs`), `schedulers`
 

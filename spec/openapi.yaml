@@ -1981,6 +1981,23 @@
       ],
       "type": "object"
     },
+    "BulkCreateEmployeePayDetailsRequest": {
+      "properties": {
+        "employeePayDetails": {
+          "description": "Pay details to add, up to 500. Each is saved on its own and gets its own result.",
+          "items": {
+            "$ref": "#/definitions/CreateEmployeePayDetailRequest"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "employeePayDetails"
+      ],
+      "type": "object"
+    },
     "BulkDeleteBatchPaymentsClientRequest": {
       "properties": {
         "resourceIds": {
@@ -2021,6 +2038,22 @@
             "type": "string"
           },
           "maxItems": 200,
+          "type": "array"
+        }
+      },
+      "required": [
+        "resourceIds"
+      ],
+      "type": "object"
+    },
+    "BulkDeletePayrunsRequest": {
+      "properties": {
+        "resourceIds": {
+          "description": "Resource IDs of the DRAFT payruns to delete, each listed once.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
           "type": "array"
         }
       },
@@ -2090,6 +2123,43 @@
       },
       "required": [
         "resourceIds"
+      ],
+      "type": "object"
+    },
+    "BulkFinalizePayrunItem": {
+      "properties": {
+        "journalValueDate": {
+          "description": "Journal date, in YYYY-MM-DD format (organization timezone), whatever the posting rule's journalDatePolicy. Omitted means the policy's date; a CUSTOM policy needs this date.",
+          "example": "2026-09-30",
+          "type": "string"
+        },
+        "payrunPostingRuleResourceId": {
+          "description": "Resource ID of the payrun posting rule to post this payrun's journal with, ahead of the payrun's own rule, its payslips' pay profiles' rule and the organization's default. Finalizing saves it as the payrun's posting rule. Omitted means that order.",
+          "type": "string"
+        },
+        "payrunResourceId": {
+          "description": "Resource ID of the payrun.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payrunResourceId"
+      ],
+      "type": "object"
+    },
+    "BulkFinalizePayrunsRequest": {
+      "properties": {
+        "payruns": {
+          "description": "Payruns to finalize, each listed once.",
+          "items": {
+            "$ref": "#/definitions/BulkFinalizePayrunItem"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "payruns"
       ],
       "type": "object"
     },
@@ -9368,6 +9438,41 @@
       ],
       "type": "object"
     },
+    "CreateEmployeePayDetailRequest": {
+      "properties": {
+        "effectiveFromDate": {
+          "description": "First day the pay detail applies, in YYYY-MM-DD format (organization timezone). It must be after the start of the employee's latest pay detail, which then ends the day before.",
+          "example": "2026-09-01",
+          "type": "string"
+        },
+        "employeeResourceId": {
+          "description": "Resource ID of an active employee of the organization.",
+          "type": "string"
+        },
+        "notes": {
+          "description": "Notes on the pay detail, up to 500 characters.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "payProfileResourceId": {
+          "description": "Resource ID of an ACTIVE pay profile of the organization.",
+          "type": "string"
+        },
+        "payTypeInputs": {
+          "description": "The employee's own figures, each pay type once. A figure the profile leaves to each employee may be left out; populating a payrun then skips the employee until it is filled in.",
+          "items": {
+            "$ref": "#/definitions/EmployeePayDetailFigure"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "effectiveFromDate",
+        "employeeResourceId",
+        "payProfileResourceId"
+      ],
+      "type": "object"
+    },
     "CreateFixedAssetRequest": {
       "properties": {
         "accumulatedDepreciationAccountResourceId": {
@@ -10743,6 +10848,358 @@
       "required": [
         "reportType",
         "templateName"
+      ],
+      "type": "object"
+    },
+    "CreatePayProfileRequest": {
+      "properties": {
+        "currencyCode": {
+          "description": "Currency of the payruns the profile's employees go into (ISO 4217): the organization's base currency or one of its active currencies.",
+          "example": "SGD",
+          "type": "string"
+        },
+        "daysPerMonth": {
+          "description": "Fixed number of days a month a line is divided by, from 1 to 31. Required for FIXED_DAYS; ignored otherwise.",
+          "example": 26,
+          "maximum": 31,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "description": {
+          "description": "Description of the pay profile, up to 500 characters.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name, unique in the organization (case-insensitive). Up to 255 characters.",
+          "example": "SG Monthly",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "payFrequency": {
+          "description": "How often the profile's employees are paid. A payrun takes only employees whose profile has its frequency.",
+          "enum": [
+            "WEEKLY",
+            "FORTNIGHTLY",
+            "SEMI_MONTHLY",
+            "MONTHLY"
+          ],
+          "type": "string"
+        },
+        "payTypeLines": {
+          "description": "The recurring pay types, in payslip order, each pay type once. Omitted means no lines.",
+          "items": {
+            "$ref": "#/definitions/PayProfileLineRequest"
+          },
+          "type": "array"
+        },
+        "payrunPostingRuleResourceId": {
+          "description": "Resource ID of the payrun posting rule the profile's payruns use. Omitted means the organization's default rule.",
+          "type": "string"
+        },
+        "prorationType": {
+          "description": "How populating a payrun counts days when it pro-rates a line: CALENDAR_DAYS (every day, out of the period's calendar days), WORKING_DAYS (the days of the work week, out of the period's working days) or FIXED_DAYS (the days of the work week, out of daysPerMonth; MONTHLY profiles only). Omitted means CALENDAR_DAYS.",
+          "enum": [
+            "CALENDAR_DAYS",
+            "WORKING_DAYS",
+            "FIXED_DAYS"
+          ],
+          "type": "string"
+        },
+        "status": {
+          "description": "Pay profile status. Omitted means ACTIVE. Populating a payrun skips the employees of an INACTIVE profile.",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ],
+          "type": "string"
+        },
+        "workWeek": {
+          "description": "Days worked a week: 5 (Monday to Friday), 5.5 (Monday to Friday and half of Saturday) or 6 (Monday to Saturday). Required for WORKING_DAYS and FIXED_DAYS; ignored for CALENDAR_DAYS.",
+          "example": 5,
+          "type": "number"
+        }
+      },
+      "required": [
+        "currencyCode",
+        "name",
+        "payFrequency"
+      ],
+      "type": "object"
+    },
+    "CreatePayTypeRequest": {
+      "properties": {
+        "calculationType": {
+          "description": "How a payslip line's amount is set. AMOUNT, the amount entered, is the only method. Omitted means AMOUNT.",
+          "enum": [
+            "AMOUNT"
+          ],
+          "type": "string"
+        },
+        "category": {
+          "description": "What the pay type is, which decides how its payslip lines post. EARNING, OVERTIME, ALLOWANCE and ADDITIONAL_PAYMENT debit an account and add to gross and net pay. DEDUCTION, EMPLOYEE_CONTRIBUTION and EMPLOYEE_TAX credit an account and reduce net pay. EMPLOYER_CONTRIBUTION and EMPLOYER_TAX debit one account and credit another, changing neither gross nor net pay.",
+          "enum": [
+            "EARNING",
+            "OVERTIME",
+            "ALLOWANCE",
+            "ADDITIONAL_PAYMENT",
+            "DEDUCTION",
+            "EMPLOYEE_CONTRIBUTION",
+            "EMPLOYEE_TAX",
+            "EMPLOYER_CONTRIBUTION",
+            "EMPLOYER_TAX"
+          ],
+          "type": "string"
+        },
+        "code": {
+          "description": "Short code for imports and API callers, unique in the organization (case-insensitive). Up to 50 characters.",
+          "example": "BASIC",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "creditAccountResourceId": {
+          "description": "Resource ID of the account a payslip line of this type credits. Required for DEDUCTION, EMPLOYEE_CONTRIBUTION, EMPLOYEE_TAX, EMPLOYER_CONTRIBUTION and EMPLOYER_TAX; leave it out for the other categories.",
+          "type": "string"
+        },
+        "debitAccountResourceId": {
+          "description": "Resource ID of the account a payslip line of this type debits. Required for EARNING, OVERTIME, ALLOWANCE, ADDITIONAL_PAYMENT, EMPLOYER_CONTRIBUTION and EMPLOYER_TAX; leave it out for the other categories.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of the pay type, up to 500 characters.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name, unique in the organization (case-insensitive). Up to 255 characters.",
+          "example": "Base Salary",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "status": {
+          "description": "Pay type status. Omitted means ACTIVE.",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "category",
+        "name"
+      ],
+      "type": "object"
+    },
+    "CreatePayrunPayoutsRequest": {
+      "properties": {
+        "disbursementProfileResourceId": {
+          "description": "Resource ID of the disbursement profile the payment gateway pays from. Required for DISBURSE (PAYRUN_PAYOUT_PROFILE_REQUIRED); not used for RECORD.",
+          "type": "string"
+        },
+        "hash": {
+          "description": "Key that makes the request safe to retry: sending it again with the same hash while its job runs returns that job, and a DISBURSE payout already sent with this hash is never sent again.",
+          "example": "9f1c2b7e-4d55-4b8e-9f3a-2c6d1e0b7a44",
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Internal notes on each payout journal, up to 1000 characters. RECORD only; a DISBURSE payout's journal carries no notes.",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "paymentAccountResourceId": {
+          "description": "Resource ID of the bank or cash account the money is paid from, in the payrun currency. For DISBURSE, the disbursement profile's own account. Required to create payouts (PAYRUN_PAYOUT_ACCOUNT_REQUIRED); a preview without it works out everything else and leaves the payment account's checks out.",
+          "type": "string"
+        },
+        "payoutMethod": {
+          "description": "How the net pay is paid out. RECORD books money paid outside Jaz, such as a bank transfer: each payout is a journal that debits the net pay account and credits paymentAccountResourceId. DISBURSE pays each employee through the payment gateway from disbursementProfileResourceId, and books the same journal once the gateway confirms the payment.",
+          "enum": [
+            "RECORD",
+            "DISBURSE"
+          ],
+          "type": "string"
+        },
+        "payslips": {
+          "description": "Payslips to pay, each listed once. Omitted or empty means every payslip with net pay still owed, each in full.",
+          "items": {
+            "$ref": "#/definitions/PayrunPayoutPayslipRequest"
+          },
+          "type": "array"
+        },
+        "reference": {
+          "description": "Reference for the payouts whose payslip gives none. Omitted means the payrun's reference, else its name. For DISBURSE, use letters and digits only: some payment gateways refuse other characters.",
+          "example": "SEP2026",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "valueDate": {
+          "description": "Day the money is paid, in YYYY-MM-DD format (organization timezone). Omitted means the payrun's payment date.",
+          "example": "2026-09-30",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payoutMethod"
+      ],
+      "type": "object"
+    },
+    "CreatePayrunPostingRuleRequest": {
+      "properties": {
+        "innerAxis": {
+          "description": "How the journal lines merge: BY_PAY_TYPE (one line per account and pay type), BY_CATEGORY (one line per account and pay type category) or BY_ACCOUNT (one line per account). A debit and a credit never merge. Omitted means BY_PAY_TYPE.",
+          "enum": [
+            "BY_PAY_TYPE",
+            "BY_CATEGORY",
+            "BY_ACCOUNT"
+          ],
+          "type": "string"
+        },
+        "isDefault": {
+          "description": "When true, this rule becomes the organization's default and the previous default loses the flag. The organization's first rule is always its default.",
+          "type": "boolean"
+        },
+        "journalDatePolicy": {
+          "description": "The journal's date: PAYMENT_DATE (the run's payment date), PERIOD_END (the last day of the run's period) or CUSTOM (a date given when the run is finalized). Omitted means PAYMENT_DATE.",
+          "enum": [
+            "PAYMENT_DATE",
+            "PERIOD_END",
+            "CUSTOM"
+          ],
+          "type": "string"
+        },
+        "journalReferenceTemplate": {
+          "description": "The journal reference, up to 255 characters (PAYRUN_POSTING_RULE_REFERENCE_TOO_LONG), with the tokens {payrunName}, {payrunReference} (the payrun's reference, else its name), {period}, {periodStart}, {periodEnd} and {paymentDate}; any other token is refused (PAYRUN_POSTING_RULE_TEMPLATE_UNKNOWN_TOKEN). Omitted or blank means \"PAYRUN-{period}-{payrunName}\".",
+          "example": "PAYRUN-{period}-{payrunName}",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "lineDescriptionTemplate": {
+          "description": "Each journal line's description, up to 500 characters, with the reference's tokens plus {payType}, {category} and {account}; any other token is refused (PAYRUN_POSTING_RULE_TEMPLATE_UNKNOWN_TOKEN). Omitted or blank means the default of innerAxis: \"{payType} · {period}\" for BY_PAY_TYPE, \"{category} · {period}\" for BY_CATEGORY or \"{account} · {period}\" for BY_ACCOUNT. A written description is kept as typed.",
+          "example": "{payType} · {period}",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name, unique in the organization (case-insensitive). Up to 255 characters.",
+          "example": "Standard",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "netPayAccountResourceId": {
+          "description": "Resource ID of the account net pay is credited to, such as Payroll Payable. It must be an active account of the organization, not a controlled account, and not a claim profile's employee balance account.",
+          "type": "string"
+        },
+        "outerAxis": {
+          "description": "How many journals a finalized payrun posts. ONE_BATCH, one journal for the whole run, is the only value. Omitted means ONE_BATCH.",
+          "enum": [
+            "ONE_BATCH"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "netPayAccountResourceId"
+      ],
+      "type": "object"
+    },
+    "CreatePayrunRequest": {
+      "properties": {
+        "attachments": {
+          "description": "Files to attach to the payrun. Leave resourceId out: each one is a new attachment.",
+          "items": {
+            "$ref": "#/definitions/PayrunAttachmentRequest"
+          },
+          "type": "array"
+        },
+        "currencyCode": {
+          "description": "Currency of the payrun (ISO 4217): the organization's base currency or one of its active currencies. Only employees whose pay profile is in this currency join it.",
+          "example": "SGD",
+          "type": "string"
+        },
+        "customFields": {
+          "description": "Header-level custom field values.",
+          "items": {
+            "$ref": "#/definitions/CustomField"
+          },
+          "type": "array"
+        },
+        "idempotencyKey": {
+          "description": "Key that makes the create safe to retry, up to 255 characters: a create repeated with the same key returns the payrun already created and does not populate it again. The repeat must ask for the same payrun (name, type, frequency, period, payment date, and currency, and the reference and posting rule when given); any other create with a key already used is refused with PAYRUN_IDEMPOTENCY_KEY_IN_USE.",
+          "example": "payrun-2026-09-sgd",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Internal notes, visible only inside the organization. Up to 500 characters.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name of the payrun, up to 255 characters.",
+          "example": "September 2026 Salaries",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "payFrequency": {
+          "description": "Pay frequency of the payrun. Only employees whose pay profile has this frequency join it.",
+          "enum": [
+            "WEEKLY",
+            "FORTNIGHTLY",
+            "SEMI_MONTHLY",
+            "MONTHLY"
+          ],
+          "type": "string"
+        },
+        "paymentDate": {
+          "description": "Payment date, in YYYY-MM-DD format (organization timezone). It is the default date of the payrun's journal.",
+          "example": "2026-09-30",
+          "type": "string"
+        },
+        "payrunPostingRuleResourceId": {
+          "description": "Resource ID of the payrun posting rule used when the payrun is finalized. Omitted means the rule its payslips' pay profiles use.",
+          "type": "string"
+        },
+        "payrunType": {
+          "description": "Kind of payrun: REGULAR (the run for a pay frequency, currency and period) or OFF_CYCLE (an extra run beside it, such as a bonus or a correction to a locked period). Several REGULAR drafts may share a frequency, currency and period, but only one of them can be finalized. Omitted means REGULAR.",
+          "enum": [
+            "REGULAR",
+            "OFF_CYCLE"
+          ],
+          "type": "string"
+        },
+        "periodEndDate": {
+          "description": "Last day of the period the payrun pays for, in YYYY-MM-DD format (organization timezone). On or after periodStartDate.",
+          "example": "2026-09-30",
+          "type": "string"
+        },
+        "periodStartDate": {
+          "description": "First day of the period the payrun pays for, in YYYY-MM-DD format (organization timezone).",
+          "example": "2026-09-01",
+          "type": "string"
+        },
+        "populate": {
+          "description": "When true, the new payrun is populated at once, as Populate Payrun does. Omitted means the payrun starts without payslips.",
+          "type": "boolean"
+        },
+        "reference": {
+          "description": "Payrun reference, up to 255 characters. Setting one moves the organization's payrun numbering on, so the next proposed reference is the following number. Omitted means no reference.",
+          "example": "",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "templateResourceId": {
+          "description": "Resource ID of the payslip PDF template. Omitted means the organization's default payslip template.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "currencyCode",
+        "name",
+        "payFrequency",
+        "paymentDate",
+        "periodEndDate",
+        "periodStartDate"
       ],
       "type": "object"
     },
@@ -13953,6 +14410,105 @@
       ],
       "type": "object"
     },
+    "EmployeePayDetailFigure": {
+      "properties": {
+        "amount": {
+          "description": "Amount for one whole pay period, in the profile currency. Not negative.",
+          "example": 6000,
+          "minimum": 0,
+          "type": "number"
+        },
+        "payTypeId": {
+          "description": "Resource ID of the pay type. A pay type on the profile overrides the profile's amount; any other pay type is an extra for this employee only and must be ACTIVE when it is added.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "payTypeId"
+      ],
+      "type": "object"
+    },
+    "EmployeePayDetailFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "employeeResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by employee resource ID."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "payProfileResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by pay profile resource ID."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by resource ID."
+        }
+      },
+      "type": "object"
+    },
+    "EmployeePayDetailSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "enum": [
+              "resourceId",
+              "employeeResourceId",
+              "payProfileResourceId",
+              "effectiveFromDate",
+              "effectiveToDate",
+              "createdAt",
+              "updatedAt"
+            ],
+            "type": "string"
+          },
+          "maxItems": 7,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
     "EmployeePayoutFilter": {
       "properties": {
         "and": {
@@ -13980,14 +14536,25 @@
           "type": "object"
         },
         "payoutStatus": {
-          "description": "Filter by payout status.",
+          "description": "Filter by payout status: RECORDED, COMPLETED, IN_PROGRESS, PENDING_USER_ACTION, CANCEL_REQUESTED, CANCELLED,\nNEEDS_REVIEW or MINT_FAILED_MANUAL. ACTION_NEEDED matches PENDING_USER_ACTION and NEEDS_REVIEW.",
           "items": {
+            "enum": [
+              "RECORDED",
+              "COMPLETED",
+              "CANCELLED",
+              "IN_PROGRESS",
+              "PENDING_USER_ACTION",
+              "CANCEL_REQUESTED",
+              "NEEDS_REVIEW",
+              "MINT_FAILED_MANUAL",
+              "ACTION_NEEDED"
+            ],
             "type": "string"
           },
           "type": "array"
         },
         "payoutType": {
-          "description": "Filter by payout type.",
+          "description": "Filter by payout type: DIRECT_ENTRY for a recorded payout, DISBURSEMENT for a payment gateway payout,\nPAYRUN_PAYOUT for a payrun's payouts, recorded or through the payment gateway, which the other two leave out.",
           "items": {
             "type": "string"
           },
@@ -14867,6 +15434,20 @@
         "order",
         "sortBy"
       ],
+      "type": "object"
+    },
+    "FinalizePayrunRequest": {
+      "properties": {
+        "journalValueDate": {
+          "description": "Journal date, in YYYY-MM-DD format (organization timezone), whatever the posting rule's journalDatePolicy. Omitted means the policy's date: the payment date (PAYMENT_DATE) or the last day of the period (PERIOD_END); a CUSTOM policy has none, so it needs this date.",
+          "example": "2026-09-30",
+          "type": "string"
+        },
+        "payrunPostingRuleResourceId": {
+          "description": "Resource ID of the payrun posting rule to post the journal with, ahead of the payrun's own rule, its payslips' pay profiles' rule and the organization's default. Finalizing saves it as the payrun's posting rule. Omitted means that order.",
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "FixedAllocationRequest": {
@@ -15917,6 +16498,18 @@
         "bankStatementEntryResourceIds",
         "recommendationType"
       ],
+      "type": "object"
+    },
+    "GeneratePayslipsRequest": {
+      "properties": {
+        "payslipResourceIds": {
+          "description": "Resource IDs of the payslips to make PDFs for. Omitted or empty means every payslip of the payrun.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
       "type": "object"
     },
     "GenerateProfitAndLossReportRequest": {
@@ -20047,6 +20640,248 @@
       },
       "type": "object"
     },
+    "PayProfileFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "currencyCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by currency code (ISO 4217)."
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by name."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "payFrequency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by pay frequency, for example MONTHLY."
+        },
+        "payrunPostingRuleResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payrun posting rule resource ID."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by resource ID."
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by status, ACTIVE or INACTIVE."
+        }
+      },
+      "type": "object"
+    },
+    "PayProfileLineRequest": {
+      "properties": {
+        "amount": {
+          "description": "What everyone on the profile gets for this pay type in one pay period, in the profile currency, unless their pay detail says otherwise. Not negative. Omit it to set the amount for each employee on their pay detail, as for a base salary.",
+          "example": 200,
+          "minimum": 0,
+          "type": "number"
+        },
+        "payTypeId": {
+          "description": "Resource ID of a pay type of the organization. A pay type new to the profile must be ACTIVE.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payTypeId"
+      ],
+      "type": "object"
+    },
+    "PayProfileSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "enum": [
+              "resourceId",
+              "name",
+              "payFrequency",
+              "currencyCode",
+              "status",
+              "createdAt",
+              "updatedAt"
+            ],
+            "type": "string"
+          },
+          "maxItems": 7,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
+    "PayTypeFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "calculationType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by calculation type."
+        },
+        "category": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by category, for example EARNING or DEDUCTION."
+        },
+        "code": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by code."
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "creditAccountResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by credit account resource ID."
+        },
+        "debitAccountResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by debit account resource ID."
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by name."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by resource ID."
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by status, ACTIVE or INACTIVE."
+        }
+      },
+      "type": "object"
+    },
+    "PayTypeSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "enum": [
+              "resourceId",
+              "name",
+              "code",
+              "category",
+              "status",
+              "createdAt",
+              "updatedAt"
+            ],
+            "type": "string"
+          },
+          "maxItems": 7,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
     "PaymentAdjustment": {
       "properties": {
         "adjustmentAccountResourceId": {
@@ -20385,6 +21220,625 @@
       },
       "required": [
         "bankStatementEntryResourceId"
+      ],
+      "type": "object"
+    },
+    "PayrunAttachmentRequest": {
+      "properties": {
+        "deleted": {
+          "description": "When true, removes the attachment from the payrun.",
+          "type": "boolean"
+        },
+        "fileId": {
+          "description": "Storage file ID.",
+          "type": "string"
+        },
+        "fileName": {
+          "description": "Display file name.",
+          "type": "string"
+        },
+        "fileType": {
+          "description": "File type of the attachment.",
+          "enum": [
+            "CSV",
+            "EML",
+            "HEIC",
+            "JPEG",
+            "JPG",
+            "MSG",
+            "PDF",
+            "PNG",
+            "RAR",
+            "TIFF",
+            "TXT",
+            "XLS",
+            "XLSX",
+            "ZIP"
+          ],
+          "type": "string"
+        },
+        "fileUrl": {
+          "description": "URL of the stored file.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of an existing attachment. Omit it to add the file; set deleted to true to remove it.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PayrunDateExpression": {
+      "properties": {
+        "between": {
+          "description": "Match payruns between these two days, both included (exactly two, in YYYY-MM-DD format).",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "eq": {
+          "description": "Match payruns on this day, in YYYY-MM-DD format.",
+          "type": "string"
+        },
+        "gt": {
+          "description": "Match payruns after this day, in YYYY-MM-DD format.",
+          "type": "string"
+        },
+        "gte": {
+          "description": "Match payruns on or after this day, in YYYY-MM-DD format.",
+          "type": "string"
+        },
+        "lt": {
+          "description": "Match payruns before this day, in YYYY-MM-DD format.",
+          "type": "string"
+        },
+        "lte": {
+          "description": "Match payruns on or before this day, in YYYY-MM-DD format.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PayrunEmployeesRequest": {
+      "properties": {
+        "employeeResourceIds": {
+          "description": "Resource IDs of the employees, each listed once.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "employeeResourceIds"
+      ],
+      "type": "object"
+    },
+    "PayrunFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "currencyCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by currency code (ISO 4217)."
+        },
+        "employeeCount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/IntExpression"
+            }
+          ],
+          "description": "Filter by the number of employees in the payrun."
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by name."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "payFrequency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by pay frequency, for example MONTHLY."
+        },
+        "paymentDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayrunDateExpression"
+            }
+          ],
+          "description": "Filter by payment date, in YYYY-MM-DD format. Each date is a whole day in UTC."
+        },
+        "payoutStatus": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payout status: UNPAID, PARTIALLY_PAID or PAID."
+        },
+        "payrunPostingRuleResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payrun posting rule resource ID."
+        },
+        "payrunType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payrun type, REGULAR or OFF_CYCLE."
+        },
+        "periodEndDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayrunDateExpression"
+            }
+          ],
+          "description": "Filter by the last day of the pay period, in YYYY-MM-DD format. Each date is a whole day in UTC."
+        },
+        "periodStartDate": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayrunDateExpression"
+            }
+          ],
+          "description": "Filter by the first day of the pay period, in YYYY-MM-DD format. Each date is a whole day in UTC."
+        },
+        "reference": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by reference."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by resource ID."
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by status: DRAFT, FINALIZED or VOID."
+        },
+        "totalNetPayAmount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BigDecimalExpression"
+            }
+          ],
+          "description": "Filter by the payrun's total net pay, in the payrun currency."
+        }
+      },
+      "type": "object"
+    },
+    "PayrunPayoutPayslipRequest": {
+      "properties": {
+        "amount": {
+          "description": "Amount to pay in the payrun currency: more than zero, at most 2 decimal places, and at most what the payslip still owes. Omitted means all it still owes.",
+          "example": 4960,
+          "type": "number"
+        },
+        "payslipResourceId": {
+          "description": "Resource ID of the payslip.",
+          "type": "string"
+        },
+        "reference": {
+          "description": "This payout's reference, which the payment gateway sends with the payment for DISBURSE. Omitted means the request's reference.",
+          "example": "SEP2026JANE",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "payslipResourceId"
+      ],
+      "type": "object"
+    },
+    "PayrunPayslipFilter": {
+      "properties": {
+        "employeeResourceId": {
+          "description": "Resource ID of the employee.",
+          "type": "string"
+        },
+        "payoutStatus": {
+          "description": "Payout statuses the employee's payslip must have. Omitted or empty means any.",
+          "items": {
+            "enum": [
+              "UNPAID",
+              "PARTIALLY_PAID",
+              "PAID"
+            ],
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "employeeResourceId"
+      ],
+      "type": "object"
+    },
+    "PayrunPostingRuleFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "innerAxis": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by how the journal lines merge."
+        },
+        "isDefault": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Filter by the default flag."
+        },
+        "journalDatePolicy": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the journal date policy."
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by name."
+        },
+        "netPayAccountResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by net pay account resource ID."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "outerAxis": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by how many journals a run posts."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by resource ID."
+        }
+      },
+      "type": "object"
+    },
+    "PayrunPostingRuleSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "enum": [
+              "resourceId",
+              "name",
+              "isDefault",
+              "createdAt",
+              "updatedAt"
+            ],
+            "type": "string"
+          },
+          "maxItems": 5,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
+    "PayrunSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "enum": [
+              "resourceId",
+              "name",
+              "reference",
+              "payrunType",
+              "payFrequency",
+              "currencyCode",
+              "periodStartDate",
+              "periodEndDate",
+              "paymentDate",
+              "status",
+              "payoutStatus",
+              "payrunPostingRuleResourceId",
+              "employeeCount",
+              "totalNetPayAmount",
+              "createdAt",
+              "updatedAt"
+            ],
+            "type": "string"
+          },
+          "maxItems": 10,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
+    "PayslipFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "createdAt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DateExpression"
+            }
+          ],
+          "description": "Filter by creation date, in YYYY-MM-DD format."
+        },
+        "employeeName": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the employee name saved on the payslip."
+        },
+        "employeePayDetailResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by employee pay detail resource ID."
+        },
+        "employeeResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by employee resource ID."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "payProfileResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by pay profile resource ID."
+        },
+        "payoutStatus": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payout status: UNPAID, PARTIALLY_PAID or PAID."
+        },
+        "payrun": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayslipPayrunFilter"
+            }
+          ],
+          "description": "Filter by the payslip's payrun, for example its status."
+        },
+        "payrunResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by payrun resource ID."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by resource ID."
+        }
+      },
+      "type": "object"
+    },
+    "PayslipLineRequest": {
+      "properties": {
+        "amount": {
+          "description": "Line amount in the payrun currency. Not negative, at most 2 decimal places.",
+          "example": 6000,
+          "minimum": 0,
+          "type": "number"
+        },
+        "description": {
+          "description": "Line description, up to 500 characters.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "payTypeId": {
+          "description": "Resource ID of the line's pay type. A new line's pay type, or a kept line's new one, must be ACTIVE.",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the payslip line to keep or change. Omit it to add a line.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "amount",
+        "payTypeId"
+      ],
+      "type": "object"
+    },
+    "PayslipLinesRequest": {
+      "properties": {
+        "clearNotes": {
+          "description": "When true, clears the payslip's notes.",
+          "type": "boolean"
+        },
+        "lines": {
+          "description": "Every line the payslip ends up with, in payslip order: a line with a resourceId is kept or changed, one without is added, and a line left out is removed. [] removes them all; null means no change.",
+          "items": {
+            "$ref": "#/definitions/PayslipLineRequest"
+          },
+          "type": "array"
+        },
+        "notes": {
+          "description": "Notes printed on the payslip, up to 500 characters. Null means no change.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "payslipResourceId": {
+          "description": "Resource ID of the payslip.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payslipResourceId"
+      ],
+      "type": "object"
+    },
+    "PayslipPayrunFilter": {
+      "properties": {
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the payrun's status: DRAFT, FINALIZED or VOID."
+        }
+      },
+      "type": "object"
+    },
+    "PayslipSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "enum": [
+              "resourceId",
+              "employeeName",
+              "grossAmount",
+              "netPayAmount",
+              "payoutStatus",
+              "createdAt",
+              "updatedAt",
+              "payrun.periodStartDate",
+              "payrun.periodEndDate",
+              "payrun.paymentDate"
+            ],
+            "type": "string"
+          },
+          "maxItems": 10,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
       ],
       "type": "object"
     },
@@ -24671,6 +26125,18 @@
       ],
       "type": "object"
     },
+    "RefreshPayslipsRequest": {
+      "properties": {
+        "payslipResourceIds": {
+          "description": "Resource IDs of the payslips to refresh, each listed once. Omitted or empty means every payslip of the payrun.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "RejectClaimRequest": {
       "properties": {
         "rejectionReason": {
@@ -25704,6 +27170,22 @@
           "type": "object"
         }
       },
+      "type": "object"
+    },
+    "SavePayrunLinesRequest": {
+      "properties": {
+        "payslips": {
+          "description": "Payslips to change, each listed once. Payslips left out are not changed.",
+          "items": {
+            "$ref": "#/definitions/PayslipLinesRequest"
+          },
+          "minItems": 1,
+          "type": "array"
+        }
+      },
+      "required": [
+        "payslips"
+      ],
       "type": "object"
     },
     "ScheduleAmountSegment": {
@@ -26887,6 +28369,51 @@
           "allOf": [
             {
               "$ref": "#/definitions/EmployeeSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
+    "SearchEmployeePayDetailsRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/EmployeePayDetailFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "inForceOn": {
+          "description": "Only the pay details in force on this day, at most one per employee, in YYYY-MM-DD format (organization timezone). Omitted means every pay detail, current and ended.",
+          "example": "2026-09-30",
+          "type": "string"
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/EmployeePayDetailSortFilter"
             }
           ],
           "description": "Sort order. Required when offset is set."
@@ -28198,6 +29725,86 @@
       },
       "type": "object"
     },
+    "SearchPayProfilesRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayProfileFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayProfileSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
+    "SearchPayTypesRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayTypeFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayTypeSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
     "SearchPaymentRequest": {
       "properties": {
         "filter": {
@@ -28231,6 +29838,134 @@
           "allOf": [
             {
               "$ref": "#/definitions/PaymentSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
+    "SearchPayrunPostingRulesRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayrunPostingRuleFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayrunPostingRuleSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
+    "SearchPayrunsRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayrunFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "payslip": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayrunPayslipFilter"
+            }
+          ],
+          "description": "Only payruns with a payslip of this employee. With filter, a payrun must match both."
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayrunSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
+    "SearchPayslipsRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayslipFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "query": {
+          "description": "Structured search query using Jaz search operators. Parsed automatically into filter fields.\nExplicit filter fields override query results on conflict.\nExample: \"status:unpaid AND $500+\".",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PayslipSortFilter"
             }
           ],
           "description": "Sort order. Required when offset is set."
@@ -35068,6 +36803,41 @@
       ],
       "type": "object"
     },
+    "UpdateEmployeePayDetailRequest": {
+      "properties": {
+        "clearEffectiveToDate": {
+          "description": "When true, removes the end date: the pay detail applies until a later pay detail replaces it, and effectiveToDate is ignored. For the employee's latest pay detail only.",
+          "type": "boolean"
+        },
+        "clearNotes": {
+          "description": "When true, clears the notes.",
+          "type": "boolean"
+        },
+        "effectiveFromDate": {
+          "description": "Corrected first day, in YYYY-MM-DD format (organization timezone), for the employee's latest pay detail only. It must stay after the previous pay detail's start; when that one ended the day before the old start, its end moves to the day before the new one.",
+          "example": "2026-09-15",
+          "type": "string"
+        },
+        "effectiveToDate": {
+          "description": "Last day the pay detail applies, in YYYY-MM-DD format (organization timezone), on or after its first day. Sets the day the employee's pay ends, or moves an end date already set. For the employee's latest pay detail only.",
+          "example": "2026-12-31",
+          "type": "string"
+        },
+        "notes": {
+          "description": "Notes on the pay detail, up to 500 characters. Null means no change.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "payTypeInputs": {
+          "description": "The employee's figures, replacing all of them; [] removes them all. Null means no change. A pay type the pay detail already had may stay after it is disabled; a new extra one must be ACTIVE.",
+          "items": {
+            "$ref": "#/definitions/EmployeePayDetailFigure"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "UpdateEmployeeRequest": {
       "properties": {
         "active": {
@@ -36142,6 +37912,281 @@
       "required": [
         "resourceId"
       ],
+      "type": "object"
+    },
+    "UpdatePayProfileRequest": {
+      "properties": {
+        "clearDescription": {
+          "description": "When true, clears the profile's description.",
+          "type": "boolean"
+        },
+        "clearPayrunPostingRuleResourceId": {
+          "description": "When true, puts the profile back on the organization's default posting rule.",
+          "type": "boolean"
+        },
+        "currencyCode": {
+          "description": "Currency of the profile's payruns (ISO 4217). Null means no change.",
+          "type": "string"
+        },
+        "daysPerMonth": {
+          "description": "Fixed number of days a month a line is divided by, from 1 to 31. Null means no change.",
+          "maximum": 31,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "description": {
+          "description": "Description of the pay profile, up to 500 characters. Null means no change.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name, unique in the organization (case-insensitive). Up to 255 characters. Null means no change.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "payFrequency": {
+          "description": "How often the profile's employees are paid. Null means no change.",
+          "enum": [
+            "WEEKLY",
+            "FORTNIGHTLY",
+            "SEMI_MONTHLY",
+            "MONTHLY"
+          ],
+          "type": "string"
+        },
+        "payTypeLines": {
+          "description": "The recurring pay types, replacing every line; [] removes them all. Null means no change. A pay type already on the profile may stay after it is disabled; a new one must be ACTIVE.",
+          "items": {
+            "$ref": "#/definitions/PayProfileLineRequest"
+          },
+          "type": "array"
+        },
+        "payrunPostingRuleResourceId": {
+          "description": "Resource ID of the payrun posting rule the profile's payruns use. Null means no change.",
+          "type": "string"
+        },
+        "prorationType": {
+          "description": "How populating counts days when it pro-rates a line. A move to WORKING_DAYS or FIXED_DAYS must bring the settings that type needs unless the profile has them. Null means no change.",
+          "enum": [
+            "CALENDAR_DAYS",
+            "WORKING_DAYS",
+            "FIXED_DAYS"
+          ],
+          "type": "string"
+        },
+        "status": {
+          "description": "Pay profile status. Set INACTIVE to have populating skip the profile's employees. Null means no change.",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ],
+          "type": "string"
+        },
+        "workWeek": {
+          "description": "Days worked a week: 5, 5.5 or 6. Null means no change.",
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "UpdatePayTypeRequest": {
+      "properties": {
+        "calculationType": {
+          "description": "How a payslip line's amount is set. Null means no change.",
+          "enum": [
+            "AMOUNT"
+          ],
+          "type": "string"
+        },
+        "category": {
+          "description": "New category, as on create. A category change must set the account the new category posts to and clear the one it no longer uses, in the same edit; a pay type on a draft or finalized payrun's lines can't change category (PAY_TYPE_IN_USE). Null means no change.",
+          "enum": [
+            "EARNING",
+            "OVERTIME",
+            "ALLOWANCE",
+            "ADDITIONAL_PAYMENT",
+            "DEDUCTION",
+            "EMPLOYEE_CONTRIBUTION",
+            "EMPLOYEE_TAX",
+            "EMPLOYER_CONTRIBUTION",
+            "EMPLOYER_TAX"
+          ],
+          "type": "string"
+        },
+        "clearCode": {
+          "description": "When true, clears the pay type's code.",
+          "type": "boolean"
+        },
+        "clearCreditAccountResourceId": {
+          "description": "When true, clears the credit account.",
+          "type": "boolean"
+        },
+        "clearDebitAccountResourceId": {
+          "description": "When true, clears the debit account.",
+          "type": "boolean"
+        },
+        "clearDescription": {
+          "description": "When true, clears the pay type's description.",
+          "type": "boolean"
+        },
+        "code": {
+          "description": "Short code, unique in the organization (case-insensitive). Up to 50 characters. Null means no change.",
+          "maxLength": 50,
+          "type": "string"
+        },
+        "creditAccountResourceId": {
+          "description": "Resource ID of the account a payslip line of this type credits. Null means no change.",
+          "type": "string"
+        },
+        "debitAccountResourceId": {
+          "description": "Resource ID of the account a payslip line of this type debits. Null means no change.",
+          "type": "string"
+        },
+        "description": {
+          "description": "Description of the pay type, up to 500 characters. Null means no change.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name, unique in the organization (case-insensitive). Up to 255 characters. Null means no change.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "status": {
+          "description": "Pay type status. Set INACTIVE to stop the pay type being added to profiles and payslips. Null means no change.",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "UpdatePayrunPostingRuleRequest": {
+      "properties": {
+        "innerAxis": {
+          "description": "How the journal lines merge. Null means no change.",
+          "enum": [
+            "BY_PAY_TYPE",
+            "BY_CATEGORY",
+            "BY_ACCOUNT"
+          ],
+          "type": "string"
+        },
+        "isDefault": {
+          "description": "When true, this rule becomes the default and the previous default loses the flag. False on the default rule is refused (PAYRUN_POSTING_RULE_DEFAULT): make another rule the default instead. Null means no change.",
+          "type": "boolean"
+        },
+        "journalDatePolicy": {
+          "description": "The journal's date. Null means no change.",
+          "enum": [
+            "PAYMENT_DATE",
+            "PERIOD_END",
+            "CUSTOM"
+          ],
+          "type": "string"
+        },
+        "journalReferenceTemplate": {
+          "description": "The journal reference, up to 255 characters, with the tokens of Create Payrun Posting Rule; any other token is refused (PAYRUN_POSTING_RULE_TEMPLATE_UNKNOWN_TOKEN). Blank goes back to the default; null means no change.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "lineDescriptionTemplate": {
+          "description": "Each journal line's description, up to 500 characters, with the tokens of Create Payrun Posting Rule; any other token is refused (PAYRUN_POSTING_RULE_TEMPLATE_UNKNOWN_TOKEN). Blank goes back to the default of innerAxis; null means no change. A description still on its grouping's default follows innerAxis when innerAxis changes; a written one is kept, another grouping's default too.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name, unique in the organization (case-insensitive). Up to 255 characters. Null means no change.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "netPayAccountResourceId": {
+          "description": "Resource ID of the account net pay is credited to. Null means no change.",
+          "type": "string"
+        },
+        "outerAxis": {
+          "description": "How many journals a finalized payrun posts. Null means no change.",
+          "enum": [
+            "ONE_BATCH"
+          ],
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "UpdatePayrunRequest": {
+      "properties": {
+        "attachments": {
+          "description": "Attachment changes: one without resourceId is added, one with resourceId is updated, and one with deleted set to true is removed. Attachments left out stay. Null means no change.",
+          "items": {
+            "$ref": "#/definitions/PayrunAttachmentRequest"
+          },
+          "type": "array"
+        },
+        "clearInternalNotes": {
+          "description": "When true, clears the internal notes.",
+          "type": "boolean"
+        },
+        "clearPayrunPostingRuleResourceId": {
+          "description": "When true, puts the payrun back on the rule its payslips' pay profiles use.",
+          "type": "boolean"
+        },
+        "clearReference": {
+          "description": "When true, clears the payrun's reference.",
+          "type": "boolean"
+        },
+        "clearTemplateResourceId": {
+          "description": "When true, puts the payrun back on the organization's default payslip template.",
+          "type": "boolean"
+        },
+        "customFields": {
+          "description": "Header-level custom field values, replacing every value; [] removes them all. Null means no change.",
+          "items": {
+            "$ref": "#/definitions/CustomField"
+          },
+          "type": "array"
+        },
+        "internalNotes": {
+          "description": "Internal notes, up to 500 characters. Null means no change.",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "name": {
+          "description": "Display name of the payrun, up to 255 characters. Null means no change.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "paymentDate": {
+          "description": "Payment date, in YYYY-MM-DD format (organization timezone). Null means no change.",
+          "example": "2026-09-30",
+          "type": "string"
+        },
+        "payrunPostingRuleResourceId": {
+          "description": "Resource ID of the payrun posting rule used when the payrun is finalized. Null means no change.",
+          "type": "string"
+        },
+        "periodEndDate": {
+          "description": "Last day of the period, in YYYY-MM-DD format (organization timezone). Null means no change.",
+          "example": "2026-09-30",
+          "type": "string"
+        },
+        "periodStartDate": {
+          "description": "First day of the period, in YYYY-MM-DD format (organization timezone). Null means no change.",
+          "example": "2026-09-01",
+          "type": "string"
+        },
+        "reference": {
+          "description": "Payrun reference, up to 255 characters. Giving a payrun its first reference moves the organization's payrun numbering on. Null means no change.",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "templateResourceId": {
+          "description": "Resource ID of the payslip PDF template. A finalized payrun takes it when it is the only change sent; its payslips keep their PDFs until Generate Payslips makes them again. Null means no change.",
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "UpdatePostingRuleRequest": {
@@ -37572,6 +39617,34 @@
           "type": "array"
         }
       },
+      "type": "object"
+    },
+    "VoidPayrunPayoutRequest": {
+      "properties": {
+        "voidReason": {
+          "description": "Why the payout is voided, up to 500 characters.",
+          "example": "Paid twice by mistake",
+          "maxLength": 500,
+          "type": "string"
+        }
+      },
+      "required": [
+        "voidReason"
+      ],
+      "type": "object"
+    },
+    "VoidPayrunRequest": {
+      "properties": {
+        "voidReason": {
+          "description": "Why the payrun is voided, up to 500 characters.",
+          "example": "Wrong pay period",
+          "maxLength": 500,
+          "type": "string"
+        }
+      },
+      "required": [
+        "voidReason"
+      ],
       "type": "object"
     },
     "VoidPurchaseOrderClientRequest": {
@@ -57659,6 +59732,293 @@
         ]
       }
     },
+    "/api/v1/employee-pay-details": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Put an employee on a pay profile from a date, with the employee's own figures. It starts after the employee's latest pay detail starts, and that pay detail ends the day before. A change of pay from a date is a new pay detail; Update Employee Pay Detail corrects one in place.",
+        "operationId": "create-employee-pay-detail",
+        "parameters": [
+          {
+            "description": "The employee pay detail to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateEmployeePayDetailRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Employee Pay Detail",
+        "tags": [
+          "Employee Pay Details"
+        ]
+      }
+    },
+    "/api/v1/employee-pay-details/bulk-create": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Put up to 500 employees on pay profiles in one call, as Create Employee Pay Detail does for one. Each pay detail is saved on its own and has its own result in the order sent: the new pay detail's resourceId, or the refusal's errorCode and errorMessage. A refused one does not stop the others.",
+        "operationId": "create-employee-pay-detail-bulk-create",
+        "parameters": [
+          {
+            "description": "The employee pay details to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkCreateEmployeePayDetailsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Create Employee Pay Details",
+        "tags": [
+          "Employee Pay Details"
+        ]
+      }
+    },
+    "/api/v1/employee-pay-details/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's employee pay details, current and ended, with filters, sort, and pagination. Each comes with its employee, pay profile, the recurring lines a payrun would give, and its totals for one pay period. Set inForceOn to get only the pay details in force on that day, at most one per employee.",
+        "operationId": "search-employee-pay-detail",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchEmployeePayDetailsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Employee Pay Details",
+        "tags": [
+          "Employee Pay Details"
+        ]
+      }
+    },
+    "/api/v1/employee-pay-details/{resourceId}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Change a pay detail in place: its figures and notes and, on the employee's latest pay detail, a wrong start date or its end date. Set effectiveToDate to end the employee's pay or move the end date, and clearEffectiveToDate to remove it. Omitted fields keep their values. A pay change from a date is a new pay detail instead.",
+        "operationId": "update-employee-pay-detail",
+        "parameters": [
+          {
+            "description": "Resource ID of the employee pay detail.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The employee pay detail fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateEmployeePayDetailRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Employee Pay Detail",
+        "tags": [
+          "Employee Pay Details"
+        ]
+      }
+    },
     "/api/v1/employees": {
       "post": {
         "consumes": [
@@ -74691,6 +77051,680 @@
         ]
       }
     },
+    "/api/v1/pay-profiles": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a pay profile: a pay frequency, a currency, and the recurring pay types its employees get, with amounts or left for each employee's pay detail. Payruns take employees by their profile's frequency and currency. Names are unique in the organization.",
+        "operationId": "create-pay-profile",
+        "parameters": [
+          {
+            "description": "The pay profile to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePayProfileRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Pay Profile",
+        "tags": [
+          "Pay Profiles"
+        ]
+      }
+    },
+    "/api/v1/pay-profiles/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's pay profiles, active or not, with filters, sort, and pagination.",
+        "operationId": "search-pay-profile",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchPayProfilesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Pay Profiles",
+        "tags": [
+          "Pay Profiles"
+        ]
+      }
+    },
+    "/api/v1/pay-profiles/{resourceId}": {
+      "delete": {
+        "description": "Delete a pay profile. A profile that an employee is or was on, through a current or ended pay detail, is refused with PAY_PROFILE_IN_USE; set its status to INACTIVE instead.",
+        "operationId": "delete-pay-profile",
+        "parameters": [
+          {
+            "description": "Resource ID of the pay profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete Pay Profile",
+        "tags": [
+          "Pay Profiles"
+        ]
+      },
+      "get": {
+        "description": "Get a pay profile by its resource ID, with its lines, posting rule, and whether it is in use. Returns PAY_PROFILE_NOT_FOUND when it is not the organization's.",
+        "operationId": "get-pay-profile",
+        "parameters": [
+          {
+            "description": "Resource ID of the pay profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Pay Profile",
+        "tags": [
+          "Pay Profiles"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update a pay profile. Omitted fields keep their values, and payTypeLines replaces every line. Changes apply only to payruns populated later; payslips already made keep their lines.",
+        "operationId": "update-pay-profile",
+        "parameters": [
+          {
+            "description": "Resource ID of the pay profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The pay profile fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePayProfileRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Pay Profile",
+        "tags": [
+          "Pay Profiles"
+        ]
+      }
+    },
+    "/api/v1/pay-types": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a pay type: one kind of pay, deduction, or employer cost that payslip lines use. Its category decides how its lines post and which accounts it needs: a debit account for earnings and employer costs, a credit account for deductions and employer costs. Names, and codes when given, are unique in the organization.",
+        "operationId": "create-pay-type",
+        "parameters": [
+          {
+            "description": "The pay type to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePayTypeRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Pay Type",
+        "tags": [
+          "Pay Types"
+        ]
+      }
+    },
+    "/api/v1/pay-types/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's pay types, active or not, with filters, sort, and pagination.",
+        "operationId": "search-pay-type",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchPayTypesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Pay Types",
+        "tags": [
+          "Pay Types"
+        ]
+      }
+    },
+    "/api/v1/pay-types/{resourceId}": {
+      "delete": {
+        "description": "Delete a pay type. A pay type that a pay profile, an employee pay detail, or a draft or finalized payrun's payslip uses is refused with PAY_TYPE_IN_USE; set its status to INACTIVE instead.",
+        "operationId": "delete-pay-type",
+        "parameters": [
+          {
+            "description": "Resource ID of the pay type.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete Pay Type",
+        "tags": [
+          "Pay Types"
+        ]
+      },
+      "get": {
+        "description": "Get a pay type by its resource ID, with its accounts and whether it is in use. Returns PAY_TYPE_NOT_FOUND when it is not the organization's.",
+        "operationId": "get-pay-type",
+        "parameters": [
+          {
+            "description": "Resource ID of the pay type.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Pay Type",
+        "tags": [
+          "Pay Types"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update a pay type. Omitted fields keep their values, and the clear flags empty an optional field. A pay type on a draft or finalized payrun's lines can't change category (PAY_TYPE_IN_USE).",
+        "operationId": "update-pay-type",
+        "parameters": [
+          {
+            "description": "Resource ID of the pay type.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The pay type fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePayTypeRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Pay Type",
+        "tags": [
+          "Pay Types"
+        ]
+      }
+    },
     "/api/v1/payment-holiday/loans/{resourceId}": {
       "post": {
         "consumes": [
@@ -75144,6 +78178,2122 @@
         "summary": "Update Payment",
         "tags": [
           "Payments"
+        ]
+      }
+    },
+    "/api/v1/payrun-posting-rules": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a payrun posting rule: the net pay account a finalized payrun's journal credits, how its lines merge, and its date and reference. The organization's first rule is its default. Names are unique in the organization.",
+        "operationId": "create-payrun-posting-rule",
+        "parameters": [
+          {
+            "description": "The payrun posting rule to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePayrunPostingRuleRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Payrun Posting Rule",
+        "tags": [
+          "Payrun Posting Rules"
+        ]
+      }
+    },
+    "/api/v1/payrun-posting-rules/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's payrun posting rules with filters, sort, and pagination.",
+        "operationId": "search-payrun-posting-rule",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchPayrunPostingRulesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Payrun Posting Rules",
+        "tags": [
+          "Payrun Posting Rules"
+        ]
+      }
+    },
+    "/api/v1/payrun-posting-rules/{resourceId}": {
+      "delete": {
+        "description": "Delete a payrun posting rule. The default rule can't be deleted (PAYRUN_POSTING_RULE_DEFAULT), and a rule that a pay profile or a payrun names is refused with PAYRUN_POSTING_RULE_IN_USE.",
+        "operationId": "delete-payrun-posting-rule",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun posting rule.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete Payrun Posting Rule",
+        "tags": [
+          "Payrun Posting Rules"
+        ]
+      },
+      "get": {
+        "description": "Get a payrun posting rule by its resource ID, with its net pay account and whether it is in use. Returns PAYRUN_POSTING_RULE_NOT_FOUND when it is not the organization's.",
+        "operationId": "get-payrun-posting-rule",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun posting rule.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Payrun Posting Rule",
+        "tags": [
+          "Payrun Posting Rules"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update a payrun posting rule. Omitted fields keep their values, and a blank template goes back to its default. Setting isDefault to true makes this rule the default; the default rule can't be unset, so make another rule the default instead.",
+        "operationId": "update-payrun-posting-rule",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun posting rule.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The payrun posting rule fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePayrunPostingRuleRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Payrun Posting Rule",
+        "tags": [
+          "Payrun Posting Rules"
+        ]
+      }
+    },
+    "/api/v1/payruns": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a DRAFT payrun for a pay frequency, currency, and period. It has no payslips unless populate is true; Populate Payrun fills it later. Several REGULAR drafts may share a frequency, currency, and period, but only one of them can be finalized. A create repeated with the same idempotencyKey returns the payrun already created; the same key with a different request is refused with PAYRUN_IDEMPOTENCY_KEY_IN_USE.",
+        "operationId": "create-payrun",
+        "parameters": [
+          {
+            "description": "The payrun to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePayrunRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/bulk/delete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Delete several DRAFT payruns in a background job, each as Delete Payrun does and on its own, so one that can't be deleted fails with its code (PAYRUN_NOT_DRAFT, PAYRUN_ALREADY_POSTED, PAYRUN_NOT_FOUND) and the others are still deleted. Returns a job ID. Poll it with Search Background Jobs. Refused before any job starts when a payrun is listed twice (PAYRUN_DUPLICATE).",
+        "operationId": "create-payrun-bulk-delete",
+        "parameters": [
+          {
+            "description": "The payruns to delete.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkDeletePayrunsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Delete Payruns",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/bulk/finalize": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Finalize several payruns in a background job, each as Finalize Payrun does and on its own, so one that can't be finalized fails with its code and leaves the others finalized. Returns a job ID. Poll it with Search Background Jobs. Refused before any job starts when a payrun is listed twice (PAYRUN_DUPLICATE).",
+        "operationId": "create-payrun-bulk-finalize",
+        "parameters": [
+          {
+            "description": "The payruns to finalize.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BulkFinalizePayrunsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Finalize Payruns",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/payouts/{journalResourceId}/void": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Void a RECORD payout, with a reason, by its journal's resource ID, as the payrun's payouts list it: the journal is voided, the payslip owes that amount again, and the payrun's payouts no longer list it. A payout paid through the payment gateway is refused with PAYRUN_PAYOUT_DISBURSED, and one dated on or before an account's lock date with PAYRUN_PERIOD_LOCKED. Returns the payrun.",
+        "operationId": "create-payrun-payout-void",
+        "parameters": [
+          {
+            "description": "Resource ID of the payout journal.",
+            "in": "path",
+            "name": "journalResourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Why the payout is voided.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VoidPayrunPayoutRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Void Payrun Payout",
+        "tags": [
+          "Payrun Payouts"
+        ]
+      }
+    },
+    "/api/v1/payruns/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's payruns with filters, sort, and pagination. Results carry each payrun's header and totals; Get Payrun returns its payslips. Set payslip to get only the payruns with a payslip of one employee, optionally in given payout statuses.",
+        "operationId": "search-payrun",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchPayrunsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Payruns",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}": {
+      "delete": {
+        "description": "Delete a DRAFT payrun with its payslips, their lines, and its attachments. A payrun unposted earlier keeps its voided journal, so it is refused with PAYRUN_ALREADY_POSTED; void it instead.",
+        "operationId": "delete-payrun",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      },
+      "get": {
+        "description": "Get a payrun by its resource ID, with its payslips and their lines, the payslips removed from it, its journal once finalized, and its attachments. Returns PAYRUN_NOT_FOUND when it is not the organization's.",
+        "operationId": "get-payrun",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update a DRAFT payrun's header. Omitted fields keep their values, and the clear flags empty an optional field. The pay frequency, currency, and payrun type can't change: they decide who joins the payrun, so delete it and create another. A finalized payrun takes one change, its payslip template (templateResourceId or clearTemplateResourceId sent alone); Generate Payslips then makes its PDFs with it. Any other change to a finalized payrun, and any change to a void one, is refused with PAYRUN_NOT_DRAFT.",
+        "operationId": "update-payrun",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The payrun fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePayrunRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/employees": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Add the named employees to a DRAFT payrun. An employee removed from it gets back the payslip they had, as it was; anyone else gets a new payslip with Populate Payrun's checks. The first employee who can't be added refuses the whole call with the reason. In an OFF_CYCLE payrun a new payslip starts with no lines; add them with Save Payrun Lines.",
+        "operationId": "create-payrun-employee",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The employees to add.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PayrunEmployeesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Add Payrun Employees",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/employees/remove": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Remove the named employees' payslips, with their lines, from a DRAFT payrun. An employee not in the payrun is ignored. A removed employee stays out when the payrun is populated again, and their payslip is kept in removedPayslips until Add Payrun Employees brings it back.",
+        "operationId": "create-payrun-employee-remove",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The employees to remove.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PayrunEmployeesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Remove Payrun Employees",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/finalize": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Post a DRAFT payrun's journal, the one Preview Payrun Journal shows, and mark the payrun FINALIZED. The first problem Validate Payrun would list refuses the call with its code. Finalizing a FINALIZED payrun returns it unchanged, so a retry never posts a second journal. Payslip PDFs are made in the background afterwards.",
+        "operationId": "create-payrun-finalize",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The finalize options.",
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/FinalizePayrunRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Finalize Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/lines": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Give each named payslip of a DRAFT payrun exactly the lines sent, in the order sent: a line with a resourceId is kept or changed, a line without one is added, and a line left out is removed. Any refusal leaves every payslip unchanged, and payslips not named are untouched. Returns the payslips named, with their new amounts.",
+        "operationId": "update-payrun-line",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The payslips and their lines.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SavePayrunLinesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Save Payrun Lines",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/payouts": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Pay out a FINALIZED payrun's net pay, one payout per payslip, in a background job: every payslip still owed, or the ones named. RECORD books money paid outside Jaz as a journal per payslip. DISBURSE pays each employee through the payment gateway and books the journal once the gateway confirms; it is refused with NOT_HAVE_ENOUGH_PERMISSION when the organization's plan doesn't include gateway payouts. Every check of Preview Payrun Payouts is made first, so the call is refused with the code the preview lists, such as PAYRUN_PAYOUT_ACCOUNT_NOT_FOUND. Returns a job ID. Poll it with Search Background Jobs; a payslip the gateway can't pay fails with PAYRUN_PAYOUT_NOT_ELIGIBLE while the others are paid.",
+        "operationId": "create-payrun-payout",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The payouts to make.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePayrunPayoutsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Payrun Payouts",
+        "tags": [
+          "Payrun Payouts"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/payouts/preview": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Preview what Create Payrun Payouts would do with the same input, with every problem that would stop it; nothing is paid. Per payslip: its net pay, what is paid, what it still owes, this payout, its reference, and the journal it would post. For DISBURSE, payoutEligible says whether the payment gateway can pay the employee, and blockReasons says why not. paymentAccountResourceId can be left out, as before a bank account is picked: everything else is worked out, and the payment account's checks wait for it.",
+        "operationId": "create-payrun-payout-preview",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The payouts to preview.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePayrunPayoutsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Preview Payrun Payouts",
+        "tags": [
+          "Payrun Payouts"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/payslips/generate": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Make a FINALIZED payrun's payslip PDFs again in a background job, for every payslip or the ones named: for a PDF that failed, or one wanted in another template (Update Payrun sets a finalized payrun's template). Finalizing makes them once by itself. Returns a job ID. Poll it with Search Background Jobs. Each new PDF link replaces the old one in the payslip's generatedDocuments.",
+        "operationId": "create-payrun-payslip-generate",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The payslips to make PDFs for.",
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/GeneratePayslipsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Generate Payslips",
+        "tags": [
+          "Payslips"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/payslips/refresh": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Make several payslips of a DRAFT payrun again from the employees' current pay details, each as Refresh Payslip does: the payslips named, or every payslip of the payrun when none are named. A payslip that cannot be refreshed is left unchanged and listed in failed with its reason, and the others are still refreshed. Refused as a whole, with nothing changed, when the payrun is not a DRAFT (PAYRUN_NOT_DRAFT), a payslip is not in the payrun (PAYSLIP_NOT_FOUND) or is listed twice (PAYSLIP_DUPLICATE), or none are named and the payrun has no payslips (PAYRUN_NO_PAYSLIPS). Returns the payrun with its new totals, the payslips refreshed and those that failed.",
+        "operationId": "create-payrun-payslip-refresh",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The payslips to refresh.",
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/RefreshPayslipsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Refresh Payslips",
+        "tags": [
+          "Payslips"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/populate": {
+      "post": {
+        "description": "Give every employee not yet in a DRAFT payrun a payslip from their pay details in the payrun's period, with their pay profile's lines and their own figures, pro-rated by days where their pay changes during the period. Returns the payrun with its new totals, the employees added, and those skipped with their reason; an employee skipped for a missing figure (PAY_PROFILE_LINE_VALUE_MISSING) comes with employeePayDetailResourceId, the pay detail to fill in. Populating again adds only employees not yet in the payrun, and an employee removed from it stays out until Add Payrun Employees adds them back.",
+        "operationId": "create-payrun-populate",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Populate Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/populate/preview": {
+      "post": {
+        "description": "Preview what Populate Payrun would do to a DRAFT payrun now, with nothing saved: the employees it would add and those it would skip with their reason, such as PAYRUN_EMPLOYEE_PAY_STARTS_LATER with the day their pay starts, or PAY_PROFILE_LINE_VALUE_MISSING with employeePayDetailResourceId, the pay detail to fill in. Employees already in the payrun are not listed.",
+        "operationId": "create-payrun-populate-preview",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Preview Populate Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/preview-journal": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Preview the journal Finalize Payrun would post for a DRAFT payrun, with Validate Payrun's errors; nothing is written. Each payslip line posts to its pay type's accounts, lines merge by the posting rule, debits come first, and net pay is one credit to the net pay account, last.",
+        "operationId": "create-payrun-preview-journal",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The finalize options to preview with.",
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/FinalizePayrunRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Preview Payrun Journal",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/unpost": {
+      "post": {
+        "description": "Unpost a FINALIZED payrun to correct it: its journal is voided and the payrun goes back to DRAFT, so its payslips can change; finalizing again posts a new journal. Refused while the payrun has payouts (PAYRUN_PAYOUT_LINKED) or payouts on their way through the payment gateway (PAYRUN_PAYOUT_DISBURSING: wait for them to finish, or cancel them), and when the journal date is on or before an account's lock date (PAYRUN_PERIOD_LOCKED). An unposted payrun comes back unchanged.",
+        "operationId": "create-payrun-unpost",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Unpost Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/validate": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Check a DRAFT payrun as Finalize Payrun would, returning every problem at once; nothing is written. valid is true when errors is empty. Each error has a code, a message, and what it is about: the payslip, the employees, the pay types, or the account. An account's error lists the employees and pay types whose payslip lines post to it, and netPay is true when the account takes the payrun's net pay. PAYRUN_EMPLOYEE_PAY_STARTS_LATER carries payStartDate, the day the employee's pay starts (epoch milliseconds). PAYRUN_REGULAR_PERIOD_EXISTS carries contextualAttributes naming the finalized payrun in the way, and PAYRUN_PERIOD_LOCKED carries them naming the locked account and the dates.",
+        "operationId": "create-payrun-validate",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The finalize options to check.",
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/FinalizePayrunRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Validate Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payruns/{resourceId}/void": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Void a payrun for good, with a reason. A FINALIZED payrun's journal is voided, with the same refusals as Unpost Payrun. A void payrun frees its period for a new REGULAR payrun and comes back unchanged if voided again. A draft never finalized is refused with PAYRUN_VOID_NEVER_POSTED; delete it instead.",
+        "operationId": "create-payrun-void",
+        "parameters": [
+          {
+            "description": "Resource ID of the payrun.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Why the payrun is voided.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/VoidPayrunRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Void Payrun",
+        "tags": [
+          "Payruns"
+        ]
+      }
+    },
+    "/api/v1/payslips/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's payslips, with their lines and payrun, using filters, sort, and pagination. For an employee's payslips, newest first: filter employeeResourceId and payrun.status FINALIZED, and sort by payrun.periodEndDate DESC.",
+        "operationId": "search-payslip",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchPayslipsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Payslips",
+        "tags": [
+          "Payslips"
+        ]
+      }
+    },
+    "/api/v1/payslips/{resourceId}": {
+      "get": {
+        "description": "Get a payslip by its resource ID, with its lines, amounts, payout status, employee, pay profile, PDF link once made, and its payrun's period and payment date. A pro-rated payslip carries proration: the pay periods the employee is paid in with the days counted out of each, and the days their pay starts, changes, or ends; each pro-rated line's parts carry the days they are out of (periodDays). Returns PAYSLIP_NOT_FOUND when it is not the organization's.",
+        "operationId": "get-payslip",
+        "parameters": [
+          {
+            "description": "Resource ID of the payslip.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Payslip",
+        "tags": [
+          "Payslips"
+        ]
+      }
+    },
+    "/api/v1/payslips/{resourceId}/refresh": {
+      "post": {
+        "description": "Make a DRAFT payrun's payslip again from the employee's current pay details, as Populate Payrun would now: its pay profile lines are replaced, pro-rated the same way, and lines added by hand keep their place. Refused, with the payslip unchanged, for the reasons Populate Payrun skips an employee. Returns the payslip, with a warning when days of the period are on a pay profile of another frequency or currency.",
+        "operationId": "create-payslip-refresh",
+        "parameters": [
+          {
+            "description": "Resource ID of the payslip.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Refresh Payslip",
+        "tags": [
+          "Payslips"
         ]
       }
     },
@@ -82295,7 +87445,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Returns the next document number in the organization's own numbering series for\none business transaction family, formatted with its prefix, separator, optional\ndate and zero padding. This is the same number the web application prefills when\na user opens a new document, so the two surfaces never diverge.\nReading a number does not take it. The series only advances when a document is\nactually created, including one saved as a draft, so repeated calls return the\nsame value and a number read here is not reserved against another caller taking it\nfirst. Two callers reading at the same moment receive the same number.\nThe date embedded in the reference is always today in the organization's timezone,\neven when the document being created is back dated.\nWhat happens on a collision depends on the family. Sales invoices, credit notes to\ncustomers, quotes, sale orders, purchase requests and purchase orders refuse a\nduplicate number and return 422, so the second caller can read again and retry.\nBills, credit notes from suppliers and manual journals accept it, so both documents\nkeep the same number and neither caller is told. Supply your own reference for\nthose three when you create in parallel.",
+        "description": "Returns the next document number in the organization's own numbering series for\none business transaction family, formatted with its prefix, separator, optional\ndate and zero padding. This is the same number the web application prefills when\na user opens a new document, so the two surfaces never diverge.\nReading a number does not take it. The series only advances when a document is\nactually created, including one saved as a draft, so repeated calls return the\nsame value and a number read here is not reserved against another caller taking it\nfirst. Two callers reading at the same moment receive the same number.\nThe date embedded in the reference is always today in the organization's timezone,\neven when the document being created is back dated.\nWhat happens on a collision depends on the family. Sales invoices, credit notes to\ncustomers, quotes, sale orders, purchase requests, purchase orders and payruns refuse a\nduplicate number and return 422, so the second caller can read again and retry.\nBills, credit notes from suppliers and manual journals accept it, so both documents\nkeep the same number and neither caller is told. Supply your own reference for\nthose three when you create in parallel.",
         "operationId": "list-reference-next",
         "parameters": [
           {
@@ -82314,7 +87464,8 @@
               "SALE_ORDER",
               "PURCHASE_REQUEST",
               "PURCHASE_ORDER",
-              "CLAIM"
+              "CLAIM",
+              "PAYRUN"
             ],
             "in": "query",
             "name": "type",
@@ -94628,6 +99779,34 @@
     {
       "description": "List, add, edit, delete, and resolve comments on invoices, bills, credit notes, and bank records, and read and update notifications.",
       "name": "Collaboration"
+    },
+    {
+      "description": "Create, update, search, and delete the rules that set how a finalized payrun's journal posts.",
+      "name": "Payrun Posting Rules"
+    },
+    {
+      "description": "Create, populate, update, validate, finalize, unpost, and void payruns, and manage their employees and payslip lines.",
+      "name": "Payruns"
+    },
+    {
+      "description": "Get, search, and refresh payslips, and make their PDFs again.",
+      "name": "Payslips"
+    },
+    {
+      "description": "Preview and make payouts of a finalized payrun's net pay, recorded or paid through the payment gateway, and void a recorded payout.",
+      "name": "Payrun Payouts"
+    },
+    {
+      "description": "Create, update, search, and delete pay types: the kinds of pay, deduction, and employer cost on a payslip.",
+      "name": "Pay Types"
+    },
+    {
+      "description": "Create, update, search, and delete pay profiles: a pay frequency, a currency, and the recurring pay types of the employees on them.",
+      "name": "Pay Profiles"
+    },
+    {
+      "description": "Put employees on pay profiles from a date with their own figures, correct or end those pay details, and search them.",
+      "name": "Employee Pay Details"
     }
   ]
 }

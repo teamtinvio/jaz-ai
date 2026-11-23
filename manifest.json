@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.6.3",
+  "version": "9.7.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -1111,6 +1111,182 @@
       "description": "Check uneven release ranges without saving. deferralAmount is the sum of the eligible line amounts. Save with create_deferral only when status is FULLY_SCHEDULED with no errors (others: SHORT, OVER, INCOMPLETE). Periods are anniversary periods from the start date, not calendar months. At most 60 periods per call: see totalPeriods, page with fromPeriod/toPeriod."
     },
     {
+      "name": "search_pay_types",
+      "description": "Search pay types (what a payslip pays or deducts: salary, overtime, bonus, tax, pension), active or not. No query: use the filters."
+    },
+    {
+      "name": "get_pay_type",
+      "description": "Get one pay type with its accounts, categoryLocked (on a payslip, so the category is fixed) and inUse (so it cannot be deleted)."
+    },
+    {
+      "name": "create_pay_type",
+      "description": "Create a pay type: one thing paid to or deducted from employees. Accounts by category:\n- EARNING, OVERTIME, ALLOWANCE, ADDITIONAL_PAYMENT: debit account (expense) only.\n- DEDUCTION, EMPLOYEE_CONTRIBUTION, EMPLOYEE_TAX: credit account (liability) only.\n- EMPLOYER_CONTRIBUTION, EMPLOYER_TAX: both. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_pay_type",
+      "description": "Edit a pay type. Partial; a clear flag true empties that field. A category change must set the new category's account and clear the old one in the same call, and is refused once the pay type is on a payslip (PAY_TYPE_IN_USE). If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_pay_type",
+      "description": "Delete a pay type used nowhere. One whose record shows inUse true is refused (PAY_TYPE_IN_USE): set it INACTIVE with update_pay_type. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "search_payrun_posting_rules",
+      "description": "Search payrun posting rules (how a payrun books its journal). Not claim posting rules (search_posting_rules). No query: use the filters."
+    },
+    {
+      "name": "get_payrun_posting_rule",
+      "description": "Get one payrun posting rule with its net pay account and inUse (so it cannot be deleted). Not a claim posting rule."
+    },
+    {
+      "name": "create_payrun_posting_rule",
+      "description": "Create a payrun posting rule: how a payrun books its journal (net pay account, line grouping, journal date, reference and line description). Not a claim posting rule (create_posting_rule).\n- Templates take {payrunName}, {payrunReference}, {period}, {periodStart}, {periodEnd}, {paymentDate}; line descriptions also {payType}, {category}, {account}.\n- One default per organization: the first rule is it; isDefault true moves it here. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_payrun_posting_rule",
+      "description": "Edit a payrun posting rule. Partial; a blank template goes back to its default. The default rule cannot be unset: make another the default (isDefault true). Not a claim posting rule (update_posting_rule). If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_payrun_posting_rule",
+      "description": "Delete a payrun posting rule. The default, and one whose record shows inUse true, are refused: make another the default first. Not a claim posting rule (delete_posting_rule). Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "search_pay_profiles",
+      "description": "Search pay profiles (shared pay templates: frequency, currency, posting rule, lines), active or not. No query: use the filters."
+    },
+    {
+      "name": "get_pay_profile",
+      "description": "Get one pay profile with its pay type lines, posting rule and inUse (so it cannot be deleted)."
+    },
+    {
+      "name": "create_pay_profile",
+      "description": "Create a pay profile: a pay template shared by employees. A payrun takes the employees whose profile has its frequency and currency.\n- A line with no amount means the figure is set per employee on their pay detail (a base salary, say).\n- No payrunPostingRuleResourceId means the organization's default rule.\n- prorationType: WORKING_DAYS needs workWeek; FIXED_DAYS (MONTHLY only) needs workWeek and daysPerMonth. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_pay_profile",
+      "description": "Edit a pay profile. Partial; a clear flag true empties that field. payTypeLines replaces EVERY line (send the whole list). Only later payruns change. Frequency and currency lock once employees are on it (PAY_PROFILE_FREQUENCY_CURRENCY_LOCKED). If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_pay_profile",
+      "description": "Delete a pay profile no employee is or was on. One whose record shows inUse true is refused (PAY_PROFILE_IN_USE): set it INACTIVE with update_pay_profile. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "search_employee_pay_details",
+      "description": "Search employee pay details, current and ended: an employee's pay profile, dates, own figures, lines and one period's totals. inForceOn: only those in force that day. No query: use the filters. No get tool: filter by resourceId."
+    },
+    {
+      "name": "create_employee_pay_detail",
+      "description": "Put one employee on a pay profile from a date. A raise is a NEW pay detail from the new date on the same profile (the previous one ends the day before), never update_employee_pay_detail.\n- effectiveFromDate must be after the start of the employee's latest pay detail.\n- Give a payTypeInputs figure for every profile line left without an amount: a payrun skips the employee until then. A pay type not on the profile is an extra for this employee.\n- Several employees: bulk_create_employee_pay_details. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "bulk_create_employee_pay_details",
+      "description": "Put up to 500 employees on pay profiles. Rows save separately; refusals do not fail the call. Reply: createdCount, failedCount, byErrorCode, then a result per row, refused first, each with its 1-based rowIndex in the request. Report refusals by employee. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_employee_pay_detail",
+      "description": "Correct a pay detail in place, or end the employee's pay with effectiveToDate (the last day). Partial. Not for a raise: create a new pay detail. payTypeInputs replaces EVERY figure. Dates change on the employee's latest pay detail only. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "search_payruns",
+      "description": "Search payruns (employee pay runs) by status, payout status, payment date, period, size. No query: use the filters. Rows are headers and totals: get_payrun has the payslips."
+    },
+    {
+      "name": "get_payrun",
+      "description": "Get one payrun: a row per payslip (lines: get_payslip), journal, attachments. payouts true: payout rows instead."
+    },
+    {
+      "name": "create_payrun",
+      "description": "Create a DRAFT payrun: a run for one period, pay frequency and currency, with a payslip per employee. Those three and the type cannot change later.\n- REGULAR is the run for a period; OFF_CYCLE is an extra one (bonus, correction). Several drafts per period are fine; only one REGULAR run per frequency, currency and period can be finalized (finalize_payrun, after validate_payrun).\n- populate true fills it from pay profiles now; skipped in the result lists who was left out; else it starts empty. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_payrun",
+      "description": "Edit a DRAFT payrun's header. Partial; a clear flag true empties that field. A finalized run takes only its payslip template, sent alone; generate_payslips remakes the PDFs. Any other change, or any to a void run, is refused (PAYRUN_NOT_DRAFT): unpost_payrun first. Changing the period leaves existing payslips as they are: refresh_payslips rebuilds them for it. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_payrun",
+      "description": "Delete a new DRAFT payrun and its payslips. A finalized run is refused (PAYRUN_NOT_DRAFT), so is one finalized then unposted (PAYRUN_ALREADY_POSTED): void_payrun it. A finalized run: unpost_payrun then edit. Several: bulk_delete_payruns. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "bulk_delete_payruns",
+      "description": "Delete several new DRAFT payruns, each on its own (ASYNC): one that cannot go (finalized, posted before: void_payrun, not found) fails in errorDetails, the rest are deleted. A run listed twice is refused (PAYRUN_DUPLICATE). If the result says it runs in the background, do not poll: its result arrives by itself. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "add_payrun_employees",
+      "description": "Add employees to a DRAFT payrun. One removed earlier gets their old payslip back; others get a payslip made from their pay in the period. An active employee with no pay in the period gets an empty payslip: fill it with save_payrun_lines. The first employee who cannot be added (inactive, other frequency or currency, missing figure) refuses the whole call. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "remove_payrun_employees",
+      "description": "Remove employees' payslips from a DRAFT payrun. One not in the run is ignored. They stay out when the run is filled again: add_payrun_employees brings the payslip back. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "save_payrun_lines",
+      "description": "Set the lines of payslips in a DRAFT payrun. A payslip's lines list replaces the whole list: a line with resourceId is kept or changed, one without is added, one left out is removed. Amounts 0 or more, 2 decimals; pay types ACTIVE. Any refusal changes nothing; payslips not named are untouched. Lines added by hand are never pro-rated and survive a refresh. Reply: the payslips named, no lines (get_payslip). If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "populate_payrun",
+      "description": "Fill a DRAFT payrun from pay profiles: adds every employee not yet in it whose pay overlaps the period on an active profile with the run's frequency and currency, pro-rated where pay changes. Existing payslips are never changed (refresh_payslips does). Removed employees stay out. Reply: skipped first (byErrorCode), addedCount, the run header. Someone with no pay: add_payrun_employees. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "preview_populate_payrun",
+      "description": "Preview populate_payrun on a DRAFT payrun, saving nothing. skipped first (byErrorCode), including who has no pay set up (add_payrun_employees gives them an empty payslip). addedCount is who it would add. added true lists them, skipped only counted. Employees already in the run are not listed."
+    },
+    {
+      "name": "search_payslips",
+      "description": "Search payslips across payruns: a row each with payout status, no lines (get_payslip). No query: use the filters. An employee's, newest first: employeeResourceId and payrunStatus FINALIZED. A run's: payrunResourceId."
+    },
+    {
+      "name": "get_payslip",
+      "description": "Get one payslip: every line with its id (what save_payrun_lines needs), amounts, payout status, employee, pay profile, its payrun's period and payment date, and generatedDocuments (the PDF link, once made)."
+    },
+    {
+      "name": "refresh_payslip",
+      "description": "Rebuild one payslip of a DRAFT payrun from the employee's current pay: pay-setup lines are replaced (pro-rated; hand edits to them lost), lines added by hand stay. Refused, payslip unchanged, with no pay in the period (PAYRUN_EMPLOYEE_NO_PAY_PROFILE). Several: refresh_payslips. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "refresh_payslips",
+      "description": "Rebuild payslips of a DRAFT payrun from current pay: pay-setup lines are replaced (hand edits to them lost), lines added by hand stay. No payslipResourceIds: every payslip. One that cannot be refreshed stays unchanged and is listed in failed with an errorCode; the rest are refreshed. Reply: failed first, refreshedCount, the run header. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "generate_payslips",
+      "description": "Make the payslip PDFs of a FINALIZED payrun again (ASYNC), for payslips named or all: one that failed, or after a template change. finalize_payrun makes them once itself. A new link replaces the old in generatedDocuments (get_payslip). If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "validate_payrun",
+      "description": "Check a DRAFT payrun as finalize_payrun would, listing every problem at once; writes nothing. valid true: finalize would go ahead. errors (absent when none): each has a code (PAYSLIP_NO_LINES, PAYRUN_NET_PAY_NEGATIVE, PAYRUN_PERIOD_LOCKED), a message and what it is about."
+    },
+    {
+      "name": "preview_payrun_journal",
+      "description": "Preview the journal finalize_payrun would post for a DRAFT payrun, with validate_payrun's errors; writes nothing. Debits first, one net pay credit last: totals must match and valid be true."
+    },
+    {
+      "name": "finalize_payrun",
+      "description": "Finalize ONE DRAFT payrun (several: bulk_finalize_payruns): posts ONE balanced journal and makes the payslip PDFs. A ledger write: validate_payrun and preview_payrun_journal first. Blocked by a payslip with no lines, negative net pay, a journal date on or before the lock date, or another finalized REGULAR run for its frequency, currency and period. A FINALIZED run comes back unchanged. A mistake: unpost_payrun. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "bulk_finalize_payruns",
+      "description": "Finalize several DRAFT payruns, each as finalize_payrun does and on its own (ASYNC): one that cannot go fails in errorDetails, the rest are finalized (PARTIAL_SUCCESS). A run listed twice is refused (PAYRUN_DUPLICATE). Validate each first. If the result says it runs in the background, do not poll: its result arrives by itself. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "unpost_payrun",
+      "description": "Unpost a FINALIZED payrun to correct it: its journal is voided and it goes back to DRAFT; finalize_payrun again posts a new one. Refused while a payout is live (PAYRUN_PAYOUT_LINKED: void_payrun_payout first) and into a locked period. Wrong amount, not paid: unpost, fix, finalize. Employee got too much: deduct in a later run; too little: an off-cycle run. Cancel for good: void_payrun. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "void_payrun",
+      "description": "Void a payrun for good, with a reason: a FINALIZED run's journal is voided and its period is free for a new REGULAR run. Same refusals as unpost_payrun (live payouts, locked period). A draft never posted is refused (PAYRUN_VOID_NEVER_POSTED): delete_payrun it. A run unposted earlier cannot be deleted: void it. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "preview_payrun_payouts",
+      "description": "Preview recording payouts for a FINALIZED payrun; writes nothing. Per payslip: netPayAmount, paidAmount, owedAmount, payoutAmount. errors lists every problem (PAYRUN_PAYOUT_EXCEEDS_OWED, PAYRUN_PAYOUT_ACCOUNT_INVALID_TYPE), no rows then. Records only: no money moves."
+    },
+    {
+      "name": "record_payrun_payouts",
+      "description": "Record a FINALIZED payrun's net pay as paid OUTSIDE Jaz, e.g. by bank transfer (ASYNC): one journal per payslip, debiting net pay and crediting the bank or cash account. It moves no money and pays no one. Payslips left out: all still owed, in full; or name payslips, a part amount allowed. Payslips go UNPAID, PARTIALLY_PAID, PAID. preview_payrun_payouts first. hash dedups only while the job runs (a later re-send records again): read get_payrun before retrying. Undo: void_payrun_payout. If the result says it runs in the background, do not poll: its result arrives by itself. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "void_payrun_payout",
+      "description": "Void one recorded payrun payout, with a reason: the payslip owes that amount again. journalResourceId: a get_payrun payouts row. Needed before unpost_payrun or void_payrun on a paid run. Refused into a locked period. Answers the payrun. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
       "name": "search_loans",
       "description": "Search loans (borrowings: term loans and director, shareholder, related-party or intercompany accounts). Each row carries outstandingPrincipal, currentPortion, nextDueDate and nextDueAmount as at endDate (default today). No free-text query: use the named filters, then get_loan."
     },
@@ -1448,27 +1624,27 @@
     },
     {
       "name": "create_posting_rule",
-      "description": "Create a posting rule (how approved claims group into journals at conversion). outerAxis + innerAxis + lineDescriptionTemplate required. Dedups by name. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a claim posting rule (how approved claims group into journals at conversion; a payrun uses create_payrun_posting_rule). outerAxis + innerAxis + lineDescriptionTemplate required. Dedups by name. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_posting_rule",
-      "description": "Update a posting rule. Omitted fields unchanged. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a claim posting rule (not a payrun one). Omitted fields unchanged. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_posting_rules",
-      "description": "Search posting rules."
+      "description": "Search claim posting rules (not payrun posting rules)."
     },
     {
       "name": "list_posting_rules",
-      "description": "List posting rules (alphabetical)."
+      "description": "List claim posting rules (alphabetical)."
     },
     {
       "name": "get_posting_rule",
-      "description": "Get a posting rule."
+      "description": "Get a claim posting rule."
     },
     {
       "name": "delete_posting_rule",
-      "description": "Delete a posting rule. The org default cannot be deleted while default (set another default first). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Delete a claim posting rule. The org default cannot be deleted while default (set another default first). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_claims",
@@ -1556,7 +1732,7 @@
     },
     {
       "name": "search_employee_payouts",
-      "description": "Search recorded employee payouts (reimbursements + advances)."
+      "description": "Search recorded employee payouts (reimbursements, advances and payrun payouts). A payrun payout row carries payrunResourceId (claim payouts have none; it is not a filter) and its journalResourceId, which void_payrun_payout takes. A payrun's own list: get_payrun."
     },
     {
       "name": "add_employee",
@@ -1572,7 +1748,7 @@
     },
     {
       "name": "search_employee_balances",
-      "description": "Search the employee-balance directory (per-currency reimbursement balances owed)."
+      "description": "Search the employee-balance directory (per-currency reimbursement balances owed). unpaidPay: net pay finalized payruns still owe the employee, per currency."
     },
     {
       "name": "get_employee",
