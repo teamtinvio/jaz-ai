@@ -11,7 +11,7 @@ Complete reference for all 80 command groups. Organized by domain.
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
-| `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
+| `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sale-order-id` (invoices created from that order), `--sort`, `--order` |
 | `create` | `--contact`, `--date`, `--due`, `--ref` or `--auto-ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
 | `update <id>` | `--date`, `--due`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
@@ -28,7 +28,7 @@ Complete reference for all 80 command groups. Organized by domain.
 |------------|-----------|
 | `list` | `--limit`, `--offset`, `--all`, `--format`, `--json` |
 | `get <id>` | `--json` |
-| `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--sort`, `--order` |
+| `search` | `--reference`, `--contact-name`, `--status`, `--from`, `--to`, `--tag`, `--purchase-order-id` (bills created from that order), `--sort`, `--order` |
 | `create` | `--contact`, `--date`, `--due`, `--ref` or `--auto-ref`, `--currency`, `--exchange-rate`, `--lines`, `--finalize`, `--input` |
 | `update <id>` | `--date`, `--due`, `--ref`, `--lines`, `--input` |
 | `delete <id>` | |
@@ -734,7 +734,7 @@ Every write after `record` takes `--hash` (from `search` or the last write). A l
 
 | Subcommand | Key flags |
 |------------|-----------|
-| `search` | `--id`, `--type` (`AR`/`AP`), `--ref`, `--account`, `--from`, `--to`, `--limit`, `--all`, `--json` |
+| `search` | `--id`, `--type` (`AR`/`AP`), `--ref`, `--account`, `--from`, `--to`, `--amount` (exact), `--min-amount`, `--max-amount`, `--currency-code`, `--sort` (`valueDate`, `totalAmount`, `reference`, `currencyCode`, `type`, `status`, `paymentMethod`, `createdAt`, `resourceId`), `--limit`, `--all`, `--json`. No contact filter |
 | `record` | `--type` (`SALE`/`PURCHASE`), `--account`, `--method`, `--amount`, `--date`, `--currency`, `--rate`, `--contact`, `--reference`, `--notes`, `--draft`, `--input` |
 | `update <id>` | `--hash`, `--reference`, `--notes`, `--method`, `--amount`, `--account`, `--date`, `--input` (for `children`) |
 | `activate <id>` | `--hash`. Posts the draft |

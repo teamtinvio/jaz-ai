@@ -3187,6 +3187,7 @@ Rules that hold on every route below:
 - **Using up the balance converts the record into an ordinary batch payment, one-way** (attributions or attach). The response cannot say so (it has no `origin`): detect it from `unappliedBalance` reaching 0. Its `origin` becomes `BATCH`, so the `UNAPPLIED` search no longer returns it: a record missing from that search may have become a batch payment, so check the batch-payment search with `origin` `BATCH` or `ALL` before concluding it is gone.
 - `paymentMethod` is the same 11-value enum as payments; lowercase or unknown values are 422.
 - Not idempotent. Clio sends every one of these once and reports a lost answer as UNCONFIRMED with the read-back, never as success.
+- **Search filters** (`BatchPaymentFilter`): `resourceId`, `type` (`AR` received / `AP` paid), `reference`, `organizationAccountResourceId`, `bankStatementEntryResourceId`, `paymentMethod`, `currencyCode`, `status`, `valueDate`, `createdAt`, `totalAmount`. Every one is an expression: `{"totalAmount": {"eq": 500}}`, never a bare `500` (400). There is **no contact filter**: a `contactResourceId` key is dropped, not refused, and every row comes back, so read the contact on the rows. `sortBy` takes `resourceId`, `reference`, `status`, `type`, `paymentMethod`, `valueDate`, `totalAmount`, `currencyCode`, `createdAt`; anything else (e.g. `amount`) is a 422. `search_unapplied_payments` sends these as `amount` / `minAmount` / `maxAmount` and `currencyCode`.
 
 ### POST /api/v1/unapplied-payments
 

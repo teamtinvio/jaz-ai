@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.7.2+881b6f0c",
+  "contentVersion": "9.7.3+43825ed0",
   "counts": {
     "tools": 521,
     "namespaces": 61,
@@ -50,7 +50,7 @@
     },
     {
       "name": "cash_transfers",
-      "description": "Cash transfers between your own bank/cash accounts and cashflow transaction search. WHEN TO USE: moving funds between own accounts (main bank → petty cash, USD → SGD). For external receipts/payments, use cash_entries namespace."
+      "description": "Cash transfers between your own bank/cash accounts. WHEN TO USE: moving funds between own accounts (main bank → petty cash, USD → SGD). To find specific transfers, use cashflow transaction search (payments_and_search namespace). For external receipts/payments, use cash_entries namespace."
     },
     {
       "name": "bank_accounts",
@@ -366,7 +366,7 @@
     {
       "name": "search_invoices",
       "namespace": "invoices",
-      "description": "Search invoices. Supports comma-separated status (e.g., \"UNPAID,PARTIALLY_PAID\"). Use filter param for advanced queries (nested paths, OR groups).",
+      "description": "Search invoices. saleOrderId finds the ones created from (linked to) a sales order: read those first for what covers or fulfils an order; match look-alikes only for unlinked ones. Supports comma-separated status (e.g., \"UNPAID,PARTIALLY_PAID\"). Use filter param for advanced queries (nested paths, OR groups).",
       "readOnly": true,
       "destructive": false
     },
@@ -436,7 +436,7 @@
     {
       "name": "search_bills",
       "namespace": "bills",
-      "description": "Search bills. Supports comma-separated status (e.g., \"UNPAID,PARTIALLY_PAID\"). Use filter param for advanced queries.",
+      "description": "Search bills. purchaseOrderId finds the ones created from (linked to) a purchase order: read those first for what covers or fulfils an order; match look-alikes only for unlinked ones. Supports comma-separated status (e.g., \"UNPAID,PARTIALLY_PAID\"). Use filter param for advanced queries.",
       "readOnly": true,
       "destructive": false
     },
@@ -513,7 +513,7 @@
     {
       "name": "search_sale_orders",
       "namespace": "sale_orders",
-      "description": "Search Sale Quotes or Sale Orders (by documentType). Filter by status, contact, date, amount, currency, tag. Use the filter param for advanced/nested queries.",
+      "description": "Search Sale Quotes or Sale Orders (by documentType). saleQuoteId finds the orders created from (linked to) a quote: read those first for what a quote led to; match look-alikes only for unlinked ones. Filter by status, contact, date, amount, currency, tag. Use the filter param for advanced/nested queries.",
       "readOnly": true,
       "destructive": false
     },
@@ -569,7 +569,7 @@
     {
       "name": "search_purchase_orders",
       "namespace": "purchase_orders",
-      "description": "Search Purchase Requests or Purchase Orders (by documentType). Filter by status, contact, date, amount, currency, tag. Use the filter param for advanced/nested queries.",
+      "description": "Search Purchase Requests or Purchase Orders (by documentType). purchaseRequestId finds the orders created from (linked to) a request: read those first for what a request led to; match look-alikes only for unlinked ones. Filter by status, contact, date, amount, currency, tag. Use the filter param for advanced/nested queries.",
       "readOnly": true,
       "destructive": false
     },
@@ -611,14 +611,14 @@
     {
       "name": "convert_sale_order_to_invoice",
       "namespace": "sale_orders",
-      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice; NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry; search invoices for one already linked to this order (saleOrderResourceId / saleQuoteResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Convert a Sale Quote or Sale Order (pick via documentType) into an Invoice. Creates a NEW invoice; NON-IDEMPOTENT: each call makes another invoice. On a timeout or uncertain result, do NOT blind-retry: first look for the invoice it may have made (an order's: search_invoices saleOrderId; a quote's: same customer, amount and date). `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "convert_purchase_order_to_bill",
       "namespace": "purchase_orders",
-      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill; NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry; search bills for one already linked to this order (purchaseOrderResourceId / purchaseRequestResourceId) first. `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Convert a Purchase Request or Purchase Order (pick via documentType) into a Bill. Creates a NEW bill; NON-IDEMPOTENT: each call makes another bill. On a timeout or uncertain result, do NOT blind-retry: first look for the bill it may have made (an order's: search_bills purchaseOrderId; a request's: same supplier, amount and date). `reference` is required by the API; set autoReference:true for the org's next number. `saveAsDraft` defaults true (lands as a DRAFT). The source must not be VOID. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -1234,7 +1234,7 @@
     {
       "name": "list_cash_in",
       "namespace": "cash_entries",
-      "description": "List cash-in entries (direct cash receipts). Paginated.",
+      "description": "List cash-in entries (direct cash receipts). Paginated, no filters: for specific ones (date, amount, account), use search_cashflow_transactions with type JOURNAL_DIRECT_CASH_IN.",
       "readOnly": true,
       "destructive": false
     },
@@ -1248,7 +1248,7 @@
     {
       "name": "list_cash_out",
       "namespace": "cash_entries",
-      "description": "List cash-out entries (direct cash disbursements). Paginated.",
+      "description": "List cash-out entries (direct cash disbursements). Paginated, no filters: for specific ones (date, amount, account), use search_cashflow_transactions with type JOURNAL_DIRECT_CASH_OUT.",
       "readOnly": true,
       "destructive": false
     },
@@ -1290,7 +1290,7 @@
     {
       "name": "list_cash_transfers",
       "namespace": "cash_transfers",
-      "description": "List cash transfer entries. Paginated.",
+      "description": "List cash transfer entries. Paginated, no filters: for specific transfers (date, amount, account, e.g. a possible duplicate), use search_cashflow_transactions with type JOURNAL_CASH_TRANSFER, accountId, direction and startDate/endDate.",
       "readOnly": true,
       "destructive": false
     },
@@ -1360,7 +1360,7 @@
     {
       "name": "search_cashflow_transactions",
       "namespace": "payments_and_search",
-      "description": "Search cashflow transactions (unified ledger across cash entries / payments / journals). direction enum: PAYIN | PAYOUT.",
+      "description": "Search cashflow transactions (unified ledger across cash entries, cash transfers, payments and journals): the exact way to find specific ones by type, account, direction and date. direction enum: PAYIN | PAYOUT.",
       "readOnly": true,
       "destructive": false
     },
@@ -3845,7 +3845,7 @@
     {
       "name": "search_unapplied_payments",
       "namespace": "unapplied_payments",
-      "description": "Unapplied payments (cash not yet applied to documents). The only read path: rows carry hash (every write needs it), unappliedStatus and unappliedBalance. A record whose cash is all applied became a batch payment and no longer appears here.",
+      "description": "Unapplied payments (cash not yet applied to documents). The only read path: rows carry hash (every write needs it), unappliedStatus and unappliedBalance. A record whose cash is all applied became a batch payment and no longer appears here. No contact filter (a contact key in filter is ignored): narrow by amount, date or reference and read contact on the rows.",
       "readOnly": true,
       "destructive": false
     },

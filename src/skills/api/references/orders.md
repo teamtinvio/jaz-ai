@@ -129,7 +129,9 @@ Purchase side is symmetric: `create -t request --finalize` (→ ACTIVE) → (opt
 
 ## Search
 
-`search_sale_orders` / `search_purchase_orders` take `documentType` plus the standard filter set (reference, status, contact, contactResourceId, currencyCode, date range, amount range, tag). The `status` enum is the per-side union (sales: DRAFT/PENDING/CREATED/ACCEPTED/CONFIRMED/VOID; purchases: DRAFT/PENDING/ACTIVE/ACCEPTED/CONFIRMED/VOID). For advanced/nested queries (e.g. filter by `saleQuoteResourceId`), pass the raw `filter` object. See `search-reference.md` §24-25 and `search-enums.md` §25-26.
+`search_sale_orders` / `search_purchase_orders` take `documentType` plus the standard filter set (reference, status, contact, contactResourceId, currencyCode, date range, amount range, tag). The `status` enum is the per-side union (sales: DRAFT/PENDING/CREATED/ACCEPTED/CONFIRMED/VOID; purchases: DRAFT/PENDING/ACTIVE/ACCEPTED/CONFIRMED/VOID). For advanced/nested queries, pass the raw `filter` object. See `search-reference.md` §24-25 and `search-enums.md` §25-26.
+
+**Linked documents.** Each search reads the documents created from another by their link: `search_sale_orders` `saleQuoteId` (the orders made from a quote, documentType `SALE_ORDER`), `search_purchase_orders` `purchaseRequestId` (the orders made from a request, documentType `PURCHASE_ORDER`), `search_invoices` `saleOrderId` (the invoices made from a sales order) and `search_bills` `purchaseOrderId` (the bills made from a purchase order). Asked what covers or fulfils a document, read its linked documents first, and match look-alikes (contact, amount, date) only for documents with no link.
 
 Search behaves exactly like the other entities: `sortBy` is an array, `order` is `ASC`/`DESC`, and an `offset` must be paired with a sort. Duplicate `sortBy` values are rejected (`422: must contain unique values`).
 

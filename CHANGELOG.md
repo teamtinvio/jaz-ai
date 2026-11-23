@@ -1,5 +1,17 @@
 # Changelog
 
+## [9.7.3] - 2026-11-23
+
+**Clio finds the documents created from a quote or an order, unrecorded payments by amount, and a single cash transfer.**
+
+- Asked what a quote, purchase request or order led to, Clio now finds the orders created from the quote or request, and the invoices or bills created from the order. Before, it matched look-alike documents by contact and amount.
+- A quote or purchase request search given the quote or request link is now refused before it is sent, with a message that the link finds orders. Before, the platform rejected it with a message naming neither the link nor the document type it is for.
+- Clio can now look for payments received but not yet applied by their amount and currency. Before, that check failed when asked whether an invoice was paid but not recorded, and if a check Clio relies on fails, its reply now says so.
+- Asked about one cash transfer, cash in or cash out, for example a possible duplicate, Clio now looks it up by type, account and date. Before, it listed every transfer and could stop at the listing limit.
+- New live eval `paid-not-recorded-names-failed-check` covers asking whether an open invoice was paid but not recorded.
+- That eval fails a check that records any payment, cash in, cash out, cash transfer or reconciliation, and a failed search on one bank account counts even when another account's search succeeded.
+- That eval also fails a check that writes anything, a journal included, and a reply that names a failed check but still gives a firm answer.
+
 ## [9.7.2] - 2026-11-23
 
 **Clio in the Jaz dashboard chat, email and Telegram answers questions that need a lookup again.**

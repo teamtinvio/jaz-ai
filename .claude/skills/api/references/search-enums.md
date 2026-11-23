@@ -109,6 +109,7 @@ org has no such account". `search_accounts` does not normalise; only
 
 **Amount fields**: `totalAmount`, `balanceAmount`, `reconciledAmount`, `paymentRecordedAmount`, `creditAppliedAmount`
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
+**Link field**: `saleOrderResourceId` (the sales order the invoice was created from)
 
 > **Note**: `OVERDUE` is not a status value (a list with it returns 422, a search matches nothing). To find overdue invoices, filter `{"status": {"in": ["UNPAID", "PARTIALLY_PAID"]}, "dueDate": {"lt": "<today in the organization's timezone>"}}`. With `search_invoices`: `status: "UNPAID,PARTIALLY_PAID"` and `dueDateTo` set to yesterday in the organization's timezone. Same for bills.
 
@@ -125,6 +126,7 @@ org has no such account". `search_accounts` does not normalise; only
 
 **Amount fields**: `totalAmount`, `balanceAmount`, `reconciledAmount`, `paymentRecordedAmount`, `creditAppliedAmount`
 **Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
+**Link field**: `purchaseOrderResourceId` (the purchase order the bill was created from)
 
 > Same status values and structure as invoices. Same overdue caveat applies.
 

@@ -217,6 +217,7 @@ To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `Y
 |-------|------|-------|
 | `resourceId` | StringExpression | |
 | `contactResourceId` | StringExpression | |
+| `saleOrderResourceId` | StringExpression | The sales order the invoice was created from (`search_invoices` `saleOrderId`) |
 | `status` | StringExpression | DRAFT, UNPAID, PAID, ACTIVE, VOID, etc. (per type, Rule 67) |
 | `reference` | StringExpression | Invoice number |
 | `terms` | IntExpression | Payment terms (days) |
@@ -254,6 +255,7 @@ To convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` → `Y
 |-------|------|-------|
 | `resourceId` | StringExpression | |
 | `contactResourceId` | StringExpression | |
+| `purchaseOrderResourceId` | StringExpression | The purchase order the bill was created from (`search_bills` `purchaseOrderId`) |
 | `contact` | ContactNestedFilter | |
 | `status` | StringExpression | |
 | `reference` | StringExpression | |
@@ -726,7 +728,7 @@ Also covers `POST /api/v1/sale-quotes/search`, same filter shape (`SaleOrderFilt
 | `status` | StringExpression | DRAFT, PENDING, CREATED, ACCEPTED, CONFIRMED, VOID |
 | `contactResourceId` | StringExpression | |
 | `contact` | ContactNestedFilter | Nested: name, resourceId, status |
-| `saleQuoteResourceId` | StringExpression | (Sale Orders) source quote link |
+| `saleQuoteResourceId` | StringExpression | (Sale Orders only) source quote link (`search_sale_orders` `saleQuoteId`) |
 | `currencyCode` | StringExpression | |
 | `valueDate` | DateExpression | |
 | `dueDate` | DateExpression | |
@@ -758,7 +760,7 @@ Also covers `POST /api/v1/purchase-requests/search`, same filter shape (`Purchas
 | `status` | StringExpression | DRAFT, PENDING, ACTIVE, ACCEPTED, CONFIRMED, VOID |
 | `contactResourceId` | StringExpression | Supplier |
 | `contact` | ContactNestedFilter | Nested: name, resourceId, status |
-| `purchaseRequestResourceId` | StringExpression | (Purchase Orders) source request link |
+| `purchaseRequestResourceId` | StringExpression | (Purchase Orders only) source request link (`search_purchase_orders` `purchaseRequestId`) |
 | `currencyCode` | StringExpression | |
 | `valueDate` | DateExpression | |
 | `dueDate` | DateExpression | |
@@ -837,6 +839,21 @@ POST /api/v1/cashflow-transactions/search
   "filter": {
     "organizationAccountResourceId": { "eq": "bank-uuid" },
     "valueDate": { "gte": "2026-01-01" }
+  },
+  "sort": { "sortBy": ["valueDate"], "order": "DESC" }
+}
+```
+
+### Find a specific cash transfer (e.g. a possible duplicate)
+`GET /cash-transfers` takes no filters, so a busy organization's list runs to hundreds of rows. Search the ledger by type, account, direction and date instead:
+```json
+POST /api/v1/cashflow-transactions/search
+{
+  "filter": {
+    "businessTransactionType": { "eq": "JOURNAL_CASH_TRANSFER" },
+    "organizationAccountResourceId": { "eq": "bank-uuid" },
+    "direction": { "eq": "PAYOUT" },
+    "valueDate": { "between": ["2026-11-01", "2026-11-30"] }
   },
   "sort": { "sortBy": ["valueDate"], "order": "DESC" }
 }
