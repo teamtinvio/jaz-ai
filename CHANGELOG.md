@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.7.1] - 2026-11-23
+
+**Clio in the Jaz dashboard chat can page and sort the list on screen, open a record, and read the record or form you have open.**
+
+- On a list, Clio can change the sort order, the rows per page and the page, then read the rows it gets back, and open a row's record.
+- Clio can read the invoice, bill, journal or contact you have open, and the New Invoice or Edit Bill form, including its errors and whether it has unsaved changes. Clio does not fill in or submit forms.
+- This works in the dashboard chat only. Nothing changes in the MCP tools, the `clio` CLI, the Claude extension, email or Telegram.
+
 ## [9.7.0] - 2026-11-23
 
 **Clio can run payroll: payruns, payslips and pay setup.**
