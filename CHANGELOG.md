@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.7.2] - 2026-11-23
+
+**Clio in the Jaz dashboard chat, email and Telegram answers questions that need a lookup again.**
+
+- Since 9.7.0, a question that needed Clio to look something up, such as your recent invoices or what blocks a payrun, ended with an error in the dashboard chat, email and Telegram. Those questions work again.
+- Nothing changes in the MCP tools, the `clio` CLI or the Claude extension.
+
 ## [9.7.1] - 2026-11-23
 
 **Clio in the Jaz dashboard chat can page and sort the list on screen, open a record, and read the record or form you have open.**
