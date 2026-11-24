@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.7.4] - 2026-11-24
+
+**Clio asks before refreshing a payslip, and says what the refresh changed.**
+
+- Before Clio refreshes a draft payslip, or every payslip in a draft payrun, from current pay, it says what the refresh does and waits for your yes: an amount someone changed by hand on a pay setup line is replaced, and lines added by hand stay.
+- After a refresh, Clio lists each line that changed with its old and new amount, and the new totals. Refreshing a whole payrun lists each payslip whose amounts moved.
+- New live evals: `payrun-preview-names-no-pay-employees` (a preview of who a payrun would add names the employees left out for having no pay set up) and `payrun-finalized-template-only-edit` (a finalized payrun takes only a payslip template change). `payrun-refresh-after-pay-change` now checks the question before the refresh and the old and new figures after it.
+
 ## [9.7.3] - 2026-11-23
 
 **Clio finds the documents created from a quote or an order, unrecorded payments by amount, and a single cash transfer.**

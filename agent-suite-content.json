@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.7.3+43825ed0",
+  "contentVersion": "9.7.4+5064c0a4",
   "counts": {
     "tools": 521,
     "namespaces": 61,
@@ -2312,14 +2312,14 @@
     {
       "name": "refresh_payslip",
       "namespace": "payslips",
-      "description": "Rebuild one payslip of a DRAFT payrun from the employee's current pay: pay-setup lines are replaced (pro-rated; hand edits to them lost), lines added by hand stay. Refused, payslip unchanged, with no pay in the period (PAYRUN_EMPLOYEE_NO_PAY_PROFILE). Several: refresh_payslips. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Rebuild one DRAFT payrun payslip from current pay: pay-setup lines are replaced (hand edits lost), lines added by hand stay. No pay in period: refused, unchanged (PAYRUN_EMPLOYEE_NO_PAY_PROFILE). Several: refresh_payslips. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "refresh_payslips",
       "namespace": "payslips",
-      "description": "Rebuild payslips of a DRAFT payrun from current pay: pay-setup lines are replaced (hand edits to them lost), lines added by hand stay. No payslipResourceIds: every payslip. One that cannot be refreshed stays unchanged and is listed in failed with an errorCode; the rest are refreshed. Reply: failed first, refreshedCount, the run header. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Rebuild payslips of a DRAFT payrun from current pay: pay-setup lines are replaced (hand edits lost), lines added by hand stay. One that cannot be refreshed stays unchanged, listed in failed with errorCode. Reply: failed first, refreshedCount, payslips changed, the run header. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

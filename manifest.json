@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.7.3",
+  "version": "9.7.4",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -1240,11 +1240,11 @@
     },
     {
       "name": "refresh_payslip",
-      "description": "Rebuild one payslip of a DRAFT payrun from the employee's current pay: pay-setup lines are replaced (pro-rated; hand edits to them lost), lines added by hand stay. Refused, payslip unchanged, with no pay in the period (PAYRUN_EMPLOYEE_NO_PAY_PROFILE). Several: refresh_payslips. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Rebuild one DRAFT payrun payslip from current pay: pay-setup lines are replaced (hand edits lost), lines added by hand stay. No pay in period: refused, unchanged (PAYRUN_EMPLOYEE_NO_PAY_PROFILE). Several: refresh_payslips. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "refresh_payslips",
-      "description": "Rebuild payslips of a DRAFT payrun from current pay: pay-setup lines are replaced (hand edits to them lost), lines added by hand stay. No payslipResourceIds: every payslip. One that cannot be refreshed stays unchanged and is listed in failed with an errorCode; the rest are refreshed. Reply: failed first, refreshedCount, the run header. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Rebuild payslips of a DRAFT payrun from current pay: pay-setup lines are replaced (hand edits lost), lines added by hand stay. One that cannot be refreshed stays unchanged, listed in failed with errorCode. Reply: failed first, refreshedCount, payslips changed, the run header. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "generate_payslips",
