@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.7.5] - 2026-11-24
+
+**Clio in the Jaz dashboard chat can open a record's action for you to confirm.**
+
+- On an open record, Clio can open the confirmation or form of an action from the record's menu, such as voiding it, the way a click on the menu does. You confirm or submit it yourself; Clio never does.
+- Nothing changes in the MCP tools, the `clio` CLI or the Claude extension.
+
 ## [9.7.4] - 2026-11-24
 
 **Clio asks before refreshing a payslip, and says what the refresh changed.**
