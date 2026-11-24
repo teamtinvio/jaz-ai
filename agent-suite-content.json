@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.7.5+2e8c70c2",
+  "contentVersion": "9.8.0+5bda2e20",
   "counts": {
-    "tools": 521,
+    "tools": 523,
     "namespaces": 61,
     "calculators": 13,
     "recipes": 16,
@@ -110,7 +110,7 @@
     },
     {
       "name": "chart_of_accounts",
-      "description": "Chart of accounts (COA/GL accounts). Create, search, update accounts, including setting or removing an account's period lock date (lock / unlock a period, lock date: block recording or editing transactions on the account dated on or before a date). Bookmarks (favorites/shortcuts). Also: ledger codes, account types."
+      "description": "Chart of accounts (COA/GL accounts). Create, search, update accounts, including setting or removing an account's period lock date (lock / unlock a period, lock date: block recording or editing transactions on the account dated on or before a date). Deposit accounts: list and flag customer or supplier deposit accounts. Bookmarks (favorites/shortcuts). Also: ledger codes, account types."
     },
     {
       "name": "currencies",
@@ -292,6 +292,20 @@
       "description": "Search chart of accounts. For OR (name or code), use filter: {\"or\":{\"name\":{\"contains\":\"X\"},\"code\":{\"contains\":\"X\"}}}.",
       "readOnly": true,
       "destructive": false
+    },
+    {
+      "name": "list_deposit_accounts",
+      "namespace": "chart_of_accounts",
+      "description": "List the accounts flagged as deposit accounts, one side per call, with balances per currency. Pages count account and currency rows: an account in several currencies can span pages, so merge by accountResourceId.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "flag_deposit_accounts",
+      "namespace": "chart_of_accounts",
+      "description": "Flag accounts as CUSTOMER (active liability) or SUPPLIER (active asset) deposit accounts, or unflag with depositContactType null. Not control, bank, cash or inventory accounts. Every call overwrites restrictPaymentOverdraft: read list_deposit_accounts first and resend the current value unless asked to change it. One change: a bad account refuses all (422 names each). Changes org setup: confirm with the user first. Admin only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
     },
     {
       "name": "create_account",

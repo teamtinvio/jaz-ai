@@ -148,6 +148,8 @@ Same subcommands and flags as `cash-in`.
 | `get <id>` | `--json` |
 | `create` | `--name`, `--code`, `--type`, `--currency`, `--status`, `--input` |
 | `delete <id>` | |
+| `deposit-accounts` | `--type CUSTOMER\|SUPPLIER` (required), `--limit`, `--offset`, `--all` |
+| `flag-deposit-accounts` | `--account <id...>`, `--type CUSTOMER\|SUPPLIER`, `--restrict-overdraft true\|false` (required to flag), `--unflag`, `--input`: changes org setup |
 
 ### `clio items`: Products and services
 | Subcommand | Key flags |
@@ -876,7 +878,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 521 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 523 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

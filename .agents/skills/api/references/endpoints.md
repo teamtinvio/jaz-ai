@@ -1837,7 +1837,7 @@ POST /api/v1/catalogs
 
 ---
 
-## Deposits (no endpoint, by design)
+## Deposits (a flag on an account, not an entity)
 
 > **There is no deposits entity.** No `/deposits` route exists at any spelling and none is
 > planned. A deposit is a *flag on a Chart of Accounts account*, not a document. See
@@ -1846,7 +1846,48 @@ POST /api/v1/catalogs
 
 **The flag**: a CoA account carries `depositContactType`, which is `CUSTOMER` (customer deposit /
 advance received, a liability), `SUPPLIER` (supplier deposit / advance paid, an asset), or
-`NULL` (an ordinary account).
+`NULL` (an ordinary account). The flag is listed and set through `/deposit-accounts`.
+
+### GET /api/v1/deposit-accounts
+
+`depositContactType=CUSTOMER|SUPPLIER` is required: one side per call. `limit` (max 1000,
+default 100) and `offset` (0-indexed page). Returns the active flagged accounts with their
+balances per currency:
+
+```json
+{ "data": [{ "accountResourceId": "uuid", "accountCode": "2150", "accountName": "Customer Deposits",
+  "accountClass": "Liability", "accountType": "Current Liability", "depositContactType": "CUSTOMER",
+  "restrictPaymentOverdraft": false,
+  "accountBalances": [{ "sourceCurrencyCode": "SGD", "sourceBalanceAmount": 500 }] }],
+  "totalElements": 1, "totalPages": 1 }
+```
+
+Paging counts one row per account AND currency, so an account holding several currencies can
+appear on two pages, each with part of its balances: merge by `accountResourceId`. An account
+with no entries yet has no `accountBalances`.
+
+### PUT /api/v1/deposit-accounts
+
+```json
+{ "accounts": [
+  { "organizationAccountResourceId": "uuid", "depositContactType": "CUSTOMER", "restrictPaymentOverdraft": true },
+  { "organizationAccountResourceId": "uuid-2", "depositContactType": null }
+] }
+```
+
+- 1-500 entries, each account once. `depositContactType` is required on every entry: `null`
+  unflags, a missing key is refused (so a missing value can never unflag by accident).
+- `restrictPaymentOverdraft` is required when flagging: the PUT sets both fields every time, so
+  a default would clear a stored `true`. `true` refuses a payment against the account that
+  exceeds the contact's remaining deposit balance. It cannot be `true` on an unflag.
+- `CUSTOMER` needs an active **liability** account, `SUPPLIER` an active **asset** account.
+  Control accounts and Bank Accounts, Cash and Inventory accounts cannot be deposit accounts.
+- Applied as one change: an account not found in the organization, or one that cannot take the
+  setting, refuses the whole request with a 422 naming every such account; nothing changes.
+- Unflagging takes the account and its balances out of the list; payments already recorded on
+  it are kept.
+- Tools: `list_deposit_accounts`, `flag_deposit_accounts`. CLI: `clio accounts deposit-accounts`,
+  `clio accounts flag-deposit-accounts`.
 
 **The movement**: once an account is flagged, a deposit is an *ordinary transaction posted
 against that account*. Nothing about the call is deposit-specific. The transaction types that
@@ -1868,11 +1909,10 @@ land on a deposit account are the normal ones: `SALE`, `PURCHASE`, `PAYMENT_SALE
 > plain choice. The tools default `paymentMethod` to `BANK_TRANSFER`, so a drawdown that
 > does not set it explicitly will 422. See SKILL.md Rule 80.
 
-**What the API cannot do**: `depositContactType` is not on any chart-of-accounts request or
-response model in this API, and the platform-backend mutation that sets it
-(`configureDepositAccounts`) is not proxied. **Flagging an account as a deposit account is a
-web-app action.** `POST /chart-of-accounts` cannot create one. Over the API you can only read
-and post against an account someone already flagged.
+**What the chart-of-accounts calls cannot do**: `depositContactType` is not on any
+chart-of-accounts request or response model, so `POST /chart-of-accounts` cannot create a
+deposit account and `GET /chart-of-accounts` does not show the flag. Create the account, then
+flag it with `PUT /deposit-accounts`; read the flag with `GET /deposit-accounts`.
 
 ---
 

@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 618 spec paths and 775 spec operations and is the authoritative list; check it before concluding
+> carries 619 spec paths and 777 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -964,6 +964,13 @@ incomplete. Reaching them needs a raw HTTP call.
 for `fixed-assets`, `deferrals`, `leases`, `loans`, `cash-in-entries`, `cash-out-entries`, `cash-transfers`.
 Upload takes the `file` field only (no `attachmentType`). Wrapped by `get_attachments` /
 `add_attachment` / `delete_attachment` and `clio attachments`.
+
+### Deposit accounts (2): 2026-11-24
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/deposit-accounts` | Flagged deposit accounts, one side per call (`depositContactType` required), balances per currency (`list_deposit_accounts`) |
+| PUT | `/deposit-accounts` | Flag (`CUSTOMER` / `SUPPLIER` + `restrictPaymentOverdraft`) or unflag (`null`) accounts, 1-500, one change (`flag_deposit_accounts`) |
 
 ---
 

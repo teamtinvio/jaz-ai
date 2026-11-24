@@ -605,12 +605,20 @@ nothing is missing: a deposit is not a document.
 carries `depositContactType` = `CUSTOMER` or `SUPPLIER`; a deposit is then an ordinary
 transaction on it.
 - Top up: `POST /journals`, `POST /cash-in-entries`, `POST /cash-out-entries` (one leg on the flagged account).
-- Draw down against an invoice or bill: `POST /invoices/:resourceId/payments` or `POST /bills/:resourceId/payments` with `accountResourceId` = the flagged account.
+- Draw down against an invoice or bill: `POST /invoices/:resourceId/payments` or `POST /bills/:resourceId/payments` with `accountResourceId` = the flagged account and `paymentMethod: OTHER` (Rule 80).
 - Read movements: `POST /cashflow-transactions/search` on that account.
 
-**Setting the flag is a web-app action**: `depositContactType` is not on any
-chart-of-accounts model in this API, so `POST /chart-of-accounts` cannot create a deposit
-account. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-glossary.md` → Deposits.
+**The flag is set with `PUT /deposit-accounts`** and listed with
+`GET /deposit-accounts?depositContactType=CUSTOMER|SUPPLIER`. `depositContactType` is not on any
+chart-of-accounts model, so `POST /chart-of-accounts` cannot create a deposit account: create the
+account, then flag it. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-glossary.md` → Deposits.
+
+### 422 on `PUT /deposit-accounts`
+The request is applied as one change, so one bad entry refuses all of them and the error names
+every bad account: not found in the organization, inactive, a control account, a Bank Accounts,
+Cash or Inventory account, or the wrong class (`CUSTOMER` needs a liability, `SUPPLIER` an
+asset). A missing `depositContactType` key, or a flag without `restrictPaymentOverdraft`, is a
+422 too. Fix the named accounts and send the whole request again.
 
 **`/cash-entries` is NOT a 404 path**; an earlier version of this note listed it. A bare
 `POST /cash-entries` has no handler, but the prefix is live:

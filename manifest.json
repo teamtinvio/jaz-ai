@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.7.5",
+  "version": "9.8.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -85,6 +85,14 @@
     {
       "name": "search_accounts",
       "description": "Search chart of accounts. For OR (name or code), use filter: {\"or\":{\"name\":{\"contains\":\"X\"},\"code\":{\"contains\":\"X\"}}}."
+    },
+    {
+      "name": "list_deposit_accounts",
+      "description": "List the accounts flagged as deposit accounts, one side per call, with balances per currency. Pages count account and currency rows: an account in several currencies can span pages, so merge by accountResourceId."
+    },
+    {
+      "name": "flag_deposit_accounts",
+      "description": "Flag accounts as CUSTOMER (active liability) or SUPPLIER (active asset) deposit accounts, or unflag with depositContactType null. Not control, bank, cash or inventory accounts. Every call overwrites restrictPaymentOverdraft: read list_deposit_accounts first and resend the current value unless asked to change it. One change: a bad account refuses all (422 names each). Changes org setup: confirm with the user first. Admin only. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "create_account",

@@ -7039,6 +7039,53 @@
       ],
       "type": "object"
     },
+    "ConfigureDepositAccount": {
+      "properties": {
+        "depositContactType": {
+          "description": "CUSTOMER sets the account up for customer deposits and must be a liability account. SUPPLIER sets it up for supplier deposits and must be an asset account. null removes the account from the deposit accounts. Required: send null explicitly to remove.",
+          "enum": [
+            "CUSTOMER",
+            "SUPPLIER"
+          ],
+          "example": "CUSTOMER",
+          "type": "string",
+          "x-nullable": true
+        },
+        "organizationAccountResourceId": {
+          "description": "Resource ID of the chart-of-accounts entry.",
+          "example": "8f2b6a3e-4c1d-4e5f-9a7b-1c2d3e4f5a6b",
+          "type": "string"
+        },
+        "restrictPaymentOverdraft": {
+          "description": "When true, a payment recorded against this deposit account cannot exceed the contact's remaining deposit balance. Required when depositContactType is CUSTOMER or SUPPLIER. Leave it out, or send false, when depositContactType is null.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "depositContactType",
+        "organizationAccountResourceId"
+      ],
+      "type": "object"
+    },
+    "ConfigureDepositAccountsRequest": {
+      "properties": {
+        "accounts": {
+          "description": "Accounts to set up as deposit accounts or remove from them. Each account may appear once.",
+          "items": {
+            "$ref": "#/definitions/ConfigureDepositAccount"
+          },
+          "maxItems": 500,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "accounts"
+      ],
+      "type": "object"
+    },
     "ContactBillingAddress": {
       "properties": {
         "addressLine1": {
@@ -59403,6 +59450,166 @@
         ]
       }
     },
+    "/api/v1/deposit-accounts": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List the active chart-of-accounts entries set up as customer or supplier deposit accounts, with their balances. depositContactType picks which: CUSTOMER lists liability accounts holding customer deposits, SUPPLIER lists asset accounts holding supplier deposits. Paging counts one row per account and currency, not per account: limit, offset, totalElements and totalPages all count those rows, so an account holding several currencies can be split across two pages and appear on both, each time with part of its balances. Merge the entries by accountResourceId when reading more than one page. An account with no entries yet is listed without accountBalances.",
+        "operationId": "list-deposit-accounts",
+        "parameters": [
+          {
+            "description": "Which deposit accounts to list: CUSTOMER for customer deposit accounts, SUPPLIER for supplier deposit accounts.",
+            "enum": [
+              "CUSTOMER",
+              "SUPPLIER"
+            ],
+            "in": "query",
+            "name": "depositContactType",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "default": 100,
+            "description": "Maximum number of account and currency rows per page (max 1000).",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "description": "Zero-indexed page number; with limit 10, offset 1 returns rows 11 to 20.",
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Deposit Accounts",
+        "tags": [
+          "Deposits"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Set chart-of-accounts entries up as customer or supplier deposit accounts, or remove them. A customer deposit account must be an active liability account and a supplier deposit account an active asset account; control accounts, and Bank Accounts, Cash and Inventory accounts, cannot be deposit accounts. The request is applied as one change: if any account is not found in the organization or cannot take the requested setting, nothing is changed and every such account is named in the error. Removing an account (depositContactType null) takes it and its balances out of List Deposit Accounts; the payments already recorded on it are kept. The response lists the resource IDs sent, in no particular order.",
+        "operationId": "update-deposit-account",
+        "parameters": [
+          {
+            "description": "The accounts to set up or remove.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ConfigureDepositAccountsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Configure Deposit Accounts",
+        "tags": [
+          "Deposits"
+        ]
+      }
+    },
     "/api/v1/discard-fixed-assets/{resourceId}": {
       "post": {
         "consumes": [
@@ -99807,6 +100014,10 @@
     {
       "description": "Put employees on pay profiles from a date with their own figures, correct or end those pay details, and search them.",
       "name": "Employee Pay Details"
+    },
+    {
+      "description": "List and configure the customer and supplier deposit accounts on the chart of accounts.",
+      "name": "Deposits"
     }
   ]
 }

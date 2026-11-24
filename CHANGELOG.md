@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.8.0] - 2026-11-24
+
+**Clio can list your customer and supplier deposit accounts and set an account up as one.**
+
+- Asked which accounts hold customer or supplier deposits, Clio lists them with their balance in each currency. Before, Clio could not see which accounts were deposit accounts.
+- Clio can set an account up as a customer deposit account (a liability) or a supplier deposit account (an asset), choose whether a payment may go beyond the contact's deposit balance, and remove the setting. It asks you first, because this changes how your organization is set up. Before, this could only be done in the Jaz web app.
+- In the `clio` CLI: `clio accounts deposit-accounts --type CUSTOMER|SUPPLIER` and `clio accounts flag-deposit-accounts`.
 ## [9.7.5] - 2026-11-24
 
 **Clio in the Jaz dashboard chat can open a record's action for you to confirm.**

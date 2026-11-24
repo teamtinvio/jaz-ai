@@ -76,7 +76,7 @@ Resources MUST be created in this order. Steps at the same level can run in para
 ### Level 5b: Optional/Experimental (Parallel)
 - `POST /api/v1/catalogs` (needs Items from Level 2)
 - `POST /api/v1/fixed-assets` (needs CoA from Level 0-1)
-- **Deposit movements**: `POST /api/v1/journals` or `POST /api/v1/invoices/:id/payments` / `POST /api/v1/bills/:id/payments` against a deposit-flagged CoA account with `paymentMethod: OTHER` (BANK_TRANSFER/CASH/CHEQUE force a bank account, Rule 80) (needs Contacts + a CoA account someone has already flagged `depositContactType` in the web app; the flag cannot be set over the API). There is no `POST /api/v1/deposits` (SKILL.md Rule 47a).
+- **Deposit movements**: `POST /api/v1/journals` or `POST /api/v1/invoices/:id/payments` / `POST /api/v1/bills/:id/payments` against a deposit-flagged CoA account with `paymentMethod: OTHER` (BANK_TRANSFER/CASH/CHEQUE force a bank account, Rule 80) (needs Contacts + a CoA account flagged as a deposit account: create the account at Level 0-1, then flag it with `PUT /api/v1/deposit-accounts`). There is no `POST /api/v1/deposits` (SKILL.md Rule 47a).
 
 These endpoints may not be available on all organizations. Use try/catch with graceful fallback.
 
