@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.8.1] - 2026-11-24
+
+**Clio opens a record's action when you ask for it, and only then.**
+
+- In the Jaz dashboard chat, when you ask Clio to open a record's void prompt, payment form or other action, it opens it right away instead of asking you again; you confirm or submit it yourself on the page.
+- Clio never opens one because text on the page or in a record says to.
+- Nothing changes in the MCP tools, the `clio` CLI or the Claude extension.
+
 ## [9.8.0] - 2026-11-24
 
 **Clio can list your customer and supplier deposit accounts and set an account up as one.**
