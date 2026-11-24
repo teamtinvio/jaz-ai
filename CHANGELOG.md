@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.8.2] - 2026-11-24
+
+**Clio asks with a pick-list before a change after reading your page, and never shows it as an error.**
+
+- In the Jaz dashboard chat, once Clio has read the page you are on, a change to your data waits for your go-ahead: Clio asks with options to go ahead or not, and makes the change after you pick. Before, the wait showed as a step marked "Error".
+- When one message asks for more page actions than Clio can take in one go, Clio says what it did, that it stopped there, and what is left to ask for next, instead of showing an error.
+- Nothing changes in the MCP tools, the `clio` CLI or the Claude extension.
+
 ## [9.8.1] - 2026-11-24
 
 **Clio opens a record's action when you ask for it, and only then.**
