@@ -443,7 +443,7 @@ Drafts only change: a finalized run is refused (`PAYRUN_NOT_DRAFT`). Type, frequ
 |------------|-----------|
 | `get <id>` | Lines, amounts and the PDF link (`generatedDocuments`) |
 | `search` | `--payrun`, `--employee`, `--employee-name`, `--pay-profile`, `--payout-status`, `--payrun-status`, `--limit`, `--offset`, `--sort`, `--order` |
-| `refresh <id>` | Rebuild one draft payslip from current pay; hand-added lines stay |
+| `refresh <id>` | Rebuild one draft payslip from current pay; a pay-setup line replaces every line of its pay type, lines of other pay types stay |
 | `refresh-payrun <payrunId>` | `--payslips <list>` (default all). Payslips that cannot be refreshed are listed and the exit code is 1 |
 | `generate <payrunId>` | `--payslips <list>` (default all). Makes the PDFs of a finalized run again; a 202 job |
 

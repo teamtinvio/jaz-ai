@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.8.4] - 2026-11-26
+
+**Clio explains payslip Refresh the way it now works.**
+
+- Refreshing a draft payslip from pay setup now replaces every line of a pay type that is in the employee's pay setup, including a line you added by hand or imported. Lines of other pay types stay. Clio, the MCP tools and the `clio` CLI help now say so, where before they said lines added by hand always stay.
+- When Clio reports what a refresh changed, a line from a payrun import is named as imported.
+
 ## [9.8.3] - 2026-11-25
 
 **The dashboard page-tool list now names the two draft tools that only browser agents use.**

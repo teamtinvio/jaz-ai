@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.8.3+393f92b7",
+  "contentVersion": "9.8.4+23da780a",
   "counts": {
     "tools": 523,
     "namespaces": 61,
@@ -2291,7 +2291,7 @@
     {
       "name": "save_payrun_lines",
       "namespace": "payruns",
-      "description": "Set the lines of payslips in a DRAFT payrun. A payslip's lines list replaces the whole list: a line with resourceId is kept or changed, one without is added, one left out is removed. Amounts 0 or more, 2 decimals; pay types ACTIVE. Any refusal changes nothing; payslips not named are untouched. Lines added by hand are never pro-rated and survive a refresh. Reply: the payslips named, no lines (get_payslip). If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Set the lines of payslips in a DRAFT payrun. A payslip's lines list replaces the whole list: a line with resourceId is kept or changed, one without is added, one left out is removed. Amounts 0 or more, 2 decimals; pay types ACTIVE. Any refusal changes nothing; payslips not named are untouched. Hand lines are never pro-rated; refresh replaces those whose pay type is in the pay setup. Reply: the payslips named, no lines (get_payslip). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2326,14 +2326,14 @@
     {
       "name": "refresh_payslip",
       "namespace": "payslips",
-      "description": "Rebuild one DRAFT payrun payslip from current pay: pay-setup lines are replaced (hand edits lost), lines added by hand stay. No pay in period: refused, unchanged (PAYRUN_EMPLOYEE_NO_PAY_PROFILE). Several: refresh_payslips. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Rebuild one DRAFT payrun payslip from current pay: a pay-setup line replaces every line of its pay type (hand edits, hand lines of it lost); others stay. No pay in period: refused, unchanged (PAYRUN_EMPLOYEE_NO_PAY_PROFILE). Several: refresh_payslips. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "refresh_payslips",
       "namespace": "payslips",
-      "description": "Rebuild payslips of a DRAFT payrun from current pay: pay-setup lines are replaced (hand edits lost), lines added by hand stay. One that cannot be refreshed stays unchanged, listed in failed with errorCode. Reply: failed first, refreshedCount, payslips changed, the run header. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Rebuild payslips of a DRAFT payrun from current pay: a pay-setup line replaces every line of its pay type (hand edits, hand lines of it lost); others stay. One that cannot be refreshed stays unchanged, listed in failed with errorCode. Reply: failed first, refreshedCount, payslips changed, the run header. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
