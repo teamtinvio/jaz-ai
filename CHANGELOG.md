@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.9.1] - 2026-11-26
+
+**No user-facing changes since v9.9.0.**
+
+- Internal fix for test copies of the hosted MCP server: tool calls now go to the same Jaz API the server checked the token against. Nothing changes on mcp.jaz.ai, the MCP tools, the `clio` CLI or the Claude extension.
+
 ## [9.9.0] - 2026-11-26
 
 **Claude loads the Jaz skills straight from the Jaz connector, with nothing extra to install.**
