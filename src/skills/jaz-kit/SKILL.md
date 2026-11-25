@@ -1,6 +1,5 @@
 ---
 name: jaz-kit
-version: 9.8.4
 description: >-
   Use this skill when an accountant, bookkeeper, or owner is running real books
   in Jaz across one or more organizations from the terminal: setting up a
@@ -10,6 +9,8 @@ description: >-
   "what's due", "add another organization".
 license: MIT
 compatibility: Works with Claude Code, Codex CLI, Cursor, Copilot, Claude Cowork, Claude.ai, and any agent that reads markdown. Multi-organization workflows need the `clio` CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Load alongside jaz-jobs for close playbooks, jaz-recipes for IFRS patterns, jaz-api for payload shapes, jaz-conversion for migrations.
+metadata:
+  version: "9.9.0"
 ---
 
 # Jaz Kit

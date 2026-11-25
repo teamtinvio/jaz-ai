@@ -1,0 +1,584 @@
+# Jaz API: Search Enum Values & Field Reference
+
+> Valid enum values for every searchable field, organized by entity.
+> For filter syntax and operators, see [search-reference.md](./search-reference.md).
+> For the `query` expression language and composition examples, see [search-syntax.md](./search-syntax.md).
+
+---
+
+## Universal Enums
+
+These values are shared across multiple entities.
+
+### approvalStatus
+
+| Value | Meaning |
+|-------|---------|
+| `PENDING` | Awaiting approval |
+| `APPROVED` | Approved |
+
+Used by: invoices, bills, customer credit notes, supplier credit notes.
+
+### paymentMethod
+
+| Value |
+|-------|
+| `CASH` |
+| `CREDIT_CARD` |
+| `BANK_TRANSFER` |
+| `E_WALLET` |
+| `CHEQUE` |
+| `WITHHOLDING_TAX_CERTIFICATE` |
+| `CLEARING_SETTLEMENT` |
+| `DEBT_WRITE_OFF` |
+| `INTER_COMPANY` |
+| `OTHER` |
+| `PAYMENT_GATEWAY` |
+
+Used by: sale payments, purchase payments, batch payments, credit note refunds.
+
+### currencyCode
+
+ISO 4217 3-letter codes. Common values: `SGD`, `USD`, `PHP`, `MYR`, `IDR`, `THB`, `VND`, `EUR`, `GBP`, `AUD`, `HKD`, `JPY`, `CNY`, `INR`, `KRW`, `NZD`, `CAD`, `CHF`.
+
+Used by: invoices, bills, credit notes, journals, items, scheduled transactions, fixed assets.
+
+### accountClass (Chart of Accounts)
+
+| Value |
+|-------|
+| `Asset` |
+| `Liability` |
+| `Equity` |
+| `Revenue` |
+| `Expense` |
+
+### accountType (Chart of Accounts)
+
+23 values. Source: `GET /api/v1/account-classifications` (`list_account_classifications`),
+which is authoritative. The set is GLOBAL: the same 23 for every organisation
+(the classifications table has no org column), so this is a stable list, not a
+per-tenant one. This table mirrors the CLI's canonical
+account-type list and is kept in step with it by an automated drift check.
+
+**Singular, and not the account's name.** An earlier version of this table listed
+pluralized inventions (`Current Assets`, `Operating Expenses`, `Other Expenses`)
+plus `Cost of Goods Sold`, which is an account NAME whose type is `Direct Costs`.
+A wrong value returns **zero rows with no error**, which reads exactly like "the
+org has no such account". `search_accounts` does not normalise; only
+`create_account` does.
+
+| Value | accountClass |
+|-------|--------------|
+| `Bank Accounts` | Asset |
+| `Cash` | Asset |
+| `Current Asset` | Asset |
+| `Non-current Asset` | Asset |
+| `Fixed Asset` | Asset |
+| `Inventory` | Asset |
+| `Investment` | Asset |
+| `Goodwill` | Asset |
+| `Current Liability` | Liability |
+| `Non-current Liability` | Liability |
+| `Shareholders Equity` | Equity |
+| `Operating Revenue` | Revenue |
+| `Other Revenue` | Revenue |
+| `Discontinued Income` | Revenue |
+| `Financing Income` | Revenue |
+| `Investing Income` | Revenue |
+| `Direct Costs` | Expense |
+| `Operating Expense` | Expense |
+| `Other Expense` | Expense |
+| `Finance Cost` | Expense |
+| `Investing Expense` | Expense |
+| `Income Tax Expense` | Expense |
+| `Discontinued Expense` | Expense |
+
+---
+
+## Per-Entity Enum Values
+
+### 1. Invoices (`POST /api/v1/invoices/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `DRAFT`, `UNPAID`, `PARTIALLY_PAID`, `PAID`, `VOID` |
+| `approvalStatus` | `PENDING`, `APPROVED` |
+| `currencyCode` | ISO 4217 (see above) |
+| `terms` | `0`, `7`, `15`, `30`, `45`, `60` (integer, payment terms in days) |
+
+**Amount fields**: `totalAmount`, `balanceAmount`, `reconciledAmount`, `paymentRecordedAmount`, `creditAppliedAmount`
+**Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
+**Link field**: `saleOrderResourceId` (the sales order the invoice was created from)
+
+> **Note**: `OVERDUE` is not a status value (a list with it returns 422, a search matches nothing). To find overdue invoices, filter `{"status": {"in": ["UNPAID", "PARTIALLY_PAID"]}, "dueDate": {"lt": "<today in the organization's timezone>"}}`. With `search_invoices`: `status: "UNPAID,PARTIALLY_PAID"` and `dueDateTo` set to yesterday in the organization's timezone. Same for bills.
+
+---
+
+### 2. Bills (`POST /api/v1/bills/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `DRAFT`, `UNPAID`, `PARTIALLY_PAID`, `PAID`, `VOID` |
+| `approvalStatus` | `PENDING`, `APPROVED` |
+| `currencyCode` | ISO 4217 |
+| `terms` | `0`, `7`, `15`, `30`, `45`, `60` |
+
+**Amount fields**: `totalAmount`, `balanceAmount`, `reconciledAmount`, `paymentRecordedAmount`, `creditAppliedAmount`
+**Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
+**Link field**: `purchaseOrderResourceId` (the purchase order the bill was created from)
+
+> Same status values and structure as invoices. Same overdue caveat applies.
+
+---
+
+### 3. Customer Credit Notes (`POST /api/v1/customer-credit-notes/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `DRAFT`, `UNAPPLIED`, `PARTIALLY_APPLIED`, `APPLIED`, `VOID` |
+| `approvalStatus` | `PENDING`, `APPROVED` |
+| `currencyCode` | ISO 4217 |
+
+**Date fields**: `valueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
+
+> **No amount filter fields**: use `totalAmount` only via sort. To find available credits, filter `status IN [UNAPPLIED, PARTIALLY_APPLIED]`.
+
+---
+
+### 4. Supplier Credit Notes (`POST /api/v1/supplier-credit-notes/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `DRAFT`, `UNAPPLIED`, `PARTIALLY_APPLIED`, `APPLIED`, `VOID` |
+| `approvalStatus` | `PENDING`, `APPROVED` |
+| `currencyCode` | ISO 4217 |
+
+**Date fields**: `valueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`, `submittedAt`
+
+> Same structure as customer credit notes.
+
+---
+
+### 5. Journals (`POST /api/v1/journals/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `DRAFT`, `ACTIVE`, `VOID` |
+| `type` | `JOURNAL_MANUAL`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT`, `JOURNAL_CASHFLOW`, `JOURNAL_CASH_TRANSFER`, `JOURNAL_TRANSFER_BALANCE`, `JOURNAL_CASHFLOW_BANK_RECON`, `JOURNAL_CASHFLOW_ADJUSTMENT` |
+| `templateType` | `CASH_TRANSFER`, `DIRECT_CASH_IN`, `DIRECT_CASH_OUT` |
+
+**Date fields**: `valueDate`, `createdAt` (DateTime), `updatedAt` (DateTime)
+**String fields**: `reference`, `tags`, `internalNotes`
+
+> **Gotcha**: Journal status uses `ACTIVE` (not `APPROVED` or `POSTED`). Use `type` to distinguish manual journals from system-generated ones.
+
+---
+
+### 6. Contacts (`POST /api/v1/contacts/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+| `customer` | `true`, `false` (BooleanExpression) |
+| `supplier` | `true`, `false` (BooleanExpression) |
+
+**String fields**: `name`, `email`, `taxId`, `registrationId`, `website`, `notes`, `networkId`, `organizationId`
+**Date fields**: `createdAt`, `updatedAt`
+
+> **Gotcha**: Use `customer` (not `isCustomer`) and `supplier` (not `isSupplier`). These are boolean filters: `{ "customer": { "eq": true } }`.
+
+---
+
+### 7. Items (`POST /api/v1/items/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+| `itemCategory` | `INVENTORY`, `NON_INVENTORY` |
+| `appliesToSale` | `true`, `false` (BooleanExpression) |
+| `appliesToPurchase` | `true`, `false` (BooleanExpression) |
+
+**String fields**: `resourceId`, `saleAccountResourceId`, `purchaseAccountResourceId`
+
+> **Gotcha**: Sort uses `internalName` and `itemCode`; these are sort-only fields, NOT available as filter fields.
+
+---
+
+### 8. Chart of Accounts (`POST /api/v1/chart-of-accounts/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+| `accountClass` | `Asset`, `Liability`, `Equity`, `Revenue`, `Expense` |
+| `accountType` | See the 23 values in Universal Enums above |
+| `appliesTo` | `Sales & Sale Credits`, `Purchases & Purchase Credits`, `Payments` |
+| `controlFlag` | `true`, `false` (BooleanExpression) |
+
+**String fields**: `code`, `name`, `currencyCode`, `sgaName`
+**Date fields**: `createdAt`, `updatedAt`
+
+---
+
+### 9. Bank Records (`POST /api/v1/bank-records/:accountResourceId/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `RECONCILED`, `UNRECONCILED`, `ARCHIVED`, `POSSIBLE_DUPLICATE` |
+
+**Amount fields**: `netAmount`
+**Date fields**: `valueDate`
+**String fields**: `description`, `extAccountNumber`, `extContactName`, `extReference`
+**Nested**: `reconciledBy` (UserNestedFilter)
+
+> **Gotcha**: Requires `accountResourceId` as a **path parameter** (UUID of a bank-type CoA account). This is NOT a filter field; it's in the URL.
+
+---
+
+### 10. Cashflow Transactions (`POST /api/v1/cashflow-transactions/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `direction` | `PAYIN`, `PAYOUT` |
+| `businessTransactionType` | `SALE`, `PURCHASE`, `SALE_CREDIT_NOTE`, `PURCHASE_CREDIT_NOTE`, `JOURNAL_MANUAL`, `JOURNAL_DIRECT_CASH_IN`, `JOURNAL_DIRECT_CASH_OUT`, `JOURNAL_CASHFLOW`, `JOURNAL_CASH_TRANSFER`, `JOURNAL_CASHFLOW_BANK_RECON`, `JOURNAL_CASHFLOW_ADJUSTMENT`, `PAYMENT_SALE`, `PAYMENT_PURCHASE`, `PAYMENT_SALE_CREDIT_NOTE`, `PAYMENT_PURCHASE_CREDIT_NOTE`, `BATCH_SALE`, `BATCH_PURCHASE`, `FIXED_ASSETS` |
+| `businessTransactionStatus` | `ACTIVE`, `UNPAID`, `PARTIALLY_PAID`, `PAID`, `VOID`, `DRAFT`, `UNAPPLIED`, `PARTIALLY_APPLIED`, `APPLIED` |
+
+**Amount fields**: `totalAmount`, `balanceAmount`
+**Date fields**: `valueDate`, `matchDate`
+**String fields**: `businessTransactionReference`, `organizationAccountResourceId`, `bankStatementEntryResourceId`
+**Nested**: `contact` (ContactNestedFilter), `account` (OrganizationAccountNestedFilter)
+
+> **Gotcha**: `businessTransactionStatus` values vary by transaction type: invoices use UNPAID/PAID, credit notes use UNAPPLIED/APPLIED, journals use ACTIVE.
+
+---
+
+### 11. Tax Profiles (`POST /api/v1/tax-profiles/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+| `isDefault` | `true`, `false` (BooleanExpression) |
+| `isShipping` | `true`, `false` (BooleanExpression) |
+| `appliesToSale` | `true`, `false` (BooleanExpression) |
+| `appliesToSaleCreditNote` | `true`, `false` (BooleanExpression) |
+| `appliesToPurchase` | `true`, `false` (BooleanExpression) |
+| `appliesToPurchaseCreditNote` | `true`, `false` (BooleanExpression) |
+
+**Amount fields**: `vatValue`, `withholdingValue`
+**String fields**: `name`, `description`, `taxTypeCode`, `taxTypeName`, `organizationResourceId`
+
+---
+
+### 12. Fixed Assets (`POST /api/v1/fixed-assets/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `ONGOING`, `COMPLETED`, `DRAFT`, `DISPOSED`, `SOLD`, `DISCARDED`, `CLOSED_OUT` |
+| `category` | `TANGIBLE`, `INTANGIBLE` |
+| `depreciationMethod` | `NO_DEPRECIATION`, `STRAIGHT_LINE` |
+| `disposalType` | `SOLD`, `DISCARDED` |
+| `registrationType` | `NEW`, `TRANSFER` |
+
+**Two status enums**: the 8 values above are the VIEW status, which is what the search filter resolves against. A fixed asset RECORD's own `status` field only ever holds `DRAFT`, `ACTIVE`, `DISPOSED`, or `CLOSED_OUT`, so `ONGOING`, `COMPLETED`, `SOLD`, and `DISCARDED` narrow the search but never come back in a record's `status`.
+
+**Amount fields**: `purchaseAmount`, `bookValueAmount`, `netBookAtDisposalAmount`, `assetDisposalGainLossAmount`
+**Date fields**: `purchaseDate`, `disposalValueDate`, `depreciationStartDate`, `depreciationEndDate`
+**String fields**: `name`, `reference`, `typeName`, `typeCode`, `tags`, `currencyCode`, `purchaseBusinessTransactionType`
+
+---
+
+### 13. Fixed Asset Types (`POST /api/v1/fixed-assets-types/search`)
+
+No enum fields. String filters only: `categoryCode`, `typeName`, `typeCode`, `resourceId`.
+
+---
+
+### 14. Scheduled Transactions (`POST /api/v1/scheduled-transaction/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+| `subscriptionStatus` | `ACTIVE`, `CANCELLED`, `INACTIVE` |
+| `interval` | `ONE_TIME`, `DAILY`, `WEEKLY`, `MONTHLY`, `QUARTERLY`, `YEARLY` |
+
+**Amount fields**: `totalAmount`, `paymentRecordedAmount`
+**Date fields**: `startDate`, `endDate`, `lastScheduleDate`, `nextScheduleDate`, `proratedStartDate`
+**String fields**: `businessTransactionReference`, `businessTransactionResourceId`, `businessTransactionType`, `schedulerType`, `contactResourceId`, `currencyCode`, `referenceGenerationMode`
+**Nested**: `contact` (ContactNestedFilter)
+
+---
+
+### 15. Tags (`POST /api/v1/tags/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+
+**String fields**: `tagName`, `organizationResourceId`
+
+---
+
+### 16. Custom Fields (`POST /api/v1/custom-fields/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+| `datatypeCode` | `TEXT`, `NUMBER`, `BOOLEAN`, `DATE`, `LINK` |
+
+**String fields**: `customFieldName`, `organizationResourceId`, `applyToPurchase`, `applyToPurchaseCreditNote`, `applyToSales`, `applyToSaleCreditNote`, `appliesToFixedAssets`, `appliesToItems`, `applyToCreditNote`, `applyToPayment`
+
+---
+
+### 17. Contact Groups (`POST /api/v1/contact-groups/search`)
+
+No enum fields. String filters only: `resourceId`, `name`.
+
+---
+
+### 18. Capsules (`POST /api/v1/capsules/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+
+**Date fields**: `startDate`, `endDate`
+**String fields**: `title`, `description`
+
+> **Gotcha**: Capsules use `title` (not `name`) for the display name.
+
+---
+
+### 19. Capsule Types (`POST /api/v1/capsuleTypes/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+| `controlFlag` | `true`, `false` (BooleanExpression) |
+| `isLocked` | `true`, `false` (BooleanExpression) |
+
+**String fields**: `name`, `displayName`, `description`
+
+---
+
+### 20. Nano Classifiers (`POST /api/v1/nano-classifiers/search`)
+
+No enum fields on the top level. String filters: `resourceId`, `type`.
+**Nested**: `classes` (className, resourceId).
+
+---
+
+### 21. Organization Users (`POST /api/v1/organization-users/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `ACTIVE`, `INACTIVE` |
+| `userType` | `ADMIN`, `CUSTOM_USER` |
+
+**String fields**: `email`, `resourceId`, `userResourceId`
+**Nested** (`user`): `user.firstName`, `user.lastName`, `user.email`, `user.status`, `user.phoneRegistered`
+
+There is no `name` or `role` field on this filter.
+
+---
+
+### 22. Bank Rules (`POST /api/v1/bank-rules/search`)
+
+No documented enum values for `actionType` or `businessTransactionType` in the filter schema. Use string operators.
+
+**String fields**: `name`, `reference`, `resourceId`, `appliesToReconciliationAccount`, `actionType`, `businessTransactionType`
+
+---
+
+### 23. Purchase Items (`POST /api/v1/purchase-items/search`)
+
+No enum fields. Plain string filters (no operators): `currencyCode`, `name`, `purchaseResourceId`, `resourceId`, `reference`.
+
+> **Gotcha**: This endpoint uses **plain string matching**; filter values are NOT expression objects. `{ "name": "Widget" }` instead of `{ "name": { "contains": "Widget" } }`.
+
+### 24. Background Jobs (`POST /api/v1/background-jobs/search`)
+
+#### status
+
+| Value | Meaning |
+|-------|---------|
+| `QUEUED` | Job queued, not yet started |
+| `DISPATCHING` | Job being dispatched to workers |
+| `PROCESSING` | Job actively running |
+| `SUCCESS` | Completed successfully |
+| `FAILED` | Failed entirely |
+| `PARTIAL_SUCCESS` | Completed with some errors; check `errorDetails` |
+
+> **Filter path**: Use `filter.resourceId.eq` (not `filter.jobId.eq`) to look up a specific job by its ID. Filter by `status` to find all jobs in a given state.
+
+---
+
+### 25. Sale Orders (`POST /api/v1/sale-orders/search`, `POST /api/v1/sale-quotes/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `DRAFT`, `PENDING`, `CREATED`, `ACCEPTED`, `CONFIRMED`, `VOID` |
+| `currencyCode` | ISO 4217 (see above) |
+| `terms` | `0`, `7`, `15`, `30`, `45`, `60` (integer, payment terms in days) |
+
+**Amount fields**: `totalAmount`, `expectedTotal`
+**Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`
+**Link field**: `saleQuoteResourceId` (on Sale Orders, the source quote)
+
+> The `status` enum is the union across both sale documents: a **Sale Quote** moves `DRAFT → CREATED → ACCEPTED` (then `VOID`); a **Sale Order** is created as `CREATED → CONFIRMED` (then `VOID`). An order made by Jaz Magic starts `PENDING` until `update_sale_order` with `isPendingToActiveSaleOrder: true` takes it live. Fulfillment is reported on the parent quote via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_INVOICED`), an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
+
+---
+
+### 26. Purchase Orders (`POST /api/v1/purchase-orders/search`, `POST /api/v1/purchase-requests/search`)
+
+| Field | Valid Values |
+|-------|-------------|
+| `status` | `DRAFT`, `PENDING`, `ACTIVE`, `ACCEPTED`, `CONFIRMED`, `VOID` |
+| `currencyCode` | ISO 4217 |
+| `terms` | `0`, `7`, `15`, `30`, `45`, `60` |
+
+**Amount fields**: `totalAmount`, `expectedTotal`
+**Date fields**: `valueDate`, `dueDate`, `createdAt` (DateTime), `updatedAt` (DateTime), `approvedAt`
+**Link field**: `purchaseRequestResourceId` (on Purchase Orders, the source request)
+
+> The `status` enum is the union across both purchase documents: a **Purchase Request** moves `DRAFT → ACTIVE → ACCEPTED` (then `VOID`); a **Purchase Order** moves `DRAFT → ACTIVE → CONFIRMED` (then `VOID`). An order made by Jaz Magic starts `PENDING` until `update_purchase_order` with `isPendingToActivePurchaseOrder: true` takes it live. Fulfillment is reported on the parent request via `orderState` (`NOT_ORDERED`, `PARTIALLY_ORDERED`, `FULLY_BILLED`), an order+invoice rollup (arap, 2026-06; `FULLY_ORDERED` retired), response field only, not a search filter.
+
+---
+
+## Nested Filter Paths
+
+Several endpoints support filtering on nested relationships. The nested object wraps standard operators.
+
+### contact (ContactNestedFilter)
+
+Available on: invoices, bills, credit notes, journals, cashflow transactions, scheduled transactions.
+
+| Nested Field | Type | Example |
+|-------------|------|---------|
+| `contact.name` | StringExpression | `{ "contact": { "name": { "contains": "Acme" } } }` |
+| `contact.resourceId` | StringExpression | `{ "contact": { "resourceId": { "eq": "uuid" } } }` |
+| `contact.status` | StringExpression | `{ "contact": { "status": { "eq": "ACTIVE" } } }` |
+| `contact.taxId` | StringExpression | `{ "contact": { "taxId": { "contains": "T12" } } }` |
+
+### account (OrganizationAccountNestedFilter)
+
+Available on: cashflow transactions.
+
+| Nested Field | Type | Example |
+|-------------|------|---------|
+| `account.accountType` | StringExpression | `{ "account": { "accountType": { "eq": "Bank Accounts" } } }` |
+| `account.accountClass` | StringExpression | `{ "account": { "accountClass": { "eq": "Asset" } } }` |
+| `account.code` | StringExpression | `{ "account": { "code": { "eq": "1000" } } }` |
+| `account.name` | StringExpression | `{ "account": { "name": { "contains": "DBS" } } }` |
+| `account.resourceId` | StringExpression | `{ "account": { "resourceId": { "eq": "uuid" } } }` |
+
+### approvedBy / submittedBy / reconciledBy (UserNestedFilter)
+
+Available on: invoices, bills, credit notes (approvedBy, submittedBy); bank records (reconciledBy).
+
+| Nested Field | Type |
+|-------------|------|
+| `*.email` | StringExpression |
+| `*.firstName` | StringExpression |
+| `*.lastName` | StringExpression |
+| `*.resourceId` | StringExpression |
+| `*.status` | StringExpression |
+
+Example: `{ "approvedBy": { "email": { "contains": "admin@" } } }`
+
+### attachments (AttachmentNestedFilter)
+
+Available on: invoices, bills.
+
+| Nested Field | Type |
+|-------------|------|
+| `attachments.fileName` | StringExpression |
+| `attachments.fileType` | StringExpression |
+| `attachments.fileUrl` | StringExpression |
+| `attachments.resourceId` | StringExpression |
+
+To check if attachments exist: `{ "attachments": { "resourceId": { "isNull": "false" } } }`
+To check no attachments: `{ "attachments": { "resourceId": { "isNull": "true" } } }`
+
+### createdBy / updatedBy (JsonExpression)
+
+Available on: invoices, bills.
+
+Uses `jsonIn` / `jsonNotIn` operators with key-value pairs:
+```json
+{ "createdBy": { "jsonIn": [{ "key": "email", "value": "admin@company.com" }] } }
+```
+
+### creator (UserNestedFilter)
+
+Available on: journals only (not `createdBy`; journals use `creator`).
+
+| Nested Field | Type |
+|-------------|------|
+| `creator.email` | StringExpression |
+| `creator.firstName` | StringExpression |
+| `creator.lastName` | StringExpression |
+| `creator.resourceId` | StringExpression |
+
+---
+
+## Response Field Mapping
+
+### Date Format Asymmetry
+
+| Direction | Format | Example |
+|-----------|--------|---------|
+| **Request** (filter dates) | `YYYY-MM-DD` string | `"2026-01-15"` |
+| **Request** (filter datetimes) | RFC3339 string | `"2026-01-15T00:00:00Z"` |
+| **Response** (ALL dates) | `int64` epoch milliseconds | `1705276800000` |
+
+Convert response dates: `new Date(epochMs).toISOString().slice(0, 10)` -> `YYYY-MM-DD`
+
+### Which Fields Use DateTimeExpression (RFC3339)?
+
+Only `createdAt` and `updatedAt` on invoices, bills, customer credit notes, supplier credit notes, and journals use `DateTimeExpression` (RFC3339 input format).
+
+All other date fields (`valueDate`, `dueDate`, `startDate`, `endDate`, `purchaseDate`, `approvedAt`, `submittedAt`, `matchDate`, etc.) use `DateExpression` (`YYYY-MM-DD` input format).
+
+### Response Shapes
+
+All search endpoints return:
+```json
+{
+  "totalElements": 142,
+  "totalPages": 2,
+  "data": [...]
+}
+```
+
+**Exception**: `GET /organization-report-template` returns its rows under a `reportTemplates` key, not `data` (measured 2026-09-06). Its `/search` sibling returns a **bare array** with no envelope (measured 2026-09-07). The tools normalize the list; read `.data` on both. Since 2026-09-24 the report template search tool filters the list itself instead of calling `/search`, because the search endpoint still refuses `and` / `or` and sorting by name (measured 2026-10-01); it takes the same filter grammar plus `templateName` (`references/report-templates.md`).
+
+---
+
+## Provenance and staleness (applies to the search reference files)
+
+**This file is derived, not authoritative.** The enum values live in exactly one place in
+code (`src/core/search/enums.ts`), which is what the entity configs, the MCP tool schemas
+and the CLI flag choices all import. Upstream of that sits the committed `spec/openapi.yaml`.
+Precedence on any disagreement:
+
+```
+spec/openapi.yaml  →  src/core/search/enums.ts  →  this file (and search-reference.md,
+                                                   field-map.md, full-api-surface.md)
+```
+
+If a value here disagrees with `enums.ts`, **this file is wrong**; fix it here and do not
+"fix" the code to match. If `enums.ts` disagrees with the spec, the spec wins and both need
+updating.
+
+**These four reference files are hand-maintained and nothing regenerates them.** The drift
+gate reads only `endpoints.md` and its `endpoints-*.md` domain files, and only their `### METHOD /api/v1/...` headers, so a stale
+enum table here fails silently and forever. Re-derive them on the same cadence as the spec
+refresh. When adding a NEW enum, add it to `enums.ts` first and reference it here rather than
+restating the values; the same enum is currently written out in up to five places, and every
+one of them has to be touched for a single upstream change.
+
+---
+
+*Derived from `src/core/search/enums.ts` + the committed OpenAPI specification. Enum tables
+above last re-derived: 2026-03-31; treat any value not confirmed against `enums.ts` as
+unverified.*

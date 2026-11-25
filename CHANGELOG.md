@@ -1,5 +1,14 @@
 # Changelog
 
+## [9.9.0] - 2026-11-26
+
+**Claude loads the Jaz skills straight from the Jaz connector, with nothing extra to install.**
+
+- Connected to Jaz at mcp.jaz.ai, Claude Code (2.1.331 or later, where skills from MCP servers are in public beta) now lists the Jaz skills and uses them when a task calls for one. They update with the connector.
+- The jaz-api skill is now two: jaz-api holds the 148 API rules, error catalog and field names, and the new jaz-api-reference holds the request and response examples for each endpoint, the endpoint catalog and the search filters and enums. `clio init --skill jaz-api` installs both, and the plugin ships both.
+- Corrected API reference docs: five search and filter examples that would have been refused, and an inventory adjustment endpoint that does not exist.
+- Nothing changes in the MCP tools or the `clio` CLI commands.
+
 ## [9.8.4] - 2026-11-26
 
 **Clio explains payslip Refresh the way it now works.**

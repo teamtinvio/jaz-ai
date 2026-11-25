@@ -128,10 +128,9 @@ Pre-existing accounts may have different codes than your templates:
 - "Cost of Goods Sold" = code 310 in the API, code 5000 in template
 - "Accounts Receivable" can have `code: null` in the API
 
-**Always map by NAME, not code**. When building lookup maps, key by both:
+**Always map by NAME, not code**. Key lookup maps by name only; a template code can belong to a different account in the organization:
 ```javascript
 coaIds[acct.name] = acct.resourceId;
-if (acct.code) coaIds[acct.code] = acct.resourceId;
 ```
 
 Resource IDs are the universal identifier, not codes.

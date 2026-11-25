@@ -1,6 +1,5 @@
 ---
 name: jaz-recipes
-version: 9.8.4
 description: >-
   Use this skill when modeling complex multi-step accounting transactions:
   anything that spans multiple periods, involves changing amounts, or requires
@@ -13,6 +12,8 @@ description: >-
   calculation.
 license: MIT
 compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill alongside this one. For the operational close workflows these recipes plug into (month-end close, GST/VAT filing, year-end close), load the jaz-jobs skill.
+metadata:
+  version: "9.9.0"
 ---
 
 # Transaction Recipes Skill
@@ -288,9 +289,9 @@ Account names in `lines` are labels to map to real accounts, and cash entries po
 
 ## See Also
 
-- **API field names and payloads**: Load the `jaz-api` skill (see `references/endpoints.md` and `references/field-map.md`)
+- **API field names and payloads**: Load the `jaz-api` skill (see `references/field-map.md`) and the `jaz-api-reference` skill (see `references/endpoints.md`)
 - **Three-step flow, action-to-tool mapping, capsule rules**: `references/building-blocks.md`
-- **Capsule API**: `POST /capsules`, `POST /capsuleTypes` (see api skill's `references/full-api-surface.md`)
+- **Capsule API**: `POST /capsules`, `POST /capsuleTypes` (see the jaz-api-reference skill's `references/full-api-surface.md`)
 - **Scheduler API**: `POST /scheduled/journals`, `POST /scheduled/invoices`, `POST /scheduled/bills`
 - **Fixed Assets API**: `POST /fixed-assets` (see api skill's `references/feature-glossary.md`)
 - **Enrichments overview**: See `references/building-blocks.md` or api skill's `references/feature-glossary.md`

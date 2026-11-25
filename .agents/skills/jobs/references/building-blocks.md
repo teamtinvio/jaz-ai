@@ -166,7 +166,7 @@ Every leg carries its own explicit `org_id`: a wrong "active" org silently posts
 ## Cross-references
 
 - `transaction-recipes/references/building-blocks.md`: recipe-side primitives (capsules, schedulers, calculators). Pair with this file for full context.
-- `jaz-api/SKILL.md`: endpoint-by-endpoint API rules. Cited per-job for specific gotchas.
+- `jaz-api/SKILL.md`: the index of the numbered API rules (they live in its `references/rules-*.md`). Cited per-job by rule number for specific gotchas.
 
 ### Filter limits on capsules and journals (measured 2026-09-07)
 

@@ -49,7 +49,7 @@ Or call `list_account_classifications`, authoritative for that organisation.
 
 ### "ORGANIZATION_CHART_OF_ACCOUNT_DUPLICATED" (400)
 **Cause**: Sending an account `name` that already exists in the org.
-**Fix**: Fetch existing accounts first (`GET /chart-of-accounts`), skip names already present. Upsert matches by name; if you want to update an existing account, the name match handles it automatically.
+**Fix**: Fetch existing accounts first (`GET /chart-of-accounts`), skip names already present. A name match never updates: to change an existing account, send its `resourceId` in the bulk upsert row, or use `PUT /chart-of-accounts/:resourceId`. In `chart-of-accounts/bulk-upsert` this error is per row, in `failedRows[]`, and the other rows still commit (rule 141).
 
 ### Wrong wrapper field
 **Cause**: Using `{ chartOfAccounts: [...] }` instead of `{ accounts: [...] }`.
@@ -272,9 +272,8 @@ hyphenated `/organization-currencies/...` rate paths still resolve but are
 - "Accounts Receivable" = `code: null` in the API
 **Fix**: Map template accounts to resource IDs via **name matching**, not code matching. Resource IDs are the universal identifier.
 ```typescript
-// Build map keyed by BOTH name and code:
+// Key the map by name only: a template code can belong to a different account here.
 ctx.coaIds[acct.name] = acct.resourceId;
-if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 ```
 
 ---
@@ -436,10 +435,9 @@ Same pattern for purchase side: `appliesToPurchase: true` + `purchaseItemName` r
 
 ### "CoA ref 'XXXX' not found"
 **Cause**: Template references CoA account by code (e.g., `"4000"`) but the lookup map only has entries keyed by name.
-**Fix**: When building CoA ID maps, key by BOTH `name` AND `code`:
+**Fix**: Reference accounts in the template by name (or resourceId), and key the CoA ID map by `name` only. Do not add code-keyed entries: a template code can belong to a different account in this organization, so the lookup resolves to the wrong ledger account.
 ```typescript
 ctx.coaIds[acct.name] = acct.resourceId;
-if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 ```
 
 ---
@@ -546,9 +544,8 @@ if (acct.code) ctx.coaIds[acct.code] = acct.resourceId;
 
 ## Contact Group PUT Errors
 
-### 500 Internal Server Error on PUT (known bug)
-**Cause**: `PUT /contact-groups/:id` returns 500 regardless of payload structure.
-**Workaround**: Cannot update contact groups via API. Delete and recreate instead.
+### PUT updates in place (no longer a 500)
+`PUT /contact-groups/:id` used to answer 500. Re-probed live 2026-09-02, it answered 200 and applied the change (rule 46). Update the group with PUT; deleting and recreating it gives it a new `resourceId`.
 
 ---
 
@@ -611,7 +608,7 @@ transaction on it.
 **The flag is set with `PUT /deposit-accounts`** and listed with
 `GET /deposit-accounts?depositContactType=CUSTOMER|SUPPLIER`. `depositContactType` is not on any
 chart-of-accounts model, so `POST /chart-of-accounts` cannot create a deposit account: create the
-account, then flag it. Full model: SKILL.md Rule 47a, `endpoints.md` → Deposits, `feature-glossary.md` → Deposits.
+account, then flag it. Full model: SKILL.md Rule 47a, jaz-api-reference `endpoints-banking-magic.md` → Deposits, `feature-glossary.md` → Deposits.
 
 ### 422 on `PUT /deposit-accounts`
 The request is applied as one change, so one bad entry refuses all of them and the error names
@@ -632,7 +629,7 @@ asset). A missing `depositContactType` key, or a flag without `restrictPaymentOv
 
 ### 404: Endpoint does not exist
 **Cause**: `POST /inventory/adjustments` returns 404. Also tested: `/inventory-adjustments`, `/inventory-items/:id/adjustments`, `/items/:id/inventory-adjustments`; all 404. None of the four is registered; there is no stock-adjustment write path at any spelling.
-**Note**: The whole inventory surface is `POST|GET /inventory-items`, `GET /inventory-item-balance/:resourceId` and `GET /inventory-balances/:balanceStatus` (balances across items: `ALL`, `AVAILABLE` or `FULLY_DRAWN`, Rule 97). Inventory items can be created, and stock moves as a side effect of a transaction carrying the item, but quantity cannot be written directly. See `endpoints.md` → Inventory.
+**Note**: The whole inventory surface is `POST|GET /inventory-items`, `GET /inventory-item-balance/:resourceId` and `GET /inventory-balances/:balanceStatus` (balances across items: `ALL`, `AVAILABLE` or `FULLY_DRAWN`, Rule 97). Inventory items can be created, and stock moves as a side effect of a transaction carrying the item, but quantity cannot be written directly. See jaz-api-reference `endpoints-master-data.md` → Inventory.
 
 ---
 

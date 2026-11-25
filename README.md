@@ -4,7 +4,7 @@
   <a href="https://github.com/teamtinvio/jaz-ai/releases"><img src="https://img.shields.io/github/v/release/teamtinvio/jaz-ai?style=for-the-badge&color=blue" alt="GitHub Release"></a>
   <img src="https://img.shields.io/badge/tools-523-blue?style=for-the-badge" alt="523 tools">
   <img src="https://img.shields.io/badge/API_rules-148-green?style=for-the-badge" alt="148 API rules">
-  <img src="https://img.shields.io/badge/skills-7-purple?style=for-the-badge" alt="7 skills">
+  <img src="https://img.shields.io/badge/skills-8-purple?style=for-the-badge" alt="8 skills">
   <img src="https://img.shields.io/badge/recipe_playbooks-16-orange?style=for-the-badge" alt="16 Recipe Playbooks">
   <img src="https://img.shields.io/badge/calculators-13-red?style=for-the-badge" alt="13 Calculators">
   <img src="https://img.shields.io/badge/jobs-12-teal?style=for-the-badge" alt="12 Jobs">
@@ -65,7 +65,7 @@ The Claude Code plugin runs the MCP server bundled inside it (needs Node.js 18 o
   "mcpServers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@9.8.4", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@9.9.0", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
@@ -78,13 +78,13 @@ The Claude Code plugin runs the MCP server bundled inside it (needs Node.js 18 o
   "servers": {
     "jaz": {
       "command": "npx",
-      "args": ["-y", "jaz-clio@9.8.4", "mcp", "--org", "oauth:<resourceId>"]
+      "args": ["-y", "jaz-clio@9.9.0", "mcp", "--org", "oauth:<resourceId>"]
     }
   }
 }
 ```
 
-Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@9.8.4` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
+Sign in first with `npx -y jaz-clio@latest auth login`, then replace `<resourceId>` with the organization to pin (`auth organizations` lists them). Pin `jaz-clio@9.9.0` for stability, or `jaz-clio@latest` for auto-updates. **Multi-org**: drop `--org` and OAuth reaches every organization granted at sign-in, with explicit `org_id` selection per call. Optional key-based access accepts comma-separated keys, e.g. `"JAZ_API_KEY": "jk-aaa,jk-bbb"`. Personal access tokens (`pat-...`) also work for multi-org.
 
 ### Remote connector · no install
 
@@ -181,11 +181,12 @@ Ask the agent **"what can you do?"** on any of them; it answers from the connect
 ## What you get
 
 - **523 tools** covering every Jaz endpoint. Each tool description disambiguates against similar tools, lists enum values inline, and notes which operations are safe to retry. The model picks the right tool on the first call.
-- **7 skills** with the production-grade rules and playbooks any agent needs:
+- **8 skills** with the production-grade rules and playbooks any agent needs:
 
 | Skill | What it teaches an agent |
 |-------|--------------------------|
-| **jaz-api** | 148 API rules, every endpoint, error catalog, field aliases, response shapes |
+| **jaz-api** | 148 API rules, error catalog, field aliases, response shapes |
+| **jaz-api-reference** | Request/response examples for every core endpoint, the endpoint catalog, search filters, syntax and enums |
 | **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
 | **jaz-conversion** | Xero / QuickBooks / Sage / MYOB / Excel migration, CoA mapping, FX, clearing accounts, TB verification |
 | **jaz-jobs** | 12 job playbooks (month-end / quarter-end / year-end close, bank recon, document collection, GST/VAT filing, payment run, credit control, supplier recon, audit prep, FA review, statutory filing) + Singapore Form C-S |
@@ -334,7 +335,7 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill t
 
 - **[CONTEXT.md](CONTEXT.md)** · runtime rules-of-engagement for agents using the stack
 - **[CHANGELOG.md](CHANGELOG.md)** · release notes
-- **[Skills source](src/skills/)** · all 7 skills (jaz-api / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-pseudo-sql / jaz-kit)
+- **[Skills source](src/skills/)** · all 8 skills (jaz-api / jaz-api-reference / jaz-cli / jaz-conversion / jaz-jobs / jaz-recipes / jaz-pseudo-sql / jaz-kit)
 - **[OpenAPI spec](spec/openapi.yaml)** · full HTTP surface, synced daily
 - **[README-cli.md](README-cli.md)** · npm-package README, full CLI command catalog
 - **[help.jaz.ai](https://help.jaz.ai)** · Jaz product help center
@@ -347,20 +348,27 @@ Start with `/jk-setup`, or just say "set up Jaz Kit for my company"; the skill t
 
 | Reference | Content |
 |-----------|---------|
-| `SKILL.md` | 148 API rules: auth, IDs, dates, FX, payments, field aliases, response shapes |
-| `endpoints.md` | Request/response examples for every core endpoint |
+| `SKILL.md` | Entry point: invocation path, reading order, and the rule index |
+| `rules-*.md` (4 files) | 148 API rules: auth, IDs, dates, FX, payments, field aliases, response shapes, bulk upserts, reconciliation, drafts |
 | `errors.md` | Error catalog with root causes and fixes |
 | `field-map.md` | Intuitive name → actual field name mapping |
-| `search-reference.md` | Filter fields, sort fields, operators for 25 search endpoints |
-| `search-enums.md` | Valid enum values for every searchable filter field, by entity |
-| `search-syntax.md` | Structured-search DSL: operators, precedence, and edge cases |
-| `full-api-surface.md` | Complete endpoint catalog, enums, limits |
 | `dependencies.md` | Resource creation order (currencies → CoA → transactions) |
 | `feature-glossary.md` | Business context per feature |
 | `claims.md` | Employee-expense claims: records, lifecycle, bulk actions, types/profiles/posting-rules, conversion, payouts |
 | `orders.md` | Sale quotes/orders and purchase requests/orders: the pre-invoice/pre-bill pipeline |
 | `bank-rule-column-mapping.md` | Bank-rule column-value mapping: resolve fields per statement row from a custom column |
 | `report-templates.md` | Report templates: layouts, packs, defaults, and which edits each report type accepts |
+
+### jaz-api-reference
+
+| Reference | Content |
+|-----------|---------|
+| `SKILL.md` | Entry point: which file answers which lookup, and the pointer back to jaz-api for the rules |
+| `endpoints.md` + `endpoints-*.md` (6 files) | Conventions every endpoint shares, then request/response examples for every core endpoint, one file per domain |
+| `full-api-surface.md` | Endpoint catalog by resource, limits, platform features |
+| `search-reference.md` | Filter fields, sort fields, operators for 25 search endpoints |
+| `search-enums.md` | Valid enum values for every searchable filter field, by entity |
+| `search-syntax.md` | Structured-search DSL: operators, precedence, and edge cases |
 
 ### jaz-recipes (16 recipe playbooks + 13 calculators)
 
@@ -481,7 +489,7 @@ For Cursor / VS Code / Windsurf, validate the JSON and pin the organization. Sig
 ```json
 {
   "command": "npx",
-  "args": ["-y", "jaz-clio@9.8.4", "mcp", "--org", "oauth:<resourceId>"]
+  "args": ["-y", "jaz-clio@9.9.0", "mcp", "--org", "oauth:<resourceId>"]
 }
 ```
 

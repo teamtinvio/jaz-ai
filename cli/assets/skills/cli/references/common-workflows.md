@@ -168,7 +168,7 @@ clio journals create --input dep-2026-01.json --json   # body: valueDate, journa
 Find transactions matching criteria and bulk-update them.
 
 ```bash
-# Search invoices via structured --query syntax (see api skill: references/search-syntax.md)
+# Search invoices via structured --query syntax (see jaz-api-reference skill: references/search-syntax.md)
 clio invoices search --query "customer:acme AND status:unpaid AND \$500+" --json
 
 # Or with discrete flags

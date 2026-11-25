@@ -1,6 +1,5 @@
 ---
 name: jaz-jobs
-version: 9.8.4
 description: >-
   Use this skill for recurring accounting workflows: month/quarter/year-end
   close, bank reconciliation, GST/VAT filing, payment runs, credit control,
@@ -10,6 +9,8 @@ description: >-
   period-end, tax filing, or any operational accounting task.
 license: MIT
 compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill. For individual transaction patterns, load the jaz-recipes skill.
+metadata:
+  version: "9.9.0"
 ---
 
 # Jobs Skill

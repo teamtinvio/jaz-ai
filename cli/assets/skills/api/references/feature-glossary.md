@@ -2,7 +2,7 @@
 
 Business context for Jaz platform features: what they are, when to use them, and which API endpoints correspond. This supplements the API-focused reference files with product knowledge that helps AI agents understand the *purpose* behind API calls.
 
-For full help center content split by section, see [help-center-mirror/](../help-center-mirror/) or [help.jaz.ai](https://help.jaz.ai). For the complete endpoint catalog (80+), see [full-api-surface.md](./full-api-surface.md).
+For full help center content, see [help.jaz.ai](https://help.jaz.ai) or search it with `clio help-center` (the `search_help_center` tool). For the complete endpoint catalog (80+), see `full-api-surface.md` in the jaz-api-reference skill.
 
 ---
 
@@ -181,7 +181,7 @@ Statement amounts are recorded in the bank account's currency, no auto-conversio
 
 Workflow for draft invoices and bills requiring admin sign-off before activation. Three user roles: Admins (approve + create active), Preparers (submit drafts for approval), Members (submit own drafts only). Status progression: Draft → For Approval → Approved (active). Approval PDFs capture Submitted By / Approved By audit trail.
 
-**API**: `POST /{invoices|bills|customer-credit-notes|supplier-credit-notes}/:id/approve` and `/bulk-approve` (irreversible: posts the ledger), `POST /{entity}/:id/request-changes` (endpoints.md sections 19c, 19d)
+**API**: `POST /{invoices|bills|customer-credit-notes|supplier-credit-notes}/:id/approve` and `/bulk-approve` (irreversible: posts the ledger), `POST /{entity}/:id/request-changes` (jaz-api-reference `endpoints-transactions.md` sections 19c, 19d)
 
 ---
 

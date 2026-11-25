@@ -1,0 +1,856 @@
+# Jaz API: Search Endpoint Reference
+
+> Single source of truth for all `POST /*/search` endpoints. Every filter field,
+> sort field, and operator is extracted from the API backend Go structs and validated
+> against the live production API. **Do not guess; look up the exact fields here.**
+
+---
+
+## Universal Search Pattern
+
+All search endpoints share this identical structure:
+
+```json
+{
+  "filter": { "fieldName": { "operator": "value" } },
+  "sort": { "sortBy": ["field1"], "order": "ASC" },
+  "limit": 100,
+  "offset": 0
+}
+```
+
+| Property | Type | Required | Constraints |
+|----------|------|----------|-------------|
+| `filter` | object | No | Per-endpoint fields (see tables below) |
+| `sort` | object | **Yes if `offset` is present** | `sortBy`: array of field names; `order`: `"ASC"` or `"DESC"` |
+| `limit` | int | No | Default: 100, min: 1, max: 1000 |
+| `offset` | int | No | **Page number** (0-indexed, not row-skip). Default: 0, min: 0, max: 65536. Exceptions, where `offset` is a 0-indexed ROW offset (next page = offset + limit): `POST /generate-reports/general-ledger` and `templated-general-ledger`, the AR/AP details reports (`ar-details-report`, `ap-details-report`, `templated-ar-details-report`, `templated-ap-details-report`), `/purchase-items` (list and search), `GET /organization/currencies/{code}/rates`, and `POST /employees/payouts/search`. |
+
+**Response shape**: `{ totalElements, totalPages, data: [...] }`; all search/list endpoints return this flat structure directly (no outer `data` wrapper).
+
+> **Exception**: the two halves of this family answer differently upstream. `POST /organization-report-template/search` returns a **bare array** with no envelope; `GET /organization-report-template` returns its rows under a **`reportTemplates`** key with no counts. Measured 2026-09-07: the two halves disagree with each other and with the house style. The tools normalize the list, so you always read `.data`. The report template search tool does not call `/search` at all: upstream still refuses `and` / `or` and sorting by name (measured 2026-10-01), so it filters the full list with the same grammar plus `templateName`. See `references/report-templates.md`.
+
+---
+
+## Search Query Field (`query`)
+
+14 endpoints accept an optional `query` string alongside `filter`:
+
+**Supported**: invoices, bills, customer-credit-notes, supplier-credit-notes, journals, cashflow-transactions, bank-records (`:accountResourceId/search`), contacts, items, capsules, fixed-assets, scheduled-transactions, chart-of-accounts, tax-profiles
+
+**Not supported** (returns `query_not_supported` 400): background-jobs, payments, tags, contact-groups, bank-rules, custom-fields, org-users, nano-classifiers
+
+### Query Syntax
+
+For the full syntax spec (amounts, dates, fields, negation, wildcards, regex, absolute value, blank checks, entity field lists, and examples), see **[search-syntax.md](./search-syntax.md)**.
+
+Quick examples:
+```
+status:unpaid AND $500+
+customer:sakura AND date:-30d
+(status:paid OR status:partial) AND date:this quarter
+amount:4k-5k   abs:1000+   ref:INV-*   ref:blank   !status:void
+sort:amount:desc
+```
+
+### Query + Filter Merge
+
+When both are present, merged at filter level. Explicit `filter` keys win on conflict:
+
+```json
+{
+  "query": "status:unpaid AND date:this year",
+  "filter": { "currencyCode": { "in": ["SGD"] } },
+  "limit": 50
+}
+```
+→ All three conditions applied (status=UNPAID AND date=this year AND currency=SGD)
+
+### Error Codes
+
+| Code | HTTP | When |
+|------|------|------|
+| `query_not_supported` | 400 | Endpoint not in supported list |
+| `query_not_understood` | 400 | Unknown field name or unparseable syntax |
+| `query_parse_error` | 502 | Parser service temporarily unavailable |
+| *(no error)* | 200 | Bad enum value, returns empty results silently |
+
+---
+
+## Filter Operators
+
+### String Operators (`StringExpression`)
+
+| Operator | Type | Example | Notes |
+|----------|------|---------|-------|
+| `eq` | string | `{ "status": { "eq": "ACTIVE" } }` | Exact match |
+| `neq` | string | `{ "status": { "neq": "DRAFT" } }` | Not equal |
+| `contains` | string | `{ "reference": { "contains": "INV" } }` | Substring match |
+| `in` | string[] | `{ "status": { "in": ["ACTIVE", "DRAFT"] } }` | Max 100 values |
+| `reg` | string[] | `{ "name": { "reg": ["Acme"] } }` | Substring match despite the name, max 100 |
+| `likeIn` | string[] | `{ "name": { "likeIn": ["Acme"] } }` | Substring match, max 100 |
+| `isNull` | string | `{ "reference": { "isNull": "true" } }` | Null check, takes "true"/"false" |
+| `notContains` | string | `{ "reference": { "notContains": "DRAFT" } }` | Substring exclusion |
+| `startWith` / `notStartWith` | string | `{ "reference": { "startWith": "INV-" } }` | Prefix match, case sensitive |
+| `endWith` / `notEndWith` | string | `{ "reference": { "endWith": "-01" } }` | Suffix match, case sensitive |
+| `isBlank` / `isNotBlank` | string | `{ "terms": { "isBlank": "true" } }` | Null-or-empty check, takes "true"/"false" |
+
+### Numeric Operators (`BigDecimalExpression`)
+
+| Operator | Type | Example |
+|----------|------|---------|
+| `eq` | number | `{ "totalAmount": { "eq": 1000 } }` |
+| `gt` | number | `{ "totalAmount": { "gt": 500 } }` |
+| `gte` | number | `{ "totalAmount": { "gte": 500 } }` |
+| `lt` | number | `{ "totalAmount": { "lt": 10000 } }` |
+| `lte` | number | `{ "totalAmount": { "lte": 10000 } }` |
+| `in` | number[] | `{ "totalAmount": { "in": [100, 200, 300] } }` |
+| `neq` | number | `{ "totalAmount": { "neq": 1000 } }` |
+| `inRange` | number[2] | `{ "totalAmount": { "inRange": [100, 1000] } }` |
+| `notInRange` | number[2] | `{ "totalAmount": { "notInRange": [100, 1000] } }` |
+
+### Integer Operators (`IntExpression`)
+
+Same as numeric minus `neq`: `eq`, `gt`, `gte`, `lt`, `lte`, `in`, `inRange`, `notInRange` (used by `terms` field on invoices/bills).
+
+### Date Operators (`DateExpression`), format: `YYYY-MM-DD`
+
+| Operator | Type | Example |
+|----------|------|---------|
+| `eq` | string | `{ "valueDate": { "eq": "2026-01-15" } }` |
+| `gt` | string | `{ "valueDate": { "gt": "2026-01-01" } }` |
+| `gte` | string | `{ "valueDate": { "gte": "2026-01-01" } }` |
+| `lt` | string | `{ "valueDate": { "lt": "2026-12-31" } }` |
+| `lte` | string | `{ "valueDate": { "lte": "2026-12-31" } }` |
+| `between` | string[2] | `{ "valueDate": { "between": ["2026-01-01", "2026-03-31"] } }` |
+| `notBetween` | string[2] | `{ "valueDate": { "notBetween": ["2026-01-01", "2026-03-31"] } }` |
+| `isNull` / `isNotNull` | string | `{ "dueDate": { "isNull": "0001-01-01" } }` | takes the placeholder DATE, not "true" |
+
+**CRITICAL**: `between`, `notBetween`, `inRange` and `notInRange` require EXACTLY 2 values, low then high. Date `isNull`/`isNotNull` take the placeholder date `"0001-01-01"`, unlike the string ones, which take `"true"`/`"false"`. All date strings must be `YYYY-MM-DD`.
+
+### DateTime Operators (`DateTimeExpression`), format: RFC3339
+
+Same operators as DateExpression but accepts RFC3339 strings (e.g., `"2026-01-15T00:00:00Z"`).
+Used by `createdAt` and `updatedAt` fields. Internally converted to epoch milliseconds.
+
+### Boolean Operators (`BooleanExpression`)
+
+| Operator | Type | Example |
+|----------|------|---------|
+| `eq` | boolean | `{ "customer": { "eq": true } }` |
+
+### JSON Operators (`JsonExpression`)
+
+| Operator | Type | Example |
+|----------|------|---------|
+| `jsonIn` | array | `{ "createdBy": { "jsonIn": [{ "key": "email", "value": "admin@co.sg" }] } }` |
+| `jsonNotIn` | array | Same structure, excludes matches |
+
+### Logical Operators
+
+Nest filters inside `and`, `or`, `not` objects:
+
+```json
+{
+  "filter": {
+    "status": { "eq": "UNPAID" },
+    "and": {
+      "totalAmount": { "gt": 1000 }
+    }
+  }
+}
+```
+
+Invoices, bills, and journals also support `andGroup` / `orGroup` (arrays of filter groups):
+
+```json
+{
+  "filter": {
+    "andGroup": [
+      { "and": { "status": { "eq": "UNPAID" } } },
+      { "or": { "valueDate": { "gte": "2026-01-01" } } }
+    ]
+  }
+}
+```
+
+### Nested Filter Objects
+
+Some fields accept nested object filters:
+
+**`contact` (ContactNestedFilter)**: `name`, `resourceId`, `status`, `taxId`
+```json
+{ "filter": { "contact": { "name": { "contains": "Acme" } } } }
+```
+
+**`account` (OrganizationAccountNestedFilter)**: `accountType`, `accountClass`, `code`, `name`, `resourceId`
+```json
+{ "filter": { "account": { "accountType": { "eq": "Bank Accounts" } } } }
+```
+
+**`approvedBy` / `submittedBy` / `reconciledBy` (UserNestedFilter)**: `email`, `firstName`, `lastName`, `phoneRegistered`, `resourceId`, `status`
+
+**`attachments` (AttachmentNestedFilter)**: `fileName`, `fileType`, `fileUrl`, `resourceId`
+
+---
+
+## Date Format Asymmetry (CRITICAL)
+
+Filter dates (`DateExpression`: `valueDate`, `dueDate`, `startDate`, `endDate`, `purchaseDate`, ...) take `YYYY-MM-DD` strings; filter datetimes (`DateTimeExpression`: `createdAt`, `updatedAt`) take RFC3339 strings; every date in a response is an int64 epoch millisecond value, business dates in the organization's timezone and audit timestamps in UTC. The full matrix, the conversion and the field-by-field expression list: jaz-api's `field-map.md` → "Date Format Matrix", and rule 52.
+
+---
+
+## Per-Endpoint Filter & Sort Fields
+
+### 1. POST /api/v1/invoices/search
+
+**Filter fields** (`SaleFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `contactResourceId` | StringExpression | |
+| `saleOrderResourceId` | StringExpression | The sales order the invoice was created from (`search_invoices` `saleOrderId`) |
+| `status` | StringExpression | DRAFT, UNPAID, PAID, ACTIVE, VOID, etc. (per type, Rule 67) |
+| `reference` | StringExpression | Invoice number |
+| `terms` | IntExpression | Payment terms (days) |
+| `contact` | ContactNestedFilter | Nested: name, resourceId, status, taxId |
+| `valueDate` | DateExpression | |
+| `dueDate` | DateExpression | |
+| `tags` | Nested: `name` (StringExpression) | |
+| `currencyCode` | StringExpression | |
+| `approvalStatus` | StringExpression | |
+| `approvedAt` | DateExpression | |
+| `approvedBy` | UserNestedFilter | |
+| `submittedAt` | DateExpression | |
+| `submittedBy` | UserNestedFilter | |
+| `balanceAmount` | BigDecimalExpression | |
+| `creditAppliedAmount` | BigDecimalExpression | |
+| `paymentRecordedAmount` | BigDecimalExpression | |
+| `reconciledAmount` | BigDecimalExpression | |
+| `totalAmount` | BigDecimalExpression | |
+| `createdAt` | DateTimeExpression | RFC3339 input |
+| `createdBy` | JsonExpression | |
+| `updatedAt` | DateTimeExpression | RFC3339 input |
+| `updatedBy` | JsonExpression | |
+| `attachments` | AttachmentNestedFilter | |
+
+**Logical**: `and`, `or`, `andGroup`, `orGroup`
+
+**Sort fields** (max 25): `resourceId`, `contactResourceId`, `status`, `reference`, `terms`, `contact`, `valueDate`, `dueDate`, `tags`, `currencyCode`, `createdAt`, `createdBy`, `attachments`, `balanceAmount`, `creditAppliedAmount`, `paymentRecordedAmount`, `reconciledAmount`, `totalAmount`, `approvalStatus`, `approvedAt`, `approvedBy`, `submittedAt`, `submittedBy`, `updatedAt`, `updatedBy`
+
+---
+
+### 2. POST /api/v1/bills/search
+
+**Filter fields** (`PurchaseFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `contactResourceId` | StringExpression | |
+| `purchaseOrderResourceId` | StringExpression | The purchase order the bill was created from (`search_bills` `purchaseOrderId`) |
+| `contact` | ContactNestedFilter | |
+| `status` | StringExpression | |
+| `reference` | StringExpression | |
+| `valueDate` | DateExpression | |
+| `dueDate` | DateExpression | |
+| `terms` | IntExpression | |
+| `tags` | Nested: `name` (StringExpression) | |
+| `currencyCode` | StringExpression | |
+| `approvalStatus` | StringExpression | |
+| `submittedBy` | UserNestedFilter | |
+| `submittedAt` | DateExpression | |
+| `approvedBy` | UserNestedFilter | |
+| `approvedAt` | DateExpression | |
+| `createdBy` | JsonExpression | |
+| `createdAt` | DateTimeExpression | |
+| `totalAmount` | BigDecimalExpression | |
+| `attachments` | AttachmentNestedFilter | |
+| `balanceAmount` | BigDecimalExpression | |
+| `paymentRecordedAmount` | BigDecimalExpression | |
+| `reconciledAmount` | BigDecimalExpression | |
+| `creditAppliedAmount` | BigDecimalExpression | |
+| `updatedBy` | JsonExpression | |
+| `updatedAt` | DateTimeExpression | |
+
+**Logical**: `and`, `or`, `andGroup`, `orGroup`
+
+**Sort fields** (max 25): `resourceId`, `contactResourceId`, `contactName`, `status`, `reference`, `valueDate`, `dueDate`, `terms`, `tags`, `currencyCode`, `approvalStatus`, `submittedBy`, `submittedAt`, `approvedBy`, `approvedAt`, `createdBy`, `createdAt`, `totalAmount`, `attachments`, `balanceAmount`, `paymentRecordedAmount`, `reconciledAmount`, `creditAppliedAmount`, `updatedBy`, `updatedAt`
+
+---
+
+### 3. POST /api/v1/customer-credit-notes/search
+
+**Filter fields** (`CustomerCreditNoteFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `contactResourceId` | StringExpression |
+| `status` | StringExpression |
+| `reference` | StringExpression |
+| `tags` | Nested: `name` (StringExpression) |
+| `valueDate` | DateExpression |
+| `contact` | ContactNestedFilter |
+| `currencyCode` | StringExpression |
+| `approvalStatus` | StringExpression |
+| `submittedBy` | UserNestedFilter |
+| `submittedAt` | DateExpression |
+| `approvedBy` | UserNestedFilter |
+| `approvedAt` | DateExpression |
+| `createdAt` | DateTimeExpression |
+| `updatedAt` | DateTimeExpression |
+| `createdBy` | JsonExpression |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 15): `resourceId`, `contactResourceId`, `status`, `reference`, `tags`, `valueDate`, `contact`, `currencyCode`, `approvalStatus`, `submittedBy`, `submittedAt`, `approvedBy`, `approvedAt`, `createdAt`, `createdBy`
+
+---
+
+### 4. POST /api/v1/supplier-credit-notes/search
+
+**Filter fields** (`SupplierCreditNoteFilter`): Same as customer-credit-notes (resourceId, contactResourceId, status, reference, tags, valueDate, contact, currencyCode, approvalStatus, submittedBy, submittedAt, approvedBy, approvedAt, createdAt, createdBy, updatedAt).
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 15): Same as customer-credit-notes.
+
+---
+
+### 5. POST /api/v1/journals/search
+
+**Filter fields** (`JournalFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `tags` | Nested: `name` (StringExpression) | |
+| `reference` | StringExpression | |
+| `status` | StringExpression | |
+| `contact` | ContactNestedFilter | |
+| `creator` | UserNestedFilter | |
+| `createdAt` | DateTimeExpression | |
+| `updatedAt` | DateTimeExpression | |
+| `valueDate` | DateExpression | |
+| `type` | StringExpression | JOURNAL_MANUAL, JOURNAL_DIRECT_CASH_IN, etc. |
+| `templateType` | StringExpression | |
+| `internalNotes` | StringExpression | |
+
+**Logical**: `and`, `or`, `andGroup`, `orGroup`
+
+**Sort fields** (max 10): `resourceId`, `reference`, `status`, `contact`, `creator`, `createdAt`, `valueDate`, `type`, `templateType`
+
+---
+
+### 6. POST /api/v1/contacts/search
+
+**Filter fields** (`ContactFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `customer` | BooleanExpression |
+| `supplier` | BooleanExpression |
+| `email` | StringExpression |
+| `name` | StringExpression |
+| `networkId` | StringExpression |
+| `notes` | StringExpression |
+| `organizationId` | StringExpression |
+| `registrationId` | StringExpression |
+| `status` | StringExpression |
+| `taxId` | StringExpression |
+| `website` | StringExpression |
+| `createdAt` | DateExpression |
+| `updatedAt` | DateExpression |
+
+**Logical**: `not`, `and`, `or`
+
+**Sort fields** (max 13): `resourceId`, `customer`, `supplier`, `name`, `networkId`, `notes`, `organizationId`, `registrationId`, `status`, `taxId`, `website`, `createdAt`, `updatedAt`
+
+---
+
+### 7. POST /api/v1/items/search
+
+**Filter fields** (`ItemFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `appliesToPurchase` | BooleanExpression |
+| `purchaseAccountResourceId` | StringExpression |
+| `appliesToSale` | BooleanExpression |
+| `saleAccountResourceId` | StringExpression |
+| `status` | StringExpression |
+| `itemCategory` | StringExpression |
+
+**Sort fields** (max 10): `resourceId`, `internalName`, `itemCode`, `itemCategory`, `status`, `updatedAt`, `createdAt`
+
+> **Note**: Filter uses `itemCategory` but sort uses `internalName` and `itemCode`; these are sort-only fields not available as filters.
+
+---
+
+### 8. POST /api/v1/tags/search
+
+**Filter fields** (`TagFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `organizationResourceId` | StringExpression |
+| `status` | StringExpression |
+| `tagName` | StringExpression |
+
+**Logical**: `not`, `and`, `or`
+
+**Sort fields** (max 13): `resourceId`, `organizationResourceId`, `tagName`, `status`
+
+---
+
+### 9. POST /api/v1/chart-of-accounts/search
+
+**Filter fields** (`AccountFilter`):
+| Field | Type |
+|-------|------|
+| `accountClass` | StringExpression |
+| `accountType` | StringExpression |
+| `appliesTo` | StringExpression |
+| `code` | StringExpression |
+| `controlFlag` | BooleanExpression |
+| `name` | StringExpression |
+| `currencyCode` | StringExpression |
+| `resourceId` | StringExpression |
+| `sgaName` | StringExpression |
+| `status` | StringExpression |
+| `createdAt` | DateExpression |
+| `updatedAt` | DateExpression |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 10): `accountClass`, `accountType`, `appliesTo`, `code`, `controlFlag`, `currencyCode`, `name`, `resourceId`, `sgaName`, `status`
+
+---
+
+### 10. POST /api/v1/cashflow-transactions/search
+
+**Filter fields** (`TransactionsFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `contact` | ContactNestedFilter | |
+| `businessTransactionReference` | StringExpression | |
+| `direction` | StringExpression | `PAYIN` or `PAYOUT` |
+| `businessTransactionStatus` | StringExpression | |
+| `account` | OrganizationAccountNestedFilter | Nested: accountType, accountClass, code, name, resourceId |
+| `organizationAccountResourceId` | StringExpression | |
+| `bankStatementEntryResourceId` | StringExpression | |
+| `businessTransactionType` | StringExpression | SALE, PURCHASE, JOURNAL_MANUAL, etc. |
+| `valueDate` | DateExpression | |
+| `matchDate` | DateExpression | |
+| `balanceAmount` | BigDecimalExpression | |
+| `totalAmount` | BigDecimalExpression | |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 13): `resourceId`, `contact`, `businessTransactionReference`, `direction`, `businessTransactionStatus`, `account`, `organizationAccountResourceId`, `bankStatementEntryResourceId`, `businessTransactionType`, `valueDate`, `matchDate`, `balanceAmount`, `totalAmount`
+
+**Response shape**: `{ totalElements, totalPages, data: [...] }` (flat, same as all other search endpoints).
+
+---
+
+### 11. POST /api/v1/bank-records/:accountResourceId/search
+
+**Path parameter**: `accountResourceId` (UUID of a bank-type CoA account, required)
+
+**Filter fields** (`BankStatementEntryFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `description` | StringExpression | |
+| `extAccountNumber` | StringExpression | |
+| `extContactName` | StringExpression | |
+| `extReference` | StringExpression | |
+| `netAmount` | BigDecimalExpression | |
+| `status` | StringExpression | `RECONCILED`, `UNRECONCILED`, `ARCHIVED`, `POSSIBLE_DUPLICATE` |
+| `valueDate` | DateExpression | |
+| `reconciledBy` | UserNestedFilter | |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 9): `description`, `extAccountNumber`, `extContactName`, `extReference`, `netAmount`, `reconciledBy`, `resourceId`, `status`, `valueDate`
+
+---
+
+### 12. POST /api/v1/tax-profiles/search
+
+**Filter fields** (`TaxProfileFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `appliesToPurchase` | BooleanExpression |
+| `appliesToPurchaseCreditNote` | BooleanExpression |
+| `appliesToSale` | BooleanExpression |
+| `appliesToSaleCreditNote` | BooleanExpression |
+| `organizationResourceId` | StringExpression |
+| `description` | StringExpression |
+| `name` | StringExpression |
+| `status` | StringExpression |
+| `taxTypeCode` | StringExpression |
+| `taxTypeName` | StringExpression |
+| `isDefault` | BooleanExpression |
+| `isShipping` | BooleanExpression |
+| `vatValue` | BigDecimalExpression |
+| `withholdingValue` | BigDecimalExpression |
+
+**Logical**: `not`, `and`, `or`
+
+**Sort fields** (max 15): `resourceId`, `organizationResourceId`, `name`, `description`, `status`, `taxTypeCode`, `taxTypeName`, `isDefault`, `isShipping`, `vatValue`, `withholdingValue`, `appliesToPurchase`, `appliesToPurchaseCreditNote`, `appliesToSale`, `appliesToSaleCreditNote`
+
+---
+
+### 13. POST /api/v1/custom-fields/search
+
+**Filter fields** (`CustomFieldFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `organizationResourceId` | StringExpression |
+| `status` | StringExpression |
+| `applyToPurchase` | StringExpression |
+| `applyToPurchaseCreditNote` | StringExpression |
+| `applyToSales` | StringExpression |
+| `applyToSaleCreditNote` | StringExpression |
+| `appliesToFixedAssets` | StringExpression |
+| `appliesToItems` | StringExpression |
+| `applyToCreditNote` | StringExpression |
+| `applyToPayment` | StringExpression |
+| `datatypeCode` | StringExpression |
+| `customFieldName` | StringExpression |
+
+**Logical**: `not`, `and`, `or`
+
+**Sort fields** (max 13): `resourceId`, `organizationResourceId`, `customFieldName`, `datatypeCode`, `status`, `appliesToPurchase`, `appliesToPurchaseCreditNote`, `appliesToSale`, `appliesToSaleCreditNote`, `appliesToFixedAssets`, `appliesToItems`, `applyToCreditNote`, `applyToPayment`
+
+---
+
+### 14. POST /api/v1/contact-groups/search
+
+**Filter fields** (`ContactGroupFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `name` | StringExpression |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 13): `resourceId`, `name`
+
+---
+
+### 15. POST /api/v1/capsules/search
+
+**Filter fields** (`CapsuleFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `description` | StringExpression |
+| `endDate` | DateExpression |
+| `startDate` | DateExpression |
+| `status` | StringExpression |
+| `title` | StringExpression |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 10): `resourceId`, `title`, `status`, `description`, `attributes`, `endDate`, `startDate`, `organizationResourceId`, `totalSchedulers`, `totalTransactions`
+
+> **Note**: Capsules uses `title` (not `name`) for the display name field.
+
+---
+
+### 16. POST /api/v1/capsuleTypes/search
+
+**Filter fields** (`CapsuleTypesFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `description` | StringExpression |
+| `displayName` | StringExpression |
+| `name` | StringExpression |
+| `status` | StringExpression |
+| `controlFlag` | BooleanExpression |
+| `isLocked` | BooleanExpression |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 10): `resourceId`, `title`, `status`, `description`, `displayName`, `name`
+
+---
+
+### 17. POST /api/v1/fixed-assets/search
+
+**Filter fields** (`FixedAssetsFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `name` | StringExpression |
+| `reference` | StringExpression |
+| `category` | StringExpression |
+| `currencyCode` | StringExpression |
+| `depreciationEndDate` | DateExpression |
+| `depreciationStartDate` | DateExpression |
+| `depreciationMethod` | StringExpression |
+| `disposalType` | StringExpression |
+| `typeName` | StringExpression |
+| `typeCode` | StringExpression |
+| `tags` | Nested: `name` (StringExpression) |
+| `status` | StringExpression |
+| `registrationType` | StringExpression |
+| `purchaseBusinessTransactionType` | StringExpression |
+| `purchaseDate` | DateExpression |
+| `disposalValueDate` | DateExpression |
+| `purchaseAmount` | BigDecimalExpression |
+| `netBookAtDisposalAmount` | BigDecimalExpression |
+| `bookValueAmount` | BigDecimalExpression |
+| `assetDisposalGainLossAmount` | BigDecimalExpression |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 13): `resourceId`, `name`, `purchaseDate`, `disposalValueDate`, `purchaseAmount`, `bookValueAmount`, `netBookAtDisposalAmount`, `assetDisposalGainLossAmount`, `typeName`, `typeCode`, `category`
+
+---
+
+### 18. POST /api/v1/fixed-assets-types/search
+
+**Filter fields** (`FixedAssetsTypesFilter`):
+| Field | Type |
+|-------|------|
+| `categoryCode` | StringExpression |
+| `typeName` | StringExpression |
+| `typeCode` | StringExpression |
+| `resourceId` | StringExpression |
+
+**Logical**: `and`, `or`
+
+**Sort fields**: `resourceId`, `typeName`, `typeCode`, `categoryCode`
+
+---
+
+### 19. POST /api/v1/scheduled-transaction/search
+
+**Filter fields** (`TransactionScheduleFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `businessTransactionReference` | StringExpression | |
+| `businessTransactionResourceId` | StringExpression | |
+| `businessTransactionType` | StringExpression | |
+| `schedulerType` | StringExpression | |
+| `contactResourceId` | StringExpression | |
+| `contact` | ContactNestedFilter | |
+| `status` | StringExpression | |
+| `currencyCode` | StringExpression | |
+| `startDate` | DateExpression | |
+| `endDate` | DateExpression | |
+| `subscriptionStatus` | StringExpression | |
+| `interval` | StringExpression | WEEKLY, MONTHLY, QUARTERLY, YEARLY |
+| `lastScheduleDate` | DateExpression | |
+| `nextScheduleDate` | DateExpression | |
+| `paymentRecordedAmount` | BigDecimalExpression | |
+| `totalAmount` | BigDecimalExpression | |
+| `referenceGenerationMode` | StringExpression | |
+| `proratedStartDate` | DateExpression | |
+
+**Logical**: `and`, `or`
+
+**Sort fields** (max 25): `resourceId`, `businessTransactionReference`, `businessTransactionResourceId`, `businessTransactionType`, `schedulerType`, `contactResourceId`, `status`, `currencyCode`, `startDate`, `endDate`, `subscriptionStatus`, `interval`, `lastScheduleDate`, `nextScheduleDate`, `paymentRecordedAmount`, `totalAmount`, `referenceGenerationMode`, `proratedStartDate`
+
+---
+
+### 20. POST /api/v1/nano-classifiers/search
+
+**Filter fields** (`NanoClassifiersFilter`):
+| Field | Type |
+|-------|------|
+| `resourceId` | StringExpression |
+| `type` | StringExpression |
+| `classes` | ClassifierClassFilter (nested: `className`, `resourceId`) |
+
+**Logical**: `not`, `and`, `or`
+
+**Sort fields**: `resourceId`, `type`
+
+---
+
+### 21. POST /api/v1/organization-users/search
+
+**Filter fields** (`OrganizationUserFilter`): `resourceId`, `userResourceId`, `userType`, `status`, `email`, `and`, `or`
+**Nested**: `user` (`user.firstName`, `user.lastName`, `user.email`, `user.phoneRegistered`, `user.status`, `user.resourceId`, `user.deleted`)
+
+**Sort fields** (max 9): `resourceId`, `status`, `userResourceId`, `userType`, `user.FirstName`, `user.LastName`, `user.Email`, `user.PhoneRegistered`, `user.Status`
+
+There is no top-level `name` or `role` on this filter, and the nested sort keys are capitalised while the nested filter keys are not: `user.firstName` filters, `user.FirstName` sorts. Anything else in `sort.sortBy` is a 422. `query` is rejected on this endpoint; use the filter.
+
+Standard pattern with limit/offset/filter/sort. Rarely used in conversions.
+
+---
+
+### 22. POST /api/v1/bank-rules/search
+
+**Filter fields** (`BankRuleFilter`): `appliesToReconciliationAccount`, `name`, `reference`, `resourceId`, `actionType`, `businessTransactionType`, `and`, `or`
+
+**Sort fields**: `resourceId`, `name`, `actionType`, `businessTransactionType`, `reference`, `appliesToReconciliationAccount`, `createdAt`
+
+Standard pattern with limit/offset/filter/sort. Used for managing bank reconciliation auto-matching rules.
+
+---
+
+### 23. POST /api/v1/purchase-items/search
+
+**Filter fields** (`PurchaseItemFilter`): `currencyCode`, `name`, `purchaseResourceId`, `resourceId`, `reference` (plain strings, NOT expression objects. Operators like `contains`, `in` are not supported on this endpoint).
+
+**Sort fields** (max 13): `resourceId`, `name`, `reference`, `currencyCode`, `status`, `valueDate`, `totalItemAmount`, `description`
+
+`query` is rejected on this endpoint ("The query field is not supported for this entity") despite being declared on `SearchPurchaseItemRequest`. Use the filter.
+
+---
+
+### 24. POST /api/v1/sale-orders/search
+
+Also covers `POST /api/v1/sale-quotes/search`, same filter shape (`SaleOrderFilter` / `SaleQuoteFilter`).
+
+**Filter fields** (`SaleOrderFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `reference` | StringExpression | Order/quote number |
+| `status` | StringExpression | DRAFT, PENDING, CREATED, ACCEPTED, CONFIRMED, VOID |
+| `contactResourceId` | StringExpression | |
+| `contact` | ContactNestedFilter | Nested: name, resourceId, status |
+| `saleQuoteResourceId` | StringExpression | (Sale Orders only) source quote link (`search_sale_orders` `saleQuoteId`) |
+| `currencyCode` | StringExpression | |
+| `valueDate` | DateExpression | |
+| `dueDate` | DateExpression | |
+| `terms` | IntExpression | Payment terms (days) |
+| `tags` | Nested: `name` (StringExpression) | |
+| `totalAmount` | BigDecimalExpression | |
+| `expectedTotal` | BigDecimalExpression | |
+| `approvedAt` | DateExpression | |
+| `createdAt` | DateTimeExpression | RFC3339 input |
+| `updatedAt` | DateTimeExpression | RFC3339 input |
+
+**Logical**: `and`, `or`, `andGroup`, `orGroup`
+
+**Sort fields**: `resourceId`, `reference`, `status`, `contactResourceId`, `valueDate`, `dueDate`, `terms`, `currencyCode`, `totalAmount`, `createdAt`, `updatedAt`
+
+> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_INVOICED for quotes, FULLY_BILLED for requests; an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired) appears on responses but is **not** a filter field.
+
+---
+
+### 25. POST /api/v1/purchase-orders/search
+
+Also covers `POST /api/v1/purchase-requests/search`, same filter shape (`PurchaseOrderFilter` / `PurchaseRequestFilter`).
+
+**Filter fields** (`PurchaseOrderFilter`):
+| Field | Type | Notes |
+|-------|------|-------|
+| `resourceId` | StringExpression | |
+| `reference` | StringExpression | Order/request number |
+| `status` | StringExpression | DRAFT, PENDING, ACTIVE, ACCEPTED, CONFIRMED, VOID |
+| `contactResourceId` | StringExpression | Supplier |
+| `contact` | ContactNestedFilter | Nested: name, resourceId, status |
+| `purchaseRequestResourceId` | StringExpression | (Purchase Orders only) source request link (`search_purchase_orders` `purchaseRequestId`) |
+| `currencyCode` | StringExpression | |
+| `valueDate` | DateExpression | |
+| `dueDate` | DateExpression | |
+| `terms` | IntExpression | Payment terms (days) |
+| `tags` | Nested: `name` (StringExpression) | |
+| `totalAmount` | BigDecimalExpression | |
+| `expectedTotal` | BigDecimalExpression | |
+| `approvedAt` | DateExpression | |
+| `createdAt` | DateTimeExpression | RFC3339 input |
+| `updatedAt` | DateTimeExpression | RFC3339 input |
+
+**Logical**: `and`, `or`, `andGroup`, `orGroup`
+
+**Sort fields**: `resourceId`, `reference`, `status`, `contactResourceId`, `valueDate`, `dueDate`, `terms`, `currencyCode`, `totalAmount`, `createdAt`, `updatedAt`
+
+> `orderState` (NOT_ORDERED / PARTIALLY_ORDERED / FULLY_BILLED for requests; an order+invoice rollup, arap 2026-06; FULLY_ORDERED retired) appears on responses but is **not** a filter field.
+
+---
+
+## Quick Lookup: Common Search Patterns
+
+### Find all invoices for a contact
+```json
+POST /api/v1/invoices/search
+{
+  "filter": { "contactResourceId": { "eq": "uuid-here" } },
+  "sort": { "sortBy": ["valueDate"], "order": "DESC" },
+  "limit": 100
+}
+```
+
+### Find unpaid invoices in a date range
+```json
+POST /api/v1/invoices/search
+{
+  "filter": {
+    "status": { "eq": "UNPAID" },
+    "balanceAmount": { "gt": 0 },
+    "valueDate": { "between": ["2026-01-01", "2026-06-30"] }
+  },
+  "sort": { "sortBy": ["valueDate"], "order": "ASC" }
+}
+```
+
+### Find bank accounts (via CoA search)
+```json
+POST /api/v1/chart-of-accounts/search
+{
+  "filter": { "accountType": { "eq": "Bank Accounts" } },
+  "sort": { "sortBy": ["name"], "order": "ASC" }
+}
+```
+
+### Find unreconciled bank records
+```json
+POST /api/v1/bank-records/:accountResourceId/search
+{
+  "filter": { "status": { "eq": "UNRECONCILED" } },
+  "sort": { "sortBy": ["valueDate"], "order": "DESC" }
+}
+```
+
+### Find contacts by name pattern
+```json
+POST /api/v1/contacts/search
+{
+  "filter": { "name": { "contains": "Sterling" } },
+  "sort": { "sortBy": ["name"], "order": "ASC" }
+}
+```
+
+### Find all cashflow transactions for a bank account
+```json
+POST /api/v1/cashflow-transactions/search
+{
+  "filter": {
+    "organizationAccountResourceId": { "eq": "bank-uuid" },
+    "valueDate": { "gte": "2026-01-01" }
+  },
+  "sort": { "sortBy": ["valueDate"], "order": "DESC" }
+}
+```
+
+### Find a specific cash transfer (e.g. a possible duplicate)
+`GET /cash-transfers` takes no filters, so a busy organization's list runs to hundreds of rows. Search the ledger by type, account, direction and date instead:
+```json
+POST /api/v1/cashflow-transactions/search
+{
+  "filter": {
+    "businessTransactionType": { "eq": "JOURNAL_CASH_TRANSFER" },
+    "organizationAccountResourceId": { "eq": "bank-uuid" },
+    "direction": { "eq": "PAYOUT" },
+    "valueDate": { "between": ["2026-11-01", "2026-11-30"] }
+  },
+  "sort": { "sortBy": ["valueDate"], "order": "DESC" }
+}
+```
+
+---
+
+*Derived from Go structs in the API backend (`models/*.go`); filter/sort fields extracted from struct validation tags and verified against the live production API. **Hand-maintained and not regenerated; nothing detects it going stale**; provenance and precedence rules: `search-enums.md` → Provenance and staleness. Last re-derived: 2026-02-14. All search/list responses standardized to flat shape. Capsules/capsuleTypes sort now array. Purchase-items sort fields corrected. Tax-profiles max fixed. Catalogs search returns paginated response.*

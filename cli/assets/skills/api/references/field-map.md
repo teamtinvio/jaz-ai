@@ -74,6 +74,8 @@ These aliases are applied by middleware on POST/PUT endpoints. The alias is only
 | `accountType` | `classificationType` | Code-level alias | POST/PUT: chart-of-accounts, bulk-upsert |
 | `currencyCode` | `currency` | Code-level alias | POST: chart-of-accounts bulk-upsert |
 
+Aliases apply only to POST/PUT request bodies. Search filter fields use their canonical names (e.g., `tagName` not `name` in `POST /tags/search`).
+
 ---
 
 ## Organization & Auth
@@ -712,4 +714,4 @@ Battle-tested patterns from production Jaz API clients:
 
 ---
 
-*Hand-maintained and not regenerated; nothing detects it going stale; provenance and precedence rules: `search-enums.md` → Provenance and staleness. Last updated: 2026-04-09. Added: Background Jobs (resourceId vs jobId critical trap, startedAt broken), Export Records (fileUrl, filterDescription, previewRows keying). Previous: 2026-03-13. Payment record fields, scheduler field asymmetry, nano-classifier fields.*
+*Hand-maintained and not regenerated; nothing detects it going stale; provenance and precedence rules: jaz-api-reference `search-enums.md` → Provenance and staleness. Last updated: 2026-04-09. Added: Background Jobs (resourceId vs jobId critical trap, startedAt broken), Export Records (fileUrl, filterDescription, previewRows keying). Previous: 2026-03-13. Payment record fields, scheduler field asymmetry, nano-classifier fields.*

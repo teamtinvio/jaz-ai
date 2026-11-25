@@ -1,6 +1,5 @@
 ---
 name: jaz-conversion
-version: 9.8.4
 description: >-
   Use this skill when migrating accounting data into Jaz, importing from Xero,
   QuickBooks, Sage, MYOB, or Excel exports. Covers the full conversion pipeline:
@@ -9,6 +8,8 @@ description: >-
   and verifying TB. Also use when the user mentions data migration, conversion,
   import, or switching accounting software, whenever a customer's prior system
   is Xero, QuickBooks, Sage, MYOB, or an Excel-based ledger.
+metadata:
+  version: "9.9.0"
 ---
 
 # Jaz Conversion Skill
@@ -151,12 +152,13 @@ If TB doesn't match, identify the discrepancy:
 5. **FYE exchange rates + original dates**: Quick conversion uses original dates (for aging) but explicit FYE rate via `currency: { sourceCurrency, exchangeRate }` on every FX transaction. Prior UGL is in the TTB; explicit rate ensures zero UGL in Jaz. See `references/edge-cases.md`.
 6. **System-generated CoA accounts cannot be deleted**: discover them via API before attempting a wipe-and-replace.
 7. **100% accuracy is required**: customer's accountant signs off on TB match. No rounding errors, no missing balances.
-8. **Always load `jaz-api` skill alongside this one**: this skill has conversion domain knowledge, `jaz-api` has API field names, endpoints, and gotchas.
+8. **Always load `jaz-api` skill alongside this one**: this skill has conversion domain knowledge, `jaz-api` has API field names and gotchas, and `jaz-api-reference` has the endpoints.
 9. **Filter noise from aging reports before creating contacts**: AR/AP aging reports contain subtotal rows, dates, column headers, and numeric-only strings that are NOT contact names. Reject them to avoid creating garbage contacts. See `references/mapping-rules.md`.
 10. **TTB routing differs between Quick and Full**: Quick routes AR/AP through clearing accounts (conversion invoices already hold the real AR/AP). Full posts directly to all accounts (detailed transactions follow). See `references/option1-full.md`.
 
 ## See Also
 
-- **jaz-api**: Field names, endpoints, error codes, and gotchas (load alongside this skill)
+- **jaz-api**: Field names, error codes, and gotchas (load alongside this skill)
+- **jaz-api-reference**: Endpoint request/response examples, the endpoint catalog, and search filters
 - **jaz-recipes**: Transaction recipes for complex IFRS scenarios encountered during conversion
 - **jaz-jobs**: Post-conversion operational workflows (month-end close, bank recon, etc.)

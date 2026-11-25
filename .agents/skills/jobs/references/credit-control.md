@@ -170,7 +170,7 @@ Returns XLSX with high-risk customer flags (rising aging trends, recently-defaul
 | Step 3 | `severitySummary.dominantLabel` is `NO_ALERTS` | Signals could not be computed; use aging alone. Don't halt the job. |
 | Step 3 | 403 `NOT_HAVE_ENOUGH_PERMISSION` | The user has no access to Sales; ask them, or skip step 3. |
 | Step 6 Path A | `apply_credits_to_invoice` 422 `credit_exceeds_balance` | Split the credit across multiple invoices, OR reduce the credit amount to match the bill balance. |
-| Step 6 Path B | `paymentMethod: 'DEBT_WRITE_OFF'` rejected | Verify the enum value via `jaz-api/SKILL.md` (some orgs may have custom payment-method config; default supports DEBT_WRITE_OFF). |
+| Step 6 Path B | `paymentMethod: 'DEBT_WRITE_OFF'` rejected | Verify the enum value via `jaz-api/SKILL.md` rule 116 (some orgs may have custom payment-method config; default supports DEBT_WRITE_OFF). |
 | Step 7 ECL top-up | Top-up causes Bad Debt Expense to spike | Expected: material aging shift = material P&L impact. Surface to practitioner; potentially split across multiple periods if it's a known one-off (rare). |
 | Customer files insolvency mid-chase | (process) | Stop chase. Move directly to step 6 specific write-off. Document the insolvency filing reference. |
 | Customer pays post-write-off | (rare) | Post `create_journal`: Dr Cash / Cr Bad Debt Recoveries. Don't reverse the original write-off; keep the audit trail clean. |

@@ -1,6 +1,5 @@
 ---
 name: jaz-cli
-version: 9.8.4
 description: >-
   Use this skill when running Clio CLI commands, building shell scripts with
   Clio, debugging auth issues, understanding --json output, paginating results,
@@ -11,6 +10,8 @@ description: >-
   80 command groups and 523 tools, including employee-expense claims.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
+metadata:
+  version: "9.9.0"
 ---
 
 # Clio CLI Skill
@@ -34,7 +35,8 @@ You are working with **Clio** (`jaz-clio`), the CLI for the Jaz accounting platf
 | Need | Skill |
 |------|-------|
 | CLI command syntax, flags, output | **jaz-cli** (this skill) |
-| API field names, error codes, 158 API rules | **jaz-api** |
+| API field names, error codes, 148 API rules | **jaz-api** |
+| Endpoint request/response shapes, search filters, search enums | **jaz-api-reference** |
 | IFRS transaction recipes (depreciation, leases, loans) | **jaz-recipes** |
 | Month-end close, bank recon, GST filing workflows | **jaz-jobs** |
 | Migration from Xero/QuickBooks/Sage | **jaz-conversion** |
@@ -239,7 +241,7 @@ clio invoices search --query "status:unpaid sort:amount:desc" --limit 10
 - Unsupported entities have no `--query` flag (background-jobs, tags, contact-groups, etc.).
 - Never use `-` for negation; it means negative amount (e.g. `$-500` = amount is -500). Use `!` or `NOT`.
 
-See `references/search-reference.md` in the `jaz-api` skill for the full syntax spec.
+See `references/search-reference.md` in the `jaz-api-reference` skill for the full syntax spec.
 
 ## Body Input
 

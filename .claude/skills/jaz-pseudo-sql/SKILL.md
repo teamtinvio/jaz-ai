@@ -1,6 +1,5 @@
 ---
 name: jaz-pseudo-sql
-version: 9.8.4
 description: >-
   Use this skill when answering ad-hoc data questions that aren't covered by
   download_export (canonical reports: anomaly, audit, aging, P&L, BS, GL,
@@ -13,6 +12,8 @@ description: >-
   export_pseudo_sql, get_pseudo_sql_export, run_pseudo_sql_and_download.
 license: MIT
 compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For canonical report types and the standard analytics surface, load the jaz-api skill alongside this one.
+metadata:
+  version: "9.9.0"
 ---
 
 # Jaz Pseudo-SQL Skill

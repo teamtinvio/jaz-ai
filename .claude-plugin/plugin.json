@@ -1,6 +1,6 @@
 {
   "name": "jaz-ai",
-  "version": "9.8.4",
+  "version": "9.9.0",
   "description": "Fastest ledger for agents. Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Skills add migration from Xero, QuickBooks, Sage, and MYOB, close playbooks, financial calculators, Singapore Form C-S, and Jaz Kit for running many organizations. Works with Claude Code, Codex, Copilot, Cursor, and any MCP-compatible agent.",
   "author": {
     "name": "Jaz",
@@ -9,8 +9,8 @@
   "homepage": "https://help.jaz.ai",
   "license": "MIT",
   "keywords": ["jaz", "juan", "accounting", "api", "invoicing", "conversion", "migration", "xero", "quickbooks"],
-  "skills": ["./.claude/skills/api", "./.claude/skills/cli", "./.claude/skills/conversion", "./.claude/skills/transaction-recipes", "./.claude/skills/jobs", "./.claude/skills/jaz-pseudo-sql", "./.claude/skills/jaz-kit"],
-  "agentSkills": ["./.agents/skills/api", "./.agents/skills/cli", "./.agents/skills/conversion", "./.agents/skills/transaction-recipes", "./.agents/skills/jobs", "./.agents/skills/jaz-pseudo-sql", "./.agents/skills/jaz-kit"],
+  "skills": ["./.claude/skills/api", "./.claude/skills/jaz-api-reference", "./.claude/skills/cli", "./.claude/skills/conversion", "./.claude/skills/transaction-recipes", "./.claude/skills/jobs", "./.claude/skills/jaz-pseudo-sql", "./.claude/skills/jaz-kit"],
+  "agentSkills": ["./.agents/skills/api", "./.agents/skills/jaz-api-reference", "./.agents/skills/cli", "./.agents/skills/conversion", "./.agents/skills/transaction-recipes", "./.agents/skills/jobs", "./.agents/skills/jaz-pseudo-sql", "./.agents/skills/jaz-kit"],
   "mcpServers": {
     "clio": {
       "command": "node",

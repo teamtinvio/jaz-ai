@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.8.4+23da780a",
+  "contentVersion": "9.9.0+0c2c4a2c",
   "counts": {
     "tools": 523,
     "namespaces": 61,
     "calculators": 13,
     "recipes": 16,
     "jobs": 12,
-    "skills": 7,
+    "skills": 8,
     "commands": 83,
     "apiRules": 148
   },
@@ -4007,6 +4007,7 @@
   ],
   "skills": [
     "jaz-api",
+    "jaz-api-reference",
     "jaz-cli",
     "jaz-conversion",
     "jaz-recipes",

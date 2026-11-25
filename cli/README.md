@@ -9,7 +9,7 @@
 
 <p align="center"><b>Fastest ledger for agents.</b><br>Jaz accounting on the command line, and inside any AI agent.</p>
 
-523 tools · 80 command groups · 7 skills · 13 calculators · 12 job playbooks · 148 field-tested API rules.
+523 tools · 80 command groups · 8 skills · 13 calculators · 12 job playbooks · 148 field-tested API rules.
 
 ```bash
 npm install -g jaz-clio

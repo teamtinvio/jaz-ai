@@ -8,7 +8,8 @@ Agent skills for the [Jaz](https://jaz.ai) accounting platform. Works with [Clau
 
 | Skill | What it teaches an agent |
 |-------|--------------------------|
-| **jaz-api** | 148 production rules, every endpoint, error catalog, field mapping. Agents write correct Jaz API code on the first call. |
+| **jaz-api** | 148 production rules, error catalog, field mapping. Agents write correct Jaz API code on the first call. |
+| **jaz-api-reference** | Request/response examples for every core endpoint, the endpoint catalog, search filters, syntax and enums. Load with jaz-api. |
 | **jaz-cli** | The `clio` command surface, auth precedence, output formats, pagination |
 | **jaz-conversion** | Xero, QuickBooks, Sage, MYOB, Excel migration: CoA mapping, FX, clearing accounts, trial balance verification |
 | **jaz-jobs** | 12 job playbooks (month / quarter / year-end, bank-recon, document-collection, GST/VAT, payment-run, credit-control, supplier-recon, audit-prep, FA-review, statutory-filing) + Singapore Form C-S |
@@ -19,7 +20,7 @@ Agent skills for the [Jaz](https://jaz.ai) accounting platform. Works with [Clau
 ## Install
 
 ```bash
-# Auto-detect your AI tool and install all 7 skills
+# Auto-detect your AI tool and install all 8 skills
 npx jaz-clio init
 
 # Or one skill at a time
