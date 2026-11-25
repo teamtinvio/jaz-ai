@@ -1,5 +1,12 @@
 # Changelog
 
+## [9.8.3] - 2026-11-25
+
+**The dashboard page-tool list now names the two draft tools that only browser agents use.**
+
+- The vendored dashboard catalogue adds `save_draft` and `discard_changes`, which run only through the browser (WebMCP), never in Clio.
+- Nothing changes in Clio, the MCP tools, the `clio` CLI or the Claude extension: Clio still has the same 10 page tools.
+
 ## [9.8.2] - 2026-11-24
 
 **Clio asks with a pick-list before a change after reading your page, and never shows it as an error.**
