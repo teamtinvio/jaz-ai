@@ -501,6 +501,14 @@
           ],
           "type": "string"
         },
+        "isEligibleClaims": {
+          "description": "Eligible for Claims: only these employees can be given claims. Needs claimProfileResourceId. Left out: on\nwhen claimProfileResourceId is given. At least one of isEligibleClaims and isEligiblePayruns is on.",
+          "type": "boolean"
+        },
+        "isEligiblePayruns": {
+          "description": "Eligible for Payruns: only these employees can be added to payruns. Left out: off.",
+          "type": "boolean"
+        },
         "managerEmployeeResourceId": {
           "description": "Manager employee (UUIDv4). Server rejects self/cyclic references.",
           "type": "string"
@@ -14235,6 +14243,22 @@
           ],
           "description": "Filter by employment type."
         },
+        "isEligibleClaims": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Filter by Eligible for Claims."
+        },
+        "isEligiblePayruns": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Filter by Eligible for Payruns."
+        },
         "name": {
           "allOf": [
             {
@@ -14344,6 +14368,22 @@
           ],
           "description": "Filter by email address."
         },
+        "isEligibleClaims": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Filter by Eligible for Claims."
+        },
+        "isEligiblePayruns": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Filter by Eligible for Payruns."
+        },
         "managerEmployeeResourceId": {
           "allOf": [
             {
@@ -14428,6 +14468,14 @@
             "CONSULTANT"
           ],
           "type": "string"
+        },
+        "isEligibleClaims": {
+          "description": "Eligible for Claims. Left out: on when claimProfileResourceId is given.",
+          "type": "boolean"
+        },
+        "isEligiblePayruns": {
+          "description": "Eligible for Payruns. Left out: off.",
+          "type": "boolean"
         },
         "managerEmployeeResourceId": {
           "description": "Resource ID of the manager.",
@@ -14728,6 +14776,14 @@
             "CONSULTANT"
           ],
           "type": "string"
+        },
+        "isEligibleClaims": {
+          "description": "Eligible for Claims. Left out: no change.",
+          "type": "boolean"
+        },
+        "isEligiblePayruns": {
+          "description": "Eligible for Payruns. Left out: no change.",
+          "type": "boolean"
         },
         "managerEmployeeResourceId": {
           "description": "Resource ID of the manager.",
@@ -36918,6 +36974,14 @@
             "CONSULTANT"
           ],
           "type": "string"
+        },
+        "isEligibleClaims": {
+          "description": "Eligible for Claims. Leave the field out (or send null) for no change. Turning it off is refused while a claim\nawaits approval or posting or a claims balance is left; the claim profile is kept.",
+          "type": "boolean"
+        },
+        "isEligiblePayruns": {
+          "description": "Eligible for Payruns. Leave the field out (or send null) for no change. Turning it off is refused while the\nemployee is in a draft payrun. At least one of the two stays on.",
+          "type": "boolean"
         },
         "managerEmployeeResourceId": {
           "description": "Manager employee (UUIDv4). Server rejects self/cyclic references. Send null to clear it.",
@@ -60231,7 +60295,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create an employee.",
+        "description": "Create an employee. An employee is Eligible for Claims, Eligible for Payruns or both: both off is refused with EMPLOYEE_ELIGIBILITY_REQUIRED, and Claims on without a claim profile with EMPLOYEE_CLAIM_PROFILE_REQUIRED.",
         "operationId": "create-employee",
         "parameters": [
           {
@@ -60771,7 +60835,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Update an existing employee.",
+        "description": "Update an existing employee. Every save keeps at least one of isEligibleClaims and isEligiblePayruns on (EMPLOYEE_ELIGIBILITY_REQUIRED), and a claim profile while Claims is on (EMPLOYEE_CLAIM_PROFILE_REQUIRED). Turning Payruns off is refused while the employee is in a draft payrun (EMPLOYEE_PAYRUNS_ELIGIBILITY_LOCKED), and Claims off while a claim awaits approval or posting or a claims balance is left (EMPLOYEE_CLAIMS_ELIGIBILITY_LOCKED).",
         "operationId": "update-employee",
         "parameters": [
           {

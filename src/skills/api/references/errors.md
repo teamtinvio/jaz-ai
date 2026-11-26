@@ -944,8 +944,36 @@ Two of the seven never reach you through this path: a zero `adjustmentValue` and
 **Fix**: Use `search_org_users` and read the member's **`userResourceId`** field (not the org-user record's `resourceId`), then retry. Each user links to at most one employee per org. To move a link, relink with `update_employee` `userResourceId` or unlink with `clearFields: ["userResourceId"]`.
 
 ### "EMPLOYEE_CLAIM_PROFILE_REQUIRED" (422)
-**Cause**: `add_employee` was called without `claimProfileResourceId` ("A claim profile is required for an employee — it carries the employee balance account used to convert and pay claims"). The claim profile is **server-required**; the org default is NOT auto-applied for employees (unlike claims), even when a default profile exists.
-**Fix**: Pick a profile via `search_claim_profiles` and pass its `resourceId` as `claimProfileResourceId`. The profile is locked while the employee has unsettled claims.
+**Cause**: An employee with Eligible for Claims on has no claim profile ("An employee eligible for claims needs a claim profile"): `add_employee` with a profile left out and `isEligibleClaims` true, or `update_employee` turning Claims on or removing the profile while it is on. The org default is NOT auto-applied for employees (unlike claims). A profile is needed only while Claims is on.
+**Fix**: Pick a profile via `search_claim_profiles` and pass its `resourceId` as `claimProfileResourceId`. For a payroll-only employee, leave Claims off and send `isEligiblePayruns: true` instead. The profile is locked while the employee has unsettled claims.
+
+### "EMPLOYEE_ELIGIBILITY_REQUIRED" (422)
+**Cause**: The save would leave both Eligible for Claims and Eligible for Payruns off ("Turn on Eligible for Claims, Eligible for Payruns or both"). `add_employee` with no profile and no `isEligiblePayruns` lands here.
+**Fix**: Set `isEligiblePayruns: true`, or give a claim profile for Claims.
+
+### "EMPLOYEE_PAYRUNS_ELIGIBILITY_LOCKED" (422)
+**Cause**: `update_employee` turned Eligible for Payruns off while the employee is in a draft payrun ("The employee is in 1 draft payrun. Remove them from it before turning off Eligible for Payruns.").
+**Fix**: Remove the employee from the draft payrun (`remove_payrun_employees`), then retry. Relay the message as is.
+
+### "EMPLOYEE_CLAIMS_ELIGIBILITY_LOCKED" (422)
+**Cause**: `update_employee` turned Eligible for Claims off while a claim awaits approval or posting, or a claims balance is left (owed, or an advance not yet claimed). The message names everything open ("The employee is still owed SGD 45.00 in claims. Record a payout for the balance before turning off Eligible for Claims.").
+**Fix**: Settle what the message names (approve or reject the claim, record the payout), then retry. Relay the message as is.
+
+### "EMPLOYEE_SETTLEMENT_CHECK_UNAVAILABLE" (422)
+**Cause**: The claim balance could not be verified right now ("Could not verify this employee's claim balance right now, please try again"). Nothing changed.
+**Fix**: Retry the same `update_employee` later.
+
+### "CLAIM_EMPLOYEE_NOT_ELIGIBLE" (422)
+**Cause**: A claim or advance was created, moved, submitted or paid out for an employee who is not eligible for claims ("Jane Lim is not eligible for claims").
+**Fix**: Pick the employee with `search_employees` `isEligibleClaims` true, or turn Eligible for Claims on with `update_employee` (ask the user first).
+
+### "PAYRUN_EMPLOYEE_NOT_ELIGIBLE" (422)
+**Cause**: `add_payrun_employees` named an employee who is not eligible for payruns ("Raj Kumar is not eligible for payruns"). Fill and create-with-populate skip such employees silently.
+**Fix**: Pick the employee with `search_employees` `isEligiblePayruns` true, or turn Eligible for Payruns on with `update_employee` (ask the user first).
+
+### "EMPLOYEE_IMPORT_ELIGIBILITY_REQUIRED" / "EMPLOYEE_IMPORT_ELIGIBILITY_INVALID" (preprocess row error)
+**Cause**: A `preprocess_employees_file` row has no Eligible For value ("Choose Claims, Payruns or Both in Eligible For") or an unknown one ("Use Claims, Payruns or Both, or leave it blank"). Blank is allowed on an existing employee only.
+**Fix**: Set the Eligible For column to Claims, Payruns or Both. If the file has no such column, download the template again. A JSON create row that ends with both flags off is refused whole with `EMPLOYEE_IMPORT_VALIDATION_FAILED`.
 
 ### "DUPLICATE_REPORT_TEMPLATE_EXISTS" (422)
 **Cause**: A report template of the same report type already has this name. Names are unique per report type, ignoring case and treating space and `_` alike ("My P&L" and "my_p&l" collide); the same name on another report type is fine.

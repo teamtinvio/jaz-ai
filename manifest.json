@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.9.1",
+  "version": "9.10.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -816,7 +816,7 @@
     },
     {
       "name": "create_claim_from_attachment",
-      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction: from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). When the host conversation provides a file with the call, omit all source arguments; the file is used automatically. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. The draft is born BOUND to the uploader's own employee automatically; to file for someone else pass employeeResourceId (server requires a claims Manager/Admin). Optional contact, claim profile, currency, value date. Returns a workflow handle; the claim appears in Drafts asynchronously (no manual bind step). If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create an employee-expense claim DRAFT from a receipt via AI extraction: from a SINGLE file, a URL (sourceURL), or raw HTML (e.g. an email body). With a file from the host conversation, omit all source arguments. On the email channel, pass attachmentId \"email-body\" to use the inbound email body. The draft binds to the uploader's own employee; for someone else pass employeeResourceId (claims Manager/Admin, and the employee must be claims-eligible: update_employee isEligibleClaims, with a claimProfileResourceId, ask first). Returns a workflow handle; the claim appears in Drafts asynchronously. If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "classify_documents",
@@ -1220,7 +1220,7 @@
     },
     {
       "name": "add_payrun_employees",
-      "description": "Add employees to a DRAFT payrun. One removed earlier gets their old payslip back; others get a payslip made from their pay in the period. An active employee with no pay in the period gets an empty payslip: fill it with save_payrun_lines. The first employee who cannot be added (inactive, other frequency or currency, missing figure) refuses the whole call. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Add employees to a DRAFT payrun. One removed earlier gets their old payslip back; others get one made from their pay in the period (none: an empty payslip, fill it with save_payrun_lines). The first employee who cannot be added (inactive, not payruns-eligible, other frequency or currency, missing figure) refuses the whole call. Eligibility: update_employee isEligiblePayruns, ask first. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "remove_payrun_employees",
@@ -1664,11 +1664,11 @@
     },
     {
       "name": "create_claim",
-      "description": "Create an employee-expense claim directly (bare create, no attachment). Vendor is EITHER contactResourceId OR vendorName, never both. saveAsDraft defaults to true (lands DRAFT with relaxed line validation); set false to validate + submit in one call (lands SUBMITTED). reference is REQUIRED when submitting (saveAsDraft=false): omitting it returns 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT; a DRAFT saves without one. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a claim directly (no attachment). saveAsDraft true (default) lands DRAFT with relaxed line validation; false validates and submits (SUBMITTED), which REQUIRES reference (else 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_claim",
-      "description": "Update a DRAFT claim (partial: omitted fields unchanged). claimItems non-empty REPLACES all lines, [] clears. Set saveAsDraft=false to validate + submit in one call: reference is REQUIRED at submit (else 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT); a DRAFT save needs none. Only DRAFT claims are editable. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update a DRAFT claim (omitted fields unchanged; only DRAFT is editable). claimItems non-empty REPLACES all lines, [] clears. saveAsDraft=false validates and submits, which REQUIRES reference (else 422 CLAIM_REFERENCE_REQUIRED_AT_SUBMIT). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "delete_claim",
@@ -1700,23 +1700,23 @@
     },
     {
       "name": "bulk_submit_claims",
-      "description": "Bulk-submit DRAFT claims (ASYNC). Returns the final job if it finished, else a job handle {jobId,...} to poll with search_background_jobs by jobId for per-item results. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. Each claim must have a reference; referenceless claims fail per-item with CLAIM_REFERENCE_REQUIRED_AT_SUBMIT (check the job result). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-submit DRAFT claims (ASYNC). Returns the final job if done, else a handle to poll with search_background_jobs by jobId for per-item results. If the result says it runs in the background, do not poll: its result arrives by itself. A claim without a reference fails per-item with CLAIM_REFERENCE_REQUIRED_AT_SUBMIT. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_approve_claims",
-      "description": "Bulk-approve SUBMITTED claims (ASYNC). Returns the final job if it finished, else a job handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-approve SUBMITTED claims (ASYNC). Returns the final job if done, else a handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_reject_claims",
-      "description": "Bulk-reject claims with one shared reason (ASYNC). Returns the final job if it finished, else a job handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-reject claims with one shared reason (ASYNC). Returns the final job if done, else a handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_cancel_claims",
-      "description": "Bulk-cancel claims with one shared reason (ASYNC). Returns the final job if it finished, else a job handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-cancel claims with one shared reason (ASYNC). Returns the final job if done, else a handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_delete_claims",
-      "description": "Bulk-delete claims (ASYNC; only DRAFT/REJECTED/CANCELLED are deletable). Returns the final job if it finished, else a job handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Max 500 ids. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk-delete claims (ASYNC; only DRAFT/REJECTED/CANCELLED are deletable). Returns the final job if done, else a handle to poll with search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "get_claim_tracking_tags",
@@ -1732,11 +1732,11 @@
     },
     {
       "name": "convert_claims_to_journal",
-      "description": "Convert an APPROVED claim batch into journals (atomic write). valueDate (YYYY-MM-DD) required. Preview first and confirm erroredClaims is empty. idempotencyKey is auto-generated for safe retries (pass your own to dedup across calls). includeReimbursementPayout adds a books-only reimbursement DCE; real-money disburse is intentionally not exposed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Convert an APPROVED claim batch into journals (atomic write). valueDate (YYYY-MM-DD) required. Preview first and confirm erroredClaims is empty. idempotencyKey is auto-generated (pass your own to dedup retries). includeReimbursementPayout adds a books-only reimbursement DCE; real-money disburse is intentionally not exposed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "record_employee_payout",
-      "description": "Record a books-only employee payout (reimbursement or advance): a DCE, no real-money transfer. amount, paymentAccountResourceId and valueDate are required; reference auto-generated if omitted. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Record a books-only employee payout (reimbursement or advance, claims-eligible employee): a DCE, no real-money transfer. amount, paymentAccountResourceId and valueDate are required; reference auto-generated if omitted. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_employee_payouts",
@@ -1744,15 +1744,15 @@
     },
     {
       "name": "add_employee",
-      "description": "Create an employee (expense-claim member). claimProfileResourceId is REQUIRED (carries the employee balance account; the org default is NOT auto-applied). userResourceId is optional: omit for an offline employee with no login. Dedups by email. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create an employee. Eligible for Claims needs claimProfileResourceId (no org default; on when given); Eligible for Payruns is off unless set. One must be on: payroll-only = isEligiblePayruns true, no profile. userResourceId optional. Dedups by email. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_employee",
-      "description": "Update an employee (partial; omitted or null = no change). Clear only via clearFields (userResourceId = unlink). To ARCHIVE, set active=false (reversible, prefer over delete_employee). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Update an employee (omitted or null = no change). Clear only via clearFields (userResourceId = unlink). Turning an eligibility off while in use is refused, saying what to settle first. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_employees",
-      "description": "Search employees by name, email, phone, manager, claim profile, active, currency."
+      "description": "Search employees by name, email, phone, manager, claim profile, active, eligibility, currency."
     },
     {
       "name": "search_employee_balances",
@@ -1764,19 +1764,19 @@
     },
     {
       "name": "delete_employee",
-      "description": "Delete an employee (server validates they are settled). Prefer update_employee active=false to archive reversibly. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Delete an employee (must be settled). Prefer update_employee active=false (reversible). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bind_employee_user",
-      "description": "Bind a login user to an OFFLINE employee (no user bound yet, e.g. imported without a binding email). Refused once bound: relink or unlink via update_employee. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bind a login user to an OFFLINE employee (none bound yet). Once bound: relink or unlink via update_employee. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "preprocess_employees_file",
-      "description": "Preprocess an uploaded employee import sheet (CSV/XLSX); returns a parsed row preview to review before import_employees. Provide the sheet fileUrl."
+      "description": "Preview an uploaded employee sheet (CSV/XLSX) as parsed rows before import_employees. Provide fileUrl."
     },
     {
       "name": "import_employees",
-      "description": "Bulk create/update/delete employees (max 100 rows per array). Rows validate synchronously (422 row errors), then an async job queues: the result is the final job if it finished, else poll search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. Create rows need name + claimProfileResourceId (userResourceId optional). If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Bulk create/update/delete employees (max 100 rows per array). Rows validate first (422 row errors), then queue as a job: the result is the final job if done, else poll search_background_jobs by jobId. If the result says it runs in the background, do not poll: its result arrives by itself. A create row needs name and a claim profile or isEligiblePayruns. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "list_inventory_items",

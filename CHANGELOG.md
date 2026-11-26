@@ -1,5 +1,16 @@
 # Changelog
 
+## [9.10.0] - 2026-11-26
+
+**Clio can add an employee for payroll only, and knows who is eligible for claims and payruns.**
+
+- Each employee now has Eligible for Claims and Eligible for Payruns. Clio can set both when it adds or edits an employee, in a sheet import, and from `clio employees create` and `clio employees update` (`--eligible-claims`, `--eligible-payruns` and their `--no-` forms).
+- An employee who is only on payruns no longer needs a claim profile. A claim profile is needed only when Eligible for Claims is on.
+- Employee searches and balance searches show both settings and can filter on them.
+- When Clio is asked to put an employee on a claim, an advance or a payrun and they are not eligible, it says so and offers to turn the setting on first.
+- When an employee is not eligible for claims, Clio offers to turn on Eligible for Claims with a claim profile, after asking first, and files the claim only after a yes. It does not send the request to an administrator.
+- Turning a setting off while it is in use is refused with a message that says what to settle first.
+
 ## [9.9.1] - 2026-11-26
 
 **No user-facing changes since v9.9.0.**

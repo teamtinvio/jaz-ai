@@ -150,11 +150,20 @@ Turn APPROVED claims into journal entries, and record books-only employee payout
 
 ## Employees (`employees` namespace)
 
-The expense-claim members. CLI: `clio employees …`. `list = search_employees` (no
-bare list endpoint).
+Claims members and payrun employees. CLI: `clio employees`. `list = search_employees`
+(no bare list endpoint).
 
-- **`add_employee`**: **`name` and `claimProfileResourceId` are required** (without a
-  profile: `422 EMPLOYEE_CLAIM_PROFILE_REQUIRED`). `userResourceId` is optional: omit it
+- **Eligibility.** Each employee has **Eligible for Claims** (`isEligibleClaims`) and **Eligible for
+  Payruns** (`isEligiblePayruns`); at least one is on. Only claims-eligible employees can be given
+  claims or advances, and only payruns-eligible ones can be put in a payrun. Both flags are returned
+  by `get_employee` / `search_employees` / `search_employee_balances` and filter as `{"isEligiblePayruns": {"eq": true}}`.
+  For a claim or advance picker search `isEligibleClaims` true; for a payrun, `isEligiblePayruns` true.
+  Turning one off while in use is refused (see errors.md); turning Claims off keeps the claim profile.
+  `update_employee` with a flag left out changes nothing.
+- **`add_employee`**: **`name` is required.** Eligible for Claims needs `claimProfileResourceId`
+  (on by default when one is given; without a profile: `422 EMPLOYEE_CLAIM_PROFILE_REQUIRED`).
+  Eligible for Payruns is off unless `isEligiblePayruns` is true. A payroll-only employee is
+  created with `isEligiblePayruns: true` and no profile. `userResourceId` is optional: omit it
   for an offline employee with no login. **`userResourceId` is the user's resourceId:
   read it as the `userResourceId` FIELD on an org-user (`search_org_users`), NOT the
   org-user record's own `resourceId`; passing the membership id returns
