@@ -13,7 +13,7 @@ description: >-
 license: MIT
 compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For canonical report types and the standard analytics surface, load the jaz-api skill alongside this one.
 metadata:
-  version: "9.10.1"
+  version: "9.11.0"
 ---
 
 # Jaz Pseudo-SQL Skill

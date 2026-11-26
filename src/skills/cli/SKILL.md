@@ -11,7 +11,7 @@ description: >-
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 metadata:
-  version: "9.10.1"
+  version: "9.11.0"
 ---
 
 # Clio CLI Skill
@@ -257,8 +257,8 @@ When `--input` or stdin provides a body, CLI flags are ignored.
 
 For invoices and bills, there are TWO bulk-upsert commands per entity:
 
-- **FLAT** (`clio invoices bulk-upsert` / `clio bills bulk-upsert`): ONE line per row. Each row carries `itemDescription` + `totalAmount` + `invoiceAccountResourceId` (or `billAccountResourceId`) at the top level. Use for CSV-like imports where each row = one transaction with a single line.
-- **NESTED** (`clio invoices bulk-upsert-line-items` / `clio bills bulk-upsert-line-items`): multi-line per row. Each row carries nested `lineItems[]` with per-line `itemDescription` + `quantity` + `unitPrice` + `accountResourceId`. Use when each transaction needs multiple lines.
+- **FLAT** (`clio invoices bulk-upsert` / `clio bills bulk-upsert`): DEPRECATED, still works. ONE line per row. Each row carries `itemDescription` + `totalAmount` + `invoiceAccountResourceId` (or `billAccountResourceId`) at the top level.
+- **NESTED** (`clio invoices bulk-upsert-line-items` / `clio bills bulk-upsert-line-items`): multi-line per row. Each row carries nested `lineItems[]` with per-line `itemDescription` + `quantity` + `unitPrice` + `accountResourceId`. Use for every new import: it also takes several lines, `currencyCode`, `dueDate` and an optional per-row `payment` object that records the payment with the document (`paymentAmount`, `paymentMethod` as the display name such as `Bank Transfer`, `paymentAccountResourceId` in the document currency). `clio customer-credit-notes bulk-upsert` and `clio supplier-credit-notes bulk-upsert` take the same `payment` as a refund.
 
 Sending `lineItems[]` to the FLAT endpoint silently ignores them and creates a $0 transaction. Sending the FLAT shape to the NESTED endpoint creates an empty `lineItems` array and 422s. Match the variant to your data shape.
 

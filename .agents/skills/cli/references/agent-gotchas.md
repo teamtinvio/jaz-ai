@@ -35,7 +35,7 @@
 
 15. **`bills draft list` (also `invoices/customer-credit-notes/supplier-credit-notes draft list`) fans out one attachment lookup per draft** (5 in flight). On accounts with hundreds of drafts this hangs >30s by default. Pass `--max-rows 10` for spot checks. Long-term: a `--with-attachments` flag is on the roadmap.
 
-16. **Bulk-upsert is TWO endpoints per entity for invoices/bills.** `clio invoices bulk-upsert` is FLAT (one line per row via `itemDescription` + `totalAmount` + `invoiceAccountResourceId` at row level). `clio invoices bulk-upsert-line-items` is NESTED (multi-line via `lineItems[]`). Sending `lineItems[]` to FLAT is silently ignored → $0 invoices. Match your data shape to the variant.
+16. **Bulk-upsert is TWO endpoints per entity for invoices/bills.** `clio invoices bulk-upsert` is FLAT and DEPRECATED (one line per row via `itemDescription` + `totalAmount` + `invoiceAccountResourceId` at row level). `clio invoices bulk-upsert-line-items` is NESTED (multi-line via `lineItems[]`, plus an optional per-row `payment` for a document that is already paid; `paymentMethod` is the display name, e.g. `Bank Transfer`). Sending `lineItems[]` to FLAT is silently ignored → $0 invoices. Match your data shape to the variant.
 
 17. **Reconciliation `lineItems[]` use `name` + `organizationAccountResourceId`.** The `reconciliations invoice-receipt` and `reconciliations bill-receipt` payloads use a DIFFERENT line-item field naming than `bulk-upsert-line-items`. Recon-create uses `name` (description) + `organizationAccountResourceId` (revenue/expense account). Bulk uses `itemDescription` + `accountResourceId`. Don't copy-paste line-items between the two.
 

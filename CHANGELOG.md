@@ -1,5 +1,14 @@
 # Changelog
 
+## [9.11.0] - 2026-11-27
+
+**Clio can import invoices, bills and credit notes that are already paid or refunded, in one step.**
+
+- A bulk import of invoices or bills with line items can now record each document's payment with it: the amount, method, bank or cash account, reference, transaction fee and adjustment. Invoices can also record a fee collected from the customer.
+- A bulk import of customer or supplier credit notes can record each credit note's refund the same way.
+- The payment or refund is dated the document date, and its account must be a bank or cash account in the document's currency.
+- The one-line-per-document invoice and bill imports (`bulk_upsert_invoices`, `bulk_upsert_bills`, `clio invoices bulk-upsert`, `clio bills bulk-upsert`) are deprecated. They still work. Use the line-item imports, which do the same and also take several lines, a currency, a due date and a payment.
+
 ## [9.10.1] - 2026-11-26
 
 **Claude answers Jaz API questions about a third faster with the jaz-api skill.**

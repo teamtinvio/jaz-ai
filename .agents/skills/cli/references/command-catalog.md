@@ -20,8 +20,8 @@ Complete reference for all 80 command groups. Organized by domain.
 | `download <id>` | `--json`: returns the PDF URL; writes no file |
 | `draft list` | `--max-rows N`, `--ids`, `--json`: ⚠️ fans out 1 attachment lookup per draft (5 in flight); pass `--max-rows 10` for spot checks |
 | `draft finalize <id>` | `--account`, `--input` |
-| `bulk-upsert` | `--input <file>`, `--json`: **FLAT** shape (one line per row via `itemDescription`+`totalAmount`+`invoiceAccountResourceId`). Async → jobId. `currencyCode` REQUIRED |
-| `bulk-upsert-line-items` | `--input <file>`, `--json`: **NESTED** shape (multi-line per row via `lineItems[]`). Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert` | `--input <file>`, `--json`: **FLAT** shape, DEPRECATED (one line per row via `itemDescription`+`totalAmount`+`invoiceAccountResourceId`). Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert-line-items` | `--input <file>`, `--json`: **NESTED** shape (multi-line per row via `lineItems[]`; optional per-row `payment`). Async → jobId. `currencyCode` REQUIRED |
 
 ### `clio bills`: Purchase bills
 | Subcommand | Key flags |
@@ -36,8 +36,8 @@ Complete reference for all 80 command groups. Organized by domain.
 | `apply-credits <id>` | `--credit-note`, `--amount` |
 | `draft list` | `--max-rows N`, `--ids`, `--json`: same attachment fan-out warning as invoices |
 | `draft finalize <id>` | `--account`, `--input` |
-| `bulk-upsert` | `--input <file>`, `--json`: **FLAT** shape. Async → jobId. `currencyCode` REQUIRED |
-| `bulk-upsert-line-items` | `--input <file>`, `--json`: **NESTED** shape. Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert` | `--input <file>`, `--json`: **FLAT** shape, DEPRECATED. Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert-line-items` | `--input <file>`, `--json`: **NESTED** shape (optional per-row `payment`). Async → jobId. `currencyCode` REQUIRED |
 
 ### `clio customer-credit-notes`: Customer credit notes
 | Subcommand | Key flags |
@@ -52,7 +52,7 @@ Complete reference for all 80 command groups. Organized by domain.
 | `refunds <id>` | List refunds for a credit note |
 | `download <id>` | `--json`: returns the PDF URL; writes no file |
 | `draft list` | `--max-rows N`, `--ids`, `--json` |
-| `bulk-upsert` | `--input <file>`, `--json`: Nested `lineItems[]`. Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert` | `--input <file>`, `--json`: Nested `lineItems[]`; optional per-row `payment` records a refund. Async → jobId. `currencyCode` REQUIRED |
 
 ### `clio supplier-credit-notes`: Supplier credit notes
 | Subcommand | Key flags |
@@ -66,7 +66,7 @@ Complete reference for all 80 command groups. Organized by domain.
 | `refund <id>` | `--amount`, `--account`, `--method`, `--ref`, `--date` |
 | `refunds <id>` | List refunds for a credit note |
 | `draft list` | `--max-rows N`, `--ids`, `--json` |
-| `bulk-upsert` | `--input <file>`, `--json`: Nested `lineItems[]`. Async → jobId. `currencyCode` REQUIRED |
+| `bulk-upsert` | `--input <file>`, `--json`: Nested `lineItems[]`; optional per-row `payment` records a refund. Async → jobId. `currencyCode` REQUIRED |
 
 ### `clio journals`: Journal entries
 | Subcommand | Key flags |

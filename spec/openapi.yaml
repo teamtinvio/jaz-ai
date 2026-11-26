@@ -3369,7 +3369,8 @@
           "type": "number"
         },
         "paymentMethod": {
-          "description": "How the payment was made.",
+          "description": "Payment method name, matched exactly: Cash, Bank Transfer, Credit Card, Check, Deposit / Wallet or Payment Gateway. Required with paymentAmount.",
+          "example": "Bank Transfer",
           "type": "string"
         },
         "paymentReference": {
@@ -3947,6 +3948,50 @@
       ],
       "type": "object"
     },
+    "BulkUpsertCreditNoteRefund": {
+      "properties": {
+        "adjustmentOrganizationAccountResourceId": {
+          "description": "Resource ID of the account the adjustment posts to. Required when adjustmentValue is not 0.",
+          "type": "string"
+        },
+        "adjustmentValue": {
+          "description": "Signed adjustment to the cash amount of the refund (positive or negative).",
+          "type": "number"
+        },
+        "feeOrganizationAccountResourceId": {
+          "description": "Resource ID of the expense account the fee charged posts to. Required with feeValue.",
+          "type": "string"
+        },
+        "feeTaxVatProfileResourceId": {
+          "description": "Resource ID of the tax profile included in the fee charged (optional).",
+          "type": "string"
+        },
+        "feeValue": {
+          "description": "Transaction fee charged on the refund (flat amount). Must be less than paymentAmount. On a customer credit note it is paid on top of the refund; on a supplier credit note it is deducted from the refund received.",
+          "type": "number"
+        },
+        "paymentAccountResourceId": {
+          "description": "Resource ID of the bank or cash account of the refund (paid from on a customer credit note, received into on a supplier credit note). Required with paymentAmount. The account must be in the credit note currency (otherwise IMPORT_PAYMENT_ACCOUNT_CURRENCY_MISMATCH).",
+          "type": "string"
+        },
+        "paymentAmount": {
+          "description": "Amount refunded, in the credit note currency. Must be more than 0 and no more than the credit note total (supplier credit notes: the total after withholding). Omit it, or send 0 with no paymentMethod and paymentAccountResourceId, to record no refund.",
+          "example": 500,
+          "type": "number"
+        },
+        "paymentMethod": {
+          "description": "Refund method name, matched exactly: Cash, Bank Transfer, Credit Card, Check, Deposit / Wallet or Payment Gateway. Required with paymentAmount.",
+          "example": "Bank Transfer",
+          "type": "string"
+        },
+        "paymentReference": {
+          "description": "Reference recorded on the refund. Defaults to PAY-<credit note reference> when blank.",
+          "example": "PAY-CN-2026-0001",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "BulkUpsertCustomerCreditNote": {
       "properties": {
         "contactResourceId": {
@@ -3972,6 +4017,14 @@
             "$ref": "#/definitions/BulkImportLineItem"
           },
           "type": "array"
+        },
+        "payment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BulkUpsertCreditNoteRefund"
+            }
+          ],
+          "description": "Optional refund to the customer to record with the credit note: one refund per credit note, dated the credit note date. Rows sharing a creditNoteReference must give the same refund, or give it on the first row only; otherwise the whole request is rejected (IMPORT_SAME_REFERENCE_DIFFERENT_HEADER or IMPORT_PAYMENT_NOT_ON_FIRST_ROW)."
         },
         "rateFunctionToSource": {
           "description": "Exchange rate from functional (base) to source currency.",
@@ -4385,7 +4438,8 @@
           "type": "number"
         },
         "paymentMethod": {
-          "description": "Payment method (e.g. CASH, BANK_TRANSFER).",
+          "description": "Payment method name, matched exactly: Cash, Bank Transfer, Credit Card, Check, Deposit / Wallet or Payment Gateway. Required with paymentAmount.",
+          "example": "Bank Transfer",
           "type": "string"
         },
         "paymentReference": {
@@ -4641,6 +4695,14 @@
           },
           "type": "array"
         },
+        "payment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BulkUpsertLineItemBillPayment"
+            }
+          ],
+          "description": "Optional payment to record with the bill: one payment per bill, dated the bill date. Rows sharing a billReference must give the same payment, or give it on the first row only; otherwise the whole request is rejected (IMPORT_SAME_REFERENCE_DIFFERENT_HEADER or IMPORT_PAYMENT_NOT_ON_FIRST_ROW). Withholding tax on the payment is not supported here."
+        },
         "rateFunctionToSource": {
           "description": "Exchange rate from functional (base) to source currency.",
           "type": "number"
@@ -4695,6 +4757,50 @@
       ],
       "type": "object"
     },
+    "BulkUpsertLineItemBillPayment": {
+      "properties": {
+        "adjustmentOrganizationAccountResourceId": {
+          "description": "Resource ID of the account the adjustment posts to. Required when adjustmentValue is not 0.",
+          "type": "string"
+        },
+        "adjustmentValue": {
+          "description": "Signed adjustment to the cash amount of the payment (positive or negative).",
+          "type": "number"
+        },
+        "feeOrganizationAccountResourceId": {
+          "description": "Resource ID of the expense account the fee posts to. Required with feeValue.",
+          "type": "string"
+        },
+        "feeTaxVatProfileResourceId": {
+          "description": "Resource ID of the tax profile included in the fee (optional).",
+          "type": "string"
+        },
+        "feeValue": {
+          "description": "Transaction fee included in the payment (flat amount). Must be less than paymentAmount.",
+          "type": "number"
+        },
+        "paymentAccountResourceId": {
+          "description": "Resource ID of the bank or cash account the payment is made from. Required with paymentAmount. The account must be in the bill currency (otherwise IMPORT_PAYMENT_ACCOUNT_CURRENCY_MISMATCH).",
+          "type": "string"
+        },
+        "paymentAmount": {
+          "description": "Amount paid, in the bill currency. Must be more than 0 and no more than the bill total. Omit it, or send 0 with no paymentMethod and paymentAccountResourceId, to record no payment.",
+          "example": 500,
+          "type": "number"
+        },
+        "paymentMethod": {
+          "description": "Payment method name, matched exactly: Cash, Bank Transfer, Credit Card, Check, Deposit / Wallet or Payment Gateway. Required with paymentAmount.",
+          "example": "Bank Transfer",
+          "type": "string"
+        },
+        "paymentReference": {
+          "description": "Reference recorded on the payment. Defaults to PAY-<bill reference> when blank.",
+          "example": "PAY-BILL-2026-0001",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "BulkUpsertLineItemBillsRequest": {
       "properties": {
         "bills": {
@@ -4742,6 +4848,14 @@
             "$ref": "#/definitions/BulkImportLineItem"
           },
           "type": "array"
+        },
+        "payment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BulkUpsertLineItemInvoicePayment"
+            }
+          ],
+          "description": "Optional payment to record with the invoice: one payment per invoice, dated the invoice date. Rows sharing an invoiceReference must give the same payment, or give it on the first row only; otherwise the whole request is rejected (IMPORT_SAME_REFERENCE_DIFFERENT_HEADER or IMPORT_PAYMENT_NOT_ON_FIRST_ROW). Withholding tax on the payment is not supported here."
         },
         "rateFunctionToSource": {
           "description": "Exchange rate from functional (base) to source currency.",
@@ -4795,6 +4909,62 @@
       "required": [
         "invoiceReference"
       ],
+      "type": "object"
+    },
+    "BulkUpsertLineItemInvoicePayment": {
+      "properties": {
+        "adjustmentOrganizationAccountResourceId": {
+          "description": "Resource ID of the account the adjustment posts to. Required when adjustmentValue is not 0.",
+          "type": "string"
+        },
+        "adjustmentValue": {
+          "description": "Signed adjustment to the cash amount of the payment (positive or negative).",
+          "type": "number"
+        },
+        "collectedFeeOrganizationAccountResourceId": {
+          "description": "Resource ID of the revenue account the fee collected posts to. Required with collectedFeeValue.",
+          "type": "string"
+        },
+        "collectedFeeTaxVatProfileResourceId": {
+          "description": "Resource ID of the tax profile included in the fee collected (optional).",
+          "type": "string"
+        },
+        "collectedFeeValue": {
+          "description": "Transaction fee collected from the customer (flat amount).",
+          "type": "number"
+        },
+        "feeOrganizationAccountResourceId": {
+          "description": "Resource ID of the expense account the fee charged posts to. Required with feeValue.",
+          "type": "string"
+        },
+        "feeTaxVatProfileResourceId": {
+          "description": "Resource ID of the tax profile included in the fee charged (optional).",
+          "type": "string"
+        },
+        "feeValue": {
+          "description": "Transaction fee charged on the payment (flat amount). Must be less than paymentAmount.",
+          "type": "number"
+        },
+        "paymentAccountResourceId": {
+          "description": "Resource ID of the bank or cash account the payment is deposited to. Required with paymentAmount. The account must be in the invoice currency (otherwise IMPORT_PAYMENT_ACCOUNT_CURRENCY_MISMATCH).",
+          "type": "string"
+        },
+        "paymentAmount": {
+          "description": "Amount paid, in the invoice currency. Must be more than 0 and no more than the invoice total. Omit it, or send 0 with no paymentMethod and paymentAccountResourceId, to record no payment.",
+          "example": 500,
+          "type": "number"
+        },
+        "paymentMethod": {
+          "description": "Payment method name, matched exactly: Cash, Bank Transfer, Credit Card, Check, Deposit / Wallet or Payment Gateway. Required with paymentAmount.",
+          "example": "Bank Transfer",
+          "type": "string"
+        },
+        "paymentReference": {
+          "description": "Reference recorded on the payment. Defaults to PAY-<invoice reference> when blank.",
+          "example": "PAY-INV-2026-0001",
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "BulkUpsertLineItemInvoicesRequest": {
@@ -5033,6 +5203,14 @@
             "$ref": "#/definitions/BulkImportLineItem"
           },
           "type": "array"
+        },
+        "payment": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BulkUpsertCreditNoteRefund"
+            }
+          ],
+          "description": "Optional refund from the supplier to record with the credit note: one refund per credit note, dated the credit note date. Rows sharing a creditNoteReference must give the same refund, or give it on the first row only; otherwise the whole request is rejected (IMPORT_SAME_REFERENCE_DIFFERENT_HEADER or IMPORT_PAYMENT_NOT_ON_FIRST_ROW)."
         },
         "rateFunctionToSource": {
           "description": "Exchange rate from functional (base) to source currency.",
@@ -41544,7 +41722,8 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create or update bills in bulk, asynchronously (one bill per row). Returns a job ID. Poll it with Search Background Jobs.",
+        "deprecated": true,
+        "description": "Deprecated: use Bulk Create or Update Bills (Line Items), which also records payments. This endpoint keeps working for existing callers. Create or update bills in bulk, asynchronously (one bill per row). Returns a job ID. Poll it with Search Background Jobs. Payment withholding (amountWithholding, withholdingReference) is available only here; the line-item endpoint does not record withholding on the payment.",
         "operationId": "create-bill-bulk-upsert",
         "parameters": [
           {
@@ -41614,7 +41793,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create or update bills in bulk, asynchronously. Rows sharing a `billReference` are merged into one bill. Returns a job ID. Poll it with Search Background Jobs.",
+        "description": "Create or update bills in bulk, asynchronously. Rows sharing a `billReference` are merged into one bill. Each row can carry an optional `payment`, recorded as one payment per bill dated the bill date. Returns a job ID. Poll it with Search Background Jobs.",
         "operationId": "create-bill-line-item-bulk-upsert",
         "parameters": [
           {
@@ -52751,7 +52930,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create or update customer credit notes in bulk, asynchronously. Rows sharing a `creditNoteReference` are merged into one credit note. Returns a job ID. Poll it with Search Background Jobs.",
+        "description": "Create or update customer credit notes in bulk, asynchronously. Rows sharing a `creditNoteReference` are merged into one credit note. Each row can carry an optional `payment`, recorded as one refund per credit note dated the credit note date. Returns a job ID. Poll it with Search Background Jobs.",
         "operationId": "create-customer-credit-note-bulk-upsert",
         "parameters": [
           {
@@ -66692,7 +66871,8 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create or update invoices in bulk, asynchronously (one invoice per row). Returns a job ID. Poll it with Search Background Jobs.",
+        "deprecated": true,
+        "description": "Deprecated: use Bulk Create or Update Invoices (Line Items), which also records payments. This endpoint keeps working for existing callers. Create or update invoices in bulk, asynchronously (one invoice per row). Returns a job ID. Poll it with Search Background Jobs. Payment withholding (amountWithholding, withholdingReference) is available only here; the line-item endpoint does not record withholding on the payment.",
         "operationId": "create-invoice-bulk-upsert",
         "parameters": [
           {
@@ -66762,7 +66942,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create or update invoices in bulk, asynchronously. Rows sharing an `invoiceReference` are merged into one invoice. Returns a job ID. Poll it with Search Background Jobs.",
+        "description": "Create or update invoices in bulk, asynchronously. Rows sharing an `invoiceReference` are merged into one invoice. Each row can carry an optional `payment`, recorded as one payment per invoice dated the invoice date. Returns a job ID. Poll it with Search Background Jobs.",
         "operationId": "create-invoice-line-item-bulk-upsert",
         "parameters": [
           {
@@ -96373,7 +96553,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create or update supplier credit notes in bulk, asynchronously. Rows sharing a `creditNoteReference` are merged into one credit note. Returns a job ID. Poll it with Search Background Jobs.",
+        "description": "Create or update supplier credit notes in bulk, asynchronously. Rows sharing a `creditNoteReference` are merged into one credit note. Each row can carry an optional `payment`, recorded as one refund per credit note dated the credit note date. Returns a job ID. Poll it with Search Background Jobs.",
         "operationId": "create-supplier-credit-note-bulk-upsert",
         "parameters": [
           {

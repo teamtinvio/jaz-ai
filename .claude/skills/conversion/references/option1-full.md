@@ -78,7 +78,9 @@ Source GL entries that aren't invoices/bills/payments → create as journal entr
 ### Phase 4: Settlements
 
 #### 4.1 Invoice Payments
-For each payment in the source:
+A payment in the invoice's own currency can be recorded with the document: send it as the row's `payment` object on `bulk_upsert_invoice_line_items` (or `bulk_upsert_bill_line_items` for a bill, `bulk_upsert_customer_credit_notes` / `bulk_upsert_supplier_credit_notes` for a credit note refund), one payment per document, dated the document date, with `paymentMethod` as the display name (`Bank Transfer`) and a bank or cash account in the document currency (jaz-api rule 134a). A payment on another date, a split payment, or a cross-currency one is recorded afterwards:
+
+For each such payment in the source:
 ```
 POST /api/v1/invoices/<invoiceResourceId>/payments
 {

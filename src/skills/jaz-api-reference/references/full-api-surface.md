@@ -55,8 +55,8 @@
 | GET | `/invoices/:resourceId/attachments` | List attachments |
 | POST | `/invoices/:resourceId/attachments` | Upload attachment |
 | DELETE | `/invoices/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| POST | `/invoices/bulk-upsert` | Bulk create/update invoices (max 500); **async**, returns `{ jobId }`. Natural key: `invoiceReference`. ISO 8601 dates only. |
-| POST | `/invoices/line-items/bulk-upsert` | Bulk create/update invoices with nested line items (max 500); **async**, returns `{ jobId }`. |
+| POST | `/invoices/bulk-upsert` | **Deprecated** (use `/invoices/line-items/bulk-upsert`); still works. Bulk create/update invoices, one per row (max 500); **async**, returns `{ jobId }`. Natural key: `invoiceReference`. ISO 8601 dates only. |
+| POST | `/invoices/line-items/bulk-upsert` | Bulk create/update invoices with nested line items (max 500); **async**, returns `{ jobId }`. Each row takes an optional `payment` (one per invoice). |
 
 ### Bills
 | Method | Path | Description |
@@ -75,8 +75,8 @@
 | GET | `/bills/:resourceId/attachments` | List attachments |
 | POST | `/bills/:resourceId/attachments` | Upload attachment |
 | DELETE | `/bills/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
-| POST | `/bills/bulk-upsert` | Bulk create/update bills (max 500); **async**, returns `{ jobId }`. Natural key: `billReference`. ISO 8601 dates only. |
-| POST | `/bills/line-items/bulk-upsert` | Bulk create/update bills with nested line items (max 500); **async**, returns `{ jobId }`. |
+| POST | `/bills/bulk-upsert` | **Deprecated** (use `/bills/line-items/bulk-upsert`); still works. Bulk create/update bills, one per row (max 500); **async**, returns `{ jobId }`. Natural key: `billReference`. ISO 8601 dates only. |
+| POST | `/bills/line-items/bulk-upsert` | Bulk create/update bills with nested line items (max 500); **async**, returns `{ jobId }`. Each row takes an optional `payment` (one per bill). |
 
 ### Orders (Sale Quotes, Sale Orders, Purchase Requests, Purchase Orders)
 Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-orders`, `purchase-requests`, or `purchase-orders`. Quotes/requests use `accept`; orders use `confirm`. See `references/orders.md`.
@@ -111,7 +111,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | GET | `/customer-credit-notes/:resourceId/download` | Download PDF |
 | POST | `/customer-credit-notes/:resourceId/refunds` | Record refund(s) |
 | GET | `/customer-credit-notes/:resourceId/refunds` | List refunds |
-| POST | `/customer-credit-notes/bulk-upsert` | Bulk create/update (max 500); **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. |
+| POST | `/customer-credit-notes/bulk-upsert` | Bulk create/update (max 500); **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. Each row takes an optional `payment`, recorded as a refund. |
 
 ### Supplier Credit Notes
 | Method | Path | Description |
@@ -124,7 +124,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | DELETE | `/supplier-credit-notes/:resourceId` | Delete |
 | POST | `/supplier-credit-notes/:resourceId/refunds` | Record refund(s) |
 | GET | `/supplier-credit-notes/:resourceId/refunds` | List refunds |
-| POST | `/supplier-credit-notes/bulk-upsert` | Bulk create/update (max 500); **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. |
+| POST | `/supplier-credit-notes/bulk-upsert` | Bulk create/update (max 500); **async**, returns `{ jobId }`. Natural key: `creditNoteReference`. Each row takes an optional `payment`, recorded as a refund. |
 
 ### Journals
 | Method | Path | Description |

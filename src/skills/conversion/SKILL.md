@@ -9,14 +9,14 @@ description: >-
   import, or switching accounting software, whenever a customer's prior system
   is Xero, QuickBooks, Sage, MYOB, or an Excel-based ledger.
 metadata:
-  version: "9.10.1"
+  version: "9.11.0"
 ---
 
 # Jaz Conversion Skill
 
 You are performing an **accounting data conversion**: migrating a customer's financial data from their previous accounting software (Xero, QuickBooks, Sage, MYOB, or Excel-based systems) into Jaz.
 
-> **Jaz-native, not generic.** The clearing-account pattern, the CoA-bulk-upsert all-or-nothing semantics, the `currencyCode`-string-silently-ignored-on-invoices gotcha, the `bulk_upsert_invoices` PARTIAL_SUCCESS path: every rule in this skill is an opinion shaped by Jaz's specific API behavior, not by generic migration theory. Source-system mapping (Xero, QB, Sage) is included only as input parsing; everything downstream is Jaz-shaped.
+> **Jaz-native, not generic.** The clearing-account pattern, the CoA-bulk-upsert all-or-nothing semantics, the `currencyCode`-string-silently-ignored-on-invoices gotcha, the `bulk_upsert_invoice_line_items` PARTIAL_SUCCESS path: every rule in this skill is an opinion shaped by Jaz's specific API behavior, not by generic migration theory. Source-system mapping (Xero, QB, Sage) is included only as input parsing; everything downstream is Jaz-shaped.
 
 **This skill provides Jaz-contextual conversion domain knowledge. For API details (field names, endpoints, gotchas), load the `jaz-api` skill alongside this one.**
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.10.1+4ec7bfc8",
+  "contentVersion": "9.11.0+73ecc7bd",
   "counts": {
     "tools": 523,
     "namespaces": 61,
@@ -18,19 +18,19 @@
     },
     {
       "name": "invoices",
-      "description": "Sales invoices (INV/SI). Create, search, get, update, delete, pay, finalize, apply credits, download PDF. Also: receivables, AR, AR aging, billing, overdue invoices, dunning, recurring invoices. To create from an uploaded invoice file/PDF/image, use the document_ai namespace (AI extraction), not manual entry."
+      "description": "Sales invoices (INV/SI). Create, search, get, update, delete, pay, finalize, apply credits, download PDF. Import or migrate many in one call from another system, each with its payment. Also: receivables, AR, AR aging, billing, overdue invoices, dunning, recurring invoices. To create from an uploaded invoice file/PDF/image, use the document_ai namespace (AI extraction), not manual entry."
     },
     {
       "name": "customer_credit_notes",
-      "description": "Customer credit notes (CN). Create, search, update, delete, finalize, refund, download PDF. Also: sales returns, customer CN."
+      "description": "Customer credit notes (CN). Create, search, update, delete, finalize, refund, download PDF. Import or migrate many in one call from another system, each with its refund. Also: sales returns, customer CN."
     },
     {
       "name": "bills",
-      "description": "Purchase bills (PO/PI). Create, search, get, update, delete, pay, finalize, apply credits. Also: payables, AP, vendor invoices, supplier bills. To create from an uploaded bill/invoice file/PDF/image, use the document_ai namespace (AI extraction), not manual entry."
+      "description": "Purchase bills (PO/PI). Create, search, get, update, delete, pay, finalize, apply credits. Import or migrate many in one call from another system, each with its payment. Also: payables, AP, vendor invoices, supplier bills. To create from an uploaded bill/invoice file/PDF/image, use the document_ai namespace (AI extraction), not manual entry."
     },
     {
       "name": "supplier_credit_notes",
-      "description": "Supplier credit notes. Create, search, update, delete, finalize, refund. Also: purchase returns, debit notes, supplier CN."
+      "description": "Supplier credit notes. Create, search, update, delete, finalize, refund. Import or migrate many in one call from another system, each with its refund. Also: purchase returns, debit notes, supplier CN."
     },
     {
       "name": "sale_orders",
@@ -3579,42 +3579,42 @@
     {
       "name": "bulk_upsert_invoices",
       "namespace": "invoices",
-      "description": "Max 500 invoices per call. FLAT shape: ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).",
+      "description": "DEPRECATED, still works: use bulk_upsert_invoice_line_items, which also takes several lines, currency, due date and a payment. Max 500 invoices per call. FLAT shape: ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level.",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_invoice_line_items",
       "namespace": "invoices",
-      "description": "Nested line items per invoice (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Nested line items per invoice (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). A row can record its payment via `payment`. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_bills",
       "namespace": "bills",
-      "description": "Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead; that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED; last wins). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "DEPRECATED, still works: use `bulk_upsert_bill_line_items`, which also takes several lines, currency, due date and a payment. Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. Natural key: `billReference` (rows sharing one within a batch are MERGED; last wins). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_bill_line_items",
       "namespace": "bills",
-      "description": "Nested line items per bill (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Nested line items per bill (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). A row can record its payment via `payment`. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_customer_credit_notes",
       "namespace": "customer_credit_notes",
-      "description": "Max 500 customer credit notes per call. Natural key: creditNoteReference. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Max 500 customer credit notes per call. Natural key: creditNoteReference. A row can record its refund via `payment`. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
     {
       "name": "bulk_upsert_supplier_credit_notes",
       "namespace": "supplier_credit_notes",
-      "description": "Max 500 supplier credit notes per call. Natural key: creditNoteReference. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Max 500 supplier credit notes per call. Natural key: creditNoteReference. A row can record its refund via `payment`. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },

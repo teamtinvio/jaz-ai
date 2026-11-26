@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.10.1",
+  "version": "9.11.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -1964,27 +1964,27 @@
     },
     {
       "name": "bulk_upsert_invoices",
-      "description": "Max 500 invoices per call. FLAT shape: ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level. For multi-line, use bulk_upsert_invoice_line_items (nested lineItems[]).\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED; last wins). resourceId does NOT update by id here; it is ignored and you get a duplicate.\n\nAsync: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "DEPRECATED, still works: use bulk_upsert_invoice_line_items, which also takes several lines, currency, due date and a payment. Max 500 invoices per call. FLAT shape: ONE line per invoice via itemDescription + totalAmount + invoiceAccountResourceId at row level.\n\nNatural key: invoiceReference (rows sharing one within a batch are MERGED; last wins). resourceId does NOT update by id here; it is ignored and you get a duplicate.\n\nAsync: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates ISO 8601 (YYYY-MM-DD); dateFormat field removed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_invoice_line_items",
-      "description": "Nested line items per invoice (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Nested line items per invoice (max 500 invoices per call). Each row carries lineItems[] under its parent invoice (scoped by invoiceReference). A row can record its payment via `payment`. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_bills",
-      "description": "Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. For multi-line bills use `bulk_upsert_bill_line_items` instead; that variant takes nested `lineItems[]`. Natural key: `billReference` (rows sharing one within a batch are MERGED; last wins). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "DEPRECATED, still works: use `bulk_upsert_bill_line_items`, which also takes several lines, currency, due date and a payment. Max 500 bills per call. FLAT shape: ONE line per bill via `itemDescription` + `totalAmount` + `billAccountResourceId` at row level. Natural key: `billReference` (rows sharing one within a batch are MERGED; last wins). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only; dateFormat field was removed. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_bill_line_items",
-      "description": "Nested line items per bill (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Nested line items per bill (max 500 bills per call). Each row carries lineItems[] under its parent bill (scoped by billReference). A row can record its payment via `payment`. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_customer_credit_notes",
-      "description": "Max 500 customer credit notes per call. Natural key: creditNoteReference. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Max 500 customer credit notes per call. Natural key: creditNoteReference. A row can record its refund via `payment`. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_supplier_credit_notes",
-      "description": "Max 500 supplier credit notes per call. Natural key: creditNoteReference. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Max 500 supplier credit notes per call. Natural key: creditNoteReference. A row can record its refund via `payment`. Async: returns the final job if it finished, else a jobId → poll search_background_jobs by resourceId. If the result says it runs in the background, do not poll: its result arrives by itself. PARTIAL_SUCCESS: errorDetails. Dates are ISO 8601 only. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "bulk_upsert_journals",

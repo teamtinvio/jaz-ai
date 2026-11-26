@@ -1,6 +1,6 @@
 # Jaz API Endpoint Reference: Bulk Edits and Jobs
 
-> Request/response examples for Quick Fix, Ledger Find & Fix, contacts bulk upsert, background jobs.
+> Request/response examples for Quick Fix, Ledger Find & Fix, contacts bulk upsert, invoice/bill/credit note bulk imports, background jobs.
 > Base URL, auth, date format, pagination and status codes apply to every endpoint: see [endpoints.md](./endpoints.md), which also indexes every section.
 
 ---
@@ -316,6 +316,52 @@ This is the REST body. The `bulk_upsert_contacts` tool takes its own names (`bil
 ```
 
 Poll: `POST /background-jobs/search` body: `{ "filter": { "resourceId": { "eq": "job-uuid-abc-123" } }, "limit": 1 }`
+
+---
+
+## 22a. Invoice, Bill and Credit Note Bulk Imports (with payment)
+
+All four are **ASYNC** (`jobId`, poll `/background-jobs/search`) and take up to 500 rows. Each row can carry an optional `payment` object: one payment per document, dated the document date. On a credit note it records a REFUND.
+
+### POST /api/v1/invoices/line-items/bulk-upsert
+
+### POST /api/v1/bills/line-items/bulk-upsert
+
+### POST /api/v1/customer-credit-notes/bulk-upsert
+
+### POST /api/v1/supplier-credit-notes/bulk-upsert
+
+```json
+// One invoice row (REST body; the tool takes currencyCode where the wire says transactionCurrency)
+{
+  "invoices": [{
+    "invoiceReference": "INV-2026-0001",
+    "contactResourceId": "uuid",
+    "valueDate": "2026-11-24",
+    "dueDate": "2026-12-24",
+    "transactionCurrency": "SGD",
+    "lineItems": [{ "itemDescription": "Widget", "quantity": 1, "unitPrice": 500, "accountResourceId": "uuid" }],
+    "payment": {
+      "paymentAmount": 500,
+      "paymentMethod": "Bank Transfer",
+      "paymentAccountResourceId": "uuid-bank-in-invoice-currency",
+      "paymentReference": "PAY-INV-2026-0001",
+      "feeValue": 5,
+      "feeOrganizationAccountResourceId": "uuid"
+    }
+  }]
+}
+```
+
+`payment` fields: `paymentAmount`, `paymentMethod`, `paymentAccountResourceId`, `paymentReference`, `feeValue`, `feeOrganizationAccountResourceId`, `feeTaxVatProfileResourceId`, `adjustmentValue`, `adjustmentOrganizationAccountResourceId`. Invoices alone also take `collectedFeeValue`, `collectedFeeOrganizationAccountResourceId`, `collectedFeeTaxVatProfileResourceId`; a bill or credit note sending them is a 422. There is no payment-level withholding on these endpoints.
+
+- `paymentMethod` is the method DISPLAY name, matched exactly: `Cash`, `Bank Transfer`, `Credit Card`, `Check`, `Deposit / Wallet`, `Payment Gateway`. It is not the `BANK_TRANSFER` enum the single-payment endpoints take.
+- `paymentAmount` is more than 0 and at most the document total. `paymentMethod` and `paymentAccountResourceId` are required with it. The account is a bank or cash account in the DOCUMENT currency (`IMPORT_PAYMENT_ACCOUNT_CURRENCY_MISMATCH`).
+- A fee is less than the amount and needs its account; a fee collected needs its account; a non-zero adjustment needs its account (not a bank, cash, control or deposit account).
+- A blank `paymentReference` becomes `PAY-<document reference>`.
+- Rows sharing a reference give the same payment, or give it on the first row only; otherwise the whole request is rejected (`IMPORT_SAME_REFERENCE_DIFFERENT_HEADER` / `IMPORT_PAYMENT_NOT_ON_FIRST_ROW`).
+
+The summary (one row per document) endpoints `POST /api/v1/invoices/bulk-upsert` and `POST /api/v1/bills/bulk-upsert` are **deprecated** and unchanged: they still work, and are the only imports that take payment-level withholding.
 
 ---
 

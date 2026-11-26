@@ -151,6 +151,7 @@ Create and update endpoints accept alias field names (`issueDate` for `valueDate
 | 20. Nano-Classifier CRUD | [endpoints-master-data.md](./endpoints-master-data.md) |
 | 21. Scheduler GET/PUT/DELETE | [endpoints-schedules-reports.md](./endpoints-schedules-reports.md) |
 | 22. Contacts Bulk Upsert | [endpoints-bulk-edits.md](./endpoints-bulk-edits.md) |
+| 22a. Invoice, Bill and Credit Note Bulk Imports (with payment) | [endpoints-bulk-edits.md](./endpoints-bulk-edits.md) |
 | 23. Background Jobs Search | [endpoints-bulk-edits.md](./endpoints-bulk-edits.md) |
 | 24. Export Records | [endpoints-schedules-reports.md](./endpoints-schedules-reports.md) |
 | 25. Jots (Judgment Journal) | [endpoints-transactions.md](./endpoints-transactions.md) |
