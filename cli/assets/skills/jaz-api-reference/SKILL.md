@@ -11,11 +11,12 @@ description: >-
   for each filter field. Load it when building or debugging a request body,
   checking whether an endpoint exists, writing a search filter, or confirming
   an enum value. The numbered API rules, error catalog, and field name mapping
-  live in the jaz-api skill: load both together.
+  live in the jaz-api skill: load it with this one, since its core contract
+  holds the rules most requests need (statuses, paging, IDs).
 license: MIT
 compatibility: Uses Jaz OAuth by default; organization API keys remain supported. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown. Load the jaz-api skill alongside this one.
 metadata:
-  version: "9.10.0"
+  version: "9.10.1"
 ---
 
 # Jaz API Reference Skill

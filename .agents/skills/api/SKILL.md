@@ -9,11 +9,12 @@ description: >-
   schedulers, subscriptions, attachments, claim settings, and Jaz Magic extraction. Also use
   when building API clients, seeding test data, or adding new endpoint support.
   Request/response examples, the endpoint catalog, and the search filter, syntax
-  and enum reference are in the jaz-api-reference skill: load it alongside.
+  and enum reference are in the jaz-api-reference skill: load it when the task
+  needs one of those.
 license: MIT
 compatibility: Uses Jaz OAuth by default; organization API keys remain supported. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown.
 metadata:
-  version: "9.10.0"
+  version: "9.10.1"
 ---
 
 # Jaz API Skill
@@ -30,13 +31,49 @@ Prefer the configured OAuth connection. Local CLI/MCP shares `clio auth login`; 
 
 The rest of this skill (field names, gotchas, error catalog, dependency order, search filter syntax) applies regardless of invocation path. Read it for *context*, not for HTTP-call construction unless you're in the third bucket.
 
-## Reading Order
+## Core contract
 
-Numbers are rule numbers; the [Rule Index](#rule-index) below names the file that holds each one.
+These facts settle most requests without opening another file. The number after each is its rule; open the rule only for its edge cases.
 
-**Core fundamentals (read first, every integration):** Identifiers & Dates 1 to 3; Names & Fields 9 to 13; Transaction Creation 14 to 16; Chart of Accounts 17 to 22; Payments / Cross-Currency 4 to 8; Journals & Cash 23 to 26; Credit Notes & Refunds 27 to 28; Reports 36 to 37; Tax Profile Scoping 100; Transaction References 104; Draft Finalization Pipeline 81 to 88; Jaz Magic / PDF-JPG 57 to 63; Currency Rates 39, 49, 105; Withholding Tax 45, 98.
+**Every request**
+- IDs are `resourceId`, never `id`; a reference to another record is `<resource>ResourceId` (1).
+- Transaction dates are `valueDate`, never `issueDate`, `invoiceDate` or `date`. Request dates are `YYYY-MM-DD` strings (2, 3); response dates come back as epoch milliseconds (52).
+- Line item text is `name`, not `description`. The document number is `reference` (9, 13).
 
-**Integration depth (API clients, pipelines, batch jobs, MCP/CLI):** Bulk Upsert (Items/Contacts/Rates); Background Jobs (filter `resourceId` not `jobId`); Export Records; Pagination (38); Search & Filter (50 to 56); Response Shape Gotchas (66 to 73); Cash Entry Response Shape (74 to 77); Entity Resolution (78 to 80); Bank Rules (89 to 90d); Fixed Assets (91 to 92c); Subscriptions & Scheduled (93 to 94); niche endpoints (95 to 102); Journals balance (103); Quick Fix (107, 111); TTB (108); Dynamic Strings (109 to 110); Sub-Resource Shapes (112); Nano-Classifier (113); Scheduler Asymmetry (114); Payment Record CRUD (115 to 117); Bulk Upserts transactions (118 to 122); Reconciliation write-side (123 to 127); Drafts lifecycle (128 to 135); Orders: Sale Quotes / Sale Orders / Purchase Requests / Purchase Orders (`references/orders.md`); Claims: records / lifecycle / bulk + conversion + payouts + Employees + Claim Settings (`references/claims.md`); Report templates and packs (161, `references/report-templates.md`).
+**Creating and finalizing**
+- Raw REST: omitting `saveAsDraft` creates a FINALIZED record, while the MCP and CLI tools default to a draft, so send it explicitly (14). With `saveAsDraft: false`, every line item needs `accountResourceId` (15).
+- A foreign-currency invoice, bill, credit note or journal takes `currency: { sourceCurrency: "USD", exchangeRate? }`. A `currencyCode` string is silently ignored and a `currency` string is a 400 (25).
+- A create answers only `{ resourceId }`; GET the record for anything else (68). A cash in, cash out or cash transfer create answers its `parentEntityResourceId`, the ID that DELETE and PUT take (74).
+- A draft is finalized by one PUT with `saveAsDraft: false` and `resourceId` in the body (83, 85). Finalized invoices and bills are `UNPAID`, then `PARTIALLY_PAID` and `PAID`; journals are `ACTIVE`. No resource has a `FINALIZED` or `POSTED` status, and `OVERDUE` is not a status either: find overdue documents with `status in [UNPAID, PARTIALLY_PAID]` plus `dueDate lt <today in the organization's timezone>` (67).
+- Journals carry `journalEntries` with `amount` and `type: "DEBIT" | "CREDIT"` (23). Payments go in `{ payments: [...] }`, each with `paymentAmount` (bank currency), `transactionAmount` (document currency), `accountResourceId`, `paymentMethod`, `reference` and `valueDate` (4, 7, 8). Credit notes are applied through a `credits` array with `amountApplied` (27).
+
+**Lists and search**
+- A search body is `{ filter?, sort: { sortBy: ["field"], order: "ASC" | "DESC" }, limit: 1-1000, offset }`. `sortBy` is always an array, and `sort` is required whenever `offset` is sent, even `offset: 0` (43, 50).
+- `offset` is a 0-indexed PAGE number, not a row skip: `offset: 1` is the second page of `limit` rows. A few report and ledger reads take a row offset instead (38).
+- A filter is `{ "<field>": { "<operator>": value } }`, and each field type accepts a fixed set of operators; any other is a 400 (51). Which fields an endpoint filters and sorts on, and the values an enum field accepts, are in jaz-api-reference.
+- List and search responses are `{ totalElements, totalPages, data: [...] }` (54).
+
+## Where to look
+
+Open only what the task needs, and open the files it names together rather than one at a time. Read the matching section whole rather than searching for fragments: the required fields and refusals sit in the lines under each example. Load the **jaz-api-reference** skill only for an endpoint's exact request and response, the endpoint catalog, or a search field's filters and values; the files in the middle column are in its `references/`.
+
+The rules column names each rule file with the rule numbers that apply to the task.
+
+| Task | Request and response (jaz-api-reference) | Rules (this skill's `references/`) |
+|------|------------------------------------------|------------------------------------|
+| Create, update, finalize or pay an invoice, bill, credit note, journal, cash entry or cash transfer | `endpoints-transactions.md` | `rules-fundamentals.md` 1-16, 23-28, 31, 40-41, 45, 47-48; `rules-search-magic-shapes.md` 64, 67-70, 74-77, 80-88; `rules-entities-quick-fix.md` 98, 101-104, 108, 112, 115-116 |
+| Search, filter, sort or page | `search-reference.md` (fields per endpoint), `search-enums.md` (values), `search-syntax.md` (a `query` string) | `rules-fundamentals.md` 38, 43; `rules-search-magic-shapes.md` 50-56, 65 |
+| Contacts, items, chart of accounts, tax profiles, currencies and rates, tags, custom fields, contact groups, inventory, bookmarks, catalogs, nano classifiers | `endpoints-master-data.md` | `rules-fundamentals.md` 10-12, 16-22, 29-30, 34-35e, 39, 46-47, 49; `rules-search-magic-shapes.md` 66, 71-73, 78; `rules-entities-quick-fix.md` 96-97, 99-100, 105-106, 113; `rules-bulk-recon-drafts.md` 136-137c, 140-141 |
+| Bank records, the cashflow ledger, Jaz Magic extraction, deposits, bank rules | `endpoints-banking-magic.md` | `rules-fundamentals.md` 44, 47-47a; `rules-search-magic-shapes.md` 57-63; `rules-entities-quick-fix.md` 89-90d, 110 |
+| Reconciliation, drafts lifecycle, transaction bulk upserts | `full-api-surface.md` (catalog) | `rules-bulk-recon-drafts.md` 118-135, 158-160 |
+| Schedulers, subscriptions, reports, exports, report templates | `endpoints-schedules-reports.md` | `rules-fundamentals.md` 32-33, 36-37a, 42; `rules-entities-quick-fix.md` 93-94, 109, 114; `rules-bulk-recon-drafts.md` 147, 161; `report-templates.md` |
+| Fixed assets, deferrals, leases, loans, payroll | `endpoints-assets-payroll.md` | `rules-entities-quick-fix.md` 91-92c, 117; `rules-bulk-recon-drafts.md` 122 |
+| Quick Fix, Ledger Find & Fix, contacts bulk upsert, background jobs | `endpoints-bulk-edits.md` | `rules-fundamentals.md` (bulk upsert and background jobs sections); `rules-entities-quick-fix.md` 107-107a, 111; `rules-bulk-recon-drafts.md` 119, 136-137c |
+| An error code or message | | `errors.md` |
+| A field name that is easy to guess wrong | | `field-map.md` |
+| Sale quotes and orders, purchase requests and orders, expense claims | | `orders.md`, `claims.md` |
+
+A rule number cited anywhere resolves through the [Rule Index](#rule-index) below.
 
 ## When to Use This Skill
 

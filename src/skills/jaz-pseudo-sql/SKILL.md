@@ -13,7 +13,7 @@ description: >-
 license: MIT
 compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For canonical report types and the standard analytics surface, load the jaz-api skill alongside this one.
 metadata:
-  version: "9.10.0"
+  version: "9.10.1"
 ---
 
 # Jaz Pseudo-SQL Skill
@@ -40,7 +40,7 @@ Don't write a pseudo-SQL query from memory. The catalog grows; column names chan
 
 | Use this instead | When |
 |---|---|
-| `download_export(exportType='analysis-anomalous-invoices')` etc. | Canonical anomaly / audit / risk reports; they're tuned, parameterized, and faster than re-deriving them in SQL. See jaz-api Rule 141. |
+| `download_export(exportType='analysis-anomalous-invoices')` etc. | Canonical anomaly / audit / risk reports; they're tuned, parameterized, and faster than re-deriving them in SQL. |
 | `download_export(exportType='trial-balance')` etc. | Statements (TB, BS, P&L, GL, cashflow). The reporting engine handles period closing rules, intercompany eliminations, FX revaluation. SQL would miss these. |
 | `search_invoices(filter:...)`, `search_bills`, etc. | Listing entities with structured filters. Returns typed objects, supports pagination, faster than SQL. |
 | `get_invoice(resourceId)` etc. | Single-entity lookup by ID. |

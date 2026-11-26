@@ -76,7 +76,7 @@ The pre-terminal states are `PENDING` and `RUNNING`; these are normal during pol
 
 If you hit `PSEUDOSQL_VALIDATION_ERROR: unknown table` repeatedly, the underlying data isn't in the curated schema:
 
-- For canonical analytics reports → `download_export(exportType=...)`. See jaz-api Rule 141.
+- For canonical analytics reports → `download_export(exportType=...)`.
 - For raw entity dumps (e.g., every invoice as a row) → `export_records`.
 - For one-off entity lookups → `get_invoice` / `get_bill` / etc.
 - For filtered listings with structured criteria → `search_invoices` / `search_bills` / etc.

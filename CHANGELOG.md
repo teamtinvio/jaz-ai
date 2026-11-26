@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.10.1] - 2026-11-26
+
+**Claude answers Jaz API questions about a third faster with the jaz-api skill.**
+
+- The jaz-api skill now opens with the API rules most requests need, and a table of which reference file to read for each task, so Claude reads fewer files before it answers. On our test questions, answers took about 11 seconds instead of 17, at the same quality.
+- Claude loads the jaz-api-reference skill only when a task needs an exact request or response, the endpoint catalog or search fields.
+- Nothing changes in the MCP tools or the `clio` CLI commands.
+
 ## [9.10.0] - 2026-11-26
 
 **Clio can add an employee for payroll only, and knows who is eligible for claims and payruns.**
