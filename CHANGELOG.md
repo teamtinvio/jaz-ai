@@ -1,5 +1,11 @@
 # Changelog
 
+## [9.13.1] - 2026-11-27
+
+**No user-facing changes since v9.13.0.**
+
+- Internal test fix: the post-deploy smoke run's two report template checks match the current API again. Nothing changes in the MCP tools, the `clio` CLI or the Claude extension.
+
 ## [9.13.0] - 2026-11-27
 
 **Clio sets up your templates from what you ask for: how documents print, the emails they go out with, e-sign templates, numbering and document defaults, report packs, and which template each customer and document uses.**

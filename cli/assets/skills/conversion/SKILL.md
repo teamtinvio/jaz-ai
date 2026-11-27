@@ -9,7 +9,7 @@ description: >-
   import, or switching accounting software, whenever a customer's prior system
   is Xero, QuickBooks, Sage, MYOB, or an Excel-based ledger.
 metadata:
-  version: "9.13.0"
+  version: "9.13.1"
 ---
 
 # Jaz Conversion Skill
