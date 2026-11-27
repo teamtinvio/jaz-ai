@@ -93,7 +93,7 @@ To change a few fields on some lines without resending the document, use `quick_
 `sale_orders`: `create_sale_order`, `get_sale_order`, `search_sale_orders`, `search_sale_order_line_items`, `update_sale_order`, `accept_sale_quote`, `confirm_sale_order`, `void_sale_order`, `delete_sale_order`, `convert_sale_order_to_invoice`.
 `purchase_orders`: `create_purchase_order`, `get_purchase_order`, `search_purchase_orders`, `search_purchase_order_line_items`, `update_purchase_order`, `accept_purchase_request`, `confirm_purchase_order`, `void_purchase_order`, `delete_purchase_order`, `convert_purchase_order_to_bill`.
 
-PDF downloads for the documents these convert into: `download_bill_pdf` (`bills`), `download_supplier_credit_note_pdf` (`supplier_credit_notes`), alongside the existing `download_invoice_pdf` / `download_credit_note_pdf`.
+PDF downloads: `download_sale_order_pdf` (`documentType` SALE_QUOTE or SALE_ORDER; a sale order also takes `variant` ORDER_CONFIRMATION or DELIVERY_SLIP) and `download_purchase_order_pdf` (`documentType` PURCHASE_REQUEST or PURCHASE_ORDER) here, and for the documents these convert into: `download_bill_pdf` (`bills`, `variant` APPROVAL_RECORD for the approval record), `download_supplier_credit_note_pdf` (`supplier_credit_notes`), `download_invoice_pdf` (`invoices`, `variant` DELIVERY_SLIP for the delivery slip) and `download_credit_note_pdf`. `download_payment_pdf` (`payments`) gives a payment receipt, payment advice or refund document. Over the API the variant is the `documentType` query parameter.
 
 ## CLI (full surface incl. long-tail)
 
@@ -102,7 +102,11 @@ clio sale-orders     list|get|search|search-line-items|create|update|accept|conf
                      |bulk-void|bulk-accept|bulk-confirm|bulk-delete|bulk-upsert-line-items   (-t quote|order)
 clio purchase-orders list|get|search|search-line-items|create|update|accept|confirm|convert-to-bill|void|delete|fast-fix \
                      |bulk-void|bulk-accept|bulk-confirm|bulk-delete|bulk-upsert-line-items   (-t request|order)
-clio bills download <id>                     # bill PDF
+clio sale-orders download <id> -t quote|order [--variant ORDER_CONFIRMATION|DELIVERY_SLIP]   # --variant: order only
+clio purchase-orders download <id> -t request|order
+clio bills download <id> [--variant APPROVAL_RECORD]   # bill PDF, or its approval record
+clio invoices download <id> [--variant DELIVERY_SLIP]
+clio payments download <id>                  # receipt, payment advice or refund document
 clio supplier-credit-notes download <id>     # supplier CN PDF
 ```
 

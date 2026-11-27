@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 619 spec paths and 777 spec operations and is the authoritative list; check it before concluding
+> carries 624 spec paths and 782 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -46,7 +46,7 @@
 | POST | `/invoices/search` | Advanced search with filters |
 | PUT | `/invoices/:resourceId` | Update invoice |
 | DELETE | `/invoices/:resourceId` | Delete invoice |
-| GET | `/invoices/:resourceId/download` | Download PDF |
+| GET | `/invoices/:resourceId/download` | Download PDF; `?documentType=DELIVERY_SLIP` for the delivery slip |
 | POST | `/invoices/:resourceId/payments` | Record payment(s) |
 | GET | `/invoices/:resourceId/payments` | List recorded payments (`{data: [...]}`) |
 | POST | `/invoices/:resourceId/credits` | Apply credit note(s) |
@@ -72,6 +72,7 @@
 | POST | `/bills/:resourceId/credits` | Apply supplier credit note(s) |
 | GET | `/bills/:resourceId/credits` | List applied credits |
 | DELETE | `/bills/:resourceId/credits/:creditsAppliedResourceId` | Reverse credit |
+| GET | `/bills/:resourceId/download` | Download PDF; `?documentType=APPROVAL_RECORD` for the approval record |
 | GET | `/bills/:resourceId/attachments` | List attachments |
 | POST | `/bills/:resourceId/attachments` | Upload attachment |
 | DELETE | `/bills/:resourceId/attachments/:attachmentResourceId` | Delete attachment |
@@ -92,6 +93,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | POST | `/{entity}/:resourceId/void` | Void (cancel) |
 | POST | `/sale-quotes\|purchase-requests/:resourceId/accept` | Accept (→ ACCEPTED) |
 | POST | `/sale-orders\|purchase-orders/:resourceId/confirm` | Confirm (→ CONFIRMED) |
+| GET | `/{entity}/:resourceId/download` | Download PDF. Only `/sale-orders` takes `?documentType=ORDER_CONFIRMATION\|DELIVERY_SLIP`; the others refuse `documentType` with 422 |
 | POST | `/{entity}/:resourceId/fast-fix` | Quick-fix details (`{ attributes }`) |
 | POST | `/{entity}/bulk-void` | Bulk void (`{ resourceIds }`) |
 | POST | `/sale-quotes\|purchase-requests/bulk-accept` | Bulk accept (`{ resourceIds }`) |
@@ -168,6 +170,7 @@ Four entities sharing one shape. Replace `{entity}` with `sale-quotes`, `sale-or
 | GET | `/payments/:resourceId` | Get payment record; returns `{data: PaymentRecord}` |
 | PUT | `/payments/:resourceId` | Update payment; returns `{data: PaymentRecord}` |
 | DELETE | `/payments/:resourceId` | Delete/void payment |
+| GET | `/payments/:resourceId/download` | Download PDF: receipt (invoice payment), payment advice (bill payment) or refund document (credit note refund) |
 
 **Note**: Payment resourceIds come from parent documents (`GET /invoices/:id` → `paymentRecords[].resourceId`). Cashflow transaction IDs from `POST /cashflow-transactions/search` are NOT the same.
 

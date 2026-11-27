@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.11.0",
+  "version": "9.12.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -168,7 +168,7 @@
     },
     {
       "name": "download_invoice_pdf",
-      "description": "Download an invoice as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered)."
+      "description": "Download an invoice as PDF, or its delivery slip. Returns { fileUrl } (may be pending/empty if the document is not yet rendered)."
     },
     {
       "name": "list_bills",
@@ -196,7 +196,7 @@
     },
     {
       "name": "download_bill_pdf",
-      "description": "Download a bill as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered)."
+      "description": "Download a bill as PDF, or its approval record. Returns { fileUrl } (may be pending/empty if the document is not yet rendered)."
     },
     {
       "name": "pay_bill",
@@ -217,6 +217,10 @@
     {
       "name": "get_sale_order",
       "description": "Fetch a Sale Quote or Sale Order by internal resourceId. To search by other fields, use `search_sale_orders`."
+    },
+    {
+      "name": "download_sale_order_pdf",
+      "description": "Download a Sale Quote or Sale Order as PDF. A Sale Order can instead give its order confirmation or delivery slip. Returns { fileUrl } (may be pending/empty if the document is not yet rendered)."
     },
     {
       "name": "search_sale_orders",
@@ -249,6 +253,10 @@
     {
       "name": "get_purchase_order",
       "description": "Fetch a Purchase Request or Purchase Order by internal resourceId. To search by other fields, use `search_purchase_orders`."
+    },
+    {
+      "name": "download_purchase_order_pdf",
+      "description": "Download a purchase request or purchase order as PDF. Returns { fileUrl } (may be pending/empty if the document is not yet rendered)."
     },
     {
       "name": "search_purchase_orders",
@@ -1933,6 +1941,10 @@
     {
       "name": "get_payment",
       "description": "Get a payment record. Takes a PAYMENT resourceId; the ledger resourceId search_cashflow_transactions returns is a different entity and 404s here."
+    },
+    {
+      "name": "download_payment_pdf",
+      "description": "Download the PDF for a payment record: a payment receipt for an invoice payment, a payment advice for a bill payment, or a refund document for a credit note refund. Returns { fileUrl } (may be pending/empty if the document is not yet rendered)."
     },
     {
       "name": "update_payment",

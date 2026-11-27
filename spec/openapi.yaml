@@ -42734,7 +42734,7 @@
     },
     "/api/v1/bills/{resourceId}/download": {
       "get": {
-        "description": "Generate the bill PDF and return its download URL.",
+        "description": "Generate the bill PDF and return its download URL. Pass documentType=APPROVAL_RECORD for the bill's approval record instead.",
         "operationId": "download-bill",
         "parameters": [
           {
@@ -42742,6 +42742,15 @@
             "in": "path",
             "name": "resourceId",
             "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Omit for the bill. APPROVAL_RECORD for the approval record.",
+            "enum": [
+              "APPROVAL_RECORD"
+            ],
+            "in": "query",
+            "name": "documentType",
             "type": "string"
           }
         ],
@@ -67886,7 +67895,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Download the invoice as a PDF.",
+        "description": "Download the invoice as a PDF. Pass documentType=DELIVERY_SLIP for the delivery slip instead.",
         "operationId": "download-invoice",
         "parameters": [
           {
@@ -67894,6 +67903,15 @@
             "in": "path",
             "name": "resourceId",
             "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Omit for the invoice. DELIVERY_SLIP for the delivery slip.",
+            "enum": [
+              "DELIVERY_SLIP"
+            ],
+            "in": "query",
+            "name": "documentType",
             "type": "string"
           }
         ],
@@ -78632,6 +78650,77 @@
         ]
       }
     },
+    "/api/v1/payments/{resourceId}/download": {
+      "get": {
+        "description": "Generate the PDF for a payment or refund and return its download URL: a payment receipt for an invoice payment, a payment advice for a bill payment, and a refund document for a credit note refund.",
+        "operationId": "download-payment",
+        "parameters": [
+          {
+            "description": "Resource ID of the payment or refund.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download Payment PDF",
+        "tags": [
+          "Payments"
+        ]
+      }
+    },
     "/api/v1/payrun-posting-rules": {
       "post": {
         "consumes": [
@@ -82714,6 +82803,77 @@
         ]
       }
     },
+    "/api/v1/purchase-orders/{resourceId}/download": {
+      "get": {
+        "description": "Generate the purchase order PDF and return its download URL.",
+        "operationId": "download-purchase-order",
+        "parameters": [
+          {
+            "description": "Resource ID of the purchase order.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download Purchase Order PDF",
+        "tags": [
+          "Purchase Orders"
+        ]
+      }
+    },
     "/api/v1/purchase-orders/{resourceId}/fast-fix": {
       "post": {
         "consumes": [
@@ -84155,6 +84315,77 @@
           }
         ],
         "summary": "Convert Purchase Request to Bill",
+        "tags": [
+          "Purchase Requests"
+        ]
+      }
+    },
+    "/api/v1/purchase-requests/{resourceId}/download": {
+      "get": {
+        "description": "Generate the purchase request PDF and return its download URL.",
+        "operationId": "download-purchase-request",
+        "parameters": [
+          {
+            "description": "Resource ID of the purchase request.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download Purchase Request PDF",
         "tags": [
           "Purchase Requests"
         ]
@@ -91450,6 +91681,87 @@
         ]
       }
     },
+    "/api/v1/sale-orders/{resourceId}/download": {
+      "get": {
+        "description": "Generate the sale order PDF and return its download URL. Pass documentType=ORDER_CONFIRMATION for the order confirmation or DELIVERY_SLIP for the delivery slip instead.",
+        "operationId": "download-sale-order",
+        "parameters": [
+          {
+            "description": "Resource ID of the sale order.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "Omit for the sale order. ORDER_CONFIRMATION for the order confirmation, DELIVERY_SLIP for the delivery slip.",
+            "enum": [
+              "ORDER_CONFIRMATION",
+              "DELIVERY_SLIP"
+            ],
+            "in": "query",
+            "name": "documentType",
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download Sale Order PDF",
+        "tags": [
+          "Sale Orders"
+        ]
+      }
+    },
     "/api/v1/sale-orders/{resourceId}/fast-fix": {
       "post": {
         "consumes": [
@@ -92891,6 +93203,77 @@
           }
         ],
         "summary": "Convert Sale Quote to Invoice",
+        "tags": [
+          "Sale Quotes"
+        ]
+      }
+    },
+    "/api/v1/sale-quotes/{resourceId}/download": {
+      "get": {
+        "description": "Generate the sale quote PDF and return its download URL.",
+        "operationId": "download-sale-quote",
+        "parameters": [
+          {
+            "description": "Resource ID of the sale quote.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download Sale Quote PDF",
         "tags": [
           "Sale Quotes"
         ]

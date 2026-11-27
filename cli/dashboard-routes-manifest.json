@@ -5611,6 +5611,7 @@
           "values": [
             "contact",
             "item-tax-profile",
+            "assign-expenses",
             "tax-settings",
             "add-adjustments",
             "view-sale-payment",

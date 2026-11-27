@@ -10,7 +10,7 @@ description: >-
 license: MIT
 compatibility: Works with Claude Code, Codex CLI, Cursor, Copilot, Claude Cowork, Claude.ai, and any agent that reads markdown. Multi-organization workflows need the `clio` CLI (`npm i -g jaz-clio`); a single organization works through MCP tools alone. Load alongside jaz-jobs for close playbooks, jaz-recipes for IFRS patterns, jaz-api for payload shapes, jaz-conversion for migrations.
 metadata:
-  version: "9.11.0"
+  version: "9.12.0"
 ---
 
 # Jaz Kit

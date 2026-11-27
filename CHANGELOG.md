@@ -1,5 +1,14 @@
 # Changelog
 
+## [9.12.0] - 2026-11-27
+
+**Clio can download the PDF of a quote, an order, a purchase request or a payment.**
+
+- Sale quotes and sale orders: `download_sale_order_pdf` and `clio sale-orders download`. A sale order can also give its order confirmation or its delivery slip.
+- Purchase requests and purchase orders: `download_purchase_order_pdf` and `clio purchase-orders download`.
+- Payments: `download_payment_pdf` and `clio payments download`. An invoice payment gives a receipt, a bill payment gives a payment advice, and a credit note refund gives a refund document.
+- An invoice download can give the delivery slip, and a bill download can give the approval record (`variant` on the tools, `--variant` on the commands).
+
 ## [9.11.0] - 2026-11-27
 
 **Clio can import invoices, bills and credit notes that are already paid or refunded, in one step.**

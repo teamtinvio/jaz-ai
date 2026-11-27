@@ -13,7 +13,7 @@ description: >-
 license: MIT
 compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill alongside this one. For the operational close workflows these recipes plug into (month-end close, GST/VAT filing, year-end close), load the jaz-jobs skill.
 metadata:
-  version: "9.11.0"
+  version: "9.12.0"
 ---
 
 # Transaction Recipes Skill

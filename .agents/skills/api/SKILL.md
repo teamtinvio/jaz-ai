@@ -14,7 +14,7 @@ description: >-
 license: MIT
 compatibility: Uses Jaz OAuth by default; organization API keys remain supported. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown.
 metadata:
-  version: "9.11.0"
+  version: "9.12.0"
 ---
 
 # Jaz API Skill

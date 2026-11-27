@@ -17,7 +17,7 @@ Complete reference for all 80 command groups. Organized by domain.
 | `delete <id>` | |
 | `pay <id>` | `--amount`, `--transaction-amount`, `--account`, `--method`, `--ref`, `--date` |
 | `apply-credits <id>` | `--credit-note`, `--amount` |
-| `download <id>` | `--json`: returns the PDF URL; writes no file |
+| `download <id>` | `--variant DELIVERY_SLIP` for the delivery slip, `--json`: returns the PDF URL; writes no file |
 | `draft list` | `--max-rows N`, `--ids`, `--json`: ⚠️ fans out 1 attachment lookup per draft (5 in flight); pass `--max-rows 10` for spot checks |
 | `draft finalize <id>` | `--account`, `--input` |
 | `bulk-upsert` | `--input <file>`, `--json`: **FLAT** shape, DEPRECATED (one line per row via `itemDescription`+`totalAmount`+`invoiceAccountResourceId`). Async → jobId. `currencyCode` REQUIRED |
@@ -103,10 +103,13 @@ Same subcommands and flags as `cash-in`.
 | `create` | `--from-account`, `--to-account`, `--amount`, `--date`, `--ref` (generated when omitted), `--input` |
 | `delete <id>` | |
 
-### `clio payments`: Payment records (search the ledger with `clio cashflow search`)
+### `clio payments`: Payment records
+Every `<id>` is a payment record ID (from an invoice or bill paymentRecords, or a credit note refund). A ledger ID from `clio cashflow search` is a different entity and 404s here.
+
 | Subcommand | Key flags |
 |------------|-----------|
 | `get <id>` | `--json` |
+| `download <id>` | `--json`: returns the PDF URL (receipt for an invoice payment, payment advice for a bill payment, refund document for a credit note refund); writes no file |
 | `update <id>` | `--date`, `--reference`, `--input` |
 | `delete <id>` | |
 
@@ -878,7 +881,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 523 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 526 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.
