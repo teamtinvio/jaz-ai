@@ -1,5 +1,17 @@
 # Changelog
 
+## [9.15.0] - 2026-11-28
+
+**The ChatGPT app gets the template, Data Transfer, team and comment tools.**
+
+- In ChatGPT, Jaz can now set up PDF templates, email templates, report templates and packs, e-sign templates, and numbering and document defaults, and bring a company's books in from another accounting system, as it already can in Claude.
+- It can also list, invite, change and remove the organization's users and read its modules, and read, post, edit and resolve comments on bills, invoices, credit notes and bank records, and read your notifications and mark them read.
+- That is 62 more actions, each its own tool. ChatGPT offers each one once OpenAI's review of it passes.
+- A logo, letterhead, payment QR code, e-sign appendix or export file for a transfer can come from a file attached to the conversation or from a link.
+- Deleting a template, a change that sends to customers, and starting a data transfer still wait for your yes: the assistant asks one plain question and acts only after you answer.
+- Not yet in ChatGPT: picking the template a single invoice, credit note, quote, purchase order or customer uses. There, a document prints with its customer's template, else the default.
+- No change for Claude users, and no change to the actions ChatGPT already had.
+
 ## [9.14.1] - 2026-11-28
 
 **Clio asks before a delete in one plain question, and four rough edges found in a production run of Data Transfer and templates are fixed.**
