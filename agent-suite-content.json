@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.12.0+ecd026e61",
+  "contentVersion": "9.13.0+06e8a092a",
   "counts": {
-    "tools": 526,
-    "namespaces": 61,
+    "tools": 555,
+    "namespaces": 65,
     "calculators": 13,
     "recipes": 16,
     "jobs": 12,
     "skills": 8,
-    "commands": 83,
-    "apiRules": 148
+    "commands": 87,
+    "apiRules": 152
   },
   "namespaces": [
     {
@@ -70,7 +70,19 @@
     },
     {
       "name": "report_templates",
-      "description": "Report templates: the saved layout of a report (title, fonts, rows, columns, period) and report packs (several reports in one document). List, read, search, create, edit, set the default, delete. Customize or rename a P&L, balance sheet, cash flow, trial balance, GL, GST/VAT ledger or aging layout; change which template a report uses by default. Render a template with download_export."
+      "description": "Report templates: the saved layout of a report (title, fonts, rows, columns, period) and report packs: several reports in one PDF, with cover, contents, signature and appendix pages and a saved period. Customize or rename a P&L, balance sheet, cash flow, trial balance, GL, GST/VAT ledger or aging layout; change which template a report uses by default. Render a template with download_export, a report pack as one PDF with download_report_pack_pdf. No plan first: build what was asked; only a delete or a write that sends to customers is held for their yes. Ask first only to pick between close matches; build what can be done and say what cannot. Read one before writing; never write to learn a shape or create documents to preview: say where it is in the app. End a handover with, leaving out empty parts: done; differs from the ask (the closest match used); not possible, said plainly (\"There is no setting for it.\"); held for their yes (its statement, quoted). Say typeName to people, not the code."
+    },
+    {
+      "name": "pdf_templates",
+      "description": "PDF templates: the print layout of documents as PDFs, one or more per type: invoice, credit note, receipt, refund advice, customer statement, quote, purchase order, delivery slip, sale order confirmation, cash in receipt, cash out advice, bill payment advice, payment request, payslip. Create one (create_pdf_template), or change its logo, letterhead, colour theme, font, margins, document title, columns, totals, bank details or footer; pick the default per type. No plan first: build what was asked; only a delete or a write that sends to customers is held for their yes. Ask first only to pick between close matches; build what can be done and say what cannot. Read one before writing; never write to learn a shape or create documents to preview: say where it is in the app. End a handover with, leaving out empty parts: done; differs from the ask (the closest match used); not possible, said plainly (\"There is no setting for it.\"); held for their yes (its statement, quoted). Themes default (Gray), calm (Green), bold (Midnight), trust (Blue), social (Pink), ivory, gold, peach. vatId is the GST/VAT number, registrationId the company registration number: never label one as the other. No setting exists for: column order, item images, a SKU column, paper other than A4, footer text on every page, hiding invoice page numbers, a signature line (invoices, credit notes, purchase orders), a fixed terms block, the amount in words on invoices, a PayNow QR with the amount, hex colours (offer the closest theme), exact logo placement (offer the closest style), bill templates. The app has nothing beyond its template options: say so plainly, e.g. \"Invoices cannot show the amount in words. There is no setting for it.\" Say typeName and the names in looks, never codes or field keys."
+    },
+    {
+      "name": "email_templates",
+      "description": "Email templates: the subject, body (message) and copied addresses of the emails sent with invoices, credit notes, quotes, purchase orders, payment and refund receipts, collection requests and payslips, and of the scheduled ones: payment reminders (dunning, before/on/after the due date), subscription reminders and customer statement emails. List types with their {{placeholder}} merge fields and schedule keys; activate or deactivate; set the default per type. No plan first: build what was asked; only a delete or a write that sends to customers is held for their yes. Ask first only to pick between close matches; build what can be done and say what cannot. Read one before writing; never write to learn a shape or create documents to preview: say where it is in the app. End a handover with, leaving out empty parts: done; differs from the ask (the closest match used); not possible, said plainly (\"There is no setting for it.\"); held for their yes (its statement, quoted). Say typeName to people, not the code."
+    },
+    {
+      "name": "signature_profiles",
+      "description": "E-sign templates (signature profiles) for e-signature of sale quotes and purchase requests: who signs (internal users or external signers, in signing order), cc, the invitation, reminder and completion emails, appended PDFs, reminder schedule, expiry, and what happens once signed (quote acceptance, auto-accept and invoice or bill). Set the default per document type. Approval to sign by a director or customer. Sending a document for signature is not a tool: the user sends it from the quote or purchase request. An internal signer is an organization user: look them up with search_org_users (organization namespace). No plan first: build what was asked; only a delete or a write that sends to customers is held for their yes. Ask first only to pick between close matches; build what can be done and say what cannot. Read one before writing; never write to learn a shape or create documents to preview: say where it is in the app. End a handover with, leaving out empty parts: done; differs from the ask (the closest match used); not possible, said plainly (\"There is no setting for it.\"); held for their yes (its statement, quoted). Say typeName to people, not the code."
     },
     {
       "name": "operational_reports",
@@ -90,7 +102,7 @@
     },
     {
       "name": "contacts",
-      "description": "Contacts (customers/suppliers/vendors), contact groups, customer segmentation. Create, search, get, update, delete contacts. Contact signals: usual values and billing rhythm. Bulk upsert contacts from CSV / spreadsheet imports: async, returns jobId, poll background_jobs. List/create contact groups."
+      "description": "Contacts (customers/suppliers/vendors), contact groups, customer segmentation. Create, search, get, update, delete contacts; set the PDF and email templates a customer uses instead of the defaults. Contact signals: usual values and billing rhythm. Bulk upsert contacts from CSV / spreadsheet imports: async, returns jobId, poll background_jobs. List/create contact groups."
     },
     {
       "name": "items_and_inventory",
@@ -158,7 +170,11 @@
     },
     {
       "name": "organization",
-      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). Agent context bundle. Next document reference number (numbering series) for invoices, bills, credit notes, quotes, orders and journals."
+      "description": "Organization info (name, currency, country, fiscal year). User management: invite, update, remove, search org users. Bulk invite. List enabled modules (org features/capabilities). Agent context bundle. Next document reference number (numbering series) for invoices, bills, credit notes, quotes, orders and journals; its format is set in transaction_defaults."
+    },
+    {
+      "name": "transaction_defaults",
+      "description": "Transaction defaults (Field Defaults, Document Defaults) per family: invoices, bills, customer and supplier credit notes, journals, expense claims, payruns, quotes, sale orders, purchase requests and purchase orders. Read or set document numbering: number series, numbering format, prefix, separator, include the date, series start, restart or renumber, invoice number format, bill number format. Also the default due date and payment terms (Net 30, on delivery), default notes or terms printed on documents, default currency, default line item account and tax, line item columns, default payment account and method, auto email and e-invoice toggles, over-fulfilment and reference display options. The next number itself is get_next_reference. Say familyName to people, not the code."
     },
     {
       "name": "document_ai",
@@ -345,7 +361,7 @@
     {
       "name": "get_contact",
       "namespace": "contacts",
-      "description": "Fetch a contact by internal resourceId. To search by other fields, use `search_contacts`.",
+      "description": "Fetch a contact by internal resourceId, with the templates it uses instead of the defaults. To search by other fields, use `search_contacts`.",
       "readOnly": true,
       "destructive": false
     },
@@ -1218,9 +1234,16 @@
       "destructive": false
     },
     {
+      "name": "download_report_pack_pdf",
+      "namespace": "report_templates",
+      "description": "Render a report pack as one PDF; fileUrl opens for 30 minutes (expiresAt). No template: the default pack; no dates: its saved period. A big pack can take longer than a call may wait: then rendered is false, with no link, and whereToSee is where to download it in the app; each call renders it again. A section that fails to render is left out without an error.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
       "name": "create_organization_report_template",
       "namespace": "report_templates",
-      "description": "Create a report template from the default layout (or templateConfiguration), with edits applied. A pack needs packTemplates. Not made the default; names are unique per report type. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Create a report template from the default layout (or templateConfiguration), with edits applied. A pack needs packTemplates; its pages and period go in edits. Not made the default; names are unique per report type. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": false
     },
@@ -1242,6 +1265,202 @@
       "name": "delete_organization_report_template",
       "namespace": "report_templates",
       "description": "Delete a report template (also removed from packs). Refused for a type's default and a pack's last report. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_pdf_templates",
+      "namespace": "pdf_templates",
+      "description": "List PDF templates (no layouts), defaults first: templateType, isDefault (one per type), styleCode, controlFlag (locked). Read one whole with get_pdf_template.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_pdf_templates",
+      "namespace": "pdf_templates",
+      "description": "Find PDF templates by name, type, default flag, style or page order (no layouts).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_pdf_template",
+      "namespace": "pdf_templates",
+      "description": "Read a PDF template with its whole layout (templateSettings), style, page order and the contacts assigned it.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_pdf_template_styles",
+      "namespace": "pdf_templates",
+      "description": "The styles (designs) a PDF template of one type can be drawn in; isDefaultStyle marks the default.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_pdf_template_layout_settings",
+      "namespace": "pdf_templates",
+      "description": "Every setting a PDF template of one type can hold, with its values or bounds. Read it before writing settings: a setting not listed cannot be set.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_pdf_template",
+      "namespace": "pdf_templates",
+      "description": "Create a PDF template: the type's default (layout, style) with the settings merged on. makeDefault also makes it the default. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_pdf_template",
+      "namespace": "pdf_templates",
+      "description": "Change a PDF template: rename it, change part of its layout (settings, merged on), its style or page order. Locked templates (controlFlag) are refused. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "set_default_pdf_template",
+      "namespace": "pdf_templates",
+      "description": "Make a template its type's default: documents of that type print with it unless the document or its contact names another. Answers with previousDefault. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "upload_template_image",
+      "namespace": "pdf_templates",
+      "description": "Upload a logo, letterhead or payment QR image (the file attached to the call, or sourceUrl). It goes on no template: pass the settings it answers to create_pdf_template or update_pdf_template. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_pdf_templates",
+      "namespace": "pdf_templates",
+      "description": "Delete up to 100 PDF templates, all or none. Refused for a type's default, a locked template and the last of a type. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_email_template_types",
+      "namespace": "email_templates",
+      "description": "The kinds of email a template is for, with the {{placeholders}} each fills (others are sent as written) and, for reminders, the schedule keys and values. Read before writing a message.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "list_email_templates",
+      "namespace": "email_templates",
+      "description": "List email templates (no bodies): type, isDefault (one per type), status, subject, reminder schedule. Read one with get_email_template.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_email_templates",
+      "namespace": "email_templates",
+      "description": "Find email templates by name, type, status or default flag (no bodies).",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_email_template",
+      "namespace": "email_templates",
+      "description": "Read an email template: subject, message (plain text), copied addresses, reminder schedule, receipt template; INVOICE and CUSTOMER_CREDIT_NOTE add variants per balance state.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_email_template",
+      "namespace": "email_templates",
+      "description": "Create an email template (sent with a document, or a reminder or statement on a schedule). Not the default; names are unique per type; a reminder starts switched off. Give message (or emailBody). INVOICE and CUSTOMER_CREDIT_NOTE send variants (BALANCE_DUE, NO_BALANCE_DUE): give both, or neither to copy the subject and message into both. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_email_template",
+      "namespace": "email_templates",
+      "description": "Change an email template: name, subject, message, copied addresses, reminder schedule, receipt template, or status. INVOICE and CUSTOMER_CREDIT_NOTE emails send their variants: change those, not the template's own subject and message. The type cannot change. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "set_default_email_template",
+      "namespace": "email_templates",
+      "description": "Make a template the default of its type: used for that kind of email unless a contact names its own. Answers with previousDefault. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "delete_email_template",
+      "namespace": "email_templates",
+      "description": "Delete an email template; contacts that named it fall back to the default. Refused for a type's default; to keep one unused, set status INACTIVE instead. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_signature_profiles",
+      "namespace": "signature_profiles",
+      "description": "List e-sign templates (signature profiles), without emails; get_signature_profile reads one.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "search_signature_profiles",
+      "namespace": "signature_profiles",
+      "description": "Find e-sign templates (signature profiles) by name or document type.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_signature_profile",
+      "namespace": "signature_profiles",
+      "description": "Read an e-sign template (signature profile) in full, emails included.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "create_signature_profile",
+      "namespace": "signature_profiles",
+      "description": "Create an e-sign template (signature profile) for quotes or purchase requests. Not the default unless isDefault. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "update_signature_profile",
+      "namespace": "signature_profiles",
+      "description": "Change an e-sign template. Fields left out keep theirs; list fields replace their list. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "set_default_signature_profile",
+      "namespace": "signature_profiles",
+      "description": "Make an e-sign template its document type's default. Answers with previousDefault. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "upload_signature_profile_appendix",
+      "namespace": "signature_profiles",
+      "description": "Upload a PDF (the file attached to the call, or sourceUrl) to append to documents sent for signature. It goes on no profile: pass the file it answers in defaultAppendices. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "delete_signature_profile",
+      "namespace": "signature_profiles",
+      "description": "Delete an e-sign template. Refused for a type's default. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "get_transaction_defaults",
+      "namespace": "transaction_defaults",
+      "description": "A family's defaults for new documents: numbering, due date term, notes, currency, line item, payment and display defaults. Absent = not applicable or unsaved. Next number: get_next_reference.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "update_transaction_defaults",
+      "namespace": "transaction_defaults",
+      "description": "Change some of a family's defaults: left out or null keeps a value; \"\" clears notes, an id or paymentMethod, never currency. Send ALL of a family's changes in ONE call: back-to-back updates can undo each other. Existing documents keep their numbers; new ones use the change (see get_next_reference). A field outside the family is refused. Returns the defaults as written. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2144,7 +2363,7 @@
     {
       "name": "delete_pay_type",
       "namespace": "payrun_settings",
-      "description": "Delete a pay type used nowhere. One whose record shows inUse true is refused (PAY_TYPE_IN_USE): set it INACTIVE with update_pay_type. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Delete a pay type used nowhere. One whose record shows inUse true is refused (PAY_TYPE_IN_USE): set it INACTIVE with update_pay_type. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2179,7 +2398,7 @@
     {
       "name": "delete_payrun_posting_rule",
       "namespace": "payrun_settings",
-      "description": "Delete a payrun posting rule. The default, and one whose record shows inUse true, are refused: make another the default first. Not a claim posting rule (delete_posting_rule). Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Delete a payrun posting rule. The default, and one whose record shows inUse true, are refused: make another the default first. Not a claim posting rule (delete_posting_rule). If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -2214,7 +2433,7 @@
     {
       "name": "delete_pay_profile",
       "namespace": "payrun_settings",
-      "description": "Delete a pay profile no employee is or was on. One whose record shows inUse true is refused (PAY_PROFILE_IN_USE): set it INACTIVE with update_pay_profile. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool).",
+      "description": "Delete a pay profile no employee is or was on. One whose record shows inUse true is refused (PAY_PROFILE_IN_USE): set it INACTIVE with update_pay_profile. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -3971,6 +4190,7 @@
     "customer-credit-notes",
     "deferrals",
     "drafts",
+    "email-templates",
     "employee-pay-details",
     "employees",
     "export-records",
@@ -4003,6 +4223,7 @@
     "payrun-posting-rules",
     "payruns",
     "payslips",
+    "pdf-templates",
     "posting-rules",
     "pseudo-sql",
     "purchase-items",
@@ -4017,10 +4238,12 @@
     "schedulers",
     "schema",
     "serve",
+    "signature-profiles",
     "subscriptions",
     "supplier-credit-notes",
     "tags",
     "tax-profiles",
+    "transaction-defaults",
     "unapplied-payments",
     "update",
     "version",

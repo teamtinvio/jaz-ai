@@ -2,7 +2,7 @@
 name: jaz-api
 description: >-
   Use this skill whenever you call, debug, or review code that touches the Jaz
-  REST API. Covers field names, response shapes, 148 production gotchas, error
+  REST API. Covers field names, response shapes, 152 production gotchas, error
   recovery (422/400/404/500), search filters, pagination, and edge cases for
   every endpoint: invoices, bills, credit notes, journals, cash entries,
   payments, contacts, CoA, items, tax profiles, bank records, fixed assets,
@@ -14,7 +14,7 @@ description: >-
 license: MIT
 compatibility: Uses Jaz OAuth by default; organization API keys remain supported. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown.
 metadata:
-  version: "9.12.0"
+  version: "9.13.0"
 ---
 
 # Jaz API Skill
@@ -67,6 +67,8 @@ The rules column names each rule file with the rule numbers that apply to the ta
 | Bank records, the cashflow ledger, Jaz Magic extraction, deposits, bank rules | `endpoints-banking-magic.md` | `rules-fundamentals.md` 44, 47-47a; `rules-search-magic-shapes.md` 57-63; `rules-entities-quick-fix.md` 89-90d, 110 |
 | Reconciliation, drafts lifecycle, transaction bulk upserts | `full-api-surface.md` (catalog) | `rules-bulk-recon-drafts.md` 118-135, 158-160 |
 | Schedulers, subscriptions, reports, exports, report templates | `endpoints-schedules-reports.md` | `rules-fundamentals.md` 32-33, 36-37a, 42; `rules-entities-quick-fix.md` 93-94, 109, 114; `rules-bulk-recon-drafts.md` 147, 161; `report-templates.md` |
+| PDF templates, email templates, e-sign templates (signature profiles) | `endpoints-schedules-reports.md` | `rules-bulk-recon-drafts.md` 162-164; `pdf-templates.md` |
+| Numbering and transaction defaults (what new documents of a family start from) | `endpoints-master-data.md` | `rules-entities-quick-fix.md` 104; `rules-bulk-recon-drafts.md` 165 |
 | Fixed assets, deferrals, leases, loans, payroll | `endpoints-assets-payroll.md` | `rules-entities-quick-fix.md` 91-92c, 117; `rules-bulk-recon-drafts.md` 122 |
 | Quick Fix, Ledger Find & Fix, contacts bulk upsert, background jobs | `endpoints-bulk-edits.md` | `rules-fundamentals.md` (bulk upsert and background jobs sections); `rules-entities-quick-fix.md` 107-107a, 111; `rules-bulk-recon-drafts.md` 119, 136-137c |
 | An error code or message | | `errors.md` |
@@ -99,7 +101,7 @@ The numbered rules are split by area into four files under `references/`. Number
 | 1-49 | [references/rules-fundamentals.md](references/rules-fundamentals.md) | Identifiers & dates; payments (cross-currency); names & fields; transaction creation (`saveAsDraft`); chart of accounts; bulk upsert of items, contacts and rates; background jobs; export records; journals & cash; credit notes & refunds; inventory items; cash transfers; schedulers; bookmarks; custom fields; tags; nano classifiers; reports; pagination; currency rates and FX; GET/POST field asymmetries; search sort; bank records; withholding tax; known bugs and non-existent endpoints; deposits; attachments; rate direction |
 | 50-88 | [references/rules-search-magic-shapes.md](references/rules-search-magic-shapes.md) | Search & filter (`query`, operators, date formats, aliases, response envelopes); Jaz Magic extraction; payment reads and the cashflow ledger; response shape gotchas; cash entry IDs; entity resolution and payment accounts; draft finalization pipeline |
 | 89-117 | [references/rules-entities-quick-fix.md](references/rules-entities-quick-fix.md) | Bank rules; fixed assets; subscriptions & scheduled transactions; contact groups; inventory balances; withholding codes and 2307 certificates; duplicate detection; tax profile scoping; cash entry PUT and account type; journal balance; transaction references; currency rates; Quick Fix and Ledger Find & Fix; transfer trial balance; dynamic strings; sub-resource shapes; nano-classifier API; scheduler asymmetry; payment records and payment methods |
-| 118-161 | [references/rules-bulk-recon-drafts.md](references/rules-bulk-recon-drafts.md) | Transaction bulk upserts; reconciliation actions; drafts lifecycle; contacts bulk upsert and payment terms; contact signals and `validate_drafts`; IFRS 18 account types; CoA bulk upsert; pseudo-SQL; cashflow report; match-to-existing reconciliation; auto-reconciliation suggestions; payment adjustments; report templates |
+| 118-165 | [references/rules-bulk-recon-drafts.md](references/rules-bulk-recon-drafts.md) | Transaction bulk upserts; reconciliation actions; drafts lifecycle; contacts bulk upsert and payment terms; contact signals and `validate_drafts`; IFRS 18 account types; CoA bulk upsert; pseudo-SQL; cashflow report; match-to-existing reconciliation; auto-reconciliation suggestions; payment adjustments; report templates; PDF templates; email templates; signature profiles; transaction defaults and document numbering |
 
 ## Supporting Files
 
@@ -112,6 +114,7 @@ For detailed reference, read these files in this skill directory (the four rule 
 - **[references/orders.md](./references/orders.md)**: Sale quotes, sale orders, purchase requests, purchase orders: lifecycle, linking, conversion, line-item edits
 - **[references/claims.md](./references/claims.md)**: Expense claims: records, lifecycle, bulk actions, conversion, payouts, employees, claim settings
 - **[references/report-templates.md](./references/report-templates.md)**: Report templates and packs: layouts, `edits`, defaults, refusals
+- **[references/pdf-templates.md](./references/pdf-templates.md)**: PDF templates: template types, the layout and `settings` merge, defaults, styles, page order, refusals
 - **[references/bank-rule-column-mapping.md](./references/bank-rule-column-mapping.md)**: Bank-rule column-value mapping (`ColumnValueMapConfig`, column tokens)
 
 ### Endpoint and search lookups: the jaz-api-reference skill

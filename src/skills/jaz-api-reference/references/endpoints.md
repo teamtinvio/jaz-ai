@@ -106,6 +106,7 @@ Create and update endpoints accept alias field names (`issueDate` for `valueDate
 | Section | File |
 |---------|------|
 | 1. Organization | [endpoints-master-data.md](./endpoints-master-data.md) |
+| 1b. Transaction Defaults (numbering and defaults per family) | [endpoints-master-data.md](./endpoints-master-data.md) |
 | 2. Chart of Accounts | [endpoints-master-data.md](./endpoints-master-data.md) |
 | 3. Tax Profiles | [endpoints-master-data.md](./endpoints-master-data.md) |
 | 4. Currencies | [endpoints-master-data.md](./endpoints-master-data.md) |
@@ -159,7 +160,10 @@ Create and update endpoints accept alias field names (`issueDate` for `valueDate
 | 27. Unapplied Payments | [endpoints-transactions.md](./endpoints-transactions.md) |
 | 28. Report Templates | [endpoints-schedules-reports.md](./endpoints-schedules-reports.md) |
 | 29. Collaboration (Comments and Notifications) | [endpoints-transactions.md](./endpoints-transactions.md) |
+| 30. PDF Templates | [endpoints-schedules-reports.md](./endpoints-schedules-reports.md) |
+| 31. Email Templates | [endpoints-schedules-reports.md](./endpoints-schedules-reports.md) |
+| 32. Signature Profiles (E-sign Templates) | [endpoints-schedules-reports.md](./endpoints-schedules-reports.md) |
 
 ---
 
-*Last updated: 2026-11-25 (split by domain into the files indexed above). Previous: 2026-11-06 (Collaboration mentions are markup in `content`). Previous: 2026-11-05 (added Collaboration, section 29). Previous: 2026-09-24 (added Report Templates, section 28). Previous: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09, added Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13: Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*
+*Last updated: 2026-11-26 (added PDF Templates, section 30, Email Templates, section 31, and Signature Profiles, section 32). Previous: 2026-11-25 (split by domain into the files indexed above). Previous: 2026-11-06 (Collaboration mentions are markup in `content`). Previous: 2026-11-05 (added Collaboration, section 29). Previous: 2026-09-24 (added Report Templates, section 28). Previous: 2026-09-23 (added Unapplied Payments, section 27). Previous: 2026-09-13 (added Bank Rules CRUD, section 26). Previous: 2026-07-11 (added Jots judgment journal, section 25). Previous: 2026-04-09, added Contacts bulk-upsert (22), Background Jobs search (23), Export Records (24). 2026-03-13: Payment record CRUD, nano-classifier, scheduler GET/PUT/DELETE.*

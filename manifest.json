@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.12.0",
+  "version": "9.13.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -116,7 +116,7 @@
     },
     {
       "name": "get_contact",
-      "description": "Fetch a contact by internal resourceId. To search by other fields, use `search_contacts`."
+      "description": "Fetch a contact by internal resourceId, with the templates it uses instead of the defaults. To search by other fields, use `search_contacts`."
     },
     {
       "name": "get_contact_signals",
@@ -615,8 +615,12 @@
       "description": "The default layout a new template of this report type starts from."
     },
     {
+      "name": "download_report_pack_pdf",
+      "description": "Render a report pack as one PDF; fileUrl opens for 30 minutes (expiresAt). No template: the default pack; no dates: its saved period. A big pack can take longer than a call may wait: then rendered is false, with no link, and whereToSee is where to download it in the app; each call renders it again. A section that fails to render is left out without an error."
+    },
+    {
       "name": "create_organization_report_template",
-      "description": "Create a report template from the default layout (or templateConfiguration), with edits applied. A pack needs packTemplates. Not made the default; names are unique per report type. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Create a report template from the default layout (or templateConfiguration), with edits applied. A pack needs packTemplates; its pages and period go in edits. Not made the default; names are unique per report type. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "update_organization_report_template",
@@ -629,6 +633,118 @@
     {
       "name": "delete_organization_report_template",
       "description": "Delete a report template (also removed from packs). Refused for a type's default and a pack's last report. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "list_pdf_templates",
+      "description": "List PDF templates (no layouts), defaults first: templateType, isDefault (one per type), styleCode, controlFlag (locked). Read one whole with get_pdf_template."
+    },
+    {
+      "name": "search_pdf_templates",
+      "description": "Find PDF templates by name, type, default flag, style or page order (no layouts)."
+    },
+    {
+      "name": "get_pdf_template",
+      "description": "Read a PDF template with its whole layout (templateSettings), style, page order and the contacts assigned it."
+    },
+    {
+      "name": "list_pdf_template_styles",
+      "description": "The styles (designs) a PDF template of one type can be drawn in; isDefaultStyle marks the default."
+    },
+    {
+      "name": "list_pdf_template_layout_settings",
+      "description": "Every setting a PDF template of one type can hold, with its values or bounds. Read it before writing settings: a setting not listed cannot be set."
+    },
+    {
+      "name": "create_pdf_template",
+      "description": "Create a PDF template: the type's default (layout, style) with the settings merged on. makeDefault also makes it the default. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_pdf_template",
+      "description": "Change a PDF template: rename it, change part of its layout (settings, merged on), its style or page order. Locked templates (controlFlag) are refused. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "set_default_pdf_template",
+      "description": "Make a template its type's default: documents of that type print with it unless the document or its contact names another. Answers with previousDefault. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "upload_template_image",
+      "description": "Upload a logo, letterhead or payment QR image (the file attached to the call, or sourceUrl). It goes on no template: pass the settings it answers to create_pdf_template or update_pdf_template. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_pdf_templates",
+      "description": "Delete up to 100 PDF templates, all or none. Refused for a type's default, a locked template and the last of a type. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "list_email_template_types",
+      "description": "The kinds of email a template is for, with the {{placeholders}} each fills (others are sent as written) and, for reminders, the schedule keys and values. Read before writing a message."
+    },
+    {
+      "name": "list_email_templates",
+      "description": "List email templates (no bodies): type, isDefault (one per type), status, subject, reminder schedule. Read one with get_email_template."
+    },
+    {
+      "name": "search_email_templates",
+      "description": "Find email templates by name, type, status or default flag (no bodies)."
+    },
+    {
+      "name": "get_email_template",
+      "description": "Read an email template: subject, message (plain text), copied addresses, reminder schedule, receipt template; INVOICE and CUSTOMER_CREDIT_NOTE add variants per balance state."
+    },
+    {
+      "name": "create_email_template",
+      "description": "Create an email template (sent with a document, or a reminder or statement on a schedule). Not the default; names are unique per type; a reminder starts switched off. Give message (or emailBody). INVOICE and CUSTOMER_CREDIT_NOTE send variants (BALANCE_DUE, NO_BALANCE_DUE): give both, or neither to copy the subject and message into both. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_email_template",
+      "description": "Change an email template: name, subject, message, copied addresses, reminder schedule, receipt template, or status. INVOICE and CUSTOMER_CREDIT_NOTE emails send their variants: change those, not the template's own subject and message. The type cannot change. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "set_default_email_template",
+      "description": "Make a template the default of its type: used for that kind of email unless a contact names its own. Answers with previousDefault. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_email_template",
+      "description": "Delete an email template; contacts that named it fall back to the default. Refused for a type's default; to keep one unused, set status INACTIVE instead. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "list_signature_profiles",
+      "description": "List e-sign templates (signature profiles), without emails; get_signature_profile reads one."
+    },
+    {
+      "name": "search_signature_profiles",
+      "description": "Find e-sign templates (signature profiles) by name or document type."
+    },
+    {
+      "name": "get_signature_profile",
+      "description": "Read an e-sign template (signature profile) in full, emails included."
+    },
+    {
+      "name": "create_signature_profile",
+      "description": "Create an e-sign template (signature profile) for quotes or purchase requests. Not the default unless isDefault. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "update_signature_profile",
+      "description": "Change an e-sign template. Fields left out keep theirs; list fields replace their list. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "set_default_signature_profile",
+      "description": "Make an e-sign template its document type's default. Answers with previousDefault. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "upload_signature_profile_appendix",
+      "description": "Upload a PDF (the file attached to the call, or sourceUrl) to append to documents sent for signature. It goes on no profile: pass the file it answers in defaultAppendices. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "delete_signature_profile",
+      "description": "Delete an e-sign template. Refused for a type's default. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "get_transaction_defaults",
+      "description": "A family's defaults for new documents: numbering, due date term, notes, currency, line item, payment and display defaults. Absent = not applicable or unsaved. Next number: get_next_reference."
+    },
+    {
+      "name": "update_transaction_defaults",
+      "description": "Change some of a family's defaults: left out or null keeps a value; \"\" clears notes, an id or paymentMethod, never currency. Send ALL of a family's changes in ONE call: back-to-back updates can undo each other. Existing documents keep their numbers; new ones use the change (see get_next_reference). A field outside the family is refused. Returns the defaults as written. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "move_transaction_capsules",
@@ -1144,7 +1260,7 @@
     },
     {
       "name": "delete_pay_type",
-      "description": "Delete a pay type used nowhere. One whose record shows inUse true is refused (PAY_TYPE_IN_USE): set it INACTIVE with update_pay_type. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Delete a pay type used nowhere. One whose record shows inUse true is refused (PAY_TYPE_IN_USE): set it INACTIVE with update_pay_type. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_payrun_posting_rules",
@@ -1164,7 +1280,7 @@
     },
     {
       "name": "delete_payrun_posting_rule",
-      "description": "Delete a payrun posting rule. The default, and one whose record shows inUse true, are refused: make another the default first. Not a claim posting rule (delete_posting_rule). Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Delete a payrun posting rule. The default, and one whose record shows inUse true, are refused: make another the default first. Not a claim posting rule (delete_posting_rule). If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_pay_profiles",
@@ -1184,7 +1300,7 @@
     },
     {
       "name": "delete_pay_profile",
-      "description": "Delete a pay profile no employee is or was on. One whose record shows inUse true is refused (PAY_PROFILE_IN_USE): set it INACTIVE with update_pay_profile. Confirm first: say what it changes and wait for a yes. If this action involved a judgment call, record it (jot field or jot tool)."
+      "description": "Delete a pay profile no employee is or was on. One whose record shows inUse true is refused (PAY_PROFILE_IN_USE): set it INACTIVE with update_pay_profile. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "search_employee_pay_details",

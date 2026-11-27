@@ -16,7 +16,7 @@ description: >-
 license: MIT
 compatibility: Uses Jaz OAuth by default; organization API keys remain supported. Works with Claude Code, Google Antigravity, OpenAI Codex, GitHub Copilot, Cursor, and any agent that reads markdown. Load the jaz-api skill alongside this one.
 metadata:
-  version: "9.12.0"
+  version: "9.13.0"
 ---
 
 # Jaz API Reference Skill
@@ -26,7 +26,7 @@ The lookup half of the Jaz REST API docs: what each endpoint takes and returns, 
 The **jaz-api** skill holds the rest: the numbered rules (production gotchas), the error catalog, the field name mapping, resource creation order, orders, claims and report templates. Read its rules before writing a request; these pages show the wire, the rules say where it bites.
 
 - A rule cited here ("rule 107", "SKILL.md rule 107") is a jaz-api rule. The Rule Index in jaz-api's `SKILL.md` names the file that holds it.
-- A file named here without a link (`field-map.md`, `errors.md`, `feature-glossary.md`, `orders.md`, `report-templates.md`, `rules-*.md`) is in jaz-api's `references/`.
+- A file named here without a link (`field-map.md`, `errors.md`, `feature-glossary.md`, `orders.md`, `report-templates.md`, `pdf-templates.md`, `rules-*.md`) is in jaz-api's `references/`.
 - Inside an MCP host or with the `clio` CLI, call the tools or commands; read these pages for context. Write raw HTTP from them only for a direct integration.
 
 ## Files
@@ -37,7 +37,7 @@ The **jaz-api** skill holds the rest: the numbered rules (production gotchas), t
 | [references/endpoints-master-data.md](references/endpoints-master-data.md) | Organization, chart of accounts, tax profiles, currencies and rates, contacts, items, tags, custom fields, inventory items and balances, contact groups, bookmarks, catalogs, nano classifiers |
 | [references/endpoints-transactions.md](references/endpoints-transactions.md) | Invoices, bills, journals, cash entries, payments and payment records, credit notes and refunds, cash transfers, attachments, transfer trial balance, approvals, jots, unapplied payments, comments and notifications |
 | [references/endpoints-banking-magic.md](references/endpoints-banking-magic.md) | Jaz Magic extraction, bank records, the cashflow ledger search, deposits, bank rules |
-| [references/endpoints-schedules-reports.md](references/endpoints-schedules-reports.md) | Schedulers, subscriptions, reports, export records, report templates |
+| [references/endpoints-schedules-reports.md](references/endpoints-schedules-reports.md) | Schedulers, subscriptions, reports, export records, report templates, PDF templates, email templates |
 | [references/endpoints-assets-payroll.md](references/endpoints-assets-payroll.md) | Fixed assets, deferrals, leases, loans, payrun settings and employee pay |
 | [references/endpoints-bulk-edits.md](references/endpoints-bulk-edits.md) | Quick Fix (with the generated per-entity field lists), Ledger Find & Fix, contacts bulk upsert, background jobs |
 | [references/full-api-surface.md](references/full-api-surface.md) | Endpoint catalog by resource (about 200 paths, more than the examples cover), limits, platform features that change API behavior |

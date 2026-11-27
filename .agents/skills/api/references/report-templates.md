@@ -10,7 +10,7 @@ Measured against production on 2026-09-24. Everything below that says "measured"
 
 ## The surfaces
 
-Every surface uses the same eight verbs, and each takes a template by **resourceId or exact name**:
+Every surface uses the same verbs, and each takes a template by **resourceId or exact name**:
 
 | Verb | MCP tool | CLI | API |
 |---|---|---|---|
@@ -23,6 +23,7 @@ Every surface uses the same eight verbs, and each takes a template by **resource
 | make default | `set_default_organization_report_template` | `clio report-templates set-default <template>` | `POST /organization-report-template/{id}/set-default` |
 | delete | `delete_organization_report_template` | `clio report-templates delete <template>` | `DELETE /organization-report-template/{id}` |
 | **render** | `download_export` with `template` | `clio exports download --template <template>` | `POST /data-exports/{type}` with `templateResourceId` |
+| **render a pack** | `download_report_pack_pdf` | `clio report-templates download-pack [pack]` | `POST /generate-report-packs-pdf` |
 
 Resolve a name to its id on its own with `clio resolve report-template <name>`.
 
@@ -44,7 +45,7 @@ Resolve a name to its id on its own with `clio resolve report-template <name>`.
 | `AGED_RECEIVABLES_DETAILS` | Aged receivables, per document | `ar-details-report` | as at a date | no |
 | `AGED_PAYABLES_SUMMARY` | Aged payables | `ap-report` | as at a date | no |
 | `AGED_PAYABLES_DETAILS` | Aged payables, per document | `ap-details-report` | as at a date | no |
-| `REPORT_PACK` | Several reports in one document | not through the public API | range | no |
+| `REPORT_PACK` | Several reports in one document | `download_report_pack_pdf` (PDF only) | range | no |
 
 - Bank balance summary and the two bank reconciliation reports have a fixed layout. No template applies to them.
 - **`framework`** takes `IAS_1`, `IFRS_18`, `GAAP`, `IND_AS` or `IFRS_SME`, and defaults to `IAS_1`.
@@ -241,11 +242,13 @@ There is no budget column.
 
 Cover and notes text may use `{{OrganizationName}}`, `{{PreparedBy}}`, `{{DateFrom}}` and `{{DateTo}}`.
 
+**The API refuses a pack page the app would not write** (422, every problem at once): a type outside the five, a component without its type's config object, a page `title` under 1 character, a `position` other than `left_aligned` / `center_aligned`, contents `dotLeaders` outside `DOTS` / `DASHES` / `NONE`, and `labelLines` that are not 1 to 5 `{ label, enabled }` with at least one enabled and a label on each enabled one. A pack holds 2 to 20 components, pages included. A value the stored layout holds, sent back unchanged, is kept. **Clio adds a page as the app does**: insert `{ type: "COVER_PAGE" }` (or `TABLE_OF_CONTENTS`, `SIGNATURE_PAGE`, `APPENDIX`) and it gets an id and the app's starting settings (cover title "<pack type> Report", "Table of Contents" with dots, "Signature Page" with one "Prepared By" line, "Appendix"); settings sent beside `type` (`title`, `subtitle`, `labelLines`) go under its config key, and `labelLines` may be names (`["Director", "Secretary"]`), written as five `{ label, enabled }`. A page the pack already holds is sent as it is.
+
 **A pack's reports are recorded twice upstream**: in its `TEMPLATE` components and in `packTemplates`. A report missing from either renders as an error page. Clio keeps them in step with one rule:
 - **`packTemplates` decides which reports** are in the pack. Give it names or resourceIds, in order. Clio writes both places from it.
 - **The layout decides everything else**: cover page, contents, signature, styling. Change those with `edits`. Use `insert` (not `set`) to add a component.
 - **Edits that would change the reports are refused** instead of silently dropping one.
-- A new pack starts with its reports and nothing else. Upstream has no default pack layout.
+- A new pack starts with its reports and nothing else (upstream has no default pack layout), so a pack of one report needs a page too.
 - A pack cannot contain a pack. The first pack an organization creates becomes its default pack.
 
 ```bash
@@ -271,7 +274,7 @@ clio report-templates create --name "Board pack" --type REPORT_PACK \
 | Delete the default of a report type | Refused; set another default first (the error names candidates) |
 | Delete a pack's last report | Refused by Clio. Upstream deletes it whenever the pack has any other component (a cover page, say), leaving a pack with no reports. |
 | Delete a report that is in a pack with others | Allowed. It leaves each pack; the answer lists them in `removedFromPacks`. |
-| Delete the default pack | Allowed. The newest remaining pack becomes default, named in `newDefault`. |
+| Delete the default pack | Refused by Clio, like every default, naming the other packs: make another the default first. (The API would hand the default to the newest remaining pack.) |
 | Set default | Every export and dashboard view of that report changes, org-wide. The answer carries `previousDefault` to undo. Already default: nothing is sent. |
 | A new template straight after create | Can 404 for a moment; the read-back retries briefly |
 | Two edits to the same template at the same moment | The last write wins: upstream has no version check. Clio re-reads just before writing and re-applies its edits on anything changed since it first read, which keeps an earlier change; it cannot protect against one sent in the same instant. |
@@ -286,6 +289,13 @@ clio report-templates create --name "Board pack" --type REPORT_PACK \
 **Upstream answers a template it cannot use with HTTP 200 and an EMPTY body.** That covers a template that doesn't exist, one of another report type, or an unknown `templateName`, and was measured on all 12 exports. If you pass `templateResourceId` directly, Clio turns that empty answer into a named error instead of retrying it.
 
 `fixed-assets-register` accepts a template id and ignores it.
+
+**A pack renders through `download_report_pack_pdf` / `clio report-templates download-pack`**, never through an export:
+- It takes the pack by name or resourceId (checked to be a `REPORT_PACK` first), or none for the default pack, and `startDate` / `endDate` (CLI `--start-date` / `--end-date`). Dates left out take the period saved on the pack; a pack saved with a custom period needs both.
+- The answer is `{ data: { fileId, fileName, fileType, fileUrl }, expiresAt }`. `fileName` is the pack name plus `.pdf`; the link opens for 30 minutes.
+- The PDF is built while the call waits, which can take minutes. The API ends a render still running at 5 minutes with a plain-text 503, which Clio reports as a pack too large to render (make it smaller; a retry stops at the same limit). A call that cannot wait that long (an agent tool call is cut off at 25 to 55 seconds) gets no link: `download_report_pack_pdf` then answers `rendered: false` with `whereToSee`, the report packs screen in the app, where the person downloads it. Asking again does not help, because each request renders the whole pack again from the start.
+- It is sent **once**: a re-send renders the whole pack again, and a pack that failed fails the same way.
+- **A section that fails to render is left out of the PDF and the call still succeeds.** The answer does not say which section; open the PDF to check.
 
 ### Search
 

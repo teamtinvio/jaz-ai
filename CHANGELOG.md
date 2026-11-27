@@ -1,5 +1,46 @@
 # Changelog
 
+## [9.13.0] - 2026-11-27
+
+**Clio sets up your templates from what you ask for: how documents print, the emails they go out with, e-sign templates, numbering and document defaults, report packs, and which template each customer and document uses.**
+
+PDF templates
+- Clio creates, reads, changes, makes default and deletes the PDF templates of every document type: invoices, credit notes, receipts, refunds, statements, quotes, purchase orders, delivery slips, sale order confirmations, cash in and cash out, bill payment advices, payment requests and payslips. Name a template by its name or ID.
+- A change is merged onto the template, so asking for one thing ("make the title Tax Invoice") changes only that. A new template starts from the default of its type and is not made the default until you ask.
+- Clio lists every setting a template type can hold, with its choices and limits, and works only with those. A value the app does not offer is refused, naming what the setting takes.
+- Clio uploads a logo, letterhead or payment QR code from a file or a link.
+- What the app cannot do is said plainly, with the closest option where there is one: "Invoices cannot show the amount in words. There is no setting for it."
+
+Which template a customer or a document uses
+- Clio sets the PDF and email templates a customer uses in place of the defaults, and reads them back by name.
+- Clio picks the PDF template when it creates or edits an invoice, credit note, quote or purchase order, and reading one names the template it prints with. Left out, a document prints with its customer's template, else the default.
+
+Email templates
+- Clio creates, reads, edits, switches off or on, makes default and deletes the emails sent with invoices, credit notes, receipts, quotes, purchase orders, collection requests and payslips, and the payment reminders, subscription reminders and statement emails.
+- The message is plain text with placeholders such as the customer's name, and stays editable in the app.
+- A new reminder is created switched off. Switching one on is the step that waits for your yes.
+
+E-sign templates
+- Clio creates, reads, changes, makes default and deletes the e-sign templates a quote or purchase request is sent for signature with: who signs and in what order, who is copied, the invitation, reminder and completion emails, the expiry, and what happens once everyone has signed.
+- Clio uploads PDFs to append to every document sent with a template, up to 8 MB in all.
+
+Numbering and document defaults
+- Clio reads and changes what new documents of each kind start from: the number format, payment term, notes, currency, and the defaults of new lines and payments. The accounts and tax it sets are the ones the app offers for that default.
+
+Report packs
+- Clio sets up a report pack with a cover page, contents, signature page and appendix as the app builds them, and renders it as one PDF with a download link that works for 30 minutes.
+
+What waits for your yes
+- Deleting anything on the Templates menu (templates, custom fields, claim settings and payroll settings), and anything that emails or sends to customers: a reminder switched on, new documents emailed or sent as e-invoices by default, and an e-sign template that turns a signed quote into an invoice. Clio quotes exactly what will happen and acts only after your yes.
+- Everything else is done straight away, editing a template in use or switching a default included, and Clio's reply says what was done, what differs from the ask, what is not possible, and links to where you can see it.
+
+Not in this release
+- The template tools are not on the ChatGPT app.
+- A preview of a template before it is saved.
+
+In the terminal
+- New `clio pdf-templates`, `clio email-templates`, `clio signature-profiles` and `clio transaction-defaults` commands, and `clio report-templates download-pack`.
+
 ## [9.12.0] - 2026-11-27
 
 **Clio can download the PDF of a quote, an order, a purchase request or a payment.**

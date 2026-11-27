@@ -9397,6 +9397,10 @@
           "description": "When true, listed prices already include tax. Required when isTaxVATApplicable is set.",
           "type": "boolean"
         },
+        "templateResourceId": {
+          "description": "Resource ID of the PDF template the customer credit note prints with. When omitted, the contact's customer credit note template applies, else the organization default.",
+          "type": "string"
+        },
         "valueDate": {
           "description": "Customer credit note date, in YYYY-MM-DD format (organization timezone).",
           "type": "string"
@@ -9668,6 +9672,99 @@
       },
       "required": [
         "reference"
+      ],
+      "type": "object"
+    },
+    "CreateEmailTemplateRequest": {
+      "properties": {
+        "additionalEmailCcList": {
+          "description": "Other addresses copied on every email sent with the template.",
+          "items": {
+            "$ref": "#/definitions/EmailTemplateCcRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "emailBody": {
+          "description": "Body of the email, as HTML. Placeholders in double braces, such as {{contactName}}, are filled in when the email is sent; List Email Template Types names the ones each type fills, and a placeholder it does not name is sent as written. To keep the template editable in the web app, write the message the way its editor saves it: inside the element with id extract-email-body, one span per line, as in a template read with Get Email Template.",
+          "example": "<span>Dear {{contactName}},</span><br><span>Please find invoice {{invoiceReference}} attached.</span>",
+          "maxLength": 200000,
+          "type": "string"
+        },
+        "emailCcList": {
+          "description": "Organization users copied on every email sent with the template, by their email address. Each must be a user of the organization; their name is filled in from the user.",
+          "items": {
+            "$ref": "#/definitions/EmailTemplateUserCcRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "emailCurrencyFormat": {
+          "default": "CURRENCY_CODE_APPENDED",
+          "description": "How amounts are written in the email: CURRENCY_CODE_APPENDED puts the currency code after the amount, CURRENCY_SYMBOL_PREPENDED puts the currency symbol before it.",
+          "enum": [
+            "CURRENCY_CODE_APPENDED",
+            "CURRENCY_SYMBOL_PREPENDED"
+          ],
+          "type": "string"
+        },
+        "emailSubject": {
+          "description": "Subject line of the email. Placeholders in double braces, such as {{invoiceReference}}, are filled in when the email is sent.",
+          "example": "Invoice {{invoiceReference}} from {{organizationName}}",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "receiptEmailTemplateResourceId": {
+          "description": "COLLECTION_REQUEST templates only: resource ID of the CASH_IN_RECEIPT template sent once the collection request is paid. When omitted, the organization's default CASH_IN_RECEIPT template is used.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        },
+        "reminderSchedules": {
+          "description": "When the email goes out, for INVOICE_PAYMENT_REMINDER, SUBSCRIPTION_REMINDER and CUSTOMER_STATEMENT_SCHEDULE templates only. List Email Template Types gives the keys and values each type takes.",
+          "items": {
+            "$ref": "#/definitions/EmailTemplateReminderScheduleRequest"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "templateName": {
+          "description": "Display name of the template. Must be unique among the organization's templates of the same type, ignoring case and treating spaces and underscores alike.",
+          "example": "Invoice with payment link",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "templateType": {
+          "description": "The email the template writes. INVOICE_PAYMENT_REMINDER, SUBSCRIPTION_REMINDER and CUSTOMER_STATEMENT_SCHEDULE templates send on their reminderSchedules; every other type is used when that kind of document is sent.",
+          "enum": [
+            "INVOICE",
+            "CUSTOMER_CREDIT_NOTE",
+            "INVOICE_PAYMENT_RECEIPT",
+            "CUSTOMER_REFUND_RECEIPT",
+            "INVOICE_PAYMENT_REMINDER",
+            "SUBSCRIPTION_REMINDER",
+            "CUSTOMER_STATEMENT_SCHEDULE",
+            "SALE_QUOTE",
+            "PURCHASE_ORDER",
+            "CASH_IN_RECEIPT",
+            "COLLECTION_REQUEST",
+            "PAYSLIP"
+          ],
+          "example": "INVOICE",
+          "type": "string"
+        },
+        "variants": {
+          "description": "INVOICE and CUSTOMER_CREDIT_NOTE templates only: the subject and body sent while the document has a balance due (BALANCE_DUE) and once it is settled (NO_BALANCE_DUE). Give both or neither; when omitted, both start as copies of emailSubject and emailBody. These, not emailSubject and emailBody, are what an invoice or credit note email sends.",
+          "items": {
+            "$ref": "#/definitions/EmailTemplateVariantRequest"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "emailBody",
+        "emailSubject",
+        "templateName",
+        "templateType"
       ],
       "type": "object"
     },
@@ -10010,7 +10107,7 @@
           "type": "boolean"
         },
         "templateResourceId": {
-          "description": "Resource ID of the print template. The organization's default template applies when omitted.",
+          "description": "Resource ID of the PDF template the invoice prints with. When omitted, the contact's invoice template applies, else the organization default.",
           "type": "string"
         },
         "valueDate": {
@@ -11039,11 +11136,11 @@
           "type": "string"
         },
         "packTemplates": {
-          "description": "Templates included in the pack, in order. Required for REPORT_PACK, and rejected for every other report type. List the same templates as the TEMPLATE entries in the includedComponents of templateConfiguration: the pack renders from includedComponents, and delete checks read it too.",
+          "description": "Templates included in the pack, in order, 1 to 20. Required for REPORT_PACK, and rejected for every other report type. List the same templates as the TEMPLATE entries in the includedComponents of templateConfiguration: the pack renders from includedComponents, and delete checks read it too.",
           "items": {
             "$ref": "#/definitions/PackTemplateRequest"
           },
-          "maxItems": 100,
+          "maxItems": 20,
           "minItems": 1,
           "type": "array"
         },
@@ -11068,7 +11165,7 @@
           "type": "string"
         },
         "templateConfiguration": {
-          "description": "Template layout, as a JSON-encoded string. When omitted, the template starts from the system default layout for the report type (see Get Default Report Template Configuration). Required for REPORT_PACK. A formula row's formulaConfig.formula string supports only + and -: send formulaConfig.tokens for a formula that multiplies, divides, or uses brackets or numbers. Each token is {\"kind\": \"REF\", \"ref\": \"<row id>\"}, {\"kind\": \"OP\", \"op\": \"+\", \"-\", \"*\" or \"/\"}, {\"kind\": \"NUM\", \"value\": \"100\"}, {\"kind\": \"LPAREN\"}, or {\"kind\": \"RPAREN\"}. The layout must keep the rows the report cannot do without, marked \"deletable\": false in the default layout (for example Net Profit, or Assets, Liabilities, and Equity), and every formula must parse and refer only to rows in the layout; otherwise the request is rejected with INVALID_TEMPLATE_CONFIGURATION or INVALID_TEMPLATE_FORMULA.",
+          "description": "Template layout, as a JSON-encoded string. When omitted, the template starts from the system default layout for the report type (see Get Default Report Template Configuration). Required for REPORT_PACK. A formula row's formulaConfig.formula string supports only + and -: send formulaConfig.tokens for a formula that multiplies, divides, or uses brackets or numbers. Each token is {\"kind\": \"REF\", \"ref\": \"<row id>\"}, {\"kind\": \"OP\", \"op\": \"+\", \"-\", \"*\" or \"/\"}, {\"kind\": \"NUM\", \"value\": \"100\"}, {\"kind\": \"LPAREN\"}, or {\"kind\": \"RPAREN\"}. The layout must keep the rows the report cannot do without, marked \"deletable\": false in the default layout (for example Net Profit, or Assets, Liabilities, and Equity), and every formula must parse and refer only to rows in the layout; otherwise the request is rejected with INVALID_TEMPLATE_CONFIGURATION or INVALID_TEMPLATE_FORMULA. A logo, in documentLogo or in a cover page's coverPageConfig.logo, must be an image uploaded for this organization with Upload PDF Template Image, kind LOGO. A report pack's includedComponents holds 2 to 20 components, cover and contents pages included, each of type TEMPLATE, COVER_PAGE, TABLE_OF_CONTENTS, SIGNATURE_PAGE or APPENDIX with its settings in templateConfig, coverPageConfig, tableOfContentsConfig, signaturePageConfig or appendixPageConfig, and a TEMPLATE's templateConfig.templateResourceId is one of the templates packTemplates lists. A page position (coverPageConfig, tableOfContentsConfig, signaturePageConfig and appendixPageConfig) is left_aligned or center_aligned, each of those pages has a title of at least 1 character, tableOfContentsConfig.dotLeaders is DOTS, DASHES or NONE, and signaturePageConfig.labelLines holds up to 5 lines of {\"enabled\", \"label\"}, at least one enabled, each enabled one with a label. A report's pdfTitleConfigs.layout is left_aligned or center_aligned, and a row sits inside at most 4 groups. A value outside these is refused.",
           "type": "string"
         },
         "templateName": {
@@ -11436,6 +11533,77 @@
       ],
       "type": "object"
     },
+    "CreatePdfTemplateRequest": {
+      "properties": {
+        "parentBtTemplateResourceId": {
+          "description": "Resource ID of the template printed as the second document. A RECEIPT printed with its invoice names an INVOICE template, and a REFUND printed with its credit note names a CUSTOMER_CREDIT template; when omitted, the organization's default template of that type, and null is refused. A COLLECTION_REQUEST may name the DIRECT_CASH_IN_RECEIPT template used once it is paid. No other template takes one.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        },
+        "styleCode": {
+          "description": "Style the template is drawn in, one of the codes List PDF Template Styles returns for this template type. When omitted, the style of the organization's default template of this type, or the default style when there is none.",
+          "example": "STYLE_CODE_CLASSIC",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "templateName": {
+          "description": "Display name of the template. Must be unique among the organization's templates.",
+          "example": "Invoice with bank details",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "templateOrderType": {
+          "description": "Page order, for RECEIPT, REFUND, DIRECT_CASH_IN_RECEIPT, DIRECT_CASH_OUT_ADVICE, BILL_PAYMENT_ADVICE and COLLECTION_REQUEST templates only. A RECEIPT takes RECEIPT_ONLY, RECEIPT_FOLLOWED_BY_INVOICE or INVOICE_FOLLOWED_BY_RECEIPT; a REFUND takes REFUND_ONLY, REFUND_FOLLOWED_BY_CUSTOMER_CREDIT or CUSTOMER_CREDIT_FOLLOWED_BY_REFUND; the cash receipts and the bill payment advice take RECEIPT_ONLY, RECEIPT_FOLLOWED_BY_VOUCHER or VOUCHER_FOLLOWED_BY_RECEIPT; a COLLECTION_REQUEST takes RECEIPT_ONLY. Defaults to the single-document order: REFUND_ONLY for a REFUND, RECEIPT_ONLY for the others.",
+          "enum": [
+            "RECEIPT_ONLY",
+            "RECEIPT_FOLLOWED_BY_INVOICE",
+            "INVOICE_FOLLOWED_BY_RECEIPT",
+            "REFUND_ONLY",
+            "REFUND_FOLLOWED_BY_CUSTOMER_CREDIT",
+            "CUSTOMER_CREDIT_FOLLOWED_BY_REFUND",
+            "RECEIPT_FOLLOWED_BY_VOUCHER",
+            "VOUCHER_FOLLOWED_BY_RECEIPT"
+          ],
+          "example": "RECEIPT_ONLY",
+          "type": "string"
+        },
+        "templateSettings": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PdfTemplateSettings"
+            }
+          ],
+          "description": "Changes to the layout of the organization's default template of this type, merged onto it: an object merges key by key at every depth, and a list, a value or null replaces what the default holds. When omitted, the template copies the default's layout unchanged. When the organization has no template of this type, the layout is stored as sent, so send all of it."
+        },
+        "templateType": {
+          "description": "Document the template lays out. A template's type cannot be changed later.",
+          "enum": [
+            "INVOICE",
+            "CUSTOMER_CREDIT",
+            "RECEIPT",
+            "REFUND",
+            "CUSTOMER_STATEMENT",
+            "SALE_QUOTE",
+            "PURCHASE_ORDER",
+            "INVOICE_DELIVERY_SLIP",
+            "ORDER_DELIVERY_SLIP",
+            "SALE_ORDER_CONFIRMATION",
+            "DIRECT_CASH_IN_RECEIPT",
+            "DIRECT_CASH_OUT_ADVICE",
+            "BILL_PAYMENT_ADVICE",
+            "COLLECTION_REQUEST",
+            "PAYSLIP"
+          ],
+          "example": "INVOICE",
+          "type": "string"
+        }
+      },
+      "required": [
+        "templateName",
+        "templateType"
+      ],
+      "type": "object"
+    },
     "CreatePostingRuleRequest": {
       "properties": {
         "defaultBankAccountResourceId": {
@@ -11612,6 +11780,10 @@
         "taxInclusion": {
           "description": "When true, listed prices already include tax. Required when isTaxVATApplicable is true.",
           "type": "boolean"
+        },
+        "templateResourceId": {
+          "description": "Resource ID of the PDF template the purchase order prints with. When omitted, the contact's purchase order template applies, else the organization default.",
+          "type": "string"
         },
         "terms": {
           "description": "Payment terms in days, one of: 0,7,15,30,45,60.",
@@ -12013,6 +12185,10 @@
           "description": "When true, listed prices already include tax. Required when isTaxVATApplicable is true.",
           "type": "boolean"
         },
+        "templateResourceId": {
+          "description": "Resource ID of the PDF template the sale quote prints with. When omitted, the contact's sale quote template applies, else the organization default.",
+          "type": "string"
+        },
         "terms": {
           "description": "Payment terms in days, one of: 0,7,15,30,45,60.",
           "enum": [
@@ -12295,6 +12471,145 @@
         "proratedConfig",
         "repeat",
         "startDate"
+      ],
+      "type": "object"
+    },
+    "CreateSignatureProfileRequest": {
+      "properties": {
+        "ccObservers": {
+          "description": "People kept informed of the request and sent the signed copy, who do not sign it themselves. On update, replaces the stored list in full; send an empty list to remove them all.",
+          "items": {
+            "$ref": "#/definitions/SignatureCcObserverRequest"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "completionEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailRequest"
+            }
+          ],
+          "description": "Email sent once everyone has signed, with the signed copy attached."
+        },
+        "declineReasonRequired": {
+          "description": "When true, a signer who declines must give a reason. A new profile defaults to true.",
+          "example": true,
+          "type": "boolean"
+        },
+        "defaultAppendices": {
+          "description": "PDF files merged after the document when it is sent for signature, in order, up to 10, each once. Upload each with Upload Signature Profile Appendix and pass the file it returns as it is; a file the profile already holds is kept when sent back as the profile returns it. On update, replaces the stored list in full; send an empty list to remove them all.",
+          "items": {
+            "$ref": "#/definitions/SignatureProfileAppendixRequest"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        "defaultExpiryDays": {
+          "description": "Days a signer has to sign before the request expires, from 1 to 365. A new profile defaults to 30.",
+          "example": 30,
+          "maximum": 365,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "description": {
+          "description": "What the profile is for.",
+          "example": "Quotes over 10,000 that need the director to countersign",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "docType": {
+          "description": "Document the profile is used for, SALE_QUOTE or PURCHASE_REQUEST. It cannot be changed later.",
+          "enum": [
+            "SALE_QUOTE",
+            "PURCHASE_REQUEST"
+          ],
+          "example": "SALE_QUOTE",
+          "type": "string"
+        },
+        "invitationEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailRequest"
+            }
+          ],
+          "description": "Email inviting each signer to sign, with their signing link."
+        },
+        "isDefault": {
+          "default": false,
+          "description": "When true, the profile becomes the default for its document type, and the profile that was the default stops being the default.",
+          "example": false,
+          "type": "boolean"
+        },
+        "movementAlerts": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureMovementAlerts"
+            }
+          ],
+          "description": "What the sender is told about a request's progress. On update, values left out keep their stored values."
+        },
+        "name": {
+          "description": "Display name of the profile.",
+          "example": "Standard quote",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "onExpiryAction": {
+          "description": "What happens when a request expires unsigned: AUTO_VOID cancels it, ALERT_THEN_VOID alerts the sender, then cancels it, MANUAL_ONLY leaves it for the sender. A new profile defaults to AUTO_VOID.",
+          "enum": [
+            "AUTO_VOID",
+            "ALERT_THEN_VOID",
+            "MANUAL_ONLY"
+          ],
+          "example": "AUTO_VOID",
+          "type": "string"
+        },
+        "postCompletionAction": {
+          "description": "What happens once everyone has signed: DO_NOTHING, AUTO_ACCEPT (accept the document), AUTO_ACCEPT_AND_INVOICE (accept the sale quote and create its invoice, sale quotes only), or AUTO_ACCEPT_AND_BILL (accept the purchase request and create its bill, purchase requests only). A new profile defaults to DO_NOTHING.",
+          "enum": [
+            "DO_NOTHING",
+            "AUTO_ACCEPT",
+            "AUTO_ACCEPT_AND_INVOICE",
+            "AUTO_ACCEPT_AND_BILL"
+          ],
+          "example": "DO_NOTHING",
+          "type": "string"
+        },
+        "reminderEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailRequest"
+            }
+          ],
+          "description": "Email reminding a signer who has not signed."
+        },
+        "reminderSchedule": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureReminderSchedule"
+            }
+          ],
+          "description": "When reminders go to signers who have not signed. On update, values left out keep their stored values."
+        },
+        "signers": {
+          "description": "People who sign, in signing order, up to 50 (a signature request holds 50 signers at most). Users of the organization sign in the app; anyone else gets a signing link by email. On update, replaces the stored list in full; send an empty list to remove every signer.",
+          "items": {
+            "$ref": "#/definitions/SignatureProfileSignerRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "voidReasonRequired": {
+          "description": "When true, the sender must give a reason to cancel a request. A new profile defaults to true.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "docType",
+        "invitationEmail",
+        "name"
       ],
       "type": "object"
     },
@@ -13966,6 +14281,24 @@
       ],
       "type": "object"
     },
+    "DeletePdfTemplatesRequest": {
+      "properties": {
+        "resourceIds": {
+          "description": "Resource IDs of the PDF templates to delete, up to 100. Either all are deleted or none is.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "resourceIds"
+      ],
+      "type": "object"
+    },
     "DepreciationRateType": {
       "properties": {
         "type": {
@@ -14380,6 +14713,194 @@
       },
       "required": [
         "hash"
+      ],
+      "type": "object"
+    },
+    "EmailTemplateCcRequest": {
+      "properties": {
+        "email": {
+          "description": "Email address to copy.",
+          "example": "accounts@example.com",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name shown for the address.",
+          "example": "Accounts team",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "name"
+      ],
+      "type": "object"
+    },
+    "EmailTemplateFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "emailCurrencyFormat": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by currency format: CURRENCY_CODE_APPENDED or CURRENCY_SYMBOL_PREPENDED."
+        },
+        "isDefault": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Match only default templates (true) or only non-default templates (false)."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by email template resource ID."
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by status: ACTIVE or INACTIVE."
+        },
+        "templateName": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by template name."
+        },
+        "templateType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by template type, such as INVOICE or INVOICE_PAYMENT_REMINDER."
+        }
+      },
+      "type": "object"
+    },
+    "EmailTemplateReminderScheduleRequest": {
+      "properties": {
+        "key": {
+          "description": "When the reminder goes out. INVOICE_PAYMENT_REMINDER: BEFORE_DUE_DATE, ON_DUE_DATE or AFTER_DUE_DATE. SUBSCRIPTION_REMINDER: BEFORE_NEXT_INVOICE_DATE. CUSTOMER_STATEMENT_SCHEDULE: DAY_OF_WEEK, DAY_OF_MONTH or DAY_OF_QUARTER.",
+          "enum": [
+            "BEFORE_DUE_DATE",
+            "ON_DUE_DATE",
+            "AFTER_DUE_DATE",
+            "BEFORE_NEXT_INVOICE_DATE",
+            "DAY_OF_WEEK",
+            "DAY_OF_MONTH",
+            "DAY_OF_QUARTER"
+          ],
+          "example": "BEFORE_DUE_DATE",
+          "type": "string"
+        },
+        "value": {
+          "description": "For BEFORE_DUE_DATE, AFTER_DUE_DATE and BEFORE_NEXT_INVOICE_DATE, the number of days (1 or more). Empty for ON_DUE_DATE. DAY_OF_WEEK: SUNDAY to SATURDAY. DAY_OF_MONTH: FIRST_DATE, LAST_DATE, or FIRST_ or LAST_ and a weekday, such as LAST_FRIDAY. DAY_OF_QUARTER: FIRST_DAY or LAST_DAY.",
+          "example": "3",
+          "maxLength": 20,
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "type": "object"
+    },
+    "EmailTemplateResourceResponse": {
+      "properties": {
+        "resourceId": {
+          "description": "Resource ID of the email template.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "EmailTemplateSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
+    "EmailTemplateUserCcRequest": {
+      "properties": {
+        "email": {
+          "description": "Email address of the organization user.",
+          "example": "finance@example.com",
+          "type": "string"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "type": "object"
+    },
+    "EmailTemplateVariantRequest": {
+      "properties": {
+        "emailBody": {
+          "description": "Body for this balance state, as HTML, written like emailBody.",
+          "maxLength": 200000,
+          "type": "string"
+        },
+        "emailSubject": {
+          "description": "Subject line for this balance state.",
+          "example": "Invoice {{invoiceReference}} from {{organizationName}}",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "paymentState": {
+          "description": "Balance state this subject and body is sent for: BALANCE_DUE while an amount is outstanding, NO_BALANCE_DUE once it is settled.",
+          "enum": [
+            "BALANCE_DUE",
+            "NO_BALANCE_DUE"
+          ],
+          "example": "BALANCE_DUE",
+          "type": "string"
+        }
+      },
+      "required": [
+        "emailBody",
+        "emailSubject",
+        "paymentState"
       ],
       "type": "object"
     },
@@ -16860,6 +17381,31 @@
       "required": [
         "reportDate"
       ],
+      "type": "object"
+    },
+    "GenerateReportPacksPDFRequest": {
+      "properties": {
+        "dateEnd": {
+          "description": "Last day of the period to report on, in YYYY-MM-DD format. When left out, the end of the period saved on the report pack is used.",
+          "example": "2026-01-31",
+          "type": "string"
+        },
+        "dateStart": {
+          "description": "First day of the period to report on, in YYYY-MM-DD format. When left out, the start of the period saved on the report pack is used.",
+          "example": "2026-01-01",
+          "type": "string"
+        },
+        "templateName": {
+          "description": "Name of the report pack to render, matched in full without regard to case. When neither templateResourceId nor templateName is sent, the default report pack is used.",
+          "example": "Month End Pack",
+          "type": "string"
+        },
+        "templateResourceId": {
+          "description": "Resource ID of the report pack to render. When both templateResourceId and templateName are sent, templateResourceId is used.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "GenerateTrialBalanceReportRequest": {
@@ -22123,6 +22669,572 @@
       ],
       "type": "object"
     },
+    "PdfTemplate": {
+      "properties": {
+        "contactResourceIds": {
+          "description": "Resource IDs of the contacts assigned this template. Invoice, credit note, receipt, refund and statement templates only.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "controlFlag": {
+          "description": "When true, the template is locked: it cannot be updated or deleted, and no other template of its type can be made the default.",
+          "example": false,
+          "type": "boolean"
+        },
+        "isDefault": {
+          "description": "When true, this is the organization's default template for its template type: documents of that type print with it unless their contact is assigned another.",
+          "example": true,
+          "type": "boolean"
+        },
+        "parentBtTemplateResourceId": {
+          "description": "Resource ID of the template printed as the second document (see Create PDF Template).",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the PDF template.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        },
+        "styleCode": {
+          "description": "Style the template is drawn in. See List PDF Template Styles.",
+          "example": "STYLE_CODE_CLASSIC",
+          "type": "string"
+        },
+        "templateName": {
+          "description": "Display name of the template.",
+          "example": "Standard Invoice",
+          "type": "string"
+        },
+        "templateOrderType": {
+          "description": "Page order of a receipt, refund, cash receipt, bill payment advice or collection request template.",
+          "enum": [
+            "RECEIPT_ONLY",
+            "RECEIPT_FOLLOWED_BY_INVOICE",
+            "INVOICE_FOLLOWED_BY_RECEIPT",
+            "REFUND_ONLY",
+            "REFUND_FOLLOWED_BY_CUSTOMER_CREDIT",
+            "CUSTOMER_CREDIT_FOLLOWED_BY_REFUND",
+            "RECEIPT_FOLLOWED_BY_VOUCHER",
+            "VOUCHER_FOLLOWED_BY_RECEIPT"
+          ],
+          "example": "RECEIPT_ONLY",
+          "type": "string"
+        },
+        "templateSettings": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PdfTemplateSettings"
+            }
+          ],
+          "description": "The layout."
+        },
+        "templateType": {
+          "description": "Document the template lays out.",
+          "enum": [
+            "INVOICE",
+            "CUSTOMER_CREDIT",
+            "RECEIPT",
+            "REFUND",
+            "CUSTOMER_STATEMENT",
+            "SALE_QUOTE",
+            "PURCHASE_ORDER",
+            "INVOICE_DELIVERY_SLIP",
+            "ORDER_DELIVERY_SLIP",
+            "SALE_ORDER_CONFIRMATION",
+            "DIRECT_CASH_IN_RECEIPT",
+            "DIRECT_CASH_OUT_ADVICE",
+            "BILL_PAYMENT_ADVICE",
+            "COLLECTION_REQUEST",
+            "PAYSLIP"
+          ],
+          "example": "INVOICE",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateDocumentTitle": {
+      "properties": {
+        "isUppercase": {
+          "description": "When true, the title is printed in capitals.",
+          "example": true,
+          "type": "boolean"
+        },
+        "title": {
+          "description": "Title text. Empty prints the document's own name, such as Invoice.",
+          "example": "Tax Invoice",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateFile": {
+      "properties": {
+        "fileId": {
+          "description": "File ID of the uploaded image.",
+          "example": "9e107d9d372bb6826bd81d3542a419d6",
+          "type": "string"
+        },
+        "fileName": {
+          "description": "File name, with its extension.",
+          "example": "logo.png",
+          "type": "string"
+        },
+        "fileType": {
+          "description": "File type of the image, such as PNG, JPEG or JPG.",
+          "example": "PNG",
+          "type": "string"
+        },
+        "fileUrl": {
+          "description": "Address of the image the document prints. A changed image must be one uploaded for this organization with Upload PDF Template Image, of the kind the key takes.",
+          "example": "https://tinvio-Jaz-filestore-production.s3.ap-southeast-1.amazonaws.com/organizations/41f626a3-9635-410c-bb5b-f34443e6903e/organization-template-logo/7d5e1c2a-4b3f-4e8a-9c6d-1a2b3c4d5e6f.PNG",
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "Resource ID of the uploaded file, on files the app stored.",
+          "example": "0b6a3f0e-5d2c-4e8b-9a1f-2c3d4e5f6a7b",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateFilter": {
+      "properties": {
+        "isDefault": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/BooleanExpression"
+            }
+          ],
+          "description": "Match only default templates (true) or only non-default templates (false)."
+        },
+        "parentBtTemplateResourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Match templates that print the template with this resource ID as their second document."
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Match the template with this resource ID."
+        },
+        "styleCode": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Match templates drawn in this style."
+        },
+        "templateName": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Match templates by display name."
+        },
+        "templateOrderType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Match templates by page order."
+        },
+        "templateType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Match templates of this template type, for example {\"eq\": \"INVOICE\"}. An eq, neq or in value that is not a template type is refused with 400, rather than matching nothing."
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateImage": {
+      "properties": {
+        "fileId": {
+          "description": "File ID of the image, the MD5 of its bytes.",
+          "example": "9e107d9d372bb6826bd81d3542a419d6",
+          "type": "string"
+        },
+        "fileName": {
+          "description": "Name of the file sent.",
+          "example": "logo.png",
+          "type": "string"
+        },
+        "fileType": {
+          "description": "File type of the image.",
+          "enum": [
+            "PNG",
+            "JPEG"
+          ],
+          "example": "PNG",
+          "type": "string"
+        },
+        "fileUrl": {
+          "description": "Address of the image in the organization's file storage.",
+          "example": "https://tinvio-Jaz-filestore-production.s3.ap-southeast-1.amazonaws.com/organizations/41f626a3-9635-410c-bb5b-f34443e6903e/organization-template-logo/7d5e1c2a-4b3f-4e8a-9c6d-1a2b3c4d5e6f.PNG",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateLayout": {
+      "properties": {
+        "settings": {
+          "description": "Every setting the layout can hold, in the order the app writes them. Any other key is refused by Create PDF Template and Update PDF Template, unless the template already holds it and it is sent unchanged.",
+          "items": {
+            "$ref": "#/definitions/PdfTemplateLayoutSetting"
+          },
+          "type": "array"
+        },
+        "templateType": {
+          "description": "Template type the settings are for.",
+          "enum": [
+            "INVOICE",
+            "CUSTOMER_CREDIT",
+            "RECEIPT",
+            "REFUND",
+            "CUSTOMER_STATEMENT",
+            "SALE_QUOTE",
+            "PURCHASE_ORDER",
+            "INVOICE_DELIVERY_SLIP",
+            "ORDER_DELIVERY_SLIP",
+            "SALE_ORDER_CONFIRMATION",
+            "DIRECT_CASH_IN_RECEIPT",
+            "DIRECT_CASH_OUT_ADVICE",
+            "BILL_PAYMENT_ADVICE",
+            "COLLECTION_REQUEST",
+            "PAYSLIP"
+          ],
+          "example": "INVOICE",
+          "type": "string"
+        },
+        "widthGroups": {
+          "description": "Sets of widths that must add up to 100 whenever one of them, or a switch of one of their columns, changes.",
+          "items": {
+            "$ref": "#/definitions/PdfTemplateLayoutWidthGroup"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateLayoutCondition": {
+      "properties": {
+        "is": {
+          "description": "Value the setting holds for the condition to hold, as text: true for a switch that is on, or a choice.",
+          "example": "true",
+          "type": "string"
+        },
+        "key": {
+          "description": "Path of the setting the condition reads.",
+          "example": "documentDetailConfigs.enableReference",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateLayoutSetting": {
+      "properties": {
+        "choices": {
+          "description": "The values a CHOICE takes.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "description": {
+          "description": "What the setting changes on the document.",
+          "example": "Gap between the total labels and their amounts, in points.",
+          "type": "string"
+        },
+        "fixedValue": {
+          "description": "The one value a BOOLEAN takes for this template type: the app always writes it.",
+          "example": false,
+          "type": "boolean"
+        },
+        "key": {
+          "description": "Path of the setting in templateSettings: nested keys joined by a period, and [] after a key that holds a list of objects, whose keys follow it (supportingTableConfigs.supportingTableColumns[].width is the width of each column).",
+          "example": "totalDetailConfigs.totalSection.sectionSpacingWidth",
+          "type": "string"
+        },
+        "maxItems": {
+          "description": "Most objects a LIST holds.",
+          "example": 10,
+          "type": "integer"
+        },
+        "maxLength": {
+          "description": "Most characters a TEXT holds.",
+          "example": 28,
+          "type": "integer"
+        },
+        "maxLines": {
+          "description": "Most lines a TEXT holds.",
+          "example": 70,
+          "type": "integer"
+        },
+        "maximum": {
+          "description": "Highest value a NUMBER or PERCENT takes.",
+          "example": 72,
+          "type": "number"
+        },
+        "minItems": {
+          "description": "Fewest objects a LIST holds.",
+          "example": 1,
+          "type": "integer"
+        },
+        "minimum": {
+          "description": "Lowest value a NUMBER or PERCENT takes.",
+          "example": 20,
+          "type": "number"
+        },
+        "required": {
+          "description": "When true, a TEXT must not be empty when its block is sent: always, or when every condition in requiredWhen holds.",
+          "example": true,
+          "type": "boolean"
+        },
+        "requiredWhen": {
+          "description": "The conditions under which a required TEXT must not be empty, all of them together.",
+          "items": {
+            "$ref": "#/definitions/PdfTemplateLayoutCondition"
+          },
+          "type": "array"
+        },
+        "valueType": {
+          "description": "What the setting holds: OBJECT the settings below it; LIST a list of objects; FILES a list of images uploaded with Upload PDF Template Image; BOOLEAN true or false; TEXT text; NUMBER a number, sent as a number or as text holding one; PERCENT a percentage of a table or block, sent the same way; CHOICE one of choices.",
+          "enum": [
+            "OBJECT",
+            "LIST",
+            "FILES",
+            "BOOLEAN",
+            "TEXT",
+            "NUMBER",
+            "PERCENT",
+            "CHOICE"
+          ],
+          "example": "NUMBER",
+          "type": "string"
+        },
+        "wholeNumber": {
+          "description": "When true, a NUMBER must be a whole number.",
+          "example": false,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateLayoutWidthColumn": {
+      "properties": {
+        "switch": {
+          "description": "Path of the switch that turns the column on, when it has one.",
+          "example": "tableColumnConfigs.enableItem",
+          "type": "string"
+        },
+        "width": {
+          "description": "Path of the width.",
+          "example": "tableColumnConfigs.item.columnWidth",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateLayoutWidthGroup": {
+      "properties": {
+        "columns": {
+          "description": "The widths, each with the switch that turns its column on. A column whose switch is not true does not count. A width with no switch is that of each object of a list, and every object counts.",
+          "items": {
+            "$ref": "#/definitions/PdfTemplateLayoutWidthColumn"
+          },
+          "type": "array"
+        },
+        "name": {
+          "description": "What the widths are, in plain words.",
+          "example": "item table columns that are on",
+          "type": "string"
+        },
+        "total": {
+          "description": "What the widths add up to.",
+          "example": 100,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateResourceResponse": {
+      "properties": {
+        "resourceId": {
+          "description": "Resource ID of the PDF template.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateSettings": {
+      "properties": {
+        "colorTheme": {
+          "description": "Colour theme of the table header and accents. It shows on the STYLE_CODE_SMOOTH, STYLE_CODE_OVERLAY and STYLE_CODE_FORMAL styles only, so a colour other than default sent for a template in another style is refused; a colour saved before and sent back unchanged is kept.",
+          "enum": [
+            "default",
+            "calm",
+            "bold",
+            "trust",
+            "social",
+            "ivory",
+            "gold",
+            "peach"
+          ],
+          "example": "calm",
+          "type": "string"
+        },
+        "documentLetterhead": {
+          "description": "Letterhead image printed across the top when headerImageType is LETTERHEAD. A changed letterhead must be an image uploaded for this organization with Upload PDF Template Image, kind LETTERHEAD: pass the file it returns, or one a template of the organization already prints.",
+          "items": {
+            "$ref": "#/definitions/PdfTemplateFile"
+          },
+          "type": "array"
+        },
+        "documentLogo": {
+          "description": "Logo printed at the top of the document. A changed logo must be an image uploaded for this organization with Upload PDF Template Image, kind LOGO: pass the file it returns, or one a template of the organization already prints. An empty list prints no logo.",
+          "items": {
+            "$ref": "#/definitions/PdfTemplateFile"
+          },
+          "type": "array"
+        },
+        "documentTitle": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PdfTemplateDocumentTitle"
+            }
+          ],
+          "description": "Title printed at the top of the document. Customer statements carry their titles in statementDocumentTitle and balanceDocumentTitle instead."
+        },
+        "fontSize": {
+          "description": "Size of the text.",
+          "enum": [
+            "default",
+            "smaller",
+            "larger"
+          ],
+          "example": "default",
+          "type": "string"
+        },
+        "headerImageType": {
+          "description": "What the top of the document shows: LOGO, or LETTERHEAD for a full-width letterhead image from documentLetterhead.",
+          "enum": [
+            "LOGO",
+            "LETTERHEAD"
+          ],
+          "example": "LOGO",
+          "type": "string"
+        },
+        "margins": {
+          "description": "Page margins.",
+          "enum": [
+            "default",
+            "compact",
+            "comfortable"
+          ],
+          "example": "default",
+          "type": "string"
+        },
+        "templateFont": {
+          "description": "Font the document is printed in.",
+          "enum": [
+            "Inter",
+            "LatoFont",
+            "Roboto",
+            "Figtree",
+            "SourceSans3"
+          ],
+          "example": "Inter",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplateSort": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "asc",
+            "DESC",
+            "desc"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "sortBy"
+      ],
+      "type": "object"
+    },
+    "PdfTemplateStyle": {
+      "properties": {
+        "isDefaultStyle": {
+          "description": "When true, this is the style a new template of the type is drawn in when no style is named.",
+          "example": true,
+          "type": "boolean"
+        },
+        "resourceId": {
+          "description": "Resource ID of the style.",
+          "example": "8f2b6a3e-4c1d-4e5f-9a7b-1c2d3e4f5a6b",
+          "type": "string"
+        },
+        "styleCode": {
+          "description": "Code to pass as styleCode.",
+          "example": "STYLE_CODE_CLASSIC",
+          "type": "string"
+        },
+        "styleName": {
+          "description": "Display name of the style.",
+          "example": "Classic",
+          "type": "string"
+        },
+        "templateType": {
+          "description": "Template type the style is for.",
+          "example": "INVOICE",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "PdfTemplatesDeletedResponse": {
+      "properties": {
+        "resourceIds": {
+          "description": "Resource IDs of the deleted PDF templates.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
     "PercentageAllocationRequest": {
       "properties": {
         "amount": {
@@ -26438,6 +27550,30 @@
       ],
       "type": "object"
     },
+    "ReportPackPDFResponse": {
+      "properties": {
+        "fileId": {
+          "description": "Identifier of the stored PDF.",
+          "example": "f1e2d3c4-5b6a-4789-8abc-def012345678",
+          "type": "string"
+        },
+        "fileName": {
+          "description": "File name of the PDF: the report pack name followed by .pdf.",
+          "example": "Month End Pack.pdf",
+          "type": "string"
+        },
+        "fileType": {
+          "description": "File format of the document. Always PDF.",
+          "example": "PDF",
+          "type": "string"
+        },
+        "fileUrl": {
+          "description": "Link to download the PDF. It expires 30 minutes after the response is returned.",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "ReportTemplateResourceResponse": {
       "properties": {
         "resourceId": {
@@ -28617,6 +29753,41 @@
       },
       "type": "object"
     },
+    "SearchEmailTemplatesRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/EmailTemplateFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 100).",
+          "maximum": 100,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed row offset into the result set. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/EmailTemplateSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
     "SearchEmployeeBalancesRequest": {
       "properties": {
         "filter": {
@@ -30254,6 +31425,41 @@
       },
       "type": "object"
     },
+    "SearchPdfTemplatesRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PdfTemplateFilter"
+            }
+          ],
+          "description": "Filter criteria."
+        },
+        "limit": {
+          "default": 20,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed page number; with limit 10, offset 1 returns rows 11 to 20.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PdfTemplateSort"
+            }
+          ],
+          "description": "Sort order. The organization's default template of each type is always listed first."
+        }
+      },
+      "type": "object"
+    },
     "SearchPostingRulesRequest": {
       "properties": {
         "filter": {
@@ -30549,6 +31755,41 @@
           "allOf": [
             {
               "$ref": "#/definitions/ScheduledSortFilter"
+            }
+          ],
+          "description": "Sort order. Required when offset is set."
+        }
+      },
+      "type": "object"
+    },
+    "SearchSignatureProfilesRequest": {
+      "properties": {
+        "filter": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureProfileFilter"
+            }
+          ],
+          "description": "Filter conditions. Combine with and and or for complex queries."
+        },
+        "limit": {
+          "default": 100,
+          "description": "Maximum number of results per page (max 1000).",
+          "maximum": 1000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "offset": {
+          "default": 0,
+          "description": "Zero-indexed page number; with limit 10, offset 1 returns rows 11 to 20. Sort is required when offset is set.",
+          "maximum": 65536,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sort": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureProfileSortFilter"
             }
           ],
           "description": "Sort order. Required when offset is set."
@@ -31167,6 +32408,520 @@
           ],
           "example": "RED",
           "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureCcObserverRequest": {
+      "properties": {
+        "email": {
+          "description": "Email of the person kept informed.",
+          "example": "finance@example.com",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the person kept informed.",
+          "example": "Finance team",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "type": "object"
+    },
+    "SignatureCcObserverResponse": {
+      "properties": {
+        "email": {
+          "description": "Email of the person kept informed.",
+          "example": "finance@example.com",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the person kept informed.",
+          "example": "Finance team",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureEmailRequest": {
+      "properties": {
+        "body": {
+          "description": "Message, as plain text; line breaks are kept. The app lays it out with the signing buttons when the email is sent. Placeholders such as {{senderName}}, {{orgName}}, {{signerName}}, {{documentTitle}}, {{expiryDate}}, and {{quoteReference}} (sale quotes) or {{requestReference}} (purchase requests) are filled in when the email is sent. The character < is not accepted.",
+          "example": "{{senderName}} has sent you a document for signature. Please review and sign by {{expiryDate}}.",
+          "maxLength": 10000,
+          "type": "string"
+        },
+        "subject": {
+          "description": "Email subject. Placeholders such as {{senderName}} are filled in when the email is sent.",
+          "example": "{{senderName}} has sent you a document to sign",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "required": [
+        "body",
+        "subject"
+      ],
+      "type": "object"
+    },
+    "SignatureEmailResponse": {
+      "properties": {
+        "body": {
+          "description": "Message, as plain text, with its placeholders.",
+          "example": "{{senderName}} has sent you a document for signature. Please review and sign by {{expiryDate}}.",
+          "type": "string"
+        },
+        "subject": {
+          "description": "Email subject, with its placeholders.",
+          "example": "{{senderName}} has sent you a document to sign",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureEmailUpdateRequest": {
+      "properties": {
+        "body": {
+          "description": "Message, as plain text; line breaks are kept. The app lays it out with the signing buttons when the email is sent. Placeholders such as {{senderName}}, {{orgName}}, {{signerName}}, {{documentTitle}}, {{expiryDate}}, and {{quoteReference}} (sale quotes) or {{requestReference}} (purchase requests) are filled in when the email is sent. The character < is not accepted.",
+          "example": "{{senderName}} has sent you a document for signature. Please review and sign by {{expiryDate}}.",
+          "maxLength": 10000,
+          "type": "string"
+        },
+        "subject": {
+          "description": "Email subject. Placeholders such as {{senderName}} are filled in when the email is sent.",
+          "example": "{{senderName}} has sent you a document to sign",
+          "maxLength": 255,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureMovementAlerts": {
+      "properties": {
+        "alertAfterDaysOfNoActivity": {
+          "description": "Alert the sender when a request has had no activity for this many days. 0 turns the alert off.",
+          "example": 5,
+          "maximum": 365,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "senderNotificationCadence": {
+          "description": "How often the sender is emailed about a request's progress: EVERY_EVENT, MILESTONES_ONLY, COMPLETION_ONLY (only once everyone has signed), or NONE. A new profile defaults to MILESTONES_ONLY.",
+          "enum": [
+            "EVERY_EVENT",
+            "MILESTONES_ONLY",
+            "COMPLETION_ONLY",
+            "NONE"
+          ],
+          "example": "MILESTONES_ONLY",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureProfileAppendix": {
+      "properties": {
+        "fileId": {
+          "description": "File ID of the PDF, the MD5 of its bytes.",
+          "example": "9e107d9d372bb6826bd81d3542a419d6",
+          "type": "string"
+        },
+        "fileName": {
+          "description": "Name of the file sent.",
+          "example": "terms-and-conditions.pdf",
+          "type": "string"
+        },
+        "fileType": {
+          "description": "File type of the PDF.",
+          "enum": [
+            "PDF"
+          ],
+          "example": "PDF",
+          "type": "string"
+        },
+        "fileUrl": {
+          "description": "Address of the PDF in the organization's file storage.",
+          "example": "https://tinvio-Jaz-filestore-production.s3.ap-southeast-1.amazonaws.com/organizations/41f626a3-9635-410c-bb5b-f34443e6903e/signature-appendices/7d5e1c2a-4b3f-4e8a-9c6d-1a2b3c4d5e6f.PDF",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureProfileAppendixRequest": {
+      "properties": {
+        "fileId": {
+          "description": "File ID of the PDF, as the upload or the profile returns it.",
+          "example": "9e107d9d372bb6826bd81d3542a419d6",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "fileName": {
+          "description": "Name of the file, as shown with the document.",
+          "example": "terms-and-conditions.pdf",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "fileType": {
+          "description": "File type: PDF for an uploaded file, which is what it is when left out. A file the profile holds is sent back with the type the profile returns.",
+          "example": "PDF",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "fileUrl": {
+          "description": "Address of the PDF, as the upload or the profile returns it.",
+          "example": "https://tinvio-Jaz-filestore-production.s3.ap-southeast-1.amazonaws.com/organizations/41f626a3-9635-410c-bb5b-f34443e6903e/signature-appendices/7d5e1c2a-4b3f-4e8a-9c6d-1a2b3c4d5e6f.PDF",
+          "maxLength": 2048,
+          "type": "string"
+        }
+      },
+      "required": [
+        "fileId",
+        "fileName",
+        "fileUrl"
+      ],
+      "type": "object"
+    },
+    "SignatureProfileAppendixResponse": {
+      "properties": {
+        "fileId": {
+          "description": "Identifier of the uploaded file. A profile holds each file once.",
+          "example": "f3a8c2d1-5b7e-4c9a-8f21-6d0e9b4a7c35",
+          "type": "string"
+        },
+        "fileName": {
+          "description": "Name of the file, as shown with the document.",
+          "example": "terms-and-conditions.pdf",
+          "type": "string"
+        },
+        "fileType": {
+          "description": "Type of the file, as recorded when it was uploaded.",
+          "example": "application/pdf",
+          "type": "string"
+        },
+        "fileUrl": {
+          "description": "Link to the uploaded file.",
+          "example": "https://files.example.com/terms-and-conditions.pdf",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureProfileFilter": {
+      "properties": {
+        "and": {
+          "description": "Combine with another filter using AND.",
+          "type": "object"
+        },
+        "docType": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the document the profile is used for, SALE_QUOTE or PURCHASE_REQUEST."
+        },
+        "name": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the profile name."
+        },
+        "or": {
+          "description": "Combine with another filter using OR.",
+          "type": "object"
+        },
+        "resourceId": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/StringExpression"
+            }
+          ],
+          "description": "Filter by the resource ID of the profile."
+        }
+      },
+      "type": "object"
+    },
+    "SignatureProfileResourceResponse": {
+      "properties": {
+        "resourceId": {
+          "description": "Resource ID of the signature profile.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureProfileResponse": {
+      "properties": {
+        "ccObservers": {
+          "description": "People kept informed of the request, who do not sign it.",
+          "items": {
+            "$ref": "#/definitions/SignatureCcObserverResponse"
+          },
+          "type": "array"
+        },
+        "completionEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailResponse"
+            }
+          ],
+          "description": "Email sent once everyone has signed. Null when the profile has none."
+        },
+        "createdAt": {
+          "description": "When the profile was created, as epoch milliseconds.",
+          "example": 1764115200000,
+          "type": "integer"
+        },
+        "declineReasonRequired": {
+          "description": "When true, a signer who declines must give a reason.",
+          "example": true,
+          "type": "boolean"
+        },
+        "defaultAppendices": {
+          "description": "PDF files merged after the document when it is sent for signature, in order.",
+          "items": {
+            "$ref": "#/definitions/SignatureProfileAppendixResponse"
+          },
+          "type": "array"
+        },
+        "defaultExpiryDays": {
+          "description": "Days a signer has to sign before the request expires.",
+          "example": 30,
+          "type": "integer"
+        },
+        "description": {
+          "description": "What the profile is for.",
+          "example": "Quotes over 10,000 that need the director to countersign",
+          "type": "string"
+        },
+        "docType": {
+          "description": "Document the profile is used for.",
+          "enum": [
+            "SALE_QUOTE",
+            "PURCHASE_REQUEST"
+          ],
+          "example": "SALE_QUOTE",
+          "type": "string"
+        },
+        "invitationEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailResponse"
+            }
+          ],
+          "description": "Email inviting each signer to sign."
+        },
+        "isDefault": {
+          "description": "When true, this is the default profile for its document type.",
+          "example": true,
+          "type": "boolean"
+        },
+        "movementAlerts": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureMovementAlerts"
+            }
+          ],
+          "description": "What the sender is told about a request's progress."
+        },
+        "name": {
+          "description": "Display name of the profile.",
+          "example": "Standard quote",
+          "type": "string"
+        },
+        "onExpiryAction": {
+          "description": "What happens when a request expires unsigned.",
+          "enum": [
+            "AUTO_VOID",
+            "ALERT_THEN_VOID",
+            "MANUAL_ONLY"
+          ],
+          "example": "AUTO_VOID",
+          "type": "string"
+        },
+        "postCompletionAction": {
+          "description": "What happens once everyone has signed.",
+          "enum": [
+            "DO_NOTHING",
+            "AUTO_ACCEPT",
+            "AUTO_ACCEPT_AND_INVOICE",
+            "AUTO_ACCEPT_AND_BILL"
+          ],
+          "example": "DO_NOTHING",
+          "type": "string"
+        },
+        "reminderEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailResponse"
+            }
+          ],
+          "description": "Email reminding a signer who has not signed. Null when the profile has none."
+        },
+        "reminderSchedule": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureReminderSchedule"
+            }
+          ],
+          "description": "When reminders go to signers who have not signed. Null when the profile has none."
+        },
+        "resourceId": {
+          "description": "Resource ID of the signature profile.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        },
+        "signers": {
+          "description": "People who sign, in signing order.",
+          "items": {
+            "$ref": "#/definitions/SignatureProfileSignerResponse"
+          },
+          "type": "array"
+        },
+        "updatedAt": {
+          "description": "When the profile was last changed, as epoch milliseconds.",
+          "example": 1764115200000,
+          "type": "integer"
+        },
+        "voidReasonRequired": {
+          "description": "When true, the sender must give a reason to cancel a request.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureProfileSignerRequest": {
+      "properties": {
+        "email": {
+          "description": "EXTERNAL signers only, and required for them: the email the signing link is sent to.",
+          "example": "jane.tan@example.com",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "internalUserId": {
+          "description": "INTERNAL signers only, and required for them: the userResourceId of the organization user (see Search Organization Users), not the resource ID of the organization user record. Their name and email come from the user.",
+          "example": "22222222-2222-4222-8222-222222222222",
+          "type": "string"
+        },
+        "name": {
+          "description": "EXTERNAL signers only, and required for them: the signer's name.",
+          "example": "Jane Tan",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "roleLabel": {
+          "description": "The signer's role, shown in emails through the {{signerRole}} placeholder.",
+          "example": "Director",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "type": {
+          "description": "INTERNAL for a user of the organization, who signs in the app, or EXTERNAL for anyone else, who gets a signing link by email.",
+          "enum": [
+            "INTERNAL",
+            "EXTERNAL"
+          ],
+          "example": "EXTERNAL",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "type": "object"
+    },
+    "SignatureProfileSignerResponse": {
+      "properties": {
+        "email": {
+          "description": "Signer's email. For an INTERNAL signer, the user's email.",
+          "example": "jane.tan@example.com",
+          "type": "string"
+        },
+        "internalUserId": {
+          "description": "INTERNAL signers only: the userResourceId of the organization user.",
+          "example": "22222222-2222-4222-8222-222222222222",
+          "type": "string"
+        },
+        "name": {
+          "description": "Signer's name. For an INTERNAL signer, the user's name.",
+          "example": "Jane Tan",
+          "type": "string"
+        },
+        "roleLabel": {
+          "description": "The signer's role, shown in emails through the {{signerRole}} placeholder.",
+          "example": "Director",
+          "type": "string"
+        },
+        "type": {
+          "description": "INTERNAL for a user of the organization, EXTERNAL for anyone else.",
+          "enum": [
+            "INTERNAL",
+            "EXTERNAL"
+          ],
+          "example": "INTERNAL",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "SignatureProfileSortFilter": {
+      "properties": {
+        "order": {
+          "description": "Sort direction, ASC or DESC.",
+          "enum": [
+            "ASC",
+            "asc",
+            "DESC",
+            "desc"
+          ],
+          "type": "string"
+        },
+        "sortBy": {
+          "description": "Fields to sort by, in priority order.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "type": "array",
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "order",
+        "sortBy"
+      ],
+      "type": "object"
+    },
+    "SignatureReminderSchedule": {
+      "properties": {
+        "everyDays": {
+          "description": "Days between reminders after the first.",
+          "example": 4,
+          "maximum": 365,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "firstReminderAfterDays": {
+          "description": "Days after sending before the first reminder.",
+          "example": 3,
+          "maximum": 365,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "stopAfterDays": {
+          "description": "Days after which reminders stop. 0 keeps sending reminders until the request expires.",
+          "example": 3,
+          "maximum": 365,
+          "minimum": 0,
+          "type": "integer"
         }
       },
       "type": "object"
@@ -34734,6 +36489,321 @@
       },
       "type": "object"
     },
+    "TransactionDefaultsItemAccount": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the account new line items post to: an active account that is not a bank, cash or control account. On SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST and PURCHASE_ORDER it can be set only while showAccountColumn is true. Send an empty string to clear it; leave it out or send null to keep it.",
+          "example": "6b1f2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+          "type": "string"
+        },
+        "itemLevel": {
+          "description": "When true, the account is chosen per line item; when false, one account applies to the whole document.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "TransactionDefaultsItemAttributes": {
+      "properties": {
+        "discount": {
+          "description": "When true, line items show a discount column.",
+          "example": true,
+          "type": "boolean"
+        },
+        "quantity": {
+          "description": "When true, line items show a quantity column.",
+          "example": true,
+          "type": "boolean"
+        },
+        "unit": {
+          "description": "When true, line items show a unit column.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "TransactionDefaultsItemTax": {
+      "properties": {
+        "itemLevel": {
+          "description": "When true, new documents apply tax and their line items show a tax column. When false, new documents carry no tax. Send false to choose no tax: taxInclusive is then unset and the tax profile cleared, so neither can be sent with it. Send true only with taxInclusive, or while a tax choice is already stored.",
+          "example": true,
+          "type": "boolean"
+        },
+        "taxInclusive": {
+          "description": "How new documents apply tax: true when line amounts include tax, false when tax is added to them. Sending either also sets itemLevel to true. Null when new documents carry no tax; to choose no tax, send itemLevel false instead, because null keeps the stored value.",
+          "example": false,
+          "type": "boolean"
+        },
+        "taxProfileResourceId": {
+          "description": "Resource ID of the tax profile new line items use. It can be set only while new documents apply tax (taxInclusive true or false). Send an empty string to clear it; leave it out or send null to keep it.",
+          "example": "0f9e8d7c-6b5a-4c3d-8e2f-1a0b9c8d7e6f",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "TransactionDefaultsPaymentSettings": {
+      "properties": {
+        "accountResourceId": {
+          "description": "Resource ID of the account payments are recorded to: an active bank or cash account. When paymentMethod is CREDIT_CARD, E_WALLET, CLEARING_SETTLEMENT, DEBT_WRITE_OFF, INTER_COMPANY, WITHHOLDING_TAX_CERTIFICATE or OTHER, it can also be the creditable withholding tax account or an active account that is not a control account. Checked against the paymentMethod sent, else the stored one. Send an empty string to clear it; leave it out or send null to keep it.",
+          "example": "9a8b7c6d-5e4f-4a3b-9c2d-1e0f9a8b7c6d",
+          "type": "string"
+        },
+        "paymentMethod": {
+          "description": "Default payment method. Send an empty string to clear it; leave it out or send null to keep it.",
+          "enum": [
+            "CASH",
+            "CREDIT_CARD",
+            "BANK_TRANSFER",
+            "E_WALLET",
+            "CHEQUE",
+            "WITHHOLDING_TAX_CERTIFICATE",
+            "CLEARING_SETTLEMENT",
+            "DEBT_WRITE_OFF",
+            "INTER_COMPANY",
+            "OTHER",
+            "PAYMENT_GATEWAY"
+          ],
+          "example": "BANK_TRANSFER",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "TransactionDefaultsResponse": {
+      "properties": {
+        "allowOverFulfillmentOrderToBill": {
+          "description": "When true, bills may bill more than their purchase order.",
+          "example": true,
+          "type": "boolean"
+        },
+        "allowOverFulfillmentOrderToInvoice": {
+          "description": "When true, invoices may bill more than their sale order.",
+          "example": true,
+          "type": "boolean"
+        },
+        "allowOverFulfillmentQuoteToOrder": {
+          "description": "When true, a sale order may order more than its quote.",
+          "example": true,
+          "type": "boolean"
+        },
+        "allowOverFulfillmentRequestToOrder": {
+          "description": "When true, a purchase order may order more than its purchase request.",
+          "example": true,
+          "type": "boolean"
+        },
+        "autoEnableEInvoice": {
+          "description": "When true, new documents are set to be sent as e-invoices.",
+          "example": false,
+          "type": "boolean"
+        },
+        "autoEnableEmail": {
+          "description": "When true, new documents are set to be emailed to the contact.",
+          "example": false,
+          "type": "boolean"
+        },
+        "currency": {
+          "description": "Default currency of new documents, as an ISO 4217 code.",
+          "example": "SGD",
+          "type": "string"
+        },
+        "displayOrderReferenceOnBill": {
+          "description": "When true, a bill raised from a purchase order shows the order's reference.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayOrderReferenceOnInvoice": {
+          "description": "When true, an invoice raised from a sale order shows the order's reference.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayQuoteReference": {
+          "description": "When true, a sale order shows the reference of its quote.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayQuoteReferenceOnInvoice": {
+          "description": "When true, an invoice raised from a sale order shows the reference of the order's quote.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayRequestReference": {
+          "description": "When true, a purchase order shows the reference of its purchase request.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayRequestReferenceOnBill": {
+          "description": "When true, a bill raised from a purchase order shows the reference of the order's purchase request.",
+          "example": true,
+          "type": "boolean"
+        },
+        "dueDateTermDays": {
+          "description": "Default payment term of new documents, in days after the document date (0 means on delivery).",
+          "example": 30,
+          "type": "integer"
+        },
+        "family": {
+          "description": "Transaction family these defaults apply to.",
+          "enum": [
+            "SALE",
+            "SALE_CREDIT_NOTE",
+            "PURCHASE",
+            "PURCHASE_CREDIT_NOTE",
+            "JOURNAL_MANUAL",
+            "CLAIM",
+            "PAYRUN",
+            "SALE_QUOTE",
+            "SALE_ORDER",
+            "PURCHASE_REQUEST",
+            "PURCHASE_ORDER"
+          ],
+          "example": "SALE",
+          "type": "string"
+        },
+        "internalNotes": {
+          "description": "Default internal notes of new documents, which are never printed.",
+          "example": "Check the delivery address.",
+          "type": "string"
+        },
+        "itemAccount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionDefaultsItemAccount"
+            }
+          ],
+          "description": "Default account of new line items."
+        },
+        "itemAttributes": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionDefaultsItemAttributes"
+            }
+          ],
+          "description": "Which optional line item columns new documents show."
+        },
+        "itemTax": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionDefaultsItemTax"
+            }
+          ],
+          "description": "Default tax of new line items."
+        },
+        "notes": {
+          "description": "Default notes printed on new documents.",
+          "example": "Payment due within 30 days.",
+          "type": "string"
+        },
+        "numbering": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionNumberingResponse"
+            }
+          ],
+          "description": "How new documents in this family are numbered. Absent when the family uses the built-in numbering; Get Next Reference shows the number either way."
+        },
+        "paymentSettings": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionDefaultsPaymentSettings"
+            }
+          ],
+          "description": "Default account and method of payments recorded against new documents."
+        },
+        "showAccountColumn": {
+          "description": "When true, new documents show the account column on their line items.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "TransactionNumberingRequest": {
+      "properties": {
+        "dateInclusion": {
+          "description": "INCLUDE puts the document date between the prefix and the sequence number; EXCLUDE leaves it out.",
+          "enum": [
+            "INCLUDE",
+            "EXCLUDE"
+          ],
+          "example": "EXCLUDE",
+          "type": "string"
+        },
+        "prefix": {
+          "description": "Text every number starts with.",
+          "example": "INV",
+          "type": "string"
+        },
+        "separator": {
+          "description": "Character between the prefix, the date and the sequence number.",
+          "enum": [
+            "HYPHEN",
+            "DOT",
+            "SPACE",
+            "UNDERSCORE"
+          ],
+          "example": "HYPHEN",
+          "type": "string"
+        },
+        "seriesOffset": {
+          "description": "Subtracted from every sequence number. The next number is seriesStart plus the documents already created in the family, minus seriesOffset, and never below 1. To make the next number N, set seriesStart to N and seriesOffset to the lastCounter that Get Next Reference returns.",
+          "example": 0,
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "seriesStart": {
+          "description": "First sequence number, as digits, at least 1. Its length sets the zero padding of every number (up to 12), so \"0001\" numbers from 0001 and \"1\" from 1. Changing it does not restart the count: see seriesOffset.",
+          "example": "0001",
+          "maxLength": 12,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "TransactionNumberingResponse": {
+      "properties": {
+        "dateInclusion": {
+          "description": "INCLUDE puts the document date between the prefix and the sequence number; EXCLUDE leaves it out.",
+          "enum": [
+            "INCLUDE",
+            "EXCLUDE"
+          ],
+          "example": "EXCLUDE",
+          "type": "string"
+        },
+        "prefix": {
+          "description": "Text every number starts with.",
+          "example": "INV",
+          "type": "string"
+        },
+        "separator": {
+          "description": "Character between the prefix, the date and the sequence number.",
+          "enum": [
+            "HYPHEN",
+            "DOT",
+            "SPACE",
+            "UNDERSCORE"
+          ],
+          "example": "HYPHEN",
+          "type": "string"
+        },
+        "seriesOffset": {
+          "description": "Subtracted from every sequence number. The next number is seriesStart plus the documents already created in the family, minus seriesOffset, and never below 1.",
+          "example": 0,
+          "type": "integer"
+        },
+        "seriesStart": {
+          "description": "First sequence number, zero padded to the width every number uses.",
+          "example": "0001",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
     "TransactionScheduleFilter": {
       "properties": {
         "and": {
@@ -36971,6 +39041,10 @@
           "description": "When true, listed prices already include tax. Required when isTaxVATApplicable is set.",
           "type": "boolean"
         },
+        "templateResourceId": {
+          "description": "Resource ID of the PDF template the customer credit note prints with. Omit it to keep the current template.",
+          "type": "string"
+        },
         "valueDate": {
           "description": "Customer credit note date, in YYYY-MM-DD format (organization timezone).",
           "type": "string"
@@ -37082,6 +39156,82 @@
         "reference",
         "resourceId"
       ],
+      "type": "object"
+    },
+    "UpdateEmailTemplateRequest": {
+      "properties": {
+        "additionalEmailCcList": {
+          "description": "Other addresses copied on every email. Replaces the stored list in full; send an empty list to remove them all.",
+          "items": {
+            "$ref": "#/definitions/EmailTemplateCcRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "emailBody": {
+          "description": "Body of the email, as HTML, replacing the stored body. See Create Email Template for the placeholders and the structure the app's editor reads.",
+          "maxLength": 200000,
+          "type": "string"
+        },
+        "emailCcList": {
+          "description": "Organization users copied on every email, by their email address. Replaces the stored list in full; send an empty list to remove them all.",
+          "items": {
+            "$ref": "#/definitions/EmailTemplateUserCcRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "emailCurrencyFormat": {
+          "description": "How amounts are written in the email: CURRENCY_CODE_APPENDED puts the currency code after the amount, CURRENCY_SYMBOL_PREPENDED puts the currency symbol before it.",
+          "enum": [
+            "CURRENCY_CODE_APPENDED",
+            "CURRENCY_SYMBOL_PREPENDED"
+          ],
+          "type": "string"
+        },
+        "emailSubject": {
+          "description": "Subject line of the email. Placeholders in double braces are filled in when the email is sent.",
+          "example": "Invoice {{invoiceReference}} from {{organizationName}}",
+          "maxLength": 500,
+          "type": "string"
+        },
+        "receiptEmailTemplateResourceId": {
+          "description": "COLLECTION_REQUEST templates only: resource ID of the CASH_IN_RECEIPT template sent once the collection request is paid. Send an empty string to remove it; the organization's default CASH_IN_RECEIPT template is then used.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string"
+        },
+        "reminderSchedules": {
+          "description": "When the email goes out, for INVOICE_PAYMENT_REMINDER, SUBSCRIPTION_REMINDER and CUSTOMER_STATEMENT_SCHEDULE templates only. Replaces the stored schedule in full; send an empty list to remove every entry.",
+          "items": {
+            "$ref": "#/definitions/EmailTemplateReminderScheduleRequest"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "status": {
+          "description": "ACTIVE or INACTIVE. Each type can have at most 100 active templates, so making one ACTIVE can be refused. The default template of a type without a reminder schedule cannot be made INACTIVE.",
+          "enum": [
+            "ACTIVE",
+            "INACTIVE"
+          ],
+          "type": "string"
+        },
+        "templateName": {
+          "description": "Display name of the template. Must be unique among the organization's templates of the same type, ignoring case and treating spaces and underscores alike.",
+          "example": "Invoice with payment link",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "variants": {
+          "description": "INVOICE and CUSTOMER_CREDIT_NOTE templates only: the subject and body for one or both balance states. A state left out keeps its stored subject and body, and an empty list is rejected, since both states always stay on the template. Changing emailSubject or emailBody alone does not change what an invoice or credit note email sends.",
+          "items": {
+            "$ref": "#/definitions/EmailTemplateVariantRequest"
+          },
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array"
+        }
+      },
       "type": "object"
     },
     "UpdateEmployeePayDetailRequest": {
@@ -37492,7 +39642,7 @@
           "type": "boolean"
         },
         "templateResourceId": {
-          "description": "Resource ID of the print template. The organization's default template applies when omitted.",
+          "description": "Resource ID of the PDF template the invoice prints with. Omit it to keep the current template.",
           "type": "string"
         },
         "valueDate": {
@@ -38154,16 +40304,16 @@
           "type": "string"
         },
         "packTemplates": {
-          "description": "Templates included in the pack, in order. Replaces the pack's current list. Report packs only. When the included templates change, update the includedComponents of templateConfiguration in the same request so the two stay in step.",
+          "description": "Templates included in the pack, in order, 1 to 20. Replaces the pack's current list. Report packs only. When the included templates change, update the includedComponents of templateConfiguration in the same request so the two stay in step.",
           "items": {
             "$ref": "#/definitions/PackTemplateRequest"
           },
-          "maxItems": 100,
+          "maxItems": 20,
           "minItems": 1,
           "type": "array"
         },
         "templateConfiguration": {
-          "description": "Template layout, as a JSON-encoded string. Replaces the stored layout in full. A formula row's formulaConfig.formula string supports only + and -: send formulaConfig.tokens for a formula that multiplies, divides, or uses brackets or numbers. Each token is {\"kind\": \"REF\", \"ref\": \"<row id>\"}, {\"kind\": \"OP\", \"op\": \"+\", \"-\", \"*\" or \"/\"}, {\"kind\": \"NUM\", \"value\": \"100\"}, {\"kind\": \"LPAREN\"}, or {\"kind\": \"RPAREN\"}. Rows marked \"deletable\": false in the stored layout must be kept, and a new or changed formula must parse and refer only to rows in the layout; otherwise the request is rejected with INVALID_TEMPLATE_CONFIGURATION or INVALID_TEMPLATE_FORMULA.",
+          "description": "Template layout, as a JSON-encoded string. Replaces the stored layout in full. A formula row's formulaConfig.formula string supports only + and -: send formulaConfig.tokens for a formula that multiplies, divides, or uses brackets or numbers. Each token is {\"kind\": \"REF\", \"ref\": \"<row id>\"}, {\"kind\": \"OP\", \"op\": \"+\", \"-\", \"*\" or \"/\"}, {\"kind\": \"NUM\", \"value\": \"100\"}, {\"kind\": \"LPAREN\"}, or {\"kind\": \"RPAREN\"}. Rows marked \"deletable\": false in the stored layout must be kept, and a new or changed formula must parse and refer only to rows in the layout; otherwise the request is rejected with INVALID_TEMPLATE_CONFIGURATION or INVALID_TEMPLATE_FORMULA. A changed logo, in documentLogo or in a cover page's coverPageConfig.logo, must be an image uploaded for this organization with Upload PDF Template Image, kind LOGO; a logo the stored layout already prints in the same place is kept as it is. A report pack's includedComponents holds 2 to 20 components, cover and contents pages included, each of type TEMPLATE, COVER_PAGE, TABLE_OF_CONTENTS, SIGNATURE_PAGE or APPENDIX with its settings in templateConfig, coverPageConfig, tableOfContentsConfig, signaturePageConfig or appendixPageConfig, and a TEMPLATE's templateConfig.templateResourceId is one of the templates packTemplates lists. A page position (coverPageConfig, tableOfContentsConfig, signaturePageConfig and appendixPageConfig) is left_aligned or center_aligned, each of those pages has a title of at least 1 character, tableOfContentsConfig.dotLeaders is DOTS, DASHES or NONE, and signaturePageConfig.labelLines holds up to 5 lines of {\"enabled\", \"label\"}, at least one enabled, each enabled one with a label. A report's pdfTitleConfigs.layout is left_aligned or center_aligned, and a row sits inside at most 4 groups. A value outside these is refused, unless the stored layout holds it and it is sent back unchanged.",
           "type": "string"
         },
         "templateName": {
@@ -38478,6 +40628,57 @@
       },
       "type": "object"
     },
+    "UpdatePdfTemplateRequest": {
+      "properties": {
+        "isDefault": {
+          "description": "Send true to make this template the default for its template type; the template that was the default stops being one. Only true is accepted: to change the default, set it on the template that should become the default.",
+          "example": true,
+          "type": "boolean"
+        },
+        "parentBtTemplateResourceId": {
+          "description": "Resource ID of the template printed as the second document, as on Create PDF Template. When omitted, the stored one is kept; send null to remove a collection request's cash-in receipt template. A receipt printed with its invoice, or a refund printed with its credit note, always names one, so null is refused for it.",
+          "example": "41f626a3-9635-410c-bb5b-f34443e6903e",
+          "type": "string",
+          "x-nullable": true
+        },
+        "styleCode": {
+          "description": "Style the template is drawn in, one of the codes List PDF Template Styles returns for its template type.",
+          "example": "STYLE_CODE_CLASSIC",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "templateName": {
+          "description": "Display name of the template. Must be unique among the organization's templates.",
+          "example": "Invoice with bank details",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "templateOrderType": {
+          "description": "Page order, with the same values as on Create PDF Template. When omitted, the stored order is kept.",
+          "enum": [
+            "RECEIPT_ONLY",
+            "RECEIPT_FOLLOWED_BY_INVOICE",
+            "INVOICE_FOLLOWED_BY_RECEIPT",
+            "REFUND_ONLY",
+            "REFUND_FOLLOWED_BY_CUSTOMER_CREDIT",
+            "CUSTOMER_CREDIT_FOLLOWED_BY_REFUND",
+            "RECEIPT_FOLLOWED_BY_VOUCHER",
+            "VOUCHER_FOLLOWED_BY_RECEIPT"
+          ],
+          "example": "RECEIPT_FOLLOWED_BY_INVOICE",
+          "type": "string"
+        },
+        "templateSettings": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PdfTemplateSettings"
+            }
+          ],
+          "description": "The whole layout. Unlike on Create PDF Template, it is not merged: it replaces the stored layout in full, and a key left out is removed. Read the template, change what you need, and send all of it back."
+        }
+      },
+      "type": "object"
+    },
     "UpdatePostingRuleRequest": {
       "properties": {
         "defaultBankAccountResourceId": {
@@ -38647,6 +40848,10 @@
         "taxInclusion": {
           "description": "When true, listed prices already include tax.",
           "type": "boolean"
+        },
+        "templateResourceId": {
+          "description": "Resource ID of the PDF template the purchase order prints with. Omit it to keep the current template.",
+          "type": "string"
         },
         "terms": {
           "description": "Payment terms in days, one of: 0,7,15,30,45,60.",
@@ -39130,6 +41335,10 @@
           "description": "When true, listed prices already include tax.",
           "type": "boolean"
         },
+        "templateResourceId": {
+          "description": "Resource ID of the PDF template the sale quote prints with. Omit it to keep the current template.",
+          "type": "string"
+        },
         "terms": {
           "description": "Filter by payment terms.",
           "enum": [
@@ -39422,6 +41631,125 @@
       ],
       "type": "object"
     },
+    "UpdateSignatureProfileRequest": {
+      "properties": {
+        "ccObservers": {
+          "description": "People kept informed of the request and sent the signed copy, who do not sign it themselves. On update, replaces the stored list in full; send an empty list to remove them all.",
+          "items": {
+            "$ref": "#/definitions/SignatureCcObserverRequest"
+          },
+          "maxItems": 100,
+          "type": "array"
+        },
+        "completionEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailUpdateRequest"
+            }
+          ],
+          "description": "Email sent once everyone has signed. Send subject, body, or both; the one left out keeps its stored value."
+        },
+        "declineReasonRequired": {
+          "description": "When true, a signer who declines must give a reason. A new profile defaults to true.",
+          "example": true,
+          "type": "boolean"
+        },
+        "defaultAppendices": {
+          "description": "PDF files merged after the document when it is sent for signature, in order, up to 10, each once. Upload each with Upload Signature Profile Appendix and pass the file it returns as it is; a file the profile already holds is kept when sent back as the profile returns it. On update, replaces the stored list in full; send an empty list to remove them all.",
+          "items": {
+            "$ref": "#/definitions/SignatureProfileAppendixRequest"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        "defaultExpiryDays": {
+          "description": "Days a signer has to sign before the request expires, from 1 to 365. A new profile defaults to 30.",
+          "example": 30,
+          "maximum": 365,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "description": {
+          "description": "What the profile is for. Send an empty string to remove it.",
+          "example": "Quotes over 10,000 that need the director to countersign",
+          "maxLength": 1000,
+          "type": "string"
+        },
+        "invitationEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailUpdateRequest"
+            }
+          ],
+          "description": "Email inviting each signer to sign. Send subject, body, or both; the one left out keeps its stored value."
+        },
+        "movementAlerts": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureMovementAlerts"
+            }
+          ],
+          "description": "What the sender is told about a request's progress. On update, values left out keep their stored values."
+        },
+        "name": {
+          "description": "Display name of the profile.",
+          "example": "Standard quote",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "onExpiryAction": {
+          "description": "What happens when a request expires unsigned: AUTO_VOID cancels it, ALERT_THEN_VOID alerts the sender, then cancels it, MANUAL_ONLY leaves it for the sender. A new profile defaults to AUTO_VOID.",
+          "enum": [
+            "AUTO_VOID",
+            "ALERT_THEN_VOID",
+            "MANUAL_ONLY"
+          ],
+          "example": "AUTO_VOID",
+          "type": "string"
+        },
+        "postCompletionAction": {
+          "description": "What happens once everyone has signed: DO_NOTHING, AUTO_ACCEPT (accept the document), AUTO_ACCEPT_AND_INVOICE (accept the sale quote and create its invoice, sale quotes only), or AUTO_ACCEPT_AND_BILL (accept the purchase request and create its bill, purchase requests only). A new profile defaults to DO_NOTHING.",
+          "enum": [
+            "DO_NOTHING",
+            "AUTO_ACCEPT",
+            "AUTO_ACCEPT_AND_INVOICE",
+            "AUTO_ACCEPT_AND_BILL"
+          ],
+          "example": "DO_NOTHING",
+          "type": "string"
+        },
+        "reminderEmail": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureEmailUpdateRequest"
+            }
+          ],
+          "description": "Email reminding a signer who has not signed. Send subject, body, or both; the one left out keeps its stored value."
+        },
+        "reminderSchedule": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SignatureReminderSchedule"
+            }
+          ],
+          "description": "When reminders go to signers who have not signed. On update, values left out keep their stored values."
+        },
+        "signers": {
+          "description": "People who sign, in signing order, up to 50 (a signature request holds 50 signers at most). Users of the organization sign in the app; anyone else gets a signing link by email. On update, replaces the stored list in full; send an empty list to remove every signer.",
+          "items": {
+            "$ref": "#/definitions/SignatureProfileSignerRequest"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        "voidReasonRequired": {
+          "description": "When true, the sender must give a reason to cancel a request. A new profile defaults to true.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "UpdateSupplierCreditClientRequest": {
       "properties": {
         "capsuleResourceId": {
@@ -39580,6 +41908,138 @@
         "taxType",
         "vatValue"
       ],
+      "type": "object"
+    },
+    "UpdateTransactionDefaultsRequest": {
+      "properties": {
+        "allowOverFulfillmentOrderToBill": {
+          "description": "When true, bills may bill more than their purchase order. PURCHASE_REQUEST and PURCHASE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "allowOverFulfillmentOrderToInvoice": {
+          "description": "When true, invoices may bill more than their sale order. SALE_QUOTE and SALE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "allowOverFulfillmentQuoteToOrder": {
+          "description": "When true, a sale order may order more than its quote. SALE_QUOTE and SALE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "allowOverFulfillmentRequestToOrder": {
+          "description": "When true, a purchase order may order more than its purchase request. PURCHASE_REQUEST and PURCHASE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "autoEnableEInvoice": {
+          "description": "When true, new documents are set to be sent as e-invoices. SALE, PURCHASE, SALE_CREDIT_NOTE and PURCHASE_CREDIT_NOTE only.",
+          "example": false,
+          "type": "boolean"
+        },
+        "autoEnableEmail": {
+          "description": "When true, new documents are set to be emailed to the contact. SALE, SALE_CREDIT_NOTE, SALE_QUOTE, SALE_ORDER and PURCHASE_ORDER only.",
+          "example": false,
+          "type": "boolean"
+        },
+        "currency": {
+          "description": "Default currency of new documents, as an ISO 4217 code. Must be one of the organization's active currencies. It cannot be cleared: leave it out or send null to keep it.",
+          "example": "SGD",
+          "type": "string"
+        },
+        "displayOrderReferenceOnBill": {
+          "description": "When true, a bill raised from a purchase order shows the order's reference. PURCHASE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayOrderReferenceOnInvoice": {
+          "description": "When true, an invoice raised from a sale order shows the order's reference. SALE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayQuoteReference": {
+          "description": "When true, a sale order shows the reference of its quote. SALE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayQuoteReferenceOnInvoice": {
+          "description": "When true, an invoice raised from a sale order shows the reference of the order's quote. SALE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayRequestReference": {
+          "description": "When true, a purchase order shows the reference of its purchase request. PURCHASE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "displayRequestReferenceOnBill": {
+          "description": "When true, a bill raised from a purchase order shows the reference of the order's purchase request. PURCHASE_ORDER only.",
+          "example": true,
+          "type": "boolean"
+        },
+        "dueDateTermDays": {
+          "description": "Default payment term of new documents, in days after the document date (0 means on delivery). SALE, PURCHASE, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST and PURCHASE_ORDER only.",
+          "example": 30,
+          "maximum": 2147483647,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "internalNotes": {
+          "description": "Default internal notes of new documents, which are never printed. Send an empty string to clear them; leave them out or send null to keep them.",
+          "example": "Check the delivery address.",
+          "type": "string"
+        },
+        "itemAccount": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionDefaultsItemAccount"
+            }
+          ],
+          "description": "Default account of new line items. Every family but JOURNAL_MANUAL."
+        },
+        "itemAttributes": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionDefaultsItemAttributes"
+            }
+          ],
+          "description": "Which optional line item columns new documents show."
+        },
+        "itemTax": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionDefaultsItemTax"
+            }
+          ],
+          "description": "Default tax of new line items."
+        },
+        "notes": {
+          "description": "Default notes printed on new documents. Send an empty string to clear them; leave them out or send null to keep them. SALE, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST and PURCHASE_ORDER only.",
+          "example": "Payment due within 30 days.",
+          "type": "string"
+        },
+        "numbering": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionNumberingRequest"
+            }
+          ],
+          "description": "How new documents in this family are numbered. Send only the parts to change. A family with no numbering of its own yet needs prefix and separator."
+        },
+        "paymentSettings": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TransactionDefaultsPaymentSettings"
+            }
+          ],
+          "description": "Default account and method of payments recorded against new documents. SALE and PURCHASE only."
+        },
+        "showAccountColumn": {
+          "description": "When true, new documents show the account column on their line items. SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST and PURCHASE_ORDER only. Sending false also clears the default account of new line items, which these families keep only while the column is shown.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
       "type": "object"
     },
     "UpsertCatalogClientRequest": {
@@ -60191,6 +62651,672 @@
         ]
       }
     },
+    "/api/v1/email-templates": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List the organization's email templates, paginated: each type's default template first, then the others by name. Every template comes with its full subject and body, and with those of each balance state for invoices and customer credit notes, so a page holds at most 100 templates. Get Email Template returns a single template.",
+        "operationId": "list-email-templates",
+        "parameters": [
+          {
+            "default": 100,
+            "description": "Maximum number of results per page (max 100).",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "description": "Zero-indexed row offset into the result set.",
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Email Templates",
+        "tags": [
+          "Email Templates"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create an email template. It starts active and is not made the default of its type; use Set Default Email Template for that. Each type can have at most 100 active templates. Reminder schedules are for INVOICE_PAYMENT_REMINDER, SUBSCRIPTION_REMINDER and CUSTOMER_STATEMENT_SCHEDULE templates, balance-state variants for INVOICE and CUSTOMER_CREDIT_NOTE templates, and a receipt template for COLLECTION_REQUEST templates; a request that sends one to another type is rejected. A contact can name its own template for a type, in its email template fields.",
+        "operationId": "create-email-template",
+        "parameters": [
+          {
+            "description": "The email template to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateEmailTemplateRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/EmailTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Email Template",
+        "tags": [
+          "Email Templates"
+        ]
+      }
+    },
+    "/api/v1/email-templates/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's email templates with filters, sort, and pagination. Without a sort, each type's default template comes first, then the others by name. Every template comes with its full subject and body, and with those of each balance state for invoices and customer credit notes, so a page holds at most 100 templates. Get Email Template returns a single template.",
+        "operationId": "search-email-template",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchEmailTemplatesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/PageableResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Email Templates",
+        "tags": [
+          "Email Templates"
+        ]
+      }
+    },
+    "/api/v1/email-templates/types": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List the kinds of email a template can be written for, each once, in the version for the organization's country when there is one. Each type carries its default subject and body, the placeholders its emails fill (emailBodyPlaceholders), the reminder schedule keys and values it takes (scheduleConfig), and the page every email of the type is sent in (emailBodyTemplate), where the template body takes the place of {{SUBSTITUTION_EMAIL_BODY}}.",
+        "operationId": "list-email-template-types",
+        "parameters": [
+          {
+            "description": "Return only this template type.",
+            "enum": [
+              "INVOICE",
+              "CUSTOMER_CREDIT_NOTE",
+              "INVOICE_PAYMENT_RECEIPT",
+              "CUSTOMER_REFUND_RECEIPT",
+              "INVOICE_PAYMENT_REMINDER",
+              "SUBSCRIPTION_REMINDER",
+              "CUSTOMER_STATEMENT_SCHEDULE",
+              "SALE_QUOTE",
+              "PURCHASE_ORDER",
+              "CASH_IN_RECEIPT",
+              "COLLECTION_REQUEST",
+              "PAYSLIP"
+            ],
+            "in": "query",
+            "name": "templateType",
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Email Template Types",
+        "tags": [
+          "Email Templates"
+        ]
+      }
+    },
+    "/api/v1/email-templates/{resourceId}": {
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Delete an email template. It is also removed from every contact and scheduled transaction that names it, which then use the default template of its type. The default template of a type cannot be deleted; set another template as the default first, or set status to INACTIVE with Update Email Template to stop using a template you want to keep.",
+        "operationId": "delete-email-template",
+        "parameters": [
+          {
+            "description": "Resource ID of the email template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/EmailTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete Email Template",
+        "tags": [
+          "Email Templates"
+        ]
+      },
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Get a single email template by its resource ID, with its subject, body, copied addresses, reminder schedule and, for invoices and customer credit notes, the subject and body of each balance state.",
+        "operationId": "get-email-template",
+        "parameters": [
+          {
+            "description": "Resource ID of the email template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/BaseResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Email Template",
+        "tags": [
+          "Email Templates"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update an email template's name, subject, body, copied addresses, reminder schedule, balance-state variants, receipt template or status. Fields left out keep their current values. emailCcList, additionalEmailCcList and reminderSchedules each replace the stored list in full, so an empty list removes every entry; variants changes only the balance states it names. The template type cannot be changed, and a request that sends it, or any other field not listed here, is rejected. Set status to INACTIVE to stop using a template without deleting it.",
+        "operationId": "update-email-template",
+        "parameters": [
+          {
+            "description": "Resource ID of the email template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The email template fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateEmailTemplateRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/EmailTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Email Template",
+        "tags": [
+          "Email Templates"
+        ]
+      }
+    },
+    "/api/v1/email-templates/{resourceId}/set-default": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Make an email template the default for its type. The template that was the default before stops being the default. For a type without a reminder schedule, an INACTIVE template is rejected; set its status to ACTIVE with Update Email Template first.",
+        "operationId": "create-email-template-set-default",
+        "parameters": [
+          {
+            "description": "Resource ID of the email template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/EmailTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Set Default Email Template",
+        "tags": [
+          "Email Templates"
+        ]
+      }
+    },
     "/api/v1/employee-pay-details": {
       "post": {
         "consumes": [
@@ -63048,6 +66174,100 @@
         "summary": "Forgive Loan",
         "tags": [
           "Loans"
+        ]
+      }
+    },
+    "/api/v1/generate-report-packs-pdf": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Render a report pack as a PDF and return a link to download it. The link expires 30 minutes after the response is returned. Choose the pack by templateResourceId or templateName; when both are sent, templateResourceId is used, and when neither is sent, the default report pack is used. Leave out dateStart and dateEnd to use the period saved on the report pack; a report pack saved with a custom period needs both dates. Rendering can take several minutes, and a request still rendering after 5 minutes is ended with 503. A section that fails to render is left out of the PDF and the request still succeeds; a pack that cannot be rendered at all returns 500.",
+        "operationId": "generate-report-packs-pdf",
+        "parameters": [
+          {
+            "description": "The report pack to render and the period it covers.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GenerateReportPacksPDFRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/ReportPackPDFResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Request timed out: the pack was still rendering after 5 minutes.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Download Report Pack PDF",
+        "tags": [
+          "Organization Report Templates"
         ]
       }
     },
@@ -75285,7 +78505,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Create a report template. When templateConfiguration is omitted, the template starts from the system default layout for the report type, the same layout Get Default Report Template Configuration returns. A report pack needs both templateConfiguration and packTemplates. The first template of a report type becomes its default; any later template is not made the default, so use Set Default Organization Report Template for that. For PROFIT_AND_LOSS and CASHFLOW, default layouts exist for the IAS_1 and IFRS_18 frameworks only; with GAAP, IND_AS, or IFRS_SME, pass templateConfiguration.",
+        "description": "Create a report template. When templateConfiguration is omitted, the template starts from the system default layout for the report type, the same layout Get Default Report Template Configuration returns. A report pack needs both templateConfiguration and packTemplates. The first template of a report type becomes its default; any later template is not made the default, so use Set Default Organization Report Template for that. For PROFIT_AND_LOSS and CASHFLOW, default layouts exist for the IAS_1 and IFRS_18 frameworks only; with GAAP, IND_AS, or IFRS_SME, pass templateConfiguration. A new logo is checked to exist: one not found is refused with 422, and a request whose logo could not be checked is refused with 503 and can be sent again.",
         "operationId": "create-organization-report-template",
         "parameters": [
           {
@@ -75352,6 +78572,12 @@
           },
           "500": {
             "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -75559,7 +78785,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Delete a report template and remove it from every report pack that includes it. The default template of a report type cannot be deleted, nor can the only template of a report type, nor a template that is the last one left in a report pack. Report packs can always be deleted.",
+        "description": "Delete a report template and remove it from every report pack that includes it, or delete a report pack. The default template of a report type cannot be deleted, and neither can the default report pack while the organization has another one: make another one the default with Set Default Organization Report Template first. Report packs are optional, so the last one can be deleted. The only template of a report type cannot be deleted either, nor can a template that is the last one left in a report pack.",
         "operationId": "delete-organization-report-template",
         "parameters": [
           {
@@ -75715,7 +78941,7 @@
         "consumes": [
           "application/json"
         ],
-        "description": "Update a report template's name, layout, or included templates. Fields left out keep their current values; templateConfiguration and packTemplates each replace the stored value in full. The report type and framework cannot be changed, and a request that sends them, or any other field not listed here, is rejected. Send the hash from the last read to have the update refused, rather than overwrite a change made since.",
+        "description": "Update a report template's name, layout, or included templates. Fields left out keep their current values; templateConfiguration and packTemplates each replace the stored value in full. The report type and framework cannot be changed, and a request that sends them, or any other field not listed here, is rejected. Send the hash from the last read to have the update refused, rather than overwrite a change made since. A new logo is checked to exist: one not found is refused with 422, and a request whose logo could not be checked is refused with 503 and can be sent again.",
         "operationId": "update-organization-report-template",
         "parameters": [
           {
@@ -75789,6 +79015,12 @@
           },
           "500": {
             "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -80834,6 +84066,765 @@
         "summary": "Refresh Payslip",
         "tags": [
           "Payslips"
+        ]
+      }
+    },
+    "/api/v1/pdf-templates": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a PDF template for one template type. The new template starts from the organization's default template of that type: its layout, with any templateSettings sent merged onto it, and, without styleCode, its style. In the merge an object merges key by key at every depth, and a list, a value or null replaces what the default holds, so send only what should differ. When the organization has no template of the type, templateSettings is stored as sent and must be the whole layout. A new template is never the default: make it one with Update PDF Template and isDefault true. An organization holds up to 100 templates of each type. A changed logo, letterhead or payment QR code must be an image uploaded for this organization with Upload PDF Template Image: pass the file it returns. A new image is checked to exist: one not found is refused with 422, and a request whose image could not be checked is refused with 503 and can be sent again. The layout takes the settings List PDF Template Layout Settings lists for the template type, with their values and bounds: any other key, at any depth and in the objects of a list, is refused with 422, even one the document printer reads, and so is a value of the wrong kind or out of its choices or bounds, a required label left empty, or a set of widths that does not add up to 100. A key or value the default template holds is not refused when sent unchanged. A refused key that looks like a misspelling names the setting meant. A colorTheme other than default for a template drawn in a style that prints no colour (STYLE_CODE_CLASSIC or STYLE_CODE_BENTO) is refused too. One refusal lists every problem of the request.",
+        "operationId": "create-pdf-template",
+        "parameters": [
+          {
+            "description": "The PDF template to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePdfTemplateRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/PdfTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create PDF Template",
+        "tags": [
+          "PDF Templates"
+        ]
+      }
+    },
+    "/api/v1/pdf-templates/bulk-delete": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Delete up to 100 PDF templates. Either all of them are deleted or none is: the request is refused, naming each cause, when a template is not found, is locked (controlFlag true), is the default template of its type, or is the last template of its type, since an organization keeps at least one template of each type. To delete a default template, first make another template of its type the default with Update PDF Template and isDefault true. Contacts assigned a deleted template go back to the default, and a receipt or refund that printed a deleted invoice or credit note template as its second document stops pointing at it.",
+        "operationId": "create-pdf-template-bulk-delete",
+        "parameters": [
+          {
+            "description": "The PDF templates to delete.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeletePdfTemplatesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/PdfTemplatesDeletedResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Bulk Delete PDF Templates",
+        "tags": [
+          "PDF Templates"
+        ]
+      }
+    },
+    "/api/v1/pdf-templates/images": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "Upload a logo, letterhead or payment QR code image for the organization's templates, and get back the file to put in a layout. Put it in a list as the only entry: in templateSettings.documentLogo, documentLetterhead or footerConfigs.paymentsSection.qrCode of a PDF template, or in the documentLogo or a cover page logo of a report template's templateConfiguration. A template takes only images uploaded for its own organization, of the kind its key holds. Uploading changes no template. The image must be a PNG or JPEG file. A LOGO is at most 2 MB, at least 120 by 60 pixels, and at most twice as high as it is wide. A LETTERHEAD is at most 5 MB, at least 1200 pixels wide, and at least 3 times as wide as it is high. A PAYMENT_QR is at most 2 MB, at least 32 by 32 pixels, and at most twice as high as it is wide. Any image is at most 25 million pixels. The type and dimensions are read from the image itself, not from the file name or the type sent with it. Anyone who has an uploaded image's address can open it, as with every template image.",
+        "operationId": "create-pdf-template-image",
+        "parameters": [
+          {
+            "description": "The image, a PNG or JPEG file.",
+            "in": "formData",
+            "name": "file",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "description": "What the image is for: LOGO, LETTERHEAD, or PAYMENT_QR for a payment QR code.",
+            "enum": [
+              "LOGO",
+              "LETTERHEAD",
+              "PAYMENT_QR"
+            ],
+            "in": "formData",
+            "name": "kind",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/PdfTemplateImage"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Upload PDF Template Image",
+        "tags": [
+          "PDF Templates"
+        ]
+      }
+    },
+    "/api/v1/pdf-templates/layout": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List every setting a PDF template layout of one template type can hold, as the app writes it: the path of each in templateSettings, the kind of value it takes, its choices or bounds, whether its label is required and when, and the sets of widths that must add up to 100. Create PDF Template and Update PDF Template refuse any other key, and any value outside these, unless the template already holds it and it is sent unchanged.",
+        "operationId": "list-pdf-template-layout",
+        "parameters": [
+          {
+            "description": "Template type to list the layout settings of.",
+            "enum": [
+              "INVOICE",
+              "CUSTOMER_CREDIT",
+              "RECEIPT",
+              "REFUND",
+              "CUSTOMER_STATEMENT",
+              "SALE_QUOTE",
+              "PURCHASE_ORDER",
+              "INVOICE_DELIVERY_SLIP",
+              "ORDER_DELIVERY_SLIP",
+              "SALE_ORDER_CONFIRMATION",
+              "DIRECT_CASH_IN_RECEIPT",
+              "DIRECT_CASH_OUT_ADVICE",
+              "BILL_PAYMENT_ADVICE",
+              "COLLECTION_REQUEST",
+              "PAYSLIP"
+            ],
+            "in": "query",
+            "name": "templateType",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/PdfTemplateLayout"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List PDF Template Layout Settings",
+        "tags": [
+          "PDF Templates"
+        ]
+      }
+    },
+    "/api/v1/pdf-templates/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search the organization's PDF templates, the print layouts of its documents, with filters, sort, and pagination. Each template comes with its whole layout. The default template of each type is always listed first; with no sort, the rest are ordered by name. A templateType filter naming a value that is not a template type, such as invoice in lower case, is refused with 400 listing the types.",
+        "operationId": "search-pdf-template",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchPdfTemplatesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PageableResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/definitions/PdfTemplate"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search PDF Templates",
+        "tags": [
+          "PDF Templates"
+        ]
+      }
+    },
+    "/api/v1/pdf-templates/styles": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List the styles a PDF template of one template type can be drawn in. Pass a style's styleCode to Create PDF Template or Update PDF Template; the style marked isDefaultStyle is used when none is named and the organization has no template of the type to copy.",
+        "operationId": "list-pdf-template-styles",
+        "parameters": [
+          {
+            "description": "Template type to list the styles of.",
+            "enum": [
+              "INVOICE",
+              "CUSTOMER_CREDIT",
+              "RECEIPT",
+              "REFUND",
+              "CUSTOMER_STATEMENT",
+              "SALE_QUOTE",
+              "PURCHASE_ORDER",
+              "INVOICE_DELIVERY_SLIP",
+              "ORDER_DELIVERY_SLIP",
+              "SALE_ORDER_CONFIRMATION",
+              "DIRECT_CASH_IN_RECEIPT",
+              "DIRECT_CASH_OUT_ADVICE",
+              "BILL_PAYMENT_ADVICE",
+              "COLLECTION_REQUEST",
+              "PAYSLIP"
+            ],
+            "in": "query",
+            "name": "templateType",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PageableResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/definitions/PdfTemplateStyle"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List PDF Template Styles",
+        "tags": [
+          "PDF Templates"
+        ]
+      }
+    },
+    "/api/v1/pdf-templates/{resourceId}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Get a PDF template and its whole layout by its resource ID.",
+        "operationId": "get-pdf-template",
+        "parameters": [
+          {
+            "description": "Resource ID of the PDF template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/PdfTemplate"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get PDF Template",
+        "tags": [
+          "PDF Templates"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update a PDF template's name, layout, style, or page order, or make it the default for its template type. Fields left out keep their current values. templateSettings is not merged as on Create PDF Template: it replaces the stored layout in full, and a key left out of it is removed, so read the template, change what you need, and send the whole layout back. isDefault true makes this template the default, and the template that was the default stops being one. The template type cannot be changed: a request that sends templateType, or any other field not listed here, is rejected with 400. A locked template (controlFlag true) cannot be updated. A changed logo, letterhead or payment QR code must be an image uploaded for this organization with Upload PDF Template Image: pass the file it returns. A new image is checked to exist: one not found is refused with 422, and a request whose image could not be checked is refused with 503 and can be sent again. The layout takes the settings List PDF Template Layout Settings lists for the template type, with their values and bounds: any other key, at any depth and in the objects of a list, is refused with 422, even one the document printer reads, and so is a value of the wrong kind or out of its choices or bounds, a required label left empty, or a set of widths that does not add up to 100. A key or value the stored layout holds is not refused when sent back unchanged. A refused key that looks like a misspelling names the setting meant. A changed colorTheme other than default for a template drawn in a style that prints no colour (STYLE_CODE_CLASSIC or STYLE_CODE_BENTO) is refused too. One refusal lists every problem of the request.",
+        "operationId": "update-pdf-template",
+        "parameters": [
+          {
+            "description": "Resource ID of the PDF template.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The PDF template fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePdfTemplateRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/PdfTemplateResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update PDF Template",
+        "tags": [
+          "PDF Templates"
         ]
       }
     },
@@ -96513,6 +100504,614 @@
         ]
       }
     },
+    "/api/v1/signature-profiles": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Create a signature profile: the signers, emails, reminders, expiry, and completion rules a sale quote or purchase request starts from when it is sent for signature in the app. A sender can change any of them when sending. Only invitationEmail is required besides the name and document type. To append PDF files to the document (defaultAppendices), upload each with Upload Signature Profile Appendix first. A refused request is answered with 422 naming every problem at once. The profile is not made the default for its document type unless isDefault is true; use Set Default Signature Profile later otherwise. Answers with the profile as saved.",
+        "operationId": "create-signature-profile",
+        "parameters": [
+          {
+            "description": "The signature profile to create.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateSignatureProfileRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/SignatureProfileResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Signature Profile",
+        "tags": [
+          "Signature Profiles"
+        ]
+      }
+    },
+    "/api/v1/signature-profiles/appendices": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "Upload a PDF to append to the documents sent with a signature profile, and get back the file to put in its defaultAppendices, as it is. A profile takes only PDFs uploaded for its own organization. Uploading changes no profile. The file must be a PDF of at most 8 MB; its type is read from the file itself, not from its name or the type sent with it. Anyone who has an uploaded file's address can open it, as with every appended PDF.",
+        "operationId": "create-signature-profile-appendice",
+        "parameters": [
+          {
+            "description": "The PDF to append. At most 8 MB.",
+            "in": "formData",
+            "name": "file",
+            "required": true,
+            "type": "file"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/SignatureProfileAppendix"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Upload Signature Profile Appendix",
+        "tags": [
+          "Signature Profiles"
+        ]
+      }
+    },
+    "/api/v1/signature-profiles/search": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Search signature profiles, the e-sign templates a sale quote or purchase request is sent for signature with, by resource ID, document type, or name. Each profile comes back in full, with its signers, emails, reminder schedule, and appended files.",
+        "operationId": "search-signature-profile",
+        "parameters": [
+          {
+            "description": "Search filters, sort, and pagination.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SearchSignatureProfilesRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PageableResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/definitions/SignatureProfileResponse"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Search Signature Profiles",
+        "tags": [
+          "Signature Profiles"
+        ]
+      }
+    },
+    "/api/v1/signature-profiles/{resourceId}": {
+      "delete": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Delete a signature profile. The default profile of a document type cannot be deleted: make another profile the default with Set Default Signature Profile first.",
+        "operationId": "delete-signature-profile",
+        "parameters": [
+          {
+            "description": "Resource ID of the signature profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/SignatureProfileResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Delete Signature Profile",
+        "tags": [
+          "Signature Profiles"
+        ]
+      },
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Get a signature profile by its resource ID, with its signers, emails, reminder schedule, and appended files.",
+        "operationId": "get-signature-profile",
+        "parameters": [
+          {
+            "description": "Resource ID of the signature profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/SignatureProfileResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Signature Profile",
+        "tags": [
+          "Signature Profiles"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Update a signature profile. Fields left out keep their stored values; signers, ccObservers and defaultAppendices each replace the stored list in full, and reminderSchedule, movementAlerts, and each email change only the values sent. To keep a file the profile holds in defaultAppendices, send it back as the profile returns it; upload a new one with Upload Signature Profile Appendix first. The document type cannot be changed and the default is set with Set Default Signature Profile, so a request that sends docType, isDefault, or any other field not listed here is rejected. A refused request is answered with 422 naming every problem at once. Answers with the profile as saved.",
+        "operationId": "update-signature-profile",
+        "parameters": [
+          {
+            "description": "Resource ID of the signature profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The signature profile fields to update.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateSignatureProfileRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/SignatureProfileResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Signature Profile",
+        "tags": [
+          "Signature Profiles"
+        ]
+      }
+    },
+    "/api/v1/signature-profiles/{resourceId}/set-default": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Make a signature profile the default for its document type: the one a sale quote or purchase request starts from when it is sent for signature. The profile that was the default stops being the default.",
+        "operationId": "create-signature-profile-set-default",
+        "parameters": [
+          {
+            "description": "Resource ID of the signature profile.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/SignatureProfileResourceResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Set Default Signature Profile",
+        "tags": [
+          "Signature Profiles"
+        ]
+      }
+    },
     "/api/v1/statement-of-account-export": {
       "post": {
         "consumes": [
@@ -99025,6 +103624,211 @@
         ]
       }
     },
+    "/api/v1/transaction-defaults/{family}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Get the defaults new documents of one transaction family start from: how they are numbered (prefix, separator, date and series start), the default payment term, notes, currency, line item account, tax and columns, and the delivery and display options. These are the Field Defaults (Document Defaults for quotes and orders) of the web application. A field that does not apply to the family, or has never been saved, is absent. To see the next number the numbering produces, use Get Next Reference with the same family as its type.",
+        "operationId": "get-transaction-default",
+        "parameters": [
+          {
+            "description": "Transaction family. The same values as the type of Get Next Reference.",
+            "enum": [
+              "SALE",
+              "SALE_CREDIT_NOTE",
+              "PURCHASE",
+              "PURCHASE_CREDIT_NOTE",
+              "JOURNAL_MANUAL",
+              "CLAIM",
+              "PAYRUN",
+              "SALE_QUOTE",
+              "SALE_ORDER",
+              "PURCHASE_REQUEST",
+              "PURCHASE_ORDER"
+            ],
+            "in": "path",
+            "name": "family",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/TransactionDefaultsResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Transaction Defaults",
+        "tags": [
+          "Transaction Defaults"
+        ]
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Change some of the defaults new documents of one transaction family start from. Fields left out, or sent as null, keep their current values, at every level: send numbering with only a prefix and the separator, date inclusion and series start stay as they are. To clear notes, internal notes, an account, a tax profile or a payment method, send an empty string. To make new documents carry no tax, send itemTax.itemLevel false. Documents already created keep their numbers; the next document created in the family takes the new format, which Get Next Reference shows right away. Changing the series start does not restart the count: set seriesOffset as its description explains. A request that changes nothing (no field, or only empty objects) is rejected with 400. Any other refused request is rejected with 422 naming every problem at once: a field that does not apply to the family, an account the family's defaults cannot use, or tax settings that conflict. Returns the family's defaults after the change.",
+        "operationId": "update-transaction-default",
+        "parameters": [
+          {
+            "description": "Transaction family. The same values as the type of Get Next Reference.",
+            "enum": [
+              "SALE",
+              "SALE_CREDIT_NOTE",
+              "PURCHASE",
+              "PURCHASE_CREDIT_NOTE",
+              "JOURNAL_MANUAL",
+              "CLAIM",
+              "PAYRUN",
+              "SALE_QUOTE",
+              "SALE_ORDER",
+              "PURCHASE_REQUEST",
+              "PURCHASE_ORDER"
+            ],
+            "in": "path",
+            "name": "family",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "description": "The defaults to change.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateTransactionDefaultsRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/TransactionDefaultsResponse"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Update Transaction Defaults",
+        "tags": [
+          "Transaction Defaults"
+        ]
+      }
+    },
     "/api/v1/transfer-fixed-assets": {
       "post": {
         "consumes": [
@@ -100645,6 +105449,22 @@
     {
       "description": "List and configure the customer and supplier deposit accounts on the chart of accounts.",
       "name": "Deposits"
+    },
+    {
+      "description": "Create, update, search, and delete the PDF templates that lay out the organization's printed documents, set the default template for each type, and list the styles a template can be drawn in.",
+      "name": "PDF Templates"
+    },
+    {
+      "description": "Create, update, search, and delete the organization's email templates, the emails sent with invoices, credit notes, receipts, quotes, purchase orders and payslips and as payment, subscription and statement reminders, and set the default template for each type.",
+      "name": "Email Templates"
+    },
+    {
+      "description": "Create, update, search, and delete signature profiles, the e-sign templates that hold the signers, emails, reminders, and completion rules a sale quote or purchase request is sent for signature with, and set the default profile for each document type. Documents are sent for signature in the app.",
+      "name": "Signature Profiles"
+    },
+    {
+      "description": "View and update the defaults new documents of each transaction family start from: their numbering, payment term, notes, currency, line item account and tax, and delivery and display options.",
+      "name": "Transaction Defaults"
     }
   ]
 }

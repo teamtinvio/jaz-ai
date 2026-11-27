@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 80 command groups. Organized by domain.
+Complete reference for all 84 command groups. Organized by domain.
 
 ---
 
@@ -566,7 +566,7 @@ Provisioned upstream; no create/update/delete exists.
 
 `roleCodes` is the column that matters: a module can be enabled and still deny the caller, because access is per role. "The module is on" and "I can use it" are different questions.
 
-### `clio report-templates`: Report layouts and report packs (8 tools)
+### `clio report-templates`: Report layouts and report packs (9 tools)
 The saved layout of each report (title, fonts, rows, columns, period), one default per report type, and packs that bundle several reports into one document. Every command that takes `<template>` accepts its resourceId or exact name. Full reference: the api skill's `references/report-templates.md`.
 
 | Subcommand | Key flags |
@@ -579,6 +579,7 @@ The saved layout of each report (title, fonts, rows, columns, period), one defau
 | `update <template>` | `--name`; layout flags below; `--report <template>` (repeat: replaces a pack's reports) |
 | `set-default <template>` | Makes it the default for every export and dashboard view of that report; prints the undo |
 | `delete <template>` | Refused for a type's default and a pack's last report |
+| `download-pack [pack]` | Renders a pack (default: the default pack) as one PDF and prints a 30-minute link; `--start-date`, `--end-date` (default: the pack's saved period). Can take minutes; a section that fails is left out of the PDF |
 
 Layout flags on `create` / `update`:
 - `--set path=value`: change one value; the value is read as JSON when it parses, else as text (repeatable).
@@ -592,10 +593,88 @@ clio report-templates create --name "Board P&L" --type PROFIT_AND_LOSS --set pdf
 clio report-templates update "Board P&L" --set colorTheme=calm
 clio report-templates create --name "Board pack" --type REPORT_PACK --report "Board P&L" --report "Standard Balance Sheet"
 clio exports download --type profit-and-loss --format PDF --start-date 2026-01-01 --end-date 2026-06-30 --template "Board P&L"
+clio report-templates download-pack "Board pack" --start-date 2026-10-01 --end-date 2026-10-31
 clio report-templates set-default "Board P&L"
 ```
 
 `list` and `search` return summaries without layouts (`configurationChars` gives each layout's size); `get` returns the layout as an object without the server-owned `coaSnapshot`. Search runs over the full list, so every filter works, `--name` included (upstream's own search refuses `and` / `or` and sorting by name). A write prints what the server did not keep, if anything (`notSaved`): profit-and-loss and balance-sheet layouts drop keys the server does not model.
+
+### `clio pdf-templates`: Print layouts of documents (8 tools)
+The PDF layout of each document type (invoice, credit note, receipt, refund, statement, quote, purchase order, delivery slips, sale order, cash in / out, bill payment advice, payment request, payslip), one default per type. Every command that takes `<template>` accepts its resourceId or exact name (`--type` narrows a name several types use). Full reference: the api skill's `references/pdf-templates.md`.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` | `--type <T>`, `--json`, `--format` |
+| `search` | `--name`, `--type`, `--default`, `--style`, `--page-order`, `--filter`, `--sort`, `--limit`, `--offset` (a page) |
+| `get <template>` | `--settings-out <file>` (the whole layout), `--json` |
+| `styles` | `--type <T>` (required): the style codes the type takes |
+| `create` | `--type`, `--name` (required); layout flags below; `--style`, `--page-order`, `--parent <template>` |
+| `update <template>` | `--name`; layout flags below; `--style`, `--page-order`, `--parent <template>` or `--no-parent` |
+| `set-default <template>` | Makes it its type's default; prints the undo |
+| `delete <template...>` | All or none; refused for a locked template and the last of a type |
+
+Layout flags on `create` / `update` are CHANGES, merged onto the whole layout (the stored one on update, the type's default template on create): objects merge key by key, arrays and values replace whole.
+- `--set path=value`: change one value; the value is read as JSON when it parses, else as text (repeatable).
+- `--settings-file <file>`: a JSON object of changes (a whole layout from `get --settings-out` works too).
+
+```bash
+clio pdf-templates list --type INVOICE
+clio pdf-templates update "Standard Invoice" --set colorTheme=calm --set documentTitle.title="Tax Invoice"
+clio pdf-templates create --type INVOICE --name "Invoice with bank details" --set footerConfigs.enablePaymentsSection=true
+clio pdf-templates set-default "Invoice with bank details"
+clio pdf-templates update "Receipt" --page-order RECEIPT_FOLLOWED_BY_INVOICE --parent "Standard Invoice"
+```
+
+### `clio email-templates`: The emails sent with documents, and reminders and statements (8 tools)
+The subject, message, copied addresses and (for reminders) schedule of each kind of email, one default per type. Every command that takes `<template>` accepts its resourceId or exact name; `--type` picks between two types that share a name. Rule 163 in the api skill has the details.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `types` | `--type <T>`: the placeholders each type fills and its reminder schedule keys and values |
+| `list` | `--limit` (max 100), `--offset`, `--format`: no bodies |
+| `search` | `--name`, `--type`, `--status`, `--default`, `--filter`, `--sort`, `--order`, `--limit` (max 100), `--offset` |
+| `get <template>` | `--type`, `--html` (each body as HTML too), `--json` |
+| `create` | `--type`, `--name`, `--subject` (required); message flags below |
+| `update <template>` | `--type`, `--name`, `--status ACTIVE\|INACTIVE`, `--no-cc` / `--no-additional-cc` / `--no-reminder` (empty that list); message flags below |
+| `set-default <template>` | Makes it the default for its type; prints the undo. Refused for an INACTIVE template of a type sent with documents |
+| `delete <template>` | Refused for a type's default |
+
+Message flags on `create` / `update`:
+- `--message <text>` or `--message-file <file>`: the email text, one line per line, `{{placeholders}}` as written. Written in the markup the web app's editor reads, so the template stays editable there.
+- `--body-file <file>`: the body as HTML, sent as is, instead.
+- `--subject`, `--currency-format`, `--cc <email>` (organization users), `--additional-cc "Name <email>"`, `--reminder KEY[=VALUE]` (each repeatable; a list replaces the stored one), `--receipt-template <template>` (collection requests).
+- `--variants-file <file>`: invoices and credit notes, a JSON list of `{ paymentState, emailSubject, message }`. Their emails send these, not the template's own subject and message.
+
+```bash
+clio email-templates types --type INVOICE_PAYMENT_REMINDER
+clio email-templates create --type INVOICE_PAYMENT_REMINDER --name "Gentle nudge" --subject "{{invoiceReference}} is due soon" --message-file nudge.txt --reminder BEFORE_DUE_DATE=3 --reminder ON_DUE_DATE
+clio email-templates update "Gentle nudge" --status INACTIVE
+clio email-templates set-default "Gentle nudge"
+```
+
+### `clio signature-profiles`: E-sign templates for quotes and purchase requests (7 tools)
+Who signs a sale quote or purchase request, the invitation, reminder and completion emails, the reminder schedule, expiry and what happens once everyone signed; one default per document type. Every command that takes `<profile>` accepts its resourceId or exact name. Sending a document for signature is done in the app, not here. Rules: the api skill's rule 164.
+
+| Subcommand | Key flags |
+|------------|-----------|
+| `list` | `--doc-type SALE_QUOTE\|PURCHASE_REQUEST`, `--json`, `--format` |
+| `get <profile>` | `--json` (emails included) |
+| `search` | `--name`, `--doc-type`, `--filter`, `--sort`, `--order`, paging flags |
+| `create` | `--doc-type`, `--name`, `--invitation-subject`, `--invitation-body` (all needed); `--default`; profile flags below |
+| `update <profile>` | profile flags below; fields left out keep theirs |
+| `set-default <profile>` | Makes it its document type's default; prints the undo |
+| `delete <profile>` | Refused for a document type's default |
+
+Profile flags on `create` / `update`: `--input <file>` (the API body as JSON, for schedules and alerts; flags are set on top), `--description`, `--expiry-days`, `--on-expiry`, `--post-completion`, `--signer EXTERNAL:Name:email[:role]` or `--signer INTERNAL:userResourceId[:role]` (repeat, in signing order; replaces the signers), `--cc <email>` (repeat), `--reminder-subject` / `--reminder-body`, `--completion-subject` / `--completion-body`.
+
+```bash
+clio org-users search --email ann@ --json                                   # an internal signer's userResourceId
+clio signature-profiles create --doc-type SALE_QUOTE --name "Large quotes" \
+  --signer "EXTERNAL:Jane Tan:jane@example.com" --signer "INTERNAL:<userResourceId>:Director" \
+  --invitation-subject "{{senderName}} has sent you a document to sign" --invitation-body "Please sign by {{expiryDate}}."
+clio signature-profiles update "Large quotes" --post-completion AUTO_ACCEPT_AND_INVOICE
+clio signature-profiles set-default "Large quotes"
+```
 
 ### `clio pseudo-sql` (alias: `sql`): Read-only SQL over the curated reporting tables (6 tools)
 A restricted SQL subset against Jaz's curated reporting schema, **not** the customer's database. SELECT only, single statement, 16384-char cap; the engine rejects DML, so there is no write verb.
@@ -832,6 +911,12 @@ Batch create via `--input` file or stdin (`{ "entries": [...] }`, 1-100 per call
 |------------|-----------|
 | `next` | `--type` (SALE, SALE_CREDIT_NOTE, PURCHASE, PURCHASE_CREDIT_NOTE, FIXED_ASSET, JOURNAL_MANUAL, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER, CLAIM), `--json`. Reading does not reserve the number; to number a create, pass the create command its own auto-ref flag |
 
+### `clio transaction-defaults`: Numbering format and defaults per family
+| Subcommand | Key flags |
+|------------|-----------|
+| `get <family>` | `--json`. `<family>` takes the `references next --type` values that have defaults: SALE, SALE_CREDIT_NOTE, PURCHASE, PURCHASE_CREDIT_NOTE, JOURNAL_MANUAL, CLAIM, PAYRUN, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER |
+| `update <family>` | `--prefix`, `--separator`, `--date-inclusion`, `--series-start`, `--series-offset`, `--currency`, `--due-days`, `--notes`, `--internal-notes`, `--input` (any other field as JSON), `--json`. Only what is sent changes, and `""` clears a note; put all of a family's changes in one command (back-to-back updates can undo each other); check the new format with `references next --type <family>` |
+
 ### `clio org-users`: User management
 | Subcommand | Key flags |
 |------------|-----------|
@@ -881,7 +966,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 526 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 555 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

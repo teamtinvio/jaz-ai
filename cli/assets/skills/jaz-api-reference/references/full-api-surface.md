@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 624 spec paths and 782 spec operations and is the authoritative list; check it before concluding
+> carries 643 spec paths and 808 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -316,6 +316,13 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 | GET | `/organization` | Get org details (returns LIST) |
 | GET | `/me` | Test API key (health check) |
 
+### Transaction Defaults (numbering and defaults per transaction family)
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/references/next?type=` | The next document number in a family's series (does not reserve it) |
+| GET | `/transaction-defaults/:family` | A family's defaults: numbering, due date term, notes, currency, line item account/tax/columns, payment settings, toggles |
+| PUT | `/transaction-defaults/:family` | Change some of them; fields left out keep their values |
+
 ### Currencies (via /organization/currencies)
 | Method | Path | Description |
 |--------|------|-------------|
@@ -447,7 +454,7 @@ Body for all three: `{ items: [{btResourceId: "<uuid>", btType: "SALE|PURCHASE|S
 ### Report Packs
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/generate-report-packs-pdf` | Generate multiple reports as single PDF |
+| POST | `/generate-report-packs-pdf` | Render a report pack as one PDF; answers a 30-minute link (can take minutes) |
 
 ### Statement of Account
 | Method | Path | Description |
@@ -635,6 +642,43 @@ Needs the Payruns module (402 without it) and an Employees admin user. Searches 
 | DELETE | `/organization-report-template/:resourceId` | Delete (refused for a type's default) |
 
 Layouts, `edits` and measured quirks: `report-templates.md`.
+
+### PDF Templates
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/pdf-templates/search` | Search (layouts included; `offset` is a page, 20 a page; defaults first) |
+| GET | `/pdf-templates/:resourceId` | Get one, with its whole layout (`templateSettings`, an object) |
+| GET | `/pdf-templates/styles` | The style codes a template of `templateType` takes |
+| POST | `/pdf-templates` | Create (layout and style default to the type's default template; never the default) |
+| PUT | `/pdf-templates/:resourceId` | Rename, replace the layout, change style or page order; `isDefault: true` makes it the default |
+| POST | `/pdf-templates/bulk-delete` | Delete up to 100, all or none (never the last of a type, never a locked one) |
+
+Layout keys, the `settings` merge and refusals: `pdf-templates.md`.
+
+### Email Templates
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/email-templates` | List (each type's default first; bodies included) |
+| POST | `/email-templates/search` | Search by name, type, status, default flag |
+| GET | `/email-templates/types` | Each kind of email: placeholders, reminder schedule keys and values, starting subject and body |
+| GET | `/email-templates/:resourceId` | Get one |
+| POST | `/email-templates` | Create (starts active, not the default) |
+| PUT | `/email-templates/:resourceId` | Change name, subject, body, copied addresses, schedule, variants, receipt template or status |
+| POST | `/email-templates/:resourceId/set-default` | Make it its type's default |
+| DELETE | `/email-templates/:resourceId` | Delete (refused for a type's default) |
+
+### Signature Profiles (E-sign Templates)
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/signature-profiles/search` | Search by `resourceId`, `docType`, `name`; whole profiles, paged |
+| GET | `/signature-profiles/:resourceId` | Get one |
+| POST | `/signature-profiles` | Create (needs `docType`, `name`, `invitationEmail`) |
+| PUT | `/signature-profiles/:resourceId` | Update (lists replace; schedules and emails merge) |
+| POST | `/signature-profiles/appendices` | Upload a PDF (multipart `file`, at most 8 MB) for `defaultAppendices` |
+| POST | `/signature-profiles/:resourceId/set-default` | Make it its document type's default |
+| DELETE | `/signature-profiles/:resourceId` | Delete (refused for a document type's default) |
+
+Sending for signature is done in the app, not the API. Wire rules: endpoints-schedules-reports.md section 32.
 
 ### Catalogs
 | Method | Path | Description |

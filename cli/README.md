@@ -3,13 +3,13 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/v/jaz-clio?style=for-the-badge&logo=npm" alt="npm"></a>
   <a href="https://www.npmjs.com/package/jaz-clio"><img src="https://img.shields.io/npm/dm/jaz-clio?style=for-the-badge&label=downloads" alt="npm downloads"></a>
-  <img src="https://img.shields.io/badge/tools-526-blue?style=for-the-badge" alt="526 tools">
+  <img src="https://img.shields.io/badge/tools-555-blue?style=for-the-badge" alt="555 tools">
   <a href="https://github.com/teamtinvio/jaz-ai/blob/main/LICENSE"><img src="https://img.shields.io/github/license/teamtinvio/jaz-ai?style=for-the-badge&color=green" alt="License"></a>
 </p>
 
 <p align="center"><b>Fastest ledger for agents.</b><br>Jaz accounting on the command line, and inside any AI agent.</p>
 
-526 tools · 80 command groups · 8 skills · 13 calculators · 12 job playbooks · 148 field-tested API rules.
+555 tools · 84 command groups · 8 skills · 13 calculators · 12 job playbooks · 152 field-tested API rules.
 
 ```bash
 npm install -g jaz-clio
@@ -66,21 +66,24 @@ clio ledger-find-fix preview --level TRANSACTIONS --input recode.json  # find & 
 clio approvals approve <resourceId> --entity invoices  # approve a document waiting on you
 clio sql preview "SELECT invoice_number, balance FROM invoices WHERE balance > 0 LIMIT 10"  # read-only pseudo-SQL
 clio report-templates update "Board P&L" --set colorTheme=calm  # customize a report layout
+clio pdf-templates update "Standard Invoice" --set colorTheme=calm  # change how invoices print
+clio email-templates create --type INVOICE_PAYMENT_REMINDER --name "Gentle nudge" --subject "{{invoiceReference}} is due soon" --message-file nudge.txt --reminder BEFORE_DUE_DATE=3  # a payment reminder email
 clio exports download --type profit-and-loss --template "Board P&L" --format PDF --start-date 2026-01-01 --end-date 2026-06-30
+clio transaction-defaults update SALE --prefix SI --due-days 30  # invoice number format and default terms
 clio modules list                                      # which features are switched on
 clio navigate reports.profit-and-loss                  # deep link into the Jaz dashboard (offline)
 ```
 
-80 command groups, 17 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
+84 command groups, 17 report types, 13 calculators, 12 job playbooks. Every command takes `--json`. Run `clio --help` for the full list.
 
 Command groups by area:
 
-- **Sales and purchases**: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `sale-orders`, `purchase-orders`, `payments`, `unapplied-payments`, `approvals`, `drafts`, `schedulers`, `subscriptions`
+- **Sales and purchases**: `invoices`, `bills`, `customer-credit-notes`, `supplier-credit-notes`, `sale-orders`, `purchase-orders`, `payments`, `unapplied-payments`, `approvals`, `drafts`, `schedulers`, `subscriptions`, `signature-profiles` (e-sign templates)
 - **Ledger and banking**: `journals`, `cash-in`, `cash-out`, `cash-transfer`, `cashflow`, `bank`, `bank-rules`, `reconciliations` (`recon`), `ledger-find-fix`, `quick-fix`, `fixed-assets` (`fa`)
 - **Master data**: `accounts`, `contacts`, `contact-groups`, `items`, `purchase-items`, `catalogs`, `inventory` (`inv`), `tags`, `custom-fields`, `nano-classifiers`, `tax-profiles`, `currencies`, `currency-rates`, `capsules`
 - **Claims**: `claims`, `claim-types`, `claim-profiles`, `posting-rules`, `employees`
-- **Reports and data**: `reports`, `exports`, `export-records`, `report-templates`, `pseudo-sql` (`sql`), `filing-submissions`, `background-jobs`
-- **Organization**: `org`, `org-users`, `references`, `modules` (`features`), `bookmarks`, `attachments`, `magic`, `jots`, `navigate` (`nav`), `help-center` (`hc`)
+- **Reports and data**: `reports`, `exports`, `export-records`, `report-templates`, `pdf-templates`, `pseudo-sql` (`sql`), `filing-submissions`, `background-jobs`
+- **Organization**: `org`, `org-users`, `email-templates`, `references`, `transaction-defaults`, `modules` (`features`), `bookmarks`, `attachments`, `magic`, `jots`, `navigate` (`nav`), `help-center` (`hc`)
 - **Calculators and job tools**: `calc` (offline), `jobs`
 - **Setup and tooling**: `auth`, `init`, `update`, `versions`, `version`, `health`, `completion`, `schema`, `resolve`, `mcp`, `mcp-call`
 
@@ -109,7 +112,7 @@ that ends up in a journal.
 
 ## MCP server
 
-526 tools for any AI agent that speaks MCP. Runs locally: no cloud, no ports.
+555 tools for any AI agent that speaks MCP. Runs locally: no cloud, no ports.
 
 > **No install at all?** Claude.ai, ChatGPT, Cowork, and Microsoft Copilot Studio can use Jaz through the hosted connector. Add `https://mcp.jaz.ai/mcp` as a custom connector and sign in with OAuth, no key. The local setup below is for terminal use, scripting, and editors that run MCP servers as local processes.
 
@@ -142,7 +145,7 @@ OAuth can reach the organizations granted at sign-in; `--org` pins one, and with
 
 ## Skills
 
-148 API rules from production testing: field-name maps, error-recovery patterns, response-shape quirks, plus 12 job playbooks. Installable into any agent project, no server involved.
+152 API rules from production testing: field-name maps, error-recovery patterns, response-shape quirks, plus 12 job playbooks. Installable into any agent project, no server involved.
 
 ```bash
 clio init                     # auto-detect the agent, install skills + agent-rules

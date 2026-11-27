@@ -7,18 +7,18 @@ description: >-
   precedence, output formats, entity resolution, and common workflow patterns.
   Also use when the user asks how to use clio, what commands are available, or
   how to automate accounting tasks from the command line. Covers all
-  80 command groups and 526 tools, including employee-expense claims.
+  84 command groups and 555 tools, including employee-expense claims.
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 metadata:
-  version: "9.12.0"
+  version: "9.13.0"
 ---
 
 # Clio CLI Skill
 
 > **Audience note:** for power users and CI/automation. Load this skill only when you're scripting from a terminal, building shell pipelines, or debugging from `clio --json` output. For day-to-day accounting inside Claude Desktop / Cowork, the MCP tools cover the common flows without dropping to the CLI.
 
-You are working with **Clio** (`jaz-clio`), the CLI for the Jaz accounting platform. 80 command groups, 13 calculators, 12 job playbooks (jaz-jobs skill), 526 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
+You are working with **Clio** (`jaz-clio`), the CLI for the Jaz accounting platform. 84 command groups, 13 calculators, 12 job playbooks (jaz-jobs skill), 555 tools. Also fully compatible with Juan Accounting (same API, same endpoints).
 
 ## When to Use This Skill
 
@@ -35,7 +35,7 @@ You are working with **Clio** (`jaz-clio`), the CLI for the Jaz accounting platf
 | Need | Skill |
 |------|-------|
 | CLI command syntax, flags, output | **jaz-cli** (this skill) |
-| API field names, error codes, 148 API rules | **jaz-api** |
+| API field names, error codes, 152 API rules | **jaz-api** |
 | Endpoint request/response shapes, search filters, search enums | **jaz-api-reference** |
 | IFRS transaction recipes (depreciation, leases, loans) | **jaz-recipes** |
 | Month-end close, bank recon, GST filing workflows | **jaz-jobs** |

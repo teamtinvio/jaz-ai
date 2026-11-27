@@ -1,6 +1,6 @@
 # Jaz API Endpoint Reference: Master Data
 
-> Request/response examples for organization, chart of accounts, tax profiles, currencies and rates, contacts, items, tags, custom fields, inventory items and balances, contact groups, bookmarks, catalogs, nano classifiers.
+> Request/response examples for organization, transaction defaults (document numbering), chart of accounts, tax profiles, currencies and rates, contacts, items, tags, custom fields, inventory items and balances, contact groups, bookmarks, catalogs, nano classifiers.
 > Base URL, auth, date format, pagination and status codes apply to every endpoint: see [endpoints.md](./endpoints.md), which also indexes every section.
 
 ---
@@ -24,6 +24,55 @@
 ```
 
 Access org via `data` directly (single object). The API previously returned an array but now returns a single object. Use `Array.isArray(data) ? data[0] : data` to handle both formats. Check `lockDate`; don't seed transactions before it.
+
+---
+
+## 1b. Transaction Defaults
+
+The defaults new documents of one transaction family start from (the app's Field Defaults, Document Defaults on quotes and orders). `{family}` is exactly the `type` of `GET /references/next`: `SALE` (invoices), `SALE_CREDIT_NOTE`, `PURCHASE` (bills), `PURCHASE_CREDIT_NOTE`, `JOURNAL_MANUAL`, `CLAIM`, `PAYRUN`, `SALE_QUOTE`, `SALE_ORDER`, `PURCHASE_REQUEST`, `PURCHASE_ORDER`. Fixed assets, deferrals, leases and loans have no readable defaults.
+
+### GET /api/v1/transaction-defaults/{family}
+
+```json
+// GET /api/v1/transaction-defaults/SALE
+{
+  "data": {
+    "family": "SALE",
+    "numbering": { "prefix": "INV", "separator": "HYPHEN", "dateInclusion": "EXCLUDE", "seriesStart": "0001", "seriesOffset": 0 },
+    "currency": "SGD",
+    "dueDateTermDays": 30,
+    "notes": "Thank you for your business.",
+    "itemAccount": { "accountResourceId": "6b1f2c3d-...", "itemLevel": true },
+    "itemTax": { "taxProfileResourceId": "0f9e8d7c-...", "taxInclusive": false, "itemLevel": true },
+    "itemAttributes": { "discount": true, "quantity": true, "unit": true },
+    "paymentSettings": { "accountResourceId": "9a8b7c6d-...", "paymentMethod": "BANK_TRANSFER" },
+    "autoEnableEmail": false,
+    "autoEnableEInvoice": false
+  }
+}
+```
+
+A field that does not apply to the family, or was never saved, is absent. No `numbering` means the family uses the built-in format; `GET /references/next` shows the number either way.
+
+### PUT /api/v1/transaction-defaults/{family}
+
+```json
+// PUT /api/v1/transaction-defaults/SALE: change the prefix and the default term only
+{ "numbering": { "prefix": "SI" }, "dueDateTermDays": 14 }
+// Response: the family's defaults as the write stored them, same shape as GET.
+```
+
+- Partial at every level: a field left out, or sent as `null`, keeps its value (`numbering.prefix` alone keeps the separator, date and series start). An unknown field is a 400 naming it; a field that does not apply to the family is a 422 naming it.
+- **One call per family.** The API reads the stored block before it writes, and that read can come from a replica a moment behind, so two updates of a family sent back to back can undo each other. Send every change for a family in one call.
+- The next number is `prefix` + separator + (date + separator when `dateInclusion` is `INCLUDE`) + sequence, zero padded to the length of `seriesStart` (max 12). Sequence = `seriesStart` + documents already created in the family − `seriesOffset`, never below 1. Changing `seriesStart` alone does not restart the count: to make the next number N, send `seriesStart` N and `seriesOffset` = `lastCounter` from `GET /references/next`.
+- Documents already created keep their numbers. The next document created (or `GET /references/next`) uses the new format at once.
+- A family with no numbering of its own yet needs `prefix` and `separator` in the first numbering change (422 otherwise).
+- Family-only fields: `dueDateTermDays` (SALE, PURCHASE, quotes, orders, requests; days after the document date, 0 = on delivery), `notes` (SALE, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER; GET leaves it out elsewhere), `paymentSettings` (SALE, PURCHASE), `showAccountColumn` (quotes, orders, requests), `autoEnableEmail`, `autoEnableEInvoice`, and the order over-fulfilment and reference display toggles.
+- `notes`, `internalNotes`, the resource IDs and `paymentSettings.paymentMethod` take `""` to clear. `currency` must be an active organization currency and cannot be cleared.
+- **No tax** is `itemTax: { "itemLevel": false }` alone: it unsets `taxInclusive` and clears the tax profile, so neither can be sent with it. Sending `taxInclusive` sets `itemLevel` true; a tax profile needs `taxInclusive` set (stored or sent).
+- `itemAccount` (every family but `JOURNAL_MANUAL`) is an active account that is not bank, cash or control. On quotes, orders and requests it is set only while `showAccountColumn` is true, and `showAccountColumn: false` clears it.
+- `paymentSettings.accountResourceId` is a bank or cash account; with a method that moves no money through one (`CREDIT_CARD`, `E_WALLET`, `CLEARING_SETTLEMENT`, `DEBT_WRITE_OFF`, `INTER_COMPANY`, `WITHHOLDING_TAX_CERTIFICATE`, `OTHER`), also the creditable withholding tax account or any active non-control account. Checked against the method sent, else the stored one.
+- A refused update is one 422 naming every problem; an update that changes nothing is a 400.
 
 ---
 
