@@ -1,5 +1,22 @@
 # Changelog
 
+## [9.14.1] - 2026-11-28
+
+**Clio asks before a delete in one plain question, and four rough edges found in a production run of Data Transfer and templates are fixed.**
+
+Confirmations
+- When a change waits for your yes (deleting a template, switching a reminder on, emailing new invoices by default, an e-sign template that invoices once signed, starting a data transfer), Clio now asks one plain question, for example: Delete the e-sign template "Smoke Sign" (Quote)? This cannot be undone. No quoted notice and no "please confirm" before it. Nothing changes until you answer, as before.
+- Assigning several reminder templates to a contact is asked as one question.
+- Over MCP, a held change answers `confirmation.question` (was `confirmation.statement`).
+
+Data Transfer
+- Files you upload for a transfer are no longer offered back to you as downloads.
+- A list a few rows longer than the sample is shown whole: no more "showing 10 of 11".
+- Asked to cancel a transfer that has finished, Clio says what it wrote stays and that nothing undoes a transfer as a whole. It no longer points to the Data Transfer screen for that.
+
+Document defaults
+- Changing only the prefix of a document number that was never customised keeps the separator and date its numbers show now, without asking for them.
+
 ## [9.14.0] - 2026-11-27
 
 **Clio brings a company's books in from another accounting system: it checks the export files, shows what will come in, and starts the transfer on your yes.**
