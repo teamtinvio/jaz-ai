@@ -1,6 +1,6 @@
 # Clio Command Catalog
 
-Complete reference for all 84 command groups. Organized by domain.
+Complete reference for all 85 command groups. Organized by domain.
 
 ---
 
@@ -917,6 +917,17 @@ Batch create via `--input` file or stdin (`{ "entries": [...] }`, 1-100 per call
 | `get <family>` | `--json`. `<family>` takes the `references next --type` values that have defaults: SALE, SALE_CREDIT_NOTE, PURCHASE, PURCHASE_CREDIT_NOTE, JOURNAL_MANUAL, CLAIM, PAYRUN, SALE_QUOTE, SALE_ORDER, PURCHASE_REQUEST, PURCHASE_ORDER |
 | `update <family>` | `--prefix`, `--separator`, `--date-inclusion`, `--series-start`, `--series-offset`, `--currency`, `--due-days`, `--notes`, `--internal-notes`, `--input` (any other field as JSON), `--json`. Only what is sent changes, and `""` clears a note; put all of a family's changes in one command (back-to-back updates can undo each other); check the new format with `references next --type <family>` |
 
+### `clio data-transfers`: Books in from another system (Xero, QuickBooks, Sage, MYOB)
+| Subcommand | Key flags |
+|------------|-----------|
+| `upload [file]` | `--source-url`, `--file-name`, `--json`. One export per call (`.xlsx`, `.xls`, `.csv`, 10 MB), kept under its name; prints the `<fileName>=<fileUrl>` pair `preview` takes |
+| `preview` | `--tier` (FOUNDATIONS or BALANCES), `--file "<fileName>=<fileUrl>"` (repeatable), `--as-at`, `--years`, `--source`, `--rate CUR:rate:YYYY-MM-DD` (repeatable), `--json`. Writes nothing; waits for the check (up to about 2 minutes) |
+| `get-preview <previewId>` | `--json`. CHECKING, READY, NOT_READY or FAILED, with what is left to answer |
+| `start <previewId>` | `--source`, `--rate` (repeatable), `--balance-without-aging`, `--json`. Not held (the operator typed it); writes the books and cannot be undone from the app. A lost answer may have started it: run `list` before anything else |
+| `list` | `--limit` (max 100), `--offset`, `--format`, `--json`. Newest first, and whether one is running (`inProgress` in json and yaml; a notice beside a table, on stderr beside csv) |
+| `get <resourceId>` | `--json`. Status only while it runs; once it ends, what it created, skipped and failed, by step |
+| `cancel <resourceId>` | `--json`. Only while QUEUED or IN_REVIEW |
+
 ### `clio org-users`: User management
 | Subcommand | Key flags |
 |------------|-----------|
@@ -966,7 +977,7 @@ Valid entity types: INVOICE, BILL, CUSTOMER_CREDIT_NOTE, SUPPLIER_CREDIT_NOTE, S
 Universal async tracker: any operation returning a jobId (contacts bulk-upsert, items bulk-upsert, bank import, magic processing) can be polled here.
 
 ### `clio mcp`: MCP stdio server
-Starts an MCP server for Claude Code / AI tool integration. Exposes all 555 operations.
+Starts an MCP server for Claude Code / AI tool integration. Exposes all 562 operations.
 
 ### `clio init`: Skill installer
 Installs AI agent skills into your project.

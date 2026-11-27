@@ -1,5 +1,20 @@
 # Changelog
 
+## [9.14.0] - 2026-11-27
+
+**Clio brings a company's books in from another accounting system: it checks the export files, shows what will come in, and starts the transfer on your yes.**
+
+Data Transfer
+- Clio stores the export files you send (.xlsx, .xls or .csv, from a file or a link) and checks them before anything is written: what each file is, how many accounts, contacts, items, invoices and bills it holds, and what is wrong with a file it cannot use.
+- Two kinds of transfer: setup only (chart of accounts, contacts, items), or setup with opening balances as at a date (open invoices and bills, the opening balance journal, lock dates). Full transaction history is not offered here.
+- Before it starts, Clio shows what will come in: the accounts with their types, the contacts, the items, the trial balance with its totals, and the exchange rates it will use. It asks only for what you alone can answer: the system the files came from, a missing year-end exchange rate, or whether to bring in a balance that has no breakdown by invoice or bill.
+- A transfer starts only after you say yes to that statement. It cannot be undone from the app, and Clio says so.
+- A small transfer finishes while Clio waits, and Clio reports what was created, skipped and failed. For a longer one Clio says it is still running and that no message follows when it ends: ask for its status at any time.
+- Clio lists past transfers, reads one transfer's result with what each step created and failed, and cancels a transfer that has not started writing.
+- Needs admin access to the Organization or Accounting module, and a plan that includes data transfer.
+
+- The `clio` CLI gains the same commands under `clio data-transfers`.
+
 ## [9.13.1] - 2026-11-27
 
 **No user-facing changes since v9.13.0.**

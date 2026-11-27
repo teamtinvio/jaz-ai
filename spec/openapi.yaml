@@ -9577,6 +9577,99 @@
       ],
       "type": "object"
     },
+    "CreateDataTransferPreviewRequest": {
+      "properties": {
+        "asAtDate": {
+          "description": "BALANCES only. Date the opening balances are as of, in YYYY-MM-DD format. It must be before the first transaction already in the organization.",
+          "example": "2025-12-31",
+          "type": "string"
+        },
+        "exchangeRates": {
+          "description": "Year-end exchange rates to use where the files do not state them.",
+          "items": {
+            "$ref": "#/definitions/DataTransferExchangeRate"
+          },
+          "maxItems": 500,
+          "type": "array"
+        },
+        "files": {
+          "description": "The export files, each stored first with Upload Data Transfer File by the same caller. At most 10, each name used once.",
+          "items": {
+            "$ref": "#/definitions/DataTransferFile"
+          },
+          "maxItems": 10,
+          "minItems": 1,
+          "type": "array"
+        },
+        "financialYears": {
+          "default": 1,
+          "description": "BALANCES only. Number of financial years of trial balances to bring forward, from 1 to 10.",
+          "example": 1,
+          "maximum": 10,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "previewId": {
+          "description": "A UUID the caller generates for this preview. Sending the same ID again answers the stored preview instead of checking the files again, so a caller whose connection drops can read the result later with Get Data Transfer Preview. Once a transfer is started from the preview, the ID is refused with 409 for the rest of its 30 minutes.",
+          "example": "4b1f8c2e-7d3a-4e6b-9c1d-2a5f8e7b6c3d",
+          "type": "string"
+        },
+        "sourceSystem": {
+          "description": "The system the files were exported from, when known. Use one of the values a preview lists in supportedSourceSystems.",
+          "example": "Xero",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "tier": {
+          "description": "What to bring in. FOUNDATIONS: chart of accounts, contacts and items. BALANCES: foundations plus opening balances and the invoices and bills still open. TRANSACTIONS: full transaction history, which is not available and is refused.",
+          "enum": [
+            "FOUNDATIONS",
+            "BALANCES",
+            "TRANSACTIONS"
+          ],
+          "example": "BALANCES",
+          "type": "string"
+        }
+      },
+      "required": [
+        "files",
+        "previewId",
+        "tier"
+      ],
+      "type": "object"
+    },
+    "CreateDataTransferRequest": {
+      "properties": {
+        "exchangeRates": {
+          "description": "Year-end exchange rates, one for each entry the preview listed in missingExchangeRates. A rate sent here replaces one sent with the preview for the same currency and date.",
+          "items": {
+            "$ref": "#/definitions/DataTransferExchangeRate"
+          },
+          "maxItems": 500,
+          "type": "array"
+        },
+        "previewId": {
+          "description": "Preview ID of a READY preview made by the same caller in the last 30 minutes. A preview starts one transfer.",
+          "example": "4b1f8c2e-7d3a-4e6b-9c1d-2a5f8e7b6c3d",
+          "type": "string"
+        },
+        "sourceSystem": {
+          "description": "The system the files were exported from. Required when the preview answered no sourceSystem, and refused with the code SOURCE_SYSTEM_REQUIRED until it is sent; otherwise it overrides the one the preview found or was given. Use one of the values the preview listed in supportedSourceSystems, and Other for a system not listed.",
+          "example": "Xero",
+          "maxLength": 100,
+          "type": "string"
+        },
+        "transferBalanceWithoutAging": {
+          "description": "When true, brings in the amount the preview named in balanceWithoutAging as one figure, without a breakdown by invoice or bill. Required when the preview set balanceWithoutAging.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "previewId"
+      ],
+      "type": "object"
+    },
     "CreateDeferralRequest": {
       "properties": {
         "amortizationAccountResourceId": {
@@ -13539,6 +13632,910 @@
         "endDate",
         "startDate"
       ],
+      "type": "object"
+    },
+    "DataTransfer": {
+      "properties": {
+        "completedAt": {
+          "description": "When the transfer finished, as epoch milliseconds. Left out while it runs.",
+          "example": 1764239500000,
+          "type": "integer"
+        },
+        "createdAt": {
+          "description": "When the transfer was started, as epoch milliseconds.",
+          "example": 1764239400000,
+          "type": "integer"
+        },
+        "createdCount": {
+          "description": "Records created. Left out while the transfer runs: records are counted once it ends.",
+          "example": 45,
+          "type": "integer"
+        },
+        "error": {
+          "description": "Why the transfer stopped or what went wrong, once it has ended. Left out otherwise.",
+          "type": "string"
+        },
+        "failedCount": {
+          "description": "Records that failed. Left out while the transfer runs.",
+          "example": 0,
+          "type": "integer"
+        },
+        "resourceId": {
+          "description": "Resource ID of the transfer.",
+          "example": "7c9e6679f2b04d6f8a3e1b2c4d5e6f70",
+          "type": "string"
+        },
+        "result": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferResult"
+            }
+          ],
+          "description": "What the transfer did, once it is SUCCESS, PARTIAL_SUCCESS or FAILED. Left out for any other status, and when what a finished transfer did cannot be read; read the transfer again later."
+        },
+        "status": {
+          "description": "Transfer status, as in List Data Transfers.",
+          "enum": [
+            "QUEUED",
+            "IN_REVIEW",
+            "PROCESSING",
+            "SUCCESS",
+            "PARTIAL_SUCCESS",
+            "FAILED",
+            "CANCELLED",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "ROLLBACK_FAILED"
+          ],
+          "example": "PROCESSING",
+          "type": "string"
+        },
+        "tier": {
+          "description": "What the transfer brings in.",
+          "enum": [
+            "FOUNDATIONS",
+            "BALANCES",
+            "TRANSACTIONS"
+          ],
+          "example": "BALANCES",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferCheck": {
+      "properties": {
+        "check": {
+          "description": "What was checked, in words to show as they are.",
+          "example": "No duplicate account codes",
+          "type": "string"
+        },
+        "code": {
+          "description": "Stable code of a WARNING or ERROR, for a caller that acts on specific results.",
+          "example": "REQUIRED_FILE_MISSING",
+          "type": "string"
+        },
+        "detail": {
+          "description": "More about the result, in words to show as they are. Left out when there is nothing to add.",
+          "type": "string"
+        },
+        "status": {
+          "description": "OK: passed. WARNING: passed with something to look at. ERROR: failed, and the transfer cannot start until it is fixed.",
+          "enum": [
+            "OK",
+            "WARNING",
+            "ERROR"
+          ],
+          "example": "OK",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferCreatedCounts": {
+      "properties": {
+        "accounts": {
+          "description": "Chart of accounts entries and currencies created.",
+          "example": 81,
+          "type": "integer"
+        },
+        "contacts": {
+          "description": "Contacts created.",
+          "example": 219,
+          "type": "integer"
+        },
+        "items": {
+          "description": "Items created.",
+          "example": 0,
+          "type": "integer"
+        },
+        "transactions": {
+          "description": "Invoices, bills, credit notes and journals created.",
+          "example": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferExchangeRate": {
+      "properties": {
+        "currency": {
+          "description": "Currency code (ISO 4217) of the foreign currency.",
+          "example": "USD",
+          "type": "string"
+        },
+        "date": {
+          "description": "Date the rate applies to, in YYYY-MM-DD format: the financial year end the preview asked about.",
+          "example": "2025-12-31",
+          "type": "string"
+        },
+        "rate": {
+          "description": "Units of the foreign currency for one unit of the organization's base currency.",
+          "example": 0.7449,
+          "type": "number"
+        }
+      },
+      "required": [
+        "currency",
+        "date",
+        "rate"
+      ],
+      "type": "object"
+    },
+    "DataTransferFile": {
+      "properties": {
+        "fileName": {
+          "description": "Name of the file as uploaded. The file name helps tell what an export holds, so keep the name the other system gave it.",
+          "example": "Chart of Accounts.xlsx",
+          "maxLength": 255,
+          "type": "string"
+        },
+        "fileUrl": {
+          "description": "URL of the stored file, as returned by Upload Data Transfer File.",
+          "example": "https://storage.example.com/uploads/3f2c9a1e.xlsx",
+          "maxLength": 2048,
+          "type": "string"
+        }
+      },
+      "required": [
+        "fileName",
+        "fileUrl"
+      ],
+      "type": "object"
+    },
+    "DataTransferListResponse": {
+      "properties": {
+        "data": {
+          "description": "Transfers, newest activity first.",
+          "items": {
+            "$ref": "#/definitions/DataTransferSummary"
+          },
+          "type": "array"
+        },
+        "inProgress": {
+          "description": "When true, a transfer of the organization is still running, on this page or another. Create Data Transfer refuses to start another until it ends.",
+          "example": false,
+          "type": "boolean"
+        },
+        "totalElements": {
+          "description": "Total number of records matching the query.",
+          "example": 3,
+          "type": "integer"
+        },
+        "totalPages": {
+          "description": "Total number of pages.",
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferPreview": {
+      "properties": {
+        "asAtDate": {
+          "description": "BALANCES only. Date the opening balances are checked as of, in YYYY-MM-DD format: the asAtDate sent with the preview. Left out when none was sent, and for FOUNDATIONS.",
+          "example": "2025-12-31",
+          "type": "string"
+        },
+        "balanceWithoutAging": {
+          "description": "Set when the trial balance shows an amount owed with no aging file for it. RECEIVABLES: no aged receivables file. PAYABLES: no aged payables file. Send that file in a new preview, or set transferBalanceWithoutAging in Create Data Transfer to bring the amount in as one figure without a breakdown by invoice or bill.",
+          "enum": [
+            "RECEIVABLES",
+            "PAYABLES"
+          ],
+          "example": "RECEIVABLES",
+          "type": "string"
+        },
+        "checks": {
+          "description": "Every check the preview ran. The check and detail texts are written for the person moving their books, so show them as they are.",
+          "items": {
+            "$ref": "#/definitions/DataTransferCheck"
+          },
+          "type": "array"
+        },
+        "counts": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferPreviewCounts"
+            }
+          ],
+          "description": "How many records of each kind the files hold."
+        },
+        "error": {
+          "description": "Why the preview FAILED. Left out otherwise.",
+          "type": "string"
+        },
+        "exchangeRates": {
+          "description": "Year-end exchange rates sent with the preview, as they were sent. A transfer started from the preview uses them, and a rate sent with Create Data Transfer for the same currency and date replaces one here. Left out when none were sent.",
+          "items": {
+            "$ref": "#/definitions/DataTransferExchangeRate"
+          },
+          "type": "array"
+        },
+        "expiresAt": {
+          "description": "When the preview expires, in RFC 3339 format. A preview can start one transfer before then.",
+          "example": "2026-11-27T10:30:00Z",
+          "type": "string"
+        },
+        "files": {
+          "description": "How each file was read.",
+          "items": {
+            "$ref": "#/definitions/DataTransferPreviewFile"
+          },
+          "type": "array"
+        },
+        "financialYears": {
+          "description": "BALANCES only. Number of financial years of trial balances the preview checks: the financialYears sent with the preview, or 1 when none was sent. Left out for FOUNDATIONS.",
+          "example": 1,
+          "type": "integer"
+        },
+        "missingExchangeRates": {
+          "description": "Year-end exchange rates the files do not state. Each must be sent in exchangeRates before Create Data Transfer starts the transfer.",
+          "items": {
+            "$ref": "#/definitions/DataTransferRateNeeded"
+          },
+          "type": "array"
+        },
+        "previewId": {
+          "description": "Preview ID the caller chose.",
+          "example": "4b1f8c2e-7d3a-4e6b-9c1d-2a5f8e7b6c3d",
+          "type": "string"
+        },
+        "review": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferPreviewReview"
+            }
+          ],
+          "description": "The records the files hold, list by list, so the person can check them before the transfer starts. Answered for a READY preview; left out otherwise."
+        },
+        "sourceSystem": {
+          "description": "The system the files appear to come from, or the one the caller named. Left out when neither is known; Create Data Transfer then needs sourceSystem.",
+          "example": "Xero",
+          "type": "string"
+        },
+        "status": {
+          "description": "CHECKING: the files are still being read. READY: a transfer can start. NOT_READY: a check failed; checks names it. FAILED: the files could not be checked; start a new preview with a new preview ID.",
+          "enum": [
+            "CHECKING",
+            "READY",
+            "NOT_READY",
+            "FAILED"
+          ],
+          "example": "READY",
+          "type": "string"
+        },
+        "supportedSourceSystems": {
+          "description": "Source systems a transfer accepts, for sourceSystem.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "tier": {
+          "description": "What the preview was asked to bring in.",
+          "enum": [
+            "FOUNDATIONS",
+            "BALANCES"
+          ],
+          "example": "BALANCES",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferPreviewCounts": {
+      "properties": {
+        "accounts": {
+          "description": "Chart of accounts entries.",
+          "example": 81,
+          "type": "integer"
+        },
+        "bills": {
+          "description": "Open bills to bring in as opening balances.",
+          "example": 0,
+          "type": "integer"
+        },
+        "contacts": {
+          "description": "Contacts, customers and suppliers together.",
+          "example": 219,
+          "type": "integer"
+        },
+        "invoices": {
+          "description": "Open invoices to bring in as opening balances.",
+          "example": 0,
+          "type": "integer"
+        },
+        "items": {
+          "description": "Products and services on the items list.",
+          "example": 0,
+          "type": "integer"
+        },
+        "journals": {
+          "description": "Opening balance journals.",
+          "example": 0,
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferPreviewFile": {
+      "properties": {
+        "fileName": {
+          "description": "Name of the file as uploaded.",
+          "example": "Chart of Accounts.xlsx",
+          "type": "string"
+        },
+        "recognizedAs": {
+          "description": "What the file was read as. UNRECOGNIZED: not a kind of export a transfer reads.",
+          "enum": [
+            "CHART_OF_ACCOUNTS",
+            "CONTACTS",
+            "ITEMS",
+            "TRIAL_BALANCE",
+            "AGED_RECEIVABLES",
+            "AGED_PAYABLES",
+            "BALANCE_SHEET",
+            "PROFIT_AND_LOSS",
+            "EXCHANGE_RATES",
+            "CURRENCIES",
+            "TAX_PROFILES",
+            "GENERAL_LEDGER",
+            "DOCUMENT_REGISTER",
+            "PAYMENT_ALLOCATION",
+            "UNRECOGNIZED"
+          ],
+          "example": "CHART_OF_ACCOUNTS",
+          "type": "string"
+        },
+        "rowCount": {
+          "description": "Number of rows read from the file.",
+          "example": 81,
+          "type": "integer"
+        },
+        "status": {
+          "description": "OK: read. WARNING: read with a problem a check names. ERROR: could not be read. IGNORED: not used.",
+          "enum": [
+            "OK",
+            "WARNING",
+            "ERROR",
+            "IGNORED"
+          ],
+          "example": "OK",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferPreviewReview": {
+      "properties": {
+        "accounts": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferReviewAccounts"
+            }
+          ],
+          "description": "Chart of accounts entries, and the account type each is brought in as."
+        },
+        "bills": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferReviewDocuments"
+            }
+          ],
+          "description": "BALANCES only. What is owed to suppliers, from the aged payables file. Each line is brought in as an open bill, or as a supplier credit note when it is a credit balance."
+        },
+        "contacts": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferReviewContacts"
+            }
+          ],
+          "description": "Contacts, and whether each is a customer or a supplier."
+        },
+        "exchangeRates": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferReviewRates"
+            }
+          ],
+          "description": "BALANCES only. Exchange rates the preview found: stated in the files, or the organization's own rate where the files name a currency without one."
+        },
+        "invoices": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferReviewDocuments"
+            }
+          ],
+          "description": "BALANCES only. What customers owe, from the aged receivables file. Each line is brought in as an open invoice, or as a customer credit note when it is a credit balance."
+        },
+        "items": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferReviewItems"
+            }
+          ],
+          "description": "FOUNDATIONS only. Products and services on the items list."
+        },
+        "trialBalance": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferReviewTrialBalance"
+            }
+          ],
+          "description": "BALANCES only. The trial balance and its totals. When the preview covers more than one financial year, the latest year's."
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferRateNeeded": {
+      "properties": {
+        "currency": {
+          "description": "Currency code (ISO 4217) of the foreign currency.",
+          "example": "USD",
+          "type": "string"
+        },
+        "date": {
+          "description": "Financial year end the rate is needed for, in YYYY-MM-DD format.",
+          "example": "2025-12-31",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferRef": {
+      "properties": {
+        "resourceId": {
+          "description": "Resource ID of the transfer. Pass it to Get Data Transfer to follow it.",
+          "example": "7c9e6679f2b04d6f8a3e1b2c4d5e6f70",
+          "type": "string"
+        },
+        "status": {
+          "description": "Transfer status, as in List Data Transfers. A small FOUNDATIONS transfer runs while the start waits, and can already be SUCCESS, PARTIAL_SUCCESS or FAILED when the start answers.",
+          "enum": [
+            "QUEUED",
+            "IN_REVIEW",
+            "PROCESSING",
+            "SUCCESS",
+            "PARTIAL_SUCCESS",
+            "FAILED",
+            "CANCELLED",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "ROLLBACK_FAILED"
+          ],
+          "example": "QUEUED",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferResult": {
+      "properties": {
+        "created": {
+          "description": "Records created.",
+          "example": 80,
+          "type": "integer"
+        },
+        "failed": {
+          "description": "Records that failed.",
+          "example": 0,
+          "type": "integer"
+        },
+        "skipped": {
+          "description": "Records skipped because the organization already had them.",
+          "example": 5,
+          "type": "integer"
+        },
+        "steps": {
+          "description": "What each stage did, in the order a transfer runs its stages. Left out when it cannot be read yet; read the transfer again later.",
+          "items": {
+            "$ref": "#/definitions/DataTransferStep"
+          },
+          "type": "array"
+        },
+        "warnings": {
+          "description": "Things to look at, in words to show as they are.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewAccount": {
+      "properties": {
+        "accountType": {
+          "description": "Account type the account is brought in as, one of the accountType values Account Classifications lists. Left out when none was found.",
+          "example": "Bank Accounts",
+          "type": "string"
+        },
+        "code": {
+          "description": "Account code from the files. Left out when the files give none.",
+          "example": "1001",
+          "type": "string"
+        },
+        "name": {
+          "description": "Account name from the files.",
+          "example": "USD Bank Account",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewAccounts": {
+      "properties": {
+        "rows": {
+          "description": "Chart of accounts entries read without a problem.",
+          "items": {
+            "$ref": "#/definitions/DataTransferReviewAccount"
+          },
+          "type": "array"
+        },
+        "total": {
+          "description": "How many records of the kind the files hold, as in counts. Rows lists only records read without a problem, so it can hold fewer than total even when truncated is false.",
+          "example": 81,
+          "type": "integer"
+        },
+        "truncated": {
+          "description": "True when rows holds only the first of the records read without a problem, at most 200. Left out otherwise.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewContact": {
+      "properties": {
+        "customer": {
+          "description": "When true, the contact is a customer. Left out, as supplier is, when the files do not say.",
+          "example": true,
+          "type": "boolean"
+        },
+        "name": {
+          "description": "Contact name from the files.",
+          "example": "Atlas Engineering",
+          "type": "string"
+        },
+        "supplier": {
+          "description": "When true, the contact is a supplier. Left out, as customer is, when the files do not say.",
+          "example": false,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewContacts": {
+      "properties": {
+        "rows": {
+          "description": "Contacts read without a problem.",
+          "items": {
+            "$ref": "#/definitions/DataTransferReviewContact"
+          },
+          "type": "array"
+        },
+        "total": {
+          "description": "How many records of the kind the files hold, as in counts. Rows lists only records read without a problem, so it can hold fewer than total even when truncated is false.",
+          "example": 81,
+          "type": "integer"
+        },
+        "truncated": {
+          "description": "True when rows holds only the first of the records read without a problem, at most 200. Left out otherwise.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewDocument": {
+      "properties": {
+        "balanceAmount": {
+          "description": "Amount owed, as the aging file states it. Always positive, a credit balance included.",
+          "example": 1250.75,
+          "type": "number"
+        },
+        "contactName": {
+          "description": "Name of the customer or supplier.",
+          "example": "Atlas Engineering",
+          "type": "string"
+        },
+        "currencyCode": {
+          "description": "Currency code (ISO 4217) the aging file names for the line. The amount is as the file states it, which can be in the organization's base currency. Left out when the file names none.",
+          "example": "USD",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewDocuments": {
+      "properties": {
+        "rows": {
+          "description": "Lines of the aging file read without a problem.",
+          "items": {
+            "$ref": "#/definitions/DataTransferReviewDocument"
+          },
+          "type": "array"
+        },
+        "total": {
+          "description": "How many records of the kind the files hold, as in counts. Rows lists only records read without a problem, so it can hold fewer than total even when truncated is false.",
+          "example": 81,
+          "type": "integer"
+        },
+        "truncated": {
+          "description": "True when rows holds only the first of the records read without a problem, at most 200. Left out otherwise.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewItem": {
+      "properties": {
+        "internalName": {
+          "description": "Item name from the files, brought in as the item's internal name.",
+          "example": "Widget",
+          "type": "string"
+        },
+        "itemCode": {
+          "description": "Item code from the files. Left out when the files give none.",
+          "example": "WIDGET-01",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewItems": {
+      "properties": {
+        "rows": {
+          "description": "Items read without a problem.",
+          "items": {
+            "$ref": "#/definitions/DataTransferReviewItem"
+          },
+          "type": "array"
+        },
+        "total": {
+          "description": "How many records of the kind the files hold, as in counts. Rows lists only records read without a problem, so it can hold fewer than total even when truncated is false.",
+          "example": 81,
+          "type": "integer"
+        },
+        "truncated": {
+          "description": "True when rows holds only the first of the records read without a problem, at most 200. Left out otherwise.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewRate": {
+      "properties": {
+        "currency": {
+          "description": "Currency code (ISO 4217) of the foreign currency.",
+          "example": "USD",
+          "type": "string"
+        },
+        "date": {
+          "description": "Date the rate applies to, in YYYY-MM-DD format. Left out when the files give none.",
+          "example": "2025-12-31",
+          "type": "string"
+        },
+        "rate": {
+          "description": "Units of the foreign currency for one unit of the organization's base currency.",
+          "example": 0.7449,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewRates": {
+      "properties": {
+        "rows": {
+          "description": "Exchange rates the preview found.",
+          "items": {
+            "$ref": "#/definitions/DataTransferReviewRate"
+          },
+          "type": "array"
+        },
+        "total": {
+          "description": "How many records of the kind the files hold, as in counts. Rows lists only records read without a problem, so it can hold fewer than total even when truncated is false.",
+          "example": 81,
+          "type": "integer"
+        },
+        "truncated": {
+          "description": "True when rows holds only the first of the records read without a problem, at most 200. Left out otherwise.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewTrialBalance": {
+      "properties": {
+        "rows": {
+          "description": "Account balances read without a problem.",
+          "items": {
+            "$ref": "#/definitions/DataTransferReviewTrialBalanceRow"
+          },
+          "type": "array"
+        },
+        "total": {
+          "description": "How many records of the kind the files hold, as in counts. Rows lists only records read without a problem, so it can hold fewer than total even when truncated is false.",
+          "example": 81,
+          "type": "integer"
+        },
+        "totalCreditAmount": {
+          "description": "Sum of the credit balances of every account read, not only of those in rows. Equal to totalDebitAmount when the trial balance balances.",
+          "example": 152340.5,
+          "type": "number"
+        },
+        "totalDebitAmount": {
+          "description": "Sum of the debit balances of every account read, not only of those in rows.",
+          "example": 152340.5,
+          "type": "number"
+        },
+        "truncated": {
+          "description": "True when rows holds only the first of the records read without a problem, at most 200. Left out otherwise.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferReviewTrialBalanceRow": {
+      "properties": {
+        "accountCode": {
+          "description": "Account code from the trial balance. Left out when it gives none.",
+          "example": "1001",
+          "type": "string"
+        },
+        "accountName": {
+          "description": "Account name from the trial balance.",
+          "example": "USD Bank Account",
+          "type": "string"
+        },
+        "creditAmount": {
+          "description": "Credit balance, or 0 for an account with a debit balance.",
+          "example": 0,
+          "type": "number"
+        },
+        "debitAmount": {
+          "description": "Debit balance, or 0 for an account with a credit balance.",
+          "example": 15000,
+          "type": "number"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferStep": {
+      "properties": {
+        "created": {
+          "description": "Records the stage created. Tax profiles it created, and records already in the organization that it changed, such as accounts and lock dates, are not counted. Left out when the status is NOT_RECORDED or OTHER.",
+          "example": 21,
+          "type": "integer"
+        },
+        "failed": {
+          "description": "Records the stage could not create, change or remove. Left out when the status is NOT_RECORDED or OTHER.",
+          "example": 0,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The stage, named by what it creates or sets. JOURNALS: journals, such as the opening balance journal of each financial year. OTHER: a stage without a name here yet.",
+          "enum": [
+            "CURRENCIES",
+            "EXCHANGE_RATES",
+            "CHART_OF_ACCOUNTS",
+            "CONTACTS",
+            "ITEMS",
+            "INVOICES",
+            "BILLS",
+            "CUSTOMER_CREDIT_NOTES",
+            "SUPPLIER_CREDIT_NOTES",
+            "JOURNALS",
+            "CASH_ENTRIES",
+            "CASH_TRANSFERS",
+            "PAYMENTS",
+            "CREDIT_NOTE_APPLICATIONS",
+            "REFUNDS",
+            "LOCK_DATES",
+            "OTHER"
+          ],
+          "example": "CHART_OF_ACCOUNTS",
+          "type": "string"
+        },
+        "status": {
+          "description": "How the stage ended. COMPLETED: it ran, and created and failed count what it did. FAILED: it stopped. SKIPPED: it did not run. ROLLED_BACK: what it created was removed. NOT_RECORDED: what it did was not recorded, so created and failed are left out. OTHER: a status without a name here yet; created and failed are left out.",
+          "enum": [
+            "COMPLETED",
+            "FAILED",
+            "SKIPPED",
+            "ROLLED_BACK",
+            "NOT_RECORDED",
+            "OTHER"
+          ],
+          "example": "COMPLETED",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "DataTransferSummary": {
+      "properties": {
+        "counts": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/DataTransferCreatedCounts"
+            }
+          ],
+          "description": "How many records of each kind the transfer created. Left out while the transfer runs: records are counted once it ends."
+        },
+        "date": {
+          "description": "Last activity on the transfer, as epoch milliseconds: when it finished, or its latest update while it runs.",
+          "example": 1764239400000,
+          "type": "integer"
+        },
+        "resourceId": {
+          "description": "Resource ID of the transfer.",
+          "example": "7c9e6679f2b04d6f8a3e1b2c4d5e6f70",
+          "type": "string"
+        },
+        "sourceSystem": {
+          "description": "The system the files came from, when it was recognized.",
+          "example": "Xero",
+          "type": "string"
+        },
+        "status": {
+          "description": "Transfer status. QUEUED: accepted, nothing written yet. IN_REVIEW: held for a review before anything is written. PROCESSING: writing. SUCCESS: finished; records already in the organization were kept and skipped. PARTIAL_SUCCESS: finished, some records failed. FAILED: stopped. CANCELLED: stopped before anything was written. ROLLING_BACK, ROLLED_BACK, ROLLBACK_FAILED: the records the transfer created are being removed, were removed, or could not all be removed.",
+          "enum": [
+            "QUEUED",
+            "IN_REVIEW",
+            "PROCESSING",
+            "SUCCESS",
+            "PARTIAL_SUCCESS",
+            "FAILED",
+            "CANCELLED",
+            "ROLLING_BACK",
+            "ROLLED_BACK",
+            "ROLLBACK_FAILED"
+          ],
+          "example": "SUCCESS",
+          "type": "string"
+        },
+        "tier": {
+          "description": "What the transfer brought in.",
+          "enum": [
+            "FOUNDATIONS",
+            "BALANCES",
+            "TRANSACTIONS"
+          ],
+          "example": "FOUNDATIONS",
+          "type": "string"
+        },
+        "transferredByUserResourceId": {
+          "description": "Resource ID of the user who started the transfer.",
+          "example": "6a1e2b3c-4d5e-4f60-8a7b-9c0d1e2f3a4b",
+          "type": "string"
+        }
+      },
       "type": "object"
     },
     "DateExpression": {
@@ -60594,6 +61591,730 @@
         ]
       }
     },
+    "/api/v1/data-transfers": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "List the organization's data transfers, newest activity first, and whether one is still running (inProgress). Requires admin access to the Organization or Accounting module.",
+        "operationId": "list-data-transfers",
+        "parameters": [
+          {
+            "default": 20,
+            "description": "Maximum number of results per page (default 20, max 100).",
+            "in": "query",
+            "name": "limit",
+            "type": "integer"
+          },
+          {
+            "default": 0,
+            "description": "Zero-indexed page number; with limit 10, offset 1 returns rows 11 to 20.",
+            "in": "query",
+            "name": "offset",
+            "type": "integer"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DataTransferListResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "List Data Transfers",
+        "tags": [
+          "Data Transfer"
+        ]
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Start the transfer a READY preview checked, with the answers it asked for: the source system when the preview answered none, any missing year-end exchange rates, and whether to bring in a balance without its aging file. A missing answer is refused with 422 and a code that names it (SOURCE_SYSTEM_REQUIRED, EXCHANGE_RATES_REQUIRED or AGING_CONFIRMATION_REQUIRED), and the preview can still be used. The transfer creates chart of accounts entries, contacts and items, and for BALANCES the open invoices and bills, the opening balance journal and lock dates. On an organization with no transactions and no earlier transfer, chart of accounts entries the files do not name are removed. A transfer cannot be undone through the API. A preview starts one transfer, and a transfer is refused while another is running or starting in the organization. Starting can take up to 2 minutes. A 502 with the code SERVICE_UNREACHABLE means nothing was started and the preview can still be used: try again shortly with the same preview ID. If the answer is lost, or comes back with the code OUTCOME_UNKNOWN, the transfer may have started: read List Data Transfers before starting again. Transferring full transaction history (TRANSACTIONS) is not available. Requires admin access to the Organization or Accounting module.",
+        "operationId": "create-data-transfer",
+        "parameters": [
+          {
+            "description": "The preview to start and the answers it asked for.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateDataTransferRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/DataTransferRef"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Create Data Transfer",
+        "tags": [
+          "Data Transfer"
+        ]
+      }
+    },
+    "/api/v1/data-transfers/files": {
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "description": "Store one export file from another accounting system for a data transfer. Send the file as the form-data key file, or send its URL as sourceUrl, in a form field or a JSON body. Only .xlsx, .xls and .csv files are accepted, up to 10 MB. Pass the fileName and fileUrl returned to Preview Data Transfer within 24 hours; only the same user can use them. Requires admin access to the Organization or Accounting module.",
+        "operationId": "create-data-transfer-file",
+        "parameters": [
+          {
+            "description": "Export file to store (XLSX, XLS or CSV). Max 10 MB.",
+            "in": "formData",
+            "name": "file",
+            "type": "file"
+          },
+          {
+            "description": "URL to download the export from, instead of sending file. The name at the end of the URL path is kept as the file name and must end in .xlsx, .xls or .csv. Max 10 MB.",
+            "in": "formData",
+            "name": "sourceUrl",
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/DataTransferFile"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Upload Data Transfer File",
+        "tags": [
+          "Data Transfer"
+        ]
+      }
+    },
+    "/api/v1/data-transfers/previews": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Check export files before a data transfer: what each file holds, how many records it brings in, and anything to fix or answer before the transfer can start. Nothing is written to the organization. Choose a new UUID as previewId for each preview. A check can take up to 2 minutes. If the connection drops, read the result with Get Data Transfer Preview and the same previewId; sending the same previewId again also answers the stored preview without checking the files again. A preview is kept for 30 minutes, and only the user who made it can read or use it. Once a transfer is started from a preview, its previewId answers 409 with the code PREVIEW_USED for the rest of the 30 minutes. Requires admin access to the Organization or Accounting module.",
+        "operationId": "create-data-transfer-preview",
+        "parameters": [
+          {
+            "description": "The files to check and what to bring in.",
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateDataTransferPreviewRequest"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/DataTransferPreview"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Preview Data Transfer",
+        "tags": [
+          "Data Transfer"
+        ]
+      }
+    },
+    "/api/v1/data-transfers/previews/{previewId}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Read a preview made with Preview Data Transfer: CHECKING while the files are being read, then READY, NOT_READY with the checks that failed, or FAILED. Only the user who made the preview can read it, for 30 minutes, until a transfer is started from it. Requires admin access to the Organization or Accounting module.",
+        "operationId": "get-data-transfer-preview",
+        "parameters": [
+          {
+            "description": "Preview ID the caller chose for Preview Data Transfer.",
+            "in": "path",
+            "name": "previewId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/DataTransferPreview"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Data Transfer Preview",
+        "tags": [
+          "Data Transfer"
+        ]
+      }
+    },
+    "/api/v1/data-transfers/{resourceId}": {
+      "get": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Get one data transfer: its status, and once it has ended, how many records it created and failed, its totals, any warnings and what each of its stages did (steps). If what a finished transfer did cannot be read yet, result is left out, or only its steps are; read the transfer again later. A transfer of another organization answers 404. Requires admin access to the Organization or Accounting module.",
+        "operationId": "get-data-transfer",
+        "parameters": [
+          {
+            "description": "Resource ID of the data transfer.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/DataTransfer"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Get Data Transfer",
+        "tags": [
+          "Data Transfer"
+        ]
+      }
+    },
+    "/api/v1/data-transfers/{resourceId}/cancel": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "description": "Stop a data transfer before it starts writing, while it is QUEUED or IN_REVIEW. A transfer that is waiting for another transfer of the organization to finish, is PROCESSING, or has ended cannot be cancelled and answers 409. A cancelled transfer has written nothing. A transfer of another organization answers 404. Requires admin access to the Organization or Accounting module.",
+        "operationId": "create-data-transfer-cancel",
+        "parameters": [
+          {
+            "description": "Resource ID of the data transfer.",
+            "in": "path",
+            "name": "resourceId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/BaseResponse"
+                },
+                {
+                  "properties": {
+                    "data": {
+                      "$ref": "#/definitions/DataTransferRef"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "402": {
+            "description": "Payment Required",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "summary": "Cancel Data Transfer",
+        "tags": [
+          "Data Transfer"
+        ]
+      }
+    },
     "/api/v1/deferral-accounts": {
       "get": {
         "consumes": [
@@ -105465,6 +107186,10 @@
     {
       "description": "View and update the defaults new documents of each transaction family start from: their numbering, payment term, notes, currency, line item account and tax, and delivery and display options.",
       "name": "Transaction Defaults"
+    },
+    {
+      "description": "Upload export files from another accounting system, preview them, start a transfer of chart of accounts, contacts, items and opening balances into the organization, and follow or cancel it.",
+      "name": "Data Transfer"
     }
   ]
 }

@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.13.1+456259c9a",
+  "contentVersion": "9.14.0+49e5de762",
   "counts": {
-    "tools": 555,
-    "namespaces": 65,
+    "tools": 562,
+    "namespaces": 66,
     "calculators": 13,
     "recipes": 16,
     "jobs": 12,
     "skills": 8,
-    "commands": 87,
-    "apiRules": 152
+    "commands": 88,
+    "apiRules": 153
   },
   "namespaces": [
     {
@@ -271,6 +271,10 @@
     {
       "name": "payrun_processing",
       "description": "Process employee pay runs: validate a draft and preview its journal, finalize payruns (posts one journal each; one or several at once), unpost a finalized run back to draft to correct it, void a run for good with a reason, and record payouts already paid outside Jaz (preview first; part amounts allowed; books only, no money moves) and void a recorded payout. Not expense claims."
+    },
+    {
+      "name": "data_transfers",
+      "description": "Data transfer: bring a company's books in from other accounting software (Xero, QuickBooks, Sage, MYOB) as its export files; there is no sign-in to that software. First read list_data_transfers: inProgress true means one is running, so say so and stop. Then ask one question: the setup only (chart of accounts, contacts and items: FOUNDATIONS), or the setup plus opening balances and the unpaid invoices and bills (BALANCES, and the date they are as of). Full transaction history is not available. Ask for the exports by name: chart of accounts, contacts, items; for BALANCES also the trial balance and the aged receivables and aged payables at that date. Upload each (upload_data_transfer_file), check them (preview_data_transfer), report the counts, ask only its toAsk, then start (start_data_transfer, held for the person's yes). Progress and the report: get_data_transfer. Also: migrate, convert, switch accounting software."
     }
   ],
   "tools": [
@@ -1461,6 +1465,55 @@
       "name": "update_transaction_defaults",
       "namespace": "transaction_defaults",
       "description": "Change some of a family's defaults: left out or null keeps a value; \"\" clears notes, an id or paymentMethod, never currency. Send ALL of a family's changes in ONE call: back-to-back updates can undo each other. Existing documents keep their numbers; new ones use the change (see get_next_reference). A field outside the family is refused. Returns the defaults as written. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "upload_data_transfer_file",
+      "namespace": "data_transfers",
+      "description": "Upload one export for a data transfer (the file attached to the call, or sourceUrl): .xlsx, .xls or .csv, up to 10 MB, kept under its own name. Pass the fileName and fileUrl it answers to preview_data_transfer. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": false
+    },
+    {
+      "name": "preview_data_transfer",
+      "namespace": "data_transfers",
+      "description": "Check uploaded exports before a transfer, writing nothing: what each file is, the counts, the checks (their words go to the person as written) and toAsk, what only the person can answer. CHECKING: still checking, read on with get_data_transfer_preview. READY: start_data_transfer.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_data_transfer_preview",
+      "namespace": "data_transfers",
+      "description": "Read a preview, waiting while it is CHECKING: READY, NOT_READY (a check failed) or FAILED, with its counts, checks and toAsk. READY: start_data_transfer.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "start_data_transfer",
+      "namespace": "data_transfers",
+      "description": "Start the transfer a READY preview checked: it writes the chart of accounts, contacts and items, and for BALANCES the open invoices and bills, the opening balance journal and lock dates. It cannot be undone from the app and waits for the person's yes. Pass the answers toAsk named. Its status and report: get_data_transfer. If this action involved a judgment call, record it (jot field or jot tool).",
+      "readOnly": false,
+      "destructive": true
+    },
+    {
+      "name": "list_data_transfers",
+      "namespace": "data_transfers",
+      "description": "The organization's data transfers, newest first: status, tier, source system and, once it ends, counts created. inProgress true: one is running and another cannot start. Read it before a transfer, and after a start whose outcome is unknown.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "get_data_transfer",
+      "namespace": "data_transfers",
+      "description": "One data transfer. While it runs: its status only. Once it ends: the records created, failed and skipped, the warnings (their words go to the person as written) and what each step created and failed; a part left out cannot be read yet, so read it again later.",
+      "readOnly": true,
+      "destructive": false
+    },
+    {
+      "name": "cancel_data_transfer",
+      "namespace": "data_transfers",
+      "description": "Cancel a data transfer before it writes anything (QUEUED or IN_REVIEW): a cancelled transfer has written nothing. Once writing has started it cannot be: pass the refusal on. If this action involved a judgment call, record it (jot field or jot tool).",
       "readOnly": false,
       "destructive": true
     },
@@ -4188,6 +4241,7 @@
     "currency-rates",
     "custom-fields",
     "customer-credit-notes",
+    "data-transfers",
     "deferrals",
     "drafts",
     "email-templates",

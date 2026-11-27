@@ -5,11 +5,12 @@ description: >-
   QuickBooks, Sage, MYOB, or Excel exports. Covers the full conversion pipeline:
   analyzing source files, mapping Chart of Accounts, contacts, tax profiles, and
   items, creating clearing accounts, running TTB (trial transaction balance),
-  and verifying TB. Also use when the user mentions data migration, conversion,
+  and verifying TB. The setup and opening balances go through the data
+  transfer tools (upload, preview, start). Also use when the user mentions data migration, conversion,
   import, or switching accounting software, whenever a customer's prior system
   is Xero, QuickBooks, Sage, MYOB, or an Excel-based ledger.
 metadata:
-  version: "9.13.1"
+  version: "9.14.0"
 ---
 
 # Jaz Conversion Skill
@@ -20,9 +21,19 @@ You are performing an **accounting data conversion**: migrating a customer's fin
 
 **This skill provides Jaz-contextual conversion domain knowledge. For API details (field names, endpoints, gotchas), load the `jaz-api` skill alongside this one.**
 
-## Guided in-app data transfer
+## Data transfer: the setup and opening balances (start here)
 
-Jaz also has a guided **Data Transfer** flow available in Settings (Xero, QuickBooks, Sage, MYOB).
+Bringing in a company's chart of accounts, contacts and items (**FOUNDATIONS**), or those plus its opening balances with the invoices and bills still open (**BALANCES**), goes through the data transfer tools: the same transfer as Settings > Data Transfer in the app. Export files only: there is no sign-in to Xero, QuickBooks, Sage or MYOB.
+
+1. **History first:** `list_data_transfers`. `inProgress: true` means one is running: say so and stop.
+2. **One question:** "Should I bring over just your setup (chart of accounts, contacts and items), or your setup plus opening balances and the invoices and bills still open?" Full transaction history is not available: say so.
+3. **BALANCES only:** the date the opening balances are as of, usually the last financial year end. It must be before the first transaction already in the organization.
+4. **The files, by name:** chart of accounts, contacts and items exports; for BALANCES also the trial balance and the aged receivables and aged payables detail at that date. Up to 10 files, `.xlsx`, `.xls` or `.csv`, 10 MB each, under the names the other system gave them.
+5. **Upload and preview:** `upload_data_transfer_file` for each, then `preview_data_transfer` (`tier`, `files`, `asAtDate`). Nothing is written. Report what it found in counts (`review` holds the first rows of each list), then ask **only** its `toAsk`: the source system when none was found, a balance with no aging file (one amount, or send that file), each missing year-end rate (units of the currency for one unit of the base currency), a failed check. Check and detail texts are written for the person: relay them unchanged. `CHECKING` means the check is still running: read on with `get_data_transfer_preview` (the files are not checked again).
+6. **Start:** `start_data_transfer` with the `previewId` and the answers; its statement takes the date from the preview and shows a sample of each list as a table, the trial balance totals and the exchange rates found and given. It is held: quote its statement word for word, tables included, end the turn, and call it again with the `confirmationId` after the yes. A start can answer a transfer that has already ended: report it with `get_data_transfer`. A start that outlasts its wait reads the list once itself and answers the transfer it finds. An unknown outcome: read `list_data_transfers` before anything else, never start again blindly. A start the API says started nothing (the service could not be reached) can be tried again with the same `previewId`; one refused because another transfer is running or starting, once `list_data_transfers` shows `inProgress` false.
+7. **Status and report:** `get_data_transfer` when asked. While it runs it answers the status only, no counts; once it ends, report what each step created and failed, the records skipped (already in the organization) and the warnings, and end with the Data Transfer screen link the result carries. A finished transfer whose result or steps are left out cannot be read yet: read it again later. `cancel_data_transfer` works only before writing starts (QUEUED or IN_REVIEW).
+
+The pipeline below stays for an operator building a conversion by hand, and for full transaction history (Full Conversion), which the transfer does not do.
 
 ## When to Use This Skill
 
@@ -36,6 +47,8 @@ Jaz also has a guided **Data Transfer** flow available in Settings (Xero, QuickB
 ## Three Conversion Types
 
 All types use the **same pipeline**; only the scope (which entity types) differs.
+
+Config Mode and Quick Conversion are the data transfer's FOUNDATIONS and BALANCES (above): use the tools unless an operator builds them by hand.
 
 ### Config Mode (foundation only)
 - **Scope:** CoA, contacts, items, currencies, tax mapping; NO transactions or journal
@@ -78,7 +91,7 @@ Receive customer files. Organize by type. Expect messy Excel files with grouped 
 ### Step 2: Parse (3-pass approach)
 See `references/file-analysis.md` for parsing guidance and `references/file-types.md` for the comprehensive file type catalog (22 types across all source systems).
 
-**Pass A (Raw dump):** Run the parser (`parseFile()`) to extract all cells + merge metadata from Excel files. The parser handles merged cell propagation automatically.
+**Pass A (Raw dump):** There is no raw cell parser in the tools. `read_spreadsheet_rows` reads a clean table: the first non-empty row is the header (a blank or repeated header cell is refused), 500 rows a call, `sheetIndex` for each sheet in `availableSheets`. A report export with title rows, merged cells or subtotals is dumped outside the tools, or goes through the data transfer tools above, which read these exports themselves.
 
 **Pass B (AI structure detection):** Read the raw JSON dump and identify:
 - Where are the data tables? (header row + data rows)
@@ -145,7 +158,7 @@ If TB doesn't match, identify the discrepancy:
 
 ## Critical Rules
 
-1. **TTB is a regular journal entry**: Jaz's TTB module is not yet on the API. Create via `POST /journals`. Lock date is set separately via CoA API.
+1. **TTB has its own tool**: `create_transfer_trial_balance` (`POST /api/v1/transfer-trial-balance`) posts the opening balance entries, always ACTIVE, with its own reference and no lock date check. Lock date is set separately via CoA API.
 2. **Fixed asset transfers use `POST /api/v1/transfer-fixed-assets`**, not the "new asset" endpoint. Preserves accumulated depreciation.
 3. **Clearing accounts must net to zero**: if they don't, something was missed in the conversion.
 4. **Never project TB before execution**: verify AFTER, then triage.

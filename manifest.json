@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "jaz-ai",
   "display_name": "Jaz Accounting",
-  "version": "9.13.1",
+  "version": "9.14.0",
   "description": "Fastest ledger for agents",
   "long_description": "Built for businesses, finance teams, and accountants. IFRS-first, multi-currency, multi-user by default. Invoicing, bills, payments, quotes & orders, bank reconciliation, fixed assets, inventory, expense claims, tax, reports, and period close, all available for read and write. MCP tools load only when needed, so your agents stay lean and fast. Ask \"what can you do?\" to see everything.",
   "author": {
@@ -745,6 +745,34 @@
     {
       "name": "update_transaction_defaults",
       "description": "Change some of a family's defaults: left out or null keeps a value; \"\" clears notes, an id or paymentMethod, never currency. Send ALL of a family's changes in ONE call: back-to-back updates can undo each other. Existing documents keep their numbers; new ones use the change (see get_next_reference). A field outside the family is refused. Returns the defaults as written. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "upload_data_transfer_file",
+      "description": "Upload one export for a data transfer (the file attached to the call, or sourceUrl): .xlsx, .xls or .csv, up to 10 MB, kept under its own name. Pass the fileName and fileUrl it answers to preview_data_transfer. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "preview_data_transfer",
+      "description": "Check uploaded exports before a transfer, writing nothing: what each file is, the counts, the checks (their words go to the person as written) and toAsk, what only the person can answer. CHECKING: still checking, read on with get_data_transfer_preview. READY: start_data_transfer."
+    },
+    {
+      "name": "get_data_transfer_preview",
+      "description": "Read a preview, waiting while it is CHECKING: READY, NOT_READY (a check failed) or FAILED, with its counts, checks and toAsk. READY: start_data_transfer."
+    },
+    {
+      "name": "start_data_transfer",
+      "description": "Start the transfer a READY preview checked: it writes the chart of accounts, contacts and items, and for BALANCES the open invoices and bills, the opening balance journal and lock dates. It cannot be undone from the app and waits for the person's yes. Pass the answers toAsk named. Its status and report: get_data_transfer. If this action involved a judgment call, record it (jot field or jot tool)."
+    },
+    {
+      "name": "list_data_transfers",
+      "description": "The organization's data transfers, newest first: status, tier, source system and, once it ends, counts created. inProgress true: one is running and another cannot start. Read it before a transfer, and after a start whose outcome is unknown."
+    },
+    {
+      "name": "get_data_transfer",
+      "description": "One data transfer. While it runs: its status only. Once it ends: the records created, failed and skipped, the warnings (their words go to the person as written) and what each step created and failed; a part left out cannot be read yet, so read it again later."
+    },
+    {
+      "name": "cancel_data_transfer",
+      "description": "Cancel a data transfer before it writes anything (QUEUED or IN_REVIEW): a cancelled transfer has written nothing. Once writing has started it cannot be: pass the refusal on. If this action involved a judgment call, record it (jot field or jot tool)."
     },
     {
       "name": "move_transaction_capsules",

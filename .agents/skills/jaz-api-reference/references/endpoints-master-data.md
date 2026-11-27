@@ -823,3 +823,62 @@ credit note). There is no direct quantity write.
 ```
 
 **CRITICAL**: GET single is double-wrapped: `{data: {data: [...], totalElements, totalPages}}`. Extract `res.data.data[0]` to get the classifier. Classes in response are objects (`{className, resourceId}`), not strings.
+
+---
+
+## 33. Data Transfer
+
+Bring a company's books in from another accounting system (Xero, QuickBooks, Sage, MYOB) from its export files, the same transfer as Settings > Data Transfer in the app. No sign-in to the other system. `tier` is `FOUNDATIONS` (chart of accounts, contacts, items) or `BALANCES` (those plus opening balances and the open invoices and bills); `TRANSACTIONS` (full history) is refused with 422 `TIER_NOT_AVAILABLE`.
+
+Rules that hold on every route below:
+- The caller must be a user with ADMIN on the Organization or Accounting module (403 otherwise); a credential that carries no user is refused (401).
+- A refusal the caller can act on carries a code in `error.error_details.code`: `FILE_NOT_UPLOADED`, `TIER_NOT_AVAILABLE`, `PREVIEW_NOT_FOUND`, `PREVIEW_CHECKING`, `PREVIEW_NOT_READY`, `PREVIEW_FAILED`, `PREVIEW_USED`, `TRANSFER_IN_PROGRESS`, `AGING_CONFIRMATION_REQUIRED`, `EXCHANGE_RATES_REQUIRED` (with `missing[]`), `SOURCE_SYSTEM_REQUIRED`, `SOURCE_SYSTEM_NOT_SUPPORTED`, `TRANSFER_REFUSED`, `OUTCOME_UNKNOWN`, `SERVICE_UNREACHABLE` (502: the transfer service could not be reached), `NOT_CANCELLABLE`, `PREVIEW_STORE_UNAVAILABLE`.
+- Check `check` and `detail` texts, and result `warnings`, are written for the person: show them as they are.
+
+### POST /api/v1/data-transfers/files
+
+Multipart `file`, or `sourceUrl` (form field or JSON). `.xlsx`, `.xls` or `.csv`, up to 10 MB; the name is kept (a `sourceUrl` keeps the last path segment). Answers 201 `{ "data": { "fileName", "fileUrl" } }`, usable in a preview by the same user for 24 hours.
+
+### POST /api/v1/data-transfers/previews
+
+```json
+{ "previewId": "4b1f8c2e-7d3a-4e6b-9c1d-2a5f8e7b6c3d", "tier": "BALANCES",
+  "files": [{ "fileName": "Trial Balance.xlsx", "fileUrl": "<from the upload>" }],
+  "asAtDate": "2025-12-31", "financialYears": 1, "sourceSystem": "Xero",
+  "exchangeRates": [{ "currency": "USD", "rate": 0.7449, "date": "2025-12-31" }] }
+```
+
+- `previewId` is a UUID v4 the caller makes; the same id again answers the stored preview, before the tier and the files are checked again, and never checks the files twice. Once a transfer is started from it, the same id answers 409 `PREVIEW_USED` for the rest of its 30 minutes. `files`: 1 to 10, each name once, each uploaded by this caller. `asAtDate` and `financialYears` (1 to 10) are BALANCES only. `rate`: units of the currency for one unit of the base currency.
+- Writes nothing to the organization. A check can take up to 2 minutes and runs on if the caller leaves. Answers 200 `{ "data": preview }`:
+  `status` (`CHECKING`, `READY`, `NOT_READY`, `FAILED`), `tier`, `asAtDate` and `financialYears` (BALANCES only), `expiresAt` (30 minutes), `sourceSystem` (found or given; absent when neither), `supportedSourceSystems[]`, `files[]` (`fileName`, `recognizedAs`, `status`, `rowCount`), `checks[]` (`check`, `status` OK/WARNING/ERROR, `detail`, `code`), `counts` (`accounts`, `contacts`, `items`, `invoices`, `bills`, `journals`), `missingExchangeRates[]` (`currency`, `date`), `balanceWithoutAging` (`RECEIVABLES` or `PAYABLES`), `exchangeRates[]` (as sent with the preview; a start uses them), `review` (below), `error` (FAILED only).
+- `review` (READY; the API answers it for NOT_READY too): one object per list the files hold, each `{ "total", "truncated", "rows" }` with up to 200 rows read without a problem (`total` also counts records with a problem): `accounts` (`code`, `name`, `accountType`), `contacts` (`name`, `customer`, `supplier`, both left out when the files do not say), `items` (`itemCode`, `internalName`), `trialBalance` (`accountCode`, `accountName`, `debitAmount`, `creditAmount`, plus `totalDebitAmount` and `totalCreditAmount` over every account read), `invoices` and `bills` (`contactName`, `balanceAmount`, always positive, `currencyCode`), `exchangeRates` (`currency`, `rate`, `date`: found in the files, or the organization's own). A list with nothing in it, or that could not be read, is left out.
+- 503 `PREVIEW_STORE_UNAVAILABLE`: previews could not be stored or read; nothing was written. Try again shortly.
+- `asAtDate` is the date sent, and is left out when none was sent: the transfer service then sets the date and the answer does not say which. `financialYears` is the number sent, or 1.
+
+### GET /api/v1/data-transfers/previews/{previewId}
+
+The stored preview, for its maker only, for 30 minutes or until a transfer starts from it; 404 `PREVIEW_NOT_FOUND` after that.
+
+### POST /api/v1/data-transfers
+
+```json
+{ "previewId": "4b1f8c2e-7d3a-4e6b-9c1d-2a5f8e7b6c3d", "sourceSystem": "Xero",
+  "exchangeRates": [{ "currency": "USD", "rate": 0.7449, "date": "2025-12-31" }],
+  "transferBalanceWithoutAging": true }
+```
+
+- Starts what a READY preview checked (409 for CHECKING, NOT_READY or FAILED), with the answers it asked for: a rate for each `missingExchangeRates` entry (422 `EXCHANGE_RATES_REQUIRED`), `transferBalanceWithoutAging: true` when `balanceWithoutAging` is set (422 `AGING_CONFIRMATION_REQUIRED`), a `sourceSystem` from `supportedSourceSystems` (422 `SOURCE_SYSTEM_NOT_SUPPORTED`; default: the preview's), needed when the preview answered none (422 `SOURCE_SYSTEM_REQUIRED`, whose message lists the values; `Other` is taken only when sent). Each of these refusals leaves the preview usable. Starts are one at a time per organization: 409 `TRANSFER_IN_PROGRESS` while another transfer runs or is starting, and the preview stays usable.
+- Creates chart of accounts entries, contacts and items, and for BALANCES the open invoices and bills, the opening balance journal and lock dates. On an organization with no transactions and no earlier transfer, accounts the files do not name are removed. Not undoable through the API. A preview starts one transfer.
+- Answers 201 `{ "data": { "resourceId", "status" } }`; a small FOUNDATIONS transfer runs while the start waits and can already be `SUCCESS`, `PARTIAL_SUCCESS` or `FAILED`. Can take up to 2 minutes. A lost answer, or 502 `OUTCOME_UNKNOWN`, may have started it: read the list before anything else (the preview is used up). 502 `SERVICE_UNREACHABLE` on a start was answered before the create was sent: nothing was started, and the same `previewId` can be sent again shortly. `TRANSFER_REFUSED` (422 or 502) and 429 say nothing was created.
+
+### GET /api/v1/data-transfers
+
+`?limit=` (1 to 100, default 20) `&offset=` (page). `{ "totalElements", "totalPages", "inProgress", "data": [{ "resourceId", "tier", "status", "date", "transferredByUserResourceId", "sourceSystem", "counts": { "accounts", "contacts", "items", "transactions" } }] }`, newest activity first; `counts` is left out while a transfer runs. `inProgress` covers every page. Statuses: `QUEUED`, `IN_REVIEW`, `PROCESSING`, `SUCCESS`, `PARTIAL_SUCCESS`, `FAILED`, `CANCELLED`, `ROLLING_BACK`, `ROLLED_BACK`, `ROLLBACK_FAILED`.
+
+### GET /api/v1/data-transfers/{resourceId}
+
+`{ "data": { "resourceId", "tier", "status", "createdCount", "failedCount", "createdAt", "completedAt", "error", "result" } }`. While it runs it answers the status only: `createdCount` and `failedCount` are left out until it ends (the service counts once, at the end), and there is no stage. `result` (SUCCESS, PARTIAL_SUCCESS, FAILED): `created`, `failed`, `skipped` (already in the organization), `warnings[]`, `steps[]` in the order a transfer runs them: `name` (`CURRENCIES`, `EXCHANGE_RATES`, `CHART_OF_ACCOUNTS`, `CONTACTS`, `ITEMS`, `INVOICES`, `BILLS`, `CUSTOMER_CREDIT_NOTES`, `SUPPLIER_CREDIT_NOTES`, `JOURNALS`, `CASH_ENTRIES`, `CASH_TRANSFERS`, `PAYMENTS`, `CREDIT_NOTE_APPLICATIONS`, `REFUNDS`, `LOCK_DATES`, `OTHER`), `status` (`COMPLETED`, `FAILED`, `SKIPPED`, `ROLLED_BACK`, `NOT_RECORDED`, `OTHER`), `created` and `failed` (left out for `NOT_RECORDED` and `OTHER`). A finished transfer's `result`, or only its `steps`, is left out while it cannot be read: read again later. Another organization's transfer is 404.
+
+### POST /api/v1/data-transfers/{resourceId}/cancel
+
+No body. Only while `QUEUED` or `IN_REVIEW`, before anything is written: answers `{ "data": { "resourceId", "status": "CANCELLED" } }`. Waiting for another transfer, `PROCESSING` or ended: 409 `NOT_CANCELLABLE`.

@@ -3,7 +3,7 @@
 > **The endpoints clio wraps (the REST surface is larger).** This file catalogues roughly 200
 > paths, organized by resource, including undocumented endpoints, magic AI features, admin
 > APIs, and advanced search/filter syntax. The committed OpenAPI spec (`spec/openapi.yaml`)
-> carries 643 spec paths and 808 spec operations and is the authoritative list; check it before concluding
+> carries 649 spec paths and 815 spec operations and is the authoritative list; check it before concluding
 > an endpoint does not exist. For request/response examples of core endpoints, see
 > endpoints.md.
 >
@@ -679,6 +679,19 @@ Layout keys, the `settings` merge and refusals: `pdf-templates.md`.
 | DELETE | `/signature-profiles/:resourceId` | Delete (refused for a document type's default) |
 
 Sending for signature is done in the app, not the API. Wire rules: endpoints-schedules-reports.md section 32.
+
+### Data Transfer (books in from another system)
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/data-transfers/files` | Upload one export (multipart `file` or `sourceUrl`; `.xlsx`, `.xls`, `.csv`, 10 MB) |
+| POST | `/data-transfers/previews` | Check the exports under a caller-made `previewId`; writes nothing, up to 2 minutes |
+| GET | `/data-transfers/previews/:previewId` | Read a stored preview (CHECKING, READY, NOT_READY, FAILED) |
+| POST | `/data-transfers` | Start the transfer a READY preview checked (not undoable through the API) |
+| GET | `/data-transfers` | History, newest first, and `inProgress` |
+| GET | `/data-transfers/:resourceId` | Status, and once ended its counts, warnings and what each step did |
+| POST | `/data-transfers/:resourceId/cancel` | Cancel before anything is written (QUEUED or IN_REVIEW) |
+
+Admin of the Organization or Accounting module only. Wire rules: endpoints-master-data.md section 33.
 
 ### Catalogs
 | Method | Path | Description |
