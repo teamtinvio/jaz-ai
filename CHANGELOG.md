@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.15.1] - 2026-11-28
+
+**Clio no longer stops partway through a list of reads, and never runs two of its messages together.**
+
+- Asked to read several things in one message, for example the document defaults of seven document types, Clio could read a few, stop, and say it could not finish the rest, though nothing had failed. Clio now remembers which of its earlier messages were only progress notes, so it no longer takes a note for its answer and stops early.
+- A progress note such as "I'll finish the remaining reads" is no longer shown as part of the answer, and two messages are never joined into one run-on sentence ("...without making changes.I could read..."). Separate messages are a paragraph apart.
+- In chat and email. No change to the Claude extension or the ChatGPT app.
+
 ## [9.15.0] - 2026-11-28
 
 **The ChatGPT app gets the template, Data Transfer, team and comment tools.**
