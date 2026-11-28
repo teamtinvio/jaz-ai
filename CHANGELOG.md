@@ -1,5 +1,27 @@
 # Changelog
 
+## [9.15.2] - 2026-11-28
+
+**Template setup fixes from a hands-on review: reminders start off, "change it back" works, and e-sign templates take outside countersigners.**
+
+Templates
+- A new payment reminder or statement email starts switched off. When switching it off right after it was made met a brief delay, it is now tried again instead of leaving the reminder on.
+- Making a template the default answers with it as the default. When the app is a moment behind, the assistant says so instead of showing it as not the default.
+- Reading a payment reminder or statement email says whom it emails. One that is on but is not the default emails only customers set to it, and no one while none is.
+- Asked to change something back in the same chat, the assistant puts it back from what the change replaced, without asking first: PDF, email, report and e-sign templates, and document defaults.
+- After writing an email's wording, the assistant shows the email as your customer reads it, with example values in place of the placeholders.
+- E-sign templates: the signers saved are default signers added to every send. Someone who is not a user signs by name and email. The customer is added, and the signing order set, when you send the quote, so "the customer signs first, then Maria" sets Maria up as an outside signer.
+- A report template no longer reports a saved comparison column or period as not saved.
+
+Asking for your yes
+- Turning on automatic emailing of new invoices names the organization and says it applies to new invoices from now on.
+- Starting a statement email on a schedule is asked as one plain question about the change.
+
+Smaller fixes
+- Searching contacts by a plain name works, and so does sorting a contact search by a list of fields.
+- Document types are taken in each other's words: JOURNAL for manual journals, INVOICE for the next invoice number, SALE for invoice templates.
+- A judgment journal entry in the wrong shape is refused with an example entry and the field that was meant.
+
 ## [9.15.1] - 2026-11-28
 
 **Clio no longer stops partway through a list of reads, and never runs two of its messages together.**

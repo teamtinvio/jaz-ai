@@ -11,7 +11,7 @@ description: >-
 license: MIT
 compatibility: Requires Node.js >= 18.0.0. Install via npm install -g jaz-clio.
 metadata:
-  version: "9.15.1"
+  version: "9.15.2"
 ---
 
 # Clio CLI Skill

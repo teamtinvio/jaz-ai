@@ -10,7 +10,7 @@ description: >-
 license: MIT
 compatibility: Works with Claude Code, Claude Cowork, Claude.ai, and any agent that reads markdown. For API payloads, load the jaz-api skill. For individual transaction patterns, load the jaz-recipes skill.
 metadata:
-  version: "9.15.1"
+  version: "9.15.2"
 ---
 
 # Jobs Skill
