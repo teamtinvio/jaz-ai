@@ -1,5 +1,13 @@
 # Changelog
 
+## [9.15.3] - 2026-11-28
+
+**Setting up several templates in one ask gets them built in the same reply.**
+
+Templates
+- Asked to set up several kinds of template at once, for example a quote PDF, its email and its e-sign template, the assistant now builds them in the same reply. It used to spend its steps fetching a link to each templates screen one at a time and stop before changing anything.
+- Reading PDF, email, e-sign and report templates now comes with the link to the screen that shows them, as changing them already did, so a reply about them links that screen with no extra step.
+
 ## [9.15.2] - 2026-11-28
 
 **Template setup fixes from a hands-on review: reminders start off, "change it back" works, and e-sign templates take outside countersigners.**

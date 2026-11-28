@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "contentVersion": "9.15.2+7ae880c5c",
+  "contentVersion": "9.15.3+b7389749e",
   "counts": {
     "tools": 562,
     "namespaces": 66,
@@ -250,7 +250,7 @@
     },
     {
       "name": "navigation",
-      "description": "Dashboard navigation deep links. Build a URL to any dashboard screen or record for the user, including the view link for a record just created or updated (a reply reporting on a record carries its link, and dashboard URLs always come from this tool, never written from memory). Also: open, go to, take me to, link, deep link, share a link, url, navigate, show me the page/screen, where can I see (for invoices, bills, reports, settings, or a specific transaction)."
+      "description": "Dashboard navigation deep links. Build a URL to any dashboard screen or record, including the view link for a record just created or updated (a reply on a record carries its link: one a tool result carries needs no call here; dashboard URLs are never written from memory). Also: open, go to, take me to, link, deep link, share a link, url, navigate, show me the page/screen, where can I see (for invoices, bills, reports, settings, or a specific transaction)."
     },
     {
       "name": "payrun_settings",
